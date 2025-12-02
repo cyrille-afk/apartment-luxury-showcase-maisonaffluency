@@ -19,7 +19,7 @@ const galleryExperiences = [
       },
       {
         image: bedroomAltImage,
-        title: "Guest Bedroom",
+        title: "A curated selection of collectibles",
         description: "Featuring Damien Langlois-Meurinne's sculptural Ooh La La Console, Hayman Editions' Carved Marble Marie Lamp, and Kiko Lopez' Silver Glass Hammer Mirror"
       }
     ]
