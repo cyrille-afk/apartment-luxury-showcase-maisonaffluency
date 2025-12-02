@@ -2,23 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-const designersBrands = [{
-  title: "Iksel Wallcoverings",
-  subtitle: "Hand-Painted Murals",
-  content: "The scenic decorative wallcoverings are custom Iksel and Pierre Frey panels, hand-painted by artisans in their London and Paris ateliers. Each crane, landscape and vista is meticulously rendered in mineral pigments on panels, creating an immersive landscape that transforms the living space into a serene sanctuary."
-}, {
-  title: "Thierry Lemaire",
-  subtitle: "Sculptural Seating",
-  content: "The organic, Tanganika-upholstered NIKO sofa is a bespoke piece from French designer Thierry Lemaire. Its undulating form challenges traditional furniture design while providing exceptional comfort. The sculptural quality makes it as much an art piece as functional seating."
-}, {
-  title: "Robicara SIRA Collection",
-  subtitle: "Statement Furniture",
-  content: "The vibrant credenza is from Robicara's SIRA collection, featuring sultry shagreen panelling, metal patinated finishes and brass detailing. Its bold yet classical allure provides a carefully calculated contrast to the muted palette, demonstrating confident use of accent pieces in luxury design."
-}, {
-  title: "Apparatus Studio",
-  subtitle: "Lighting Design",
-  content: "Custom lighting fixtures from New York's Apparatus Studio blend traditional craftsmanship with contemporary sensibility. The brass and glass compositions create ambient pools of light that enhance the space's intimate atmosphere."
-}];
+
 const philosophyPoints = [{
   title: "East Meets West",
   subtitle: "Cultural Fusion",
@@ -51,48 +35,11 @@ const DesignDetails = () => {
         opacity: 1,
         y: 0
       } : {}} transition={{
-        duration: 0.8
-      }} className="mb-20">
-          <p className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-primary">
-            Featured Designers
-          </p>
-          <h2 className="mb-12 font-display text-4xl text-foreground md:text-5xl">
-            Artisans & Collaborators
-          </h2>
-          
-          <Accordion type="single" collapsible className="space-y-4">
-            {designersBrands.map((item, index) => <AccordionItem key={index} value={`designer-${index}`} className="border border-border bg-card px-8 py-2 transition-colors hover:bg-muted/30">
-                <AccordionTrigger className="text-left hover:no-underline">
-                  <div>
-                    <div className="font-display text-xl text-foreground md:text-2xl">
-                      {item.title}
-                    </div>
-                    <div className="mt-1 font-body text-sm text-muted-foreground">
-                      {item.subtitle}
-                    </div>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pt-4 pb-2">
-                  <p className="font-body leading-relaxed text-muted-foreground">
-                    {item.content}
-                  </p>
-                </AccordionContent>
-              </AccordionItem>)}
-          </Accordion>
-        </motion.div>
-
-        <motion.div initial={{
-        opacity: 0,
-        y: 30
-      }} animate={isInView ? {
-        opacity: 1,
-        y: 0
-      } : {}} transition={{
         duration: 0.8,
         delay: 0.2
       }}>
-          <p className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-secondary">
-            ​
+          <p className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-primary">
+            DESIGN PHILOSOPHY
           </p>
           <h2 className="mb-12 font-display text-4xl text-foreground md:text-5xl">Our Guiding Principles</h2>
           
