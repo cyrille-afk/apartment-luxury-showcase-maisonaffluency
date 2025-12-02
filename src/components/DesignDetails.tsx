@@ -9,7 +9,7 @@ const philosophyPoints = [{
   content: "Maison Affluency nurture one-on-one relationships with its clients offering personalised and tailored advice on each project. From access to confidential sourcing, design collaborations and curation of artworks, our curating team offers a solid partnership"
 }, {
   title: "Custom Requests",
-  subtitle: "Integrated Aesthetics",
+  subtitle: "From inspiration to customisation",
   content: "Rather than treating art as an afterthought, the design integrates artistic expression into the architectural fabric. The mural work isn't merely decorative; it defines spatial boundaries and influences the emotional tone of each room. Furniture pieces are selected for their sculptural merit, blurring the line between functional objects and art."
 }, {
   title: "Samples & Swatches",
