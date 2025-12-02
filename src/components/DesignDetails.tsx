@@ -58,7 +58,7 @@ const philosophyPoints = [
     title: "Unique Curation",
     subtitle: "Intentional Simplicity",
     content:
-      "The philosophy embraces minimalism not as stark emptiness, but as careful curation. Each piece is deliberately chosen and thoughtfully placed. Negative space is valued as highly as the objects themselves, allowing individual elements to be fully appreciated without visual competition.",
+      "The philosophy celebrates the uniqueness and distinctive selection of exceptional pieces that define the space. Each piece is deliberately chosen and thoughtfully placed. Negative space is valued as highly as the objects themselves, allowing individual elements to be fully appreciated without visual competition.",
   },
 ];
 
