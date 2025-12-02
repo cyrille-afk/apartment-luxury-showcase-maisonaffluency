@@ -78,7 +78,7 @@ const ContactInquiry = () => {
               <Input
                 id="phone"
                 type="tel"
-                placeholder="+1 (555) 000-0000"
+                placeholder="+65 XXXX XXXX"
                 className="border-border bg-background font-body"
               />
             </div>
