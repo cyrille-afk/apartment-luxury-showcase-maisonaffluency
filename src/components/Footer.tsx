@@ -14,9 +14,6 @@ const Footer = () => {
             <p className="font-body text-sm text-muted-foreground text-center md:text-left">
               Professional Design Portfolio
             </p>
-            <a href="tel:+6591393850" className="font-body text-sm text-primary hover:text-primary/80 transition-colors">
-              +65 9139 3850
-            </a>
             <div className="flex gap-4 mt-2">
               <a href="https://www.instagram.com/myaffluency/?hl=en" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
                 <Instagram size={20} />
