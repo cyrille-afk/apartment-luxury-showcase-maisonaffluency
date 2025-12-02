@@ -38,8 +38,8 @@ const Navigation = () => {
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         <div className="flex h-16 md:h-20 items-center justify-center md:justify-between relative">
           {/* Logo/Brand */}
-          <button onClick={() => handleNavClick("#home")} className="hover:opacity-80 transition-opacity">
-            <span className="font-serif text-base md:text-xl font-extrabold text-foreground">
+          <button onClick={() => handleNavClick("#home")} className="group transition-all duration-300">
+            <span className="font-serif text-base md:text-xl font-extrabold text-foreground relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-center after:transition-transform after:duration-300 group-hover:after:scale-x-100">
               Maison Affluency Singapore
             </span>
           </button>
