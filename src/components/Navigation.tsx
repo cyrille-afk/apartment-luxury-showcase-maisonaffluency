@@ -19,7 +19,7 @@ const navItems = [{
   label: "Trade Program",
   href: "#details"
 }, {
-  label: "Contact",
+  label: "Contact Us - Appointment",
   href: "#contact"
 }];
 const Navigation = () => {
