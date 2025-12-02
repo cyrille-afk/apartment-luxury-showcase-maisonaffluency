@@ -6,7 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 const philosophyPoints = [{
   title: "Dedicated Client Advisor",
   subtitle: "Cultural Fusion",
-  content: "This residence embodies a sophisticated dialogue between Eastern and Western design philosophies. Asian artistic traditions—evident in the hand-painted murals and organic forms—are balanced with Western modernist principles of clean lines and functional elegance. The result is a space that honors both heritages without pastiche."
+  content: "Maison Affluency nurture one-on-one relationships with its clients offering personalised and tailored advice on each project. From access to confidential sourcing, design collaborations and curation of artworks, our curating team offers a solid partnership"
 }, {
   title: "Custom Requests",
   subtitle: "Integrated Aesthetics",
