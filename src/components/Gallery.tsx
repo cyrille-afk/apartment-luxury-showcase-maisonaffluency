@@ -15,7 +15,7 @@ const galleryItems = [{
 }, {
   image: boudoirImage,
   title: "Sophisticated Boudoir",
-  description: "Marble finishes and brass details throughout"
+  description: "Bespoke furniture and unique artworks throughout"
 }];
 const Gallery = () => {
   const ref = useRef(null);
