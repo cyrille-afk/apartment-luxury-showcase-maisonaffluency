@@ -10,7 +10,7 @@ import {
 
 const designersBrands = [
   {
-    title: "de Gournay Wallcoverings",
+    title: "Iksel Wallcoverings",
     subtitle: "Hand-Painted Murals",
     content:
       "The centerpiece wallcoverings are custom de Gournay chinoiserie panels, hand-painted by artisans in their London atelier. Each crane and cloud is meticulously rendered in mineral pigments on silk panels, creating an immersive landscape that transforms the living space into a serene sanctuary.",
