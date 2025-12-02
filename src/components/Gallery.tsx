@@ -37,7 +37,7 @@ const Gallery = () => {
           <p className="mb-2 md:mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
             OUR GALLERY
           </p>
-          <h2 className="font-display text-xl leading-relaxed md:text-3xl text-foreground text-left px-2 lg:text-2xl md:text-justify">From Thierry Lemaire's limited edition Orsay Table, Nathalie Ziegler's and Hervé van der Straeten's mesmerising Chandeliers, to Hamrei's whimsical Pépé Chairs and Pierre Bonnefille's Bronze Painting, Maison Affluency Singapore is a unique venue where design and art congregate</h2>
+          <h2 className="text-xl leading-relaxed md:text-3xl text-foreground text-left px-2 lg:text-2xl md:text-justify font-serif">From Thierry Lemaire's limited edition Orsay Table, Nathalie Ziegler's and Hervé van der Straeten's mesmerising Chandeliers, to Hamrei's whimsical Pépé Chairs and Pierre Bonnefille's Bronze Painting, Maison Affluency Singapore is a unique venue where design and art congregate</h2>
         </motion.div>
         
         <div className="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
