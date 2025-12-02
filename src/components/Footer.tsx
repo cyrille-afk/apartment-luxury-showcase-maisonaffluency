@@ -23,7 +23,7 @@ const Footer = () => {
             <a className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground" href="https://thierry-lemaire.fr/en/" target="_blank" rel="noopener noreferrer">
               Designers
             </a>
-            <a href="#" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
+            <a href="#contact" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               Contact
             </a>
           </div>
