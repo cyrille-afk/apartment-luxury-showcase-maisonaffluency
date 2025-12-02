@@ -39,7 +39,7 @@ const DesignDetails = () => {
         delay: 0.2
       }}>
           <p className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-primary">
-            DESIGN PHILOSOPHY
+            TRADE PROGRAM
           </p>
           <h2 className="mb-12 font-display text-4xl text-foreground md:text-5xl">Our Guiding Principles</h2>
           
