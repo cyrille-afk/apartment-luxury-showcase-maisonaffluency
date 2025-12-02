@@ -15,7 +15,7 @@ const galleryExperiences = [{
     description: "Sculptural Hervé van der Straeten's Mic Mac Chandelier, Atelier Demichelis' limited edition Bud Table Lamp, Adam Court's Villa Pedestal Nightstand"
   }, {
     image: bedroomAltImage,
-    title: "A Curated Selection Of Collectible Items",
+    title: "With Curated Collectible Items",
     description: "Damien Langlois-Meurinne's Ooh La La Console, Hayman Editions' Carved Marble Marie Lamp, and Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
   }]
 }, {
