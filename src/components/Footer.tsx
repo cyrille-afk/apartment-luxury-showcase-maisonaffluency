@@ -2,11 +2,19 @@ const Footer = () => {
   return <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          <div className="text-center md:text-left">
-            <div className="mb-2 font-display text-2xl text-foreground">Maison Affluency Showcase</div>
-            <p className="font-body text-sm text-muted-foreground">
+          <div className="flex flex-col items-center md:items-start gap-4">
+            <div className="flex items-center gap-3">
+              <img alt="Affluency" className="h-10 md:h-12 w-auto" src="/lovable-uploads/18ec40c0-d3d8-423e-bf58-8a0f98938aeb.jpg" />
+              <span className="font-serif text-base font-bold text-foreground">
+                Maison Affluency
+              </span>
+            </div>
+            <p className="font-body text-sm text-muted-foreground text-center md:text-left">
               Professional Design Portfolio
             </p>
+            <a href="tel:+6591393850" className="font-body text-sm text-primary hover:text-primary/80 transition-colors">
+              +65 9139 3850
+            </a>
           </div>
           
           <div className="flex gap-8">
