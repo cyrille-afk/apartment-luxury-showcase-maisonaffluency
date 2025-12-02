@@ -7,7 +7,7 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>
       
-      <div className="relative z-10 h-full px-6 pb-20 md:px-12 lg:px-20 flex-col border rounded-none flex items-start justify-center opacity-100 shadow-none">
+      <div className="relative z-10 h-full px-4 pb-16 pt-20 md:px-12 md:pb-20 lg:px-20 flex-col border rounded-none flex items-start justify-center opacity-100 shadow-none">
         <motion.div initial={{
         opacity: 0,
         y: 30
@@ -25,7 +25,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.4
-        }} className="mb-4 uppercase tracking-[0.3em] text-cream/90 font-extrabold font-sans text-3xl">MAISON AFFLUENCY SINGAPORE</motion.p>
+        }} className="mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-cream/90 font-extrabold font-sans text-sm md:text-xl lg:text-2xl">MAISON AFFLUENCY SINGAPORE</motion.p>
           
           <motion.h1 initial={{
           opacity: 0,
@@ -36,7 +36,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-        }} className="mb-6 text-5xl leading-tight text-cream md:text-7xl font-serif lg:text-3xl">We showcase the best talents of interior design and craftsmanship ​
+        }} className="mb-4 md:mb-6 text-3xl leading-tight text-cream md:text-5xl lg:text-6xl font-serif">We showcase the best talents of interior design and craftsmanship ​
           <br />
               ​
           </motion.h1>
@@ -48,7 +48,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.8
-        }} className="max-w-2xl text-lg leading-relaxed text-cream/80 text-justify font-medium font-serif md:text-xl"> This is a unique opportunity for architects and interior decorators to dazzle their clientele and experience first hand couture furniture, collectibles and artworks from world reknown designers and makers.</motion.p>
+        }} className="max-w-2xl text-base leading-relaxed text-cream/80 text-left md:text-justify font-medium font-serif md:text-lg lg:text-xl"> This is a unique opportunity for architects and interior decorators to dazzle their clientele and experience first hand couture furniture, collectibles and artworks from world reknown designers and makers.</motion.p>
         </motion.div>
       </div>
       
