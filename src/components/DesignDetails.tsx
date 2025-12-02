@@ -16,7 +16,7 @@ const designersBrands = [
       "The centerpiece wallcoverings are custom de Gournay chinoiserie panels, hand-painted by artisans in their London atelier. Each crane and cloud is meticulously rendered in mineral pigments on silk panels, creating an immersive landscape that transforms the living space into a serene sanctuary.",
   },
   {
-    title: "Pierre Augustin Rose",
+    title: "Thierry Lemaire",
     subtitle: "Sculptural Seating",
     content:
       "The organic, bouclé-upholstered sofa is a bespoke piece from French designer Pierre Augustin Rose. Its undulating form challenges traditional furniture design while providing exceptional comfort. The sculptural quality makes it as much an art piece as functional seating.",
