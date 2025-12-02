@@ -25,7 +25,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.4
-        }} className="mb-4 uppercase tracking-[0.3em] text-cream/90 font-extrabold text-2xl font-sans">MAISON AFFLUENCY SINGAPORE</motion.p>
+        }} className="mb-4 uppercase tracking-[0.3em] text-cream/90 font-extrabold font-sans text-3xl">MAISON AFFLUENCY SINGAPORE</motion.p>
           
           <motion.h1 initial={{
           opacity: 0,
