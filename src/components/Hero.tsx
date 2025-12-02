@@ -25,7 +25,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.4
-        }} className="mb-4 uppercase tracking-[0.3em] text-cream/90 font-extrabold font-serif text-3xl">MAISON AFFLUENCY SINGAPORE</motion.p>
+        }} className="mb-4 uppercase tracking-[0.3em] text-cream/90 font-extrabold font-serif text-2xl">MAISON AFFLUENCY SINGAPORE</motion.p>
           
           <motion.h1 initial={{
           opacity: 0,
@@ -36,7 +36,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-        }} className="mb-6 text-5xl leading-tight text-cream md:text-7xl font-serif lg:text-8xl">We showcase the best talents of interior design and craftsmanship.
+        }} className="mb-6 text-5xl leading-tight text-cream md:text-7xl font-serif lg:text-3xl">We showcase the best talents of interior design and craftsmanship.
           <br />
               ​
           </motion.h1>
@@ -48,7 +48,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.8
-        }} className="max-w-2xl text-lg leading-relaxed text-cream/80 md:text-lg text-justify font-medium font-serif"> This is a unique opportunity for architects and interior decorators to dazzle their clientele and experience first hand couture furniture, collectibles and artworks from world reknown designers and makers.</motion.p>
+        }} className="max-w-2xl text-lg leading-relaxed text-cream/80 text-justify font-medium font-serif md:text-xl"> This is a unique opportunity for architects and interior decorators to dazzle their clientele and experience first hand couture furniture, collectibles and artworks from world reknown designers and makers.</motion.p>
         </motion.div>
       </div>
       
