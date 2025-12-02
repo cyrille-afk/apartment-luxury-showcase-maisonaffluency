@@ -27,7 +27,7 @@ const galleryExperiences = [{
     description: "Sophisticated gathering space with designer furniture and artisan lighting"
   }, {
     image: diningImage,
-    title: "Room with a view",
+    title: "Panoramic Cityscape Views",
     description: "Sculptural terracotta pedestal table, designer bouclé seating, statement alabaster pendant lighting, with panoramic cityscape views"
   }]
 }, {
