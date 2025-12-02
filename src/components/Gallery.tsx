@@ -28,7 +28,7 @@ const galleryExperiences = [{
   }, {
     image: diningImage,
     title: "Dining Room",
-    description: "Elegant entertaining space with dreamy Tuscan vista inviting you to travel"
+    description: "Sculptural terracotta pedestal table, designer bouclé seating, statement alabaster pendant lighting, with panoramic cityscape views"
   }]
 }, {
   experience: "Personal Sanctuary",
