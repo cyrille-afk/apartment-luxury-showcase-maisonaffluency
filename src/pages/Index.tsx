@@ -1,5 +1,6 @@
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
+import FeaturedDesigners from "@/components/FeaturedDesigners";
 import Overview from "@/components/Overview";
 import Gallery from "@/components/Gallery";
 import DesignDetails from "@/components/DesignDetails";
@@ -13,6 +14,9 @@ const Index = () => {
       <main className="min-h-screen">
         <section id="home">
           <Hero />
+        </section>
+        <section id="designers">
+          <FeaturedDesigners />
         </section>
         <section id="overview">
           <Overview />
