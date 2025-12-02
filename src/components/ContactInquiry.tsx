@@ -24,9 +24,7 @@ const ContactInquiry = () => {
           <p className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-primary">
             Professional Inquiries
           </p>
-          <h2 className="mb-6 font-display text-4xl text-foreground md:text-5xl">
-            Request Information
-          </h2>
+          <h2 className="mb-6 font-display text-4xl text-foreground md:text-5xl">Book an appointment</h2>
           <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
             For architects, interior designers, and industry professionals interested
             in detailed specifications, material sources, or collaboration opportunities.
