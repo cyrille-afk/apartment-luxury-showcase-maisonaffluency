@@ -24,7 +24,7 @@ const featuredDesigners = [
     specialty: "Sculptural Furniture & Limited Editions",
     image: thierryLemaireImg,
     biography: "A French Star Architect, Interior Designer and Design, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
-    notableWorks: "Orsay Centre Table, Sculptural Console Series",
+    notableWorks: "Orsay Mds Coffee Table in Alabastrino travertine and Onyx Ocean. \nLimited and numbered edition (12 copies).",
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
     links: [
       { type: "https://thierry-lemaire.fr/en/furniture/", url: "https://thierry-lemaire.fr/en/furniture/" },
