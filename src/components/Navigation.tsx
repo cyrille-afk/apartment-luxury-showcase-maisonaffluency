@@ -35,9 +35,8 @@ const Navigation = () => {
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         <div className="flex h-16 md:h-20 items-center justify-between">
           {/* Logo/Brand */}
-          <button onClick={() => handleNavClick("#home")} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img alt="Affluency" className="h-10 md:h-12 w-auto" src="/lovable-uploads/18ec40c0-d3d8-423e-bf58-8a0f98938aeb.jpg" />
-            <span className="font-serif text-base font-bold text-foreground hidden sm:inline md:text-base">
+          <button onClick={() => handleNavClick("#home")} className="hover:opacity-80 transition-opacity">
+            <span className="font-serif text-base font-bold text-foreground md:text-base">
               Maison Affluency
             </span>
           </button>
