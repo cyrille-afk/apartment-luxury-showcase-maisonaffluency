@@ -59,7 +59,7 @@ const Gallery = () => {
           <p className="mb-2 md:mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
             OUR GALLERY
           </p>
-          <h2 className="text-xl leading-relaxed md:text-3xl text-foreground text-left px-2 md:text-justify font-serif lg:text-lg">From Thierry Lemaire's limited edition Orsay Centre Table, Jean-Michel Frank Coffee Table Soleil 1930, Nathalie Ziegler's and Hervé van der Straeten's mesmerising Chandeliers, to Hamrei's whimsical Pépé Chairs and Pierre Bonnefille's Bronze Painting, Maison Affluency Singapore is a unique venue where design and art congregate  </h2>
+          <h2 className="text-xl leading-relaxed md:text-3xl text-foreground text-left px-2 md:text-justify font-serif lg:text-lg">From Thierry Lemaire's limited edition Orsay Centre Table, Jean-Michel Frank Coffee Table Soleil 1930, Nathalie Ziegler's and Hervé van der Straeten's Chandeliers, to Hamrei's whimsical Pépé Chairs and Pierre Bonnefille's Bronze Painting, Maison Affluency Singapore is a uniquely curated venue where design and art congregate  </h2>
         </motion.div>
         
         {galleryExperiences.map((section, sectionIndex) => <div key={section.experience} className="mb-16 md:mb-24">
