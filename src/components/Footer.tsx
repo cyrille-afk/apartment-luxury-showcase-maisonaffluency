@@ -1,5 +1,5 @@
 import { Instagram } from "lucide-react";
-import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
+import affluencyLogo from "@/assets/affluency-logo-new.jpg";
 const Footer = () => {
   return <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
       <div className="mx-auto max-w-7xl">
