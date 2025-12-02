@@ -3,7 +3,7 @@ import { useInView } from "framer-motion";
 import { useRef } from "react";
 import bedroomImage from "@/assets/master-suite.jpg";
 import diningImage from "@/assets/dining-room.jpg";
-import kitchenImage from "@/assets/kitchen.jpg";
+import boudoirImage from "@/assets/boudoir.jpg";
 const galleryItems = [{
   image: bedroomImage,
   title: "Master Suite",
@@ -13,8 +13,8 @@ const galleryItems = [{
   title: "Dining Room",
   description: "Elegant entertaining space with bespoke furnishings"
 }, {
-  image: kitchenImage,
-  title: "Gourmet Kitchen",
+  image: boudoirImage,
+  title: "Sophisticated Boudoir",
   description: "Marble finishes and brass details throughout"
 }];
 const Gallery = () => {
