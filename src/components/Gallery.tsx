@@ -15,7 +15,7 @@ const galleryExperiences = [
       {
         image: bedroomImage,
         title: "A Masterful Suite",
-        description: "Serene retreat with collectible lighting, bespoke furniture and handcrafted rugs"
+        description: "Sculptural Hervé van der Straeten's Mic Mac Chandelier, Atelier Demichelis' limited edition Buds Lamp, Adam Court's Villa Pedestal Nightstands"
       },
       {
         image: bedroomAltImage,
