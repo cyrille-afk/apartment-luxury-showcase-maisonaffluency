@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import bedroomImage from "@/assets/bedroom.jpg";
+import bedroomImage from "@/assets/master-suite.jpg";
 import diningImage from "@/assets/dining-room.jpg";
 import kitchenImage from "@/assets/kitchen.jpg";
 const galleryItems = [{
