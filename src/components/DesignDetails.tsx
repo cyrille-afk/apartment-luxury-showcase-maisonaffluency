@@ -33,7 +33,7 @@ const philosophyPoints = [{
   content: "Every material speaks to authenticity and craftsmanship. Natural stone, hand-woven textiles, solid brass fixtures, and hand-painted finishes create a tactile richness that can't be replicated with synthetic alternatives. The patina of quality materials improves with age, ensuring the design's longevity."
 }, {
   title: "Expert Curation",
-  subtitle: "Intentional Simplicity",
+  subtitle: "Distinctive Selection",
   content: "Maison Affluency philosophy celebrates the uniqueness and distinctive selection of exceptional pieces that define the space. Each piece is deliberately chosen and thoughtfully placed. Negative space is valued as highly as the objects themselves, allowing individual elements to be fully appreciated without visual competition."
 }];
 const DesignDetails = () => {
