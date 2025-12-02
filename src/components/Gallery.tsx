@@ -14,7 +14,7 @@ const galleryExperiences = [
     items: [
       {
         image: bedroomImage,
-        title: "Master Suite",
+        title: "A Masterful Suite",
         description: "Serene retreat with collectible lighting, bespoke furniture and handcrafted rugs"
       },
       {
