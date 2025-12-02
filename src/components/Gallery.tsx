@@ -24,7 +24,7 @@ const galleryExperiences = [{
   items: [{
     image: livingRoomImage,
     title: "A Sophisticated Living Room",
-    description: "Sophisticated gathering space with designer furniture and artisan lighting"
+    description: "Thierry Lemaire Orsay Centre Table, Atelier Fevrier's Hand-knotted Ricky Rug, Robicara's Sira Credenza, Jean-Michel Frank & Adolphe Chanaux' Stool 1934,  Olivia Cognet's Valauris Lamp, Leo Sentou's AB armchair, Garnier & Linker lost-wax cast crystal centerpiece for Théorème Editions  "
   }, {
     image: diningImage,
     title: "With Panoramic Cityscape Views",
