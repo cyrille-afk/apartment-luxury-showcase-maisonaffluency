@@ -21,11 +21,11 @@ const Index = () => {
         <section id="gallery">
           <Gallery />
         </section>
-        <section id="details">
-          <DesignDetails />
-        </section>
         <section id="designers">
           <FeaturedDesigners />
+        </section>
+        <section id="details">
+          <DesignDetails />
         </section>
         <section id="contact">
           <ContactInquiry />
