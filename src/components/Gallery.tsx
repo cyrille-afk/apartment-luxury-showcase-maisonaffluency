@@ -36,7 +36,7 @@ const galleryExperiences = [{
   items: [{
     image: boudoirImage,
     title: "A Sophisticated Boudoir",
-    description: "Bespoke furniture and unique artworks over white cherry blossom"
+    description: "Bertrand de Maistre's Lyrical Desk, Hamrei's Pépé Chair,  Made in Kira's Toshiro Lamp, Nathalie Ziegler's Saint Just Custom Glass Chandelier, Nika Zupanc's Stardust Loveseat, Apparatus Studio's Metronome Reading Floor Lamp "
   }]
 }];
 const Gallery = () => {
