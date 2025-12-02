@@ -115,7 +115,7 @@ const DesignDetails = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <p className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-secondary">
-            Design Philosophy
+            Maison Affluency Philosophy
           </p>
           <h2 className="mb-12 font-display text-4xl text-foreground md:text-5xl">
             Guiding Principles
