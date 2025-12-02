@@ -13,7 +13,7 @@ const designersBrands = [
     title: "Iksel Wallcoverings",
     subtitle: "Hand-Painted Murals",
     content:
-      "The scenic decorative wallcoverings are custom Iksel and Pierre Freuy panels, hand-painted by artisans in their London and Paris ateliers. Each crane, landscape and vista is meticulously rendered in mineral pigments on panels, creating an immersive landscape that transforms the living space into a serene sanctuary.",
+      "The scenic decorative wallcoverings are custom Iksel and Pierre Frey panels, hand-painted by artisans in their London and Paris ateliers. Each crane, landscape and vista is meticulously rendered in mineral pigments on panels, creating an immersive landscape that transforms the living space into a serene sanctuary.",
   },
   {
     title: "Thierry Lemaire",
