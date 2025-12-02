@@ -43,6 +43,9 @@ const Navigation = () => {
             {navItems.map(item => <button key={item.href} onClick={() => handleNavClick(item.href)} className="font-body text-sm uppercase tracking-wider text-foreground/80 hover:text-primary transition-colors">
                 {item.label}
               </button>)}
+            <a href="tel:+6591393850" className="font-body text-sm text-primary hover:text-primary/80 transition-colors">
+              +65 9139 3850
+            </a>
           </div>
 
           {/* Mobile Hamburger Menu */}
@@ -58,6 +61,9 @@ const Navigation = () => {
                 {navItems.map(item => <button key={item.href} onClick={() => handleNavClick(item.href)} className="font-serif text-2xl text-left text-foreground hover:text-primary transition-colors py-3 border-b border-border/30">
                     {item.label}
                   </button>)}
+                <a href="tel:+6591393850" className="font-serif text-2xl text-left text-primary hover:text-primary/80 transition-colors py-3 border-b border-border/30">
+                  +65 9139 3850
+                </a>
               </div>
             </SheetContent>
           </Sheet>
