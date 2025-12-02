@@ -8,7 +8,7 @@ const philosophyPoints = [{
   subtitle: "Cultural Fusion",
   content: "This residence embodies a sophisticated dialogue between Eastern and Western design philosophies. Asian artistic traditions—evident in the hand-painted murals and organic forms—are balanced with Western modernist principles of clean lines and functional elegance. The result is a space that honors both heritages without pastiche."
 }, {
-  title: "Art as Architecture",
+  title: "Custom Requests",
   subtitle: "Integrated Aesthetics",
   content: "Rather than treating art as an afterthought, the design integrates artistic expression into the architectural fabric. The mural work isn't merely decorative; it defines spatial boundaries and influences the emotional tone of each room. Furniture pieces are selected for their sculptural merit, blurring the line between functional objects and art."
 }, {
