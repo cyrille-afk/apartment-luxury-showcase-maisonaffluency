@@ -38,7 +38,7 @@ const Gallery = () => {
             OUR GALLERY
           </p>
           <h2 className="font-display text-xl leading-relaxed md:text-3xl lg:text-4xl text-foreground text-left md:text-justify px-2">
-            From Thierry Lemaire's limited edition Orsay Table to Nathalie Ziegler's and Hervé van der Straeten's exquisite Chandeliers, from Hamrei's whimsical Pépé Chairs to Pierre Bonnefill'se Bronze Painting, Maison Affluency Singapore is a unique venue where design and art congregate.
+            From Thierry Lemaire's limited edition Orsay Table to Nathalie Ziegler's and Hervé van der Straeten's exquisite Chandeliers, from Hamrei's whimsical Pépé Chairs to Pierre Bonnefille's Bronze Painting, Maison Affluency Singapore is a unique venue where design and art congregate.
           </h2>
         </motion.div>
         
