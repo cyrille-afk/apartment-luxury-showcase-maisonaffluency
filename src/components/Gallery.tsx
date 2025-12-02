@@ -12,7 +12,7 @@ const galleryExperiences = [{
   items: [{
     image: bedroomImage,
     title: "A Masterful Suite",
-    description: "Sculptural Hervé van der Straeten's Mic Mac Chandelier, Atelier Demichelis' Limited Edition Bud Table Lamp, Adam Court's Villa Pedestal Nightstand, CC tapis Giudecca Bespoke Rug"
+    description: "Hervé van der Straeten's Mic Mac Chandelier, Atelier Demichelis' Limited Edition Bud Table Lamp, Adam Court's Villa Pedestal Nightstand, CC-Tapis Giudecca and Pinton 1867 Custom Rugs"
   }, {
     image: bedroomAltImage,
     title: "With Curated Collectible Items",
