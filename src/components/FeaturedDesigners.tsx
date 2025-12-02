@@ -140,18 +140,21 @@ const FeaturedDesigners = () => {
                 value={designer.id}
                 className="border border-border/40 rounded-lg px-6 bg-card/30 hover:bg-card/50 transition-colors duration-300"
               >
-                <AccordionTrigger className="hover:no-underline py-6">
+                <AccordionTrigger className="hover:no-underline py-6 group">
                   <div className="flex items-center gap-4 md:gap-6 text-left w-full">
-                    <img 
-                      src={designer.image} 
-                      alt={designer.name}
-                      className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover ring-2 ring-border/40 flex-shrink-0"
-                    />
+                    <div className="relative flex-shrink-0">
+                      <img 
+                        src={designer.image} 
+                        alt={designer.name}
+                        className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 group-hover:ring-primary/60 group-hover:scale-110 group-hover:shadow-lg"
+                      />
+                      <div className="absolute inset-0 rounded-full bg-primary/0 group-hover:bg-primary/10 transition-all duration-300" />
+                    </div>
                     <div className="flex flex-col items-start gap-1 flex-1 min-w-0">
-                      <h3 className="text-xl md:text-2xl font-serif text-foreground">
+                      <h3 className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 group-hover:text-primary">
                         {designer.name}
                       </h3>
-                      <p className="text-sm md:text-base text-primary font-body italic">
+                      <p className="text-sm md:text-base text-primary font-body italic transition-opacity duration-300 group-hover:opacity-80">
                         {designer.specialty}
                       </p>
                     </div>
