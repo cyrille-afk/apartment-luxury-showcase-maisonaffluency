@@ -25,7 +25,11 @@ const featuredDesigners = [
     image: thierryLemaireImg,
     biography: "Thierry Lemaire is a French designer known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
     notableWorks: "Orsay Centre Table, Sculptural Console Series",
-    philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects."
+    philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
+    links: [
+      { type: "Website", url: "https://thierrylemaire.com" },
+      { type: "Instagram", url: "https://instagram.com/thierrylemaire_design" }
+    ]
   },
   {
     id: "jean-michel-frank",
@@ -34,7 +38,11 @@ const featuredDesigners = [
     image: jeanMichelFrankImg,
     biography: "Jean-Michel Frank (1895-1941) was a French interior designer known for his minimalist and refined approach to luxury. Working alongside craftsman Adolphe Chanaux, Frank created iconic pieces that defined 1930s modernism. His work emphasized pure forms, exceptional materials, and understated elegance.",
     notableWorks: "Stool 1934, Coffee Table Soleil 1930",
-    philosophy: "True luxury lies in the quality of materials and the purity of form, not in ostentatious decoration."
+    philosophy: "True luxury lies in the quality of materials and the purity of form, not in ostentatious decoration.",
+    links: [
+      { type: "Archive", url: "https://jeanmichelfrank-archive.com" },
+      { type: "Gallery", url: "https://galerie-downtown.com/jean-michel-frank" }
+    ]
   },
   {
     id: "herve-van-der-straeten",
@@ -43,7 +51,11 @@ const featuredDesigners = [
     image: herveVanDerStraetenImg,
     biography: "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
     notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
-    philosophy: "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement."
+    philosophy: "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
+    links: [
+      { type: "Website", url: "https://hervevanderstraeten.com" },
+      { type: "Instagram", url: "https://instagram.com/hervevanderstraeten" }
+    ]
   },
   {
     id: "nathalie-ziegler",
@@ -52,7 +64,11 @@ const featuredDesigners = [
     image: nathalieZieglerImg,
     biography: "Nathalie Ziegler is a French glass artist known for her custom chandeliers and glass sculptures that blur the line between functional lighting and fine art. Her Saint Just Custom Glass Chandelier showcases her ability to manipulate glass into dramatic, ethereal forms that transform spaces with light and color.",
     notableWorks: "Saint Just Custom Glass Chandelier, Gold Leaves+Glass Snake Vase, Sculptural Glass Series",
-    philosophy: "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment."
+    philosophy: "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
+    links: [
+      { type: "Website", url: "https://nathalie-ziegler.com" },
+      { type: "Instagram", url: "https://instagram.com/nathalie_ziegler_glass" }
+    ]
   },
   {
     id: "atelier-demichelis",
@@ -61,7 +77,11 @@ const featuredDesigners = [
     image: atelierDemichelisImg,
     biography: "Atelier Demichelis is a contemporary design studio specializing in limited edition lighting fixtures. Each piece is meticulously handcrafted, combining traditional techniques with innovative design. Their Bud Table Lamp represents their commitment to creating functional art objects with exceptional attention to detail.",
     notableWorks: "Limited Edition Bud Table Lamp, Artisan Lighting Collection",
-    philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation."
+    philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
+    links: [
+      { type: "Website", url: "https://atelierdemichelis.com" },
+      { type: "Instagram", url: "https://instagram.com/atelier_demichelis" }
+    ]
   },
   {
     id: "bertrand-de-maistre",
@@ -70,7 +90,11 @@ const featuredDesigners = [
     image: bertrandDeMaistreImg,
     biography: "Bertrand de Maistre is a French designer known for his poetic approach to furniture design. His Lyrical Desk demonstrates his ability to create pieces that are both functional and emotionally resonant, with flowing lines and thoughtful proportions that inspire creativity and contemplation.",
     notableWorks: "Lyrical Desk, Contemporary Furniture Series",
-    philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind."
+    philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
+    links: [
+      { type: "Website", url: "https://bertranddemaistre.fr" },
+      { type: "Instagram", url: "https://instagram.com/bertrand_de_maistre" }
+    ]
   },
   {
     id: "hamrei",
@@ -79,7 +103,11 @@ const featuredDesigners = [
     image: hamreiImg,
     biography: "Hamrei brings a playful yet sophisticated approach to contemporary design. Their Pépé Chair showcases their signature style of combining comfort with unexpected visual delight. Each piece demonstrates a mastery of form and craftsmanship while maintaining a sense of joy and personality.",
     notableWorks: "Pépé Chair, Whimsical Furniture Collection",
-    philosophy: "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship."
+    philosophy: "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
+    links: [
+      { type: "Website", url: "https://hamrei.design" },
+      { type: "Instagram", url: "https://instagram.com/hamrei_design" }
+    ]
   },
   {
     id: "atelier-fevrier",
@@ -88,7 +116,11 @@ const featuredDesigners = [
     image: atelierFevrierImg,
     biography: "Atelier Fevrier is a textile studio dedicated to the ancient art of hand-knotted rug making. Their Ricky Rug exemplifies their commitment to traditional techniques combined with contemporary design sensibilities. Each rug is a labor of love, taking months to complete with meticulous attention to texture, color, and pattern.",
     notableWorks: "Hand-knotted Ricky Rug, Custom Textile Collection",
-    philosophy: "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities."
+    philosophy: "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
+    links: [
+      { type: "Website", url: "https://atelierfevrier.com" },
+      { type: "Instagram", url: "https://instagram.com/atelier_fevrier" }
+    ]
   },
   {
     id: "apparatus-studio",
@@ -97,7 +129,11 @@ const featuredDesigners = [
     image: apparatusStudioImg,
     biography: "Apparatus Studio is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
     notableWorks: "Metronome Reading Floor Lamp, Sculptural Lighting Series",
-    philosophy: "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit."
+    philosophy: "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
+    links: [
+      { type: "Website", url: "https://apparatusstudio.com" },
+      { type: "Instagram", url: "https://instagram.com/apparatus_studio" }
+    ]
   }
 ];
 
@@ -176,9 +212,28 @@ const FeaturedDesigners = () => {
                     </div>
                     
                     <div className="pt-2 border-t border-border/30 mt-4">
-                      <p className="text-sm md:text-base italic leading-relaxed text-foreground/80">
+                      <p className="text-sm md:text-base italic leading-relaxed text-foreground/80 mb-4">
                         "{designer.philosophy}"
                       </p>
+                      
+                      {designer.links && designer.links.length > 0 && (
+                        <div className="flex flex-wrap gap-3 mt-4">
+                          {designer.links.map((link, idx) => (
+                            <a
+                              key={idx}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-colors duration-300 border border-primary/20 hover:border-primary/40"
+                            >
+                              <span>{link.type}</span>
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </AccordionContent>
