@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
+import { cn } from "@/lib/utils";
+
 const navItems = [{
   label: "Home",
   href: "#home"
@@ -24,6 +25,30 @@ const navItems = [{
 }];
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("#home");
+
+  useEffect(() => {
+    const sectionIds = navItems.map(item => item.href.replace("#", ""));
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(`#${entry.target.id}`);
+          }
+        });
+      },
+      { rootMargin: "-20% 0px -70% 0px", threshold: 0 }
+    );
+
+    sectionIds.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const handleNavClick = (href: string) => {
     setIsOpen(false);
     const element = document.querySelector(href);
@@ -46,9 +71,20 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {navItems.map(item => <button key={item.href} onClick={() => handleNavClick(item.href)} className="font-body text-sm uppercase tracking-wider text-foreground/80 hover:text-primary transition-colors">
+            {navItems.map(item => (
+              <button 
+                key={item.href} 
+                onClick={() => handleNavClick(item.href)} 
+                className={cn(
+                  "font-body text-sm uppercase tracking-wider transition-colors",
+                  activeSection === item.href 
+                    ? "text-primary font-medium" 
+                    : "text-foreground/80 hover:text-primary"
+                )}
+              >
                 {item.label}
-              </button>)}
+              </button>
+            ))}
           </div>
 
           {/* Mobile Hamburger Menu */}
@@ -61,9 +97,20 @@ const Navigation = () => {
             
             <SheetContent side="right" className="w-[280px] sm:w-[320px]">
               <div className="flex flex-col gap-6 mt-8">
-                {navItems.map(item => <button key={item.href} onClick={() => handleNavClick(item.href)} className="font-serif text-2xl text-left text-foreground hover:text-primary transition-colors py-3 border-b border-border/30">
+                {navItems.map(item => (
+                  <button 
+                    key={item.href} 
+                    onClick={() => handleNavClick(item.href)} 
+                    className={cn(
+                      "font-serif text-2xl text-left transition-colors py-3 border-b border-border/30",
+                      activeSection === item.href 
+                        ? "text-primary" 
+                        : "text-foreground hover:text-primary"
+                    )}
+                  >
                     {item.label}
-                  </button>)}
+                  </button>
+                ))}
               </div>
             </SheetContent>
           </Sheet>
