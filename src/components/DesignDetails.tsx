@@ -22,10 +22,10 @@ const designersBrands = [
       "The organic, Tanganika-upholstered NIKO sofa is a bespoke piece from French designer Thierry Lemaire. Its undulating form challenges traditional furniture design while providing exceptional comfort. The sculptural quality makes it as much an art piece as functional seating.",
   },
   {
-    title: "Kelly Wearstler Collection",
+    title: "Robicara SIRA Collection",
     subtitle: "Statement Furniture",
     content:
-      "The vibrant coral credenza is from Kelly Wearstler's signature collection, featuring lacquered finishes and brass detailing. Its bold color provides a carefully calculated contrast to the muted palette, demonstrating confident use of accent pieces in luxury design.",
+      "The vibrant credenza is from Robicara's SIRA collection, featuring sultry shagreen panelling, metal patinated finishes and brass detailing. Its bold yet classical allure provides a carefully calculated contrast to the muted palette, demonstrating confident use of accent pieces in luxury design.",
   },
   {
     title: "Apparatus Studio",
