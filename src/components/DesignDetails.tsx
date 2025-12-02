@@ -18,7 +18,7 @@ const philosophyPoints = [{
 }, {
   title: "Consolidated Insured Shipping",
   subtitle: "Distinctive Selection",
-  content: "Maison Affluency philosophy celebrates the uniqueness and distinctive selection of exceptional pieces that define the space. Each piece is deliberately chosen and thoughtfully placed. Negative space is valued as highly as the objects themselves, allowing individual elements to be fully appreciated without visual competition."
+  content: "Let us help you navigate the many pitfalls of the freight world by recommending the most appropriate partners with full insurance coverage"
 }];
 const DesignDetails = () => {
   const ref = useRef(null);
