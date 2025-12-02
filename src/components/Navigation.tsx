@@ -13,11 +13,11 @@ const navItems = [{
   label: "Gallery",
   href: "#gallery"
 }, {
-  label: "Trade Program",
-  href: "#details"
-}, {
   label: "Featured Designers",
   href: "#designers"
+}, {
+  label: "Trade Program",
+  href: "#details"
 }, {
   label: "Contact",
   href: "#contact"
