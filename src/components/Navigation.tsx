@@ -39,7 +39,9 @@ const Navigation = () => {
         <div className="flex h-16 md:h-20 items-center justify-center md:justify-between relative">
           {/* Logo/Brand */}
           <button onClick={() => handleNavClick("#home")} className="hover:opacity-80 transition-opacity">
-            <img src={affluencyLogo} alt="Affluency - Unique by Design" className="h-6 sm:h-8 md:h-10 w-auto" />
+            <span className="font-serif text-base md:text-xl font-extrabold text-foreground">
+              Maison Affluency Singapore
+            </span>
           </button>
 
           {/* Desktop Navigation */}
