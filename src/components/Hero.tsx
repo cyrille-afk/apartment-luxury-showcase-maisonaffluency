@@ -4,7 +4,7 @@ const Hero = () => {
   return <section className="relative h-screen w-full overflow-hidden">
       <div className="absolute inset-0">
         <img src={heroImage} alt="Luxury living room with Asian-inspired murals and designer furniture" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>
       
       <div className="relative z-10 h-full px-6 pb-20 md:px-12 lg:px-20 flex-col border rounded-none flex items-start justify-center opacity-100 shadow-none">
