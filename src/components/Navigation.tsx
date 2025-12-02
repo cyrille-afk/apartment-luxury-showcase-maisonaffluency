@@ -36,7 +36,7 @@ const Navigation = () => {
         <div className="flex h-16 md:h-20 items-center justify-between">
           {/* Logo/Brand */}
           <button onClick={() => handleNavClick("#home")} className="hover:opacity-80 transition-opacity">
-            <span className="font-serif text-base text-foreground font-extrabold md:text-xl">
+            <span className="font-serif text-base text-foreground font-extrabold md:text-xl text-center">
               Maison Affluency
             </span>
           </button>
