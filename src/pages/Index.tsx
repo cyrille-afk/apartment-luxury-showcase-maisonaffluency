@@ -4,18 +4,14 @@ import Gallery from "@/components/Gallery";
 import DesignDetails from "@/components/DesignDetails";
 import ContactInquiry from "@/components/ContactInquiry";
 import Footer from "@/components/Footer";
-
 const Index = () => {
-  return (
-    <main className="min-h-screen">
+  return <main className="min-h-screen">
       <Hero />
-      <Overview />
+      <Overview className="border-none" />
       <Gallery />
       <DesignDetails />
       <ContactInquiry />
       <Footer />
-    </main>
-  );
+    </main>;
 };
-
 export default Index;

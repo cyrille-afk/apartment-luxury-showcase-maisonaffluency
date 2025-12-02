@@ -26,7 +26,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.2
-          }} className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-primary">MAISON AFFLUENCY OVERVIEW</motion.p>
+          }} className="mb-3 font-body uppercase tracking-[0.3em] text-primary text-xl">MAISON AFFLUENCY OVERVIEW</motion.p>
             
             <motion.h2 initial={{
             opacity: 0,
@@ -37,7 +37,8 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.8,
             delay: 0.3
-          }} className="mb-8 font-display text-4xl leading-tight text-foreground md:text-5xl lg:text-6xl">An exclusive showroom where professionals and design connoisseurs can find the loving pieces to elevate their interiors.<br />
+          }} className="mb-8 font-display text-4xl leading-tight text-foreground md:text-5xl lg:text-2xl">An exclusive showroom where professionals and design connoisseurs can find the loving pieces to elevate their interiors.
+            <br />
               Living Space
             </motion.h2>
           </div>
