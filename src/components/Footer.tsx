@@ -1,6 +1,5 @@
 import { Instagram } from "lucide-react";
 import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
-
 const Footer = () => {
   return <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
       <div className="mx-auto max-w-7xl">
@@ -9,9 +8,7 @@ const Footer = () => {
             <div className="flex items-center gap-3">
               <img alt="Affluency - Unique by Design" className="h-10 md:h-12 w-auto" src={affluencyLogo} />
             </div>
-            <p className="font-body text-sm text-muted-foreground text-center md:text-left">
-              Professional Design Portfolio
-            </p>
+            <p className="font-body text-sm text-muted-foreground text-center md:text-center">A curator of choice</p>
             <div className="flex gap-4 mt-2">
               <a href="https://www.instagram.com/myaffluency/?hl=en" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
                 <Instagram size={20} />
