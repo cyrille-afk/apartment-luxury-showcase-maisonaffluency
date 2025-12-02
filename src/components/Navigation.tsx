@@ -10,6 +10,9 @@ const navItems = [{
   label: "Overview",
   href: "#overview"
 }, {
+  label: "Featured Designers",
+  href: "#designers"
+}, {
   label: "Gallery",
   href: "#gallery"
 }, {
