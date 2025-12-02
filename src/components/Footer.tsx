@@ -16,12 +16,12 @@ const Footer = () => {
             </div>
           </div>
           
-          <div className="flex gap-8">
+          <div className="flex gap-8 items-center">
             <a href="#" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               Specifications
             </a>
-            <a className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground" href="https://thierry-lemaire.fr/en/" target="_blank" rel="noopener noreferrer">
-              Designers
+            <a href="https://www.instagram.com/thierrylemaire_/?hl=en" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Thierry Lemaire Instagram">
+              <Instagram size={20} />
             </a>
             <a href="#contact" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               Contact
