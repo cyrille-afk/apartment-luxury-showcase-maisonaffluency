@@ -37,7 +37,7 @@ const Navigation = () => {
           {/* Logo/Brand */}
           <button onClick={() => handleNavClick("#home")} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img alt="Affluency" className="h-10 md:h-12 w-auto" src="/lovable-uploads/18ec40c0-d3d8-423e-bf58-8a0f98938aeb.jpg" />
-            <span className="font-serif text-base md:text-lg font-bold text-primary hidden sm:inline">
+            <span className="font-serif text-base font-bold text-primary hidden sm:inline md:text-base">
               MAISON AFFLUENCY SINGAPORE
             </span>
           </button>
