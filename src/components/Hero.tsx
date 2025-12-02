@@ -51,21 +51,7 @@ const Hero = () => {
           delay: 0.8
         }} className="max-w-2xl text-base leading-relaxed text-cream/80 text-left md:text-justify font-serif md:text-lg lg:text-xl font-medium mb-6">This is a unique opportunity for architects and interior decorators to dazzle their clientele and experience first hand couture furniture, collectibles and artworks from world reknown designers and makers</motion.p>
           
-          <motion.div initial={{
-          opacity: 0
-        }} animate={{
-          opacity: 1
-        }} transition={{
-          duration: 0.6,
-          delay: 1.0
-        }} className="max-w-3xl">
-            <p className="text-sm leading-relaxed text-cream/70 text-left md:text-justify font-serif md:text-base lg:text-lg mb-4">
-              Maison Affluency Singapore represents a carefully curated convergence of European design excellence and artisanal mastery. Each space tells a story through the work of renowned ateliers and independent designers who push the boundaries of contemporary luxury.
-            </p>
-            <p className="text-sm leading-relaxed text-cream/70 text-left md:text-justify font-serif md:text-base lg:text-lg">
-              From Thierry Lemaire's limited edition sculptural tables and Jean-Michel Frank's iconic 1930s modernist pieces, to Hervé van der Straeten's dramatic chandeliers and Nathalie Ziegler's bespoke glass artworks — this residence showcases furniture and objects that blur the line between functional design and collectible art. Complemented by works from Atelier Demichelis, Hamrei, Bertrand de Maistre, and other visionary makers, every room embodies a philosophy of timeless elegance, material authenticity, and uncompromising craftsmanship.
-            </p>
-          </motion.div>
+          
         </motion.div>
       </div>
       
