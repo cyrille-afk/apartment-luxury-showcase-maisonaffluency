@@ -31,9 +31,9 @@ const Navigation = () => {
       });
     }
   };
-  return <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50">
+    return <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50">
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
-        <div className="flex h-16 md:h-20 items-center justify-between">
+        <div className="flex h-16 md:h-20 items-center justify-center md:justify-between relative">
           {/* Logo/Brand */}
           <button onClick={() => handleNavClick("#home")} className="hover:opacity-80 transition-opacity">
             <span className="font-serif text-base text-foreground font-extrabold md:text-xl text-center">
@@ -51,7 +51,7 @@ const Navigation = () => {
           {/* Mobile Hamburger Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="h-12 w-12" aria-label="Toggle menu">
+              <Button variant="ghost" size="icon" className="h-12 w-12 absolute right-0" aria-label="Toggle menu">
                 {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
             </SheetTrigger>
