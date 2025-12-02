@@ -11,7 +11,7 @@ const galleryItems = [{
 }, {
   image: diningImage,
   title: "Dining Room",
-  description: "Elegant entertaining space with bespoke furnishings"
+  description: "Elegant entertaining space with dreamy Tuscan vista inviting you to travel"
 }, {
   image: boudoirImage,
   title: "Sophisticated Boudoir",
