@@ -10,7 +10,7 @@ import bedroomAltImage from "@/assets/bedroom.jpg";
 const galleryExperiences = [
   {
     experience: "Restful Retreat",
-    subtitle: "Spaces designed for peaceful rejuvenation",
+    subtitle: "Serene retreat with collectible lighting, bespoke furniture and handcrafted rugs",
     items: [
       {
         image: bedroomImage,
