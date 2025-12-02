@@ -28,7 +28,7 @@ const featuredDesigners = [
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
     links: [
       { type: "Website", url: "https://thierrylemaire.com" },
-      { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" }
+      { type: "https://www.instagram.com/thierrylemaire_/?hl=en", url: "https://www.instagram.com/thierrylemaire_/?hl=en" }
     ]
   },
   {
