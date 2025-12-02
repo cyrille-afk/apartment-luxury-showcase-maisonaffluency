@@ -19,7 +19,7 @@ const designersBrands = [
     title: "Thierry Lemaire",
     subtitle: "Sculptural Seating",
     content:
-      "The organic, Tanganika-upholstered sofa is a bespoke piece from French designer Thierry Lemaire. Its undulating form challenges traditional furniture design while providing exceptional comfort. The sculptural quality makes it as much an art piece as functional seating.",
+      "The organic, Tanganika-upholstered NIKO sofa is a bespoke piece from French designer Thierry Lemaire. Its undulating form challenges traditional furniture design while providing exceptional comfort. The sculptural quality makes it as much an art piece as functional seating.",
   },
   {
     title: "Kelly Wearstler Collection",
