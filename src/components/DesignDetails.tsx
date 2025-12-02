@@ -10,7 +10,7 @@ const philosophyPoints = [{
 }, {
   title: "Custom Requests",
   subtitle: "From inspiration to customisation",
-  content: "Rather than treating art as an afterthought, the design integrates artistic expression into the architectural fabric. The mural work isn't merely decorative; it defines spatial boundaries and influences the emotional tone of each room. Furniture pieces are selected for their sculptural merit, blurring the line between functional objects and art."
+  content: "Let us use our global connections to specialist workshops and renowned designers to help you find the best solutions"
 }, {
   title: "Samples & Swatches",
   subtitle: "A comprehensive Material Library",
