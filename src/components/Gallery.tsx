@@ -28,7 +28,7 @@ const galleryExperiences = [{
   }, {
     image: diningImage,
     title: "With Panoramic Cityscape Views",
-    description: "Alinea Design Objects' Angelo M table surrounded by Eric Schmitt Studio Chairie dining chairs, Emanuelle Levet Stenne's Alabaster Pendant, Emmanuel Babled's Limited Edition Sculptured Book Cover from his emblematic Osmosi series "
+    description: "Alinea Design Objects' Angelo M table paired with Eric Schmitt Studio Chairie and Cazes&Conquet Augusta dining chairs, Emanuelle Levet Stenne's Alabaster Pendant, Emmanuel Babled's Limited Edition Sculptured Book Cover from his emblematic Osmosi series "
   }]
 }, {
   experience: "Personal Sanctuary",
