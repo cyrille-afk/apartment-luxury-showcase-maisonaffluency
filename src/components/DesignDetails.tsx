@@ -17,7 +17,7 @@ const philosophyPoints = [{
   content: "Every material speaks to authenticity and craftsmanship. Natural stone, hand-woven textiles, solid brass fixtures, and hand-painted finishes create a tactile richness that can't be replicated with synthetic alternatives. Access a comprehensive material library featuring a vast, curated selection of items or Request the ones you truly desire"
 }, {
   title: "Consolidated Insured Shipping",
-  subtitle: "Distinctive Selection",
+  subtitle: "Maximising time whilst minimising frictions",
   content: "Let us help you navigate the many pitfalls of the freight world by recommending the most appropriate partners with full insurance coverage"
 }];
 const DesignDetails = () => {
