@@ -23,7 +23,7 @@ const galleryExperiences = [{
   subtitle: "Elegant spaces for entertaining and connection",
   items: [{
     image: livingRoomImage,
-    title: "Living Room",
+    title: "A Sophisticated Living Room",
     description: "Sophisticated gathering space with designer furniture and artisan lighting"
   }, {
     image: diningImage,
