@@ -55,7 +55,7 @@ const philosophyPoints = [
       "Every material speaks to authenticity and craftsmanship. Natural stone, hand-woven textiles, solid brass fixtures, and hand-painted finishes create a tactile richness that can't be replicated with synthetic alternatives. The patina of quality materials improves with age, ensuring the design's longevity.",
   },
   {
-    title: "Curated Minimalism",
+    title: "Unique Curation",
     subtitle: "Intentional Simplicity",
     content:
       "The philosophy embraces minimalism not as stark emptiness, but as careful curation. Each piece is deliberately chosen and thoughtfully placed. Negative space is valued as highly as the objects themselves, allowing individual elements to be fully appreciated without visual competition.",
