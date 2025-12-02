@@ -35,7 +35,7 @@ const galleryExperiences = [{
   subtitle: "Intimate spaces for reflection and creativity",
   items: [{
     image: boudoirImage,
-    title: "Sophisticated Boudoir",
+    title: "A Sophisticated Boudoir",
     description: "Bespoke furniture and unique artworks over white cherry blossom"
   }]
 }];
