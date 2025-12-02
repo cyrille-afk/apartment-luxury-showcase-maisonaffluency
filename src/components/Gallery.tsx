@@ -5,7 +5,7 @@ import bedroomImage from "@/assets/master-suite.jpg";
 import diningImage from "@/assets/dining-room.jpg";
 import boudoirImage from "@/assets/boudoir.jpg";
 import livingRoomImage from "@/assets/living-room-hero.jpg";
-import bedroomAltImage from "@/assets/bedroom.jpg";
+import bedroomAltImage from "@/assets/bedroom-alt.jpg";
 const galleryExperiences = [{
   experience: "Restful Retreat",
   subtitle: "Serene retreat with curated collectible items, bespoke furniture and handcrafted rugs",
