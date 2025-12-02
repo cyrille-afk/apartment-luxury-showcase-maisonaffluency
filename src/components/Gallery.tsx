@@ -19,7 +19,7 @@ const galleryItems = [
   {
     image: boudoirImage,
     title: "Sophisticated Boudoir",
-    description: "Bespoke furniture and unique artworks throughout"
+    description: "Bespoke furniture and unique artworks over white cherry blossom"
   }
 ];
 
