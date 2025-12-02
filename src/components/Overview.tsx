@@ -39,7 +39,7 @@ const Overview = () => {
             delay: 0.3
           }} className="mb-8 font-display text-4xl leading-tight text-foreground md:text-5xl lg:text-2xl">An exclusive showroom where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors.
             <br />
-              Living Space
+              ​
             </motion.h2>
           </div>
           
