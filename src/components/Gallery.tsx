@@ -34,7 +34,7 @@ const Gallery = () => {
       } : {}} transition={{
         duration: 0.8
       }} className="mb-16 text-center">
-          <p className="mb-3 font-body uppercase tracking-[0.3em] text-primary text-3xl">MAISON AFFLUENCY GALLERY</p>
+          <p className="mb-3 uppercase tracking-[0.3em] text-primary text-3xl font-serif">OUR GALLERY</p>
           <h2 className="font-display text-4xl text-foreground md:text-5xl text-justify lg:text-lg">From Thierry Lemaire limited edition Orsay Table, Hamrei whimsical Pepe chairs, Nathalie Ziegler, Emmanuel Levet Stenne and Hervé van der Straeten exquisite Chandeliers to Pierre Bonnefille Bronze Painting, Maison Affluency is a unique venue where design and art congregate. </h2>
         </motion.div>
         

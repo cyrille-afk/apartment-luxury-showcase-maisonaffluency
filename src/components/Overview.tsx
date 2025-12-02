@@ -26,7 +26,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.2
-          }} className="mb-3 font-body uppercase tracking-[0.3em] text-primary text-xl">MAISON AFFLUENCY OVERVIEW</motion.p>
+          }} className="mb-3 uppercase tracking-[0.3em] text-primary text-xl font-serif">MAISON AFFLUENCY OVERVIEW</motion.p>
             
             <motion.h2 initial={{
             opacity: 0,
