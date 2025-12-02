@@ -7,7 +7,7 @@ import kitchenImage from "@/assets/kitchen.jpg";
 const galleryItems = [{
   image: bedroomImage,
   title: "Master Suite",
-  description: "Tranquil retreat with custom lighting and curated artwork"
+  description: "Dreamy and serene retreat with collectible lighting, bespoke furniture, handcrafted rugs and curated artwork"
 }, {
   image: diningImage,
   title: "Dining Room",
