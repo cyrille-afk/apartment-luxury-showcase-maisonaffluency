@@ -7,7 +7,7 @@ import boudoirImage from "@/assets/boudoir.jpg";
 const galleryItems = [{
   image: bedroomImage,
   title: "Master Suite",
-  description: "Elegant entertaining space with dreamy vista"
+  description: "Serene retreat with collectible lighting, bespoke furniture and handcrafted rugs "
 }, {
   image: diningImage,
   title: "Dining Room",
