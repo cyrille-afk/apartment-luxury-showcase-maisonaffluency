@@ -1,4 +1,4 @@
-import { Instagram, Linkedin, Facebook } from "lucide-react";
+import { Instagram } from "lucide-react";
 
 const Footer = () => {
   return <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
@@ -20,12 +20,6 @@ const Footer = () => {
             <div className="flex gap-4 mt-2">
               <a href="https://www.instagram.com/myaffluency/?hl=en" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
                 <Instagram size={20} />
-              </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="LinkedIn">
-                <Linkedin size={20} />
-              </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">
-                <Facebook size={20} />
               </a>
             </div>
           </div>
