@@ -1,12 +1,17 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank.jpg";
 import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.jpg";
@@ -140,6 +145,7 @@ const featuredDesigners = [
 const FeaturedDesigners = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
 
   return (
     <section 
@@ -178,14 +184,40 @@ const FeaturedDesigners = () => {
               >
                 <AccordionTrigger className="hover:no-underline py-6 group">
                   <div className="flex items-center gap-4 md:gap-6 text-left w-full">
-                    <div className="relative flex-shrink-0">
-                      <img 
-                        src={designer.image} 
-                        alt={designer.name}
-                        className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 group-hover:ring-primary/60 group-hover:scale-110 group-hover:shadow-lg"
-                      />
-                      <div className="absolute inset-0 rounded-full bg-primary/0 group-hover:bg-primary/10 transition-all duration-300" />
-                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div 
+                          className="relative flex-shrink-0 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedImage({ name: designer.name, image: designer.image });
+                          }}
+                        >
+                          <img 
+                            src={designer.image} 
+                            alt={designer.name}
+                            className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
+                          />
+                          <div className="absolute inset-0 rounded-full bg-primary/0 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center">
+                            <svg className="w-8 h-8 text-primary opacity-0 hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl">
+                        <div className="relative w-full h-full">
+                          <img 
+                            src={selectedImage?.image || designer.image} 
+                            alt={selectedImage?.name || designer.name}
+                            className="w-full h-auto rounded-lg object-contain"
+                          />
+                          <p className="text-center mt-4 text-lg font-serif text-foreground">
+                            {selectedImage?.name || designer.name}
+                          </p>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     <div className="flex flex-col items-start gap-1 flex-1 min-w-0">
                       <h3 className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 group-hover:text-primary">
                         {designer.name}
