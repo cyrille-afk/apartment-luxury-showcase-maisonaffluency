@@ -5,7 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 const philosophyPoints = [{
   title: "Dedicated Client Advisor",
-  subtitle: "Cultural Fusion",
+  subtitle: "Tailored Advice and True Partnership",
   content: "Maison Affluency nurture one-on-one relationships with its clients offering personalised and tailored advice on each project. From access to confidential sourcing, design collaborations and curation of artworks, our curating team offers a solid partnership"
 }, {
   title: "Custom Requests",
