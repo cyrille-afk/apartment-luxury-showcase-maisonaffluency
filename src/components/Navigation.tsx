@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import affluencyLogo from "@/assets/affluency-logo.png";
+import affluencyLogo from "@/assets/affluency-logo-full.jpeg";
 const navItems = [{
   label: "Home",
   href: "#home"
@@ -39,9 +39,7 @@ const Navigation = () => {
         <div className="flex h-16 md:h-20 items-center justify-center md:justify-between relative">
           {/* Logo/Brand */}
           <button onClick={() => handleNavClick("#home")} className="hover:opacity-80 transition-opacity">
-            <span className="font-serif text-base text-foreground font-extrabold md:text-xl text-center">
-              Maison Affluency Singapore 
-            </span>
+            <img src={affluencyLogo} alt="Affluency - Unique by Design" className="h-8 md:h-10 w-auto" />
           </button>
 
           {/* Desktop Navigation */}
