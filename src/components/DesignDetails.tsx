@@ -14,7 +14,7 @@ const philosophyPoints = [{
 }, {
   title: "Samples & Swatches",
   subtitle: "Craft & Quality",
-  content: "Every material speaks to authenticity and craftsmanship. Natural stone, hand-woven textiles, solid brass fixtures, and hand-painted finishes create a tactile richness that can't be replicated with synthetic alternatives. The patina of quality materials improves with age, ensuring the design's longevity."
+  content: "Every material speaks to authenticity and craftsmanship. Natural stone, hand-woven textiles, solid brass fixtures, and hand-painted finishes create a tactile richness that can't be replicated with synthetic alternatives. Access a comprehensive material library featuring a vast, curated selection of items or Request the ones you truly desire"
 }, {
   title: "Consolidated Insured Shipping",
   subtitle: "Distinctive Selection",
