@@ -26,7 +26,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.2
-          }} className="mb-3 uppercase tracking-[0.3em] text-primary text-xl font-serif">MAISON AFFLUENCY OVERVIEW</motion.p>
+          }} className="mb-3 uppercase tracking-[0.3em] text-primary text-xl font-serif">OVERVIEW</motion.p>
             
             <motion.h2 initial={{
             opacity: 0,
@@ -37,7 +37,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.8,
             delay: 0.3
-          }} className="mb-8 font-display text-4xl leading-tight text-foreground md:text-5xl lg:text-2xl">An exclusive showroom where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors.
+          }} className="mb-8 font-display text-4xl leading-tight text-foreground md:text-5xl lg:text-lg">An exclusive showroom where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors.
             <br />
               ​
             </motion.h2>
@@ -82,7 +82,7 @@ const Overview = () => {
           }} className="grid grid-cols-3 gap-6 pt-8 border-t border-border">
               <div>
                 <div className="mb-2 font-display text-3xl text-primary">5</div>
-                <div className="font-body text-sm uppercase tracking-wider text-muted-foreground">VIGNETTES</div>
+                <div className="font-body text-sm uppercase tracking-wider text-muted-foreground">ATMOSPHERES</div>
               </div>
               <div>
                 <div className="mb-2 font-display text-3xl text-primary">40</div>
