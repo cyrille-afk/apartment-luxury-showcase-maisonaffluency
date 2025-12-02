@@ -85,7 +85,7 @@ const Overview = () => {
                 <div className="font-body text-sm uppercase tracking-wider text-muted-foreground">ATMOSPHERES</div>
               </div>
               <div>
-                <div className="mb-2 font-display text-3xl text-primary">40</div>
+                <div className="mb-2 font-display text-3xl text-primary">50</div>
                 <div className="font-body text-sm uppercase tracking-wider text-muted-foreground">DESIGNERS</div>
               </div>
               <div>
