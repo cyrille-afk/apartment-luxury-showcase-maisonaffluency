@@ -36,7 +36,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-        }} className="mb-6 text-5xl leading-tight text-cream md:text-7xl font-serif lg:text-2xl">We showcase the best talents of interior design and craftsmanship.
+        }} className="mb-6 text-5xl leading-tight text-cream md:text-7xl font-serif lg:text-8xl">We showcase the best talents of interior design and craftsmanship.
           <br />
               ​
           </motion.h1>
