@@ -13,7 +13,7 @@ import bertrandDeMaistreImg from "@/assets/designers/bertrand-de-maistre.jpg";
 import hamreiImg from "@/assets/designers/hamrei.jpg";
 import atelierFevrierImg from "@/assets/designers/atelier-fevrier.jpg";
 import apparatusStudioImg from "@/assets/designers/apparatus-studio.jpg";
-import oliviaCognetImg from "@/assets/designers/olivia-cognet.avif";
+import oliviaCognetImg from "@/assets/designers/olivia-cognet.jpg";
 
 const featuredDesigners = [
   {
@@ -153,7 +153,7 @@ const featuredDesigners = [
     name: "Olivia Cognet",
     specialty: "Ceramic Artist & Designer",
     image: oliviaCognetImg,
-    imagePosition: "!object-contain",
+    
     biography:
       "Olivia Cognet is a French ceramic artist that draws her inspiration from the South of France where she grew up and and was nourished by the brilliant masters from the school of Vallauris, from Picasso to Roger Capron. Her Vallauris floor lamp in a custom blue glazed ceramic, is a testimony of her constant search for the balance between art & design. ",
     notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
@@ -217,7 +217,7 @@ const FeaturedDesigners = () => {
                           <img
                             src={designer.image}
                             alt={designer.name}
-                            className={`w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg ${designer.imagePosition || ""}`}
+                            className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
                           />
                           <div className="absolute inset-0 rounded-full bg-primary/0 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center">
                             <svg
