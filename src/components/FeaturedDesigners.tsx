@@ -153,7 +153,7 @@ const featuredDesigners = [
     name: "Olivia Cognet",
     specialty: "Ceramic Artist & Designer",
     image: oliviaCognetImg,
-    imagePosition: "object-top",
+    imagePosition: "!object-contain",
     biography:
       "Olivia Cognet is a French ceramic artist that draws her inspiration from the South of France where she grew up and and was nourished by the brilliant masters from the school of Vallauris, from Picasso to Roger Capron. Her Vallauris floor lamp in a custom blue glazed ceramic, is a testimony of her constant search for the balance between art & design. ",
     notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
