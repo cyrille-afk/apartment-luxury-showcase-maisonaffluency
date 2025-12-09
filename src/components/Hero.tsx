@@ -7,7 +7,7 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>
       
-      <div className="relative z-10 h-full px-4 pb-16 pt-20 md:px-12 md:pb-20 lg:px-20 flex-col border rounded-none flex items-start justify-center opacity-100 shadow-none">
+      <div className="relative z-10 h-full px-4 pb-16 pt-20 md:px-12 md:pb-20 lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-center">
         <motion.div initial={{
         opacity: 0,
         y: 30
@@ -37,8 +37,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-        }} className="mb-4 md:mb-6 text-2xl leading-tight text-cream md:text-4xl font-serif lg:text-2xl">We showcase the best talents of interior design and craftsmanship ​
-from around the world
+        }} className="mb-4 md:mb-6 text-2xl leading-tight text-cream md:text-4xl font-serif lg:text-2xl">We showcase the best talents of interior design and craftsmanship ​
 ​<br />
               ​
           </motion.h1>
