@@ -81,14 +81,24 @@ const partnerBrands = [
     galleryIndex: 2, // Design Icons and Collectibles
   },
   {
-    id: "iksel",
+    id: "iksel-brunelleschi",
     name: "Iksel",
     category: "Wallcoverings & Murals",
     origin: "United Kingdom",
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
-    featured: "Brunelleschi Perspective Wallcover, White Blossom Wallcover",
+    featured: "Brunelleschi Perspective Wallcover",
     instagram: "https://instagram.com/iksel_decorative_arts",
-    galleryIndex: 0, // A Masterful Suite (Brunelleschi) and 7: A Serene Decor (White Blossom)
+    galleryIndex: 0, // A Masterful Suite
+  },
+  {
+    id: "iksel-white-blossom",
+    name: "Iksel",
+    category: "Wallcoverings & Murals",
+    origin: "United Kingdom",
+    description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
+    featured: "White Blossom Wallcover",
+    instagram: "https://instagram.com/iksel_decorative_arts",
+    galleryIndex: 7, // A Serene Decor
   },
   {
     id: "made-in-kira",
