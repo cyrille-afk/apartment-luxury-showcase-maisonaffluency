@@ -191,7 +191,7 @@ const featuredDesigners = [
     philosophy:
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
     links: [
-      { type: "Instagram", url: "https://instagram.com/nathalie_ziegler_glass" },
+      { type: "Instagram", url: "https://instagram.com/nathaliezieglerpasqua" },
       { type: "Curators' choice" },
     ],
   },
