@@ -34,6 +34,21 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "atelier-fevrier",
+    name: "Atelier Fevrier",
+    specialty: "Hand-knotted Rugs & Textile Art",
+    image: atelierFevrierImg,
+    biography:
+      "Atelier Fevrier is a textile studio dedicated to the ancient art of hand-knotted rug making. Their Ricky Rug exemplifies their commitment to traditional techniques combined with contemporary design sensibilities. Each rug is a labor of love, taking months to complete with meticulous attention to texture, color, and pattern.",
+    notableWorks: "Hand-knotted Ricky Rug, Custom Textile Collection",
+    philosophy:
+      "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
+    links: [
+      { type: "Website", url: "https://atelierfevrier.com" },
+      { type: "Instagram", url: "https://instagram.com/atelier_fevrier" },
+    ],
+  },
+  {
     id: "jean-michel-frank",
     name: "Jean-Michel Frank & Adolphe Chanaux",
     specialty: "Modernist Furniture & Interior Design",
@@ -119,21 +134,6 @@ const featuredDesigners = [
     links: [
       { type: "Website", url: "https://hamrei.design" },
       { type: "Instagram", url: "https://instagram.com/hamrei_design" },
-    ],
-  },
-  {
-    id: "atelier-fevrier",
-    name: "Atelier Fevrier",
-    specialty: "Hand-knotted Rugs & Textile Art",
-    image: atelierFevrierImg,
-    biography:
-      "Atelier Fevrier is a textile studio dedicated to the ancient art of hand-knotted rug making. Their Ricky Rug exemplifies their commitment to traditional techniques combined with contemporary design sensibilities. Each rug is a labor of love, taking months to complete with meticulous attention to texture, color, and pattern.",
-    notableWorks: "Hand-knotted Ricky Rug, Custom Textile Collection",
-    philosophy:
-      "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
-    links: [
-      { type: "Website", url: "https://atelierfevrier.com" },
-      { type: "Instagram", url: "https://instagram.com/atelier_fevrier" },
     ],
   },
   {
