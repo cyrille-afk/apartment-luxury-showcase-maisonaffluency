@@ -13,7 +13,7 @@ const galleryExperiences = [{
   items: [{
     image: bedroomImage,
     title: "A Masterful Suite",
-    description: "CC-Tapis Giudecca custom rug, Celso de Lemos Silk Bed Cover, Hervé van der Straeten's MicMac Chandelier, Iksel's Brunelleschi Perspective Wallcover"
+    description: "CC-Tapis Giudecca custom rug, Celso de Lemos' Silk Bed Cover, Hervé van der Straeten's Bronze MicMac Chandelier, Iksel's Brunelleschi Perspective Wallcover"
   }, {
     image: bedroomAltImage,
     title: "Unique by Design",
