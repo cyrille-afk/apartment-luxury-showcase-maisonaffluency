@@ -7,10 +7,12 @@ import DesignDetails from "@/components/DesignDetails";
 import ContactInquiry from "@/components/ContactInquiry";
 import Footer from "@/components/Footer";
 import BackToTop from "@/components/BackToTop";
+import ScrollProgress from "@/components/ScrollProgress";
 
 const Index = () => {
   return (
     <>
+      <ScrollProgress />
       <Navigation />
       <main className="min-h-screen">
         <section id="home">
