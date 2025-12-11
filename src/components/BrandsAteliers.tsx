@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { Search, X, Instagram, ExternalLink, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -422,6 +422,7 @@ const BrandsAteliers = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [searchQuery, setSearchQuery] = useState("");
+  const [openCategories, setOpenCategories] = useState<string[]>([]);
 
   const filteredBrands = useMemo(() => {
     if (!searchQuery.trim()) return partnerBrands;
@@ -446,6 +447,24 @@ const BrandsAteliers = () => {
     // Sort categories alphabetically
     return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
   }, [filteredBrands]);
+
+  // Initialize open categories when grouped brands change
+  const allCategories = useMemo(() => groupedBrands.map(([category]) => category), [groupedBrands]);
+  
+  // Set all categories open by default on first render or when categories change
+  useEffect(() => {
+    setOpenCategories(allCategories);
+  }, [allCategories]);
+
+  const isAllExpanded = openCategories.length === allCategories.length;
+
+  const toggleAllCategories = () => {
+    if (isAllExpanded) {
+      setOpenCategories([]);
+    } else {
+      setOpenCategories(allCategories);
+    }
+  };
 
   const scrollToGallery = (galleryIndex: number) => {
     const gallerySection = document.getElementById('gallery');
@@ -511,7 +530,17 @@ const BrandsAteliers = () => {
           )}
         </motion.div>
 
-        <Accordion type="multiple" defaultValue={groupedBrands.map(([category]) => category)} className="space-y-4">
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={toggleAllCategories}
+            className="text-sm text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-2"
+          >
+            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
+            {isAllExpanded ? 'Collapse All' : 'Expand All'}
+          </button>
+        </div>
+
+        <Accordion type="multiple" value={openCategories} onValueChange={setOpenCategories} className="space-y-4">
           {groupedBrands.map(([category, brands], categoryIndex) => (
             <AccordionItem key={category} value={category} className="border border-border/40 rounded-lg bg-card/30 overflow-hidden">
               <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/50 transition-colors">
