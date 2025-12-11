@@ -1,8 +1,14 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo } from "react";
-import { Search, X, Instagram, ExternalLink } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: A Masterful Suite, 1: Unique by Design, 2: Design Icons and Collectibles
@@ -428,6 +434,19 @@ const BrandsAteliers = () => {
     );
   }, [searchQuery]);
 
+  // Group brands by category
+  const groupedBrands = useMemo(() => {
+    const groups: Record<string, typeof partnerBrands> = {};
+    filteredBrands.forEach((brand) => {
+      if (!groups[brand.category]) {
+        groups[brand.category] = [];
+      }
+      groups[brand.category].push(brand);
+    });
+    // Sort categories alphabetically
+    return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [filteredBrands]);
+
   const scrollToGallery = (galleryIndex: number) => {
     const gallerySection = document.getElementById('gallery');
     if (gallerySection) {
@@ -492,66 +511,76 @@ const BrandsAteliers = () => {
           )}
         </motion.div>
 
-        <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredBrands.map((brand, index) => (
-            <motion.div
-              key={brand.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-              className="group p-6 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-primary transition-colors duration-300">
-                    {brand.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">
-                    {brand.origin}
-                  </p>
+        <Accordion type="multiple" defaultValue={groupedBrands.map(([category]) => category)} className="space-y-4">
+          {groupedBrands.map(([category, brands], categoryIndex) => (
+            <AccordionItem key={category} value={category} className="border border-border/40 rounded-lg bg-card/30 overflow-hidden">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <span className="font-serif text-lg md:text-xl text-primary">{category}</span>
+                  <span className="text-sm text-muted-foreground font-body">({brands.length})</span>
                 </div>
-                {brand.instagram && (
-                  <a
-                    href={brand.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors duration-300"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Instagram className="h-4 w-4" />
-                  </a>
-                )}
-              </div>
-              
-              <p className="text-xs md:text-sm text-primary font-body italic mb-3">
-                {brand.category}
-              </p>
-              
-              <p className="text-sm text-muted-foreground font-body leading-relaxed mb-4">
-                {brand.description}
-              </p>
-              
-              <div className="pt-3 border-t border-border/30">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Featured</p>
-                {brand.galleryIndex !== undefined ? (
-                  <button
-                    onClick={() => scrollToGallery(brand.galleryIndex)}
-                    className="text-sm text-foreground/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link"
-                  >
-                    <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                      {brand.featured}
-                    </span>
-                    <ExternalLink className="h-3 w-3 opacity-0 group-hover/link:opacity-100 transition-opacity" />
-                  </button>
-                ) : (
-                  <p className="text-sm text-foreground/80 font-body">
-                    {brand.featured}
-                  </p>
-                )}
-              </div>
-            </motion.div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-2">
+                  {brands.map((brand, index) => (
+                    <motion.div
+                      key={brand.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={isInView ? { opacity: 1, y: 0 } : {}}
+                      transition={{ duration: 0.5, delay: categoryIndex * 0.1 + index * 0.05 }}
+                      className="group p-6 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-primary transition-colors duration-300">
+                            {brand.name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">
+                            {brand.origin}
+                          </p>
+                        </div>
+                        {brand.instagram && (
+                          <a
+                            href={brand.instagram}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-primary transition-colors duration-300"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Instagram className="h-4 w-4" />
+                          </a>
+                        )}
+                      </div>
+                      
+                      <p className="text-sm text-muted-foreground font-body leading-relaxed mb-4">
+                        {brand.description}
+                      </p>
+                      
+                      <div className="pt-3 border-t border-border/30">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Featured</p>
+                        {brand.galleryIndex !== undefined ? (
+                          <button
+                            onClick={() => scrollToGallery(brand.galleryIndex)}
+                            className="text-sm text-foreground/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link"
+                          >
+                            <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                              {brand.featured}
+                            </span>
+                            <ExternalLink className="h-3 w-3 opacity-0 group-hover/link:opacity-100 transition-opacity" />
+                          </button>
+                        ) : (
+                          <p className="text-sm text-foreground/80 font-body">
+                            {brand.featured}
+                          </p>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </div>
     </section>
   );
