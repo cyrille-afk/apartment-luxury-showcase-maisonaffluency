@@ -626,6 +626,10 @@ const BrandsAteliers = () => {
           type="multiple" 
           value={openCategories} 
           onValueChange={(values) => {
+            // Trigger haptic feedback on mobile
+            if ('vibrate' in navigator) {
+              navigator.vibrate(10);
+            }
             setOpenCategories(values);
             // On mobile, scroll to the newly opened category
             if (window.innerWidth < 768 && values.length > openCategories.length) {
@@ -649,7 +653,7 @@ const BrandsAteliers = () => {
               data-category={category}
               className="border border-border/40 rounded-lg bg-card/30 overflow-hidden scroll-mt-4"
             >
-              <AccordionTrigger className="px-4 md:px-6 py-3 md:py-4 hover:no-underline hover:bg-card/50 transition-colors">
+              <AccordionTrigger className="px-4 md:px-6 py-3 md:py-4 hover:no-underline hover:bg-card/50 transition-colors active:scale-[0.99] touch-manipulation">
                 <div className="flex items-center gap-2 md:gap-3">
                   <span className="font-serif text-base md:text-lg lg:text-xl text-primary">{category}</span>
                   <span className="text-xs md:text-sm text-muted-foreground font-body">({brands.length})</span>
