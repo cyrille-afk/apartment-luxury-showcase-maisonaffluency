@@ -52,7 +52,7 @@ const BackToTop = () => {
               ease: "easeInOut"
             }
           }}
-          className="fixed bottom-8 right-8 md:bottom-10 md:right-10 z-50"
+          className="fixed bottom-36 right-4 md:bottom-10 md:right-10 z-50"
         >
           <TooltipProvider>
             <Tooltip>
