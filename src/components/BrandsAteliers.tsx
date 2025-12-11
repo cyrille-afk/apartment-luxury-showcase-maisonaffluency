@@ -8,8 +8,8 @@ const partnerBrands = [
     id: "alinea-design-objects",
     name: "Alinea Design Objects",
     category: "Designer Furniture",
-    origin: "France",
-    description: "French design house curating and producing exceptional furniture pieces that blend sculptural form with functional elegance.",
+    origin: "Belgium",
+    description: "Belgian design house curating and producing exceptional furniture pieces that blend sculptural form with functional elegance.",
     featured: "Angelo M Table",
   },
   {
