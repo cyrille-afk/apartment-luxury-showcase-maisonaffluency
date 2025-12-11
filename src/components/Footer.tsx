@@ -3,12 +3,8 @@ import affluencyLogo from "@/assets/affluency-logo-new.jpg";
 const Footer = () => {
   return <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          <div className="flex flex-col items-center md:items-start gap-4">
-            <div className="flex items-center gap-3">
-              <img alt="Affluency - Unique by Design" className="h-10 md:h-12 w-auto" src={affluencyLogo} />
-            </div>
-          </div>
+        <div className="flex flex-col items-center gap-6">
+          <img alt="Affluency - Unique by Design" className="h-10 md:h-12 w-auto" src={affluencyLogo} />
           
           <div className="flex gap-8 items-center">
             <a href="#curating-team" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
