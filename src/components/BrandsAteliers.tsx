@@ -181,6 +181,16 @@ const partnerBrands = [
     galleryIndex: 6, // A Sophisticated Boudoir
   },
   {
+    id: "nathalie-ziegler",
+    name: "Nathalie Ziegler",
+    category: "Glass Art & Lighting",
+    origin: "France",
+    description: "French glass artist creating bespoke chandeliers and sculptural glass pieces, each work a unique expression of light and organic form.",
+    featured: "Custom Glass Chandelier",
+    instagram: "https://instagram.com/nathalieziegler",
+    galleryIndex: 6, // A Sophisticated Boudoir
+  },
+  {
     id: "nika-zupanc",
     name: "Nika Zupanc Studio",
     category: "Contemporary Design",
