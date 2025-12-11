@@ -17,7 +17,7 @@ const curatingTeam = [
     name: "Cyrille Delval",
     role: "Co-Founder and CEO",
     image: cyrilleDelvalImg,
-    bio: "Cyrille leads Maison Affluency with a passion for exceptional design and craftsmanship.",
+    bio: "As a former Investment Banker, Serial Entrepreneur, long time Art and Design Collector, Cyrille leads Maison Affluency with a passion for exceptional design and craftsmanship.",
   },
 ];
 
