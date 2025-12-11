@@ -49,6 +49,10 @@ const galleryExperiences = [{
     title: "A Sophisticated Boudoir",
     description: "Bertrand de Maistre's Lyrical Desk, Hamrei's Pépé Chair, Made in Kira's Toshiro Lamp, Nathalie Ziegler's Custom Glass Chandelier and Gold Leaves+Glass Snake Vase, Nika Zupanc's Stardust Loveseat, Iksel's White Blossom Wallcover"
   }, {
+    image: boudoirImage,
+    title: "A Sophisticated Boudoir",
+    description: "Bertrand de Maistre's Lyrical Desk, Hamrei's Pépé Chair, Made in Kira's Toshiro Lamp, Nathalie Ziegler's Custom Glass Chandelier and Gold Leaves+Glass Snake Vase, Nika Zupanc's Stardust Loveseat, Iksel's White Blossom Wallcover"
+  }, {
     image: artMasterBronzeImage,
     title: "The Art Master Bronze Painting",
     description: "Pierre Bonnefille's Bronze Painting 204, Alexander Lamont's Straw Marquetry Mantle Box, Baleri's Plato bookcase"
