@@ -79,6 +79,7 @@ const featuredDesigners = [
   {
     id: "atelier-demichelis",
     name: "Atelier Demichelis",
+    founder: "Laura Demichelis",
     specialty: "Limited Edition Lighting & Artisan Craftsmanship",
     image: atelierDemichelisImg,
     biography:
@@ -261,6 +262,11 @@ const FeaturedDesigners = () => {
                           <p className="text-center mt-4 text-lg font-serif text-foreground">
                             {selectedImage?.name || designer.name}
                           </p>
+                          {designer.founder && (
+                            <p className="text-center mt-1 text-sm text-muted-foreground font-body">
+                              {designer.founder}
+                            </p>
+                          )}
                         </div>
                       </DialogContent>
                     </Dialog>
