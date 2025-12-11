@@ -75,7 +75,7 @@ const partnerBrands = [
     origin: "United Kingdom",
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
     featured: "Brunelleschi Perspective Wallcover, White Blossom Wallcover",
-    instagram: "https://instagram.com/ikseldecorativearts",
+    instagram: "https://instagram.com/iksel_decorative_arts",
   },
   {
     id: "made-in-kira",
