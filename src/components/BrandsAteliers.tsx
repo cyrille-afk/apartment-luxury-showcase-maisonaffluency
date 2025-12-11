@@ -147,7 +147,7 @@ const partnerBrands = [
     origin: "France",
     description: "French publisher of limited edition decorative objects, collaborating with renowned artists and designers including Garnier & Linker.",
     featured: "Lost-wax Cast Crystal Centerpiece",
-    instagram: "https://instagram.com/theoremeeditions",
+    instagram: "https://instagram.com/theoreme_editions",
   },
 ];
 
