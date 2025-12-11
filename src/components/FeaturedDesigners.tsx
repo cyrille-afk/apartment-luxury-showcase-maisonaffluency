@@ -332,6 +332,18 @@ const FeaturedDesigners = () => {
               if ('vibrate' in navigator) {
                 navigator.vibrate(10);
               }
+              // On mobile, scroll to the newly opened designer
+              if (window.innerWidth < 768 && values.length > openDesigners.length) {
+                const newDesigner = values.find(v => !openDesigners.includes(v));
+                if (newDesigner) {
+                  setTimeout(() => {
+                    const element = document.querySelector(`[data-designer="${newDesigner}"]`);
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }, 100);
+                }
+              }
               setOpenDesigners(values);
             }} 
             className="w-full space-y-4"
@@ -340,7 +352,8 @@ const FeaturedDesigners = () => {
               <AccordionItem
                 key={designer.id}
                 value={designer.id}
-                className="border border-border/40 rounded-lg px-4 md:px-6 bg-card/30 hover:bg-card/50 transition-colors duration-300"
+                data-designer={designer.id}
+                className="border border-border/40 rounded-lg px-4 md:px-6 bg-card/30 hover:bg-card/50 transition-colors duration-300 scroll-mt-16"
               >
                 <AccordionTrigger className="hover:no-underline py-4 md:py-6 group active:scale-[0.99] touch-manipulation">
                   <div className="flex items-center gap-4 md:gap-6 text-left w-full">
