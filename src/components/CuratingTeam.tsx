@@ -7,29 +7,11 @@ const curatingTeam = [
     id: 1,
     name: "Team Member 1",
     role: "Curator",
-    image: null, // Replace with uploaded image
+    image: null,
   },
   {
     id: 2,
     name: "Team Member 2",
-    role: "Curator",
-    image: null,
-  },
-  {
-    id: 3,
-    name: "Team Member 3",
-    role: "Curator",
-    image: null,
-  },
-  {
-    id: 4,
-    name: "Team Member 4",
-    role: "Curator",
-    image: null,
-  },
-  {
-    id: 5,
-    name: "Team Member 5",
     role: "Curator",
     image: null,
   },
@@ -54,7 +36,7 @@ const CuratingTeam = () => {
         The dedicated curators behind our designer selections
       </p>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-8">
+      <div className="grid grid-cols-2 gap-6 md:gap-8 max-w-md mx-auto">
         {curatingTeam.map((member, index) => (
           <motion.div
             key={member.id}
