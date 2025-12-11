@@ -65,11 +65,17 @@ const QuickJumpMenu = () => {
     }
   };
 
-  if (!isVisible) return null;
-
   return (
-    <div className="fixed right-4 bottom-6 md:right-6 md:bottom-24 z-50">
-      <AnimatePresence>
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="fixed right-4 bottom-6 md:right-6 md:bottom-24 z-50"
+        >
+          <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -139,7 +145,9 @@ const QuickJumpMenu = () => {
           )}
         </AnimatePresence>
       </motion.button>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
