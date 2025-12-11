@@ -15,6 +15,7 @@ import hamreiImg from "@/assets/designers/hamrei.jpg";
 import atelierFevrierImg from "@/assets/designers/atelier-fevrier.jpg";
 import apparatusStudioImg from "@/assets/designers/apparatus-studio.jpg";
 import oliviaCognetImg from "@/assets/designers/olivia-cognet.jpg";
+import jeremyMaxwellWintrebertImg from "@/assets/designers/jeremy-maxwell-wintrebert.jpg";
 
 const featuredDesigners = [
   {
@@ -169,7 +170,7 @@ const featuredDesigners = [
     id: "jeremy-maxwell-wintrebert",
     name: "Jeremy Maxwell Wintrebert",
     specialty: "Freehand glassblown lights and sculptures",
-    image: oliviaCognetImg,
+    image: jeremyMaxwellWintrebertImg,
 
     biography: " ",
     notableWorks: "",
