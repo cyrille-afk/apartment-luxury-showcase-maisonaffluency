@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState } from "react";
-import { Instagram } from "lucide-react";
+import { useRef, useState, useMemo } from "react";
+import { Instagram, Search, X } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import CuratingTeam from "@/components/CuratingTeam";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 
@@ -202,6 +203,17 @@ const FeaturedDesigners = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredDesigners = useMemo(() => {
+    if (!searchQuery.trim()) return featuredDesigners;
+    const query = searchQuery.toLowerCase();
+    return featuredDesigners.filter(
+      (designer) =>
+        designer.name.toLowerCase().includes(query) ||
+        designer.specialty.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
 
   return (
     <section ref={ref} className="py-16 px-4 md:py-24 md:px-12 lg:px-20 bg-background">
@@ -228,9 +240,40 @@ const FeaturedDesigners = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
+          className="mb-8"
+        >
+          <div className="relative max-w-md mx-auto">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search by name or specialty..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10 bg-card/50 border-border/40 focus:border-primary/60"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="text-center text-sm text-muted-foreground mt-3">
+              {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
+            </p>
+          )}
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
         >
           <Accordion type="single" collapsible className="w-full space-y-4">
-            {featuredDesigners.map((designer, index) => (
+            {filteredDesigners.map((designer, index) => (
               <AccordionItem
                 key={designer.id}
                 value={designer.id}
