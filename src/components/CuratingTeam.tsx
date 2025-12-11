@@ -3,13 +3,14 @@ import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import cyrilleDelvalImg from "@/assets/team/cyrille-delval.jpg";
+import elsaLemarignierImg from "@/assets/team/elsa-lemarignier.jpg";
 
 const curatingTeam = [
   {
     id: 1,
     name: "Elsa Lemarignier",
     role: "Co-Founder and CPO",
-    image: null,
+    image: elsaLemarignierImg,
     bio: "Elsa brings her expertise in curation and design to Maison Affluency.",
   },
   {
