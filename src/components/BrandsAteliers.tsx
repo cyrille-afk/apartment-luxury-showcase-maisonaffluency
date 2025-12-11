@@ -120,8 +120,8 @@ const partnerBrands = [
     id: "robicara",
     name: "Robicara",
     category: "Bespoke Furniture",
-    origin: "United Kingdom",
-    description: "London-based design studio creating bespoke furniture and cabinetry with exceptional attention to material, proportion, and craftsmanship.",
+    origin: "Italy",
+    description: "Italian design studio creating bespoke furniture and cabinetry with exceptional attention to material, proportion, and craftsmanship.",
     featured: "Sira Credenza",
   },
   {
