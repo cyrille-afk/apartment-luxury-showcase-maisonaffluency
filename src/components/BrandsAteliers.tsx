@@ -46,7 +46,7 @@ const partnerBrands = [
   {
     id: "alinea-design-objects",
     name: "Alinea Design Objects",
-    category: "Designer Furniture",
+    category: "Furniture",
     origin: "Belgium",
     description: "Belgian design house curating and producing exceptional furniture pieces that blend sculptural form with functional elegance.",
     featured: "Angelo M Table",
@@ -96,7 +96,7 @@ const partnerBrands = [
   {
     id: "baleri",
     name: "Baleri Italia",
-    category: "Designer Furniture",
+    category: "Furniture",
     origin: "Italy",
     description: "Italian furniture company known for innovative designs and collaborations with leading architects and designers since 1984.",
     featured: "Plato Bookcase",
@@ -106,7 +106,7 @@ const partnerBrands = [
   {
     id: "bruno-de-maistre",
     name: "Bruno de Maistre",
-    category: "Bespoke Furniture",
+    category: "Furniture",
     origin: "France",
     description: "French furniture designer creating refined bespoke pieces that combine classical proportions with contemporary elegance and exceptional craftsmanship.",
     featured: "Lyric Desk",
@@ -116,7 +116,7 @@ const partnerBrands = [
   {
     id: "cazes-conquet",
     name: "Cazes & Conquet",
-    category: "Bespoke Furniture",
+    category: "Furniture",
     origin: "France",
     description: "French design duo creating refined furniture pieces that blend contemporary aesthetics with traditional craftsmanship and timeless elegance.",
     featured: "Augusta Dining Chairs",
@@ -146,7 +146,7 @@ const partnerBrands = [
   {
     id: "damien-langlois-meurinne",
     name: "Damien Langlois-Meurinne",
-    category: "Bespoke Furniture",
+    category: "Furniture",
     origin: "France",
     description: "French designer creating bold, sculptural furniture and lighting that combines artistic vision with masterful craftsmanship and luxurious materials.",
     featured: "Ooh La La Console",
@@ -226,7 +226,7 @@ const partnerBrands = [
   {
     id: "hamrei",
     name: "Hamrei",
-    category: "Artisan Furniture",
+    category: "Furniture",
     origin: "France",
     description: "French design studio crafting whimsical and sculptural furniture pieces that blend playful forms with exceptional craftsmanship and artistic expression.",
     featured: "Pépé Chair",
@@ -236,7 +236,7 @@ const partnerBrands = [
   {
     id: "jindrich-halabala",
     name: "Jindrich Halabala",
-    category: "Heritage Furniture",
+    category: "Furniture",
     origin: "Czech Republic",
     description: "Legendary Czech furniture designer whose iconic mid-century lounge chairs represent the pinnacle of functionalist design, prized by collectors worldwide.",
     featured: "Lounge Chair",
@@ -276,7 +276,7 @@ const partnerBrands = [
   {
     id: "leo-sentou",
     name: "Leo Sentou",
-    category: "Contemporary Furniture",
+    category: "Furniture",
     origin: "France",
     description: "French furniture designer creating refined contemporary pieces that balance sculptural presence with functional elegance and exceptional craftsmanship.",
     featured: "AB Armchair",
@@ -316,7 +316,7 @@ const partnerBrands = [
   {
     id: "okha",
     name: "Okha",
-    category: "Contemporary Furniture",
+    category: "Furniture",
     origin: "South Africa",
     description: "South African design studio creating sophisticated furniture that bridges African craft traditions with contemporary global aesthetics.",
     featured: "Adam Court's Villa Pedestal Nightstand",
@@ -386,7 +386,7 @@ const partnerBrands = [
   {
     id: "robicara",
     name: "Robicara",
-    category: "Bespoke Furniture",
+    category: "Furniture",
     origin: "Italy",
     description: "Italian design studio creating bespoke furniture and cabinetry with exceptional attention to material, proportion, and craftsmanship.",
     featured: "Sira Credenza",
@@ -406,7 +406,7 @@ const partnerBrands = [
   {
     id: "thierry-lemaire-sofa",
     name: "Thierry Lemaire",
-    category: "Bespoke Furniture",
+    category: "Furniture",
     origin: "France",
     description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
     featured: "Niko 420 Custom Sofa",
@@ -416,7 +416,7 @@ const partnerBrands = [
   {
     id: "thierry-lemaire-table",
     name: "Thierry Lemaire",
-    category: "Bespoke Furniture",
+    category: "Furniture",
     origin: "France",
     description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
     featured: "Orsay Centre Table",
