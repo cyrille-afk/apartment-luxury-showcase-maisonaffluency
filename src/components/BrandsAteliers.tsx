@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef } from "react";
-import { ExternalLink } from "lucide-react";
+import { useRef, useState, useMemo } from "react";
+import { Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 const partnerBrands = [
   {
@@ -137,6 +138,18 @@ const partnerBrands = [
 const BrandsAteliers = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredBrands = useMemo(() => {
+    if (!searchQuery.trim()) return partnerBrands;
+    const query = searchQuery.toLowerCase();
+    return partnerBrands.filter(
+      (brand) =>
+        brand.name.toLowerCase().includes(query) ||
+        brand.category.toLowerCase().includes(query) ||
+        brand.origin.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
 
   return (
     <section ref={ref} className="py-16 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30">
@@ -159,8 +172,39 @@ const BrandsAteliers = () => {
           </p>
         </motion.div>
 
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mb-8"
+        >
+          <div className="relative max-w-md mx-auto">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search by name, category, or origin..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10 bg-card/50 border-border/40 focus:border-primary/60"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="text-center text-sm text-muted-foreground mt-3">
+              {filteredBrands.length} brand{filteredBrands.length !== 1 ? 's' : ''} found
+            </p>
+          )}
+        </motion.div>
+
         <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {partnerBrands.map((brand, index) => (
+          {filteredBrands.map((brand, index) => (
             <motion.div
               key={brand.id}
               initial={{ opacity: 0, y: 30 }}
