@@ -101,6 +101,16 @@ const partnerBrands = [
     galleryIndex: 6, // A Sophisticated Boudoir
   },
   {
+    id: "cazes-conquet",
+    name: "Cazes & Conquet",
+    category: "Bespoke Furniture",
+    origin: "France",
+    description: "French design duo creating refined furniture pieces that blend contemporary aesthetics with traditional craftsmanship and timeless elegance.",
+    featured: "Augusta Dining Chairs",
+    instagram: "https://instagram.com/cazesconquet",
+    galleryIndex: 5, // With Panoramic Cityscape Views
+  },
+  {
     id: "cc-tapis",
     name: "CC-Tapis",
     category: "Rugs & Textiles",
