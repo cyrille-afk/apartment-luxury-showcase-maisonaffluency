@@ -111,7 +111,7 @@ const partnerBrands = [
     origin: "United Kingdom",
     description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
     featured: "Riyad Double Faced Throw and Cushion",
-    instagram: "https://instagram.com/peterreedlinens",
+    instagram: "https://instagram.com/peterreed1861",
   },
   {
     id: "pinton-1867",
