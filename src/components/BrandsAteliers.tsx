@@ -53,8 +53,8 @@ const partnerBrands = [
     featured: "Chairie Dining Chair",
   },
   {
-    id: "hayman-editions",
-    name: "Hayman Editions",
+    id: "haymann-editions",
+    name: "Haymann Editions",
     category: "Sculptural Lighting",
     origin: "United Kingdom",
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
