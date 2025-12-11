@@ -121,6 +121,16 @@ const partnerBrands = [
     galleryIndex: 0, // A Masterful Suite
   },
   {
+    id: "damien-langlois-meurinne",
+    name: "Damien Langlois-Meurinne",
+    category: "Bespoke Furniture",
+    origin: "France",
+    description: "French designer creating bold, sculptural furniture and lighting that combines artistic vision with masterful craftsmanship and luxurious materials.",
+    featured: "Ooh La La Console",
+    instagram: "https://instagram.com/damienlanglois_meurinne",
+    galleryIndex: 2, // Design Icons and Collectibles
+  },
+  {
     id: "ecart-paris",
     name: "Ecart Paris",
     category: "Heritage Furniture Editions",
