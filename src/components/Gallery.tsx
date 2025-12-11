@@ -16,7 +16,7 @@ const galleryExperiences = [{
     description: "Hervé van der Straeten's Mic Mac Chandelier, Atelier Demichelis' Limited Edition Bud Table Lamp, Adam Court's Villa Pedestal Nightstand, CC-Tapis Giudecca and Pinton 1867 Custom Rugs"
   }, {
     image: bedroomAltImage,
-    title: "Unique by Design items and collectibles",
+    title: "Unique by Design",
     description: "Adam Court's Villa Pedestal Nightstand, Atelier DeMichelis' Limited Edition Bud Table Lamp, Pinton 1867 Custom Rug, Peter Reed's Riyad Double Faced Throw and Cushion"
   }, {
     image: bedroomThirdImage,
