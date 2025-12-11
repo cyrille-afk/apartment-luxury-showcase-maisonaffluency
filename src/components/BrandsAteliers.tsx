@@ -91,6 +91,16 @@ const partnerBrands = [
     galleryIndex: 8, // An Art Master Display
   },
   {
+    id: "bruno-de-maistre",
+    name: "Bruno de Maistre",
+    category: "Bespoke Furniture",
+    origin: "France",
+    description: "French furniture designer creating refined bespoke pieces that combine classical proportions with contemporary elegance and exceptional craftsmanship.",
+    featured: "Lyric Desk",
+    instagram: "https://instagram.com/brunodemaistre",
+    galleryIndex: 6, // A Sophisticated Boudoir
+  },
+  {
     id: "cc-tapis",
     name: "CC-Tapis",
     category: "Rugs & Textiles",
