@@ -46,7 +46,7 @@ const featuredDesigners = [
     philosophy:
       "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
     links: [
-      { type: "Website", url: "https://atelierfevrier.com" },
+      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/atelier_fevrier" },
     ],
   },
@@ -60,7 +60,7 @@ const featuredDesigners = [
     notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
     philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
     links: [
-      { type: "Website", url: "https://www.oliviacognet.com" },
+      { type: "Curators' choice" },
       { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
     ],
   },
@@ -76,7 +76,7 @@ const featuredDesigners = [
     philosophy:
       "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
     links: [
-      { type: "Website", url: "https://apparatusstudio.com" },
+      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/apparatus_studio" },
     ],
   },
@@ -89,7 +89,7 @@ const featuredDesigners = [
     notableWorks: "",
     philosophy: "",
     links: [
-      { type: "Website", url: "https://alexanderlamont.com" },
+      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
     ],
   },
@@ -104,7 +104,7 @@ const featuredDesigners = [
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     links: [
-      { type: "Website", url: "https://hervevanderstraeten.com" },
+      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/hervevanderstraeten" },
     ],
   },
@@ -119,7 +119,7 @@ const featuredDesigners = [
     philosophy:
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
     links: [
-      { type: "Website", url: "https://nathalie-ziegler.com" },
+      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/nathalie_ziegler_glass" },
     ],
   },
@@ -134,7 +134,7 @@ const featuredDesigners = [
     notableWorks: "Limited Edition Bud Table Lamp, Artisan Lighting Collection",
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
     links: [
-      { type: "Website", url: "https://atelierdemichelis.com" },
+      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/atelier_demichelis" },
     ],
   },
@@ -148,7 +148,7 @@ const featuredDesigners = [
     notableWorks: "Lyrical Desk, Contemporary Furniture Series",
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     links: [
-      { type: "Website", url: "https://brunodemaistre.fr" },
+      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/bruno_de_maistre" },
     ],
   },
@@ -163,7 +163,7 @@ const featuredDesigners = [
     philosophy:
       "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
     links: [
-      { type: "Website", url: "https://hamrei.design" },
+      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/hamrei_design" },
     ],
   },
@@ -177,7 +177,7 @@ const featuredDesigners = [
     notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J",
     philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
     links: [
-      { type: "Website", url: "https://www.leo-sentou.com" },
+      { type: "Curators' choice" },
       { type: "Instagram", url: "https://www.instagram.com/leosentou" },
     ],
   },
@@ -191,7 +191,7 @@ const featuredDesigners = [
     notableWorks: "",
     philosophy: "",
     links: [
-      { type: "Website", url: "https://jeremymaxwellwintrebert.com" },
+      { type: "Curators' choice" },
       { type: "Instagram", url: "https://www.instagram.com/jmw_studio" },
     ],
   },
