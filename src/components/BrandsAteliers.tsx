@@ -106,7 +106,7 @@ const partnerBrands = [
   },
   {
     id: "peter-reed",
-    name: "Peter Reed",
+    name: "Peter Reed 1861",
     category: "Fine Linens",
     origin: "United Kingdom",
     description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
