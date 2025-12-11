@@ -7,7 +7,8 @@ const BackToTop = () => {
 
   useEffect(() => {
     const toggleVisibility = () => {
-      if (window.scrollY > 400) {
+      // Show button after scrolling past the hero section (full viewport height)
+      if (window.scrollY > window.innerHeight) {
         setIsVisible(true);
       } else {
         setIsVisible(false);
