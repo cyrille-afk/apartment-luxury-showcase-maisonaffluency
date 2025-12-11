@@ -17,7 +17,7 @@ const galleryExperiences = [{
   }, {
     image: bedroomAltImage,
     title: "Unique by Design items and collectibles",
-    description: "Description for the third photo goes here"
+    description: "Adam Court's Villa Pedestal Nightstand, Atelier DeMichelis' Limited Edition Bud Table Lamp, Pinton 1867 Custom Rug, Peter Reed's Riyad Double Faced Throw and Cushion"
   }, {
     image: bedroomThirdImage,
     title: "Curated Collectible Items",
