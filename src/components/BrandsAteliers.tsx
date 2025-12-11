@@ -201,6 +201,16 @@ const partnerBrands = [
     galleryIndex: 6, // A Sophisticated Boudoir
   },
   {
+    id: "jindrich-halabala",
+    name: "Jindrich Halabala",
+    category: "Heritage Furniture",
+    origin: "Czech Republic",
+    description: "Legendary Czech furniture designer whose iconic mid-century lounge chairs represent the pinnacle of functionalist design, prized by collectors worldwide.",
+    featured: "Lounge Chair",
+    instagram: "",
+    galleryIndex: 3, // An Inviting Bespoke Sofa
+  },
+  {
     id: "iksel-brunelleschi",
     name: "Iksel",
     category: "Wallcoverings & Murals",
