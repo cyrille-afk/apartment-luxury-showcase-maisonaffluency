@@ -251,6 +251,16 @@ const partnerBrands = [
     galleryIndex: 1, // Unique by Design
   },
   {
+    id: "pierre-bonnefille",
+    name: "Pierre Bonnefille",
+    category: "Fine Art",
+    origin: "France",
+    description: "French artist renowned for his bronze paintings and sculptural works, creating pieces that blur the boundaries between painting and sculpture through masterful material exploration.",
+    featured: "Bronze Painting 204",
+    instagram: "https://instagram.com/pierrebonnefille",
+    galleryIndex: 8, // An Art Master Display
+  },
+  {
     id: "pinton-1867",
     name: "Pinton 1867",
     category: "Rugs & Tapestries",
