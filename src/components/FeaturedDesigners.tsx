@@ -166,6 +166,19 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "leo-sentou",
+    name: "Leo Sentou",
+    specialty: "",
+    image: herveVanDerStraetenImg, // Placeholder - replace with actual image
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [
+      { type: "Website", url: "" },
+      { type: "Instagram", url: "" },
+    ],
+  },
+  {
     id: "jeremy-maxwell-wintrebert",
     name: "Jeremy Maxwell Wintrebert",
     specialty: "Freehand glassblown lights and sculptures",
