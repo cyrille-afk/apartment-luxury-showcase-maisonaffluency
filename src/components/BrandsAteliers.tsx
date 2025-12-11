@@ -11,6 +11,26 @@ import { Input } from "@/components/ui/input";
 
 const partnerBrands = [
   {
+    id: "alexander-lamont-reef",
+    name: "Alexander Lamont",
+    category: "Decorative Objects",
+    origin: "Thailand",
+    description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
+    featured: "Reef Vessels",
+    instagram: "https://instagram.com/alexanderlamont",
+    galleryIndex: 3, // An Inviting Bespoke Sofa
+  },
+  {
+    id: "alexander-lamont-mantle",
+    name: "Alexander Lamont",
+    category: "Decorative Objects",
+    origin: "Thailand",
+    description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
+    featured: "Straw Marquetry Mantle Box",
+    instagram: "https://instagram.com/alexanderlamont",
+    galleryIndex: 8, // An Art Master Display
+  },
+  {
     id: "alinea-design-objects",
     name: "Alinea Design Objects",
     category: "Designer Furniture",
