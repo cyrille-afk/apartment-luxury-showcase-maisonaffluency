@@ -93,7 +93,7 @@ const partnerBrands = [
     origin: "Slovenia",
     description: "Slovenian designer known for poetic, feminine furniture and lighting that combines nostalgic elegance with contemporary sensibility.",
     featured: "Stardust Loveseat",
-    instagram: "https://instagram.com/nikazupanc",
+    instagram: "https://instagram.com/nikazupancstudio",
   },
   {
     id: "okha",
