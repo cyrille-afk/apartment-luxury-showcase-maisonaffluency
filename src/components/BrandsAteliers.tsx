@@ -151,6 +151,16 @@ const partnerBrands = [
     galleryIndex: 0, // A Masterful Suite
   },
   {
+    id: "hamrei",
+    name: "Hamrei",
+    category: "Artisan Furniture",
+    origin: "France",
+    description: "French design studio crafting whimsical and sculptural furniture pieces that blend playful forms with exceptional craftsmanship and artistic expression.",
+    featured: "Pépé Chair",
+    instagram: "https://instagram.com/hamrei_",
+    galleryIndex: 6, // A Sophisticated Boudoir
+  },
+  {
     id: "iksel-brunelleschi",
     name: "Iksel",
     category: "Wallcoverings & Murals",
