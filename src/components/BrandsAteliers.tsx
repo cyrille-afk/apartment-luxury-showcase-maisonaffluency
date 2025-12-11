@@ -102,7 +102,7 @@ const partnerBrands = [
     origin: "South Africa",
     description: "South African design studio creating sophisticated furniture that bridges African craft traditions with contemporary global aesthetics.",
     featured: "Adam Court's Villa Pedestal Nightstand",
-    instagram: "https://instagram.com/okaboratories",
+    instagram: "https://instagram.com/_okha",
   },
   {
     id: "peter-reed",
