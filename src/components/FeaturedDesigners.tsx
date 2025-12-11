@@ -50,6 +50,20 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "olivia-cognet",
+    name: "Olivia Cognet",
+    specialty: "Ceramic Artist & Designer",
+    image: oliviaCognetImg,
+    biography:
+      "Olivia Cognet is a French ceramic artist that draws her inspiration from the South of France where she grew up and and was nourished by the brilliant masters from the school of Vallauris, from Picasso to Roger Capron. Her Vallauris floor lamp in a custom blue glazed ceramic, is a testimony of her constant search for the balance between art & design. ",
+    notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
+    philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
+    links: [
+      { type: "Website", url: "https://www.oliviacognet.com" },
+      { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
+    ],
+  },
+  {
     id: "alexander-lamont",
     name: "Alexander Lamont",
     specialty: "Artisan Furniture & Luxury Craftsmanship",
@@ -149,21 +163,6 @@ const featuredDesigners = [
     links: [
       { type: "Website", url: "https://apparatusstudio.com" },
       { type: "Instagram", url: "https://instagram.com/apparatus_studio" },
-    ],
-  },
-  {
-    id: "olivia-cognet",
-    name: "Olivia Cognet",
-    specialty: "Ceramic Artist & Designer",
-    image: oliviaCognetImg,
-
-    biography:
-      "Olivia Cognet is a French ceramic artist that draws her inspiration from the South of France where she grew up and and was nourished by the brilliant masters from the school of Vallauris, from Picasso to Roger Capron. Her Vallauris floor lamp in a custom blue glazed ceramic, is a testimony of her constant search for the balance between art & design. ",
-    notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
-    philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
-    links: [
-      { type: "Website", url: "https://www.oliviacognet.com" },
-      { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
     ],
   },
   {
