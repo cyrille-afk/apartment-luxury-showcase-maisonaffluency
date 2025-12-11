@@ -6,7 +6,7 @@ const curatingTeam = [
   {
     id: 1,
     name: "Elsa Lemarignier",
-    role: "Curator",
+    role: "Co-Founder and CPO",
     image: null,
   },
   {
