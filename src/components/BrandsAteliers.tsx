@@ -201,6 +201,16 @@ const partnerBrands = [
     galleryIndex: 2, // Design Icons and Collectibles
   },
   {
+    id: "leo-sentou",
+    name: "Leo Sentou",
+    category: "Contemporary Furniture",
+    origin: "France",
+    description: "French furniture designer creating refined contemporary pieces that balance sculptural presence with functional elegance and exceptional craftsmanship.",
+    featured: "AB Armchair",
+    instagram: "https://instagram.com/leosentou",
+    galleryIndex: 4, // A Sophisticated Living Room
+  },
+  {
     id: "made-in-kira",
     name: "Made in Kira",
     category: "Artisan Lighting",
