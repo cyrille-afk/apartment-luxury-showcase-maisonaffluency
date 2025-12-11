@@ -56,7 +56,7 @@ const partnerBrands = [
     id: "haymann-editions",
     name: "Haymann Editions",
     category: "Sculptural Lighting",
-    origin: "United Kingdom",
+    origin: "France",
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
     featured: "Carved Marble Marie Lamp",
   },
