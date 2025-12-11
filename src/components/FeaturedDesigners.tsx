@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Instagram } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import CuratingTeam from "@/components/CuratingTeam";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank.jpg";
 import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.jpg";
@@ -329,6 +330,8 @@ const FeaturedDesigners = () => {
             ))}
           </Accordion>
         </motion.div>
+
+        <CuratingTeam />
       </div>
     </section>
   );
