@@ -129,7 +129,7 @@ const partnerBrands = [
     origin: "Italy",
     description: "Iconic Italian furniture house renowned for exceptional leather craftsmanship since 1912. Their timeless designs grace prestigious residences and institutions worldwide.",
     featured: "Albero Bookcase",
-    instagram: "https://instagram.com/poltronafrau",
+    instagram: "https://instagram.com/poltronafrauofficial",
   },
   {
     id: "robicara",
