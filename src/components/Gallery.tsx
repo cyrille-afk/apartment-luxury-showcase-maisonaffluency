@@ -38,7 +38,7 @@ const galleryExperiences = [{
   }, {
     image: bespokeSofaImage,
     title: "An Inviting Bespoke Sofa",
-    description: ""
+    description: "Thierry Lemaire's Niko 420 custom sofa, Atelier Février's Ricky custom rug, Poltrona Frau's Albero bookcase, Jindrich Halabala's lounge chair, Apparatus Studio's Median 3 Surface Alabaster lights, Alexander Lamont's Reef Vessels"
   }]
 }, {
   experience: "Personal Sanctuary",
