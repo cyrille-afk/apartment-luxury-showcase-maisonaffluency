@@ -69,14 +69,6 @@ const partnerBrands = [
     featured: "Carved Marble Marie Lamp",
   },
   {
-    id: "kiko-lopez",
-    name: "Kiko Lopez",
-    category: "Artisan Mirrors",
-    origin: "France",
-    description: "Master mirror artisan creating extraordinary reflective surfaces using traditional techniques and innovative approaches to glass and metal.",
-    featured: "Silver Glass Hammer Mirror",
-  },
-  {
     id: "robicara",
     name: "Robicara",
     category: "Bespoke Furniture",
