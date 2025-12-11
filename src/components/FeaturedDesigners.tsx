@@ -122,7 +122,7 @@ const featuredDesigners = [
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     links: [
-      { type: "Instagram", url: "https://instagram.com/hervevanderstraeten" },
+      { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
       { type: "Curators' choice" },
     ],
   },
