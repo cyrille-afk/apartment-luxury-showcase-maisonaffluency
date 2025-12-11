@@ -66,6 +66,7 @@ const featuredDesigners = [
   {
     id: "apparatus-studio",
     name: "Apparatus Studio",
+    founder: "Gabriel Hendifar",
     specialty: "Contemporary Lighting & Industrial Design",
     image: apparatusStudioImg,
     biography:
