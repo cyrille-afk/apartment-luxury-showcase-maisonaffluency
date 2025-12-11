@@ -41,6 +41,16 @@ const partnerBrands = [
     galleryIndex: 5, // With Panoramic Cityscape Views
   },
   {
+    id: "atelier-demichelis",
+    name: "Atelier DeMichelis",
+    category: "Artisan Lighting",
+    origin: "France",
+    description: "French atelier crafting limited edition lighting pieces that combine organic forms with precious materials, each piece a sculptural work of art.",
+    featured: "Limited Edition Bud Table Lamp",
+    instagram: "https://instagram.com/atelierdemichelis",
+    galleryIndex: 1, // Unique by Design
+  },
+  {
     id: "apparatus-studio-median",
     name: "Apparatus Studio",
     category: "Sculptural Lighting",
