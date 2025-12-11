@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import BackToTop from "@/components/BackToTop";
 import ScrollProgress from "@/components/ScrollProgress";
 import CuratingTeam from "@/components/CuratingTeam";
+import QuickJumpMenu from "@/components/QuickJumpMenu";
 
 const Index = () => {
   return (
@@ -44,6 +45,7 @@ const Index = () => {
         <Footer />
       </main>
       <BackToTop />
+      <QuickJumpMenu />
     </>
   );
 };
