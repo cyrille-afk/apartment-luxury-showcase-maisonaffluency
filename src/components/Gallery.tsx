@@ -17,6 +17,10 @@ const galleryExperiences = [{
     image: bedroomAltImage,
     title: "Curated Collectible Items",
     description: "Damien Langlois-Meurinne's Ooh La La Console, Hayman Editions' Carved Marble Marie Lamp, and Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
+  }, {
+    image: bedroomImage,
+    title: "Third Photo Title",
+    description: "Description for the third photo goes here"
   }]
 }, {
   experience: "Social Gathering",
