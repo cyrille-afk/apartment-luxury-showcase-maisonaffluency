@@ -622,9 +622,33 @@ const BrandsAteliers = () => {
           </button>
         </div>
 
-        <Accordion type="multiple" value={openCategories} onValueChange={setOpenCategories} className="space-y-3 md:space-y-4">
+        <Accordion 
+          type="multiple" 
+          value={openCategories} 
+          onValueChange={(values) => {
+            setOpenCategories(values);
+            // On mobile, scroll to the newly opened category
+            if (window.innerWidth < 768 && values.length > openCategories.length) {
+              const newCategory = values.find(v => !openCategories.includes(v));
+              if (newCategory) {
+                setTimeout(() => {
+                  const element = document.querySelector(`[data-category="${newCategory}"]`);
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
+              }
+            }
+          }} 
+          className="space-y-3 md:space-y-4"
+        >
           {groupedBrands.map(([category, brands], categoryIndex) => (
-            <AccordionItem key={category} value={category} className="border border-border/40 rounded-lg bg-card/30 overflow-hidden">
+            <AccordionItem 
+              key={category} 
+              value={category} 
+              data-category={category}
+              className="border border-border/40 rounded-lg bg-card/30 overflow-hidden scroll-mt-4"
+            >
               <AccordionTrigger className="px-4 md:px-6 py-3 md:py-4 hover:no-underline hover:bg-card/50 transition-colors">
                 <div className="flex items-center gap-2 md:gap-3">
                   <span className="font-serif text-base md:text-lg lg:text-xl text-primary">{category}</span>
