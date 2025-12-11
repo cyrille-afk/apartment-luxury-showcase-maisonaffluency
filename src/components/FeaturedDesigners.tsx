@@ -153,6 +153,19 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "kiko-lopez",
+    name: "Kiko Lopez",
+    specialty: "Artisan Mirrors & Reflective Surfaces",
+    image: jeanMichelFrankImg, // Placeholder until dedicated image is available
+    biography:
+      "Kiko Lopez is a French master mirror artisan renowned for creating extraordinary reflective surfaces that blur the line between functional object and sculptural art. Using traditional techniques combined with innovative approaches to glass and metal, his mirrors transform spaces with their unique textural qualities and light-capturing properties. His Silver Glass Hammer Mirror exemplifies his distinctive style of treating mirrors as artistic statements.",
+    notableWorks: "Silver Glass Hammer Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
+    philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
+    links: [
+      { type: "Curators' choice" },
+    ],
+  },
+  {
     id: "leo-sentou",
     name: "Leo Sentou",
     specialty: "Contemporary Classicist Furniture Design",
