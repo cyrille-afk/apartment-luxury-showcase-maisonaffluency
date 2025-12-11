@@ -540,89 +540,91 @@ const BrandsAteliers = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-8"
+          className="sticky top-0 z-40 -mx-4 px-4 md:-mx-12 md:px-12 lg:-mx-20 lg:px-20 py-3 md:py-4 mb-4 bg-muted/95 backdrop-blur-md border-b border-border/20"
         >
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search by name, category, or origin..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-10 bg-card/50 border-border/40 focus:border-primary/60"
-              />
-              {searchQuery && (
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+              <div className="relative w-full sm:w-auto sm:flex-1 sm:max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search brands..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-10 bg-card/80 border-border/40 focus:border-primary/60 h-9 text-sm"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="bg-card/80 border-border/40 hover:bg-card h-9">
+                      <Filter className="h-3.5 w-3.5 mr-1.5" />
+                      <span className="hidden sm:inline">Categories</span>
+                      {selectedCategoryFilters.length > 0 && (
+                        <span className="ml-1.5 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full">
+                          {selectedCategoryFilters.length}
+                        </span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="end">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
+                      {selectedCategoryFilters.length > 0 && (
+                        <button
+                          onClick={clearCategoryFilters}
+                          className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          Clear all
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {allUniqueCategories.map((category) => (
+                        <label
+                          key={category}
+                          className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
+                        >
+                          <Checkbox
+                            checked={selectedCategoryFilters.includes(category)}
+                            onCheckedChange={() => toggleCategoryFilter(category)}
+                          />
+                          <span className="text-sm text-foreground font-body">{category}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                
                 <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={toggleAllCategories}
+                  className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1 h-9 px-2"
                 >
-                  <X className="h-4 w-4" />
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
+                  <span className="hidden sm:inline">{isAllExpanded ? 'Collapse' : 'Expand'}</span>
                 </button>
-              )}
+              </div>
             </div>
             
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="bg-card/50 border-border/40 hover:bg-card/80">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Categories
-                  {selectedCategoryFilters.length > 0 && (
-                    <span className="ml-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
-                      {selectedCategoryFilters.length}
-                    </span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="end">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
-                  {selectedCategoryFilters.length > 0 && (
-                    <button
-                      onClick={clearCategoryFilters}
-                      className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      Clear all
-                    </button>
-                  )}
-                </div>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {allUniqueCategories.map((category) => (
-                    <label
-                      key={category}
-                      className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
-                    >
-                      <Checkbox
-                        checked={selectedCategoryFilters.includes(category)}
-                        onCheckedChange={() => toggleCategoryFilter(category)}
-                      />
-                      <span className="text-sm text-foreground font-body">{category}</span>
-                    </label>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
+            {(searchQuery || selectedCategoryFilters.length > 0) && (
+              <p className="text-center text-xs text-muted-foreground mt-2">
+                {filteredBrands.length} brand{filteredBrands.length !== 1 ? 's' : ''} found
+                {selectedCategoryFilters.length > 0 && ` in ${selectedCategoryFilters.length} categor${selectedCategoryFilters.length !== 1 ? 'ies' : 'y'}`}
+              </p>
+            )}
           </div>
-          
-          {(searchQuery || selectedCategoryFilters.length > 0) && (
-            <p className="text-center text-sm text-muted-foreground mt-3">
-              {filteredBrands.length} brand{filteredBrands.length !== 1 ? 's' : ''} found
-              {selectedCategoryFilters.length > 0 && ` in ${selectedCategoryFilters.length} categor${selectedCategoryFilters.length !== 1 ? 'ies' : 'y'}`}
-            </p>
-          )}
         </motion.div>
 
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={toggleAllCategories}
-            className="text-sm text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-2"
-          >
-            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
-            {isAllExpanded ? 'Collapse All' : 'Expand All'}
-          </button>
-        </div>
-
-        <Accordion 
+        <Accordion
           type="multiple" 
           value={openCategories} 
           onValueChange={(values) => {
