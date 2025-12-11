@@ -31,8 +31,9 @@ const QuickJumpMenu = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show menu after scrolling past hero
-      setIsVisible(window.scrollY > 400);
+      // Show menu only after scrolling past the hero section (full viewport height)
+      // This keeps it hidden when the main navigation is most prominent
+      setIsVisible(window.scrollY > window.innerHeight);
 
       // Determine active section
       const scrollPosition = window.scrollY + window.innerHeight / 3;
