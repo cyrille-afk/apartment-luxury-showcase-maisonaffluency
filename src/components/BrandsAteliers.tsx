@@ -138,7 +138,7 @@ const partnerBrands = [
     origin: "Italy",
     description: "Italian design studio creating bespoke furniture and cabinetry with exceptional attention to material, proportion, and craftsmanship.",
     featured: "Sira Credenza",
-    instagram: "https://instagram.com/robicara_official",
+    instagram: "https://instagram.com/robicaradesign",
   },
   {
     id: "theoreme-editions",
