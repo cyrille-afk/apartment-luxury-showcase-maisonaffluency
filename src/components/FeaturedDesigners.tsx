@@ -6,7 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import CuratingTeam from "@/components/CuratingTeam";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
-import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank.jpg";
+
 import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.jpg";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
 import atelierDemichelisImg from "@/assets/designers/atelier-demichelis.jpg";
@@ -46,20 +46,6 @@ const featuredDesigners = [
     links: [
       { type: "Website", url: "https://atelierfevrier.com" },
       { type: "Instagram", url: "https://instagram.com/atelier_fevrier" },
-    ],
-  },
-  {
-    id: "jean-michel-frank",
-    name: "Jean-Michel Frank & Adolphe Chanaux",
-    specialty: "Modernist Furniture & Interior Design",
-    image: jeanMichelFrankImg,
-    biography:
-      "Jean-Michel Frank (1895-1941) was a French interior designer known for his minimalist and refined approach to luxury. Working alongside craftsman Adolphe Chanaux, Frank created iconic pieces that defined 1930s modernism. His work emphasized pure forms, exceptional materials, and understated elegance.",
-    notableWorks: "Stool 1934, Coffee Table Soleil 1930",
-    philosophy: "True luxury lies in the quality of materials and the purity of form, not in ostentatious decoration.",
-    links: [
-      { type: "Archive", url: "https://jeanmichelfrank-archive.com" },
-      { type: "Gallery", url: "https://galerie-downtown.com/jean-michel-frank" },
     ],
   },
   {
