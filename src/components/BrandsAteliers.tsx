@@ -21,6 +21,26 @@ const partnerBrands = [
     galleryIndex: 5, // With Panoramic Cityscape Views
   },
   {
+    id: "apparatus-studio-median",
+    name: "Apparatus Studio",
+    category: "Sculptural Lighting",
+    origin: "United States",
+    description: "New York-based design studio creating refined lighting and furniture that bridges art and function through meticulous craftsmanship and material exploration.",
+    featured: "Median 3 Surface Alabaster Lights",
+    instagram: "https://instagram.com/apparatusstudio",
+    galleryIndex: 3, // An Inviting Bespoke Sofa
+  },
+  {
+    id: "apparatus-studio-metronome",
+    name: "Apparatus Studio",
+    category: "Sculptural Lighting",
+    origin: "United States",
+    description: "New York-based design studio creating refined lighting and furniture that bridges art and function through meticulous craftsmanship and material exploration.",
+    featured: "Metronome Reading Suede Floor Lamp",
+    instagram: "https://instagram.com/apparatusstudio",
+    galleryIndex: 7, // A Serene Decor
+  },
+  {
     id: "baleri",
     name: "Baleri Italia",
     category: "Designer Furniture",
