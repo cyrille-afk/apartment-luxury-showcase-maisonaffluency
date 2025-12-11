@@ -51,7 +51,7 @@ const galleryExperiences = [{
   }, {
     image: boudoirImage,
     title: "A Sophisticated Boudoir",
-    description: "Iksel's White Blossom Wallcover"
+    description: "Iksel's White Blossom Wallcover, Apparatus Studio's Metronome Reading Suede Floor Lamp"
   }, {
     image: artMasterBronzeImage,
     title: "The Art Master Bronze Painting",
