@@ -91,17 +91,17 @@ const featuredDesigners = [
     ],
   },
   {
-    id: "bertrand-de-maistre",
-    name: "Bertrand de Maistre",
+    id: "bruno-de-maistre",
+    name: "Bruno de Maistre",
     specialty: "Contemporary Furniture Design",
     image: bertrandDeMaistreImg,
     biography:
-      "Bertrand de Maistre is a French designer known for his poetic approach to furniture design. His Lyrical Desk demonstrates his ability to create pieces that are both functional and emotionally resonant, with flowing lines and thoughtful proportions that inspire creativity and contemplation.",
+      "Bruno de Maistre is a French designer known for his poetic approach to furniture design. His Lyrical Desk demonstrates his ability to create pieces that are both functional and emotionally resonant, with flowing lines and thoughtful proportions that inspire creativity and contemplation.",
     notableWorks: "Lyrical Desk, Contemporary Furniture Series",
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     links: [
-      { type: "Website", url: "https://bertranddemaistre.fr" },
-      { type: "Instagram", url: "https://instagram.com/bertrand_de_maistre" },
+      { type: "Website", url: "https://brunodemaistre.fr" },
+      { type: "Instagram", url: "https://instagram.com/bruno_de_maistre" },
     ],
   },
   {
