@@ -84,6 +84,7 @@ const partnerBrands = [
     origin: "France",
     description: "Japanese lighting atelier creating delicate paper and natural material lamps that embody the principles of wabi-sabi and mindful design.",
     featured: "Toshiro Lamp",
+    instagram: "https://instagram.com/madeinkira",
   },
   {
     id: "nika-zupanc",
