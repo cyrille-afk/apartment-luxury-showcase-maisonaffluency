@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Search, X, Instagram, ExternalLink, ChevronDown } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, ChevronDown, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -9,6 +9,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: A Masterful Suite, 1: Unique by Design, 2: Design Icons and Collectibles
@@ -423,17 +430,35 @@ const BrandsAteliers = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [searchQuery, setSearchQuery] = useState("");
   const [openCategories, setOpenCategories] = useState<string[]>([]);
+  const [selectedCategoryFilters, setSelectedCategoryFilters] = useState<string[]>([]);
+
+  // Get all unique categories from partner brands
+  const allUniqueCategories = useMemo(() => {
+    const categories = [...new Set(partnerBrands.map(brand => brand.category))];
+    return categories.sort((a, b) => a.localeCompare(b));
+  }, []);
 
   const filteredBrands = useMemo(() => {
-    if (!searchQuery.trim()) return partnerBrands;
-    const query = searchQuery.toLowerCase();
-    return partnerBrands.filter(
-      (brand) =>
-        brand.name.toLowerCase().includes(query) ||
-        brand.category.toLowerCase().includes(query) ||
-        brand.origin.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
+    let brands = partnerBrands;
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      brands = brands.filter(
+        (brand) =>
+          brand.name.toLowerCase().includes(query) ||
+          brand.category.toLowerCase().includes(query) ||
+          brand.origin.toLowerCase().includes(query)
+      );
+    }
+    
+    // Filter by selected categories
+    if (selectedCategoryFilters.length > 0) {
+      brands = brands.filter(brand => selectedCategoryFilters.includes(brand.category));
+    }
+    
+    return brands;
+  }, [searchQuery, selectedCategoryFilters]);
 
   // Group brands by category
   const groupedBrands = useMemo(() => {
@@ -447,6 +472,18 @@ const BrandsAteliers = () => {
     // Sort categories alphabetically
     return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
   }, [filteredBrands]);
+
+  const toggleCategoryFilter = (category: string) => {
+    setSelectedCategoryFilters(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const clearCategoryFilters = () => {
+    setSelectedCategoryFilters([]);
+  };
 
   // Initialize open categories when grouped brands change
   const allCategories = useMemo(() => groupedBrands.map(([category]) => category), [groupedBrands]);
@@ -505,27 +542,72 @@ const BrandsAteliers = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mb-8"
         >
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search by name, category, or origin..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-10 bg-card/50 border-border/40 focus:border-primary/60"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search by name, category, or origin..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-10 bg-card/50 border-border/40 focus:border-primary/60"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="bg-card/50 border-border/40 hover:bg-card/80">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Categories
+                  {selectedCategoryFilters.length > 0 && (
+                    <span className="ml-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
+                      {selectedCategoryFilters.length}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="end">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
+                  {selectedCategoryFilters.length > 0 && (
+                    <button
+                      onClick={clearCategoryFilters}
+                      className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {allUniqueCategories.map((category) => (
+                    <label
+                      key={category}
+                      className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
+                    >
+                      <Checkbox
+                        checked={selectedCategoryFilters.includes(category)}
+                        onCheckedChange={() => toggleCategoryFilter(category)}
+                      />
+                      <span className="text-sm text-foreground font-body">{category}</span>
+                    </label>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
-          {searchQuery && (
+          
+          {(searchQuery || selectedCategoryFilters.length > 0) && (
             <p className="text-center text-sm text-muted-foreground mt-3">
               {filteredBrands.length} brand{filteredBrands.length !== 1 ? 's' : ''} found
+              {selectedCategoryFilters.length > 0 && ` in ${selectedCategoryFilters.length} categor${selectedCategoryFilters.length !== 1 ? 'ies' : 'y'}`}
             </p>
           )}
         </motion.div>
