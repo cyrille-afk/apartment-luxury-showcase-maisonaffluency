@@ -241,6 +241,16 @@ const partnerBrands = [
     galleryIndex: 1, // Unique by Design
   },
   {
+    id: "olivia-cognet",
+    name: "Olivia Cognet",
+    category: "Sculptural Lighting",
+    origin: "France",
+    description: "French artist and designer creating sculptural ceramic lighting and furniture that celebrates organic forms and handcrafted textures.",
+    featured: "Valauris Lamp",
+    instagram: "https://instagram.com/oliviacognet",
+    galleryIndex: 4, // A Sophisticated Living Room
+  },
+  {
     id: "peter-reed",
     name: "Peter Reed 1861",
     category: "Fine Linens",
