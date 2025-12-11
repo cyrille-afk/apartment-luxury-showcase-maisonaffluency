@@ -17,8 +17,8 @@ const Footer = () => {
           </div>
           
           <div className="flex gap-8 items-center">
-            <a href="#" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
-              Specifications
+            <a href="#curating-team" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
+              About Us
             </a>
             <a href="https://www.instagram.com/thierrylemaire_/?hl=en" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Thierry Lemaire Instagram">
               <Instagram size={20} />
