@@ -186,7 +186,7 @@ const partnerBrands = [
   {
     id: "eric-schmitt-studio",
     name: "Eric Schmitt Studio",
-    category: "Sculptural Furniture",
+    category: "Furniture",
     origin: "France",
     description: "French designer creating bold sculptural furniture in bronze and iron, each piece a statement of artistic vision and master craftsmanship.",
     featured: "Chairie Dining Chair",
@@ -376,7 +376,7 @@ const partnerBrands = [
   {
     id: "poltrona-frau",
     name: "Poltrona Frau",
-    category: "Luxury Furniture",
+    category: "Furniture",
     origin: "Italy",
     description: "Iconic Italian furniture house renowned for exceptional leather craftsmanship since 1912. Their timeless designs grace prestigious residences and institutions worldwide.",
     featured: "Albero Bookcase",
