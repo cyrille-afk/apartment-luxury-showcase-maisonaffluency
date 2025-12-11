@@ -90,7 +90,7 @@ const ContactInquiry = () => {
           </h2>
           <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
             For architects, interior designers, and design connoisseurs interested
-            in detailed and custom specifications, material sources, or collaboration opportunities.
+            in detailed and custom specifications, material sourcing, or collaboration opportunities.
           </p>
         </motion.div>
 
