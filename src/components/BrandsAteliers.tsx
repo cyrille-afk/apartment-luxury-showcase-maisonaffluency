@@ -141,6 +141,16 @@ const partnerBrands = [
     galleryIndex: 2, // Design Icons and Collectibles
   },
   {
+    id: "herve-van-der-straeten",
+    name: "Hervé van der Straeten",
+    category: "Sculptural Lighting & Furniture",
+    origin: "France",
+    description: "Renowned French designer and artist creating sculptural furniture and lighting in bronze, his pieces are celebrated for their organic forms and exceptional craftsmanship.",
+    featured: "Bronze MicMac Chandelier",
+    instagram: "https://instagram.com/hervevanderstraeten",
+    galleryIndex: 0, // A Masterful Suite
+  },
+  {
     id: "iksel-brunelleschi",
     name: "Iksel",
     category: "Wallcoverings & Murals",
