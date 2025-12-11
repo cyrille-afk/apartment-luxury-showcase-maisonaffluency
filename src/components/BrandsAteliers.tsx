@@ -622,31 +622,31 @@ const BrandsAteliers = () => {
           </button>
         </div>
 
-        <Accordion type="multiple" value={openCategories} onValueChange={setOpenCategories} className="space-y-4">
+        <Accordion type="multiple" value={openCategories} onValueChange={setOpenCategories} className="space-y-3 md:space-y-4">
           {groupedBrands.map(([category, brands], categoryIndex) => (
             <AccordionItem key={category} value={category} className="border border-border/40 rounded-lg bg-card/30 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-card/50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <span className="font-serif text-lg md:text-xl text-primary">{category}</span>
-                  <span className="text-sm text-muted-foreground font-body">({brands.length})</span>
+              <AccordionTrigger className="px-4 md:px-6 py-3 md:py-4 hover:no-underline hover:bg-card/50 transition-colors">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <span className="font-serif text-base md:text-lg lg:text-xl text-primary">{category}</span>
+                  <span className="text-xs md:text-sm text-muted-foreground font-body">({brands.length})</span>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
-                <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-2">
+              <AccordionContent className="px-3 md:px-6 pb-4 md:pb-6">
+                <div className="grid gap-3 md:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-2">
                   {brands.map((brand, index) => (
                     <motion.div
                       key={brand.id}
                       initial={{ opacity: 0, y: 30 }}
                       animate={isInView ? { opacity: 1, y: 0 } : {}}
                       transition={{ duration: 0.5, delay: categoryIndex * 0.1 + index * 0.05 }}
-                      className="group p-6 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
+                      className="group p-4 md:p-6 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
                     >
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-primary transition-colors duration-300">
+                      <div className="flex items-start justify-between mb-2 md:mb-3">
+                        <div className="flex-1 min-w-0 pr-2">
+                          <h3 className="font-serif text-base md:text-lg lg:text-xl text-foreground group-hover:text-primary transition-colors duration-300 leading-tight">
                             {brand.name}
                           </h3>
-                          <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">
+                          <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider mt-0.5 md:mt-1">
                             {brand.origin}
                           </p>
                         </div>
@@ -655,32 +655,32 @@ const BrandsAteliers = () => {
                             href={brand.instagram}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-muted-foreground hover:text-primary transition-colors duration-300"
+                            className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <Instagram className="h-4 w-4" />
+                            <Instagram className="h-5 w-5 md:h-4 md:w-4" />
                           </a>
                         )}
                       </div>
                       
-                      <p className="text-sm text-muted-foreground font-body leading-relaxed mb-4">
+                      <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-3 md:mb-4 line-clamp-3 md:line-clamp-none">
                         {brand.description}
                       </p>
                       
-                      <div className="pt-3 border-t border-border/30">
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Featured</p>
+                      <div className="pt-2 md:pt-3 border-t border-border/30">
+                        <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider mb-1">Featured</p>
                         {brand.galleryIndex !== undefined ? (
                           <button
                             onClick={() => scrollToGallery(brand.galleryIndex)}
-                            className="text-sm text-foreground/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link"
+                            className="text-xs md:text-sm text-foreground/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation py-1"
                           >
                             <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
                               {brand.featured}
                             </span>
-                            <ExternalLink className="h-3 w-3 opacity-0 group-hover/link:opacity-100 transition-opacity" />
+                            <ExternalLink className="h-3 w-3 opacity-50 md:opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
                           </button>
                         ) : (
-                          <p className="text-sm text-foreground/80 font-body">
+                          <p className="text-xs md:text-sm text-foreground/80 font-body">
                             {brand.featured}
                           </p>
                         )}
