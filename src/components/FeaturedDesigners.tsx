@@ -65,6 +65,20 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "leo-sentou",
+    name: "Leo Sentou",
+    specialty: "Contemporary Classicist Furniture Design",
+    image: leoSentouImg,
+    biography:
+      "French designer Leo Sentou is a contemporary classicist whose debut capsule collection pays homage to the elegance and sophistication of eighteenth-century French decorative arts. His pieces are rooted in tradition yet unequivocally modern, reducing classical forms to their essential shapes while elevating them with a refined palette of limed oak, wrought iron, bronze, mohair, linen and lacquer.",
+    notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J",
+    philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
+    links: [
+      { type: "Curators' choice" },
+      { type: "Instagram", url: "https://www.instagram.com/leosentou" },
+    ],
+  },
+  {
     id: "apparatus-studio",
     name: "Apparatus Studio",
     founder: "Gabriel Hendifar",
@@ -166,20 +180,6 @@ const featuredDesigners = [
     links: [
       { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/hamrei_design" },
-    ],
-  },
-  {
-    id: "leo-sentou",
-    name: "Leo Sentou",
-    specialty: "Contemporary Classicist Furniture Design",
-    image: leoSentouImg,
-    biography:
-      "French designer Leo Sentou is a contemporary classicist whose debut capsule collection pays homage to the elegance and sophistication of eighteenth-century French decorative arts. His pieces are rooted in tradition yet unequivocally modern, reducing classical forms to their essential shapes while elevating them with a refined palette of limed oak, wrought iron, bronze, mohair, linen and lacquer.",
-    notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J",
-    philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
-    links: [
-      { type: "Curators' choice" },
-      { type: "Instagram", url: "https://www.instagram.com/leosentou" },
     ],
   },
   {
