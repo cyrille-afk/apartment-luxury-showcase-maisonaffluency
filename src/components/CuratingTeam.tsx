@@ -12,7 +12,7 @@ const curatingTeam = [
   {
     id: 2,
     name: "Cyrille Delval",
-    role: "Curator",
+    role: "Co-Founder and CEO",
     image: null,
   },
 ];
