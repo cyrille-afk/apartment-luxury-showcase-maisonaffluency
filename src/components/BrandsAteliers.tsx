@@ -88,7 +88,7 @@ const partnerBrands = [
   },
   {
     id: "nika-zupanc",
-    name: "Nika Zupanc",
+    name: "Nika Zupanc Studio",
     category: "Contemporary Design",
     origin: "Slovenia",
     description: "Slovenian designer known for poetic, feminine furniture and lighting that combines nostalgic elegance with contemporary sensibility.",
