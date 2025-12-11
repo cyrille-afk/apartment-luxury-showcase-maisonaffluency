@@ -48,7 +48,7 @@ const featuredDesigners = [
     philosophy:
       "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
     links: [
-      { type: "Instagram", url: "https://instagram.com/apparatus_studio" },
+      { type: "Instagram", url: "https://instagram.com/apparatusstudio" },
       { type: "Curators' choice" },
     ],
   },
