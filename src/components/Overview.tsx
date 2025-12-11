@@ -65,7 +65,7 @@ const Overview = () => {
           }}>
               <Button 
                 onClick={scrollToTeam}
-                className="group bg-primary hover:bg-primary/90 text-primary-foreground border-none transition-all duration-300"
+                className="group bg-primary hover:bg-primary/90 text-primary-foreground border-2 border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300"
               >
                 <Users className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
                 <span className="font-body">Meet Our Curating Team</span>
