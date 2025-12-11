@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import cyrilleDelvalImg from "@/assets/team/cyrille-delval.jpg";
 
 const curatingTeam = [
   {
@@ -13,7 +14,7 @@ const curatingTeam = [
     id: 2,
     name: "Cyrille Delval",
     role: "Co-Founder and CEO",
-    image: null,
+    image: cyrilleDelvalImg,
   },
 ];
 
