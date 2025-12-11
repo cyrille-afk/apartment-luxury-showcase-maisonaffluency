@@ -59,7 +59,7 @@ const BackToTop = () => {
               <TooltipTrigger asChild>
                 <button
                   onClick={scrollToTop}
-                  className="p-3 bg-primary text-primary-foreground rounded-full shadow-lg border-2 border-[hsl(var(--gold))] hover:bg-primary/90 hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 group"
+                  className="p-3 bg-white text-foreground rounded-full shadow-lg border-2 border-[hsl(var(--gold))] hover:bg-white/90 hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 group"
                   aria-label="Back to top"
                 >
                   <ArrowUp className="h-5 w-5 group-hover:-translate-y-0.5 transition-transform duration-200" />
