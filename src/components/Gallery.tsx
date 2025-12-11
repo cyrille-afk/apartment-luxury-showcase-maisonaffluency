@@ -7,6 +7,7 @@ import boudoirImage from "@/assets/boudoir.jpg";
 import livingRoomImage from "@/assets/living-room-hero.jpg";
 import bedroomAltImage from "@/assets/bedroom-alt.jpg";
 import bedroomThirdImage from "@/assets/bedroom-third.jpg";
+import bespokeSofaImage from "@/assets/bespoke-sofa.jpg";
 const galleryExperiences = [{
   experience: "Restful Retreat",
   subtitle: "Serene retreat with curated collectible items, bespoke furniture and handcrafted rugs",
@@ -34,6 +35,10 @@ const galleryExperiences = [{
     image: diningImage,
     title: "With Panoramic Cityscape Views",
     description: "Alinea Design Objects' Angelo M table paired with Eric Schmitt Studio's Chairie and Cazes&Conquet's Augusta dining chairs, Emanuelle Levet Stenne's Alabaster Pendant Light, Emmanuel Babled's Limited Edition Sculptured Book Cover from his emblematic Osmosi Series "
+  }, {
+    image: bespokeSofaImage,
+    title: "An Inviting Bespoke Sofa",
+    description: ""
   }]
 }, {
   experience: "Personal Sanctuary",
