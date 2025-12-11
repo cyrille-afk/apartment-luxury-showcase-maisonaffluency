@@ -17,6 +17,9 @@ const navItems = [{
   label: "Featured Designers",
   href: "#designers"
 }, {
+  label: "Brands & Ateliers",
+  href: "#brands"
+}, {
   label: "Trade Program",
   href: "#details"
 }, {

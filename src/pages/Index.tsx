@@ -1,6 +1,7 @@
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import FeaturedDesigners from "@/components/FeaturedDesigners";
+import BrandsAteliers from "@/components/BrandsAteliers";
 import Overview from "@/components/Overview";
 import Gallery from "@/components/Gallery";
 import DesignDetails from "@/components/DesignDetails";
@@ -26,6 +27,9 @@ const Index = () => {
         </section>
         <section id="designers">
           <FeaturedDesigners />
+        </section>
+        <section id="brands">
+          <BrandsAteliers />
         </section>
         <section id="details">
           <DesignDetails />
