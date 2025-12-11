@@ -19,6 +19,7 @@ import jeremyMaxwellWintrebertImg from "@/assets/designers/jeremy-maxwell-wintre
 import alexanderLamontImg from "@/assets/designers/alexander-lamont.jpg";
 import leoSentouImg from "@/assets/designers/leo-sentou.jpg";
 import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank.jpg";
+import kikoLopezImg from "@/assets/designers/kiko-lopez.jpg";
 
 const featuredDesigners = [
   {
@@ -156,7 +157,7 @@ const featuredDesigners = [
     id: "kiko-lopez",
     name: "Kiko Lopez",
     specialty: "Artisan Mirrors & Reflective Surfaces",
-    image: jeanMichelFrankImg, // Placeholder until dedicated image is available
+    image: kikoLopezImg,
     biography:
       "Kiko Lopez is a French master mirror artisan renowned for creating extraordinary reflective surfaces that blur the line between functional object and sculptural art. Using traditional techniques combined with innovative approaches to glass and metal, his mirrors transform spaces with their unique textural qualities and light-capturing properties. His Silver Glass Hammer Mirror exemplifies his distinctive style of treating mirrors as artistic statements.",
     notableWorks: "Silver Glass Hammer Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
