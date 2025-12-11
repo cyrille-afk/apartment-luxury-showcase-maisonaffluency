@@ -28,12 +28,18 @@ const QuickJumpMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isVisible, setIsVisible] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       // Show menu only after scrolling past the hero section (full viewport height)
       // This keeps it hidden when the main navigation is most prominent
       setIsVisible(window.scrollY > window.innerHeight);
+
+      // Calculate scroll progress (0-100)
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollHeight > 0 ? (window.scrollY / scrollHeight) * 100 : 0;
+      setScrollProgress(Math.min(100, Math.max(0, progress)));
 
       // Determine active section
       const scrollPosition = window.scrollY + window.innerHeight / 3;
@@ -111,16 +117,45 @@ const QuickJumpMenu = () => {
         )}
       </AnimatePresence>
 
-      <motion.button
-        onClick={() => setIsOpen(!isOpen)}
-        whileTap={{ scale: 0.95 }}
-        className={`flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-colors duration-300 touch-manipulation ${
-          isOpen
-            ? "bg-primary text-primary-foreground"
-            : "bg-card/95 backdrop-blur-md border border-border/40 text-foreground hover:bg-card"
-        }`}
-        aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-      >
+      {/* Circular progress indicator around button */}
+      <div className="relative">
+        <svg
+          className="absolute -inset-1 w-14 h-14 -rotate-90"
+          viewBox="0 0 56 56"
+        >
+          <circle
+            cx="28"
+            cy="28"
+            r="26"
+            fill="none"
+            stroke="hsl(var(--border))"
+            strokeWidth="2"
+            opacity="0.3"
+          />
+          <circle
+            cx="28"
+            cy="28"
+            r="26"
+            fill="none"
+            stroke="hsl(var(--primary))"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray={`${2 * Math.PI * 26}`}
+            strokeDashoffset={`${2 * Math.PI * 26 * (1 - scrollProgress / 100)}`}
+            className="transition-all duration-150 ease-out"
+          />
+        </svg>
+        
+        <motion.button
+          onClick={() => setIsOpen(!isOpen)}
+          whileTap={{ scale: 0.95 }}
+          className={`relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-colors duration-300 touch-manipulation ${
+            isOpen
+              ? "bg-primary text-primary-foreground"
+              : "bg-card/95 backdrop-blur-md border border-border/40 text-foreground hover:bg-card"
+          }`}
+          aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+        >
         <AnimatePresence mode="wait">
           {isOpen ? (
             <motion.div
@@ -144,7 +179,8 @@ const QuickJumpMenu = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.button>
+        </motion.button>
+      </div>
         </motion.div>
       )}
     </AnimatePresence>
