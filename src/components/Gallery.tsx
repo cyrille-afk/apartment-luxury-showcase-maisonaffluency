@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import bedroomImage from "@/assets/master-suite.jpg";
@@ -80,6 +80,27 @@ const Gallery = () => {
   const allItems = useMemo(() => {
     return galleryExperiences.flatMap(section => section.items);
   }, []);
+
+  // Check for gallery index from sessionStorage (set by BrandsAteliers)
+  useEffect(() => {
+    const checkForGalleryIndex = () => {
+      const storedIndex = sessionStorage.getItem('openGalleryIndex');
+      if (storedIndex !== null) {
+        const index = parseInt(storedIndex, 10);
+        if (!isNaN(index) && index >= 0 && index < allItems.length) {
+          setCurrentImageIndex(index);
+          setLightboxOpen(true);
+        }
+        sessionStorage.removeItem('openGalleryIndex');
+      }
+    };
+
+    // Check immediately and also after a short delay (for scroll completion)
+    checkForGalleryIndex();
+    const timeout = setTimeout(checkForGalleryIndex, 800);
+    
+    return () => clearTimeout(timeout);
+  }, [allItems.length]);
 
   const openLightbox = (sectionIndex: number, itemIndex: number) => {
     // Calculate the flat index

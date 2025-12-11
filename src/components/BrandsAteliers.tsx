@@ -1,8 +1,13 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo } from "react";
-import { Search, X, Instagram } from "lucide-react";
+import { Search, X, Instagram, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
+
+// Gallery image index mapping (based on flattened gallery items order)
+// 0: A Masterful Suite, 1: Unique by Design, 2: Design Icons and Collectibles
+// 3: An Inviting Bespoke Sofa, 4: A Sophisticated Living Room, 5: With Panoramic Cityscape Views
+// 6: A Sophisticated Boudoir, 7: A Serene Decor, 8: An Art Master Display
 
 const partnerBrands = [
   {
@@ -13,6 +18,7 @@ const partnerBrands = [
     description: "Belgian design house curating and producing exceptional furniture pieces that blend sculptural form with functional elegance.",
     featured: "Angelo M Table",
     instagram: "https://instagram.com/alinea_design_objects",
+    galleryIndex: 5, // With Panoramic Cityscape Views
   },
   {
     id: "baleri",
@@ -22,6 +28,7 @@ const partnerBrands = [
     description: "Italian furniture company known for innovative designs and collaborations with leading architects and designers since 1984.",
     featured: "Plato Bookcase",
     instagram: "https://instagram.com/baleriitalia",
+    galleryIndex: 8, // An Art Master Display
   },
   {
     id: "cc-tapis",
@@ -31,6 +38,7 @@ const partnerBrands = [
     description: "Italian rug manufacturer known for contemporary designs and traditional Nepalese hand-knotting techniques. Their Giudecca custom rugs blend artistry with exceptional craftsmanship.",
     featured: "Giudecca Custom Rug",
     instagram: "https://instagram.com/cc_tapis",
+    galleryIndex: 0, // A Masterful Suite
   },
   {
     id: "celso-de-lemos",
@@ -40,6 +48,7 @@ const partnerBrands = [
     description: "Portuguese textile house crafting exquisite bed linens and home textiles using the finest natural fibers and artisanal techniques.",
     featured: "Silk Bed Cover",
     instagram: "https://instagram.com/celso.de.lemos",
+    galleryIndex: 0, // A Masterful Suite
   },
   {
     id: "ecart-paris",
@@ -49,6 +58,7 @@ const partnerBrands = [
     description: "Founded by legendary designer Andrée Putman, Ecart International re-edits iconic furniture designs from the 20th century's greatest masters, including Jean-Michel Frank, Eileen Gray, and Pierre Chareau. Their meticulous reproductions preserve the original craftsmanship and materials.",
     featured: "Jean-Michel Frank Re-editions, Eileen Gray Designs",
     instagram: "https://instagram.com/ecart.paris",
+    galleryIndex: 4, // A Sophisticated Living Room (Jean-Michel Frank Stool)
   },
   {
     id: "eric-schmitt-studio",
@@ -58,6 +68,7 @@ const partnerBrands = [
     description: "French designer creating bold sculptural furniture in bronze and iron, each piece a statement of artistic vision and master craftsmanship.",
     featured: "Chairie Dining Chair",
     instagram: "https://instagram.com/studio_eric_schmitt_",
+    galleryIndex: 5, // With Panoramic Cityscape Views
   },
   {
     id: "haymann-editions",
@@ -67,6 +78,7 @@ const partnerBrands = [
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
     featured: "Carved Marble Marie Lamp",
     instagram: "https://instagram.com/haymanneditions",
+    galleryIndex: 2, // Design Icons and Collectibles
   },
   {
     id: "iksel",
@@ -76,6 +88,7 @@ const partnerBrands = [
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
     featured: "Brunelleschi Perspective Wallcover, White Blossom Wallcover",
     instagram: "https://instagram.com/iksel_decorative_arts",
+    galleryIndex: 0, // A Masterful Suite (Brunelleschi) and 7: A Serene Decor (White Blossom)
   },
   {
     id: "made-in-kira",
@@ -85,6 +98,7 @@ const partnerBrands = [
     description: "Japanese lighting atelier creating delicate paper and natural material lamps that embody the principles of wabi-sabi and mindful design.",
     featured: "Toshiro Lamp",
     instagram: "https://instagram.com/madeinkira",
+    galleryIndex: 6, // A Sophisticated Boudoir
   },
   {
     id: "nika-zupanc",
@@ -94,6 +108,7 @@ const partnerBrands = [
     description: "Slovenian designer known for poetic, feminine furniture and lighting that combines nostalgic elegance with contemporary sensibility.",
     featured: "Stardust Loveseat",
     instagram: "https://instagram.com/nikazupancstudio",
+    galleryIndex: 6, // A Sophisticated Boudoir
   },
   {
     id: "okha",
@@ -103,6 +118,7 @@ const partnerBrands = [
     description: "South African design studio creating sophisticated furniture that bridges African craft traditions with contemporary global aesthetics.",
     featured: "Adam Court's Villa Pedestal Nightstand",
     instagram: "https://instagram.com/_okha",
+    galleryIndex: 1, // Unique by Design
   },
   {
     id: "peter-reed",
@@ -112,6 +128,7 @@ const partnerBrands = [
     description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
     featured: "Riyad Double Faced Throw and Cushion",
     instagram: "https://instagram.com/peterreed1861",
+    galleryIndex: 1, // Unique by Design
   },
   {
     id: "pinton-1867",
@@ -121,6 +138,7 @@ const partnerBrands = [
     description: "French textile house continuing the Aubusson tradition of handcrafted rugs and tapestries, blending historical techniques with contemporary design.",
     featured: "Custom Rug Collection",
     instagram: "https://instagram.com/pinton1867",
+    galleryIndex: 1, // Unique by Design
   },
   {
     id: "poltrona-frau",
@@ -130,6 +148,7 @@ const partnerBrands = [
     description: "Iconic Italian furniture house renowned for exceptional leather craftsmanship since 1912. Their timeless designs grace prestigious residences and institutions worldwide.",
     featured: "Albero Bookcase",
     instagram: "https://instagram.com/poltronafrauofficial",
+    galleryIndex: 3, // An Inviting Bespoke Sofa
   },
   {
     id: "robicara",
@@ -139,6 +158,7 @@ const partnerBrands = [
     description: "Italian design studio creating bespoke furniture and cabinetry with exceptional attention to material, proportion, and craftsmanship.",
     featured: "Sira Credenza",
     instagram: "https://instagram.com/robicaradesign",
+    galleryIndex: 4, // A Sophisticated Living Room
   },
   {
     id: "theoreme-editions",
@@ -148,6 +168,7 @@ const partnerBrands = [
     description: "French publisher of limited edition decorative objects, collaborating with renowned artists and designers including Garnier & Linker.",
     featured: "Lost-wax Cast Crystal Centerpiece",
     instagram: "https://instagram.com/theoreme_editions",
+    galleryIndex: 4, // A Sophisticated Living Room
   },
 ];
 
@@ -166,6 +187,15 @@ const BrandsAteliers = () => {
         brand.origin.toLowerCase().includes(query)
     );
   }, [searchQuery]);
+
+  const scrollToGallery = (galleryIndex: number) => {
+    const gallerySection = document.getElementById('gallery');
+    if (gallerySection) {
+      gallerySection.scrollIntoView({ behavior: 'smooth' });
+      // Store the gallery index in sessionStorage to trigger lightbox after scroll
+      sessionStorage.setItem('openGalleryIndex', galleryIndex.toString());
+    }
+  };
 
   return (
     <section ref={ref} className="py-16 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30">
@@ -260,9 +290,21 @@ const BrandsAteliers = () => {
               
               <div className="pt-3 border-t border-border/30">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Featured</p>
-                <p className="text-sm text-foreground/80 font-body">
-                  {brand.featured}
-                </p>
+                {brand.galleryIndex !== undefined ? (
+                  <button
+                    onClick={() => scrollToGallery(brand.galleryIndex)}
+                    className="text-sm text-foreground/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link"
+                  >
+                    <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                      {brand.featured}
+                    </span>
+                    <ExternalLink className="h-3 w-3 opacity-0 group-hover/link:opacity-100 transition-opacity" />
+                  </button>
+                ) : (
+                  <p className="text-sm text-foreground/80 font-body">
+                    {brand.featured}
+                  </p>
+                )}
               </div>
             </motion.div>
           ))}
