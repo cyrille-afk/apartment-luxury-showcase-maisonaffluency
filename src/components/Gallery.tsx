@@ -50,7 +50,7 @@ const galleryExperiences = [{
     description: "Bruno de Maistre's Lyric Desk, Hamrei's Pépé Chair, Made in Kira's Toshiro Lamp, Nathalie Ziegler's Custom Glass Chandelier and Gold Leaves+Glass Snake Vase, Nika Zupanc's Stardust Loveseat"
   }, {
     image: boudoirImage,
-    title: "A Sophisticated Boudoir",
+    title: "A Serene Decor",
     description: "Iksel's White Blossom Wallcover, Apparatus Studio's Metronome Reading Suede Floor Lamp"
   }, {
     image: artMasterBronzeImage,
