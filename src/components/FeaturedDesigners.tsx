@@ -17,6 +17,7 @@ import apparatusStudioImg from "@/assets/designers/apparatus-studio.jpg";
 import oliviaCognetImg from "@/assets/designers/olivia-cognet.jpg";
 import jeremyMaxwellWintrebertImg from "@/assets/designers/jeremy-maxwell-wintrebert.jpg";
 import alexanderLamontImg from "@/assets/designers/alexander-lamont.jpg";
+import leoSentouImg from "@/assets/designers/leo-sentou.jpg";
 
 const featuredDesigners = [
   {
@@ -170,7 +171,7 @@ const featuredDesigners = [
     id: "leo-sentou",
     name: "Leo Sentou",
     specialty: "",
-    image: herveVanDerStraetenImg, // Placeholder - replace with actual image
+    image: leoSentouImg,
     biography: "",
     notableWorks: "",
     philosophy: "",
