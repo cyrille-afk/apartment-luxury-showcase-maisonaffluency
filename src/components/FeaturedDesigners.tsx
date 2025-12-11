@@ -260,13 +260,8 @@ const FeaturedDesigners = () => {
                             className="w-full h-auto rounded-lg object-contain"
                           />
                           <p className="text-center mt-4 text-lg font-serif text-foreground">
-                            {selectedImage?.name || designer.name}
+                            {designer.founder || selectedImage?.name || designer.name}
                           </p>
-                          {designer.founder && (
-                            <p className="text-center mt-1 text-sm text-muted-foreground font-body">
-                              {designer.founder}
-                            </p>
-                          )}
                         </div>
                       </DialogContent>
                     </Dialog>
