@@ -1,11 +1,27 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 import heroImage from "@/assets/living-room-hero.jpg";
+
 const Hero = () => {
-  return <section className="relative h-screen w-full overflow-hidden">
-      <div className="absolute inset-0">
-        <img src={heroImage} alt="Luxury living room with Asian-inspired murals and designer furniture" className="h-full w-full object-cover" />
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"]
+  });
+  
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.3]);
+
+  return <section ref={ref} className="relative h-screen w-full overflow-hidden">
+      <motion.div className="absolute inset-0" style={{ y }}>
+        <motion.img 
+          src={heroImage} 
+          alt="Luxury living room with Asian-inspired murals and designer furniture" 
+          className="h-[130%] w-full object-cover"
+          style={{ opacity }}
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
-      </div>
+      </motion.div>
       
       <div className="relative z-10 h-full px-4 pb-16 pt-20 md:px-12 md:pb-20 lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-center">
         <motion.div initial={{
