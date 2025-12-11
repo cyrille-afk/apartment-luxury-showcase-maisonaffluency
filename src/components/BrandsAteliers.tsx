@@ -181,6 +181,16 @@ const partnerBrands = [
     galleryIndex: 7, // A Serene Decor
   },
   {
+    id: "kiko-lopez",
+    name: "Kiko Lopez",
+    category: "Glass Art & Mirrors",
+    origin: "France",
+    description: "French glass artist renowned for his extraordinary hand-silvered mirrors and sculptural glass works, each piece a unique testament to ancient techniques reimagined.",
+    featured: "Silver Glass Hammer Mirror",
+    instagram: "https://instagram.com/kikolopez_",
+    galleryIndex: 2, // Design Icons and Collectibles
+  },
+  {
     id: "made-in-kira",
     name: "Made in Kira",
     category: "Artisan Lighting",
