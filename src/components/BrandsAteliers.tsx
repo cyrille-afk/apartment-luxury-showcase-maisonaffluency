@@ -141,6 +141,16 @@ const partnerBrands = [
     galleryIndex: 4, // A Sophisticated Living Room (Jean-Michel Frank Stool)
   },
   {
+    id: "emanuelle-levet-stenne",
+    name: "Emanuelle Levet Stenne",
+    category: "Artisan Lighting",
+    origin: "France",
+    description: "French lighting designer creating ethereal alabaster pendant lights and sculptural fixtures that transform spaces with their warm, natural glow.",
+    featured: "Alabaster Pendant Light",
+    instagram: "https://instagram.com/emanuellelevetstenne",
+    galleryIndex: 5, // With Panoramic Cityscape Views
+  },
+  {
     id: "eric-schmitt-studio",
     name: "Eric Schmitt Studio",
     category: "Sculptural Furniture",
