@@ -56,7 +56,7 @@ const partnerBrands = [
   {
     id: "atelier-demichelis",
     name: "Atelier DeMichelis",
-    category: "Artisan Lighting",
+    category: "Lighting",
     origin: "France",
     description: "French atelier crafting limited edition lighting pieces that combine organic forms with precious materials, each piece a sculptural work of art.",
     featured: "Limited Edition Bud Table Lamp",
@@ -76,7 +76,7 @@ const partnerBrands = [
   {
     id: "apparatus-studio-median",
     name: "Apparatus Studio",
-    category: "Sculptural Lighting",
+    category: "Lighting",
     origin: "United States",
     description: "New York-based design studio creating refined lighting and furniture that bridges art and function through meticulous craftsmanship and material exploration.",
     featured: "Median 3 Surface Alabaster Lights",
@@ -86,7 +86,7 @@ const partnerBrands = [
   {
     id: "apparatus-studio-metronome",
     name: "Apparatus Studio",
-    category: "Sculptural Lighting",
+    category: "Lighting",
     origin: "United States",
     description: "New York-based design studio creating refined lighting and furniture that bridges art and function through meticulous craftsmanship and material exploration.",
     featured: "Metronome Reading Suede Floor Lamp",
@@ -166,7 +166,7 @@ const partnerBrands = [
   {
     id: "emanuelle-levet-stenne",
     name: "Emanuelle Levet Stenne",
-    category: "Artisan Lighting",
+    category: "Lighting",
     origin: "France",
     description: "French lighting designer creating ethereal alabaster pendant lights and sculptural fixtures that transform spaces with their warm, natural glow.",
     featured: "Alabaster Pendant Light",
@@ -206,7 +206,7 @@ const partnerBrands = [
   {
     id: "haymann-editions",
     name: "Haymann Editions",
-    category: "Sculptural Lighting",
+    category: "Lighting",
     origin: "France",
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
     featured: "Carved Marble Marie Lamp",
@@ -216,7 +216,7 @@ const partnerBrands = [
   {
     id: "herve-van-der-straeten",
     name: "Hervé van der Straeten",
-    category: "Sculptural Lighting & Furniture",
+    category: "Lighting",
     origin: "France",
     description: "Renowned French designer and artist creating sculptural furniture and lighting in bronze, his pieces are celebrated for their organic forms and exceptional craftsmanship.",
     featured: "Bronze MicMac Chandelier",
@@ -286,7 +286,7 @@ const partnerBrands = [
   {
     id: "made-in-kira",
     name: "Made in Kira",
-    category: "Artisan Lighting",
+    category: "Lighting",
     origin: "France",
     description: "Japanese lighting atelier creating delicate paper and natural material lamps that embody the principles of wabi-sabi and mindful design.",
     featured: "Toshiro Lamp",
@@ -336,7 +336,7 @@ const partnerBrands = [
   {
     id: "olivia-cognet",
     name: "Olivia Cognet",
-    category: "Sculptural Lighting",
+    category: "Lighting",
     origin: "France",
     description: "French artist and designer creating sculptural ceramic lighting and furniture that celebrates organic forms and handcrafted textures.",
     featured: "Valauris Lamp",
