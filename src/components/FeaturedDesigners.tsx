@@ -64,6 +64,21 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "apparatus-studio",
+    name: "Apparatus Studio",
+    specialty: "Contemporary Lighting & Industrial Design",
+    image: apparatusStudioImg,
+    biography:
+      "Apparatus Studio is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
+    notableWorks: "Metronome Reading Floor Lamp, Sculptural Lighting Series",
+    philosophy:
+      "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
+    links: [
+      { type: "Website", url: "https://apparatusstudio.com" },
+      { type: "Instagram", url: "https://instagram.com/apparatus_studio" },
+    ],
+  },
+  {
     id: "alexander-lamont",
     name: "Alexander Lamont",
     specialty: "Artisan Furniture & Luxury Craftsmanship",
@@ -148,21 +163,6 @@ const featuredDesigners = [
     links: [
       { type: "Website", url: "https://hamrei.design" },
       { type: "Instagram", url: "https://instagram.com/hamrei_design" },
-    ],
-  },
-  {
-    id: "apparatus-studio",
-    name: "Apparatus Studio",
-    specialty: "Contemporary Lighting & Industrial Design",
-    image: apparatusStudioImg,
-    biography:
-      "Apparatus Studio is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
-    notableWorks: "Metronome Reading Floor Lamp, Sculptural Lighting Series",
-    philosophy:
-      "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
-    links: [
-      { type: "Website", url: "https://apparatusstudio.com" },
-      { type: "Instagram", url: "https://instagram.com/apparatus_studio" },
     ],
   },
   {
