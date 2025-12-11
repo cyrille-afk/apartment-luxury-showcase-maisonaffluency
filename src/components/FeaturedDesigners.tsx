@@ -255,7 +255,7 @@ const FeaturedDesigners = () => {
             THE ARTISANS
           </p>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-4">
-            Featured Designers & Makers
+            Designers & Makers
           </h2>
           <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl mx-auto">
             Discover the visionary designers and artisans whose exceptional work defines Maison Affluency. Each brings
