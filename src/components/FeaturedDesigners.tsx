@@ -31,8 +31,8 @@ const featuredDesigners = [
       "Orsay Mds Coffee Table in Alabastrino travertine and Onyx Ocean. \nLimited and numbered edition (12 copies).",
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
+      { type: "Curators' choice" },
     ],
   },
   {
@@ -46,8 +46,8 @@ const featuredDesigners = [
     philosophy:
       "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/atelier_fevrier" },
+      { type: "Curators' choice" },
     ],
   },
   {
@@ -60,8 +60,8 @@ const featuredDesigners = [
     notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
     philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
+      { type: "Curators' choice" },
     ],
   },
   {
@@ -74,8 +74,8 @@ const featuredDesigners = [
     notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J",
     philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://www.instagram.com/leosentou" },
+      { type: "Curators' choice" },
     ],
   },
   {
@@ -90,8 +90,8 @@ const featuredDesigners = [
     philosophy:
       "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/apparatus_studio" },
+      { type: "Curators' choice" },
     ],
   },
   {
@@ -104,8 +104,8 @@ const featuredDesigners = [
     notableWorks: "Hammered Bowls (UNESCO Award), Brancusi Spiral Table, River Ledge Credenza, Agata Cabinet, Lune Mirrors",
     philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
+      { type: "Curators' choice" },
     ],
   },
   {
@@ -119,8 +119,8 @@ const featuredDesigners = [
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/hervevanderstraeten" },
+      { type: "Curators' choice" },
     ],
   },
   {
@@ -134,8 +134,8 @@ const featuredDesigners = [
     philosophy:
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/nathalie_ziegler_glass" },
+      { type: "Curators' choice" },
     ],
   },
   {
@@ -149,8 +149,8 @@ const featuredDesigners = [
     notableWorks: "Limited Edition Bud Table Lamp, Artisan Lighting Collection",
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/atelier_demichelis" },
+      { type: "Curators' choice" },
     ],
   },
   {
@@ -163,8 +163,8 @@ const featuredDesigners = [
     notableWorks: "Lyrical Desk, Contemporary Furniture Series",
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/bruno_de_maistre" },
+      { type: "Curators' choice" },
     ],
   },
   {
@@ -178,8 +178,8 @@ const featuredDesigners = [
     philosophy:
       "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://instagram.com/hamrei_design" },
+      { type: "Curators' choice" },
     ],
   },
   {
@@ -192,8 +192,8 @@ const featuredDesigners = [
     notableWorks: "Cloud Pendants, Autumn Light Pendants, Space Nugget Side Table, Sonde Chandelier, Dark Matter Installation",
     philosophy: "Freehand glassblowing is an emotional conversation between hands, head, heart, and material. You start with a small seed and help it grow—it is a humble process.",
     links: [
-      { type: "Curators' choice" },
       { type: "Instagram", url: "https://www.instagram.com/jmw_studio" },
+      { type: "Curators' choice" },
     ],
   },
 ];
