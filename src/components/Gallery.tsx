@@ -16,12 +16,12 @@ const galleryExperiences = [{
     description: "Hervé van der Straeten's Mic Mac Chandelier, Atelier Demichelis' Limited Edition Bud Table Lamp, Adam Court's Villa Pedestal Nightstand, CC-Tapis Giudecca and Pinton 1867 Custom Rugs"
   }, {
     image: bedroomAltImage,
-    title: "Curated Collectible Items",
-    description: "Damien Langlois-Meurinne's Ooh La La Console, Hayman Editions' Carved Marble Marie Lamp, and Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
-  }, {
-    image: bedroomThirdImage,
     title: "Third Photo Title",
     description: "Description for the third photo goes here"
+  }, {
+    image: bedroomThirdImage,
+    title: "Curated Collectible Items",
+    description: "Damien Langlois-Meurinne's Ooh La La Console, Hayman Editions' Carved Marble Marie Lamp, and Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
   }]
 }, {
   experience: "Social Gathering",
