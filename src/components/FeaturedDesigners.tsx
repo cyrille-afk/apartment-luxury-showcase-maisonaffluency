@@ -268,31 +268,33 @@ const FeaturedDesigners = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-8"
+          className="sticky top-0 z-40 -mx-4 px-4 md:-mx-12 md:px-12 lg:-mx-20 lg:px-20 py-3 md:py-4 mb-4 bg-background/95 backdrop-blur-md border-b border-border/20"
         >
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search by name or specialty..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-10 bg-card/50 border-border/40 focus:border-primary/60"
-            />
+          <div className="max-w-6xl mx-auto">
+            <div className="relative max-w-md mx-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search designers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-10 bg-card/80 border-border/40 focus:border-primary/60 h-9 text-sm"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
             {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              <p className="text-center text-xs text-muted-foreground mt-2">
+                {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
+              </p>
             )}
           </div>
-          {searchQuery && (
-            <p className="text-center text-sm text-muted-foreground mt-3">
-              {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
-            </p>
-          )}
         </motion.div>
 
         <motion.div
