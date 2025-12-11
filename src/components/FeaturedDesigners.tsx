@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import CuratingTeam from "@/components/CuratingTeam";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 
-import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.jpg";
+import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.png";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
 import atelierDemichelisImg from "@/assets/designers/atelier-demichelis.jpg";
 import brunoDeMaistreImg from "@/assets/designers/bruno-de-maistre.jpg";
