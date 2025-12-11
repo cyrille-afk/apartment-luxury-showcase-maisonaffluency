@@ -66,7 +66,7 @@ const partnerBrands = [
   {
     id: "atelier-fevrier",
     name: "Atelier Février",
-    category: "Rugs & Textiles",
+    category: "Textiles",
     origin: "France",
     description: "French atelier specializing in bespoke handcrafted rugs, combining traditional weaving techniques with contemporary design sensibility.",
     featured: "Ricky Custom Rug",
@@ -126,7 +126,7 @@ const partnerBrands = [
   {
     id: "cc-tapis",
     name: "CC-Tapis",
-    category: "Rugs & Textiles",
+    category: "Textiles",
     origin: "Italy",
     description: "Italian rug manufacturer known for contemporary designs and traditional Nepalese hand-knotting techniques. Their Giudecca custom rugs blend artistry with exceptional craftsmanship.",
     featured: "Giudecca Custom Rug",
@@ -136,7 +136,7 @@ const partnerBrands = [
   {
     id: "celso-de-lemos",
     name: "Celso de Lemos",
-    category: "Luxury Textiles",
+    category: "Textiles",
     origin: "Portugal",
     description: "Portuguese textile house crafting exquisite bed linens and home textiles using the finest natural fibers and artisanal techniques.",
     featured: "Silk Bed Cover",
@@ -346,7 +346,7 @@ const partnerBrands = [
   {
     id: "peter-reed",
     name: "Peter Reed 1861",
-    category: "Fine Linens",
+    category: "Textiles",
     origin: "United Kingdom",
     description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
     featured: "Riyad Double Faced Throw and Cushion",
@@ -366,7 +366,7 @@ const partnerBrands = [
   {
     id: "pinton-1867",
     name: "Pinton 1867",
-    category: "Rugs & Tapestries",
+    category: "Textiles",
     origin: "France",
     description: "French textile house continuing the Aubusson tradition of handcrafted rugs and tapestries, blending historical techniques with contemporary design.",
     featured: "Custom Rug Collection",
