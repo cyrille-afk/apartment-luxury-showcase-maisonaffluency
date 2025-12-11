@@ -32,13 +32,13 @@ const galleryExperiences = [{
     title: "A Sophisticated Living Room",
     description: "Thierry Lemaire Orsay Centre Table, Robicara's Sira Credenza, Jean-Michel Frank & Adolphe Chanaux' Stool 1934, Olivia Cognet's Valauris Lamp, Leo Sentou's AB armchair, Garnier & Linker lost-wax cast crystal centerpiece for Théorème Editions"
   }, {
-    image: diningImage,
-    title: "With Panoramic Cityscape Views",
-    description: "Alinea Design Objects' Angelo M table paired with Eric Schmitt Studio's Chairie and Cazes&Conquet's Augusta dining chairs, Emanuelle Levet Stenne's Alabaster Pendant Light, Emmanuel Babled's Limited Edition Sculptured Book Cover from his emblematic Osmosi Series "
-  }, {
     image: bespokeSofaImage,
     title: "An Inviting Bespoke Sofa",
     description: "Thierry Lemaire's Niko 420 custom sofa, Atelier Février's Ricky custom rug, Poltrona Frau's Albero bookcase, Jindrich Halabala's lounge chair, Apparatus Studio's Median 3 Surface Alabaster lights, Alexander Lamont's Reef Vessels"
+  }, {
+    image: diningImage,
+    title: "With Panoramic Cityscape Views",
+    description: "Alinea Design Objects' Angelo M table paired with Eric Schmitt Studio's Chairie and Cazes&Conquet's Augusta dining chairs, Emanuelle Levet Stenne's Alabaster Pendant Light, Emmanuel Babled's Limited Edition Sculptured Book Cover from his emblematic Osmosi Series "
   }]
 }, {
   experience: "Personal Sanctuary",
