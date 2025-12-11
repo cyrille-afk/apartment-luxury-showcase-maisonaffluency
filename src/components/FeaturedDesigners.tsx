@@ -21,60 +21,16 @@ import leoSentouImg from "@/assets/designers/leo-sentou.jpg";
 
 const featuredDesigners = [
   {
-    id: "thierry-lemaire",
-    name: "Thierry Lemaire",
-    specialty: "Sculptural Furniture & Limited Editions",
-    image: thierryLemaireImg,
+    id: "alexander-lamont",
+    name: "Alexander Lamont",
+    specialty: "Artisan Furniture & Luxury Craftsmanship",
+    image: alexanderLamontImg,
     biography:
-      "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
-    notableWorks:
-      "Orsay Mds Coffee Table in Alabastrino travertine and Onyx Ocean. \nLimited and numbered edition (12 copies).",
-    philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
+      "Alexander Lamont is a British designer based in Bangkok whose eponymous brand has become synonymous with exceptional craftsmanship and the innovative use of traditional materials. Working with bronze, shagreen, straw marquetry, lacquer and gold leaf, his pieces marry East and West influences with a distinct sculptural presence. Winner of multiple UNESCO Awards for Excellence in Craftsmanship, his work graces prestigious interiors worldwide.",
+    notableWorks: "Hammered Bowls (UNESCO Award), Brancusi Spiral Table, River Ledge Credenza, Agata Cabinet, Lune Mirrors",
+    philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
-      { type: "Curators' choice" },
-    ],
-  },
-  {
-    id: "atelier-fevrier",
-    name: "Atelier Fevrier",
-    specialty: "Hand-knotted Rugs & Textile Art",
-    image: atelierFevrierImg,
-    biography:
-      "Atelier Fevrier is a textile studio dedicated to the ancient art of hand-knotted rug making. Their Ricky Rug exemplifies their commitment to traditional techniques combined with contemporary design sensibilities. Each rug is a labor of love, taking months to complete with meticulous attention to texture, color, and pattern.",
-    notableWorks: "Hand-knotted Ricky Rug, Custom Textile Collection",
-    philosophy:
-      "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
-    links: [
-      { type: "Instagram", url: "https://instagram.com/atelier_fevrier" },
-      { type: "Curators' choice" },
-    ],
-  },
-  {
-    id: "olivia-cognet",
-    name: "Olivia Cognet",
-    specialty: "Ceramic Artist & Designer",
-    image: oliviaCognetImg,
-    biography:
-      "Olivia Cognet is a French ceramic artist that draws her inspiration from the South of France where she grew up and and was nourished by the brilliant masters from the school of Vallauris, from Picasso to Roger Capron. Her Vallauris floor lamp in a custom blue glazed ceramic, is a testimony of her constant search for the balance between art & design. ",
-    notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
-    philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
-      { type: "Curators' choice" },
-    ],
-  },
-  {
-    id: "leo-sentou",
-    name: "Leo Sentou",
-    specialty: "Contemporary Classicist Furniture Design",
-    image: leoSentouImg,
-    biography:
-      "French designer Leo Sentou is a contemporary classicist whose debut capsule collection pays homage to the elegance and sophistication of eighteenth-century French decorative arts. His pieces are rooted in tradition yet unequivocally modern, reducing classical forms to their essential shapes while elevating them with a refined palette of limed oak, wrought iron, bronze, mohair, linen and lacquer.",
-    notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J",
-    philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/leosentou" },
+      { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
       { type: "Curators' choice" },
     ],
   },
@@ -95,50 +51,6 @@ const featuredDesigners = [
     ],
   },
   {
-    id: "alexander-lamont",
-    name: "Alexander Lamont",
-    specialty: "Artisan Furniture & Luxury Craftsmanship",
-    image: alexanderLamontImg,
-    biography:
-      "Alexander Lamont is a British designer based in Bangkok whose eponymous brand has become synonymous with exceptional craftsmanship and the innovative use of traditional materials. Working with bronze, shagreen, straw marquetry, lacquer and gold leaf, his pieces marry East and West influences with a distinct sculptural presence. Winner of multiple UNESCO Awards for Excellence in Craftsmanship, his work graces prestigious interiors worldwide.",
-    notableWorks: "Hammered Bowls (UNESCO Award), Brancusi Spiral Table, River Ledge Credenza, Agata Cabinet, Lune Mirrors",
-    philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
-    links: [
-      { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
-      { type: "Curators' choice" },
-    ],
-  },
-  {
-    id: "herve-van-der-straeten",
-    name: "Hervé van der Straeten",
-    specialty: "Bronze Sculpture & Lighting Design",
-    image: herveVanDerStraetenImg,
-    biography:
-      "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
-    notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
-    philosophy:
-      "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
-    links: [
-      { type: "Instagram", url: "https://instagram.com/hervevanderstraeten" },
-      { type: "Curators' choice" },
-    ],
-  },
-  {
-    id: "nathalie-ziegler",
-    name: "Nathalie Ziegler",
-    specialty: "Bespoke Glass Art & Chandeliers",
-    image: nathalieZieglerImg,
-    biography:
-      "Nathalie Ziegler is a French glass artist known for her custom chandeliers and glass sculptures that blur the line between functional lighting and fine art. Her Saint Just Custom Glass Chandelier showcases her ability to manipulate glass into dramatic, ethereal forms that transform spaces with light and color.",
-    notableWorks: "Saint Just Custom Glass Chandelier, Gold Leaves+Glass Snake Vase, Sculptural Glass Series",
-    philosophy:
-      "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
-    links: [
-      { type: "Instagram", url: "https://instagram.com/nathalie_ziegler_glass" },
-      { type: "Curators' choice" },
-    ],
-  },
-  {
     id: "atelier-demichelis",
     name: "Atelier Demichelis",
     founder: "Laura Demichelis",
@@ -150,6 +62,21 @@ const featuredDesigners = [
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
     links: [
       { type: "Instagram", url: "https://instagram.com/atelier_demichelis" },
+      { type: "Curators' choice" },
+    ],
+  },
+  {
+    id: "atelier-fevrier",
+    name: "Atelier Fevrier",
+    specialty: "Hand-knotted Rugs & Textile Art",
+    image: atelierFevrierImg,
+    biography:
+      "Atelier Fevrier is a textile studio dedicated to the ancient art of hand-knotted rug making. Their Ricky Rug exemplifies their commitment to traditional techniques combined with contemporary design sensibilities. Each rug is a labor of love, taking months to complete with meticulous attention to texture, color, and pattern.",
+    notableWorks: "Hand-knotted Ricky Rug, Custom Textile Collection",
+    philosophy:
+      "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
+    links: [
+      { type: "Instagram", url: "https://instagram.com/atelier_fevrier" },
       { type: "Curators' choice" },
     ],
   },
@@ -183,6 +110,21 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "herve-van-der-straeten",
+    name: "Hervé van der Straeten",
+    specialty: "Bronze Sculpture & Lighting Design",
+    image: herveVanDerStraetenImg,
+    biography:
+      "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
+    notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
+    philosophy:
+      "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
+    links: [
+      { type: "Instagram", url: "https://instagram.com/hervevanderstraeten" },
+      { type: "Curators' choice" },
+    ],
+  },
+  {
     id: "jeremy-maxwell-wintrebert",
     name: "Jeremy Maxwell Wintrebert",
     specialty: "Freehand Glassblown Lights & Sculptures",
@@ -193,6 +135,64 @@ const featuredDesigners = [
     philosophy: "Freehand glassblowing is an emotional conversation between hands, head, heart, and material. You start with a small seed and help it grow—it is a humble process.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/jmw_studio" },
+      { type: "Curators' choice" },
+    ],
+  },
+  {
+    id: "leo-sentou",
+    name: "Leo Sentou",
+    specialty: "Contemporary Classicist Furniture Design",
+    image: leoSentouImg,
+    biography:
+      "French designer Leo Sentou is a contemporary classicist whose debut capsule collection pays homage to the elegance and sophistication of eighteenth-century French decorative arts. His pieces are rooted in tradition yet unequivocally modern, reducing classical forms to their essential shapes while elevating them with a refined palette of limed oak, wrought iron, bronze, mohair, linen and lacquer.",
+    notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J",
+    philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/leosentou" },
+      { type: "Curators' choice" },
+    ],
+  },
+  {
+    id: "nathalie-ziegler",
+    name: "Nathalie Ziegler",
+    specialty: "Bespoke Glass Art & Chandeliers",
+    image: nathalieZieglerImg,
+    biography:
+      "Nathalie Ziegler is a French glass artist known for her custom chandeliers and glass sculptures that blur the line between functional lighting and fine art. Her Saint Just Custom Glass Chandelier showcases her ability to manipulate glass into dramatic, ethereal forms that transform spaces with light and color.",
+    notableWorks: "Saint Just Custom Glass Chandelier, Gold Leaves+Glass Snake Vase, Sculptural Glass Series",
+    philosophy:
+      "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
+    links: [
+      { type: "Instagram", url: "https://instagram.com/nathalie_ziegler_glass" },
+      { type: "Curators' choice" },
+    ],
+  },
+  {
+    id: "olivia-cognet",
+    name: "Olivia Cognet",
+    specialty: "Ceramic Artist & Designer",
+    image: oliviaCognetImg,
+    biography:
+      "Olivia Cognet is a French ceramic artist that draws her inspiration from the South of France where she grew up and and was nourished by the brilliant masters from the school of Vallauris, from Picasso to Roger Capron. Her Vallauris floor lamp in a custom blue glazed ceramic, is a testimony of her constant search for the balance between art & design. ",
+    notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
+    philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
+      { type: "Curators' choice" },
+    ],
+  },
+  {
+    id: "thierry-lemaire",
+    name: "Thierry Lemaire",
+    specialty: "Sculptural Furniture & Limited Editions",
+    image: thierryLemaireImg,
+    biography:
+      "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
+    notableWorks:
+      "Orsay Mds Coffee Table in Alabastrino travertine and Onyx Ocean. \nLimited and numbered edition (12 copies).",
+    philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
       { type: "Curators' choice" },
     ],
   },
