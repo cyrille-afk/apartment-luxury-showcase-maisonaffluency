@@ -6,6 +6,7 @@ import Gallery from "@/components/Gallery";
 import DesignDetails from "@/components/DesignDetails";
 import ContactInquiry from "@/components/ContactInquiry";
 import Footer from "@/components/Footer";
+import BackToTop from "@/components/BackToTop";
 
 const Index = () => {
   return (
@@ -32,6 +33,7 @@ const Index = () => {
         </section>
         <Footer />
       </main>
+      <BackToTop />
     </>
   );
 };
