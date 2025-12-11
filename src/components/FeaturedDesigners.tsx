@@ -49,6 +49,19 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "alexander-lamont",
+    name: "Alexander Lamont",
+    specialty: "Artisan Furniture & Luxury Craftsmanship",
+    image: herveVanDerStraetenImg, // Placeholder - replace with actual image
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [
+      { type: "Website", url: "https://alexanderlamont.com" },
+      { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
+    ],
+  },
+  {
     id: "herve-van-der-straeten",
     name: "Hervé van der Straeten",
     specialty: "Bronze Sculpture & Lighting Design",
