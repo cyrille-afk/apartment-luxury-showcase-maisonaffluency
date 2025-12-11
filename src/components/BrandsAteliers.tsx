@@ -64,7 +64,7 @@ const partnerBrands = [
     id: "iksel",
     name: "Iksel",
     category: "Wallcoverings & Murals",
-    origin: "Belgium",
+    origin: "United Kingdom",
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
     featured: "Brunelleschi Perspective Wallcover, White Blossom Wallcover",
   },
