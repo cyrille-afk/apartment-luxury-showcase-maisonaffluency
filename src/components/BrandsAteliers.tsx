@@ -326,7 +326,7 @@ const partnerBrands = [
   {
     id: "ooumm",
     name: "oOumm",
-    category: "Luxury Candles & Objects",
+    category: "Art Objects",
     origin: "France",
     description: "French luxury brand creating sculptural marble candles and decorative objects that blend artisanal craftsmanship with contemporary design sensibility.",
     featured: "Lyra Marble Candle",
