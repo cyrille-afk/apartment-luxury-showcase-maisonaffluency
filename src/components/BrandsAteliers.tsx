@@ -51,6 +51,16 @@ const partnerBrands = [
     galleryIndex: 1, // Unique by Design
   },
   {
+    id: "atelier-fevrier",
+    name: "Atelier Février",
+    category: "Rugs & Textiles",
+    origin: "France",
+    description: "French atelier specializing in bespoke handcrafted rugs, combining traditional weaving techniques with contemporary design sensibility.",
+    featured: "Ricky Custom Rug",
+    instagram: "https://instagram.com/atelierfevrier",
+    galleryIndex: 3, // An Inviting Bespoke Sofa
+  },
+  {
     id: "apparatus-studio-median",
     name: "Apparatus Studio",
     category: "Sculptural Lighting",
