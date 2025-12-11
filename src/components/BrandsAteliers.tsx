@@ -311,6 +311,16 @@ const partnerBrands = [
     galleryIndex: 1, // Unique by Design
   },
   {
+    id: "ooumm",
+    name: "oOumm",
+    category: "Luxury Candles & Objects",
+    origin: "France",
+    description: "French luxury brand creating sculptural marble candles and decorative objects that blend artisanal craftsmanship with contemporary design sensibility.",
+    featured: "Lyra Marble Candle",
+    instagram: "https://instagram.com/ooumm_paris",
+    galleryIndex: 2, // Design Icons and Collectibles
+  },
+  {
     id: "olivia-cognet",
     name: "Olivia Cognet",
     category: "Sculptural Lighting",
