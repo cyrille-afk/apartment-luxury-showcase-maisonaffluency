@@ -51,7 +51,7 @@ const galleryExperiences = [{
   }, {
     image: artMasterBronzeImage,
     title: "The Art Master Bronze Painting",
-    description: "Pierre Bonnefille's Bronze Painting 204, Alexander Lamont's Straw Marquetry Mantle Box, curated design library featuring works from Oitoemponto, Gilles & Boissier, Studio KO, and Jean-Louis Deniot"
+    description: "Pierre Bonnefille's Bronze Painting 204, Alexander Lamont's Straw Marquetry Mantle Box, Baleri Plato bookcase"
   }]
 }];
 const Gallery = () => {
