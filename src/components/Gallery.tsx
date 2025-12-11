@@ -19,7 +19,7 @@ const galleryExperiences = [{
   }, {
     image: bedroomAltImage,
     title: "Unique by Design",
-    description: "Adam Court's Villa Pedestal Nightstand, Atelier DeMichelis' Limited Edition Bud Table Lamp, Pinton 1867 Custom Rug, Peter Reed's Riyad Double Faced Throw and Cushion"
+    description: "Okha's Adam Court's Villa Pedestal Nightstand, Atelier DeMichelis' Limited Edition Bud Table Lamp, Pinton 1867 Custom Rug, Peter Reed's Riyad Double Faced Throw and Cushion"
   }, {
     image: bedroomThirdImage,
     title: "Design Icons and Collectibles",
