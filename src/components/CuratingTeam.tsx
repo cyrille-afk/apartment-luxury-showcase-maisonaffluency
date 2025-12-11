@@ -5,13 +5,13 @@ import { useRef } from "react";
 const curatingTeam = [
   {
     id: 1,
-    name: "Team Member 1",
+    name: "Elsa Lemarignier",
     role: "Curator",
     image: null,
   },
   {
     id: 2,
-    name: "Team Member 2",
+    name: "Cyrille Delval",
     role: "Curator",
     image: null,
   },
