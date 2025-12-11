@@ -96,11 +96,13 @@ const Gallery = () => {
       }
     };
 
-    // Check immediately and also after a short delay (for scroll completion)
+    // Check immediately
     checkForGalleryIndex();
-    const timeout = setTimeout(checkForGalleryIndex, 800);
     
-    return () => clearTimeout(timeout);
+    // Also set up an interval to check for changes (when user clicks from BrandsAteliers)
+    const interval = setInterval(checkForGalleryIndex, 300);
+    
+    return () => clearInterval(interval);
   }, [allItems.length]);
 
   const openLightbox = (sectionIndex: number, itemIndex: number) => {
