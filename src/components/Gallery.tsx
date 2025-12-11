@@ -51,7 +51,7 @@ const galleryExperiences = [{
   }, {
     image: artMasterBronzeImage,
     title: "The Art Master Bronze Painting",
-    description: "Pierre Bonnefille's Bronze Painting 204, Alexander Lamont's Straw Marquetry Mantle Box, Baleri Plato bookcase"
+    description: "Pierre Bonnefille's Bronze Painting 204, Alexander Lamont's Straw Marquetry Mantle Box, Baleri's Plato bookcase"
   }]
 }];
 const Gallery = () => {
