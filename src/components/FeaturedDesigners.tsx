@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState, useMemo } from "react";
-import { Instagram, Search, X } from "lucide-react";
+import { useRef, useState, useMemo, useEffect } from "react";
+import { Instagram, Search, X, ChevronDown } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -232,6 +232,7 @@ const FeaturedDesigners = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [openDesigners, setOpenDesigners] = useState<string[]>([]);
 
   const filteredDesigners = useMemo(() => {
     if (!searchQuery.trim()) return featuredDesigners;
@@ -242,6 +243,17 @@ const FeaturedDesigners = () => {
         designer.specialty.toLowerCase().includes(query)
     );
   }, [searchQuery]);
+
+  const allDesignerIds = useMemo(() => filteredDesigners.map(d => d.id), [filteredDesigners]);
+  const isAllExpanded = openDesigners.length === allDesignerIds.length && allDesignerIds.length > 0;
+
+  const toggleAllDesigners = () => {
+    if (isAllExpanded) {
+      setOpenDesigners([]);
+    } else {
+      setOpenDesigners(allDesignerIds);
+    }
+  };
 
   return (
     <section ref={ref} className="py-16 px-4 md:py-24 md:px-12 lg:px-20 bg-background">
@@ -297,12 +309,22 @@ const FeaturedDesigners = () => {
           </div>
         </motion.div>
 
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={toggleAllDesigners}
+            className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1"
+          >
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
+            <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
+          </button>
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <Accordion type="single" collapsible className="w-full space-y-4">
+          <Accordion type="multiple" value={openDesigners} onValueChange={setOpenDesigners} className="w-full space-y-4">
             {filteredDesigners.map((designer, index) => (
               <AccordionItem
                 key={designer.id}
