@@ -67,7 +67,7 @@ const QuickJumpMenu = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed right-4 bottom-20 md:right-6 md:bottom-24 z-50">
+    <div className="fixed right-4 bottom-6 md:right-6 md:bottom-24 z-50">
       <AnimatePresence>
         {isOpen && (
           <motion.div
