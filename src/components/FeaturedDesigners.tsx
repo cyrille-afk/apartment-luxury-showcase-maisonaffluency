@@ -16,6 +16,7 @@ import atelierFevrierImg from "@/assets/designers/atelier-fevrier.jpg";
 import apparatusStudioImg from "@/assets/designers/apparatus-studio.jpg";
 import oliviaCognetImg from "@/assets/designers/olivia-cognet.jpg";
 import jeremyMaxwellWintrebertImg from "@/assets/designers/jeremy-maxwell-wintrebert.jpg";
+import alexanderLamontImg from "@/assets/designers/alexander-lamont.jpg";
 
 const featuredDesigners = [
   {
@@ -52,7 +53,7 @@ const featuredDesigners = [
     id: "alexander-lamont",
     name: "Alexander Lamont",
     specialty: "Artisan Furniture & Luxury Craftsmanship",
-    image: herveVanDerStraetenImg, // Placeholder - replace with actual image
+    image: alexanderLamontImg,
     biography: "",
     notableWorks: "",
     philosophy: "",
