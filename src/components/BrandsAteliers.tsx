@@ -57,7 +57,7 @@ const partnerBrands = [
     origin: "France",
     description: "French designer creating bold sculptural furniture in bronze and iron, each piece a statement of artistic vision and master craftsmanship.",
     featured: "Chairie Dining Chair",
-    instagram: "https://instagram.com/ericschmittstudio",
+    instagram: "https://instagram.com/studio_eric_schmitt_",
   },
   {
     id: "haymann-editions",
