@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useMemo } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import bedroomImage from "@/assets/master-suite.jpg";
 import diningImage from "@/assets/dining-room.jpg";
 import boudoirImage from "@/assets/boudoir.jpg";
@@ -9,6 +11,7 @@ import bedroomAltImage from "@/assets/bedroom-alt.jpg";
 import bedroomThirdImage from "@/assets/bedroom-third.jpg";
 import bespokeSofaImage from "@/assets/bespoke-sofa.jpg";
 import artMasterBronzeImage from "@/assets/art-master-bronze.jpg";
+
 const galleryExperiences = [{
   experience: "Restful Retreat",
   subtitle: "Serene retreat with curated collectible items, bespoke furniture and handcrafted rugs",
@@ -58,74 +61,176 @@ const galleryExperiences = [{
     description: "Pierre Bonnefille's Bronze Painting 204, Alexander Lamont's Straw Marquetry Mantle Box, Baleri's Plato bookcase"
   }]
 }];
+
 const Gallery = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, {
     once: true,
     margin: "-100px"
   });
-  return <section ref={ref} className="py-16 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30">
-      <div className="mx-auto max-w-7xl">
-        <motion.div initial={{
-        opacity: 0,
-        y: 30
-      }} animate={isInView ? {
-        opacity: 1,
-        y: 0
-      } : {}} transition={{
-        duration: 0.8
-      }} className="mb-12 md:mb-16 text-center">
-          <p className="mb-2 md:mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
-            OUR GALLERY
-          </p>
-          <h2 className="text-xl leading-relaxed md:text-3xl text-foreground text-left px-2 md:text-justify font-serif lg:text-lg">From Thierry Lemaire's Orsay Mds Centre Table, Jean-Michel Frank Table Soleil 1930, Nathalie Ziegler's and Hervé van der Straeten's Chandeliers, to Hamrei's whimsical Chairs and Pierre Bonnefille's Bronze Painting, Maison Affluency Singapore is a uniquely curated venue where design and art congregate</h2>
-        </motion.div>
-        
-        {galleryExperiences.map((section, sectionIndex) => <div key={section.experience} className="mb-16 md:mb-24">
-            <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={isInView ? {
-          opacity: 1,
-          y: 0
-        } : {}} transition={{
-          duration: 0.6,
-          delay: sectionIndex * 0.2
-        }} className="mb-8 md:mb-12">
-              <h3 className="text-2xl md:text-3xl lg:text-4xl font-serif text-primary mb-2">
-                {section.experience}
-              </h3>
-              <p className="text-sm md:text-base text-muted-foreground font-body italic">
-                {section.subtitle}
-              </p>
-            </motion.div>
-            
-            <div className="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {section.items.map((item, index) => <motion.div key={item.title} initial={{
-            opacity: 0,
-            y: 40
-          }} animate={isInView ? {
-            opacity: 1,
-            y: 0
-          } : {}} transition={{
-            duration: 0.6,
-            delay: sectionIndex * 0.2 + index * 0.1
-          }} className="group cursor-pointer">
-                  <div className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm">
-                    <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                  </div>
-                  
-                  <h3 className="mb-2 font-display text-xl md:text-2xl text-foreground">
-                    {item.title}
-                  </h3>
-                  <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground">
-                    {item.description}
-                  </p>
-                </motion.div>)}
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Flatten all gallery items for lightbox navigation
+  const allItems = useMemo(() => {
+    return galleryExperiences.flatMap(section => section.items);
+  }, []);
+
+  const openLightbox = (sectionIndex: number, itemIndex: number) => {
+    // Calculate the flat index
+    let flatIndex = 0;
+    for (let i = 0; i < sectionIndex; i++) {
+      flatIndex += galleryExperiences[i].items.length;
+    }
+    flatIndex += itemIndex;
+    setCurrentImageIndex(flatIndex);
+    setLightboxOpen(true);
+  };
+
+  const goToPrevious = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? allItems.length - 1 : prev - 1));
+  };
+
+  const goToNext = () => {
+    setCurrentImageIndex((prev) => (prev === allItems.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") goToPrevious();
+    if (e.key === "ArrowRight") goToNext();
+    if (e.key === "Escape") setLightboxOpen(false);
+  };
+
+  return (
+    <>
+      <section ref={ref} className="py-16 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30">
+        <div className="mx-auto max-w-7xl">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8 }}
+            className="mb-12 md:mb-16 text-center"
+          >
+            <p className="mb-2 md:mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
+              OUR GALLERY
+            </p>
+            <h2 className="text-xl leading-relaxed md:text-3xl text-foreground text-left px-2 md:text-justify font-serif lg:text-lg">
+              From Thierry Lemaire's Orsay Mds Centre Table, Jean-Michel Frank Table Soleil 1930, Nathalie Ziegler's and Hervé van der Straeten's Chandeliers, to Hamrei's whimsical Chairs and Pierre Bonnefille's Bronze Painting, Maison Affluency Singapore is a uniquely curated venue where design and art congregate
+            </h2>
+          </motion.div>
+
+          {galleryExperiences.map((section, sectionIndex) => (
+            <div key={section.experience} className="mb-16 md:mb-24">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: sectionIndex * 0.2 }}
+                className="mb-8 md:mb-12"
+              >
+                <h3 className="text-2xl md:text-3xl lg:text-4xl font-serif text-primary mb-2">
+                  {section.experience}
+                </h3>
+                <p className="text-sm md:text-base text-muted-foreground font-body italic">
+                  {section.subtitle}
+                </p>
+              </motion.div>
+
+              <div className="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {section.items.map((item, index) => (
+                  <motion.div
+                    key={`${item.title}-${index}`}
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.6, delay: sectionIndex * 0.2 + index * 0.1 }}
+                    className="group cursor-pointer"
+                    onClick={() => openLightbox(sectionIndex, index)}
+                  >
+                    <div className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="bg-background/80 text-foreground px-4 py-2 rounded-full text-sm font-body">
+                          Click to enlarge
+                        </span>
+                      </div>
+                    </div>
+
+                    <h3 className="mb-2 font-display text-xl md:text-2xl text-foreground">
+                      {item.title}
+                    </h3>
+                    <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground">
+                      {item.description}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </div>)}
-      </div>
-    </section>;
+          ))}
+        </div>
+      </section>
+
+      {/* Lightbox Dialog */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent
+          className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none"
+          onKeyDown={handleKeyDown}
+        >
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* Close button */}
+            <button
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors"
+              aria-label="Close lightbox"
+            >
+              <X className="h-6 w-6 text-white" />
+            </button>
+
+            {/* Previous button */}
+            <button
+              onClick={goToPrevious}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="h-8 w-8 text-white" />
+            </button>
+
+            {/* Image container */}
+            <div className="flex flex-col items-center justify-center max-w-[90vw] max-h-[85vh] px-16">
+              <img
+                src={allItems[currentImageIndex]?.image}
+                alt={allItems[currentImageIndex]?.title}
+                className="max-w-full max-h-[70vh] object-contain"
+              />
+              <div className="mt-4 text-center">
+                <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
+                  {allItems[currentImageIndex]?.title}
+                </h3>
+                <p className="text-sm md:text-base text-white/70 font-body max-w-2xl">
+                  {allItems[currentImageIndex]?.description}
+                </p>
+                <p className="text-xs text-white/50 mt-3 font-body">
+                  {currentImageIndex + 1} / {allItems.length}
+                </p>
+              </div>
+            </div>
+
+            {/* Next button */}
+            <button
+              onClick={goToNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors"
+              aria-label="Next image"
+            >
+              <ChevronRight className="h-8 w-8 text-white" />
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 };
+
 export default Gallery;
