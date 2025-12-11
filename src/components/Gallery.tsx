@@ -20,7 +20,7 @@ const galleryExperiences = [{
     description: "Adam Court's Villa Pedestal Nightstand, Atelier DeMichelis' Limited Edition Bud Table Lamp, Pinton 1867 Custom Rug, Peter Reed's Riyad Double Faced Throw and Cushion"
   }, {
     image: bedroomThirdImage,
-    title: "Curated Collectible Items",
+    title: "With Design Icons and Collectibles",
     description: "Damien Langlois-Meurinne's Ooh La La Console, Hayman Editions' Carved Marble Marie Lamp, and Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
   }]
 }, {
