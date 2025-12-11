@@ -6,6 +6,7 @@ import diningImage from "@/assets/dining-room.jpg";
 import boudoirImage from "@/assets/boudoir.jpg";
 import livingRoomImage from "@/assets/living-room-hero.jpg";
 import bedroomAltImage from "@/assets/bedroom-alt.jpg";
+import bedroomThirdImage from "@/assets/bedroom-third.jpg";
 const galleryExperiences = [{
   experience: "Restful Retreat",
   subtitle: "Serene retreat with curated collectible items, bespoke furniture and handcrafted rugs",
@@ -18,7 +19,7 @@ const galleryExperiences = [{
     title: "Curated Collectible Items",
     description: "Damien Langlois-Meurinne's Ooh La La Console, Hayman Editions' Carved Marble Marie Lamp, and Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
   }, {
-    image: bedroomImage,
+    image: bedroomThirdImage,
     title: "Third Photo Title",
     description: "Description for the third photo goes here"
   }]
