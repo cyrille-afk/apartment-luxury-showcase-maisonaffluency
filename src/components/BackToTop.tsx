@@ -37,9 +37,21 @@ const BackToTop = () => {
       {isVisible && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
+          animate={{ 
+            opacity: 1, 
+            scale: 1,
+            y: [0, -6, 0]
+          }}
           exit={{ opacity: 0, scale: 0.8 }}
-          transition={{ duration: 0.2 }}
+          transition={{ 
+            duration: 0.2,
+            y: {
+              duration: 1.5,
+              repeat: Infinity,
+              repeatDelay: 2,
+              ease: "easeInOut"
+            }
+          }}
           className="fixed bottom-8 right-8 md:bottom-10 md:right-10 z-50"
         >
           <TooltipProvider>
