@@ -54,7 +54,7 @@ const galleryExperiences = [{
     description: "Iksel's White Blossom Wallcover, Apparatus Studio's Metronome Reading Suede Floor Lamp"
   }, {
     image: artMasterBronzeImage,
-    title: "The Art Master Bronze Painting",
+    title: "An Art Master Display",
     description: "Pierre Bonnefille's Bronze Painting 204, Alexander Lamont's Straw Marquetry Mantle Box, Baleri's Plato bookcase"
   }]
 }];
