@@ -69,7 +69,7 @@ const Overview = () => {
                 className="group border-primary/30 hover:border-primary hover:bg-primary/5 transition-all duration-300"
               >
                 <Users className="mr-2 h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
-                <span className="font-body">Meet Our Team</span>
+                <span className="font-body">Meet Our Curating Team</span>
               </Button>
             </motion.div>
           </div>
