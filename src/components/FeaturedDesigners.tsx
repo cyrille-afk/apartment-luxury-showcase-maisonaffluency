@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import CuratingTeam from "@/components/CuratingTeam";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
-
 import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.png";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
 import atelierDemichelisImg from "@/assets/designers/atelier-demichelis.jpg";
@@ -19,6 +18,7 @@ import oliviaCognetImg from "@/assets/designers/olivia-cognet.jpg";
 import jeremyMaxwellWintrebertImg from "@/assets/designers/jeremy-maxwell-wintrebert.jpg";
 import alexanderLamontImg from "@/assets/designers/alexander-lamont.jpg";
 import leoSentouImg from "@/assets/designers/leo-sentou.jpg";
+import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank.jpg";
 
 const featuredDesigners = [
   {
@@ -136,6 +136,19 @@ const featuredDesigners = [
     philosophy: "Freehand glassblowing is an emotional conversation between hands, head, heart, and material. You start with a small seed and help it grow—it is a humble process.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/jmw_studio" },
+      { type: "Curators' choice" },
+    ],
+  },
+  {
+    id: "jean-michel-frank",
+    name: "Jean-Michel Frank",
+    specialty: "Minimalist Luxury & Art Deco Pioneer",
+    image: jeanMichelFrankImg,
+    biography:
+      "Jean-Michel Frank (1895–1941) was a legendary French interior decorator and furniture designer who pioneered the luxurious minimalist aesthetic of the Art Deco era. His work emphasized refined simplicity, using the finest materials—parchment, shagreen, straw marquetry, and bronze—to create pieces of understated elegance. Collaborating with artists like Alberto Giacometti and Christian Bérard, Frank created iconic designs that continue to influence contemporary luxury interiors.",
+    notableWorks: "Table Soleil 1930, Stool 1934 (with Adolphe Chanaux), Parchment-covered furniture, Shagreen desks",
+    philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
+    links: [
       { type: "Curators' choice" },
     ],
   },
