@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowUp } from "lucide-react";
 import cyrilleDelvalImg from "@/assets/team/cyrille-delval.jpg";
 import elsaLemarignierImg from "@/assets/team/elsa-lemarignier.jpg";
 
@@ -119,6 +120,26 @@ const CuratingTeam = () => {
           </motion.div>
         ))}
       </div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        className="mt-10 text-center"
+      >
+        <button
+          onClick={() => {
+            const overviewSection = document.getElementById("overview");
+            if (overviewSection) {
+              overviewSection.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors duration-300 font-body"
+        >
+          <ArrowUp className="h-4 w-4" />
+          Back to Overview
+        </button>
+      </motion.div>
     </motion.div>
   );
 };
