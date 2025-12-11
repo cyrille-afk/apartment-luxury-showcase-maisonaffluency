@@ -92,7 +92,7 @@ const featuredDesigners = [
     notableWorks: "Lyrical Desk, Contemporary Furniture Series",
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     links: [
-      { type: "Instagram", url: "https://instagram.com/bruno_de_maistre" },
+      { type: "Instagram", url: "https://instagram.com/bruno_de_maistre_bdm" },
       { type: "Curators' choice" },
     ],
   },
