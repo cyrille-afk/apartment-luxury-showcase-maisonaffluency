@@ -10,7 +10,7 @@ import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank.jpg";
 import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.jpg";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
 import atelierDemichelisImg from "@/assets/designers/atelier-demichelis.jpg";
-import bertrandDeMaistreImg from "@/assets/designers/bertrand-de-maistre.jpg";
+import brunoDeMaistreImg from "@/assets/designers/bruno-de-maistre.jpg";
 import hamreiImg from "@/assets/designers/hamrei.jpg";
 import atelierFevrierImg from "@/assets/designers/atelier-fevrier.jpg";
 import apparatusStudioImg from "@/assets/designers/apparatus-studio.jpg";
@@ -94,7 +94,7 @@ const featuredDesigners = [
     id: "bruno-de-maistre",
     name: "Bruno de Maistre",
     specialty: "Contemporary Furniture Design",
-    image: bertrandDeMaistreImg,
+    image: brunoDeMaistreImg,
     biography:
       "Bruno de Maistre is a French designer known for his poetic approach to furniture design. His Lyrical Desk demonstrates his ability to create pieces that are both functional and emotionally resonant, with flowing lines and thoughtful proportions that inspire creativity and contemplation.",
     notableWorks: "Lyrical Desk, Contemporary Furniture Series",
