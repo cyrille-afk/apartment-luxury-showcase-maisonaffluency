@@ -163,7 +163,7 @@ const featuredDesigners = [
     notableWorks: "Silver Glass Hammer Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
     links: [
-      { type: "Instagram", url: "https://instagram.com/kikolopez_mirrors" },
+      { type: "Instagram", url: "https://instagram.com/kikolumieres" },
       { type: "Curators' choice" },
     ],
   },
