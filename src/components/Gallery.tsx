@@ -8,6 +8,7 @@ import livingRoomImage from "@/assets/living-room-hero.jpg";
 import bedroomAltImage from "@/assets/bedroom-alt.jpg";
 import bedroomThirdImage from "@/assets/bedroom-third.jpg";
 import bespokeSofaImage from "@/assets/bespoke-sofa.jpg";
+import artMasterBronzeImage from "@/assets/art-master-bronze.jpg";
 const galleryExperiences = [{
   experience: "Restful Retreat",
   subtitle: "Serene retreat with curated collectible items, bespoke furniture and handcrafted rugs",
@@ -47,6 +48,10 @@ const galleryExperiences = [{
     image: boudoirImage,
     title: "A Sophisticated Boudoir",
     description: "Bertrand de Maistre's Lyrical Desk, Hamrei's Pépé Chair,  Made in Kira's Toshiro Lamp, Nathalie Ziegler's Saint Just Custom Glass Chandelier and Gold Leaves+Glass Snake Vase, Nika Zupanc's Stardust Loveseat, Apparatus Studio's Metronome Reading Floor Lamp "
+  }, {
+    image: artMasterBronzeImage,
+    title: "The Art Master Bronze Painting",
+    description: "Pierre Bonnefille's Bronze Painting, curated design library featuring works from Oitoemponto, Gilles & Boissier, Studio KO, and Jean-Louis Deniot"
   }]
 }];
 const Gallery = () => {
