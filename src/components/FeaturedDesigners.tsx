@@ -107,7 +107,7 @@ const featuredDesigners = [
     philosophy:
       "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
     links: [
-      { type: "Instagram", url: "https://instagram.com/hamrei_design" },
+      { type: "Instagram", url: "https://instagram.com/hamrei" },
       { type: "Curators' choice" },
     ],
   },
