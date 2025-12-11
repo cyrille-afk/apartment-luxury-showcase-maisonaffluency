@@ -324,14 +324,25 @@ const FeaturedDesigners = () => {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <Accordion type="multiple" value={openDesigners} onValueChange={setOpenDesigners} className="w-full space-y-4">
+          <Accordion 
+            type="multiple" 
+            value={openDesigners} 
+            onValueChange={(values) => {
+              // Trigger haptic feedback on mobile
+              if ('vibrate' in navigator) {
+                navigator.vibrate(10);
+              }
+              setOpenDesigners(values);
+            }} 
+            className="w-full space-y-4"
+          >
             {filteredDesigners.map((designer, index) => (
               <AccordionItem
                 key={designer.id}
                 value={designer.id}
-                className="border border-border/40 rounded-lg px-6 bg-card/30 hover:bg-card/50 transition-colors duration-300"
+                className="border border-border/40 rounded-lg px-4 md:px-6 bg-card/30 hover:bg-card/50 transition-colors duration-300"
               >
-                <AccordionTrigger className="hover:no-underline py-6 group">
+                <AccordionTrigger className="hover:no-underline py-4 md:py-6 group active:scale-[0.99] touch-manipulation">
                   <div className="flex items-center gap-4 md:gap-6 text-left w-full">
                     <Dialog>
                       <DialogTrigger asChild>
