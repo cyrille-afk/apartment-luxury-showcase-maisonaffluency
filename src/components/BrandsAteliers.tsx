@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, Instagram } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 const partnerBrands = [
@@ -12,6 +12,7 @@ const partnerBrands = [
     origin: "Belgium",
     description: "Belgian design house curating and producing exceptional furniture pieces that blend sculptural form with functional elegance.",
     featured: "Angelo M Table",
+    instagram: "https://instagram.com/alineadesignobjects",
   },
   {
     id: "baleri",
@@ -20,6 +21,7 @@ const partnerBrands = [
     origin: "Italy",
     description: "Italian furniture company known for innovative designs and collaborations with leading architects and designers since 1984.",
     featured: "Plato Bookcase",
+    instagram: "https://instagram.com/baleriitalia",
   },
   {
     id: "cc-tapis",
@@ -28,6 +30,7 @@ const partnerBrands = [
     origin: "Italy",
     description: "Italian rug manufacturer known for contemporary designs and traditional Nepalese hand-knotting techniques. Their Giudecca custom rugs blend artistry with exceptional craftsmanship.",
     featured: "Giudecca Custom Rug",
+    instagram: "https://instagram.com/cc_tapis",
   },
   {
     id: "celso-de-lemos",
@@ -36,6 +39,7 @@ const partnerBrands = [
     origin: "Portugal",
     description: "Portuguese textile house crafting exquisite bed linens and home textiles using the finest natural fibers and artisanal techniques.",
     featured: "Silk Bed Cover",
+    instagram: "https://instagram.com/celsodelemos",
   },
   {
     id: "ecart-paris",
@@ -44,6 +48,7 @@ const partnerBrands = [
     origin: "France",
     description: "Founded by legendary designer Andrée Putman, Ecart International re-edits iconic furniture designs from the 20th century's greatest masters, including Jean-Michel Frank, Eileen Gray, and Pierre Chareau. Their meticulous reproductions preserve the original craftsmanship and materials.",
     featured: "Jean-Michel Frank Re-editions, Eileen Gray Designs",
+    instagram: "https://instagram.com/ecart_paris",
   },
   {
     id: "eric-schmitt-studio",
@@ -52,6 +57,7 @@ const partnerBrands = [
     origin: "France",
     description: "French designer creating bold sculptural furniture in bronze and iron, each piece a statement of artistic vision and master craftsmanship.",
     featured: "Chairie Dining Chair",
+    instagram: "https://instagram.com/ericschmittstudio",
   },
   {
     id: "haymann-editions",
@@ -60,6 +66,7 @@ const partnerBrands = [
     origin: "France",
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
     featured: "Carved Marble Marie Lamp",
+    instagram: "https://instagram.com/haymanneditions",
   },
   {
     id: "iksel",
@@ -68,6 +75,7 @@ const partnerBrands = [
     origin: "United Kingdom",
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
     featured: "Brunelleschi Perspective Wallcover, White Blossom Wallcover",
+    instagram: "https://instagram.com/ikseldecorativearts",
   },
   {
     id: "made-in-kira",
@@ -84,6 +92,7 @@ const partnerBrands = [
     origin: "Slovenia",
     description: "Slovenian designer known for poetic, feminine furniture and lighting that combines nostalgic elegance with contemporary sensibility.",
     featured: "Stardust Loveseat",
+    instagram: "https://instagram.com/nikazupanc",
   },
   {
     id: "okha",
@@ -92,6 +101,7 @@ const partnerBrands = [
     origin: "South Africa",
     description: "South African design studio creating sophisticated furniture that bridges African craft traditions with contemporary global aesthetics.",
     featured: "Adam Court's Villa Pedestal Nightstand",
+    instagram: "https://instagram.com/okaboratories",
   },
   {
     id: "peter-reed",
@@ -100,6 +110,7 @@ const partnerBrands = [
     origin: "United Kingdom",
     description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
     featured: "Riyad Double Faced Throw and Cushion",
+    instagram: "https://instagram.com/peterreedlinens",
   },
   {
     id: "pinton-1867",
@@ -108,6 +119,7 @@ const partnerBrands = [
     origin: "France",
     description: "French textile house continuing the Aubusson tradition of handcrafted rugs and tapestries, blending historical techniques with contemporary design.",
     featured: "Custom Rug Collection",
+    instagram: "https://instagram.com/pinton1867",
   },
   {
     id: "poltrona-frau",
@@ -116,6 +128,7 @@ const partnerBrands = [
     origin: "Italy",
     description: "Iconic Italian furniture house renowned for exceptional leather craftsmanship since 1912. Their timeless designs grace prestigious residences and institutions worldwide.",
     featured: "Albero Bookcase",
+    instagram: "https://instagram.com/poltronafrau",
   },
   {
     id: "robicara",
@@ -124,6 +137,7 @@ const partnerBrands = [
     origin: "Italy",
     description: "Italian design studio creating bespoke furniture and cabinetry with exceptional attention to material, proportion, and craftsmanship.",
     featured: "Sira Credenza",
+    instagram: "https://instagram.com/robicara_official",
   },
   {
     id: "theoreme-editions",
@@ -132,6 +146,7 @@ const partnerBrands = [
     origin: "France",
     description: "French publisher of limited edition decorative objects, collaborating with renowned artists and designers including Garnier & Linker.",
     featured: "Lost-wax Cast Crystal Centerpiece",
+    instagram: "https://instagram.com/theoremeeditions",
   },
 ];
 
@@ -221,6 +236,17 @@ const BrandsAteliers = () => {
                     {brand.origin}
                   </p>
                 </div>
+                {brand.instagram && (
+                  <a
+                    href={brand.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary transition-colors duration-300"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Instagram className="h-4 w-4" />
+                  </a>
+                )}
               </div>
               
               <p className="text-xs md:text-sm text-primary font-body italic mb-3">
