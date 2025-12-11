@@ -178,7 +178,7 @@ const ContactInquiry = () => {
               type="submit"
               size="lg"
               disabled={isSubmitting}
-              className="bg-primary px-12 py-6 font-body text-sm uppercase tracking-widest text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50"
+              className="bg-primary px-12 py-6 font-body text-sm uppercase tracking-widest text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 border-2 border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)]"
             >
               {isSubmitting ? "Sending..." : "Submit Inquiry"}
             </Button>
