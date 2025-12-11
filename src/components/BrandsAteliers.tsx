@@ -181,6 +181,16 @@ const partnerBrands = [
     galleryIndex: 5, // With Panoramic Cityscape Views
   },
   {
+    id: "garnier-linker",
+    name: "Garnier & Linker",
+    category: "Sculptural Art Objects",
+    origin: "France",
+    description: "French artist duo creating exceptional lost-wax cast crystal sculptures and decorative objects, their work for Théorème Editions exemplifies masterful artistry.",
+    featured: "Lost-wax Cast Crystal Centerpiece",
+    instagram: "https://instagram.com/garnieretlinker",
+    galleryIndex: 4, // A Sophisticated Living Room
+  },
+  {
     id: "haymann-editions",
     name: "Haymann Editions",
     category: "Sculptural Lighting",
