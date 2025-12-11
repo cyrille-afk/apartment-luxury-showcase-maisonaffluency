@@ -89,7 +89,7 @@ const ContactInquiry = () => {
             Visit Us By Appointment
           </h2>
           <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
-            For architects, interior designers, and industry professionals interested
+            For architects, interior designers, and design connoisseurs interested
             in detailed specifications, material sources, or collaboration opportunities.
           </p>
         </motion.div>
