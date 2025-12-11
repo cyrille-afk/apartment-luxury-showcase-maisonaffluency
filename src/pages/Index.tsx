@@ -9,6 +9,7 @@ import ContactInquiry from "@/components/ContactInquiry";
 import Footer from "@/components/Footer";
 import BackToTop from "@/components/BackToTop";
 import ScrollProgress from "@/components/ScrollProgress";
+import CuratingTeam from "@/components/CuratingTeam";
 
 const Index = () => {
   return (
@@ -24,6 +25,9 @@ const Index = () => {
         </section>
         <section id="gallery">
           <Gallery />
+        </section>
+        <section id="curating-team">
+          <CuratingTeam />
         </section>
         <section id="designers">
           <FeaturedDesigners />
