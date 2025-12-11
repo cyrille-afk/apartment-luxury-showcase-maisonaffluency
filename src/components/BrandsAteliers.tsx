@@ -250,6 +250,26 @@ const partnerBrands = [
     instagram: "https://instagram.com/theoreme_editions",
     galleryIndex: 4, // A Sophisticated Living Room
   },
+  {
+    id: "thierry-lemaire-sofa",
+    name: "Thierry Lemaire",
+    category: "Bespoke Furniture",
+    origin: "France",
+    description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
+    featured: "Niko 420 Custom Sofa",
+    instagram: "https://instagram.com/thierrylemaire",
+    galleryIndex: 3, // An Inviting Bespoke Sofa
+  },
+  {
+    id: "thierry-lemaire-table",
+    name: "Thierry Lemaire",
+    category: "Bespoke Furniture",
+    origin: "France",
+    description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
+    featured: "Orsay Centre Table",
+    instagram: "https://instagram.com/thierrylemaire",
+    galleryIndex: 4, // A Sophisticated Living Room
+  },
 ];
 
 const BrandsAteliers = () => {
