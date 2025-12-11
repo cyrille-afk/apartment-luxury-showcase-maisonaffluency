@@ -151,6 +151,16 @@ const partnerBrands = [
     galleryIndex: 5, // With Panoramic Cityscape Views
   },
   {
+    id: "emmanuel-babled",
+    name: "Emmanuel Babled",
+    category: "Sculptural Art Objects",
+    origin: "France",
+    description: "French-Italian designer creating limited edition sculptural objects in glass and marble, his Osmosi Series represents the pinnacle of material exploration and artistic vision.",
+    featured: "Limited Edition Osmosi Series Sculptured Book Cover",
+    instagram: "https://instagram.com/emmanuelbabled",
+    galleryIndex: 5, // With Panoramic Cityscape Views
+  },
+  {
     id: "eric-schmitt-studio",
     name: "Eric Schmitt Studio",
     category: "Sculptural Furniture",
