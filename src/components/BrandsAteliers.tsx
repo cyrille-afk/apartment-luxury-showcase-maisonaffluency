@@ -61,6 +61,14 @@ const partnerBrands = [
     featured: "Adam Court's Villa Pedestal Nightstand",
   },
   {
+    id: "ecart-paris",
+    name: "Ecart Paris",
+    category: "Heritage Furniture Editions",
+    origin: "France",
+    description: "Founded by legendary designer Andrée Putman, Ecart International re-edits iconic furniture designs from the 20th century's greatest masters, including Jean-Michel Frank, Eileen Gray, and Pierre Chareau. Their meticulous reproductions preserve the original craftsmanship and materials.",
+    featured: "Jean-Michel Frank Re-editions, Eileen Gray Designs",
+  },
+  {
     id: "hayman-editions",
     name: "Hayman Editions",
     category: "Sculptural Lighting",
