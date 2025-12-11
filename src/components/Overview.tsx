@@ -52,6 +52,26 @@ const Overview = () => {
 ​<br />
               ​
             </motion.h2>
+
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} animate={isInView ? {
+            opacity: 1,
+            y: 0
+          } : {}} transition={{
+            duration: 0.6,
+            delay: 0.4
+          }}>
+              <Button 
+                onClick={scrollToTeam}
+                variant="outline"
+                className="group border-primary/30 hover:border-primary hover:bg-primary/5 transition-all duration-300"
+              >
+                <Users className="mr-2 h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
+                <span className="font-body">Meet Our Team</span>
+              </Button>
+            </motion.div>
           </div>
           
           <div className="space-y-6">
@@ -105,26 +125,6 @@ const Overview = () => {
                   Sq Ft
                 </div>
               </div>
-            </motion.div>
-
-            <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} animate={isInView ? {
-            opacity: 1,
-            y: 0
-          } : {}} transition={{
-            duration: 0.6,
-            delay: 0.7
-          }} className="pt-8">
-              <Button 
-                onClick={scrollToTeam}
-                variant="outline"
-                className="group border-primary/30 hover:border-primary hover:bg-primary/5 transition-all duration-300"
-              >
-                <Users className="mr-2 h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
-                <span className="font-body">Meet Our Team</span>
-              </Button>
             </motion.div>
           </div>
         </motion.div>
