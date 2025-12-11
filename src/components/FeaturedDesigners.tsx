@@ -78,7 +78,7 @@ const featuredDesigners = [
     philosophy:
       "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
     links: [
-      { type: "Instagram", url: "https://instagram.com/atelier_fevrier" },
+      { type: "Instagram", url: "https://instagram.com/atelierfevrier" },
       { type: "Curators' choice" },
     ],
   },
