@@ -128,19 +128,6 @@ const featuredDesigners = [
     ],
   },
   {
-    id: "delcourt-collection",
-    name: "Delcourt Collection",
-    specialty: "Contemporary Upholstered Furniture",
-    biography:
-      "Delcourt Collection is a prestigious French furniture house known for their refined approach to contemporary seating and upholstery. Their BOB armchair represents the pinnacle of comfort-focused design, combining generous proportions with elegant detailing. Each piece is crafted in France using premium materials and traditional upholstery techniques.",
-    notableWorks: "BOB Armchair, Contemporary Seating Collection",
-    notableWorksLink: { text: "BOB Armchair", galleryIndex: 5 },
-    philosophy: "True comfort is an art form—it requires mastery of proportion, material, and craft.",
-    links: [
-      { type: "Curators' choice" },
-    ],
-  },
-  {
     id: "emanuelle-levet-stenne",
     name: "Emanuelle Levet Stenne",
     specialty: "Alabaster Lighting & Sculptural Fixtures",
@@ -286,19 +273,6 @@ const featuredDesigners = [
     philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
-      { type: "Curators' choice" },
-    ],
-  },
-  {
-    id: "takayokaya",
-    name: "Takayokaya",
-    specialty: "Japanese Artisan Textiles & Cushions",
-    biography:
-      "Takayokaya is a Japanese artisan studio specializing in traditional textile craftsmanship with a contemporary sensibility. Their Ojami Cushion represents the pinnacle of Japanese comfort design, combining traditional floor seating culture with modern aesthetics. Each piece is handcrafted using time-honored techniques passed down through generations.",
-    notableWorks: "Ojami Cushion, Artisan Textile Collection",
-    notableWorksLink: { text: "Ojami Cushion", galleryIndex: 5 },
-    philosophy: "Comfort and beauty are inseparable—true craftsmanship honors both the body and the spirit.",
-    links: [
       { type: "Curators' choice" },
     ],
   },

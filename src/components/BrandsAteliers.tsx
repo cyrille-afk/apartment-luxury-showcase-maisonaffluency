@@ -160,6 +160,18 @@ const partnerBrands = [
     galleryIndex: 3, // A Masterful Suite
   },
   {
+    id: "delcourt-collection",
+    name: "Delcourt Collection",
+    category: "Furniture",
+    subcategory: "Seating",
+    seatType: "Armchairs",
+    origin: "France",
+    description: "Prestigious French furniture house known for their refined approach to contemporary seating and upholstery, combining generous proportions with elegant detailing.",
+    featured: "BOB Armchair",
+    instagram: "https://instagram.com/delcourtcollection",
+    galleryIndex: 5, // A Relaxed Setting
+  },
+  {
     id: "celso-de-lemos",
     name: "Celso de Lemos",
     category: "Decor",
@@ -473,6 +485,17 @@ const partnerBrands = [
     featured: "Orsay Centre Table",
     instagram: "https://instagram.com/thierrylemaire",
     galleryIndex: 1, // A Sophisticated Living Room
+  },
+  {
+    id: "takayokaya",
+    name: "Takayokaya",
+    category: "Decor",
+    subcategory: "Decorative Objects",
+    origin: "Japan",
+    description: "Japanese artisan studio specializing in traditional textile craftsmanship with a contemporary sensibility, creating pieces that represent the pinnacle of Japanese comfort design.",
+    featured: "Ojami Cushion",
+    instagram: "https://instagram.com/takayokaya",
+    galleryIndex: 5, // A Relaxed Setting
   },
 ];
 
