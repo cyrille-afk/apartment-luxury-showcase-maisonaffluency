@@ -54,7 +54,15 @@ const handler = async (req: Request): Promise<Response> => {
       to: [email],
       subject: "Welcome to Maison Affluency Trade Program",
       html: `
-        <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #faf9f7;">
+          <div style="text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e8e4de;">
+            <img 
+              src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-logo.png" 
+              alt="Maison Affluency" 
+              style="max-width: 180px; height: auto;"
+            />
+          </div>
+          
           <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 24px;">Dear ${name},</h1>
           
           <p style="color: #333; line-height: 1.8; margin-bottom: 20px;">
@@ -81,11 +89,11 @@ const handler = async (req: Request): Promise<Response> => {
             <strong>The Maison Affluency Team</strong>
           </p>
           
-          <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 40px 0 20px;" />
+          <hr style="border: none; border-top: 1px solid #e8e4de; margin: 40px 0 20px;" />
           
-          <p style="color: #888; font-size: 12px; line-height: 1.6;">
+          <p style="color: #888; font-size: 12px; line-height: 1.6; text-align: center;">
             Maison Affluency Singapore<br>
-            Unique by Design
+            <em>Unique by Design</em>
           </p>
         </div>
       `,
