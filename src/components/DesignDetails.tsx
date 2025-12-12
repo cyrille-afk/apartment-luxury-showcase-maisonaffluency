@@ -38,14 +38,22 @@ const DesignDetails = () => {
         duration: 0.8,
         delay: 0.2
       }}>
-          <p className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-primary">
-            TRADE PROGRAM
-          </p>
-          <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <p className="font-body text-sm uppercase tracking-[0.3em] text-primary">
+              TRADE PROGRAM
+            </p>
+            <button 
+              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              className="bg-foreground text-background px-4 py-2 font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors sm:hidden"
+            >
+              Join Now
+            </button>
+          </div>
+          <div className="mb-12 flex items-center justify-between">
             <h2 className="font-display text-4xl text-foreground md:text-5xl">Our Guiding Principles</h2>
             <button 
               onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-              className="self-start bg-foreground text-background px-6 py-3 font-body text-sm uppercase tracking-wider hover:bg-foreground/90 transition-colors"
+              className="hidden sm:block bg-foreground text-background px-6 py-3 font-body text-sm uppercase tracking-wider hover:bg-foreground/90 transition-colors"
             >
               Join Now
             </button>
