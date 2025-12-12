@@ -3,7 +3,8 @@ import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
 import { Instagram, Search, X, ChevronDown, ExternalLink } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
 
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
@@ -429,6 +430,7 @@ const FeaturedDesigners = () => {
               <AccordionItem
                 key={designer.id}
                 value={designer.id}
+                id={`designer-${designer.id}`}
                 data-designer={designer.id}
                 className="border border-border/40 rounded-lg px-4 md:px-6 bg-card/30 hover:bg-card/50 transition-colors duration-300 scroll-mt-16"
               >
@@ -465,7 +467,10 @@ const FeaturedDesigners = () => {
                           </div>
                         </div>
                       </DialogTrigger>
-                      <DialogContent className="max-w-3xl">
+                      <DialogContent className="max-w-3xl" aria-describedby={undefined}>
+                        <VisuallyHidden>
+                          <DialogTitle>{selectedImage?.name || designer.name}</DialogTitle>
+                        </VisuallyHidden>
                         <div className="relative w-full h-full">
                           <img
                             src={selectedImage?.image || designer.image}
@@ -505,7 +510,7 @@ const FeaturedDesigners = () => {
                                     gallerySection.scrollIntoView({ behavior: 'smooth' });
                                     setTimeout(() => {
                                       window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
-                                        detail: { index: link.galleryIndex } 
+                                        detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` } 
                                       }));
                                     }, 500);
                                   }
@@ -530,7 +535,7 @@ const FeaturedDesigners = () => {
                                 gallerySection.scrollIntoView({ behavior: 'smooth' });
                                 setTimeout(() => {
                                   window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
-                                    detail: { index: designer.notableWorksLink.galleryIndex } 
+                                    detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` } 
                                   }));
                                 }, 500);
                               }

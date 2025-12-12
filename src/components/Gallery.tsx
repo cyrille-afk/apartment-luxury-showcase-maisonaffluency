@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X, Maximize2, Eye } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import bedroomImage from "@/assets/master-suite.jpg";
 import diningImage from "@/assets/dining-room.jpg";
 import boudoirImage from "@/assets/boudoir.jpg";
@@ -102,17 +103,23 @@ const Gallery = () => {
     return galleryExperiences.flatMap(section => section.items);
   }, []);
 
+  const [externalSourceId, setExternalSourceId] = useState<string | null>(null);
+
   // Check for gallery index from sessionStorage (set by BrandsAteliers)
   useEffect(() => {
     const checkForGalleryIndex = () => {
       const storedIndex = sessionStorage.getItem('openGalleryIndex');
+      const sourceId = sessionStorage.getItem('gallerySourceId');
       if (storedIndex !== null) {
         const index = parseInt(storedIndex, 10);
         if (!isNaN(index) && index >= 0 && index < allItems.length) {
           setCurrentImageIndex(index);
+          setExternalSourceId(sourceId);
+          setSourceItemKey(null); // Clear internal source
           setLightboxOpen(true);
         }
         sessionStorage.removeItem('openGalleryIndex');
+        sessionStorage.removeItem('gallerySourceId');
       }
     };
 
@@ -128,10 +135,13 @@ const Gallery = () => {
   useEffect(() => {
     const handleOpenLightbox = (e: CustomEvent<{
       index: number;
+      sourceId?: string;
     }>) => {
       const index = e.detail.index;
       if (index >= 0 && index < allItems.length) {
         setCurrentImageIndex(index);
+        setExternalSourceId(e.detail.sourceId || null);
+        setSourceItemKey(null); // Clear internal source
         setLightboxOpen(true);
       }
     };
@@ -153,7 +163,15 @@ const Gallery = () => {
   const closeLightbox = () => {
     setLightboxOpen(false);
     // Scroll back to the source item after closing
-    if (sourceItemKey) {
+    if (externalSourceId) {
+      setTimeout(() => {
+        const element = document.getElementById(externalSourceId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        setExternalSourceId(null);
+      }, 100);
+    } else if (sourceItemKey) {
       setTimeout(() => {
         const element = document.getElementById(`gallery-item-${sourceItemKey}`);
         if (element) {
@@ -307,7 +325,10 @@ const Gallery = () => {
 
       {/* Lightbox Dialog */}
       <Dialog open={lightboxOpen} onOpenChange={(open) => !open && closeLightbox()}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none" onKeyDown={handleKeyDown}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none" onKeyDown={handleKeyDown} aria-describedby={undefined}>
+          <VisuallyHidden>
+            <DialogTitle>{allItems[currentImageIndex]?.title || 'Gallery Image'}</DialogTitle>
+          </VisuallyHidden>
           <div className="relative w-full h-full flex items-center justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
             {/* Close button */}
             <button onClick={closeLightbox} className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Close lightbox">

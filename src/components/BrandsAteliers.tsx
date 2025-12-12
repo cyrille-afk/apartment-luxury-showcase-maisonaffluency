@@ -573,11 +573,12 @@ const BrandsAteliers = () => {
     setSelectedCategoryFilters([]);
   };
 
-  const scrollToGallery = (galleryIndex: number) => {
+  const scrollToGallery = (galleryIndex: number, brandName: string) => {
     const gallerySection = document.getElementById('gallery');
     if (gallerySection) {
       gallerySection.scrollIntoView({ behavior: 'smooth' });
       sessionStorage.setItem('openGalleryIndex', galleryIndex.toString());
+      sessionStorage.setItem('gallerySourceId', `brand-${brandName.replace(/\s+/g, '-').toLowerCase()}`);
     }
   };
 
@@ -687,6 +688,7 @@ const BrandsAteliers = () => {
           {consolidatedBrands.map((brand, brandIndex) => (
             <motion.div
               key={brand.name}
+              id={`brand-${brand.name.replace(/\s+/g, '-').toLowerCase()}`}
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.4, delay: brandIndex * 0.02 }}
@@ -736,7 +738,7 @@ const BrandsAteliers = () => {
                   <span key={itemIndex} className="flex items-center">
                     {item.galleryIndex !== undefined ? (
                       <button
-                        onClick={() => scrollToGallery(item.galleryIndex!)}
+                        onClick={() => scrollToGallery(item.galleryIndex!, brand.name)}
                         className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
                       >
                         <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
