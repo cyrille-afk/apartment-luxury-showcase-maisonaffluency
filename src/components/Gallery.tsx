@@ -33,6 +33,22 @@ const galleryExperiences = [{
     description: "Alinea Design Objects' Angelo M table, Eric Schmitt Studio's Chairie and Cazes&Conquet's Augusta dining chairs, Emanuelle Levet Stenne's Alabaster Pendant Light, Emmanuel Babled's Limited Edition Sculptured Book Cover from his emblematic Osmosi Series"
   }]
 }, {
+  experience: "An Intimate Setting",
+  subtitle: "Custom dining furniture, hand-blown glass pendants, sculptural seating and artisan accessories",
+  items: [{
+    image: intimateDiningImage,
+    title: "A Dreamy Tuscan Landscape",
+    description: "Atelier Pendhapa's Deepah custom table, Hamrei's Pépé custom chairs, Jeremy Maxwell Wintrebert's Cloud Pendants, Milan Pekar's Crystalline Vase"
+  }, {
+    image: intimateTableImage,
+    title: "A Highly Customised Table",
+    description: "Atelier Pendhapa's Deepah custom table details, Hamrei's Pépé custom chairs details, Milan Pekar's Crystalline Vase"
+  }, {
+    image: intimateLoungeImage,
+    title: "A Relaxed Setting",
+    description: "Delcourt Collection's BOB armchair, Kiko Lopez' shadow drawings mirror, Alinea Design Objects' Angelo M side table, Takayokaya's Ojami Cushion, Milan Pekar's Crystalline Vase"
+  }]
+}, {
   experience: "Restful Retreat",
   subtitle: "Curated collectibles, hand-carved furniture and hand-knotted silk rugs",
   items: [{
@@ -63,22 +79,6 @@ const galleryExperiences = [{
     image: artMasterBronzeImage,
     title: "A Design Treasure Trove",
     description: "Pierre Bonnefille's Bronze Painting 204, Alexander Lamont's Straw Marquetry Mantle Box, Baleri Italia's Marble Carved and Solid Wood Plato bookcase"
-  }]
-}, {
-  experience: "An Intimate Setting",
-  subtitle: "Custom dining furniture, hand-blown glass pendants, sculptural seating and artisan accessories",
-  items: [{
-    image: intimateDiningImage,
-    title: "A Dreamy Tuscan Landscape",
-    description: "Atelier Pendhapa's Deepah custom table, Hamrei's Pépé custom chairs, Jeremy Maxwell Wintrebert's Cloud Pendants, Milan Pekar's Crystalline Vase"
-  }, {
-    image: intimateTableImage,
-    title: "A Highly Customised Table",
-    description: "Atelier Pendhapa's Deepah custom table details, Hamrei's Pépé custom chairs details, Milan Pekar's Crystalline Vase"
-  }, {
-    image: intimateLoungeImage,
-    title: "A Relaxed Setting",
-    description: "Delcourt Collection's BOB armchair, Kiko Lopez' shadow drawings mirror, Alinea Design Objects' Angelo M side table, Takayokaya's Ojami Cushion, Milan Pekar's Crystalline Vase"
   }]
 }];
 
