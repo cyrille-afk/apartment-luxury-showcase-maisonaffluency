@@ -58,7 +58,7 @@ const galleryExperiences = [{
     description: "Iksel's White Blossom Wallcover, Apparatus Studio's Metronome Reading Suede Floor Lamp, Nika Zupanc's Stardust Loveseat for Sé Collections"
   }, {
     image: artMasterBronzeImage,
-    title: "An Art Master Display",
+    title: "A Design Treasure Trove",
     description: "Pierre Bonnefille's Bronze Painting 204, Alexander Lamont's Straw Marquetry Mantle Box, Baleri's Plato bookcase"
   }]
 }];
