@@ -866,7 +866,7 @@ const BrandsAteliers = () => {
                                               {brand.description}
                                             </p>
                                             <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                                              <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
+                                              <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
                                               {brand.featuredItems.map((item, itemIndex) => (
                                                 <span key={itemIndex} className="flex items-center">
                                                   {item.galleryIndex !== undefined ? (
@@ -931,7 +931,7 @@ const BrandsAteliers = () => {
                                         {brand.description}
                                       </p>
                                       <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                                        <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
+                                        <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
                                         {brand.featuredItems.map((item, itemIndex) => (
                                           <span key={itemIndex} className="flex items-center">
                                             {item.galleryIndex !== undefined ? (
@@ -997,7 +997,7 @@ const BrandsAteliers = () => {
                                     {brand.description}
                                   </p>
                                   <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                                    <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
+                                    <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
                                     {brand.featuredItems.map((item, itemIndex) => (
                                       <span key={itemIndex} className="flex items-center">
                                         {item.galleryIndex !== undefined ? (
