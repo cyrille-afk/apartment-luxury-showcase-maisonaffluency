@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -109,6 +109,7 @@ const Navigation = () => {
                         : "text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
                   )}
                 >
+                  {isTradeProgram && <Sparkles className="inline-block w-3.5 h-3.5 mr-1.5" />}
                   {item.label}
                   {!isTradeProgram && (
                     <span className={cn(
@@ -150,6 +151,7 @@ const Navigation = () => {
                             : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
                       )}
                     >
+                      {isTradeProgram && <Sparkles className="inline-block w-5 h-5 mr-2" />}
                       {item.label}
                       {!isTradeProgram && (
                         <span className={cn(
