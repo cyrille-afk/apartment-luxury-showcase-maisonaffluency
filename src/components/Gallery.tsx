@@ -14,22 +14,6 @@ import artMasterBronzeImage from "@/assets/art-master-bronze.jpg";
 import bedroomSecondImage from "@/assets/bedroom-second.jpg";
 
 const galleryExperiences = [{
-  experience: "Restful Retreat",
-  subtitle: "Serene retreat with curated collectible items, bespoke furniture and handcrafted rugs",
-  items: [{
-    image: bedroomImage,
-    title: "A Masterful Suite",
-    description: "CC-Tapis Giudecca custom rug, Celso de Lemos' Silk Bed Cover, Hervé van der Straeten's Bronze MicMac Chandelier, Iksel's Brunelleschi Perspective Wallcover"
-  }, {
-    image: bedroomAltImage,
-    title: "Unique by Design",
-    description: "Okha's Adam Court's Villa Pedestal Nightstand, Atelier DeMichelis' Limited Edition Bud Table Lamp, Pinton 1867 Custom Rug, Peter Reed's Riyad Double Faced Throw and Cushion"
-  }, {
-    image: bedroomThirdImage,
-    title: "Design Icons and Collectibles",
-    description: "Damien Langlois-Meurinne's Ooh La La Console, Haymann Editions' Carved Marble Marie Lamp, Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
-  }]
-}, {
   experience: "Social Gathering",
   subtitle: "Elegant spaces for entertaining and connection",
   items: [{
@@ -44,6 +28,22 @@ const galleryExperiences = [{
     image: diningImage,
     title: "With Panoramic Cityscape Views",
     description: "Alinea Design Objects' Angelo M table, Eric Schmitt Studio's Chairie and Cazes&Conquet's Augusta dining chairs, Emanuelle Levet Stenne's Alabaster Pendant Light, Emmanuel Babled's Limited Edition Sculptured Book Cover from his emblematic Osmosi Series"
+  }]
+}, {
+  experience: "Restful Retreat",
+  subtitle: "Serene retreat with curated collectible items, bespoke furniture and handcrafted rugs",
+  items: [{
+    image: bedroomImage,
+    title: "A Masterful Suite",
+    description: "CC-Tapis Giudecca custom rug, Celso de Lemos' Silk Bed Cover, Hervé van der Straeten's Bronze MicMac Chandelier, Iksel's Brunelleschi Perspective Wallcover"
+  }, {
+    image: bedroomAltImage,
+    title: "Unique by Design",
+    description: "Okha's Adam Court's Villa Pedestal Nightstand, Atelier DeMichelis' Limited Edition Bud Table Lamp, Pinton 1867 Custom Rug, Peter Reed's Riyad Double Faced Throw and Cushion"
+  }, {
+    image: bedroomThirdImage,
+    title: "Design Icons and Collectibles",
+    description: "Damien Langlois-Meurinne's Ooh La La Console, Haymann Editions' Carved Marble Marie Lamp, Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
   }]
 }, {
   experience: "Personal Sanctuary",

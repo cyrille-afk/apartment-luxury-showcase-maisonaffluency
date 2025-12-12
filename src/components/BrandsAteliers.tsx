@@ -37,7 +37,7 @@ const partnerBrands = [
     description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
     featured: "Reef Vessels",
     instagram: "https://instagram.com/alexanderlamont",
-    galleryIndex: 3, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Bespoke Sofa
   },
   {
     id: "alexander-lamont-mantle",
@@ -60,7 +60,7 @@ const partnerBrands = [
     description: "Belgian design house curating and producing exceptional furniture pieces that blend sculptural form with functional elegance.",
     featured: "Angelo M Table",
     instagram: "https://instagram.com/alinea_design_objects",
-    galleryIndex: 5, // With Panoramic Cityscape Views
+    galleryIndex: 2, // With Panoramic Cityscape Views
   },
   {
     id: "atelier-demichelis",
@@ -71,7 +71,7 @@ const partnerBrands = [
     description: "French atelier crafting limited edition lighting pieces that combine organic forms with precious materials, each piece a sculptural work of art.",
     featured: "Limited Edition Bud Table Lamp",
     instagram: "https://instagram.com/atelierdemichelis",
-    galleryIndex: 1, // Unique by Design
+    galleryIndex: 4, // Unique by Design
   },
   {
     id: "atelier-fevrier",
@@ -81,7 +81,7 @@ const partnerBrands = [
     description: "French atelier specializing in bespoke handcrafted rugs, combining traditional weaving techniques with contemporary design sensibility.",
     featured: "Ricky Custom Rug",
     instagram: "https://instagram.com/atelierfevrier",
-    galleryIndex: 3, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Bespoke Sofa
   },
   {
     id: "apparatus-studio-median",
@@ -92,7 +92,7 @@ const partnerBrands = [
     description: "New York-based design studio creating refined lighting and furniture that bridges art and function through meticulous craftsmanship and material exploration.",
     featured: "Median 3 Surface Alabaster Lights",
     instagram: "https://instagram.com/apparatusstudio",
-    galleryIndex: 3, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Bespoke Sofa
   },
   {
     id: "apparatus-studio-metronome",
@@ -147,7 +147,7 @@ const partnerBrands = [
     description: "French design duo creating refined furniture pieces that blend contemporary aesthetics with traditional craftsmanship and timeless elegance.",
     featured: "Augusta Dining Chairs",
     instagram: "https://instagram.com/cazesconquet",
-    galleryIndex: 5, // With Panoramic Cityscape Views
+    galleryIndex: 2, // With Panoramic Cityscape Views
   },
   {
     id: "cc-tapis",
@@ -157,7 +157,7 @@ const partnerBrands = [
     description: "Italian rug manufacturer known for contemporary designs and traditional Nepalese hand-knotting techniques. Their Giudecca custom rugs blend artistry with exceptional craftsmanship.",
     featured: "Giudecca Custom Rug",
     instagram: "https://instagram.com/cc_tapis",
-    galleryIndex: 0, // A Masterful Suite
+    galleryIndex: 3, // A Masterful Suite
   },
   {
     id: "celso-de-lemos",
@@ -168,7 +168,7 @@ const partnerBrands = [
     description: "Portuguese textile house crafting exquisite bed linens and home textiles using the finest natural fibers and artisanal techniques.",
     featured: "Silk Bed Cover",
     instagram: "https://instagram.com/celso.de.lemos",
-    galleryIndex: 0, // A Masterful Suite
+    galleryIndex: 3, // A Masterful Suite
   },
   {
     id: "damien-langlois-meurinne",
@@ -180,7 +180,7 @@ const partnerBrands = [
     description: "French designer creating bold, sculptural furniture and lighting that combines artistic vision with masterful craftsmanship and luxurious materials.",
     featured: "Ooh La La Console",
     instagram: "https://instagram.com/damienlanglois_meurinne",
-    galleryIndex: 2, // Design Icons and Collectibles
+    galleryIndex: 5, // Design Icons and Collectibles
   },
   {
     id: "ecart-paris",
@@ -191,7 +191,7 @@ const partnerBrands = [
     description: "Founded by legendary designer Andrée Putman, Ecart International re-edits iconic furniture designs from the 20th century's greatest masters, including Jean-Michel Frank, Eileen Gray, and Pierre Chareau. Their meticulous reproductions preserve the original craftsmanship and materials.",
     featured: "Jean-Michel Frank Re-editions, Eileen Gray Designs",
     instagram: "https://instagram.com/ecart.paris",
-    galleryIndex: 4, // A Sophisticated Living Room (Jean-Michel Frank Stool)
+    galleryIndex: 1, // A Sophisticated Living Room (Jean-Michel Frank Stool)
   },
   {
     id: "emmanuel-babled",
@@ -202,7 +202,7 @@ const partnerBrands = [
     description: "French-Italian designer creating limited edition sculptural objects in glass and marble, his Osmosi Series represents the pinnacle of material exploration and artistic vision.",
     featured: "Limited Edition Osmosi Series Sculptured Book Cover",
     instagram: "https://instagram.com/emmanuelbabled",
-    galleryIndex: 5, // With Panoramic Cityscape Views
+    galleryIndex: 2, // With Panoramic Cityscape Views
   },
   {
     id: "eric-schmitt-studio",
@@ -214,7 +214,7 @@ const partnerBrands = [
     description: "French designer creating bold sculptural furniture in bronze and iron, each piece a statement of artistic vision and master craftsmanship.",
     featured: "Chairie Dining Chair",
     instagram: "https://instagram.com/studio_eric_schmitt_",
-    galleryIndex: 5, // With Panoramic Cityscape Views
+    galleryIndex: 2, // With Panoramic Cityscape Views
   },
   {
     id: "garnier-linker",
@@ -225,7 +225,7 @@ const partnerBrands = [
     description: "French artist duo creating exceptional lost-wax cast crystal sculptures and decorative objects, their work for Théorème Editions exemplifies masterful artistry.",
     featured: "Lost-wax Cast Crystal Centerpiece",
     instagram: "https://instagram.com/garnieretlinker",
-    galleryIndex: 4, // A Sophisticated Living Room
+    galleryIndex: 1, // A Sophisticated Living Room
   },
   {
     id: "haymann-editions",
@@ -236,7 +236,7 @@ const partnerBrands = [
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
     featured: "Carved Marble Marie Lamp",
     instagram: "https://instagram.com/haymanneditions",
-    galleryIndex: 2, // Design Icons and Collectibles
+    galleryIndex: 5, // Design Icons and Collectibles
   },
   {
     id: "herve-van-der-straeten",
@@ -247,7 +247,7 @@ const partnerBrands = [
     description: "Renowned French designer and artist creating sculptural furniture and lighting in bronze, his pieces are celebrated for their organic forms and exceptional craftsmanship.",
     featured: "Bronze MicMac Chandelier",
     instagram: "https://instagram.com/hervevanderstraeten",
-    galleryIndex: 0, // A Masterful Suite
+    galleryIndex: 3, // A Masterful Suite
   },
   {
     id: "hamrei",
@@ -271,7 +271,7 @@ const partnerBrands = [
     description: "Legendary Czech furniture designer whose iconic mid-century lounge chairs represent the pinnacle of functionalist design, prized by collectors worldwide.",
     featured: "Lounge Chair",
     instagram: "",
-    galleryIndex: 3, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Bespoke Sofa
   },
   {
     id: "iksel-brunelleschi",
@@ -282,7 +282,7 @@ const partnerBrands = [
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
     featured: "Brunelleschi Perspective Wallcover",
     instagram: "https://instagram.com/iksel_decorative_arts",
-    galleryIndex: 0, // A Masterful Suite
+    galleryIndex: 3, // A Masterful Suite
   },
   {
     id: "iksel-white-blossom",
@@ -304,7 +304,7 @@ const partnerBrands = [
     description: "French glass artist renowned for his extraordinary hand-silvered mirrors and sculptural glass works, each piece a unique testament to ancient techniques reimagined.",
     featured: "Silver Glass Hammer Mirror",
     instagram: "https://instagram.com/kikolopez_",
-    galleryIndex: 2, // Design Icons and Collectibles
+    galleryIndex: 5, // Design Icons and Collectibles
   },
   {
     id: "leo-sentou",
@@ -316,7 +316,7 @@ const partnerBrands = [
     description: "French furniture designer creating refined contemporary pieces that balance sculptural presence with functional elegance and exceptional craftsmanship.",
     featured: "AB Armchair",
     instagram: "https://instagram.com/leosentou",
-    galleryIndex: 4, // A Sophisticated Living Room
+    galleryIndex: 1, // A Sophisticated Living Room
   },
   {
     id: "made-in-kira",
@@ -362,7 +362,7 @@ const partnerBrands = [
     description: "South African design studio creating sophisticated furniture that bridges African craft traditions with contemporary global aesthetics.",
     featured: "Adam Court's Villa Pedestal Nightstand",
     instagram: "https://instagram.com/_okha",
-    galleryIndex: 1, // Unique by Design
+    galleryIndex: 4, // Unique by Design
   },
   {
     id: "ooumm",
@@ -373,7 +373,7 @@ const partnerBrands = [
     description: "French luxury brand creating sculptural marble candles and decorative objects that blend artisanal craftsmanship with contemporary design sensibility.",
     featured: "Lyra Marble Candle",
     instagram: "https://instagram.com/ooumm_paris",
-    galleryIndex: 2, // Design Icons and Collectibles
+    galleryIndex: 5, // Design Icons and Collectibles
   },
   {
     id: "olivia-cognet",
@@ -384,7 +384,7 @@ const partnerBrands = [
     description: "French artist and designer creating sculptural ceramic lighting and furniture that celebrates organic forms and handcrafted textures.",
     featured: "Valauris Lamp",
     instagram: "https://instagram.com/oliviacognet",
-    galleryIndex: 4, // A Sophisticated Living Room
+    galleryIndex: 1, // A Sophisticated Living Room
   },
   {
     id: "peter-reed",
@@ -395,7 +395,7 @@ const partnerBrands = [
     description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
     featured: "Riyad Double Faced Throw and Cushion",
     instagram: "https://instagram.com/peterreed1861",
-    galleryIndex: 1, // Unique by Design
+    galleryIndex: 4, // Unique by Design
   },
   {
     id: "pierre-bonnefille",
@@ -415,7 +415,7 @@ const partnerBrands = [
     description: "French textile house continuing the Aubusson tradition of handcrafted rugs and tapestries, blending historical techniques with contemporary design.",
     featured: "Custom Rug Collection",
     instagram: "https://instagram.com/pinton1867",
-    galleryIndex: 1, // Unique by Design
+    galleryIndex: 4, // Unique by Design
   },
   {
     id: "poltrona-frau",
@@ -426,7 +426,7 @@ const partnerBrands = [
     description: "Iconic Italian furniture house renowned for exceptional leather craftsmanship since 1912. Their timeless designs grace prestigious residences and institutions worldwide.",
     featured: "Albero Bookcase",
     instagram: "https://instagram.com/poltronafrauofficial",
-    galleryIndex: 3, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Bespoke Sofa
   },
   {
     id: "robicara",
@@ -437,7 +437,7 @@ const partnerBrands = [
     description: "Italian design studio creating bespoke furniture and cabinetry with exceptional attention to material, proportion, and craftsmanship.",
     featured: "Sira Credenza",
     instagram: "https://instagram.com/robicaradesign",
-    galleryIndex: 4, // A Sophisticated Living Room
+    galleryIndex: 1, // A Sophisticated Living Room
   },
   {
     id: "theoreme-editions",
@@ -448,7 +448,7 @@ const partnerBrands = [
     description: "French publisher of limited edition decorative objects, collaborating with renowned artists and designers including Garnier & Linker.",
     featured: "Lost-wax Cast Crystal Centerpiece",
     instagram: "https://instagram.com/theoreme_editions",
-    galleryIndex: 4, // A Sophisticated Living Room
+    galleryIndex: 1, // A Sophisticated Living Room
   },
   {
     id: "thierry-lemaire-sofa",
@@ -460,7 +460,7 @@ const partnerBrands = [
     description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
     featured: "Niko 420 Custom Sofa",
     instagram: "https://instagram.com/thierrylemaire",
-    galleryIndex: 3, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Bespoke Sofa
   },
   {
     id: "thierry-lemaire-table",
@@ -472,7 +472,7 @@ const partnerBrands = [
     description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
     featured: "Orsay Centre Table",
     instagram: "https://instagram.com/thierrylemaire",
-    galleryIndex: 4, // A Sophisticated Living Room
+    galleryIndex: 1, // A Sophisticated Living Room
   },
 ];
 
