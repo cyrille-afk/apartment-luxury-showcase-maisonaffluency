@@ -273,7 +273,8 @@ const partnerBrands = [
   {
     id: "iksel-brunelleschi",
     name: "Iksel",
-    category: "Wallcoverings",
+    category: "Decor",
+    subcategory: "Wallcoverings",
     origin: "United Kingdom",
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
     featured: "Brunelleschi Perspective Wallcover",
@@ -283,7 +284,8 @@ const partnerBrands = [
   {
     id: "iksel-white-blossom",
     name: "Iksel",
-    category: "Wallcoverings",
+    category: "Decor",
+    subcategory: "Wallcoverings",
     origin: "United Kingdom",
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
     featured: "White Blossom Wallcover",
