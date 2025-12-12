@@ -15,7 +15,6 @@ import bedroomSecondImage from "@/assets/bedroom-second.jpg";
 import intimateDiningImage from "@/assets/intimate-dining.jpg";
 import intimateTableImage from "@/assets/intimate-table-detail.jpg";
 import intimateLoungeImage from "@/assets/intimate-lounge.jpg";
-
 const galleryExperiences = [{
   experience: "A Sociable Environment",
   subtitle: "Bespoke sofa, hand-knotted artisan rug, sculptural lighting and collectible furniture",
@@ -81,7 +80,6 @@ const galleryExperiences = [{
     description: "Damien Langlois-Meurinne's Ooh La La Console, Haymann Editions' Carved Marble Marie Lamp, Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
   }]
 }];
-
 const Gallery = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, {
@@ -118,27 +116,26 @@ const Gallery = () => {
 
     // Check immediately
     checkForGalleryIndex();
-    
+
     // Also set up an interval to check for changes (when user clicks from BrandsAteliers)
     const interval = setInterval(checkForGalleryIndex, 300);
-    
     return () => clearInterval(interval);
   }, [allItems.length]);
 
   // Listen for custom event from FeaturedDesigners
   useEffect(() => {
-    const handleOpenLightbox = (e: CustomEvent<{ index: number }>) => {
+    const handleOpenLightbox = (e: CustomEvent<{
+      index: number;
+    }>) => {
       const index = e.detail.index;
       if (index >= 0 && index < allItems.length) {
         setCurrentImageIndex(index);
         setLightboxOpen(true);
       }
     };
-
     window.addEventListener('openGalleryLightbox', handleOpenLightbox as EventListener);
     return () => window.removeEventListener('openGalleryLightbox', handleOpenLightbox as EventListener);
   }, [allItems.length]);
-
   const openLightbox = (sectionIndex: number, itemIndex: number) => {
     // Calculate the flat index
     let flatIndex = 0;
@@ -149,69 +146,66 @@ const Gallery = () => {
     setCurrentImageIndex(flatIndex);
     setLightboxOpen(true);
   };
-
   const goToPrevious = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? allItems.length - 1 : prev - 1));
+    setCurrentImageIndex(prev => prev === 0 ? allItems.length - 1 : prev - 1);
   };
-
   const goToNext = () => {
-    setCurrentImageIndex((prev) => (prev === allItems.length - 1 ? 0 : prev + 1));
+    setCurrentImageIndex(prev => prev === allItems.length - 1 ? 0 : prev + 1);
   };
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") goToPrevious();
     if (e.key === "ArrowRight") goToNext();
     if (e.key === "Escape") setLightboxOpen(false);
   };
-
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
-
   const onTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
-
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    
     if (isLeftSwipe) {
       goToNext();
     } else if (isRightSwipe) {
       goToPrevious();
     }
   };
-
-  return (
-    <>
+  return <>
       <section ref={ref} className="py-16 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30">
         <div className="mx-auto max-w-7xl">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8 }}
-            className="mb-12 md:mb-16 text-center"
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 30
+        }} animate={isInView ? {
+          opacity: 1,
+          y: 0
+        } : {}} transition={{
+          duration: 0.8
+        }} className="mb-12 md:mb-16 text-center">
             <p className="mb-2 md:mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
               OUR GALLERY
             </p>
             <h2 className="text-xl leading-relaxed md:text-3xl text-foreground text-left px-2 md:text-justify font-serif lg:text-lg">
-              From Thierry Lemaire's Orsay Mds Centre Table, Jean-Michel Frank Table Soleil 1930, Nathalie Ziegler's and Hervé van der Straeten's Chandeliers, to Hamrei's whimsical Chairs, Jeremy Maxwell Wintrebert's Cloud Pendants, Pierre Bonnefille's Bronze Painting and Atelier Pendhapa's bespoke Deepah Table, Maison Affluency Singapore is a uniquely curated venue where design and art congregate
+              From Thierry Lemaire's Orsay Mds Centre Table to Hervé van der Straeten's Chandeliers, from Hamrei's whimsical Pépé Chair to Jeremy Maxwell Wintrebert's Cloud Pendants, from Pierre Bonnefille's Bronze Painting and Stéphane CG Abstract Diasecs, Maison Affluency Singapore is a uniquely curated venue where design and art congregate
             </h2>
           </motion.div>
 
-          {galleryExperiences.map((section, sectionIndex) => (
-            <div key={section.experience} className="mb-16 md:mb-24">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: sectionIndex * 0.2 }}
-                className="mb-8 md:mb-12"
-              >
+          {galleryExperiences.map((section, sectionIndex) => <div key={section.experience} className="mb-16 md:mb-24">
+              <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} animate={isInView ? {
+            opacity: 1,
+            y: 0
+          } : {}} transition={{
+            duration: 0.6,
+            delay: sectionIndex * 0.2
+          }} className="mb-8 md:mb-12">
                 <h3 className="text-2xl md:text-3xl lg:text-4xl font-serif text-primary mb-2">
                   {section.experience}
                 </h3>
@@ -221,32 +215,27 @@ const Gallery = () => {
               </motion.div>
 
               <div className="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {section.items.map((item, index) => (
-                  <motion.div
-                    key={`${item.title}-${index}`}
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.6, delay: sectionIndex * 0.2 + index * 0.1 }}
-                    className="group cursor-pointer"
-                    onClick={() => {
-                      setHasTapped(true);
-                      openLightbox(sectionIndex, index);
-                    }}
-                  >
+                {section.items.map((item, index) => <motion.div key={`${item.title}-${index}`} initial={{
+              opacity: 0,
+              y: 40
+            }} animate={isInView ? {
+              opacity: 1,
+              y: 0
+            } : {}} transition={{
+              duration: 0.6,
+              delay: sectionIndex * 0.2 + index * 0.1
+            }} className="group cursor-pointer" onClick={() => {
+              setHasTapped(true);
+              openLightbox(sectionIndex, index);
+            }}>
                     <div className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
+                      <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                       {/* Mobile tap indicator */}
-                      {!hasTapped && (
-                        <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground px-3 py-1.5 rounded-full text-xs font-body flex items-center gap-1.5">
+                      {!hasTapped && <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground px-3 py-1.5 rounded-full text-xs font-body flex items-center gap-1.5">
                           <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
                           Tap to view
-                        </div>
-                      )}
+                        </div>}
                       {/* Desktop hover indicator */}
                       <div className="absolute bottom-4 right-4 hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <span className="bg-background/90 text-foreground p-2.5 rounded-full shadow-lg backdrop-blur-sm">
@@ -261,56 +250,32 @@ const Gallery = () => {
                     <div className="font-body text-sm md:text-base leading-relaxed text-muted-foreground">
                       <span className="font-semibold italic text-primary">Featuring:</span>
                       <ul className="mt-2 space-y-1">
-                        {item.description.split(', ').map((feature, idx) => (
-                          <li key={idx} className="pl-2 border-l-2 border-primary/30">{feature}</li>
-                        ))}
+                        {item.description.split(', ').map((feature, idx) => <li key={idx} className="pl-2 border-l-2 border-primary/30">{feature}</li>)}
                       </ul>
                     </div>
-                  </motion.div>
-                ))}
+                  </motion.div>)}
               </div>
-            </div>
-          ))}
+            </div>)}
         </div>
       </section>
 
       {/* Lightbox Dialog */}
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent
-          className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none"
-          onKeyDown={handleKeyDown}
-        >
-          <div 
-            className="relative w-full h-full flex items-center justify-center"
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-          >
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none" onKeyDown={handleKeyDown}>
+          <div className="relative w-full h-full flex items-center justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
             {/* Close button */}
-            <button
-              onClick={() => setLightboxOpen(false)}
-              className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors"
-              aria-label="Close lightbox"
-            >
+            <button onClick={() => setLightboxOpen(false)} className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Close lightbox">
               <X className="h-6 w-6 text-white" />
             </button>
 
             {/* Previous button */}
-            <button
-              onClick={goToPrevious}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors"
-              aria-label="Previous image"
-            >
+            <button onClick={goToPrevious} className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Previous image">
               <ChevronLeft className="h-8 w-8 text-white" />
             </button>
 
             {/* Image container */}
             <div className="flex flex-col items-center justify-center max-w-[90vw] max-h-[85vh] px-16">
-              <img
-                src={allItems[currentImageIndex]?.image}
-                alt={allItems[currentImageIndex]?.title}
-                className="max-w-full max-h-[70vh] object-contain"
-              />
+              <img src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="max-w-full max-h-[70vh] object-contain" />
               <div className="mt-4 text-center">
                 <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
                   {allItems[currentImageIndex]?.title}
@@ -325,18 +290,12 @@ const Gallery = () => {
             </div>
 
             {/* Next button */}
-            <button
-              onClick={goToNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors"
-              aria-label="Next image"
-            >
+            <button onClick={goToNext} className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Next image">
               <ChevronRight className="h-8 w-8 text-white" />
             </button>
           </div>
         </DialogContent>
       </Dialog>
-    </>
-  );
+    </>;
 };
-
 export default Gallery;
