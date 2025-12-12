@@ -22,7 +22,7 @@ const Footer = () => {
                 <button onClick={scrollToTop} className="group cursor-pointer" aria-label="Scroll to top">
                   <img 
                     alt="Affluency - Unique by Design" 
-                    className="h-10 md:h-12 w-auto transition-all duration-300 group-hover:scale-105 group-hover:[filter:drop-shadow(0_0_8px_hsl(var(--primary)/0.4))_drop-shadow(0_0_20px_hsl(var(--primary)/0.2))]" 
+                    className="h-14 md:h-16 w-auto transition-all duration-300 group-hover:scale-105 group-hover:[filter:drop-shadow(0_0_8px_hsl(var(--primary)/0.4))_drop-shadow(0_0_20px_hsl(var(--primary)/0.2))]" 
                     src={affluencyLogo} 
                   />
                 </button>
