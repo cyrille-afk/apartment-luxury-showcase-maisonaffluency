@@ -174,14 +174,14 @@ const partnerBrands = [
   },
   {
     id: "damien-langlois-meurinne",
-    name: "Damien Langlois-Meurinne",
+    name: "Damien Langlois Meurinne Studio",
     category: "Furniture",
     subcategory: "Tables",
     tableType: "Console Tables",
     origin: "France",
     description: "French designer creating bold, sculptural furniture and lighting that combines artistic vision with masterful craftsmanship and luxurious materials.",
     featured: "Ooh La La Console",
-    instagram: "https://instagram.com/damienlanglois_meurinne",
+    instagram: "https://instagram.com/damienlangloismeurinne_studio",
     galleryIndex: 11, // Design Icons and Collectibles
   },
   {
