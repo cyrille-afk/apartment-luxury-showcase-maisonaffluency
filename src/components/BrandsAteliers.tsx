@@ -560,7 +560,7 @@ const BrandsAteliers = () => {
     Object.entries(groups).forEach(([category, brands]) => {
       const brandMap: Record<string, ConsolidatedBrand> = {};
       brands.forEach((brand) => {
-        const brandKey = `${brand.name}-${(brand as any).tableType || ''}-${(brand as any).seatType || ''}`;
+        const brandKey = `${brand.name}-${(brand as any).subcategory || ''}-${(brand as any).tableType || ''}-${(brand as any).seatType || ''}`;
         if (!brandMap[brandKey]) {
           brandMap[brandKey] = {
             name: brand.name,
