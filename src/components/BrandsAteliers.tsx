@@ -191,7 +191,7 @@ const partnerBrands = [
     subcategory: "Iconic Editions",
     origin: "France",
     description: "Founded by legendary designer Andrée Putman, Ecart International re-edits iconic furniture designs from the 20th century's greatest masters, including Jean-Michel Frank and Pierre Chareau. Their meticulous reproductions preserve the original craftsmanship and materials.",
-    featured: "Jean-Michel Frank Re-editions",
+    featured: "Jean-Michel Frank Table Soleil 1930",
     instagram: "https://instagram.com/ecart.paris",
     galleryIndex: 1, // A Sophisticated Living Room (Jean-Michel Frank Stool)
   },
