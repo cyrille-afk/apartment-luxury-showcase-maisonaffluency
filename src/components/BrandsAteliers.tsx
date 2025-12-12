@@ -87,7 +87,7 @@ const partnerBrands = [
     id: "apparatus-studio-median",
     name: "Apparatus Studio",
     category: "Lighting",
-    subcategory: "Wall Lights",
+    subcategory: "Ceiling Lights",
     origin: "United States",
     description: "New York-based design studio creating refined lighting and furniture that bridges art and function through meticulous craftsmanship and material exploration.",
     featured: "Median 3 Surface Alabaster Lights",
