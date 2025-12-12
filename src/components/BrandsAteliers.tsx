@@ -656,57 +656,57 @@ const BrandsAteliers = () => {
                 <span className="font-serif text-base md:text-lg lg:text-xl text-primary">{category}</span>
               </AccordionTrigger>
               <AccordionContent className="px-3 md:px-6 pb-4 md:pb-6">
-                <div className="grid gap-3 md:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-2">
+                <div className="space-y-3 md:space-y-4 pt-2">
                   {brands.map((brand, index) => (
                     <motion.div
                       key={brand.id}
-                      initial={{ opacity: 0, y: 30 }}
+                      initial={{ opacity: 0, y: 20 }}
                       animate={isInView ? { opacity: 1, y: 0 } : {}}
-                      transition={{ duration: 0.5, delay: categoryIndex * 0.1 + index * 0.05 }}
-                      className="group p-4 md:p-6 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
+                      transition={{ duration: 0.4, delay: categoryIndex * 0.1 + index * 0.03 }}
+                      className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
                     >
-                      <div className="flex items-start justify-between mb-2 md:mb-3">
-                        <div className="flex-1 min-w-0 pr-2">
-                          <h3 className="font-serif text-base md:text-lg lg:text-xl text-foreground group-hover:text-primary transition-colors duration-300 leading-tight">
-                            {brand.name}
-                          </h3>
-                          <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider mt-0.5 md:mt-1">
-                            {brand.origin}
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
+                              {brand.name}
+                            </h3>
+                            <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
+                              — {brand.origin}
+                            </span>
+                          </div>
+                          <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
+                            {brand.description}
                           </p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
+                            {brand.galleryIndex !== undefined ? (
+                              <button
+                                onClick={() => scrollToGallery(brand.galleryIndex)}
+                                className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                              >
+                                <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                  {brand.featured}
+                                </span>
+                                <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                              </button>
+                            ) : (
+                              <span className="text-xs md:text-sm text-foreground/80 font-body">
+                                {brand.featured}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         {brand.instagram && (
                           <a
                             href={brand.instagram}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation"
+                            className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Instagram className="h-5 w-5 md:h-4 md:w-4" />
                           </a>
-                        )}
-                      </div>
-                      
-                      <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-3 md:mb-4 line-clamp-3 md:line-clamp-none">
-                        {brand.description}
-                      </p>
-                      
-                      <div className="pt-2 md:pt-3 border-t border-border/30">
-                        <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider mb-1">Featured</p>
-                        {brand.galleryIndex !== undefined ? (
-                          <button
-                            onClick={() => scrollToGallery(brand.galleryIndex)}
-                            className="text-xs md:text-sm text-foreground/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation py-1"
-                          >
-                            <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                              {brand.featured}
-                            </span>
-                            <ExternalLink className="h-3 w-3 opacity-50 md:opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                          </button>
-                        ) : (
-                          <p className="text-xs md:text-sm text-foreground/80 font-body">
-                            {brand.featured}
-                          </p>
                         )}
                       </div>
                     </motion.div>
