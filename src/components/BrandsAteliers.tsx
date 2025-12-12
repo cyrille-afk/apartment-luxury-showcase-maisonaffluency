@@ -822,8 +822,8 @@ const BrandsAteliers = () => {
                   {brands.map((subcategoryGroup, subIndex) => (
                     <div key={subcategoryGroup.subcategory || 'general'}>
                       {subcategoryGroup.subcategory ? (
-                        <Collapsible defaultOpen className="space-y-3 md:space-y-4">
-                          <CollapsibleTrigger className="flex items-center gap-3 w-full group/sub hover:opacity-80 transition-opacity">
+                        <Collapsible defaultOpen className="group/sub space-y-3 md:space-y-4">
+                          <CollapsibleTrigger className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity cursor-pointer">
                             <ChevronRight className="h-4 w-4 text-primary/60 transition-transform duration-200 group-data-[state=open]/sub:rotate-90" />
                             <h4 className="font-serif text-sm md:text-base text-primary/80 uppercase tracking-wider">
                               {subcategoryGroup.subcategory}
