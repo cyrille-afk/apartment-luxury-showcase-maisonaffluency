@@ -130,13 +130,19 @@ const Navigation = () => {
                     key={item.href} 
                     onClick={() => handleNavClick(item.href)} 
                     className={cn(
-                      "font-serif text-2xl text-left transition-colors py-3 border-b border-border/30",
+                      "font-serif text-2xl text-left transition-all duration-300 py-3 border-b border-border/30 relative group",
                       activeSection === item.href 
                         ? "text-primary" 
-                        : "text-foreground hover:text-primary"
+                        : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
                     )}
                   >
                     {item.label}
+                    <span className={cn(
+                      "absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300",
+                      activeSection === item.href 
+                        ? "w-full" 
+                        : "w-0 group-hover:w-full"
+                    )} />
                   </button>
                 ))}
               </div>
