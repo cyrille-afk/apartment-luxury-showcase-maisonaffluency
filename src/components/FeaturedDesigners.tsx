@@ -119,6 +119,7 @@ const featuredDesigners = [
     biography:
       "Hamrei brings a playful yet sophisticated approach to contemporary design. Their Pépé Chair showcases their signature style of combining comfort with unexpected visual delight. Each piece demonstrates a mastery of form and craftsmanship while maintaining a sense of joy and personality.",
     notableWorks: "Pépé Chair, Whimsical Furniture Collection",
+    notableWorksLink: { text: "Pépé Chair", galleryIndex: 6 },
     philosophy:
       "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
     links: [
@@ -434,7 +435,34 @@ const FeaturedDesigners = () => {
                       <h4 className="text-sm font-semibold text-foreground mb-2 uppercase tracking-wider">
                         Notable Works
                       </h4>
-                      <p className="text-sm md:text-base">{designer.notableWorks}</p>
+                      <p className="text-sm md:text-base">
+                        {designer.notableWorksLink ? (
+                          <>
+                            <a
+                              href="#gallery"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const gallerySection = document.getElementById('gallery');
+                                if (gallerySection) {
+                                  gallerySection.scrollIntoView({ behavior: 'smooth' });
+                                  // Dispatch custom event to open lightbox at specific index
+                                  setTimeout(() => {
+                                    window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                      detail: { index: designer.notableWorksLink.galleryIndex } 
+                                    }));
+                                  }, 500);
+                                }
+                              }}
+                              className="text-primary hover:underline cursor-pointer font-medium"
+                            >
+                              {designer.notableWorksLink.text}
+                            </a>
+                            {designer.notableWorks.replace(designer.notableWorksLink.text, '').replace(/^,\s*/, ', ')}
+                          </>
+                        ) : (
+                          designer.notableWorks
+                        )}
+                      </p>
                     </div>
 
                     <div className="pt-2 border-t border-border/30 mt-4">
