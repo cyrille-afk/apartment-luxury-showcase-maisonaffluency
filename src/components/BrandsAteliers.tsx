@@ -60,7 +60,7 @@ const partnerBrands = [
     origin: "France",
     description: "French atelier crafting limited edition lighting pieces that combine organic forms with precious materials, each piece a sculptural work of art.",
     featured: "Limited Edition Bud Table Lamp",
-    instagram: "https://instagram.com/atelierdemichelis",
+    instagram: "https://instagram.com/atelier_demichelis",
     galleryIndex: 10, // Unique by Design
   },
   {
@@ -124,7 +124,7 @@ const partnerBrands = [
     origin: "France",
     description: "French furniture designer creating refined bespoke pieces that combine classical proportions with contemporary elegance and exceptional craftsmanship.",
     featured: "Lyric Desk",
-    instagram: "https://instagram.com/brunodemaistre",
+    instagram: "https://instagram.com/bruno_de_maistre_bdm",
     galleryIndex: 6, // A Sophisticated Boudoir
   },
   {
@@ -317,7 +317,7 @@ const partnerBrands = [
     origin: "France",
     description: "French furniture designer creating refined contemporary pieces that balance sculptural presence with functional elegance and exceptional craftsmanship.",
     featured: "AB Armchair",
-    instagram: "https://instagram.com/leosentou",
+    instagram: "https://www.instagram.com/leosentou",
     galleryIndex: 1, // A Sophisticated Living Room
   },
   {
@@ -339,7 +339,7 @@ const partnerBrands = [
     origin: "France",
     description: "French glass artist creating bespoke chandeliers and sculptural glass pieces, each work a unique expression of light and organic form.",
     featured: "Custom Glass Chandelier",
-    instagram: "https://instagram.com/nathalieziegler",
+    instagram: "https://instagram.com/nathaliezieglerpasqua",
     galleryIndex: 6, // A Sophisticated Boudoir
   },
   {
