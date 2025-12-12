@@ -137,6 +137,7 @@ const partnerBrands = [
     id: "celso-de-lemos",
     name: "Celso de Lemos",
     category: "Decor",
+    subcategory: "Linens",
     origin: "Portugal",
     description: "Portuguese textile house crafting exquisite bed linens and home textiles using the finest natural fibers and artisanal techniques.",
     featured: "Silk Bed Cover",
@@ -347,6 +348,7 @@ const partnerBrands = [
     id: "peter-reed",
     name: "Peter Reed 1861",
     category: "Decor",
+    subcategory: "Linens",
     origin: "United Kingdom",
     description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
     featured: "Riyad Double Faced Throw and Cushion",
@@ -476,6 +478,7 @@ const BrandsAteliers = () => {
       origin: string;
       description: string;
       instagram: string;
+      subcategory?: string;
       featuredItems: Array<{ featured: string; galleryIndex?: number }>;
     }>> = {};
     
@@ -488,6 +491,7 @@ const BrandsAteliers = () => {
             origin: brand.origin,
             description: brand.description,
             instagram: brand.instagram,
+            subcategory: (brand as any).subcategory,
             featuredItems: [],
           };
         }
@@ -496,7 +500,17 @@ const BrandsAteliers = () => {
           galleryIndex: brand.galleryIndex,
         });
       });
-      consolidatedGroups[category] = Object.values(brandMap);
+      // Sort brands: those without subcategory first, then by subcategory, then by name
+      const sortedBrands = Object.values(brandMap).sort((a, b) => {
+        if (!a.subcategory && b.subcategory) return -1;
+        if (a.subcategory && !b.subcategory) return 1;
+        if (a.subcategory && b.subcategory) {
+          const subCompare = a.subcategory.localeCompare(b.subcategory);
+          if (subCompare !== 0) return subCompare;
+        }
+        return a.name.localeCompare(b.name);
+      });
+      consolidatedGroups[category] = sortedBrands;
     });
     
     // Sort categories alphabetically
@@ -697,13 +711,18 @@ const BrandsAteliers = () => {
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
                             <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
                               {brand.name}
                             </h3>
                             <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
                               — {brand.origin}
                             </span>
+                            {brand.subcategory && (
+                              <span className="text-[10px] md:text-xs text-primary/70 uppercase tracking-wider px-2 py-0.5 bg-primary/10 rounded-full">
+                                {brand.subcategory}
+                              </span>
+                            )}
                           </div>
                           <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
                             {brand.description}
