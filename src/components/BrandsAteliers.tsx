@@ -136,7 +136,7 @@ const partnerBrands = [
   {
     id: "celso-de-lemos",
     name: "Celso de Lemos",
-    category: "Bed Linen",
+    category: "Linens",
     origin: "Portugal",
     description: "Portuguese textile house crafting exquisite bed linens and home textiles using the finest natural fibers and artisanal techniques.",
     featured: "Silk Bed Cover",
@@ -346,7 +346,7 @@ const partnerBrands = [
   {
     id: "peter-reed",
     name: "Peter Reed 1861",
-    category: "Bed Linen",
+    category: "Linens",
     origin: "United Kingdom",
     description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
     featured: "Riyad Double Faced Throw and Cushion",
