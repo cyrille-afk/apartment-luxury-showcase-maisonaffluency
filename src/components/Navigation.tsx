@@ -75,7 +75,7 @@ const Navigation = () => {
   };
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50">
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
-        <div className="flex h-16 md:h-20 items-center justify-center md:justify-between relative">
+        <div className="flex h-20 md:h-20 items-center justify-center md:justify-between relative">
           {/* Logo/Brand */}
           <TooltipProvider>
             <Tooltip>
