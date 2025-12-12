@@ -200,7 +200,7 @@ const Gallery = () => {
               OUR GALLERY
             </p>
             <h2 className="text-xl leading-relaxed md:text-3xl text-foreground text-left px-2 md:text-justify font-serif lg:text-lg">
-              From Thierry Lemaire's Orsay Mds Centre Table, Jean-Michel Frank Table Soleil 1930, Nathalie Ziegler's and Hervé van der Straeten's Chandeliers, to Hamrei's whimsical Chairs, Jeremy Maxwell Wintrebert's Cloud Pendants, Pierre Bonnefille's Bronze Painting and Atelier Pendhapa's bespoke Deepah Table, Maison Affluency Singapore is a uniquely curated venue where design and art congregate
+              From Thierry Lemaire's Niko 420 Custom Sofa and Orsay Mds Centre Table, Jean-Michel Frank Table Soleil 1930, Nathalie Ziegler's and Hervé van der Straeten's Chandeliers, to Hamrei's whimsical Chairs, Jeremy Maxwell Wintrebert's Cloud Pendants, Pierre Bonnefille's Bronze Painting and Atelier Pendhapa's bespoke Deepah Table, Maison Affluency Singapore is a uniquely curated venue where design and art congregate
             </h2>
           </motion.div>
 
