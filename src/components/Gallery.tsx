@@ -47,7 +47,7 @@ const galleryExperiences = [{
   }]
 }, {
   experience: "Personal Sanctuary",
-  subtitle: "Bespoke desks, handcrafted chandeliers, artisan lamps and bronze painting",
+  subtitle: "Bespoke desk, handcrafted chandelier, artisan lamp and bronze painting",
   items: [{
     image: boudoirImage,
     title: "A Sophisticated Boudoir",
