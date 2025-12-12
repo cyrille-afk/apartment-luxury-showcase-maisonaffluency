@@ -32,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send notification email to Maison Affluency
     const notificationEmail = await resend.emails.send({
-      from: "Maison Affluency <onboarding@resend.dev>",
+      from: "Maison Affluency <concierge@myaffluency.com>",
       to: ["concierge@myaffluency.com"],
       subject: subject || `New Inquiry from ${name}${companyName ? ` - ${companyName}` : ""}`,
       html: `
@@ -50,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to the applicant
     const confirmationEmail = await resend.emails.send({
-      from: "Maison Affluency <onboarding@resend.dev>",
+      from: "Maison Affluency <concierge@myaffluency.com>",
       to: [email],
       subject: "Welcome to Maison Affluency Trade Program",
       html: `
