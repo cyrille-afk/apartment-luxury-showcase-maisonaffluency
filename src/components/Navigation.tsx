@@ -92,7 +92,7 @@ const Navigation = () => {
           </TooltipProvider>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-8 ml-12">
             {navItems.map(item => {
               const isTradeProgram = item.href === "#details";
               return (
