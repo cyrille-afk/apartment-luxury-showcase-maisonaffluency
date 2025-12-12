@@ -93,26 +93,34 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {navItems.map(item => (
-              <button 
-                key={item.href} 
-                onClick={() => handleNavClick(item.href)} 
-                className={cn(
-                  "font-body text-sm uppercase tracking-wider transition-all duration-300 relative group",
-                  activeSection === item.href 
-                    ? "text-primary font-medium" 
-                    : "text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
-                )}
-              >
-                {item.label}
-                <span className={cn(
-                  "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
-                  activeSection === item.href 
-                    ? "w-full" 
-                    : "w-0 group-hover:w-full"
-                )} />
-              </button>
-            ))}
+            {navItems.map(item => {
+              const isTradeProgram = item.href === "#details";
+              return (
+                <button 
+                  key={item.href} 
+                  onClick={() => handleNavClick(item.href)} 
+                  className={cn(
+                    "font-body text-sm uppercase tracking-wider transition-all duration-300 relative group",
+                    isTradeProgram && "px-3 py-1.5 border border-primary/50 rounded-sm bg-primary/5 hover:bg-primary/10",
+                    activeSection === item.href 
+                      ? "text-primary font-medium" 
+                      : isTradeProgram
+                        ? "text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                        : "text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                  )}
+                >
+                  {item.label}
+                  {!isTradeProgram && (
+                    <span className={cn(
+                      "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
+                      activeSection === item.href 
+                        ? "w-full" 
+                        : "w-0 group-hover:w-full"
+                    )} />
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Mobile Hamburger Menu */}
