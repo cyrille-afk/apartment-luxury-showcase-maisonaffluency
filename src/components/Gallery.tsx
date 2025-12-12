@@ -105,6 +105,20 @@ const Gallery = () => {
     return () => clearInterval(interval);
   }, [allItems.length]);
 
+  // Listen for custom event from FeaturedDesigners
+  useEffect(() => {
+    const handleOpenLightbox = (e: CustomEvent<{ index: number }>) => {
+      const index = e.detail.index;
+      if (index >= 0 && index < allItems.length) {
+        setCurrentImageIndex(index);
+        setLightboxOpen(true);
+      }
+    };
+
+    window.addEventListener('openGalleryLightbox', handleOpenLightbox as EventListener);
+    return () => window.removeEventListener('openGalleryLightbox', handleOpenLightbox as EventListener);
+  }, [allItems.length]);
+
   const openLightbox = (sectionIndex: number, itemIndex: number) => {
     // Calculate the flat index
     let flatIndex = 0;
