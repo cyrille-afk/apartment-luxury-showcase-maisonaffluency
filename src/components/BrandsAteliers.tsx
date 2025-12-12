@@ -1,19 +1,8 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState, useMemo, useEffect } from "react";
-import { Search, X, Instagram, ExternalLink, ChevronDown, ChevronRight, Filter } from "lucide-react";
+import { useRef, useState, useMemo } from "react";
+import { Search, X, Instagram, ExternalLink, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Popover,
   PopoverContent,
@@ -503,7 +492,6 @@ const BrandsAteliers = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [searchQuery, setSearchQuery] = useState("");
-  const [openCategories, setOpenCategories] = useState<string[]>([]);
   const [selectedCategoryFilters, setSelectedCategoryFilters] = useState<string[]>([]);
 
   // Get all unique categories from partner brands
@@ -534,9 +522,8 @@ const BrandsAteliers = () => {
     return brands;
   }, [searchQuery, selectedCategoryFilters]);
 
-  // Group brands by first letter of name, then consolidate by brand name
-  const groupedBrands = useMemo(() => {
-    // Consolidate brands with same name
+  // Consolidate brands by name and sort alphabetically
+  const consolidatedBrands = useMemo(() => {
     type ConsolidatedBrand = {
       name: string;
       origin: string;
@@ -569,24 +556,8 @@ const BrandsAteliers = () => {
       });
     });
     
-    // Group by first letter
-    const letterGroups: Record<string, ConsolidatedBrand[]> = {};
-    
-    Object.values(brandMap).forEach((brand) => {
-      const firstLetter = brand.name.charAt(0).toUpperCase();
-      if (!letterGroups[firstLetter]) {
-        letterGroups[firstLetter] = [];
-      }
-      letterGroups[firstLetter].push(brand);
-    });
-    
-    // Sort brands within each letter group
-    Object.values(letterGroups).forEach((brands) => {
-      brands.sort((a, b) => a.name.localeCompare(b.name));
-    });
-    
-    // Sort letters alphabetically
-    return Object.entries(letterGroups).sort((a, b) => a[0].localeCompare(b[0]));
+    // Return sorted array of brands
+    return Object.values(brandMap).sort((a, b) => a.name.localeCompare(b.name));
   }, [filteredBrands]);
 
   const toggleCategoryFilter = (category: string) => {
@@ -601,32 +572,14 @@ const BrandsAteliers = () => {
     setSelectedCategoryFilters([]);
   };
 
-  // Initialize open letters when grouped brands change
-  const allLetters = useMemo(() => groupedBrands.map(([letter]) => letter), [groupedBrands]);
-  
-  // Set all letters open by default on first render or when letters change
-  useEffect(() => {
-    setOpenCategories(allLetters);
-  }, [allLetters]);
-
-  const isAllExpanded = openCategories.length === allLetters.length;
-
-  const toggleAllLetters = () => {
-    if (isAllExpanded) {
-      setOpenCategories([]);
-    } else {
-      setOpenCategories(allLetters);
-    }
-  };
-
   const scrollToGallery = (galleryIndex: number) => {
     const gallerySection = document.getElementById('gallery');
     if (gallerySection) {
       gallerySection.scrollIntoView({ behavior: 'smooth' });
-      // Store the gallery index in sessionStorage to trigger lightbox after scroll
       sessionStorage.setItem('openGalleryIndex', galleryIndex.toString());
     }
   };
+
 
   return (
     <section ref={ref} className="py-16 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30">
@@ -717,138 +670,92 @@ const BrandsAteliers = () => {
                     </div>
                   </PopoverContent>
                 </Popover>
-                
-                <button
-                  onClick={toggleAllLetters}
-                  className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1 h-9 px-2"
-                >
-                  <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
-                  <span className="hidden sm:inline">{isAllExpanded ? 'Collapse' : 'Expand'}</span>
-                </button>
               </div>
             </div>
             
             {(searchQuery || selectedCategoryFilters.length > 0) && (
               <p className="text-center text-xs text-muted-foreground mt-2">
-                {filteredBrands.length} brand{filteredBrands.length !== 1 ? 's' : ''} found
+                {consolidatedBrands.length} brand{consolidatedBrands.length !== 1 ? 's' : ''} found
                 {selectedCategoryFilters.length > 0 && ` in ${selectedCategoryFilters.length} categor${selectedCategoryFilters.length !== 1 ? 'ies' : 'y'}`}
               </p>
             )}
           </div>
         </motion.div>
 
-        <Accordion
-          type="multiple" 
-          value={openCategories} 
-          onValueChange={(values) => {
-            // Trigger haptic feedback on mobile
-            if ('vibrate' in navigator) {
-              navigator.vibrate(10);
-            }
-            setOpenCategories(values);
-            // On mobile, scroll to the newly opened letter
-            if (window.innerWidth < 768 && values.length > openCategories.length) {
-              const newLetter = values.find(v => !openCategories.includes(v));
-              if (newLetter) {
-                setTimeout(() => {
-                  const element = document.querySelector(`[data-category="${newLetter}"]`);
-                  if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }, 100);
-              }
-            }
-          }} 
-          className="space-y-3 md:space-y-4"
-        >
-          {groupedBrands.map(([letter, brands], letterIndex) => (
-            <AccordionItem 
-              key={letter} 
-              value={letter} 
-              data-category={letter}
-              className="border border-border/40 rounded-lg bg-card/30 overflow-hidden scroll-mt-4"
+        <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {consolidatedBrands.map((brand, brandIndex) => (
+            <motion.div
+              key={brand.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.4, delay: brandIndex * 0.02 }}
+              className="group p-5 md:p-6 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default"
             >
-              <AccordionTrigger className="px-4 md:px-6 py-3 md:py-4 hover:no-underline hover:bg-card/50 transition-colors active:scale-[0.99] touch-manipulation">
-                <span className="font-serif text-base md:text-lg lg:text-xl text-primary">{letter}</span>
-              </AccordionTrigger>
-              <AccordionContent className="px-3 md:px-6 pb-4 md:pb-6">
-                <div className="space-y-3 md:space-y-4 pt-2">
-                  {brands.map((brand, brandIndex) => (
-                    <motion.div
-                      key={brand.name}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={isInView ? { opacity: 1, y: 0 } : {}}
-                      transition={{ duration: 0.4, delay: letterIndex * 0.1 + brandIndex * 0.03 }}
-                      className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
-                            <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
-                              {brand.name}
-                            </h3>
-                            <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
-                              — {brand.origin}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5 mb-2">
-                            {brand.categories.map((category, catIndex) => (
-                              <span 
-                                key={catIndex}
-                                className="text-[10px] md:text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider"
-                              >
-                                {category}
-                              </span>
-                            ))}
-                          </div>
-                          <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
-                            {brand.description}
-                          </p>
-                          <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                            <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
-                            {brand.featuredItems.map((item, itemIndex) => (
-                              <span key={itemIndex} className="flex items-center">
-                                {item.galleryIndex !== undefined ? (
-                                  <button
-                                    onClick={() => scrollToGallery(item.galleryIndex!)}
-                                    className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                                  >
-                                    <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                                      {item.featured}
-                                    </span>
-                                    <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                                  </button>
-                                ) : (
-                                  <span className="text-xs md:text-sm text-foreground/80 font-body">
-                                    {item.featured}
-                                  </span>
-                                )}
-                                {itemIndex < brand.featuredItems.length - 1 && (
-                                  <span className="text-muted-foreground mx-1">•</span>
-                                )}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        {brand.instagram && (
-                          <a
-                            href={brand.instagram}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Instagram className="h-5 w-5 md:h-4 md:w-4" />
-                          </a>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-primary transition-colors duration-300 mb-1">
+                    {brand.name}
+                  </h3>
+                  <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
+                    {brand.origin}
+                  </span>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
+                {brand.instagram && (
+                  <a
+                    href={brand.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
+              
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {brand.categories.map((category, catIndex) => (
+                  <span 
+                    key={catIndex}
+                    className="text-[10px] md:text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider"
+                  >
+                    {category}
+                  </span>
+                ))}
+              </div>
+              
+              <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-3 line-clamp-3">
+                {brand.description}
+              </p>
+              
+              <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
+                {brand.featuredItems.map((item, itemIndex) => (
+                  <span key={itemIndex} className="flex items-center">
+                    {item.galleryIndex !== undefined ? (
+                      <button
+                        onClick={() => scrollToGallery(item.galleryIndex!)}
+                        className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                      >
+                        <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                          {item.featured}
+                        </span>
+                        <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                      </button>
+                    ) : (
+                      <span className="text-xs md:text-sm text-foreground/80 font-body">
+                        {item.featured}
+                      </span>
+                    )}
+                    {itemIndex < brand.featuredItems.length - 1 && (
+                      <span className="text-muted-foreground mx-1">•</span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
           ))}
-        </Accordion>
+        </div>
       </div>
     </section>
   );
