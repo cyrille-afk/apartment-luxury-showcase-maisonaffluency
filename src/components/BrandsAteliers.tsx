@@ -822,7 +822,7 @@ const BrandsAteliers = () => {
                   {brands.map((subcategoryGroup, subIndex) => (
                     <div key={subcategoryGroup.subcategory || 'general'}>
                       {subcategoryGroup.subcategory ? (
-                        <Collapsible defaultOpen className="group/sub space-y-3 md:space-y-4">
+                        <Collapsible className="group/sub space-y-3 md:space-y-4">
                           <CollapsibleTrigger className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity cursor-pointer">
                             <ChevronRight className="h-4 w-4 text-primary/60 transition-transform duration-200 group-data-[state=open]/sub:rotate-90" />
                             <h4 className="font-serif text-sm md:text-base text-primary/80 uppercase tracking-wider">
@@ -834,7 +834,7 @@ const BrandsAteliers = () => {
                             {/* Handle tableTypeGroups for Tables subcategory */}
                             {subcategoryGroup.tableTypeGroups ? (
                               subcategoryGroup.tableTypeGroups.map((tableTypeGroup, typeIndex) => (
-                                <Collapsible key={tableTypeGroup.tableType || 'general-tables'} defaultOpen className="group/type space-y-2 md:space-y-3 ml-4 md:ml-6">
+                                <Collapsible key={tableTypeGroup.tableType || 'general-tables'} className="group/type space-y-2 md:space-y-3 ml-4 md:ml-6">
                                   {tableTypeGroup.tableType && (
                                     <CollapsibleTrigger className="flex items-center gap-2 w-full hover:opacity-80 transition-opacity cursor-pointer">
                                       <ChevronRight className="h-3 w-3 text-primary/50 transition-transform duration-200 group-data-[state=open]/type:rotate-90" />
