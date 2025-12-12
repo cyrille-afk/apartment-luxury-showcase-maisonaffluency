@@ -24,6 +24,19 @@ import emanuelleLevetStenneImg from "@/assets/designers/emanuelle-levet-stenne.p
 
 const featuredDesigners = [
   {
+    id: "alinea-design-objects",
+    name: "Alinea Design Objects",
+    specialty: "Contemporary Furniture & Sculptural Design",
+    biography:
+      "Alinea Design Objects is a contemporary design studio creating sculptural furniture pieces that balance artistry with function. Their Angelo M collection exemplifies their philosophy of creating objects that serve as both functional furniture and artistic statements, with clean lines and refined proportions that elevate any interior.",
+    notableWorks: "Angelo M Table, Angelo M Side Table, Sculptural Furniture Collection",
+    notableWorksLink: { text: "Angelo M Side Table", galleryIndex: 11 },
+    philosophy: "Design should exist at the intersection of sculpture and function—objects that are as beautiful as they are useful.",
+    links: [
+      { type: "Curators' choice" },
+    ],
+  },
+  {
     id: "alexander-lamont",
     name: "Alexander Lamont",
     specialty: "Artisan Furniture & Luxury Craftsmanship",
@@ -71,6 +84,19 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "atelier-pendhapa",
+    name: "Atelier Pendhapa",
+    specialty: "Bespoke Furniture & Indonesian Craftsmanship",
+    biography:
+      "Atelier Pendhapa is an Indonesian design atelier specializing in bespoke furniture that celebrates the rich tradition of Indonesian woodworking and craftsmanship. Their Deepah custom table exemplifies their philosophy of creating pieces that honor traditional techniques while embracing contemporary design sensibilities. Each piece is handcrafted by master artisans using sustainably sourced materials.",
+    notableWorks: "Deepah Custom Table, Bespoke Dining Collection",
+    notableWorksLink: { text: "Deepah Custom Table", galleryIndex: 9 },
+    philosophy: "We create furniture that bridges the gap between ancient Indonesian craft traditions and contemporary global design.",
+    links: [
+      { type: "Curators' choice" },
+    ],
+  },
+  {
     id: "atelier-fevrier",
     name: "Atelier Fevrier",
     specialty: "Hand-knotted Rugs & Textile Art",
@@ -98,6 +124,19 @@ const featuredDesigners = [
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     links: [
       { type: "Instagram", url: "https://instagram.com/bruno_de_maistre_bdm" },
+      { type: "Curators' choice" },
+    ],
+  },
+  {
+    id: "delcourt-collection",
+    name: "Delcourt Collection",
+    specialty: "Contemporary Upholstered Furniture",
+    biography:
+      "Delcourt Collection is a prestigious French furniture house known for their refined approach to contemporary seating and upholstery. Their BOB armchair represents the pinnacle of comfort-focused design, combining generous proportions with elegant detailing. Each piece is crafted in France using premium materials and traditional upholstery techniques.",
+    notableWorks: "BOB Armchair, Contemporary Seating Collection",
+    notableWorksLink: { text: "BOB Armchair", galleryIndex: 11 },
+    philosophy: "True comfort is an art form—it requires mastery of proportion, material, and craft.",
+    links: [
       { type: "Curators' choice" },
     ],
   },
@@ -182,8 +221,8 @@ const featuredDesigners = [
     specialty: "Artisan Mirrors & Reflective Surfaces",
     image: kikoLopezImg,
     biography:
-      "Kiko Lopez is a French master mirror artisan renowned for creating extraordinary reflective surfaces that blur the line between functional object and sculptural art. Using traditional techniques combined with innovative approaches to glass and metal, his mirrors transform spaces with their unique textural qualities and light-capturing properties. His Silver Glass Hammer Mirror exemplifies his distinctive style of treating mirrors as artistic statements.",
-    notableWorks: "Silver Glass Hammer Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
+      "Kiko Lopez is a French master mirror artisan renowned for creating extraordinary reflective surfaces that blur the line between functional object and sculptural art. Using traditional techniques combined with innovative approaches to glass and metal, his mirrors transform spaces with their unique textural qualities and light-capturing properties. His Silver Glass Hammer Mirror and Shadow Drawings Mirror exemplify his distinctive style of treating mirrors as artistic statements.",
+    notableWorks: "Silver Glass Hammer Mirror, Shadow Drawings Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
     notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 5 },
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
     links: [
@@ -203,6 +242,19 @@ const featuredDesigners = [
     philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/leosentou" },
+      { type: "Curators' choice" },
+    ],
+  },
+  {
+    id: "milan-pekar",
+    name: "Milan Pekar",
+    specialty: "Crystalline Glass Art & Sculptural Vessels",
+    biography:
+      "Milan Pekar is a Czech glass artist renowned for his mastery of crystalline glass techniques. His Crystalline Vase collection showcases his exceptional skill in creating pieces that capture and refract light in mesmerizing ways. Working in the tradition of Bohemian glassmaking while pushing contemporary boundaries, his work transforms functional vessels into sculptural art.",
+    notableWorks: "Crystalline Vase Collection, Sculptural Glass Vessels",
+    notableWorksLink: { text: "Crystalline Vase", galleryIndex: 9 },
+    philosophy: "Glass is frozen light—my work seeks to capture that ephemeral quality in permanent form.",
+    links: [
       { type: "Curators' choice" },
     ],
   },
@@ -234,6 +286,19 @@ const featuredDesigners = [
     philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
+      { type: "Curators' choice" },
+    ],
+  },
+  {
+    id: "takayokaya",
+    name: "Takayokaya",
+    specialty: "Japanese Artisan Textiles & Cushions",
+    biography:
+      "Takayokaya is a Japanese artisan studio specializing in traditional textile craftsmanship with a contemporary sensibility. Their Ojami Cushion represents the pinnacle of Japanese comfort design, combining traditional floor seating culture with modern aesthetics. Each piece is handcrafted using time-honored techniques passed down through generations.",
+    notableWorks: "Ojami Cushion, Artisan Textile Collection",
+    notableWorksLink: { text: "Ojami Cushion", galleryIndex: 11 },
+    philosophy: "Comfort and beauty are inseparable—true craftsmanship honors both the body and the spirit.",
+    links: [
       { type: "Curators' choice" },
     ],
   },
