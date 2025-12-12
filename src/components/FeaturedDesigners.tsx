@@ -443,39 +443,34 @@ const FeaturedDesigners = () => {
                   <div className="space-y-4 text-muted-foreground font-body">
                     <p className="text-sm md:text-base leading-relaxed">{designer.biography}</p>
 
-                    <div className="pt-2">
-                      <h4 className="text-sm font-semibold text-foreground mb-2 uppercase tracking-wider">
-                        Notable Works
-                      </h4>
-                      <p className="text-sm md:text-base">
-                        {designer.notableWorksLink ? (
-                          <>
-                            <a
-                              href="#gallery"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                const gallerySection = document.getElementById('gallery');
-                                if (gallerySection) {
-                                  gallerySection.scrollIntoView({ behavior: 'smooth' });
-                                  // Dispatch custom event to open lightbox at specific index
-                                  setTimeout(() => {
-                                    window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
-                                      detail: { index: designer.notableWorksLink.galleryIndex } 
-                                    }));
-                                  }, 500);
-                                }
-                              }}
-                              className="text-primary hover:underline cursor-pointer font-medium"
-                            >
-                              {designer.notableWorksLink.text}
-                            </a>
-                            {designer.notableWorks.replace(designer.notableWorksLink.text, '').replace(/^,\s*/, ', ')}
-                          </>
-                        ) : (
-                          designer.notableWorks
-                        )}
-                      </p>
-                    </div>
+                    {designer.notableWorksLink && (
+                      <div className="pt-2">
+                        <h4 className="text-sm font-semibold text-foreground mb-2 uppercase tracking-wider">
+                          Gallery Featured
+                        </h4>
+                        <p className="text-sm md:text-base">
+                          <a
+                            href="#gallery"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              const gallerySection = document.getElementById('gallery');
+                              if (gallerySection) {
+                                gallerySection.scrollIntoView({ behavior: 'smooth' });
+                                // Dispatch custom event to open lightbox at specific index
+                                setTimeout(() => {
+                                  window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                    detail: { index: designer.notableWorksLink.galleryIndex } 
+                                  }));
+                                }, 500);
+                              }
+                            }}
+                            className="text-primary hover:underline cursor-pointer font-medium"
+                          >
+                            {designer.notableWorksLink.text}
+                          </a>
+                        </p>
+                      </div>
+                    )}
 
                     <div className="pt-2 border-t border-border/30 mt-4">
                       <p className="text-sm md:text-base italic leading-relaxed text-foreground/80 mb-4">
