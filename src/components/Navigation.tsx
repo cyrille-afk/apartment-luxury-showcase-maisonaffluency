@@ -98,10 +98,10 @@ const Navigation = () => {
                 key={item.href} 
                 onClick={() => handleNavClick(item.href)} 
                 className={cn(
-                  "font-body text-sm uppercase tracking-wider transition-colors",
+                  "font-body text-sm uppercase tracking-wider transition-all duration-300 relative",
                   activeSection === item.href 
                     ? "text-primary font-medium" 
-                    : "text-foreground/80 hover:text-primary"
+                    : "text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
                 )}
               >
                 {item.label}
