@@ -484,7 +484,7 @@ const partnerBrands = [
     origin: "Japan",
     description: "Japanese artisan studio specializing in traditional textile craftsmanship with a contemporary sensibility, creating pieces that represent the pinnacle of Japanese comfort design.",
     featured: "Ojami Cushion",
-    instagram: "https://instagram.com/takayokaya",
+    instagram: "https://instagram.com/takaokaya_en",
     galleryIndex: 5, // A Relaxed Setting
   },
 ];
