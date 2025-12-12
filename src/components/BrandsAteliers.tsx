@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Search, X, Instagram, ExternalLink, ChevronDown, Filter } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, ChevronDown, ChevronRight, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -9,6 +9,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Popover,
   PopoverContent,
@@ -763,77 +768,147 @@ const BrandsAteliers = () => {
                 <div className="space-y-6 md:space-y-8 pt-2">
                   {brands.map((subcategoryGroup, subIndex) => (
                     <div key={subcategoryGroup.subcategory || 'general'}>
-                      {subcategoryGroup.subcategory && (
-                        <div className="flex items-center gap-3 mb-3 md:mb-4">
-                          <h4 className="font-serif text-sm md:text-base text-primary/80 uppercase tracking-wider">
-                            {subcategoryGroup.subcategory}
-                          </h4>
-                          <div className="flex-1 h-px bg-border/40" />
-                        </div>
-                      )}
-                      <div className="space-y-3 md:space-y-4">
-                        {subcategoryGroup.brands.map((brand, index) => (
-                          <motion.div
-                            key={`${category}-${brand.name}`}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={isInView ? { opacity: 1, y: 0 } : {}}
-                            transition={{ duration: 0.4, delay: categoryIndex * 0.1 + subIndex * 0.05 + index * 0.03 }}
-                            className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
-                                  <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
-                                    {brand.name}
-                                  </h3>
-                                  <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
-                                    — {brand.origin}
-                                  </span>
+                      {subcategoryGroup.subcategory ? (
+                        <Collapsible defaultOpen className="space-y-3 md:space-y-4">
+                          <CollapsibleTrigger className="flex items-center gap-3 w-full group/sub hover:opacity-80 transition-opacity">
+                            <ChevronRight className="h-4 w-4 text-primary/60 transition-transform duration-200 group-data-[state=open]/sub:rotate-90" />
+                            <h4 className="font-serif text-sm md:text-base text-primary/80 uppercase tracking-wider">
+                              {subcategoryGroup.subcategory}
+                            </h4>
+                            <span className="text-[10px] md:text-xs text-muted-foreground">
+                              ({subcategoryGroup.brands.length})
+                            </span>
+                            <div className="flex-1 h-px bg-border/40" />
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="space-y-3 md:space-y-4">
+                            {subcategoryGroup.brands.map((brand, index) => (
+                              <motion.div
+                                key={`${category}-${brand.name}`}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                                transition={{ duration: 0.4, delay: categoryIndex * 0.1 + subIndex * 0.05 + index * 0.03 }}
+                                className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300 ml-4 md:ml-6"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
+                                      <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
+                                        {brand.name}
+                                      </h3>
+                                      <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
+                                        — {brand.origin}
+                                      </span>
+                                    </div>
+                                    <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
+                                      {brand.description}
+                                    </p>
+                                    <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                                      <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
+                                      {brand.featuredItems.map((item, itemIndex) => (
+                                        <span key={itemIndex} className="flex items-center">
+                                          {item.galleryIndex !== undefined ? (
+                                            <button
+                                              onClick={() => scrollToGallery(item.galleryIndex!)}
+                                              className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                                            >
+                                              <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                                {item.featured}
+                                              </span>
+                                              <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                                            </button>
+                                          ) : (
+                                            <span className="text-xs md:text-sm text-foreground/80 font-body">
+                                              {item.featured}
+                                            </span>
+                                          )}
+                                          {itemIndex < brand.featuredItems.length - 1 && (
+                                            <span className="text-muted-foreground mx-1">•</span>
+                                          )}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  {brand.instagram && (
+                                    <a
+                                      href={brand.instagram}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <Instagram className="h-5 w-5 md:h-4 md:w-4" />
+                                    </a>
+                                  )}
                                 </div>
-                                <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
-                                  {brand.description}
-                                </p>
-                                <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                                  <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
-                                  {brand.featuredItems.map((item, itemIndex) => (
-                                    <span key={itemIndex} className="flex items-center">
-                                      {item.galleryIndex !== undefined ? (
-                                        <button
-                                          onClick={() => scrollToGallery(item.galleryIndex!)}
-                                          className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                                        >
-                                          <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                              </motion.div>
+                            ))}
+                          </CollapsibleContent>
+                        </Collapsible>
+                      ) : (
+                        <div className="space-y-3 md:space-y-4">
+                          {subcategoryGroup.brands.map((brand, index) => (
+                            <motion.div
+                              key={`${category}-${brand.name}`}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={isInView ? { opacity: 1, y: 0 } : {}}
+                              transition={{ duration: 0.4, delay: categoryIndex * 0.1 + subIndex * 0.05 + index * 0.03 }}
+                              className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
+                                    <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
+                                      {brand.name}
+                                    </h3>
+                                    <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
+                                      — {brand.origin}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
+                                    {brand.description}
+                                  </p>
+                                  <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                                    <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
+                                    {brand.featuredItems.map((item, itemIndex) => (
+                                      <span key={itemIndex} className="flex items-center">
+                                        {item.galleryIndex !== undefined ? (
+                                          <button
+                                            onClick={() => scrollToGallery(item.galleryIndex!)}
+                                            className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                                          >
+                                            <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                              {item.featured}
+                                            </span>
+                                            <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                                          </button>
+                                        ) : (
+                                          <span className="text-xs md:text-sm text-foreground/80 font-body">
                                             {item.featured}
                                           </span>
-                                          <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                                        </button>
-                                      ) : (
-                                        <span className="text-xs md:text-sm text-foreground/80 font-body">
-                                          {item.featured}
-                                        </span>
-                                      )}
-                                      {itemIndex < brand.featuredItems.length - 1 && (
-                                        <span className="text-muted-foreground mx-1">•</span>
-                                      )}
-                                    </span>
-                                  ))}
+                                        )}
+                                        {itemIndex < brand.featuredItems.length - 1 && (
+                                          <span className="text-muted-foreground mx-1">•</span>
+                                        )}
+                                      </span>
+                                    ))}
+                                  </div>
                                 </div>
+                                {brand.instagram && (
+                                  <a
+                                    href={brand.instagram}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Instagram className="h-5 w-5 md:h-4 md:w-4" />
+                                  </a>
+                                )}
                               </div>
-                              {brand.instagram && (
-                                <a
-                                  href={brand.instagram}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Instagram className="h-5 w-5 md:h-4 md:w-4" />
-                                </a>
-                              )}
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
