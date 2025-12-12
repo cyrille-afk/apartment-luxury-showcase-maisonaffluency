@@ -190,8 +190,8 @@ const partnerBrands = [
     category: "Furniture",
     subcategory: "Iconic Editions",
     origin: "France",
-    description: "Founded by legendary designer Andrée Putman, Ecart International re-edits iconic furniture designs from the 20th century's greatest masters, including Jean-Michel Frank, Eileen Gray, and Pierre Chareau. Their meticulous reproductions preserve the original craftsmanship and materials.",
-    featured: "Jean-Michel Frank Re-editions, Eileen Gray Designs",
+    description: "Founded by legendary designer Andrée Putman, Ecart International re-edits iconic furniture designs from the 20th century's greatest masters, including Jean-Michel Frank and Pierre Chareau. Their meticulous reproductions preserve the original craftsmanship and materials.",
+    featured: "Jean-Michel Frank Re-editions",
     instagram: "https://instagram.com/ecart.paris",
     galleryIndex: 1, // A Sophisticated Living Room (Jean-Michel Frank Stool)
   },
