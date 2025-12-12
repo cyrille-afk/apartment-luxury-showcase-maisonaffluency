@@ -267,7 +267,8 @@ const partnerBrands = [
   {
     id: "kiko-lopez",
     name: "Kiko Lopez",
-    category: "Glass Art",
+    category: "Decor",
+    subcategory: "Mirrors",
     origin: "France",
     description: "French glass artist renowned for his extraordinary hand-silvered mirrors and sculptural glass works, each piece a unique testament to ancient techniques reimagined.",
     featured: "Silver Glass Hammer Mirror",
@@ -297,7 +298,7 @@ const partnerBrands = [
   {
     id: "nathalie-ziegler",
     name: "Nathalie Ziegler",
-    category: "Glass Art",
+    category: "Lighting",
     origin: "France",
     description: "French glass artist creating bespoke chandeliers and sculptural glass pieces, each work a unique expression of light and organic form.",
     featured: "Custom Glass Chandelier",
