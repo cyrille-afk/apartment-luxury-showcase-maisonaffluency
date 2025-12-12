@@ -3,6 +3,12 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const navItems = [{
   label: "Home",
@@ -52,6 +58,10 @@ const Navigation = () => {
     return () => observer.disconnect();
   }, []);
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleNavClick = (href: string) => {
     setIsOpen(false);
     const element = document.querySelector(href);
@@ -66,11 +76,20 @@ const Navigation = () => {
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         <div className="flex h-16 md:h-20 items-center justify-center md:justify-between relative">
           {/* Logo/Brand */}
-          <button onClick={() => handleNavClick("#home")}>
-            <span className="font-serif text-base md:text-xl font-extrabold text-foreground">
-              Maison Affluency Singapore
-            </span>
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button onClick={scrollToTop} className="group cursor-pointer">
+                  <span className="font-serif text-base md:text-xl font-extrabold text-foreground transition-all duration-300 group-hover:text-primary">
+                    Maison Affluency Singapore
+                  </span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Back to top</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
