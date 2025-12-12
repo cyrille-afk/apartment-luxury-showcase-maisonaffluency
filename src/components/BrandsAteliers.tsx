@@ -55,7 +55,7 @@ const partnerBrands = [
     name: "Alinea Design Objects",
     category: "Furniture",
     subcategory: "Tables",
-    tableType: "Side Tables",
+    tableType: "Dining Tables",
     origin: "Belgium",
     description: "Belgian design house curating and producing exceptional furniture pieces that blend sculptural form with functional elegance.",
     featured: "Angelo M Table",
