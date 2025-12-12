@@ -30,7 +30,7 @@ const featuredDesigners = [
     biography:
       "Alinea Design Objects is a contemporary design studio creating sculptural furniture pieces that balance artistry with function. Their Angelo M collection exemplifies their philosophy of creating objects that serve as both functional furniture and artistic statements, with clean lines and refined proportions that elevate any interior.",
     notableWorks: "Angelo M Table, Angelo M Side Table, Sculptural Furniture Collection",
-    notableWorksLink: { text: "Angelo M Side Table", galleryIndex: 11 },
+    notableWorksLink: { text: "Angelo M Side Table", galleryIndex: 5 },
     philosophy: "Design should exist at the intersection of sculpture and function—objects that are as beautiful as they are useful.",
     links: [
       { type: "Curators' choice" },
@@ -59,7 +59,7 @@ const featuredDesigners = [
     biography:
       "Apparatus Studio is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
     notableWorks: "Metronome Reading Floor Lamp, Sculptural Lighting Series",
-    notableWorksLink: { text: "Metronome Reading Floor Lamp", galleryIndex: 7 },
+    notableWorksLink: { text: "Metronome Reading Floor Lamp", galleryIndex: 10 },
     philosophy:
       "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
     links: [
@@ -76,7 +76,7 @@ const featuredDesigners = [
     biography:
       "Atelier Demichelis is a contemporary design studio specializing in limited edition lighting fixtures. Each piece is meticulously handcrafted, combining traditional techniques with innovative design. Their Bud Table Lamp represents their commitment to creating functional art objects with exceptional attention to detail.",
     notableWorks: "Limited Edition Bud Table Lamp, Artisan Lighting Collection",
-    notableWorksLink: { text: "Limited Edition Bud Table Lamp", galleryIndex: 4 },
+    notableWorksLink: { text: "Limited Edition Bud Table Lamp", galleryIndex: 7 },
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
     links: [
       { type: "Instagram", url: "https://instagram.com/atelier_demichelis" },
@@ -90,7 +90,7 @@ const featuredDesigners = [
     biography:
       "Atelier Pendhapa is an Indonesian design atelier specializing in bespoke furniture that celebrates the rich tradition of Indonesian woodworking and craftsmanship. Their Deepah custom table exemplifies their philosophy of creating pieces that honor traditional techniques while embracing contemporary design sensibilities. Each piece is handcrafted by master artisans using sustainably sourced materials.",
     notableWorks: "Deepah Custom Table, Bespoke Dining Collection",
-    notableWorksLink: { text: "Deepah Custom Table", galleryIndex: 9 },
+    notableWorksLink: { text: "Deepah Custom Table", galleryIndex: 3 },
     philosophy: "We create furniture that bridges the gap between ancient Indonesian craft traditions and contemporary global design.",
     links: [
       { type: "Curators' choice" },
@@ -120,7 +120,7 @@ const featuredDesigners = [
     biography:
       "Bruno de Maistre is a French designer known for his poetic approach to furniture design. His Lyrical Desk demonstrates his ability to create pieces that are both functional and emotionally resonant, with flowing lines and thoughtful proportions that inspire creativity and contemplation.",
     notableWorks: "Lyric Desk, Contemporary Furniture Series",
-    notableWorksLink: { text: "Lyric Desk", galleryIndex: 6 },
+    notableWorksLink: { text: "Lyric Desk", galleryIndex: 9 },
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     links: [
       { type: "Instagram", url: "https://instagram.com/bruno_de_maistre_bdm" },
@@ -134,7 +134,7 @@ const featuredDesigners = [
     biography:
       "Delcourt Collection is a prestigious French furniture house known for their refined approach to contemporary seating and upholstery. Their BOB armchair represents the pinnacle of comfort-focused design, combining generous proportions with elegant detailing. Each piece is crafted in France using premium materials and traditional upholstery techniques.",
     notableWorks: "BOB Armchair, Contemporary Seating Collection",
-    notableWorksLink: { text: "BOB Armchair", galleryIndex: 11 },
+    notableWorksLink: { text: "BOB Armchair", galleryIndex: 5 },
     philosophy: "True comfort is an art form—it requires mastery of proportion, material, and craft.",
     links: [
       { type: "Curators' choice" },
@@ -163,7 +163,7 @@ const featuredDesigners = [
     biography:
       "Hamrei brings a playful yet sophisticated approach to contemporary design. Their Pépé Chair showcases their signature style of combining comfort with unexpected visual delight. Each piece demonstrates a mastery of form and craftsmanship while maintaining a sense of joy and personality.",
     notableWorks: "Pépé Chair, Whimsical Furniture Collection",
-    notableWorksLink: { text: "Pépé Chair", galleryIndex: 6 },
+    notableWorksLink: { text: "Pépé Chair", galleryIndex: 3 },
     philosophy:
       "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
     links: [
@@ -179,7 +179,7 @@ const featuredDesigners = [
     biography:
       "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
     notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
-    notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 3 },
+    notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 6 },
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     links: [
@@ -223,7 +223,7 @@ const featuredDesigners = [
     biography:
       "Kiko Lopez is a French master mirror artisan renowned for creating extraordinary reflective surfaces that blur the line between functional object and sculptural art. Using traditional techniques combined with innovative approaches to glass and metal, his mirrors transform spaces with their unique textural qualities and light-capturing properties. His Silver Glass Hammer Mirror and Shadow Drawings Mirror exemplify his distinctive style of treating mirrors as artistic statements.",
     notableWorks: "Silver Glass Hammer Mirror, Shadow Drawings Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
-    notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 5 },
+    notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 8 },
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
     links: [
       { type: "Instagram", url: "https://instagram.com/kikolumieres" },
@@ -252,7 +252,7 @@ const featuredDesigners = [
     biography:
       "Milan Pekar is a Czech glass artist renowned for his mastery of crystalline glass techniques. His Crystalline Vase collection showcases his exceptional skill in creating pieces that capture and refract light in mesmerizing ways. Working in the tradition of Bohemian glassmaking while pushing contemporary boundaries, his work transforms functional vessels into sculptural art.",
     notableWorks: "Crystalline Vase Collection, Sculptural Glass Vessels",
-    notableWorksLink: { text: "Crystalline Vase", galleryIndex: 9 },
+    notableWorksLink: { text: "Crystalline Vase", galleryIndex: 3 },
     philosophy: "Glass is frozen light—my work seeks to capture that ephemeral quality in permanent form.",
     links: [
       { type: "Curators' choice" },
@@ -266,7 +266,7 @@ const featuredDesigners = [
     biography:
       "Nathalie Ziegler is a French glass artist known for her custom chandeliers and glass sculptures that blur the line between functional lighting and fine art. Her Saint Just Custom Glass Chandelier showcases her ability to manipulate glass into dramatic, ethereal forms that transform spaces with light and color.",
     notableWorks: "Saint Just Custom Glass Chandelier, Gold Leaves+Glass Snake Vase, Sculptural Glass Series",
-    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 6 },
+    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 9 },
     philosophy:
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
     links: [
@@ -296,7 +296,7 @@ const featuredDesigners = [
     biography:
       "Takayokaya is a Japanese artisan studio specializing in traditional textile craftsmanship with a contemporary sensibility. Their Ojami Cushion represents the pinnacle of Japanese comfort design, combining traditional floor seating culture with modern aesthetics. Each piece is handcrafted using time-honored techniques passed down through generations.",
     notableWorks: "Ojami Cushion, Artisan Textile Collection",
-    notableWorksLink: { text: "Ojami Cushion", galleryIndex: 11 },
+    notableWorksLink: { text: "Ojami Cushion", galleryIndex: 5 },
     philosophy: "Comfort and beauty are inseparable—true craftsmanship honors both the body and the spirit.",
     links: [
       { type: "Curators' choice" },
