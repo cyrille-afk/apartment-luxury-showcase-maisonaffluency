@@ -1,5 +1,5 @@
 import { Instagram } from "lucide-react";
-import affluencyLogo from "@/assets/affluency-logo-icon.jpeg";
+import affluencyLogo from "@/assets/affluency-logo-new.jpg";
 import {
   Tooltip,
   TooltipContent,
