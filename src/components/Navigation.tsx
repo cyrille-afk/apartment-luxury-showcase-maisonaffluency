@@ -80,7 +80,7 @@ const Navigation = () => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button onClick={scrollToTop} className="group cursor-pointer flex items-center gap-2">
+                <button onClick={scrollToTop} className="group cursor-pointer flex items-center gap-2 whitespace-nowrap">
                   <img src={logoIcon} alt="Affluency Logo" className="h-7 md:h-9 w-auto" />
                   <span className="font-serif text-base md:text-xl font-extrabold text-foreground transition-all duration-300 group-hover:text-primary group-hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.4),0_0_20px_hsl(var(--primary)/0.2)]">
                     Maison Affluency
@@ -94,7 +94,7 @@ const Navigation = () => {
           </TooltipProvider>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8 ml-12">
+          <div className="hidden md:flex items-center gap-5 ml-8">
             {navItems.map(item => {
               const isTradeProgram = item.href === "#details";
               return (
