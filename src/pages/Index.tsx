@@ -7,7 +7,7 @@ import Gallery from "@/components/Gallery";
 import DesignDetails from "@/components/DesignDetails";
 import ContactInquiry from "@/components/ContactInquiry";
 import Footer from "@/components/Footer";
-import BackToTop from "@/components/BackToTop";
+
 import ScrollProgress from "@/components/ScrollProgress";
 import CuratingTeam from "@/components/CuratingTeam";
 import QuickJumpMenu from "@/components/QuickJumpMenu";
@@ -44,7 +44,7 @@ const Index = () => {
         </section>
         <Footer />
       </main>
-      <BackToTop />
+      
       <QuickJumpMenu />
     </>
   );
