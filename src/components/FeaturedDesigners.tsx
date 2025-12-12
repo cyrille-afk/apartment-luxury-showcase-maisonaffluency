@@ -46,6 +46,7 @@ const featuredDesigners = [
     biography:
       "Apparatus Studio is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
     notableWorks: "Metronome Reading Floor Lamp, Sculptural Lighting Series",
+    notableWorksLink: { text: "Metronome Reading Floor Lamp", galleryIndex: 7 },
     philosophy:
       "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
     links: [
@@ -62,6 +63,7 @@ const featuredDesigners = [
     biography:
       "Atelier Demichelis is a contemporary design studio specializing in limited edition lighting fixtures. Each piece is meticulously handcrafted, combining traditional techniques with innovative design. Their Bud Table Lamp represents their commitment to creating functional art objects with exceptional attention to detail.",
     notableWorks: "Limited Edition Bud Table Lamp, Artisan Lighting Collection",
+    notableWorksLink: { text: "Limited Edition Bud Table Lamp", galleryIndex: 1 },
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
     links: [
       { type: "Instagram", url: "https://instagram.com/atelier_demichelis" },
@@ -76,6 +78,7 @@ const featuredDesigners = [
     biography:
       "Atelier Fevrier is a textile studio dedicated to the ancient art of hand-knotted rug making. Their Ricky Rug exemplifies their commitment to traditional techniques combined with contemporary design sensibilities. Each rug is a labor of love, taking months to complete with meticulous attention to texture, color, and pattern.",
     notableWorks: "Hand-knotted Ricky Rug, Custom Textile Collection",
+    notableWorksLink: { text: "Ricky Rug", galleryIndex: 3 },
     philosophy:
       "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
     links: [
@@ -90,7 +93,8 @@ const featuredDesigners = [
     image: brunoDeMaistreImg,
     biography:
       "Bruno de Maistre is a French designer known for his poetic approach to furniture design. His Lyrical Desk demonstrates his ability to create pieces that are both functional and emotionally resonant, with flowing lines and thoughtful proportions that inspire creativity and contemplation.",
-    notableWorks: "Lyrical Desk, Contemporary Furniture Series",
+    notableWorks: "Lyric Desk, Contemporary Furniture Series",
+    notableWorksLink: { text: "Lyric Desk", galleryIndex: 6 },
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     links: [
       { type: "Instagram", url: "https://instagram.com/bruno_de_maistre_bdm" },
@@ -105,6 +109,7 @@ const featuredDesigners = [
     biography:
       "Emanuelle Levet Stenne is a French lighting designer renowned for creating ethereal alabaster pendant lights and sculptural fixtures that transform spaces with their warm, natural glow. Her work celebrates the inherent beauty of natural stone, allowing light to pass through alabaster to create an atmosphere of timeless elegance.",
     notableWorks: "Alabaster Pendant Light, Sculptural Lighting Collection",
+    notableWorksLink: { text: "Alabaster Pendant Light", galleryIndex: 5 },
     philosophy: "Light should not merely illuminate—it should transform space into poetry.",
     links: [
       { type: "Instagram", url: "https://instagram.com/emanuellelevetstenne" },
@@ -135,6 +140,7 @@ const featuredDesigners = [
     biography:
       "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
     notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
+    notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 0 },
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     links: [
@@ -164,6 +170,7 @@ const featuredDesigners = [
     biography:
       "Jean-Michel Frank (1895–1941) was a legendary French interior decorator and furniture designer who pioneered the luxurious minimalist aesthetic of the Art Deco era. His work emphasized refined simplicity, using the finest materials—parchment, shagreen, straw marquetry, and bronze—to create pieces of understated elegance. Collaborating with artists like Alberto Giacometti and Christian Bérard, Frank created iconic designs that continue to influence contemporary luxury interiors.",
     notableWorks: "Table Soleil 1930, Stool 1934 (with Adolphe Chanaux), Parchment-covered furniture, Shagreen desks",
+    notableWorksLink: { text: "Stool 1934", galleryIndex: 4 },
     philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
     links: [
       { type: "Curators' choice" },
@@ -177,6 +184,7 @@ const featuredDesigners = [
     biography:
       "Kiko Lopez is a French master mirror artisan renowned for creating extraordinary reflective surfaces that blur the line between functional object and sculptural art. Using traditional techniques combined with innovative approaches to glass and metal, his mirrors transform spaces with their unique textural qualities and light-capturing properties. His Silver Glass Hammer Mirror exemplifies his distinctive style of treating mirrors as artistic statements.",
     notableWorks: "Silver Glass Hammer Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
+    notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 2 },
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
     links: [
       { type: "Instagram", url: "https://instagram.com/kikolumieres" },
@@ -190,7 +198,8 @@ const featuredDesigners = [
     image: leoSentouImg,
     biography:
       "French designer Leo Sentou is a contemporary classicist whose debut capsule collection pays homage to the elegance and sophistication of eighteenth-century French decorative arts. His pieces are rooted in tradition yet unequivocally modern, reducing classical forms to their essential shapes while elevating them with a refined palette of limed oak, wrought iron, bronze, mohair, linen and lacquer.",
-    notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J",
+    notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J, AB Armchair",
+    notableWorksLink: { text: "AB Armchair", galleryIndex: 4 },
     philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/leosentou" },
@@ -205,6 +214,7 @@ const featuredDesigners = [
     biography:
       "Nathalie Ziegler is a French glass artist known for her custom chandeliers and glass sculptures that blur the line between functional lighting and fine art. Her Saint Just Custom Glass Chandelier showcases her ability to manipulate glass into dramatic, ethereal forms that transform spaces with light and color.",
     notableWorks: "Saint Just Custom Glass Chandelier, Gold Leaves+Glass Snake Vase, Sculptural Glass Series",
+    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 6 },
     philosophy:
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
     links: [
@@ -220,6 +230,7 @@ const featuredDesigners = [
     biography:
       "Olivia Cognet is a French ceramic artist that draws her inspiration from the South of France where she grew up and and was nourished by the brilliant masters from the school of Vallauris, from Picasso to Roger Capron. Her Vallauris floor lamp in a custom blue glazed ceramic, is a testimony of her constant search for the balance between art & design. ",
     notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
+    notableWorksLink: { text: "Vallauris floor lamp", galleryIndex: 4 },
     philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
@@ -234,7 +245,8 @@ const featuredDesigners = [
     biography:
       "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
     notableWorks:
-      "Orsay Mds Coffee Table in Alabastrino travertine and Onyx Ocean. \nLimited and numbered edition (12 copies).",
+      "Orsay Centre Table, Niko 420 custom sofa. \nLimited and numbered edition (12 copies).",
+    notableWorksLink: { text: "Orsay Centre Table", galleryIndex: 4 },
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
