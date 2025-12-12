@@ -41,8 +41,8 @@ const partnerBrands = [
     galleryIndex: 8, // A Design Treasure Trove
   },
   {
-    id: "alinea-design-objects",
-    name: "Alinea Design Objects",
+    id: "alinea",
+    name: "Alinea",
     category: "Furniture",
     subcategory: "Tables",
     tableType: "Dining Tables",
