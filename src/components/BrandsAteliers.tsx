@@ -692,7 +692,7 @@ const BrandsAteliers = () => {
               transition={{ duration: 0.4, delay: brandIndex * 0.02 }}
               className="group p-5 md:p-6 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default"
             >
-              <div className="flex items-start justify-between mb-2">
+              <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-primary transition-colors duration-300 mb-1">
                     {brand.name}
@@ -701,28 +701,29 @@ const BrandsAteliers = () => {
                     {brand.origin}
                   </span>
                 </div>
-                {brand.instagram && (
-                  <a
-                    href={brand.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Instagram className="h-5 w-5" />
-                  </a>
-                )}
-              </div>
-              
-              <div className="flex flex-wrap gap-1.5 mb-3">
-                {brand.categories.map((category, catIndex) => (
-                  <span 
-                    key={catIndex}
-                    className="text-[10px] md:text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider"
-                  >
-                    {category}
-                  </span>
-                ))}
+                <div className="flex flex-col items-end gap-2 flex-shrink-0 ml-3">
+                  {brand.instagram && (
+                    <a
+                      href={brand.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Instagram className="h-5 w-5" />
+                    </a>
+                  )}
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[120px]">
+                    {brand.categories.map((category, catIndex) => (
+                      <span 
+                        key={catIndex}
+                        className="text-[9px] md:text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full uppercase tracking-wider"
+                      >
+                        {category}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
               
               <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-3 line-clamp-3">
