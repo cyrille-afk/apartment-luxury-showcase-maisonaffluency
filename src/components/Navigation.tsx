@@ -101,7 +101,7 @@ const Navigation = () => {
                   onClick={() => handleNavClick(item.href)} 
                   className={cn(
                     "font-body text-sm uppercase tracking-wider transition-all duration-300 relative group",
-                    isTradeProgram && "px-3 py-1.5 border border-primary/50 rounded-sm bg-primary/5 hover:bg-primary/10 animate-[pulse-glow_4s_ease-in-out_infinite]",
+                    isTradeProgram && "px-3 py-1.5 border border-primary/50 rounded-sm bg-primary/5 hover:bg-primary/10 animate-[pulse-glow_6s_ease-in-out_infinite]",
                     activeSection === item.href 
                       ? "text-primary font-medium" 
                       : isTradeProgram
@@ -142,7 +142,7 @@ const Navigation = () => {
                       className={cn(
                         "font-serif text-2xl text-left transition-all duration-300 py-3 relative group",
                         !isTradeProgram && "border-b border-border/30",
-                        isTradeProgram && "px-4 py-2 mt-2 border border-primary/50 rounded-sm bg-primary/5 hover:bg-primary/10 animate-[pulse-glow_4s_ease-in-out_infinite]",
+                        isTradeProgram && "px-4 py-2 mt-2 border border-primary/50 rounded-sm bg-primary/5 hover:bg-primary/10 animate-[pulse-glow_6s_ease-in-out_infinite]",
                         activeSection === item.href 
                           ? "text-primary" 
                           : isTradeProgram
