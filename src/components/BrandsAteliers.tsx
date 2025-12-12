@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo } from "react";
-import { Search, X, Instagram, ExternalLink, Filter } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -634,7 +634,7 @@ const BrandsAteliers = () => {
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="bg-card/80 border-border/40 hover:bg-card h-9">
-                      <Filter className="h-3.5 w-3.5 mr-1.5" />
+                      <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
                       <span className="hidden sm:inline">Categories</span>
                       {selectedCategoryFilters.length > 0 && (
                         <span className="ml-1.5 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full">
