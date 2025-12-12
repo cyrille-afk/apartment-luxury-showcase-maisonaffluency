@@ -227,10 +227,14 @@ const Gallery = () => {
                     <h3 className="mb-2 font-display text-xl md:text-2xl text-foreground">
                       {item.title}
                     </h3>
-                    <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground">
-                      <span className="font-semibold italic text-primary">Featuring: </span>
-                      {item.description}
-                    </p>
+                    <div className="font-body text-sm md:text-base leading-relaxed text-muted-foreground">
+                      <span className="font-semibold italic text-primary">Featuring:</span>
+                      <ul className="mt-2 space-y-1 list-disc list-inside">
+                        {item.description.split(', ').map((feature, idx) => (
+                          <li key={idx}>{feature}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </motion.div>
                 ))}
               </div>
