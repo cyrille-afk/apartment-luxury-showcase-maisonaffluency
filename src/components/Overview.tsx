@@ -68,7 +68,7 @@ const Overview = () => {
                 className="group bg-white hover:bg-white/90 text-foreground border-2 border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300"
               >
                 <Users className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
-                <span className="font-body">Meet Our Curating Team</span>
+                <span className="font-body">Meet The Curating Team</span>
               </Button>
             </motion.div>
           </div>
