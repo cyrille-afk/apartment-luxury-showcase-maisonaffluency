@@ -374,7 +374,7 @@ const partnerBrands = [
     origin: "France",
     description: "French luxury brand creating sculptural marble candles and decorative objects that blend artisanal craftsmanship with contemporary design sensibility.",
     featured: "Lyra Marble Candle",
-    instagram: "https://instagram.com/ooumm_paris",
+    instagram: "https://instagram.com/ooummparis",
     galleryIndex: 11, // Design Icons and Collectibles
   },
   {
