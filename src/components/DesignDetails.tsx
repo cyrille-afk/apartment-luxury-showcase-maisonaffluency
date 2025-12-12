@@ -145,7 +145,7 @@ const DesignDetails = () => {
           <DialogHeader>
             <DialogTitle className="font-display text-2xl">Welcome to Your Trade Account</DialogTitle>
             <DialogDescription className="font-body text-muted-foreground">
-              Complete the form below to apply for exclusive trade benefits.
+              We look forward to partnering with you!
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
