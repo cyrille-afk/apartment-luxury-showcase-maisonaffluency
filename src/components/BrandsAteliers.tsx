@@ -26,7 +26,7 @@ const partnerBrands = [
   {
     id: "alexander-lamont-reef",
     name: "Alexander Lamont",
-    category: "Art Objects",
+    category: "Decor",
     origin: "Thailand",
     description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
     featured: "Reef Vessels",
@@ -36,7 +36,7 @@ const partnerBrands = [
   {
     id: "alexander-lamont-mantle",
     name: "Alexander Lamont",
-    category: "Art Objects",
+    category: "Decor",
     origin: "Thailand",
     description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
     featured: "Straw Marquetry Mantle Box",
@@ -176,7 +176,7 @@ const partnerBrands = [
   {
     id: "emmanuel-babled",
     name: "Emmanuel Babled",
-    category: "Art Objects",
+    category: "Decor",
     origin: "France",
     description: "French-Italian designer creating limited edition sculptural objects in glass and marble, his Osmosi Series represents the pinnacle of material exploration and artistic vision.",
     featured: "Limited Edition Osmosi Series Sculptured Book Cover",
@@ -196,7 +196,7 @@ const partnerBrands = [
   {
     id: "garnier-linker",
     name: "Garnier & Linker",
-    category: "Art Objects",
+    category: "Decor",
     origin: "France",
     description: "French artist duo creating exceptional lost-wax cast crystal sculptures and decorative objects, their work for Théorème Editions exemplifies masterful artistry.",
     featured: "Lost-wax Cast Crystal Centerpiece",
@@ -326,7 +326,7 @@ const partnerBrands = [
   {
     id: "ooumm",
     name: "oOumm",
-    category: "Art Objects",
+    category: "Decor",
     origin: "France",
     description: "French luxury brand creating sculptural marble candles and decorative objects that blend artisanal craftsmanship with contemporary design sensibility.",
     featured: "Lyra Marble Candle",
@@ -396,7 +396,7 @@ const partnerBrands = [
   {
     id: "theoreme-editions",
     name: "Théorème Editions",
-    category: "Art Objects",
+    category: "Decor",
     origin: "France",
     description: "French publisher of limited edition decorative objects, collaborating with renowned artists and designers including Garnier & Linker.",
     featured: "Lost-wax Cast Crystal Centerpiece",
