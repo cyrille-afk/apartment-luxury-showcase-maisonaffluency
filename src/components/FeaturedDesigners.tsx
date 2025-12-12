@@ -25,19 +25,6 @@ import milanPekarImg from "@/assets/designers/milan-pekar.png";
 
 const featuredDesigners = [
   {
-    id: "alinea-design-objects",
-    name: "Alinea Design Objects",
-    specialty: "Contemporary Furniture & Sculptural Design",
-    biography:
-      "Alinea Design Objects is a contemporary design studio creating sculptural furniture pieces that balance artistry with function. Their Angelo M collection exemplifies their philosophy of creating objects that serve as both functional furniture and artistic statements, with clean lines and refined proportions that elevate any interior.",
-    notableWorks: "Angelo M Table, Angelo M Side Table, Sculptural Furniture Collection",
-    notableWorksLink: { text: "Angelo M Side Table", galleryIndex: 5 },
-    philosophy: "Design should exist at the intersection of sculpture and function—objects that are as beautiful as they are useful.",
-    links: [
-      { type: "Curators' choice" },
-    ],
-  },
-  {
     id: "alexander-lamont",
     name: "Alexander Lamont",
     specialty: "Artisan Furniture & Luxury Craftsmanship",
