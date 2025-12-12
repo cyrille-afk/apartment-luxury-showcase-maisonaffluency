@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Instagram, Search, X, ChevronDown } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ExternalLink } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -444,31 +444,27 @@ const FeaturedDesigners = () => {
                     <p className="text-sm md:text-base leading-relaxed">{designer.biography}</p>
 
                     {designer.notableWorksLink && (
-                      <div className="pt-2">
-                        <h4 className="text-sm font-semibold text-foreground mb-2 uppercase tracking-wider">
-                          Gallery Featured
-                        </h4>
-                        <p className="text-sm md:text-base">
-                          <a
-                            href="#gallery"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              const gallerySection = document.getElementById('gallery');
-                              if (gallerySection) {
-                                gallerySection.scrollIntoView({ behavior: 'smooth' });
-                                // Dispatch custom event to open lightbox at specific index
-                                setTimeout(() => {
-                                  window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
-                                    detail: { index: designer.notableWorksLink.galleryIndex } 
-                                  }));
-                                }, 500);
-                              }
-                            }}
-                            className="text-primary hover:underline cursor-pointer font-medium"
-                          >
+                      <div className="flex flex-wrap items-center gap-x-1 gap-y-1 pt-2">
+                        <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
+                        <button
+                          onClick={() => {
+                            const gallerySection = document.getElementById('gallery');
+                            if (gallerySection) {
+                              gallerySection.scrollIntoView({ behavior: 'smooth' });
+                              setTimeout(() => {
+                                window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                  detail: { index: designer.notableWorksLink.galleryIndex } 
+                                }));
+                              }, 500);
+                            }
+                          }}
+                          className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                        >
+                          <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
                             {designer.notableWorksLink.text}
-                          </a>
-                        </p>
+                          </span>
+                          <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                        </button>
                       </div>
                     )}
 
