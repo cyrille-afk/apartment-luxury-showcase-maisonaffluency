@@ -133,26 +133,35 @@ const Navigation = () => {
             
             <SheetContent side="right" className="w-[280px] sm:w-[320px]">
               <div className="flex flex-col gap-6 mt-8">
-                {navItems.map(item => (
-                  <button 
-                    key={item.href} 
-                    onClick={() => handleNavClick(item.href)} 
-                    className={cn(
-                      "font-serif text-2xl text-left transition-all duration-300 py-3 border-b border-border/30 relative group",
-                      activeSection === item.href 
-                        ? "text-primary" 
-                        : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
-                    )}
-                  >
-                    {item.label}
-                    <span className={cn(
-                      "absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300",
-                      activeSection === item.href 
-                        ? "w-full" 
-                        : "w-0 group-hover:w-full"
-                    )} />
-                  </button>
-                ))}
+                {navItems.map(item => {
+                  const isTradeProgram = item.href === "#details";
+                  return (
+                    <button 
+                      key={item.href} 
+                      onClick={() => handleNavClick(item.href)} 
+                      className={cn(
+                        "font-serif text-2xl text-left transition-all duration-300 py-3 relative group",
+                        !isTradeProgram && "border-b border-border/30",
+                        isTradeProgram && "px-4 py-2 mt-2 border border-primary/50 rounded-sm bg-primary/5 hover:bg-primary/10",
+                        activeSection === item.href 
+                          ? "text-primary" 
+                          : isTradeProgram
+                            ? "text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                            : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                      )}
+                    >
+                      {item.label}
+                      {!isTradeProgram && (
+                        <span className={cn(
+                          "absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300",
+                          activeSection === item.href 
+                            ? "w-full" 
+                            : "w-0 group-hover:w-full"
+                        )} />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </SheetContent>
           </Sheet>
