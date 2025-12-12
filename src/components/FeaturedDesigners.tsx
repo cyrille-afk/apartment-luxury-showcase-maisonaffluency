@@ -21,6 +21,7 @@ import leoSentouImg from "@/assets/designers/leo-sentou.jpg";
 import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank.jpg";
 import kikoLopezImg from "@/assets/designers/kiko-lopez.jpg";
 import emanuelleLevetStenneImg from "@/assets/designers/emanuelle-levet-stenne.png";
+import milanPekarImg from "@/assets/designers/milan-pekar.png";
 
 const featuredDesigners = [
   {
@@ -236,6 +237,7 @@ const featuredDesigners = [
     id: "milan-pekar",
     name: "Milan Pekař",
     specialty: "Crystalline Glass Art & Sculptural Vessels",
+    image: milanPekarImg,
     biography:
       "Milan Pekař is a Czech glass artist renowned for his mastery of crystalline glass techniques. His Crystalline Vase collection showcases his exceptional skill in creating pieces that capture and refract light in mesmerizing ways. Working in the tradition of Bohemian glassmaking while pushing contemporary boundaries, his work transforms functional vessels into sculptural art.",
     notableWorks: "Crystalline Vase Collection, Sculptural Glass Vessels",
