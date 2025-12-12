@@ -31,7 +31,7 @@ const galleryExperiences = [{
   }]
 }, {
   experience: "Restful Retreat",
-  subtitle: "Curated collectibles, bespoke furniture and handcrafted rugs",
+  subtitle: "Curated collectibles, hand-carved furniture and hand-knotted silk rugs",
   items: [{
     image: bedroomImage,
     title: "A Masterful Suite",
@@ -47,7 +47,7 @@ const galleryExperiences = [{
   }]
 }, {
   experience: "Personal Sanctuary",
-  subtitle: "Bespoke desk, handcrafted chandelier, artisan lamp and bronze painting",
+  subtitle: "Bespoke marquetry desk, hand-blown glass chandelier, artisan suede lamp and bronze painting",
   items: [{
     image: boudoirImage,
     title: "A Sophisticated Boudoir",
