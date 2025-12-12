@@ -41,7 +41,15 @@ const DesignDetails = () => {
           <p className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-primary">
             TRADE PROGRAM
           </p>
-          <h2 className="mb-12 font-display text-4xl text-foreground md:text-5xl">Our Guiding Principles</h2>
+          <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="font-display text-4xl text-foreground md:text-5xl">Our Guiding Principles</h2>
+            <button 
+              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              className="self-start bg-foreground text-background px-6 py-3 font-body text-sm uppercase tracking-wider hover:bg-foreground/90 transition-colors"
+            >
+              Join Now
+            </button>
+          </div>
           
           <Accordion type="single" collapsible className="space-y-4">
             {philosophyPoints.map((item, index) => <AccordionItem key={index} value={`philosophy-${index}`} className="border border-border bg-card px-8 py-2 transition-colors hover:bg-muted/30">
