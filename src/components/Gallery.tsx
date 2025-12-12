@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, Eye } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import bedroomImage from "@/assets/master-suite.jpg";
 import diningImage from "@/assets/dining-room.jpg";
@@ -232,9 +232,8 @@ const Gallery = () => {
                       <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                       {/* Mobile tap indicator */}
-                      {!hasTapped && <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground px-3 py-1.5 rounded-full text-xs font-body flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                          Tap to view
+                      {!hasTapped && <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground p-2 rounded-full flex items-center justify-center">
+                          <Eye className="w-4 h-4" />
                         </div>}
                       {/* Desktop hover indicator */}
                       <div className="absolute bottom-4 right-4 hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
