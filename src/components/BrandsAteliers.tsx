@@ -136,7 +136,7 @@ const partnerBrands = [
     origin: "France",
     description: "French design duo creating refined furniture pieces that blend contemporary aesthetics with traditional craftsmanship and timeless elegance.",
     featured: "Augusta Dining Chairs",
-    instagram: "https://instagram.com/cazesconquet",
+    instagram: "https://instagram.com/thierryconquet",
     galleryIndex: 2, // With Panoramic Cityscape Views
   },
   {
