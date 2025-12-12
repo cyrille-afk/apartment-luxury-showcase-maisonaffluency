@@ -260,7 +260,7 @@ const partnerBrands = [
     origin: "France",
     description: "French design studio crafting whimsical and sculptural furniture pieces that blend playful forms with exceptional craftsmanship and artistic expression.",
     featured: "Pépé Chair",
-    instagram: "https://instagram.com/hamrei_",
+    instagram: "https://instagram.com/hamrei",
     galleryIndex: 3, // A Dreamy Tuscan Landscape (Intimate Setting)
   },
   {
