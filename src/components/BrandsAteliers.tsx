@@ -106,6 +106,16 @@ const partnerBrands = [
     galleryIndex: 7, // A Serene Decor
   },
   {
+    id: "apparatus-studio-lantern",
+    name: "Apparatus Studio",
+    category: "Lighting",
+    subcategory: "Table Lamps",
+    origin: "United States",
+    description: "New York-based design studio creating refined lighting and furniture that bridges art and function through meticulous craftsmanship and material exploration.",
+    featured: "Lantern Table Lamp",
+    instagram: "https://instagram.com/apparatusstudio",
+  },
+  {
     id: "baleri",
     name: "Baleri Italia",
     category: "Furniture",
