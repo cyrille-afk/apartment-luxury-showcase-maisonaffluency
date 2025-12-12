@@ -81,7 +81,7 @@ const Navigation = () => {
               <TooltipTrigger asChild>
                 <button onClick={scrollToTop} className="group cursor-pointer">
                   <span className="font-serif text-base md:text-xl font-extrabold text-foreground transition-all duration-300 group-hover:text-primary group-hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.4),0_0_20px_hsl(var(--primary)/0.2)]">
-                    Maison Affluency Singapore
+                    Maison Affluency
                   </span>
                 </button>
               </TooltipTrigger>
