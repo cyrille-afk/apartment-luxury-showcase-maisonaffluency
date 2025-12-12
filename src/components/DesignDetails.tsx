@@ -143,7 +143,7 @@ const DesignDetails = () => {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display text-2xl">Join Our Trade Program</DialogTitle>
+            <DialogTitle className="font-display text-2xl">Welcome to Your Trade Account</DialogTitle>
             <DialogDescription className="font-body text-muted-foreground">
               Complete the form below to apply for exclusive trade benefits.
             </DialogDescription>
