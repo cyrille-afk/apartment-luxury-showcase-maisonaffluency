@@ -305,7 +305,7 @@ const partnerBrands = [
     origin: "France",
     description: "French glass artist renowned for his extraordinary hand-silvered mirrors and sculptural glass works, each piece a unique testament to ancient techniques reimagined.",
     featured: "Silver Glass Hammer Mirror",
-    instagram: "https://instagram.com/kikolopez_",
+    instagram: "https://instagram.com/kikolumieres",
     galleryIndex: 11, // Design Icons and Collectibles
   },
   {
