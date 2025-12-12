@@ -692,7 +692,7 @@ const BrandsAteliers = () => {
               transition={{ duration: 0.4, delay: brandIndex * 0.02 }}
               className="group p-5 md:p-6 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default"
             >
-              <div className="flex items-start justify-between mb-3">
+              <div className="flex items-start justify-between mb-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-primary transition-colors duration-300 mb-1">
                     {brand.name}
