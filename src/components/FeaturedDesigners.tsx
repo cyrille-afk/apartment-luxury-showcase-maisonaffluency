@@ -273,8 +273,11 @@ const featuredDesigners = [
     biography:
       "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
     notableWorks:
-      "Orsay Centre Table, Niko 420 custom sofa. \nLimited and numbered edition (12 copies).",
-    notableWorksLink: { text: "Orsay Centre Table", galleryIndex: 1 },
+      "Orsay Centre Table, Niko 420 Custom Sofa. \nLimited and numbered edition (12 copies).",
+    notableWorksLinks: [
+      { text: "Orsay Centre Table", galleryIndex: 1 },
+      { text: "Niko 420 Custom Sofa", galleryIndex: 0 },
+    ],
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
@@ -471,28 +474,57 @@ const FeaturedDesigners = () => {
                   <div className="space-y-4 text-muted-foreground font-body">
                     <p className="text-sm md:text-base leading-relaxed">{designer.biography}</p>
 
-                    {designer.notableWorksLink && (
+                    {(designer.notableWorksLink || designer.notableWorksLinks) && (
                       <div className="flex flex-wrap items-center gap-x-1 gap-y-1 pt-2">
                         <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
-                        <button
-                          onClick={() => {
-                            const gallerySection = document.getElementById('gallery');
-                            if (gallerySection) {
-                              gallerySection.scrollIntoView({ behavior: 'smooth' });
-                              setTimeout(() => {
-                                window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
-                                  detail: { index: designer.notableWorksLink.galleryIndex } 
-                                }));
-                              }, 500);
-                            }
-                          }}
-                          className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                        >
-                          <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                            {designer.notableWorksLink.text}
-                          </span>
-                          <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                        </button>
+                        {designer.notableWorksLinks ? (
+                          designer.notableWorksLinks.map((link, linkIdx) => (
+                            <span key={linkIdx} className="flex items-center">
+                              <button
+                                onClick={() => {
+                                  const gallerySection = document.getElementById('gallery');
+                                  if (gallerySection) {
+                                    gallerySection.scrollIntoView({ behavior: 'smooth' });
+                                    setTimeout(() => {
+                                      window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                        detail: { index: link.galleryIndex } 
+                                      }));
+                                    }, 500);
+                                  }
+                                }}
+                                className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                              >
+                                <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                  {link.text}
+                                </span>
+                                <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                              </button>
+                              {linkIdx < designer.notableWorksLinks.length - 1 && (
+                                <span className="text-muted-foreground mx-1">•</span>
+                              )}
+                            </span>
+                          ))
+                        ) : designer.notableWorksLink && (
+                          <button
+                            onClick={() => {
+                              const gallerySection = document.getElementById('gallery');
+                              if (gallerySection) {
+                                gallerySection.scrollIntoView({ behavior: 'smooth' });
+                                setTimeout(() => {
+                                  window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                    detail: { index: designer.notableWorksLink.galleryIndex } 
+                                  }));
+                                }, 500);
+                              }
+                            }}
+                            className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                          >
+                            <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                              {designer.notableWorksLink.text}
+                            </span>
+                            <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                          </button>
+                        )}
                       </div>
                     )}
 
