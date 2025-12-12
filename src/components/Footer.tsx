@@ -5,7 +5,7 @@ const Footer = () => {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-center gap-6">
           <a href="https://www.instagram.com/myaffluency/?hl=en" target="_blank" rel="noopener noreferrer" className="group">
-            <img alt="Affluency - Unique by Design" className="h-10 md:h-12 w-auto transition-all duration-300 group-hover:scale-105 group-hover:opacity-90 group-hover:drop-shadow-lg" src={affluencyLogo} />
+            <img alt="Affluency - Unique by Design" className="h-10 md:h-12 w-auto transition-all duration-300 group-hover:scale-105 group-hover:[filter:drop-shadow(0_0_8px_hsl(var(--primary)/0.4))_drop-shadow(0_0_20px_hsl(var(--primary)/0.2))]" src={affluencyLogo} />
           </a>
           
           <div className="flex gap-8 items-center">
