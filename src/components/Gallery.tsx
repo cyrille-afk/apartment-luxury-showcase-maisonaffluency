@@ -14,7 +14,7 @@ import artMasterBronzeImage from "@/assets/art-master-bronze.jpg";
 import bedroomSecondImage from "@/assets/bedroom-second.jpg";
 
 const galleryExperiences = [{
-  experience: "Social Gathering",
+  experience: "A Sociable Environment",
   subtitle: "Bespoke sofa, hand-knotted artisan rug, sculptural lighting and collectible furniture",
   items: [{
     image: bespokeSofaImage,
