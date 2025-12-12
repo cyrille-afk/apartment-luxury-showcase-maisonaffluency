@@ -834,9 +834,9 @@ const BrandsAteliers = () => {
                             {/* Handle tableTypeGroups for Tables subcategory */}
                             {subcategoryGroup.tableTypeGroups ? (
                               subcategoryGroup.tableTypeGroups.map((tableTypeGroup, typeIndex) => (
-                                <Collapsible key={tableTypeGroup.tableType || 'general-tables'} defaultOpen className="space-y-2 md:space-y-3 ml-4 md:ml-6">
+                                <Collapsible key={tableTypeGroup.tableType || 'general-tables'} defaultOpen className="group/type space-y-2 md:space-y-3 ml-4 md:ml-6">
                                   {tableTypeGroup.tableType && (
-                                    <CollapsibleTrigger className="flex items-center gap-2 w-full group/type hover:opacity-80 transition-opacity">
+                                    <CollapsibleTrigger className="flex items-center gap-2 w-full hover:opacity-80 transition-opacity cursor-pointer">
                                       <ChevronRight className="h-3 w-3 text-primary/50 transition-transform duration-200 group-data-[state=open]/type:rotate-90" />
                                       <h5 className="font-body text-xs md:text-sm text-primary/70 uppercase tracking-wider">
                                         {tableTypeGroup.tableType}
