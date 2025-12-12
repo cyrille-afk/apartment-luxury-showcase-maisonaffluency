@@ -197,7 +197,7 @@ const partnerBrands = [
   },
   {
     id: "emmanuel-babled",
-    name: "Emmanuel Babled",
+    name: "Babled Studio",
     category: "Decor",
     subcategory: "Decorative Objects",
     origin: "France",

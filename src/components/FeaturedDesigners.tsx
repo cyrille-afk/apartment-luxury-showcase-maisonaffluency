@@ -133,6 +133,20 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "emmanuel-babled",
+    name: "Emmanuel Babled",
+    specialty: "Sculptural Glass & Marble Design",
+    biography:
+      "Emmanuel Babled is a French-Italian designer renowned for his limited edition sculptural objects in glass and marble. His Osmosi Series represents the pinnacle of material exploration and artistic vision, blending organic forms with exceptional craftsmanship. Each piece is a unique work of art that pushes the boundaries of material possibilities.",
+    notableWorks: "Osmosi Series Sculptured Book Cover, Glass Sculptures, Marble Objects",
+    notableWorksLink: { text: "Osmosi Series", galleryIndex: 2 },
+    philosophy: "I explore the boundaries between art and design, creating objects that challenge perception and celebrate material beauty.",
+    links: [
+      { type: "Instagram", url: "https://instagram.com/emmanuelbabled" },
+      { type: "Curators' choice" },
+    ],
+  },
+  {
     id: "hamrei",
     name: "Hamrei",
     specialty: "Whimsical Furniture & Collectible Design",
