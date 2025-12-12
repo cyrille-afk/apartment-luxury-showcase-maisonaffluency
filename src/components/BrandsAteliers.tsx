@@ -55,6 +55,7 @@ const partnerBrands = [
     name: "Alinea Design Objects",
     category: "Furniture",
     subcategory: "Tables",
+    tableType: "Side Tables",
     origin: "Belgium",
     description: "Belgian design house curating and producing exceptional furniture pieces that blend sculptural form with functional elegance.",
     featured: "Angelo M Table",
@@ -108,7 +109,7 @@ const partnerBrands = [
     id: "baleri",
     name: "Baleri Italia",
     category: "Furniture",
-    subcategory: "Tables",
+    subcategory: "Storage",
     origin: "Italy",
     description: "Italian furniture company known for innovative designs and collaborations with leading architects and designers since 1984.",
     featured: "Plato Bookcase",
@@ -120,6 +121,7 @@ const partnerBrands = [
     name: "Bruno de Maistre",
     category: "Furniture",
     subcategory: "Tables",
+    tableType: "Console Tables",
     origin: "France",
     description: "French furniture designer creating refined bespoke pieces that combine classical proportions with contemporary elegance and exceptional craftsmanship.",
     featured: "Lyric Desk",
@@ -163,6 +165,7 @@ const partnerBrands = [
     name: "Damien Langlois-Meurinne",
     category: "Furniture",
     subcategory: "Tables",
+    tableType: "Console Tables",
     origin: "France",
     description: "French designer creating bold, sculptural furniture and lighting that combines artistic vision with masterful craftsmanship and luxurious materials.",
     featured: "Ooh La La Console",
@@ -348,6 +351,7 @@ const partnerBrands = [
     name: "Okha",
     category: "Furniture",
     subcategory: "Tables",
+    tableType: "Side Tables",
     origin: "South Africa",
     description: "South African design studio creating sophisticated furniture that bridges African craft traditions with contemporary global aesthetics.",
     featured: "Adam Court's Villa Pedestal Nightstand",
@@ -411,7 +415,7 @@ const partnerBrands = [
     id: "poltrona-frau",
     name: "Poltrona Frau",
     category: "Furniture",
-    subcategory: "Tables",
+    subcategory: "Storage",
     origin: "Italy",
     description: "Iconic Italian furniture house renowned for exceptional leather craftsmanship since 1912. Their timeless designs grace prestigious residences and institutions worldwide.",
     featured: "Albero Bookcase",
@@ -422,7 +426,7 @@ const partnerBrands = [
     id: "robicara",
     name: "Robicara",
     category: "Furniture",
-    subcategory: "Tables",
+    subcategory: "Storage",
     origin: "Italy",
     description: "Italian design studio creating bespoke furniture and cabinetry with exceptional attention to material, proportion, and craftsmanship.",
     featured: "Sira Credenza",
@@ -456,6 +460,7 @@ const partnerBrands = [
     name: "Thierry Lemaire",
     category: "Furniture",
     subcategory: "Tables",
+    tableType: "Coffee Tables",
     origin: "France",
     description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
     featured: "Orsay Centre Table",
@@ -516,12 +521,19 @@ const BrandsAteliers = () => {
       description: string;
       instagram: string;
       subcategory?: string;
+      tableType?: string;
       featuredItems: Array<{ featured: string; galleryIndex?: number }>;
+    };
+    
+    type TableTypeGroup = {
+      tableType: string | null;
+      brands: ConsolidatedBrand[];
     };
     
     type SubcategoryGroup = {
       subcategory: string | null;
       brands: ConsolidatedBrand[];
+      tableTypeGroups?: TableTypeGroup[];
     };
     
     const consolidatedGroups: Record<string, SubcategoryGroup[]> = {};
@@ -529,17 +541,19 @@ const BrandsAteliers = () => {
     Object.entries(groups).forEach(([category, brands]) => {
       const brandMap: Record<string, ConsolidatedBrand> = {};
       brands.forEach((brand) => {
-        if (!brandMap[brand.name]) {
-          brandMap[brand.name] = {
+        const brandKey = `${brand.name}-${(brand as any).tableType || ''}`;
+        if (!brandMap[brandKey]) {
+          brandMap[brandKey] = {
             name: brand.name,
             origin: brand.origin,
             description: brand.description,
             instagram: brand.instagram,
             subcategory: (brand as any).subcategory,
+            tableType: (brand as any).tableType,
             featuredItems: [],
           };
         }
-        brandMap[brand.name].featuredItems.push({
+        brandMap[brandKey].featuredItems.push({
           featured: brand.featured,
           galleryIndex: brand.galleryIndex,
         });
@@ -555,17 +569,56 @@ const BrandsAteliers = () => {
         subcategoryMap[subKey].push(brand);
       });
       
-      // Sort brands within each subcategory by name
-      Object.values(subcategoryMap).forEach((brandList) => {
-        brandList.sort((a, b) => a.name.localeCompare(b.name));
-      });
-      
-      // Convert to array and sort: no subcategory first, then alphabetically
+      // Convert to array and handle tableType grouping for Tables subcategory
       const subcategoryGroups: SubcategoryGroup[] = Object.entries(subcategoryMap)
-        .map(([key, brandList]) => ({
-          subcategory: key === '__none__' ? null : key,
-          brands: brandList,
-        }))
+        .map(([key, brandList]) => {
+          const subcategory = key === '__none__' ? null : key;
+          
+          // For Tables subcategory, group by tableType
+          if (subcategory === 'Tables') {
+            const tableTypeMap: Record<string, ConsolidatedBrand[]> = {};
+            brandList.forEach((brand) => {
+              const typeKey = brand.tableType || '__none__';
+              if (!tableTypeMap[typeKey]) {
+                tableTypeMap[typeKey] = [];
+              }
+              tableTypeMap[typeKey].push(brand);
+            });
+            
+            // Sort brands within each tableType by name
+            Object.values(tableTypeMap).forEach((list) => {
+              list.sort((a, b) => a.name.localeCompare(b.name));
+            });
+            
+            const tableTypeGroups: TableTypeGroup[] = Object.entries(tableTypeMap)
+              .map(([typeKey, typeBrands]) => ({
+                tableType: typeKey === '__none__' ? null : typeKey,
+                brands: typeBrands,
+              }))
+              .sort((a, b) => {
+                if (a.tableType === null && b.tableType !== null) return 1;
+                if (a.tableType !== null && b.tableType === null) return -1;
+                if (a.tableType && b.tableType) {
+                  return a.tableType.localeCompare(b.tableType);
+                }
+                return 0;
+              });
+            
+            return {
+              subcategory,
+              brands: [],
+              tableTypeGroups,
+            };
+          }
+          
+          // Sort brands within each subcategory by name
+          brandList.sort((a, b) => a.name.localeCompare(b.name));
+          
+          return {
+            subcategory,
+            brands: brandList,
+          };
+        })
         .sort((a, b) => {
           if (a.subcategory === null && b.subcategory !== null) return -1;
           if (a.subcategory !== null && b.subcategory === null) return 1;
@@ -778,67 +831,147 @@ const BrandsAteliers = () => {
                             <div className="flex-1 h-px bg-border/40" />
                           </CollapsibleTrigger>
                           <CollapsibleContent className="space-y-3 md:space-y-4">
-                            {subcategoryGroup.brands.map((brand, index) => (
-                              <motion.div
-                                key={`${category}-${brand.name}`}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                                transition={{ duration: 0.4, delay: categoryIndex * 0.1 + subIndex * 0.05 + index * 0.03 }}
-                                className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300 ml-4 md:ml-6"
-                              >
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
-                                      <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
-                                        {brand.name}
-                                      </h3>
-                                      <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
-                                        — {brand.origin}
-                                      </span>
-                                    </div>
-                                    <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
-                                      {brand.description}
-                                    </p>
-                                    <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                                      <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
-                                      {brand.featuredItems.map((item, itemIndex) => (
-                                        <span key={itemIndex} className="flex items-center">
-                                          {item.galleryIndex !== undefined ? (
-                                            <button
-                                              onClick={() => scrollToGallery(item.galleryIndex!)}
-                                              className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                            {/* Handle tableTypeGroups for Tables subcategory */}
+                            {subcategoryGroup.tableTypeGroups ? (
+                              subcategoryGroup.tableTypeGroups.map((tableTypeGroup, typeIndex) => (
+                                <Collapsible key={tableTypeGroup.tableType || 'general-tables'} defaultOpen className="space-y-2 md:space-y-3 ml-4 md:ml-6">
+                                  {tableTypeGroup.tableType && (
+                                    <CollapsibleTrigger className="flex items-center gap-2 w-full group/type hover:opacity-80 transition-opacity">
+                                      <ChevronRight className="h-3 w-3 text-primary/50 transition-transform duration-200 group-data-[state=open]/type:rotate-90" />
+                                      <h5 className="font-body text-xs md:text-sm text-primary/70 uppercase tracking-wider">
+                                        {tableTypeGroup.tableType}
+                                      </h5>
+                                      <div className="flex-1 h-px bg-border/30" />
+                                    </CollapsibleTrigger>
+                                  )}
+                                  <CollapsibleContent className={`space-y-3 md:space-y-4 ${tableTypeGroup.tableType ? 'ml-3 md:ml-5' : ''}`}>
+                                    {tableTypeGroup.brands.map((brand, index) => (
+                                      <motion.div
+                                        key={`${category}-${brand.name}-${brand.tableType || ''}`}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={isInView ? { opacity: 1, y: 0 } : {}}
+                                        transition={{ duration: 0.4, delay: categoryIndex * 0.1 + subIndex * 0.05 + typeIndex * 0.03 + index * 0.02 }}
+                                        className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
+                                      >
+                                        <div className="flex items-start justify-between">
+                                          <div className="flex-1 min-w-0">
+                                            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
+                                              <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
+                                                {brand.name}
+                                              </h3>
+                                              <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
+                                                — {brand.origin}
+                                              </span>
+                                            </div>
+                                            <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
+                                              {brand.description}
+                                            </p>
+                                            <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                                              <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
+                                              {brand.featuredItems.map((item, itemIndex) => (
+                                                <span key={itemIndex} className="flex items-center">
+                                                  {item.galleryIndex !== undefined ? (
+                                                    <button
+                                                      onClick={() => scrollToGallery(item.galleryIndex!)}
+                                                      className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                                                    >
+                                                      <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                                        {item.featured}
+                                                      </span>
+                                                      <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                                                    </button>
+                                                  ) : (
+                                                    <span className="text-xs md:text-sm text-foreground/80 font-body">
+                                                      {item.featured}
+                                                    </span>
+                                                  )}
+                                                  {itemIndex < brand.featuredItems.length - 1 && (
+                                                    <span className="text-muted-foreground mx-1">•</span>
+                                                  )}
+                                                </span>
+                                              ))}
+                                            </div>
+                                          </div>
+                                          {brand.instagram && (
+                                            <a
+                                              href={brand.instagram}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
+                                              onClick={(e) => e.stopPropagation()}
                                             >
-                                              <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                              <Instagram className="h-5 w-5 md:h-4 md:w-4" />
+                                            </a>
+                                          )}
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  </CollapsibleContent>
+                                </Collapsible>
+                              ))
+                            ) : (
+                              subcategoryGroup.brands.map((brand, index) => (
+                                <motion.div
+                                  key={`${category}-${brand.name}`}
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                                  transition={{ duration: 0.4, delay: categoryIndex * 0.1 + subIndex * 0.05 + index * 0.03 }}
+                                  className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300 ml-4 md:ml-6"
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
+                                        <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
+                                          {brand.name}
+                                        </h3>
+                                        <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
+                                          — {brand.origin}
+                                        </span>
+                                      </div>
+                                      <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
+                                        {brand.description}
+                                      </p>
+                                      <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                                        <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
+                                        {brand.featuredItems.map((item, itemIndex) => (
+                                          <span key={itemIndex} className="flex items-center">
+                                            {item.galleryIndex !== undefined ? (
+                                              <button
+                                                onClick={() => scrollToGallery(item.galleryIndex!)}
+                                                className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                                              >
+                                                <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                                  {item.featured}
+                                                </span>
+                                                <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                                              </button>
+                                            ) : (
+                                              <span className="text-xs md:text-sm text-foreground/80 font-body">
                                                 {item.featured}
                                               </span>
-                                              <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                                            </button>
-                                          ) : (
-                                            <span className="text-xs md:text-sm text-foreground/80 font-body">
-                                              {item.featured}
-                                            </span>
-                                          )}
-                                          {itemIndex < brand.featuredItems.length - 1 && (
-                                            <span className="text-muted-foreground mx-1">•</span>
-                                          )}
-                                        </span>
-                                      ))}
+                                            )}
+                                            {itemIndex < brand.featuredItems.length - 1 && (
+                                              <span className="text-muted-foreground mx-1">•</span>
+                                            )}
+                                          </span>
+                                        ))}
+                                      </div>
                                     </div>
+                                    {brand.instagram && (
+                                      <a
+                                        href={brand.instagram}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <Instagram className="h-5 w-5 md:h-4 md:w-4" />
+                                      </a>
+                                    )}
                                   </div>
-                                  {brand.instagram && (
-                                    <a
-                                      href={brand.instagram}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <Instagram className="h-5 w-5 md:h-4 md:w-4" />
-                                    </a>
-                                  )}
-                                </div>
-                              </motion.div>
-                            ))}
+                                </motion.div>
+                              ))
+                            )}
                           </CollapsibleContent>
                         </Collapsible>
                       ) : (
