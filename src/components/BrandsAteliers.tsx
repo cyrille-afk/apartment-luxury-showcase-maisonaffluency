@@ -380,7 +380,7 @@ const partnerBrands = [
     id: "olivia-cognet",
     name: "Olivia Cognet",
     category: "Lighting",
-    subcategory: "Table Lamps",
+    subcategory: "Floor Lamps",
     origin: "France",
     description: "French artist and designer creating sculptural ceramic lighting and furniture that celebrates organic forms and handcrafted textures.",
     featured: "Valauris Lamp",
