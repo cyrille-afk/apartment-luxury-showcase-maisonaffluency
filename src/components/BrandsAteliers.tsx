@@ -12,9 +12,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 // Gallery image index mapping (based on flattened gallery items order)
-// 0: A Masterful Suite, 1: Unique by Design, 2: Design Icons and Collectibles
-// 3: An Inviting Lounge Area, 4: A Sophisticated Living Room, 5: With Panoramic Cityscape Views
-// 6: A Sophisticated Boudoir, 7: A Serene Decor, 8: An Art Master Display
+// 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
+// 3: A Dreamy Tuscan Landscape, 4: A Highly Customised Table, 5: A Relaxed Setting
+// 6: A Masterful Suite, 7: Unique by Design, 8: Design Icons and Collectibles
+// 9: A Sophisticated Boudoir, 10: A Serene Decor, 11: A Design Treasure Trove
 
 const partnerBrands = [
   {
@@ -37,7 +38,7 @@ const partnerBrands = [
     description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
     featured: "Straw Marquetry Mantle Box",
     instagram: "https://instagram.com/alexanderlamont",
-    galleryIndex: 8, // An Art Master Display
+    galleryIndex: 11, // A Design Treasure Trove
   },
   {
     id: "alinea-design-objects",
@@ -60,7 +61,7 @@ const partnerBrands = [
     description: "French atelier crafting limited edition lighting pieces that combine organic forms with precious materials, each piece a sculptural work of art.",
     featured: "Limited Edition Bud Table Lamp",
     instagram: "https://instagram.com/atelierdemichelis",
-    galleryIndex: 4, // Unique by Design
+    galleryIndex: 7, // Unique by Design
   },
   {
     id: "atelier-fevrier",
@@ -92,7 +93,7 @@ const partnerBrands = [
     description: "New York-based design studio creating refined lighting and furniture that bridges art and function through meticulous craftsmanship and material exploration.",
     featured: "Metronome Reading Suede Floor Lamp",
     instagram: "https://instagram.com/apparatusstudio",
-    galleryIndex: 7, // A Serene Decor
+    galleryIndex: 10, // A Serene Decor
   },
   {
     id: "apparatus-studio-lantern",
@@ -113,7 +114,7 @@ const partnerBrands = [
     description: "Italian furniture company known for innovative designs and collaborations with leading architects and designers since 1984.",
     featured: "Plato Bookcase",
     instagram: "https://instagram.com/baleriitalia",
-    galleryIndex: 8, // An Art Master Display
+    galleryIndex: 11, // A Design Treasure Trove
   },
   {
     id: "bruno-de-maistre",
@@ -124,7 +125,7 @@ const partnerBrands = [
     description: "French furniture designer creating refined bespoke pieces that combine classical proportions with contemporary elegance and exceptional craftsmanship.",
     featured: "Lyric Desk",
     instagram: "https://instagram.com/brunodemaistre",
-    galleryIndex: 6, // A Sophisticated Boudoir
+    galleryIndex: 9, // A Sophisticated Boudoir
   },
   {
     id: "cazes-conquet",
@@ -146,7 +147,7 @@ const partnerBrands = [
     description: "Italian rug manufacturer known for contemporary designs and traditional Nepalese hand-knotting techniques. Their Giudecca custom rugs blend artistry with exceptional craftsmanship.",
     featured: "Giudecca Custom Rug",
     instagram: "https://instagram.com/cc_tapis",
-    galleryIndex: 3, // A Masterful Suite
+    galleryIndex: 6, // A Masterful Suite
   },
   {
     id: "delcourt-collection",
@@ -169,7 +170,7 @@ const partnerBrands = [
     description: "Portuguese textile house crafting exquisite bed linens and home textiles using the finest natural fibers and artisanal techniques.",
     featured: "Silk Bed Cover",
     instagram: "https://instagram.com/celso.de.lemos",
-    galleryIndex: 3, // A Masterful Suite
+    galleryIndex: 6, // A Masterful Suite
   },
   {
     id: "damien-langlois-meurinne",
@@ -181,7 +182,7 @@ const partnerBrands = [
     description: "French designer creating bold, sculptural furniture and lighting that combines artistic vision with masterful craftsmanship and luxurious materials.",
     featured: "Ooh La La Console",
     instagram: "https://instagram.com/damienlanglois_meurinne",
-    galleryIndex: 5, // Design Icons and Collectibles
+    galleryIndex: 8, // Design Icons and Collectibles
   },
   {
     id: "ecart-paris",
@@ -237,7 +238,7 @@ const partnerBrands = [
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
     featured: "Carved Marble Marie Lamp",
     instagram: "https://instagram.com/haymanneditions",
-    galleryIndex: 5, // Design Icons and Collectibles
+    galleryIndex: 8, // Design Icons and Collectibles
   },
   {
     id: "herve-van-der-straeten",
@@ -248,7 +249,7 @@ const partnerBrands = [
     description: "Renowned French designer and artist creating sculptural furniture and lighting in bronze, his pieces are celebrated for their organic forms and exceptional craftsmanship.",
     featured: "Bronze MicMac Chandelier",
     instagram: "https://instagram.com/hervevanderstraeten",
-    galleryIndex: 3, // A Masterful Suite
+    galleryIndex: 6, // A Masterful Suite
   },
   {
     id: "hamrei",
@@ -260,7 +261,7 @@ const partnerBrands = [
     description: "French design studio crafting whimsical and sculptural furniture pieces that blend playful forms with exceptional craftsmanship and artistic expression.",
     featured: "Pépé Chair",
     instagram: "https://instagram.com/hamrei_",
-    galleryIndex: 6, // A Sophisticated Boudoir
+    galleryIndex: 3, // A Dreamy Tuscan Landscape (Intimate Setting)
   },
   {
     id: "jindrich-halabala",
@@ -283,7 +284,7 @@ const partnerBrands = [
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
     featured: "Brunelleschi Perspective Wallcover",
     instagram: "https://instagram.com/iksel_decorative_arts",
-    galleryIndex: 3, // A Masterful Suite
+    galleryIndex: 6, // A Masterful Suite
   },
   {
     id: "iksel-white-blossom",
@@ -294,7 +295,7 @@ const partnerBrands = [
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
     featured: "White Blossom Wallcover",
     instagram: "https://instagram.com/iksel_decorative_arts",
-    galleryIndex: 7, // A Serene Decor
+    galleryIndex: 10, // A Serene Decor
   },
   {
     id: "kiko-lopez",
@@ -305,7 +306,7 @@ const partnerBrands = [
     description: "French glass artist renowned for his extraordinary hand-silvered mirrors and sculptural glass works, each piece a unique testament to ancient techniques reimagined.",
     featured: "Silver Glass Hammer Mirror",
     instagram: "https://instagram.com/kikolopez_",
-    galleryIndex: 5, // Design Icons and Collectibles
+    galleryIndex: 8, // Design Icons and Collectibles
   },
   {
     id: "leo-sentou",
@@ -328,7 +329,7 @@ const partnerBrands = [
     description: "Japanese lighting atelier creating delicate paper and natural material lamps that embody the principles of wabi-sabi and mindful design.",
     featured: "Toshiro Lamp",
     instagram: "https://instagram.com/madeinkira",
-    galleryIndex: 6, // A Sophisticated Boudoir
+    galleryIndex: 9, // A Sophisticated Boudoir
   },
   {
     id: "nathalie-ziegler",
@@ -339,7 +340,7 @@ const partnerBrands = [
     description: "French glass artist creating bespoke chandeliers and sculptural glass pieces, each work a unique expression of light and organic form.",
     featured: "Custom Glass Chandelier",
     instagram: "https://instagram.com/nathalieziegler",
-    galleryIndex: 6, // A Sophisticated Boudoir
+    galleryIndex: 9, // A Sophisticated Boudoir
   },
   {
     id: "nika-zupanc",
@@ -351,7 +352,7 @@ const partnerBrands = [
     description: "Slovenian designer known for poetic, feminine furniture and lighting that combines nostalgic elegance with contemporary sensibility.",
     featured: "Stardust Loveseat",
     instagram: "https://instagram.com/nikazupancstudio",
-    galleryIndex: 6, // A Sophisticated Boudoir
+    galleryIndex: 9, // A Sophisticated Boudoir
   },
   {
     id: "okha",
@@ -363,7 +364,7 @@ const partnerBrands = [
     description: "South African design studio creating sophisticated furniture that bridges African craft traditions with contemporary global aesthetics.",
     featured: "Adam Court's Villa Pedestal Nightstand",
     instagram: "https://instagram.com/_okha",
-    galleryIndex: 4, // Unique by Design
+    galleryIndex: 7, // Unique by Design
   },
   {
     id: "ooumm",
@@ -374,7 +375,7 @@ const partnerBrands = [
     description: "French luxury brand creating sculptural marble candles and decorative objects that blend artisanal craftsmanship with contemporary design sensibility.",
     featured: "Lyra Marble Candle",
     instagram: "https://instagram.com/ooumm_paris",
-    galleryIndex: 5, // Design Icons and Collectibles
+    galleryIndex: 8, // Design Icons and Collectibles
   },
   {
     id: "olivia-cognet",
@@ -396,7 +397,7 @@ const partnerBrands = [
     description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
     featured: "Riyad Double Faced Throw and Cushion",
     instagram: "https://instagram.com/peterreed1861",
-    galleryIndex: 4, // Unique by Design
+    galleryIndex: 7, // Unique by Design
   },
   {
     id: "pierre-bonnefille",
@@ -406,7 +407,7 @@ const partnerBrands = [
     description: "French artist renowned for his bronze paintings and sculptural works, creating pieces that blur the boundaries between painting and sculpture through masterful material exploration.",
     featured: "Bronze Painting 204",
     instagram: "https://instagram.com/pierrebonnefille",
-    galleryIndex: 8, // An Art Master Display
+    galleryIndex: 11, // A Design Treasure Trove
   },
   {
     id: "pinton-1867",
@@ -416,7 +417,7 @@ const partnerBrands = [
     description: "French textile house continuing the Aubusson tradition of handcrafted rugs and tapestries, blending historical techniques with contemporary design.",
     featured: "Custom Rug Collection",
     instagram: "https://instagram.com/pinton1867",
-    galleryIndex: 4, // Unique by Design
+    galleryIndex: 7, // Unique by Design
   },
   {
     id: "poltrona-frau",
