@@ -65,7 +65,7 @@ const galleryExperiences = [{
     description: "Damien Langlois-Meurinne's Ooh La La Console, Haymann Editions' Carved Marble Marie Lamp, Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
   }]
 }, {
-  experience: "Personal Sanctuary",
+  experience: "A Personal Sanctuary",
   subtitle: "Bespoke marquetry desk, hand-blown glass chandelier, artisan suede lamp and bronze painting",
   items: [{
     image: boudoirImage,
