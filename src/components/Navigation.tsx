@@ -101,11 +101,11 @@ const Navigation = () => {
                   onClick={() => handleNavClick(item.href)} 
                   className={cn(
                     "font-body text-sm uppercase tracking-wider transition-all duration-300 relative group",
-                    isTradeProgram && "px-3 py-1.5 border border-primary/50 rounded-sm bg-primary/5 hover:bg-primary/10",
+                    isTradeProgram && "px-3 py-1.5 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
                     activeSection === item.href 
-                      ? "text-primary font-medium" 
+                      ? isTradeProgram ? "text-background font-medium" : "text-primary font-medium"
                       : isTradeProgram
-                        ? "text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                        ? "text-background"
                         : "text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
                   )}
                 >
@@ -143,11 +143,11 @@ const Navigation = () => {
                       className={cn(
                         "font-serif text-2xl text-left transition-all duration-300 py-3 relative group",
                         !isTradeProgram && "border-b border-border/30",
-                        isTradeProgram && "px-4 py-2 mt-2 border border-primary/50 rounded-sm bg-primary/5 hover:bg-primary/10",
+                        isTradeProgram && "px-4 py-2 mt-2 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
                         activeSection === item.href 
-                          ? "text-primary" 
+                          ? isTradeProgram ? "text-background" : "text-primary"
                           : isTradeProgram
-                            ? "text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                            ? "text-background"
                             : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
                       )}
                     >
