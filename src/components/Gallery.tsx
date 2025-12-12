@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import bedroomImage from "@/assets/master-suite.jpg";
 import diningImage from "@/assets/dining-room.jpg";
@@ -229,9 +229,9 @@ const Gallery = () => {
                         </div>
                       )}
                       {/* Desktop hover indicator */}
-                      <div className="absolute inset-0 hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span className="bg-background/80 text-foreground px-4 py-2 rounded-full text-sm font-body">
-                          Click to enlarge
+                      <div className="absolute bottom-4 right-4 hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="bg-background/90 text-foreground p-2.5 rounded-full shadow-lg backdrop-blur-sm">
+                          <Maximize2 className="w-4 h-4" />
                         </span>
                       </div>
                     </div>
