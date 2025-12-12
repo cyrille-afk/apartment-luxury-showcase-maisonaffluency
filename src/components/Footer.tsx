@@ -4,8 +4,8 @@ const Footer = () => {
   return <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-center gap-6">
-          <a href="https://www.instagram.com/myaffluency/?hl=en" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
-            <img alt="Affluency - Unique by Design" className="h-10 md:h-12 w-auto" src={affluencyLogo} />
+          <a href="https://www.instagram.com/myaffluency/?hl=en" target="_blank" rel="noopener noreferrer" className="group">
+            <img alt="Affluency - Unique by Design" className="h-10 md:h-12 w-auto transition-all duration-300 group-hover:scale-105 group-hover:opacity-90 group-hover:drop-shadow-lg" src={affluencyLogo} />
           </a>
           
           <div className="flex gap-8 items-center">
