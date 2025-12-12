@@ -73,6 +73,7 @@ const Gallery = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [hasTapped, setHasTapped] = useState(false);
 
   // Minimum swipe distance required (in px)
   const minSwipeDistance = 50;
@@ -208,7 +209,10 @@ const Gallery = () => {
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.6, delay: sectionIndex * 0.2 + index * 0.1 }}
                     className="group cursor-pointer"
-                    onClick={() => openLightbox(sectionIndex, index)}
+                    onClick={() => {
+                      setHasTapped(true);
+                      openLightbox(sectionIndex, index);
+                    }}
                   >
                     <div className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm">
                       <img
@@ -218,10 +222,12 @@ const Gallery = () => {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                       {/* Mobile tap indicator */}
-                      <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground px-3 py-1.5 rounded-full text-xs font-body flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                        Tap to view
-                      </div>
+                      {!hasTapped && (
+                        <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground px-3 py-1.5 rounded-full text-xs font-body flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                          Tap to view
+                        </div>
+                      )}
                       {/* Desktop hover indicator */}
                       <div className="absolute inset-0 hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <span className="bg-background/80 text-foreground px-4 py-2 rounded-full text-sm font-body">
