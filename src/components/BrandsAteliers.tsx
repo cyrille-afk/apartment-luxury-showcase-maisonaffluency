@@ -708,29 +708,30 @@ const BrandsAteliers = () => {
                           <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
                             {brand.description}
                           </p>
-                          <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
                             <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
-                            <ul className="space-y-1 ml-2">
-                              {brand.featuredItems.map((item, itemIndex) => (
-                                <li key={itemIndex} className="flex items-center gap-1">
-                                  {item.galleryIndex !== undefined ? (
-                                    <button
-                                      onClick={() => scrollToGallery(item.galleryIndex!)}
-                                      className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                                    >
-                                      <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                                        {item.featured}
-                                      </span>
-                                      <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                                    </button>
-                                  ) : (
-                                    <span className="text-xs md:text-sm text-foreground/80 font-body">
+                            {brand.featuredItems.map((item, itemIndex) => (
+                              <span key={itemIndex} className="flex items-center">
+                                {item.galleryIndex !== undefined ? (
+                                  <button
+                                    onClick={() => scrollToGallery(item.galleryIndex!)}
+                                    className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                                  >
+                                    <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
                                       {item.featured}
                                     </span>
-                                  )}
-                                </li>
-                              ))}
-                            </ul>
+                                    <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                                  </button>
+                                ) : (
+                                  <span className="text-xs md:text-sm text-foreground/80 font-body">
+                                    {item.featured}
+                                  </span>
+                                )}
+                                {itemIndex < brand.featuredItems.length - 1 && (
+                                  <span className="text-muted-foreground mx-1">•</span>
+                                )}
+                              </span>
+                            ))}
                           </div>
                         </div>
                         {brand.instagram && (
