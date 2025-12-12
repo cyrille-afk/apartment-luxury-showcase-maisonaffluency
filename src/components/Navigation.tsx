@@ -81,8 +81,8 @@ const Navigation = () => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <button onClick={scrollToTop} className="group cursor-pointer flex items-center gap-2 whitespace-nowrap">
-                  <img src={logoIcon} alt="Affluency Logo" className="h-7 md:h-9 w-auto" />
-                  <span className="font-serif text-base md:text-xl font-extrabold text-foreground transition-all duration-300 group-hover:text-primary group-hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.4),0_0_20px_hsl(var(--primary)/0.2)]">
+                  <img src={logoIcon} alt="Affluency Logo" className="h-9 md:h-9 w-auto" />
+                  <span className="font-serif text-lg md:text-xl font-extrabold text-foreground transition-all duration-300 group-hover:text-primary group-hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.4),0_0_20px_hsl(var(--primary)/0.2)]">
                     Maison Affluency
                   </span>
                 </button>
