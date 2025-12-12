@@ -132,6 +132,7 @@ const partnerBrands = [
     name: "Cazes & Conquet",
     category: "Furniture",
     subcategory: "Seating",
+    seatType: "Chairs",
     origin: "France",
     description: "French design duo creating refined furniture pieces that blend contemporary aesthetics with traditional craftsmanship and timeless elegance.",
     featured: "Augusta Dining Chairs",
@@ -209,6 +210,7 @@ const partnerBrands = [
     name: "Eric Schmitt Studio",
     category: "Furniture",
     subcategory: "Seating",
+    seatType: "Chairs",
     origin: "France",
     description: "French designer creating bold sculptural furniture in bronze and iron, each piece a statement of artistic vision and master craftsmanship.",
     featured: "Chairie Dining Chair",
@@ -253,6 +255,7 @@ const partnerBrands = [
     name: "Hamrei",
     category: "Furniture",
     subcategory: "Seating",
+    seatType: "Chairs",
     origin: "France",
     description: "French design studio crafting whimsical and sculptural furniture pieces that blend playful forms with exceptional craftsmanship and artistic expression.",
     featured: "Pépé Chair",
@@ -264,6 +267,7 @@ const partnerBrands = [
     name: "Jindrich Halabala",
     category: "Furniture",
     subcategory: "Seating",
+    seatType: "Armchairs",
     origin: "Czech Republic",
     description: "Legendary Czech furniture designer whose iconic mid-century lounge chairs represent the pinnacle of functionalist design, prized by collectors worldwide.",
     featured: "Lounge Chair",
@@ -308,6 +312,7 @@ const partnerBrands = [
     name: "Leo Sentou",
     category: "Furniture",
     subcategory: "Seating",
+    seatType: "Armchairs",
     origin: "France",
     description: "French furniture designer creating refined contemporary pieces that balance sculptural presence with functional elegance and exceptional craftsmanship.",
     featured: "AB Armchair",
@@ -341,6 +346,7 @@ const partnerBrands = [
     name: "Nika Zupanc Studio",
     category: "Furniture",
     subcategory: "Seating",
+    seatType: "Sofas & Loveseats",
     origin: "Slovenia",
     description: "Slovenian designer known for poetic, feminine furniture and lighting that combines nostalgic elegance with contemporary sensibility.",
     featured: "Stardust Loveseat",
@@ -450,6 +456,7 @@ const partnerBrands = [
     name: "Thierry Lemaire",
     category: "Furniture",
     subcategory: "Seating",
+    seatType: "Sofas & Loveseats",
     origin: "France",
     description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
     featured: "Niko 420 Custom Sofa",
@@ -523,18 +530,19 @@ const BrandsAteliers = () => {
       instagram: string;
       subcategory?: string;
       tableType?: string;
+      seatType?: string;
       featuredItems: Array<{ featured: string; galleryIndex?: number }>;
     };
     
-    type TableTypeGroup = {
-      tableType: string | null;
+    type SubTypeGroup = {
+      subType: string | null;
       brands: ConsolidatedBrand[];
     };
     
     type SubcategoryGroup = {
       subcategory: string | null;
       brands: ConsolidatedBrand[];
-      tableTypeGroups?: TableTypeGroup[];
+      subTypeGroups?: SubTypeGroup[];
     };
     
     const consolidatedGroups: Record<string, SubcategoryGroup[]> = {};
@@ -542,7 +550,7 @@ const BrandsAteliers = () => {
     Object.entries(groups).forEach(([category, brands]) => {
       const brandMap: Record<string, ConsolidatedBrand> = {};
       brands.forEach((brand) => {
-        const brandKey = `${brand.name}-${(brand as any).tableType || ''}`;
+        const brandKey = `${brand.name}-${(brand as any).tableType || ''}-${(brand as any).seatType || ''}`;
         if (!brandMap[brandKey]) {
           brandMap[brandKey] = {
             name: brand.name,
@@ -551,6 +559,7 @@ const BrandsAteliers = () => {
             instagram: brand.instagram,
             subcategory: (brand as any).subcategory,
             tableType: (brand as any).tableType,
+            seatType: (brand as any).seatType,
             featuredItems: [],
           };
         }
@@ -570,37 +579,37 @@ const BrandsAteliers = () => {
         subcategoryMap[subKey].push(brand);
       });
       
-      // Convert to array and handle tableType grouping for Tables subcategory
+      // Convert to array and handle subType grouping for Tables and Seating subcategories
       const subcategoryGroups: SubcategoryGroup[] = Object.entries(subcategoryMap)
         .map(([key, brandList]) => {
           const subcategory = key === '__none__' ? null : key;
           
           // For Tables subcategory, group by tableType
           if (subcategory === 'Tables') {
-            const tableTypeMap: Record<string, ConsolidatedBrand[]> = {};
+            const subTypeMap: Record<string, ConsolidatedBrand[]> = {};
             brandList.forEach((brand) => {
               const typeKey = brand.tableType || '__none__';
-              if (!tableTypeMap[typeKey]) {
-                tableTypeMap[typeKey] = [];
+              if (!subTypeMap[typeKey]) {
+                subTypeMap[typeKey] = [];
               }
-              tableTypeMap[typeKey].push(brand);
+              subTypeMap[typeKey].push(brand);
             });
             
-            // Sort brands within each tableType by name
-            Object.values(tableTypeMap).forEach((list) => {
+            // Sort brands within each subType by name
+            Object.values(subTypeMap).forEach((list) => {
               list.sort((a, b) => a.name.localeCompare(b.name));
             });
             
-            const tableTypeGroups: TableTypeGroup[] = Object.entries(tableTypeMap)
+            const subTypeGroups: SubTypeGroup[] = Object.entries(subTypeMap)
               .map(([typeKey, typeBrands]) => ({
-                tableType: typeKey === '__none__' ? null : typeKey,
+                subType: typeKey === '__none__' ? null : typeKey,
                 brands: typeBrands,
               }))
               .sort((a, b) => {
-                if (a.tableType === null && b.tableType !== null) return 1;
-                if (a.tableType !== null && b.tableType === null) return -1;
-                if (a.tableType && b.tableType) {
-                  return a.tableType.localeCompare(b.tableType);
+                if (a.subType === null && b.subType !== null) return 1;
+                if (a.subType !== null && b.subType === null) return -1;
+                if (a.subType && b.subType) {
+                  return a.subType.localeCompare(b.subType);
                 }
                 return 0;
               });
@@ -608,7 +617,44 @@ const BrandsAteliers = () => {
             return {
               subcategory,
               brands: [],
-              tableTypeGroups,
+              subTypeGroups,
+            };
+          }
+          
+          // For Seating subcategory, group by seatType
+          if (subcategory === 'Seating') {
+            const subTypeMap: Record<string, ConsolidatedBrand[]> = {};
+            brandList.forEach((brand) => {
+              const typeKey = brand.seatType || '__none__';
+              if (!subTypeMap[typeKey]) {
+                subTypeMap[typeKey] = [];
+              }
+              subTypeMap[typeKey].push(brand);
+            });
+            
+            // Sort brands within each subType by name
+            Object.values(subTypeMap).forEach((list) => {
+              list.sort((a, b) => a.name.localeCompare(b.name));
+            });
+            
+            const subTypeGroups: SubTypeGroup[] = Object.entries(subTypeMap)
+              .map(([typeKey, typeBrands]) => ({
+                subType: typeKey === '__none__' ? null : typeKey,
+                brands: typeBrands,
+              }))
+              .sort((a, b) => {
+                if (a.subType === null && b.subType !== null) return 1;
+                if (a.subType !== null && b.subType === null) return -1;
+                if (a.subType && b.subType) {
+                  return a.subType.localeCompare(b.subType);
+                }
+                return 0;
+              });
+            
+            return {
+              subcategory,
+              brands: [],
+              subTypeGroups,
             };
           }
           
@@ -832,23 +878,23 @@ const BrandsAteliers = () => {
                             <div className="flex-1 h-px bg-border/40" />
                           </CollapsibleTrigger>
                           <CollapsibleContent className="space-y-3 md:space-y-4">
-                            {/* Handle tableTypeGroups for Tables subcategory */}
-                            {subcategoryGroup.tableTypeGroups ? (
-                              subcategoryGroup.tableTypeGroups.map((tableTypeGroup, typeIndex) => (
-                                <Collapsible key={tableTypeGroup.tableType || 'general-tables'} className="group/type space-y-2 md:space-y-3 ml-4 md:ml-6">
-                                  {tableTypeGroup.tableType && (
+                            {/* Handle subTypeGroups for Tables and Seating subcategories */}
+                            {subcategoryGroup.subTypeGroups ? (
+                              subcategoryGroup.subTypeGroups.map((subTypeGroup, typeIndex) => (
+                                <Collapsible key={subTypeGroup.subType || 'general-subtype'} className="group/type space-y-2 md:space-y-3 ml-4 md:ml-6">
+                                  {subTypeGroup.subType && (
                                     <CollapsibleTrigger className="flex items-center gap-2 w-full hover:opacity-80 transition-opacity cursor-pointer">
                                       <ChevronRight className="h-3 w-3 text-primary/50 transition-transform duration-200 group-data-[state=open]/type:rotate-90" />
                                       <h5 className="font-body text-xs md:text-sm text-primary/70 uppercase tracking-wider">
-                                        {tableTypeGroup.tableType}
+                                        {subTypeGroup.subType}
                                       </h5>
                                       <div className="flex-1 h-px bg-border/30" />
                                     </CollapsibleTrigger>
                                   )}
-                                  <CollapsibleContent className={`space-y-3 md:space-y-4 ${tableTypeGroup.tableType ? 'ml-3 md:ml-5' : ''}`}>
-                                    {tableTypeGroup.brands.map((brand, index) => (
+                                  <CollapsibleContent className={`space-y-3 md:space-y-4 ${subTypeGroup.subType ? 'ml-3 md:ml-5' : ''}`}>
+                                    {subTypeGroup.brands.map((brand, index) => (
                                       <motion.div
-                                        key={`${category}-${brand.name}-${brand.tableType || ''}`}
+                                        key={`${category}-${brand.name}-${brand.tableType || brand.seatType || ''}`}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={isInView ? { opacity: 1, y: 0 } : {}}
                                         transition={{ duration: 0.4, delay: categoryIndex * 0.1 + subIndex * 0.05 + typeIndex * 0.03 + index * 0.02 }}
