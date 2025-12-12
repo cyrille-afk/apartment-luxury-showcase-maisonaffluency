@@ -775,9 +775,6 @@ const BrandsAteliers = () => {
                             <h4 className="font-serif text-sm md:text-base text-primary/80 uppercase tracking-wider">
                               {subcategoryGroup.subcategory}
                             </h4>
-                            <span className="text-[10px] md:text-xs text-muted-foreground">
-                              ({subcategoryGroup.brands.length})
-                            </span>
                             <div className="flex-1 h-px bg-border/40" />
                           </CollapsibleTrigger>
                           <CollapsibleContent className="space-y-3 md:space-y-4">
