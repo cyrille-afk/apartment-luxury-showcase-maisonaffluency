@@ -229,9 +229,9 @@ const Gallery = () => {
                     </h3>
                     <div className="font-body text-sm md:text-base leading-relaxed text-muted-foreground">
                       <span className="font-semibold italic text-primary">Featuring:</span>
-                      <ul className="mt-2 space-y-1 list-disc list-inside">
+                      <ul className="mt-2 space-y-1">
                         {item.description.split(', ').map((feature, idx) => (
-                          <li key={idx}>{feature}</li>
+                          <li key={idx} className="pl-2 border-l-2 border-primary/30">{feature}</li>
                         ))}
                       </ul>
                     </div>
