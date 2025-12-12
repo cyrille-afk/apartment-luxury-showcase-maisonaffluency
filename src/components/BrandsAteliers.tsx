@@ -460,7 +460,7 @@ const BrandsAteliers = () => {
     return brands;
   }, [searchQuery, selectedCategoryFilters]);
 
-  // Group brands by category
+  // Group brands by category, then consolidate by brand name
   const groupedBrands = useMemo(() => {
     const groups: Record<string, typeof partnerBrands> = {};
     filteredBrands.forEach((brand) => {
@@ -469,8 +469,38 @@ const BrandsAteliers = () => {
       }
       groups[brand.category].push(brand);
     });
+    
+    // Consolidate brands with same name within each category
+    const consolidatedGroups: Record<string, Array<{
+      name: string;
+      origin: string;
+      description: string;
+      instagram: string;
+      featuredItems: Array<{ featured: string; galleryIndex?: number }>;
+    }>> = {};
+    
+    Object.entries(groups).forEach(([category, brands]) => {
+      const brandMap: Record<string, typeof consolidatedGroups[string][0]> = {};
+      brands.forEach((brand) => {
+        if (!brandMap[brand.name]) {
+          brandMap[brand.name] = {
+            name: brand.name,
+            origin: brand.origin,
+            description: brand.description,
+            instagram: brand.instagram,
+            featuredItems: [],
+          };
+        }
+        brandMap[brand.name].featuredItems.push({
+          featured: brand.featured,
+          galleryIndex: brand.galleryIndex,
+        });
+      });
+      consolidatedGroups[category] = Object.values(brandMap);
+    });
+    
     // Sort categories alphabetically
-    return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
+    return Object.entries(consolidatedGroups).sort((a, b) => a[0].localeCompare(b[0]));
   }, [filteredBrands]);
 
   const toggleCategoryFilter = (category: string) => {
@@ -659,7 +689,7 @@ const BrandsAteliers = () => {
                 <div className="space-y-3 md:space-y-4 pt-2">
                   {brands.map((brand, index) => (
                     <motion.div
-                      key={brand.id}
+                      key={`${category}-${brand.name}`}
                       initial={{ opacity: 0, y: 20 }}
                       animate={isInView ? { opacity: 1, y: 0 } : {}}
                       transition={{ duration: 0.4, delay: categoryIndex * 0.1 + index * 0.03 }}
@@ -678,23 +708,29 @@ const BrandsAteliers = () => {
                           <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
                             {brand.description}
                           </p>
-                          <div className="flex items-center gap-2">
+                          <div className="space-y-1">
                             <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
-                            {brand.galleryIndex !== undefined ? (
-                              <button
-                                onClick={() => scrollToGallery(brand.galleryIndex)}
-                                className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                              >
-                                <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                                  {brand.featured}
-                                </span>
-                                <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                              </button>
-                            ) : (
-                              <span className="text-xs md:text-sm text-foreground/80 font-body">
-                                {brand.featured}
-                              </span>
-                            )}
+                            <ul className="space-y-1 ml-2">
+                              {brand.featuredItems.map((item, itemIndex) => (
+                                <li key={itemIndex} className="flex items-center gap-1">
+                                  {item.galleryIndex !== undefined ? (
+                                    <button
+                                      onClick={() => scrollToGallery(item.galleryIndex!)}
+                                      className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                                    >
+                                      <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                        {item.featured}
+                                      </span>
+                                      <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                                    </button>
+                                  ) : (
+                                    <span className="text-xs md:text-sm text-foreground/80 font-body">
+                                      {item.featured}
+                                    </span>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
                           </div>
                         </div>
                         {brand.instagram && (
