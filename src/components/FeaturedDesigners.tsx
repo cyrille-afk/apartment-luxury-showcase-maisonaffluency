@@ -22,6 +22,7 @@ import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank.jpg";
 import kikoLopezImg from "@/assets/designers/kiko-lopez.jpg";
 import emanuelleLevetStenneImg from "@/assets/designers/emanuelle-levet-stenne.png";
 import milanPekarImg from "@/assets/designers/milan-pekar.png";
+import atelierPendhapaImg from "@/assets/designers/atelier-pendhapa.png";
 
 const featuredDesigners = [
   {
@@ -75,6 +76,7 @@ const featuredDesigners = [
     id: "atelier-pendhapa",
     name: "Atelier Pendhapa",
     specialty: "Bespoke Furniture & Indonesian Craftsmanship",
+    image: atelierPendhapaImg,
     biography:
       "Atelier Pendhapa is an Indonesian design atelier specializing in bespoke furniture that celebrates the rich tradition of Indonesian woodworking and craftsmanship. Their Deepah custom table exemplifies their philosophy of creating pieces that honor traditional techniques while embracing contemporary design sensibilities. Each piece is handcrafted by master artisans using sustainably sourced materials.",
     notableWorks: "Deepah Custom Table, Bespoke Dining Collection",
