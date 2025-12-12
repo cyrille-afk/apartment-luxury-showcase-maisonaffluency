@@ -248,7 +248,7 @@ const partnerBrands = [
     origin: "France",
     description: "Renowned French designer and artist creating sculptural furniture and lighting in bronze, his pieces are celebrated for their organic forms and exceptional craftsmanship.",
     featured: "Bronze MicMac Chandelier",
-    instagram: "https://instagram.com/hervevanderstraeten",
+    instagram: "https://instagram.com/hervevanderstraetengalerie",
     galleryIndex: 9, // A Masterful Suite
   },
   {
