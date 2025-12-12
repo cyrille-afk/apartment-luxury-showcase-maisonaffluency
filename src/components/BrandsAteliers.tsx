@@ -385,7 +385,7 @@ const partnerBrands = [
     origin: "France",
     description: "French artist and designer creating sculptural ceramic lighting and furniture that celebrates organic forms and handcrafted textures.",
     featured: "Valauris Lamp",
-    instagram: "https://instagram.com/oliviacognet",
+    instagram: "https://www.instagram.com/olivia_cognet",
     galleryIndex: 1, // A Sophisticated Living Room
   },
   {
@@ -461,7 +461,7 @@ const partnerBrands = [
     origin: "France",
     description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
     featured: "Niko 420 Custom Sofa",
-    instagram: "https://instagram.com/thierrylemaire",
+    instagram: "https://www.instagram.com/thierrylemaire_/?hl=en",
     galleryIndex: 0, // An Inviting Lounge Area
   },
   {
@@ -473,7 +473,7 @@ const partnerBrands = [
     origin: "France",
     description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
     featured: "Orsay Centre Table",
-    instagram: "https://instagram.com/thierrylemaire",
+    instagram: "https://www.instagram.com/thierrylemaire_/?hl=en",
     galleryIndex: 1, // A Sophisticated Living Room
   },
   {
