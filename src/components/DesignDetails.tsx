@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -41,7 +42,8 @@ const DesignDetails = () => {
     email: "",
     company: "",
     phone: "",
-    message: ""
+    message: "",
+    isCertified: false
   });
   const { toast } = useToast();
 
@@ -68,7 +70,7 @@ const DesignDetails = () => {
         description: "Thank you for your interest. We'll be in touch shortly.",
       });
       
-      setFormData({ name: "", email: "", company: "", phone: "", message: "" });
+      setFormData({ name: "", email: "", company: "", phone: "", message: "", isCertified: false });
       setIsOpen(false);
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -202,9 +204,20 @@ const DesignDetails = () => {
                 rows={4}
               />
             </div>
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="certified"
+                checked={formData.isCertified}
+                onCheckedChange={(checked) => setFormData({ ...formData, isCertified: checked === true })}
+                required
+              />
+              <Label htmlFor="certified" className="text-sm leading-relaxed cursor-pointer">
+                I Certify that I am an Architect or an Interior Designer
+              </Label>
+            </div>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !formData.isCertified}
               className="w-full bg-foreground text-background py-3 font-body text-sm uppercase tracking-wider hover:bg-foreground/90 transition-colors disabled:opacity-50"
             >
               {isSubmitting ? "Submitting..." : "Submit Application"}
