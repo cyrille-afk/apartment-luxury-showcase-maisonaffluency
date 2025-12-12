@@ -49,7 +49,7 @@ const galleryExperiences = [{
     description: "Delcourt Collection's BOB armchair, Kiko Lopez' shadow drawings mirror, Alinea Design Objects' Angelo M side table, Takayokaya's Ojami Cushion, Milan Pekar's Crystalline Vase"
   }]
 }, {
-  experience: "Restful Retreat",
+  experience: "A Calming and Dreamy Environment",
   subtitle: "Curated collectibles, hand-carved furniture and hand-knotted silk rugs",
   items: [{
     image: bedroomImage,
