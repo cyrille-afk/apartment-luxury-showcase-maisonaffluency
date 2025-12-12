@@ -102,7 +102,7 @@ const Navigation = () => {
                   key={item.href} 
                   onClick={() => handleNavClick(item.href)} 
                   className={cn(
-                    "font-body text-sm uppercase tracking-wider transition-all duration-300 relative group",
+                    "font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap",
                     isTradeProgram && "px-3 py-1.5 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
                     activeSection === item.href 
                       ? isTradeProgram ? "text-background font-medium" : "text-primary font-medium"
