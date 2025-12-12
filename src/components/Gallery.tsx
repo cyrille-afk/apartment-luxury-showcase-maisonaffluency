@@ -15,7 +15,7 @@ import bedroomSecondImage from "@/assets/bedroom-second.jpg";
 
 const galleryExperiences = [{
   experience: "Social Gathering",
-  subtitle: "Elegant spaces for entertaining and connection",
+  subtitle: "Elegant entertaining spaces with custom sofas, artisan rugs, sculptural lighting and collectible furniture",
   items: [{
     image: bespokeSofaImage,
     title: "An Inviting Lounge Area",
@@ -47,7 +47,7 @@ const galleryExperiences = [{
   }]
 }, {
   experience: "Personal Sanctuary",
-  subtitle: "Intimate spaces for reflection and creativity",
+  subtitle: "Intimate creative spaces with bespoke desks, handcrafted chandeliers, artisan lamps and sculptural bronze art",
   items: [{
     image: boudoirImage,
     title: "A Sophisticated Boudoir",
