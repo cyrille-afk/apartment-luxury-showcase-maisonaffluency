@@ -534,174 +534,59 @@ const BrandsAteliers = () => {
     return brands;
   }, [searchQuery, selectedCategoryFilters]);
 
-  // Group brands by category, then consolidate by brand name
+  // Group brands by first letter of name, then consolidate by brand name
   const groupedBrands = useMemo(() => {
-    const groups: Record<string, typeof partnerBrands> = {};
-    filteredBrands.forEach((brand) => {
-      if (!groups[brand.category]) {
-        groups[brand.category] = [];
-      }
-      groups[brand.category].push(brand);
-    });
-    
-    // Consolidate brands with same name within each category
+    // Consolidate brands with same name
     type ConsolidatedBrand = {
       name: string;
       origin: string;
       description: string;
       instagram: string;
-      subcategory?: string;
-      tableType?: string;
-      seatType?: string;
-      featuredItems: Array<{ featured: string; galleryIndex?: number }>;
+      categories: string[];
+      featuredItems: Array<{ featured: string; galleryIndex?: number; category: string }>;
     };
     
-    type SubTypeGroup = {
-      subType: string | null;
-      brands: ConsolidatedBrand[];
-    };
+    const brandMap: Record<string, ConsolidatedBrand> = {};
     
-    type SubcategoryGroup = {
-      subcategory: string | null;
-      brands: ConsolidatedBrand[];
-      subTypeGroups?: SubTypeGroup[];
-    };
-    
-    const consolidatedGroups: Record<string, SubcategoryGroup[]> = {};
-    
-    Object.entries(groups).forEach(([category, brands]) => {
-      const brandMap: Record<string, ConsolidatedBrand> = {};
-      brands.forEach((brand) => {
-        const brandKey = `${brand.name}-${(brand as any).subcategory || ''}-${(brand as any).tableType || ''}-${(brand as any).seatType || ''}`;
-        if (!brandMap[brandKey]) {
-          brandMap[brandKey] = {
-            name: brand.name,
-            origin: brand.origin,
-            description: brand.description,
-            instagram: brand.instagram,
-            subcategory: (brand as any).subcategory,
-            tableType: (brand as any).tableType,
-            seatType: (brand as any).seatType,
-            featuredItems: [],
-          };
-        }
-        brandMap[brandKey].featuredItems.push({
-          featured: brand.featured,
-          galleryIndex: brand.galleryIndex,
-        });
+    filteredBrands.forEach((brand) => {
+      if (!brandMap[brand.name]) {
+        brandMap[brand.name] = {
+          name: brand.name,
+          origin: brand.origin,
+          description: brand.description,
+          instagram: brand.instagram,
+          categories: [],
+          featuredItems: [],
+        };
+      }
+      if (!brandMap[brand.name].categories.includes(brand.category)) {
+        brandMap[brand.name].categories.push(brand.category);
+      }
+      brandMap[brand.name].featuredItems.push({
+        featured: brand.featured,
+        galleryIndex: brand.galleryIndex,
+        category: brand.category,
       });
-      
-      // Group by subcategory
-      const subcategoryMap: Record<string, ConsolidatedBrand[]> = {};
-      Object.values(brandMap).forEach((brand) => {
-        const subKey = brand.subcategory || '__none__';
-        if (!subcategoryMap[subKey]) {
-          subcategoryMap[subKey] = [];
-        }
-        subcategoryMap[subKey].push(brand);
-      });
-      
-      // Convert to array and handle subType grouping for Tables and Seating subcategories
-      const subcategoryGroups: SubcategoryGroup[] = Object.entries(subcategoryMap)
-        .map(([key, brandList]) => {
-          const subcategory = key === '__none__' ? null : key;
-          
-          // For Tables subcategory, group by tableType
-          if (subcategory === 'Tables') {
-            const subTypeMap: Record<string, ConsolidatedBrand[]> = {};
-            brandList.forEach((brand) => {
-              const typeKey = brand.tableType || '__none__';
-              if (!subTypeMap[typeKey]) {
-                subTypeMap[typeKey] = [];
-              }
-              subTypeMap[typeKey].push(brand);
-            });
-            
-            // Sort brands within each subType by name
-            Object.values(subTypeMap).forEach((list) => {
-              list.sort((a, b) => a.name.localeCompare(b.name));
-            });
-            
-            const subTypeGroups: SubTypeGroup[] = Object.entries(subTypeMap)
-              .map(([typeKey, typeBrands]) => ({
-                subType: typeKey === '__none__' ? null : typeKey,
-                brands: typeBrands,
-              }))
-              .sort((a, b) => {
-                if (a.subType === null && b.subType !== null) return 1;
-                if (a.subType !== null && b.subType === null) return -1;
-                if (a.subType && b.subType) {
-                  return a.subType.localeCompare(b.subType);
-                }
-                return 0;
-              });
-            
-            return {
-              subcategory,
-              brands: [],
-              subTypeGroups,
-            };
-          }
-          
-          // For Seating subcategory, group by seatType
-          if (subcategory === 'Seating') {
-            const subTypeMap: Record<string, ConsolidatedBrand[]> = {};
-            brandList.forEach((brand) => {
-              const typeKey = brand.seatType || '__none__';
-              if (!subTypeMap[typeKey]) {
-                subTypeMap[typeKey] = [];
-              }
-              subTypeMap[typeKey].push(brand);
-            });
-            
-            // Sort brands within each subType by name
-            Object.values(subTypeMap).forEach((list) => {
-              list.sort((a, b) => a.name.localeCompare(b.name));
-            });
-            
-            const subTypeGroups: SubTypeGroup[] = Object.entries(subTypeMap)
-              .map(([typeKey, typeBrands]) => ({
-                subType: typeKey === '__none__' ? null : typeKey,
-                brands: typeBrands,
-              }))
-              .sort((a, b) => {
-                if (a.subType === null && b.subType !== null) return 1;
-                if (a.subType !== null && b.subType === null) return -1;
-                if (a.subType && b.subType) {
-                  return a.subType.localeCompare(b.subType);
-                }
-                return 0;
-              });
-            
-            return {
-              subcategory,
-              brands: [],
-              subTypeGroups,
-            };
-          }
-          
-          // Sort brands within each subcategory by name
-          brandList.sort((a, b) => a.name.localeCompare(b.name));
-          
-          return {
-            subcategory,
-            brands: brandList,
-          };
-        })
-        .sort((a, b) => {
-          if (a.subcategory === null && b.subcategory !== null) return -1;
-          if (a.subcategory !== null && b.subcategory === null) return 1;
-          if (a.subcategory && b.subcategory) {
-            return a.subcategory.localeCompare(b.subcategory);
-          }
-          return 0;
-        });
-      
-      consolidatedGroups[category] = subcategoryGroups;
     });
     
-    // Sort categories alphabetically
-    return Object.entries(consolidatedGroups).sort((a, b) => a[0].localeCompare(b[0]));
+    // Group by first letter
+    const letterGroups: Record<string, ConsolidatedBrand[]> = {};
+    
+    Object.values(brandMap).forEach((brand) => {
+      const firstLetter = brand.name.charAt(0).toUpperCase();
+      if (!letterGroups[firstLetter]) {
+        letterGroups[firstLetter] = [];
+      }
+      letterGroups[firstLetter].push(brand);
+    });
+    
+    // Sort brands within each letter group
+    Object.values(letterGroups).forEach((brands) => {
+      brands.sort((a, b) => a.name.localeCompare(b.name));
+    });
+    
+    // Sort letters alphabetically
+    return Object.entries(letterGroups).sort((a, b) => a[0].localeCompare(b[0]));
   }, [filteredBrands]);
 
   const toggleCategoryFilter = (category: string) => {
@@ -716,21 +601,21 @@ const BrandsAteliers = () => {
     setSelectedCategoryFilters([]);
   };
 
-  // Initialize open categories when grouped brands change
-  const allCategories = useMemo(() => groupedBrands.map(([category]) => category), [groupedBrands]);
+  // Initialize open letters when grouped brands change
+  const allLetters = useMemo(() => groupedBrands.map(([letter]) => letter), [groupedBrands]);
   
-  // Set all categories open by default on first render or when categories change
+  // Set all letters open by default on first render or when letters change
   useEffect(() => {
-    setOpenCategories(allCategories);
-  }, [allCategories]);
+    setOpenCategories(allLetters);
+  }, [allLetters]);
 
-  const isAllExpanded = openCategories.length === allCategories.length;
+  const isAllExpanded = openCategories.length === allLetters.length;
 
-  const toggleAllCategories = () => {
+  const toggleAllLetters = () => {
     if (isAllExpanded) {
       setOpenCategories([]);
     } else {
-      setOpenCategories(allCategories);
+      setOpenCategories(allLetters);
     }
   };
 
@@ -834,7 +719,7 @@ const BrandsAteliers = () => {
                 </Popover>
                 
                 <button
-                  onClick={toggleAllCategories}
+                  onClick={toggleAllLetters}
                   className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1 h-9 px-2"
                 >
                   <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
@@ -861,12 +746,12 @@ const BrandsAteliers = () => {
               navigator.vibrate(10);
             }
             setOpenCategories(values);
-            // On mobile, scroll to the newly opened category
+            // On mobile, scroll to the newly opened letter
             if (window.innerWidth < 768 && values.length > openCategories.length) {
-              const newCategory = values.find(v => !openCategories.includes(v));
-              if (newCategory) {
+              const newLetter = values.find(v => !openCategories.includes(v));
+              if (newLetter) {
                 setTimeout(() => {
-                  const element = document.querySelector(`[data-category="${newCategory}"]`);
+                  const element = document.querySelector(`[data-category="${newLetter}"]`);
                   if (element) {
                     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }
@@ -876,239 +761,88 @@ const BrandsAteliers = () => {
           }} 
           className="space-y-3 md:space-y-4"
         >
-          {groupedBrands.map(([category, brands], categoryIndex) => (
+          {groupedBrands.map(([letter, brands], letterIndex) => (
             <AccordionItem 
-              key={category} 
-              value={category} 
-              data-category={category}
+              key={letter} 
+              value={letter} 
+              data-category={letter}
               className="border border-border/40 rounded-lg bg-card/30 overflow-hidden scroll-mt-4"
             >
               <AccordionTrigger className="px-4 md:px-6 py-3 md:py-4 hover:no-underline hover:bg-card/50 transition-colors active:scale-[0.99] touch-manipulation">
-                <span className="font-serif text-base md:text-lg lg:text-xl text-primary">{category}</span>
+                <span className="font-serif text-base md:text-lg lg:text-xl text-primary">{letter}</span>
               </AccordionTrigger>
               <AccordionContent className="px-3 md:px-6 pb-4 md:pb-6">
-                <div className="space-y-6 md:space-y-8 pt-2">
-                  {brands.map((subcategoryGroup, subIndex) => (
-                    <div key={subcategoryGroup.subcategory || 'general'}>
-                      {subcategoryGroup.subcategory ? (
-                        <Collapsible className="group/sub space-y-3 md:space-y-4">
-                          <CollapsibleTrigger className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity cursor-pointer">
-                            <ChevronRight className="h-4 w-4 text-primary/60 transition-transform duration-200 group-data-[state=open]/sub:rotate-90" />
-                            <h4 className="font-serif text-sm md:text-base text-primary/80 uppercase tracking-wider">
-                              {subcategoryGroup.subcategory}
-                            </h4>
-                            <div className="flex-1 h-px bg-border/40" />
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="space-y-3 md:space-y-4">
-                            {/* Handle subTypeGroups for Tables and Seating subcategories */}
-                            {subcategoryGroup.subTypeGroups ? (
-                              subcategoryGroup.subTypeGroups.map((subTypeGroup, typeIndex) => (
-                                <Collapsible key={subTypeGroup.subType || 'general-subtype'} className="group/type space-y-2 md:space-y-3 ml-4 md:ml-6">
-                                  {subTypeGroup.subType && (
-                                    <CollapsibleTrigger className="flex items-center gap-2 w-full hover:opacity-80 transition-opacity cursor-pointer">
-                                      <ChevronRight className="h-3 w-3 text-primary/50 transition-transform duration-200 group-data-[state=open]/type:rotate-90" />
-                                      <h5 className="font-body text-xs md:text-sm text-primary/70 uppercase tracking-wider">
-                                        {subTypeGroup.subType}
-                                      </h5>
-                                      <div className="flex-1 h-px bg-border/30" />
-                                    </CollapsibleTrigger>
-                                  )}
-                                  <CollapsibleContent className={`space-y-3 md:space-y-4 ${subTypeGroup.subType ? 'ml-3 md:ml-5' : ''}`}>
-                                    {subTypeGroup.brands.map((brand, index) => (
-                                      <motion.div
-                                        key={`${category}-${brand.name}-${brand.tableType || brand.seatType || ''}`}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={isInView ? { opacity: 1, y: 0 } : {}}
-                                        transition={{ duration: 0.4, delay: categoryIndex * 0.1 + subIndex * 0.05 + typeIndex * 0.03 + index * 0.02 }}
-                                        className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
-                                      >
-                                        <div className="flex items-start justify-between">
-                                          <div className="flex-1 min-w-0">
-                                            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
-                                              <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
-                                                {brand.name}
-                                              </h3>
-                                              <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
-                                                — {brand.origin}
-                                              </span>
-                                            </div>
-                                            <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
-                                              {brand.description}
-                                            </p>
-                                            <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                                              <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
-                                              {brand.featuredItems.map((item, itemIndex) => (
-                                                <span key={itemIndex} className="flex items-center">
-                                                  {item.galleryIndex !== undefined ? (
-                                                    <button
-                                                      onClick={() => scrollToGallery(item.galleryIndex!)}
-                                                      className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                                                    >
-                                                      <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                                                        {item.featured}
-                                                      </span>
-                                                      <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                                                    </button>
-                                                  ) : (
-                                                    <span className="text-xs md:text-sm text-foreground/80 font-body">
-                                                      {item.featured}
-                                                    </span>
-                                                  )}
-                                                  {itemIndex < brand.featuredItems.length - 1 && (
-                                                    <span className="text-muted-foreground mx-1">•</span>
-                                                  )}
-                                                </span>
-                                              ))}
-                                            </div>
-                                          </div>
-                                          {brand.instagram && (
-                                            <a
-                                              href={brand.instagram}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
-                                              onClick={(e) => e.stopPropagation()}
-                                            >
-                                              <Instagram className="h-5 w-5 md:h-4 md:w-4" />
-                                            </a>
-                                          )}
-                                        </div>
-                                      </motion.div>
-                                    ))}
-                                  </CollapsibleContent>
-                                </Collapsible>
-                              ))
-                            ) : (
-                              subcategoryGroup.brands.map((brand, index) => (
-                                <motion.div
-                                  key={`${category}-${brand.name}`}
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={isInView ? { opacity: 1, y: 0 } : {}}
-                                  transition={{ duration: 0.4, delay: categoryIndex * 0.1 + subIndex * 0.05 + index * 0.03 }}
-                                  className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300 ml-4 md:ml-6"
-                                >
-                                  <div className="flex items-start justify-between">
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
-                                        <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
-                                          {brand.name}
-                                        </h3>
-                                        <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
-                                          — {brand.origin}
-                                        </span>
-                                      </div>
-                                      <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
-                                        {brand.description}
-                                      </p>
-                                      <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                                        <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
-                                        {brand.featuredItems.map((item, itemIndex) => (
-                                          <span key={itemIndex} className="flex items-center">
-                                            {item.galleryIndex !== undefined ? (
-                                              <button
-                                                onClick={() => scrollToGallery(item.galleryIndex!)}
-                                                className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                                              >
-                                                <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                                                  {item.featured}
-                                                </span>
-                                                <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                                              </button>
-                                            ) : (
-                                              <span className="text-xs md:text-sm text-foreground/80 font-body">
-                                                {item.featured}
-                                              </span>
-                                            )}
-                                            {itemIndex < brand.featuredItems.length - 1 && (
-                                              <span className="text-muted-foreground mx-1">•</span>
-                                            )}
-                                          </span>
-                                        ))}
-                                      </div>
-                                    </div>
-                                    {brand.instagram && (
-                                      <a
-                                        href={brand.instagram}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        <Instagram className="h-5 w-5 md:h-4 md:w-4" />
-                                      </a>
-                                    )}
-                                  </div>
-                                </motion.div>
-                              ))
-                            )}
-                          </CollapsibleContent>
-                        </Collapsible>
-                      ) : (
-                        <div className="space-y-3 md:space-y-4">
-                          {subcategoryGroup.brands.map((brand, index) => (
-                            <motion.div
-                              key={`${category}-${brand.name}`}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={isInView ? { opacity: 1, y: 0 } : {}}
-                              transition={{ duration: 0.4, delay: categoryIndex * 0.1 + subIndex * 0.05 + index * 0.03 }}
-                              className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
-                                    <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
-                                      {brand.name}
-                                    </h3>
-                                    <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
-                                      — {brand.origin}
-                                    </span>
-                                  </div>
-                                  <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
-                                    {brand.description}
-                                  </p>
-                                  <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                                    <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
-                                    {brand.featuredItems.map((item, itemIndex) => (
-                                      <span key={itemIndex} className="flex items-center">
-                                        {item.galleryIndex !== undefined ? (
-                                          <button
-                                            onClick={() => scrollToGallery(item.galleryIndex!)}
-                                            className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                                          >
-                                            <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                                              {item.featured}
-                                            </span>
-                                            <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                                          </button>
-                                        ) : (
-                                          <span className="text-xs md:text-sm text-foreground/80 font-body">
-                                            {item.featured}
-                                          </span>
-                                        )}
-                                        {itemIndex < brand.featuredItems.length - 1 && (
-                                          <span className="text-muted-foreground mx-1">•</span>
-                                        )}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                                {brand.instagram && (
-                                  <a
-                                    href={brand.instagram}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
-                                    onClick={(e) => e.stopPropagation()}
+                <div className="space-y-3 md:space-y-4 pt-2">
+                  {brands.map((brand, brandIndex) => (
+                    <motion.div
+                      key={brand.name}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={isInView ? { opacity: 1, y: 0 } : {}}
+                      transition={{ duration: 0.4, delay: letterIndex * 0.1 + brandIndex * 0.03 }}
+                      className="group p-4 md:p-5 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/30 transition-all duration-300"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">
+                            <h3 className="font-serif text-base md:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
+                              {brand.name}
+                            </h3>
+                            <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
+                              — {brand.origin}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 mb-2">
+                            {brand.categories.map((category, catIndex) => (
+                              <span 
+                                key={catIndex}
+                                className="text-[10px] md:text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider"
+                              >
+                                {category}
+                              </span>
+                            ))}
+                          </div>
+                          <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-2 line-clamp-2 md:line-clamp-none">
+                            {brand.description}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                            <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
+                            {brand.featuredItems.map((item, itemIndex) => (
+                              <span key={itemIndex} className="flex items-center">
+                                {item.galleryIndex !== undefined ? (
+                                  <button
+                                    onClick={() => scrollToGallery(item.galleryIndex!)}
+                                    className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
                                   >
-                                    <Instagram className="h-5 w-5 md:h-4 md:w-4" />
-                                  </a>
+                                    <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                      {item.featured}
+                                    </span>
+                                    <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                                  </button>
+                                ) : (
+                                  <span className="text-xs md:text-sm text-foreground/80 font-body">
+                                    {item.featured}
+                                  </span>
                                 )}
-                              </div>
-                            </motion.div>
-                          ))}
+                                {itemIndex < brand.featuredItems.length - 1 && (
+                                  <span className="text-muted-foreground mx-1">•</span>
+                                )}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                      )}
-                    </div>
+                        {brand.instagram && (
+                          <a
+                            href={brand.instagram}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1.5 -m-1.5 touch-manipulation flex-shrink-0 ml-3"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Instagram className="h-5 w-5 md:h-4 md:w-4" />
+                          </a>
+                        )}
+                      </div>
+                    </motion.div>
                   ))}
                 </div>
               </AccordionContent>
