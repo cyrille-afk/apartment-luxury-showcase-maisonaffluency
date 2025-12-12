@@ -656,10 +656,7 @@ const BrandsAteliers = () => {
               className="border border-border/40 rounded-lg bg-card/30 overflow-hidden scroll-mt-4"
             >
               <AccordionTrigger className="px-4 md:px-6 py-3 md:py-4 hover:no-underline hover:bg-card/50 transition-colors active:scale-[0.99] touch-manipulation">
-                <div className="flex items-center gap-2 md:gap-3">
-                  <span className="font-serif text-base md:text-lg lg:text-xl text-primary">{category}</span>
-                  <span className="text-xs md:text-sm text-muted-foreground font-body">({brands.length})</span>
-                </div>
+                <span className="font-serif text-base md:text-lg lg:text-xl text-primary">{category}</span>
               </AccordionTrigger>
               <AccordionContent className="px-3 md:px-6 pb-4 md:pb-6">
                 <div className="grid gap-3 md:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-2">
