@@ -38,15 +38,15 @@ const galleryExperiences = [{
   items: [{
     image: intimateDiningImage,
     title: "A Dreamy Tuscan Landscape",
-    description: "Atelier Pendhapa's Deepah custom table, Hamrei's Pépé custom chairs, Jeremy Maxwell Wintrebert's Cloud Pendants, Milan Pekar's Crystalline Vase"
+    description: "Atelier Pendhapa's Deepah custom table, Hamrei's Pépé custom chairs, Jeremy Maxwell Wintrebert's Cloud Pendants, Milan Pekař's Crystalline Vase"
   }, {
     image: intimateTableImage,
     title: "A Highly Customised Table",
-    description: "Atelier Pendhapa's Deepah custom table details, Hamrei's Pépé custom chairs details, Milan Pekar's Crystalline Vase"
+    description: "Atelier Pendhapa's Deepah custom table details, Hamrei's Pépé custom chairs details, Milan Pekař's Crystalline Vase"
   }, {
     image: intimateLoungeImage,
     title: "A Relaxed Setting",
-    description: "Delcourt Collection's BOB armchair, Kiko Lopez' shadow drawings mirror, Alinea Design Objects' Angelo M side table, Takayokaya's Ojami Cushion, Milan Pekar's Crystalline Vase"
+    description: "Delcourt Collection's BOB armchair, Kiko Lopez' shadow drawings mirror, Alinea Design Objects' Angelo M side table, Takayokaya's Ojami Cushion, Milan Pekař's Crystalline Vase"
   }]
 }, {
   experience: "A Personal Sanctuary",
