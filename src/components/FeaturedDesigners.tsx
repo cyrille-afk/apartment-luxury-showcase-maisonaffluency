@@ -49,7 +49,7 @@ const featuredDesigners = [
     biography:
       "Apparatus Studio is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
     notableWorks: "Metronome Reading Floor Lamp, Sculptural Lighting Series",
-    notableWorksLink: { text: "Metronome Reading Floor Lamp", galleryIndex: 10 },
+    notableWorksLink: { text: "Metronome Reading Floor Lamp", galleryIndex: 7 },
     philosophy:
       "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
     links: [
@@ -111,7 +111,7 @@ const featuredDesigners = [
     biography:
       "Bruno de Maistre is a French designer known for his poetic approach to furniture design. His Lyrical Desk demonstrates his ability to create pieces that are both functional and emotionally resonant, with flowing lines and thoughtful proportions that inspire creativity and contemplation.",
     notableWorks: "Lyric Desk, Contemporary Furniture Series",
-    notableWorksLink: { text: "Lyric Desk", galleryIndex: 9 },
+    notableWorksLink: { text: "Lyric Desk", galleryIndex: 6 },
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     links: [
       { type: "Instagram", url: "https://instagram.com/bruno_de_maistre_bdm" },
@@ -172,7 +172,7 @@ const featuredDesigners = [
     biography:
       "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
     notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
-    notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 6 },
+    notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 9 },
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     links: [
@@ -216,7 +216,7 @@ const featuredDesigners = [
     biography:
       "Kiko Lopez is a French master mirror artisan renowned for creating extraordinary reflective surfaces that blur the line between functional object and sculptural art. Using traditional techniques combined with innovative approaches to glass and metal, his mirrors transform spaces with their unique textural qualities and light-capturing properties. His Silver Glass Hammer Mirror and Shadow Drawings Mirror exemplify his distinctive style of treating mirrors as artistic statements.",
     notableWorks: "Silver Glass Hammer Mirror, Shadow Drawings Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
-    notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 8 },
+    notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 11 },
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
     links: [
       { type: "Instagram", url: "https://instagram.com/kikolumieres" },
@@ -260,7 +260,7 @@ const featuredDesigners = [
     biography:
       "Nathalie Ziegler is a French glass artist known for her custom chandeliers and glass sculptures that blur the line between functional lighting and fine art. Her Saint Just Custom Glass Chandelier showcases her ability to manipulate glass into dramatic, ethereal forms that transform spaces with light and color.",
     notableWorks: "Saint Just Custom Glass Chandelier, Gold Leaves+Glass Snake Vase, Sculptural Glass Series",
-    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 9 },
+    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 6 },
     philosophy:
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
     links: [
