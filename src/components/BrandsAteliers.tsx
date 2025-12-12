@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: A Masterful Suite, 1: Unique by Design, 2: Design Icons and Collectibles
-// 3: An Inviting Bespoke Sofa, 4: A Sophisticated Living Room, 5: With Panoramic Cityscape Views
+// 3: An Inviting Lounge Area, 4: A Sophisticated Living Room, 5: With Panoramic Cityscape Views
 // 6: A Sophisticated Boudoir, 7: A Serene Decor, 8: An Art Master Display
 
 const partnerBrands = [
@@ -37,7 +37,7 @@ const partnerBrands = [
     description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
     featured: "Reef Vessels",
     instagram: "https://instagram.com/alexanderlamont",
-    galleryIndex: 0, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Lounge Area
   },
   {
     id: "alexander-lamont-mantle",
@@ -81,7 +81,7 @@ const partnerBrands = [
     description: "French atelier specializing in bespoke handcrafted rugs, combining traditional weaving techniques with contemporary design sensibility.",
     featured: "Ricky Custom Rug",
     instagram: "https://instagram.com/atelierfevrier",
-    galleryIndex: 0, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Lounge Area
   },
   {
     id: "apparatus-studio-median",
@@ -92,7 +92,7 @@ const partnerBrands = [
     description: "New York-based design studio creating refined lighting and furniture that bridges art and function through meticulous craftsmanship and material exploration.",
     featured: "Median 3 Surface Alabaster Lights",
     instagram: "https://instagram.com/apparatusstudio",
-    galleryIndex: 0, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Lounge Area
   },
   {
     id: "apparatus-studio-metronome",
@@ -271,7 +271,7 @@ const partnerBrands = [
     description: "Legendary Czech furniture designer whose iconic mid-century lounge chairs represent the pinnacle of functionalist design, prized by collectors worldwide.",
     featured: "Lounge Chair",
     instagram: "",
-    galleryIndex: 0, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Lounge Area
   },
   {
     id: "iksel-brunelleschi",
@@ -426,7 +426,7 @@ const partnerBrands = [
     description: "Iconic Italian furniture house renowned for exceptional leather craftsmanship since 1912. Their timeless designs grace prestigious residences and institutions worldwide.",
     featured: "Albero Bookcase",
     instagram: "https://instagram.com/poltronafrauofficial",
-    galleryIndex: 0, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Lounge Area
   },
   {
     id: "robicara",
@@ -460,7 +460,7 @@ const partnerBrands = [
     description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
     featured: "Niko 420 Custom Sofa",
     instagram: "https://instagram.com/thierrylemaire",
-    galleryIndex: 0, // An Inviting Bespoke Sofa
+    galleryIndex: 0, // An Inviting Lounge Area
   },
   {
     id: "thierry-lemaire-table",
