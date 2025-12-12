@@ -92,6 +92,7 @@ const Gallery = () => {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [hasTapped, setHasTapped] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
 
   // Minimum swipe distance required (in px)
   const minSwipeDistance = 50;
@@ -145,7 +146,21 @@ const Gallery = () => {
     }
     flatIndex += itemIndex;
     setCurrentImageIndex(flatIndex);
+    setSourceItemKey(`${sectionIndex}-${itemIndex}`);
     setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    // Scroll back to the source item after closing
+    if (sourceItemKey) {
+      setTimeout(() => {
+        const element = document.getElementById(`gallery-item-${sourceItemKey}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
   };
   const goToPrevious = () => {
     setCurrentImageIndex(prev => prev === 0 ? allItems.length - 1 : prev - 1);
@@ -156,7 +171,7 @@ const Gallery = () => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") goToPrevious();
     if (e.key === "ArrowRight") goToNext();
-    if (e.key === "Escape") setLightboxOpen(false);
+    if (e.key === "Escape") closeLightbox();
   };
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
@@ -222,7 +237,8 @@ const Gallery = () => {
                   
                   return (
                     <motion.div 
-                      key={`${item.title}-${index}`} 
+                      key={`${item.title}-${index}`}
+                      id={`gallery-item-${itemKey}`}
                       initial={{ opacity: 0, y: 40 }} 
                       animate={isInView ? { opacity: 1, y: 0 } : {}} 
                       transition={{ duration: 0.6, delay: sectionIndex * 0.2 + index * 0.1 }} 
@@ -290,11 +306,11 @@ const Gallery = () => {
       </section>
 
       {/* Lightbox Dialog */}
-      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+      <Dialog open={lightboxOpen} onOpenChange={(open) => !open && closeLightbox()}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none" onKeyDown={handleKeyDown}>
           <div className="relative w-full h-full flex items-center justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
             {/* Close button */}
-            <button onClick={() => setLightboxOpen(false)} className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Close lightbox">
+            <button onClick={closeLightbox} className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Close lightbox">
               <X className="h-6 w-6 text-white" />
             </button>
 
