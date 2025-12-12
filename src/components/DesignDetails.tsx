@@ -146,6 +146,8 @@ const DesignDetails = () => {
             <DialogTitle className="font-display text-2xl">Welcome to Your Trade Account</DialogTitle>
             <DialogDescription className="font-body text-muted-foreground">
               We look forward to partnering with you!
+              <br />
+              <span className="text-sm mt-2 block">If you have any questions, please contact us at: <a href="mailto:concierge@myaffluency.com" className="text-primary hover:underline">concierge@myaffluency.com</a></span>
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
