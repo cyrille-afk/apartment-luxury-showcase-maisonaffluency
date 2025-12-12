@@ -526,9 +526,6 @@ const BrandsAteliers = () => {
           </p>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-4">
             Brands & Ateliers
-            <span className="ml-3 text-lg md:text-xl lg:text-2xl text-muted-foreground font-body">
-              ({partnerBrands.length})
-            </span>
           </h2>
           <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl mx-auto">
             We collaborate with the world's most distinguished furniture houses, textile ateliers, and artisan workshops 
