@@ -91,6 +91,7 @@ const Gallery = () => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [hasTapped, setHasTapped] = useState(false);
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
   // Minimum swipe distance required (in px)
   const minSwipeDistance = 50;
@@ -215,44 +216,74 @@ const Gallery = () => {
               </motion.div>
 
               <div className="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {section.items.map((item, index) => <motion.div key={`${item.title}-${index}`} initial={{
-              opacity: 0,
-              y: 40
-            }} animate={isInView ? {
-              opacity: 1,
-              y: 0
-            } : {}} transition={{
-              duration: 0.6,
-              delay: sectionIndex * 0.2 + index * 0.1
-            }} className="group cursor-pointer" onClick={() => {
-              setHasTapped(true);
-              openLightbox(sectionIndex, index);
-            }}>
-                    <div className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm">
-                      <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                      {/* Mobile tap indicator */}
-                      {!hasTapped && <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground p-2 rounded-full flex items-center justify-center">
-                          <Eye className="w-4 h-4" />
-                        </div>}
-                      {/* Desktop hover indicator */}
-                      <div className="absolute bottom-4 right-4 hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span className="bg-background/90 text-foreground p-2.5 rounded-full shadow-lg backdrop-blur-sm">
-                          <Maximize2 className="w-4 h-4" />
-                        </span>
+                {section.items.map((item, index) => {
+                  const itemKey = `${sectionIndex}-${index}`;
+                  const isExpanded = expandedItem === itemKey;
+                  
+                  return (
+                    <motion.div 
+                      key={`${item.title}-${index}`} 
+                      initial={{ opacity: 0, y: 40 }} 
+                      animate={isInView ? { opacity: 1, y: 0 } : {}} 
+                      transition={{ duration: 0.6, delay: sectionIndex * 0.2 + index * 0.1 }} 
+                      className="group cursor-pointer"
+                    >
+                      <div 
+                        className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setHasTapped(true);
+                          setExpandedItem(isExpanded ? null : itemKey);
+                        }}
+                      >
+                        <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                        {/* Mobile tap indicator */}
+                        {!hasTapped && <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground p-2 rounded-full flex items-center justify-center">
+                            <Eye className="w-4 h-4" />
+                          </div>}
+                        {/* Expand/View indicator */}
+                        <div className="absolute bottom-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <span className="bg-background/90 text-foreground p-2.5 rounded-full shadow-lg backdrop-blur-sm">
+                            {isExpanded ? <X className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                          </span>
+                        </div>
                       </div>
-                    </div>
 
-                    <h3 className="mb-2 font-display text-xl md:text-2xl text-foreground">
-                      {item.title}
-                    </h3>
-                    <div className="font-body text-sm md:text-base leading-relaxed text-muted-foreground">
-                      <span className="font-semibold italic text-primary">Featuring:</span>
-                      <ul className="mt-2 space-y-1">
-                        {item.description.split(', ').map((feature, idx) => <li key={idx} className="pl-2 border-l-2 border-primary/30">{feature}</li>)}
-                      </ul>
-                    </div>
-                  </motion.div>)}
+                      <h3 className="mb-2 font-display text-xl md:text-2xl text-foreground">
+                        {item.title}
+                      </h3>
+                      
+                      {/* Featuring section - only visible when expanded */}
+                      <motion.div 
+                        initial={false}
+                        animate={{ 
+                          height: isExpanded ? "auto" : 0, 
+                          opacity: isExpanded ? 1 : 0 
+                        }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="font-body text-sm md:text-base leading-relaxed text-muted-foreground pb-4">
+                          <span className="font-semibold italic text-primary">Featuring:</span>
+                          <ul className="mt-2 space-y-1">
+                            {item.description.split(', ').map((feature, idx) => <li key={idx} className="pl-2 border-l-2 border-primary/30">{feature}</li>)}
+                          </ul>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openLightbox(sectionIndex, index);
+                            }}
+                            className="mt-4 text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1 transition-colors"
+                          >
+                            <Maximize2 className="w-3.5 h-3.5" />
+                            View Full Image
+                          </button>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>)}
         </div>
