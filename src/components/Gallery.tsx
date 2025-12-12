@@ -228,7 +228,7 @@ const Gallery = () => {
                       {item.title}
                     </h3>
                     <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground">
-                      <span className="font-semibold italic text-primary">Featured: </span>
+                      <span className="font-semibold italic text-primary">Featuring: </span>
                       {item.description}
                     </p>
                   </motion.div>
