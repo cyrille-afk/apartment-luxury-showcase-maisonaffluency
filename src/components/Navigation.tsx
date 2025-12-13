@@ -51,7 +51,7 @@ const contactOptions = [
     label: "WhatsApp", 
     icon: MessageCircle,
     action: () => {
-      window.open('https://wa.me/6591aboriosam', '_blank');
+      window.open('https://wa.me/6591393850', '_blank');
     }
   },
   { 
