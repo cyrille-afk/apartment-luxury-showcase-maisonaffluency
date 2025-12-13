@@ -30,6 +30,7 @@ import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
 import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
 import alexanderLamontPick2 from "@/assets/curators-picks/alexander-lamont-2.jpg";
 import alexanderLamontPick3 from "@/assets/curators-picks/alexander-lamont-3.jpg";
+import alexanderLamontPick4 from "@/assets/curators-picks/alexander-lamont-4.jpg";
 
 const featuredDesigners = [
   {
@@ -56,6 +57,13 @@ const featuredDesigners = [
         category: "Lighting",
         materials: "Hand-cast bronze with clear glass diffuser",
         dimensions: "H45 × W12 × D14 cm"
+      },
+      { 
+        image: alexanderLamontPick4, 
+        title: "Dais Lounge Chair", 
+        category: "Furniture",
+        materials: "Bouclé upholstery • Shagreen leather • Straw marquetry accents",
+        dimensions: "H75 × W80 × D85 cm"
       },
       { 
         image: alexanderLamontPick2, 
