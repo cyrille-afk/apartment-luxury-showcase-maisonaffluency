@@ -44,7 +44,7 @@ const CuratingTeam = () => {
         The dedicated curators behind our designer selections
       </p>
 
-      <div className="grid grid-cols-2 gap-6 md:gap-8 max-w-md mx-auto">
+      <div className="grid grid-cols-2 gap-3 md:gap-8 max-w-md mx-auto">
         {curatingTeam.map((member, index) => (
           <motion.div
             key={member.id}
