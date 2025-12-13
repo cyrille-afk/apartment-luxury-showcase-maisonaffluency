@@ -166,10 +166,10 @@ const featuredDesigners = [
       },
       { 
         image: demichelisPick3, 
-        title: "Ellipse 2 Table Lamp", 
-        category: "Lighting",
-        materials: "Patinated brass • Grey fabric shade",
-        dimensions: "W41 × D43 × H63 cm"
+        title: "Table d'appoint RHINO", 
+        category: "Furniture",
+        materials: "Enamelled bronze • Ultramarine blue",
+        dimensions: "H43 × Ø34 cm"
       },
       { 
         image: demichelisPick4, 
