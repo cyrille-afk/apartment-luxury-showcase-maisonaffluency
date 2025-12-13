@@ -19,7 +19,7 @@ const curatingTeam = [
     name: "Elsa Lemarignier",
     role: "Co-Founder and CPO",
     image: elsaLemarignierImg,
-    bio: "After studying at the École du Louvre, Elsa opened her own art and design gallery in Paris and curated her own collection of design pieces with the likes of Ron Arad. As Affluency's co-founder, her mission is to seek out and select exceptional design, art and collectible pieces around the world, showcasing exceptional craftsmanship.",
+    bio: "After studying at the École du Louvre, Elsa opened her own art and design gallery in Paris and curated her own collection of design pieces with the likes of Ron Arad. As Affluency co-founder, her mission is to seek out and select exceptional design, art and collectible pieces around the world, showcasing exceptional craftsmanship.",
   },
 ];
 
