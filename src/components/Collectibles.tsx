@@ -12,6 +12,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import atelierDemichelisImg from "@/assets/designers/atelier-demichelis.jpg";
 import kikoLopezImg from "@/assets/designers/kiko-lopez.jpg";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
+import maartenVrolijkImg from "@/assets/designers/maarten-vrolijk.png";
 
 // Curators' Picks images
 import demichelisPick1 from "@/assets/curators-picks/demichelis-1.jpg";
@@ -172,8 +173,8 @@ const collectibleDesigners = [
   {
     id: "maarten-vrolijk",
     name: "Maarten Vrolijk",
-    specialty: "Contemporary Sculptural Furniture",
-    image: nathalieZieglerImg, // Placeholder - replace with actual image
+    specialty: "Contemporary Glass Art & Sculptural Vessels",
+    image: maartenVrolijkImg,
     biography:
       "Maarten Vrolijk is a Dutch designer known for his sculptural approach to furniture design. His work explores the intersection of art and functionality, creating pieces that challenge conventional forms while remaining inherently practical. Each creation reflects his deep understanding of materials and his commitment to pushing the boundaries of contemporary design.",
     notableWorks: "Sculptural Tables, Organic Form Seating, Limited Edition Furniture Collection",
