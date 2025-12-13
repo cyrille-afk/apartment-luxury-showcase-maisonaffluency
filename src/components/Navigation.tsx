@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Crown, ChevronDown } from "lucide-react";
+import { Menu, X, Crown } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -9,17 +10,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import logoIcon from "@/assets/affluency-logo-icon.jpeg";
 
 const navItems = [{
@@ -42,18 +32,9 @@ const navItems = [{
   href: "#contact"
 }];
 
-const collectiblesItems = [
-  { label: "Mangala Coffee Table", designer: "Atelier Pendhapa" },
-  { label: "Akar Dining Chair", designer: "Atelier Pendhapa" },
-  { label: "Lantern Table Lamp", designer: "Apparatus Studio" },
-  { label: "Babel Table Lamp", designer: "Atelier Demichelis" },
-  { label: "Galea Lantern", designer: "Alexander Lamont" },
-  { label: "Entrelacs Chair", designer: "Yves Macheret" },
-];
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("#home");
-  const [collectiblesOpen, setCollectiblesOpen] = useState(false);
 
   useEffect(() => {
     const sectionIds = navItems.map(item => item.href.replace("#", ""));
@@ -149,27 +130,15 @@ const Navigation = () => {
                     )}
                   </button>
                   
-                  {/* Collectibles Dropdown - appears before Trade Program */}
+                  {/* Collectibles Link - appears before Trade Program */}
                   {isBeforeTradeProgram && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)] flex items-center gap-1">
-                        Collectibles
-                        <ChevronDown className="h-3 w-3" />
-                        <span className="absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
-                        {collectiblesItems.map((collectible) => (
-                          <DropdownMenuItem 
-                            key={collectible.label}
-                            onClick={handleCollectibleClick}
-                            className="cursor-pointer flex flex-col items-start py-3 px-4 hover:bg-muted"
-                          >
-                            <span className="font-medium text-foreground">{collectible.label}</span>
-                            <span className="text-xs text-muted-foreground">{collectible.designer}</span>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Link 
+                      to="/collectibles"
+                      className="font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                    >
+                      Collectibles
+                      <span className="absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
+                    </Link>
                   )}
                 </>
               );
@@ -218,26 +187,16 @@ const Navigation = () => {
                         )}
                       </button>
                       
-                      {/* Collectibles Section - appears before Trade Program */}
+                      {/* Collectibles Link - appears before Trade Program */}
                       {isBeforeTradeProgram && (
-                        <Collapsible open={collectiblesOpen} onOpenChange={setCollectiblesOpen}>
-                          <CollapsibleTrigger className="font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30 w-full flex items-center justify-between text-foreground hover:text-primary">
-                            Collectibles
-                            <ChevronDown className={cn("h-5 w-5 transition-transform", collectiblesOpen && "rotate-180")} />
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="pl-4 space-y-3 mt-2">
-                            {collectiblesItems.map((collectible) => (
-                              <button 
-                                key={collectible.label}
-                                onClick={handleCollectibleClick}
-                                className="block text-left py-2 border-b border-border/20 w-full"
-                              >
-                                <span className="font-body text-lg text-foreground">{collectible.label}</span>
-                                <span className="block text-sm text-muted-foreground">{collectible.designer}</span>
-                              </button>
-                            ))}
-                          </CollapsibleContent>
-                        </Collapsible>
+                        <Link 
+                          to="/collectibles"
+                          onClick={() => setIsOpen(false)}
+                          className="font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30 text-foreground hover:text-primary block"
+                        >
+                          Collectibles
+                          <span className="absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
+                        </Link>
                       )}
                     </>
                   );
