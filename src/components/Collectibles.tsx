@@ -355,10 +355,10 @@ const Collectibles = () => {
                         <div className="pt-2">
                           <button
                             onClick={() => openCuratorPicks(designer)}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-colors duration-300 text-sm font-medium"
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-gradient-to-r from-accent/90 to-primary/80 hover:from-accent hover:to-primary text-white rounded-md transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer border border-accent/30"
                           >
-                            <Star className="w-4 h-4" />
-                            Limited Editions
+                            <Star size={16} className="fill-current" />
+                            <span className="font-medium">Limited Editions</span>
                           </button>
                         </div>
                       )}
