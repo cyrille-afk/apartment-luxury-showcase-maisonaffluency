@@ -56,7 +56,7 @@ const CuratingTeam = () => {
             <Dialog>
               <DialogTrigger asChild>
                 <button 
-                  className="relative group aspect-square rounded-full overflow-hidden mb-4 bg-primary/5 border border-primary/10 mx-auto w-24 h-24 md:w-32 md:h-32 cursor-pointer transition-transform duration-300 hover:scale-105 hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="relative group aspect-square rounded-full overflow-hidden mb-4 bg-primary/5 border border-primary/20 mx-auto w-24 h-24 md:w-32 md:h-32 cursor-pointer transition-transform duration-300 hover:scale-105 hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20 animate-pulse-glow"
                   onClick={() => setSelectedMember(member)}
                 >
                   {member.image ? (
