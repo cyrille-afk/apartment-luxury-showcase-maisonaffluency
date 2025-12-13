@@ -173,6 +173,17 @@ const partnerBrands = [
     galleryIndex: 9, // A Masterful Suite
   },
   {
+    id: "entrelacs-creation",
+    name: "Entrelacs Création",
+    category: "Furniture",
+    subcategory: "Seating",
+    seatType: "Sofas & Loveseats",
+    origin: "France",
+    description: "French atelier renowned for bespoke upholstery and furniture, combining traditional savoir-faire with contemporary design to create exceptional seating pieces.",
+    featured: "Custom Upholstered Sofa",
+    instagram: "https://instagram.com/entrelacs_creation",
+  },
+  {
     id: "damien-langlois-meurinne",
     name: "Damien Langlois Meurinne Studio",
     category: "Furniture",
