@@ -45,12 +45,14 @@ const featuredDesigners = [
       { 
         image: alexanderLamontPick1, 
         title: "Ondas Sconce Clear", 
-        description: "Hand-cast bronze with clear glass diffuser. H45 × W12 × D14 cm" 
+        materials: "Hand-cast bronze with clear glass diffuser",
+        dimensions: "H45 × W12 × D14 cm"
       },
       { 
         image: alexanderLamontPick2, 
         title: "Galea Lantern Rock Crystal", 
-        description: "Hammered bronze base • Rock crystal & frosted glass shades • H28 × W18 × D18 cm" 
+        materials: "Hammered bronze base • Rock crystal & frosted glass shades",
+        dimensions: "H28 × W18 × D18 cm"
       },
     ],
     links: [
@@ -711,10 +713,19 @@ const FeaturedDesigners = () => {
                       <p className="text-sm md:text-base text-white/70 font-body max-w-2xl">
                         <span className="italic">by</span> {curatorPicksDesigner.name}
                       </p>
-                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.description && (
-                        <p className="text-xs md:text-sm text-white/50 font-body mt-2 max-w-xl">
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].description}
-                        </p>
+                      {(curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions) && (
+                        <div className="mt-2 max-w-xl space-y-1">
+                          {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
+                            <p className="text-xs md:text-sm text-white/60 font-body">
+                              {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials}
+                            </p>
+                          )}
+                          {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions && (
+                            <p className="text-xs md:text-sm text-white/40 font-body italic">
+                              {curatorPicksDesigner.curatorPicks[curatorPickIndex].dimensions}
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
