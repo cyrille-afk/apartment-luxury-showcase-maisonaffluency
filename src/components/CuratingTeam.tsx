@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Maximize2 } from "lucide-react";
 import cyrilleDelvalImg from "@/assets/team/cyrille-delval.jpg";
 import elsaLemarignierImg from "@/assets/team/elsa-lemarignier.jpg";
 
@@ -56,7 +56,7 @@ const CuratingTeam = () => {
             <Dialog>
               <DialogTrigger asChild>
                 <button 
-                  className="aspect-square rounded-full overflow-hidden mb-4 bg-primary/5 border border-primary/10 mx-auto w-24 h-24 md:w-32 md:h-32 cursor-pointer transition-transform duration-300 hover:scale-105 hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="relative group aspect-square rounded-full overflow-hidden mb-4 bg-primary/5 border border-primary/10 mx-auto w-24 h-24 md:w-32 md:h-32 cursor-pointer transition-transform duration-300 hover:scale-105 hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   onClick={() => setSelectedMember(member)}
                 >
                   {member.image ? (
@@ -76,6 +76,12 @@ const CuratingTeam = () => {
                       </svg>
                     </div>
                   )}
+                  {/* Expand icon overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 rounded-full flex items-center justify-center">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-background/90 p-1.5 rounded-full shadow-md">
+                      <Maximize2 className="w-3.5 h-3.5 text-foreground" />
+                    </span>
+                  </div>
                 </button>
               </DialogTrigger>
               <DialogContent className="max-w-md p-0 overflow-hidden bg-background border-primary/20">
