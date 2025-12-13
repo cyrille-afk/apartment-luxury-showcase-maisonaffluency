@@ -18,7 +18,7 @@ const Overview = () => {
     }
   };
 
-  return <section id="overview" ref={ref} className="py-24 px-6 md:px-12 lg:px-20 bg-background">
+  return <section id="overview" ref={ref} className="py-12 md:py-24 px-6 md:px-12 lg:px-20 bg-background">
       <div className="mx-auto max-w-7xl">
         <motion.div initial={{
         opacity: 0,
