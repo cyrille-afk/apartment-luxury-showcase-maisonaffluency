@@ -45,12 +45,14 @@ const featuredDesigners = [
       { 
         image: alexanderLamontPick1, 
         title: "Ondas Sconce Clear", 
+        category: "Lighting",
         materials: "Hand-cast bronze with clear glass diffuser",
         dimensions: "H45 × W12 × D14 cm"
       },
       { 
         image: alexanderLamontPick2, 
         title: "Galea Lantern Rock Crystal", 
+        category: "Lighting",
         materials: "Hammered bronze base • Rock crystal & frosted glass shades",
         dimensions: "H28 × W18 × D18 cm"
       },
@@ -707,6 +709,11 @@ const FeaturedDesigners = () => {
                       className="max-w-full max-h-[55vh] object-contain" 
                     />
                     <div className="mt-4 text-center">
+                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && (
+                        <span className="inline-block px-3 py-1 mb-2 text-xs uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
+                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
+                        </span>
+                      )}
                       <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
                       </h3>
