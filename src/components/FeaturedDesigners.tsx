@@ -608,15 +608,32 @@ const FeaturedDesigners = () => {
                                 href={link.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-md transition-colors duration-300 border ${
+                                className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-md transition-all duration-300 border group/link ${
                                   link.type === "Instagram" 
-                                    ? "bg-[#E4405F]/10 hover:bg-[#E4405F]/20 text-[#E4405F] border-[#E4405F]/20 hover:border-[#E4405F]/40" 
+                                    ? "bg-gradient-to-r from-[#f09433]/10 via-[#dc2743]/10 to-[#bc1888]/10 hover:from-[#f09433]/20 hover:via-[#dc2743]/20 hover:to-[#bc1888]/20 border-[#dc2743]/30 hover:border-[#dc2743]/50" 
                                     : "bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 hover:border-primary/40"
                                 }`}
                                 aria-label={link.type}
                               >
-                                {link.type === "Instagram" ? <Instagram size={16} /> : <span>{link.type}</span>}
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {link.type === "Instagram" ? (
+                                  <svg className="w-4 h-4 transition-transform duration-300 group-hover/link:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-btn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <defs>
+                                      <linearGradient id="instagram-gradient-btn" x1="0%" y1="100%" x2="100%" y2="0%">
+                                        <stop offset="0%" stopColor="#f09433" />
+                                        <stop offset="25%" stopColor="#e6683c" />
+                                        <stop offset="50%" stopColor="#dc2743" />
+                                        <stop offset="75%" stopColor="#cc2366" />
+                                        <stop offset="100%" stopColor="#bc1888" />
+                                      </linearGradient>
+                                    </defs>
+                                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                                  </svg>
+                                ) : (
+                                  <span>{link.type}</span>
+                                )}
+                                <svg className={`w-3 h-3 ${link.type === "Instagram" ? "" : ""}`} fill="none" stroke={link.type === "Instagram" ? "url(#instagram-gradient-btn)" : "currentColor"} viewBox="0 0 24 24">
                                   <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
