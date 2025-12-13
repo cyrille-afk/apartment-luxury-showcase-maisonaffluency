@@ -50,7 +50,7 @@ const featuredDesigners = [
       { 
         image: alexanderLamontPick2, 
         title: "Galea Lantern Rock Crystal", 
-        description: "Hammered bronze base with rock crystal and frosted glass shades. H28 × W18 × D18 cm" 
+        description: "Hammered bronze base • Rock crystal & frosted glass shades • H28 × W18 × D18 cm" 
       },
     ],
     links: [
