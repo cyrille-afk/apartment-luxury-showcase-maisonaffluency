@@ -48,7 +48,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.8,
             delay: 0.3
-          }} className="mb-8 font-display text-xl leading-tight text-foreground md:text-2xl lg:text-3xl">A{" "}
+          }} className="mb-8 font-display text-xl leading-tight text-foreground md:text-2xl lg:text-3xl">An exclusive{" "}
               <button
                 onClick={() => {
                   const gallerySection = document.getElementById("gallery");
