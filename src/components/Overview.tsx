@@ -48,9 +48,19 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.8,
             delay: 0.3
-          }} className="mb-8 font-display text-xl leading-tight text-foreground md:text-2xl lg:text-3xl">An exclusive showroom where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors
-​<br />
-              ​
+          }} className="mb-8 font-display text-xl leading-tight text-foreground md:text-2xl lg:text-3xl">An exclusive showroom{" "}
+              <button
+                onClick={() => {
+                  const gallerySection = document.getElementById("gallery");
+                  if (gallerySection) {
+                    gallerySection.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="inline text-primary hover:text-accent underline decoration-primary/30 hover:decoration-accent transition-all duration-300 cursor-pointer"
+              >
+                (2,400 sq ft)
+              </button>
+              {" "}where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors
             </motion.h2>
 
             <motion.div initial={{
@@ -109,7 +119,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.6
-          }} className="grid grid-cols-3 gap-6 pt-8 border-t border-border">
+          }} className="grid grid-cols-2 gap-6 pt-8 border-t border-border">
               <button 
                 onClick={() => {
                   const gallerySection = document.getElementById("gallery");
@@ -134,12 +144,6 @@ const Overview = () => {
                 <div className="mb-2 font-display text-3xl text-primary group-hover:text-accent transition-colors duration-300">50</div>
                 <div className="font-body text-sm uppercase tracking-wider text-muted-foreground underline decoration-primary/30 group-hover:decoration-accent group-hover:text-foreground transition-all duration-300">DESIGNERS</div>
               </button>
-              <div className="transition-all duration-300">
-                <div className="mb-2 font-display text-3xl text-primary">2,400</div>
-                <div className="font-body text-sm uppercase tracking-wider text-muted-foreground">
-                  Sq Ft
-                </div>
-              </div>
             </motion.div>
           </div>
         </motion.div>
