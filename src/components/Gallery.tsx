@@ -239,7 +239,7 @@ const Gallery = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: sectionIndex * 0.2
-          }} className="mb-8 md:mb-12">
+          }} className="mb-4 md:mb-6">
                 <h3 className="text-2xl md:text-3xl lg:text-4xl font-serif text-primary mb-2">
                   {section.experience}
                 </h3>
