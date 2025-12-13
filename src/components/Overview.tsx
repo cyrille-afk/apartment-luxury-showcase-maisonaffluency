@@ -56,7 +56,7 @@ const Overview = () => {
                     gallerySection.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
-                className="inline text-primary hover:text-accent underline decoration-primary/30 hover:decoration-accent transition-all duration-300 cursor-pointer hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.5),0_0_24px_hsl(var(--accent)/0.3)]"
+                className="inline text-primary hover:text-accent underline decoration-primary/30 hover:decoration-accent transition-all duration-300 cursor-pointer"
               >
                 exclusive 2,400 sq ft showroom
               </button>
