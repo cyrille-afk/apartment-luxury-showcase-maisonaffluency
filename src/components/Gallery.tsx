@@ -80,6 +80,14 @@ const galleryExperiences = [{
     title: "Design Icons and Collectibles",
     description: "Damien Langlois-Meurinne's Ooh La La Console, Haymann Editions' Carved Marble Marie Lamp, Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
   }]
+}, {
+  experience: "A Small Room with Massive Personality",
+  subtitle: "Bold statement pieces, artisan craftsmanship and curated collectibles",
+  items: [{
+    image: bedroomAltImage,
+    title: "Compact Elegance",
+    description: "Curated selection of statement pieces that transform intimate spaces into design destinations"
+  }]
 }];
 const Gallery = () => {
   const ref = useRef(null);
