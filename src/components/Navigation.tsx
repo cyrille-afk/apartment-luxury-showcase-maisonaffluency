@@ -136,7 +136,7 @@ const Navigation = () => {
           {/* Brand - Center (absolutely positioned on desktop for true centering) */}
           <div className="md:absolute md:left-1/2 md:-translate-x-1/2 z-10">
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-2xl md:text-3xl font-medium tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+              <span className="font-brand text-xl md:text-2xl font-medium tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                 MAISON AFFLUENCY
               </span>
             </button>
