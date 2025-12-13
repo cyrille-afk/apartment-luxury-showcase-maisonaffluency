@@ -177,7 +177,8 @@ const collectibleDesigners = [
     image: maartenVrolijkImg,
     biography:
       "Maarten Vrolijk is a Dutch designer known for his sculptural approach to furniture design. His work explores the intersection of art and functionality, creating pieces that challenge conventional forms while remaining inherently practical. Each creation reflects his deep understanding of materials and his commitment to pushing the boundaries of contemporary design.",
-    notableWorks: "Sculptural Tables, Organic Form Seating, Limited Edition Furniture Collection",
+    notableWorks: "Sakura TRP 22001, Sculptural Glass Vessels, Unique Art Pieces",
+    notableWorksLink: { text: "Sakura TRP 22001", galleryIndex: 0 },
     philosophy: "Furniture should be a conversation between form and function—each piece tells a story of material and intention.",
     curatorPicks: [
       { 
