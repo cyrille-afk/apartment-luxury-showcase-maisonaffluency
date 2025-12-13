@@ -244,16 +244,20 @@ const Navigation = () => {
             <SheetContent side="right" className="w-[280px] sm:w-[320px]">
               <div className="flex flex-col gap-6 mt-8">
                 {/* Main Navigation Items */}
-                {leftNavItems.map((item) => (
+                {leftNavItems.map((item, index) => (
                   <button 
                     key={item.href} 
                     onClick={() => handleNavClick(item.href)} 
                     className={cn(
-                      "font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30",
+                      "font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30 animate-fade-in opacity-0",
                       activeSection === item.href 
                         ? "text-primary"
                         : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
                     )}
+                    style={{ 
+                      animationDelay: `${index * 75}ms`,
+                      animationFillMode: 'forwards'
+                    }}
                   >
                     {item.label}
                     <span className={cn(
@@ -266,7 +270,13 @@ const Navigation = () => {
                 ))}
                 
                 {/* Trade Program Section */}
-                <div className="pt-4 border-t border-border/50">
+                <div 
+                  className="pt-4 border-t border-border/50 animate-fade-in opacity-0"
+                  style={{ 
+                    animationDelay: `${leftNavItems.length * 75}ms`,
+                    animationFillMode: 'forwards'
+                  }}
+                >
                   {rightNavItems.map((item) => (
                     <button 
                       key={item.href} 
@@ -280,17 +290,27 @@ const Navigation = () => {
                 </div>
                 
                 {/* Contact Us Section */}
-                <div className="pt-4 border-t border-border/30">
+                <div 
+                  className="pt-4 border-t border-border/30 animate-fade-in opacity-0"
+                  style={{ 
+                    animationDelay: `${(leftNavItems.length + 1) * 75}ms`,
+                    animationFillMode: 'forwards'
+                  }}
+                >
                   <p className="font-serif text-xl text-foreground mb-4">Contact Us</p>
                   <div className="flex flex-col gap-3">
-                    {contactOptions.map((option) => (
+                    {contactOptions.map((option, index) => (
                       <button
                         key={option.label}
                         onClick={() => {
                           setIsOpen(false);
                           option.action();
                         }}
-                        className="flex items-center gap-3 text-left font-body text-base text-muted-foreground hover:text-primary transition-colors"
+                        className="flex items-center gap-3 text-left font-body text-base text-muted-foreground hover:text-primary transition-colors animate-fade-in opacity-0"
+                        style={{ 
+                          animationDelay: `${(leftNavItems.length + 2 + index) * 75}ms`,
+                          animationFillMode: 'forwards'
+                        }}
                       >
                         <option.icon className="h-5 w-5 text-primary" />
                         <span>{option.label}</span>
