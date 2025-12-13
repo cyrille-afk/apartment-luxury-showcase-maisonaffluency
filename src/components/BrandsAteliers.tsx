@@ -595,7 +595,7 @@ const BrandsAteliers = () => {
 
 
   return (
-    <section ref={ref} className="py-16 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30">
+    <section ref={ref} className="py-10 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
