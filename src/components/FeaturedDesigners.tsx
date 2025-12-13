@@ -40,6 +40,10 @@ import apparatusPick1 from "@/assets/curators-picks/apparatus-1.jpg";
 import apparatusPick2 from "@/assets/curators-picks/apparatus-2.jpg";
 import apparatusPick3 from "@/assets/curators-picks/apparatus-3.jpg";
 import apparatusPick4 from "@/assets/curators-picks/apparatus-4.jpg";
+import demichelisPick1 from "@/assets/curators-picks/demichelis-1.jpg";
+import demichelisPick2 from "@/assets/curators-picks/demichelis-2.jpg";
+import demichelisPick3 from "@/assets/curators-picks/demichelis-3.jpg";
+import demichelisPick4 from "@/assets/curators-picks/demichelis-4.jpg";
 
 const featuredDesigners = [
   {
@@ -145,6 +149,36 @@ const featuredDesigners = [
     notableWorks: "Limited Edition Bud Table Lamp, Artisan Lighting Collection",
     notableWorksLink: { text: "Limited Edition Bud Table Lamp", galleryIndex: 10 },
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
+    curatorPicks: [
+      { 
+        image: demichelisPick1, 
+        title: "Babel Table Lamp", 
+        category: "Lighting",
+        materials: "Bronze • Brass • Ash wood • White fabric shade",
+        dimensions: "Ø45 × H60.9 cm"
+      },
+      { 
+        image: demichelisPick2, 
+        title: "Bud Table Lamp", 
+        category: "Lighting",
+        materials: "Bronze • White oak • Hand-made fabric shade",
+        dimensions: "Ø40 × H71 cm"
+      },
+      { 
+        image: demichelisPick3, 
+        title: "Ellipse 2 Table Lamp", 
+        category: "Lighting",
+        materials: "Patinated brass • Grey fabric shade",
+        dimensions: "W41 × D43 × H63 cm"
+      },
+      { 
+        image: demichelisPick4, 
+        title: "Echo Floor Lamp", 
+        category: "Lighting",
+        materials: "Patinated and varnished brass",
+        dimensions: "Ø38 × H166 cm"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/atelier_demichelis" },
       { type: "Curators' Picks" },
