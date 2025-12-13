@@ -121,11 +121,10 @@ const CuratingTeam = () => {
                       href={member.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-4 inline-flex items-center gap-2 text-[#0077B5] hover:text-[#005582] transition-colors duration-300"
+                      className="mt-4 text-[#0077B5] hover:text-[#005582] transition-colors duration-300"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Linkedin className="w-5 h-5" />
-                      <span className="text-sm font-body">View LinkedIn Profile</span>
                     </a>
                   )}
                 </div>
