@@ -133,11 +133,10 @@ const Navigation = () => {
             ))}
           </div>
 
-          {/* Logo/Brand - Center (absolutely positioned on desktop for true centering) */}
+          {/* Brand - Center (absolutely positioned on desktop for true centering) */}
           <div className="md:absolute md:left-1/2 md:-translate-x-1/2">
-            <button onClick={scrollToTop} className="group cursor-pointer flex items-center gap-2 whitespace-nowrap">
-              <img src={logoIcon} alt="Affluency Logo" className="h-9 md:h-9 w-auto" />
-              <span className="font-serif text-lg md:text-xl font-extrabold text-foreground transition-all duration-300 group-hover:text-primary">
+            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
+              <span className="font-serif text-xl md:text-2xl font-extrabold tracking-wide text-foreground transition-all duration-300 group-hover:text-primary uppercase">
                 Maison Affluency
               </span>
             </button>
