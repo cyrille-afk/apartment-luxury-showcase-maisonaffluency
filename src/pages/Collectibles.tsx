@@ -8,13 +8,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import logoIcon from "@/assets/affluency-logo-icon.jpeg";
 
 // Import images
-import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
-import alexanderLamontPick2 from "@/assets/curators-picks/alexander-lamont-2.jpg";
-import apparatusPick1 from "@/assets/curators-picks/apparatus-1.jpg";
 import demichelisPick1 from "@/assets/curators-picks/demichelis-1.jpg";
-import pendhapaPick1 from "@/assets/curators-picks/pendhapa-1.jpg";
-import pendhapaPick4 from "@/assets/curators-picks/pendhapa-4.jpg";
-import yvesMacheretPick4 from "@/assets/curators-picks/yves-macheret-4.jpg";
 
 interface Collectible {
   id: string;
@@ -31,42 +25,6 @@ interface Collectible {
 
 const collectibles: Collectible[] = [
   {
-    id: "mangala-coffee-table",
-    title: "Mangala Coffee Table",
-    designer: "Atelier Pendhapa",
-    designerSlug: "atelier-pendhapa",
-    category: "Furniture",
-    image: pendhapaPick1,
-    materials: "Black teak • Lava stone crème brûlée tabletop",
-    dimensions: "L190 × W180 × H35 cm",
-    description: "A stunning coffee table that embodies Indonesian craftsmanship. The volcanic lava stone top is hand-finished with a distinctive crème brûlée texture, resting upon an elegantly sculpted black teak base.",
-    priceRange: "Price upon request"
-  },
-  {
-    id: "akar-dining-chair",
-    title: "Akar Dining Chair",
-    designer: "Atelier Pendhapa",
-    designerSlug: "atelier-pendhapa",
-    category: "Furniture",
-    image: pendhapaPick4,
-    materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery",
-    dimensions: "L49 × W52 × H85 cm",
-    description: "The Akar Dining Chair combines master woodworking with luxurious French textile artistry. Each chair is hand-carved from premium brown oak and upholstered in exclusive Elitis fabric.",
-    priceRange: "Price upon request"
-  },
-  {
-    id: "lantern-table-lamp",
-    title: "Lantern Table Lamp",
-    designer: "Apparatus Studio",
-    designerSlug: "apparatus-studio",
-    category: "Lighting",
-    image: apparatusPick1,
-    materials: "Brass armature • Pressed glass shade",
-    dimensions: "H18\" × Ø10\"",
-    description: "A sculptural interpretation of traditional lantern forms. The brass armature creates geometric elegance while the pressed glass diffuses warm, ambient light throughout any interior.",
-    priceRange: "Price upon request"
-  },
-  {
     id: "babel-table-lamp",
     title: "Babel Table Lamp",
     designer: "Atelier Demichelis",
@@ -76,42 +34,6 @@ const collectibles: Collectible[] = [
     materials: "Bronze • Brass • Ash wood • White fabric shade",
     dimensions: "Ø45 × H60.9 cm",
     description: "A masterwork of mixed-media lighting design. The Babel Table Lamp features hand-patinated bronze and brass elements anchored by an ash wood base, crowned with a handcrafted fabric shade.",
-    priceRange: "Price upon request"
-  },
-  {
-    id: "galea-lantern",
-    title: "Galea Lantern Rock Crystal",
-    designer: "Alexander Lamont",
-    designerSlug: "alexander-lamont",
-    category: "Lighting",
-    image: alexanderLamontPick2,
-    materials: "Hammered bronze base • Rock crystal & frosted glass shades",
-    dimensions: "H28 × W18 × D18 cm",
-    description: "An exquisite lantern that showcases Alexander Lamont's mastery of traditional metalworking. The hammered bronze base supports ethereal rock crystal and frosted glass shades.",
-    priceRange: "Price upon request"
-  },
-  {
-    id: "entrelacs-chair",
-    title: "Entrelacs Chair",
-    designer: "Yves Macheret",
-    designerSlug: "yves-macheret",
-    category: "Furniture",
-    image: yvesMacheretPick4,
-    materials: "Hand-woven wicker • Solid oak frame",
-    dimensions: "H85 × W65 × D70 cm",
-    description: "The Entrelacs Chair is a celebration of artisanal weaving traditions. Each chair features intricate hand-woven wicker work supported by a meticulously crafted solid oak frame.",
-    priceRange: "Price upon request"
-  },
-  {
-    id: "ondas-sconce",
-    title: "Ondas Sconce Clear",
-    designer: "Alexander Lamont",
-    designerSlug: "alexander-lamont",
-    category: "Lighting",
-    image: alexanderLamontPick1,
-    materials: "Hand-cast bronze with clear glass diffuser",
-    dimensions: "H45 × W12 × D14 cm",
-    description: "A sculptural wall sconce that embodies the fluidity of ocean waves. Hand-cast bronze creates organic, flowing forms while the clear glass diffuser provides elegant illumination.",
     priceRange: "Price upon request"
   },
 ];
