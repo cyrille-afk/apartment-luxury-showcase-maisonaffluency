@@ -164,21 +164,12 @@ const Navigation = () => {
 
           {/* Logo/Brand - Center (absolutely positioned on desktop for true centering) */}
           <div className="md:absolute md:left-1/2 md:-translate-x-1/2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button onClick={scrollToTop} className="group cursor-pointer flex items-center gap-2 whitespace-nowrap">
-                    <img src={logoIcon} alt="Affluency Logo" className="h-9 md:h-9 w-auto" />
-                    <span className="font-serif text-lg md:text-xl font-extrabold text-foreground transition-all duration-300 group-hover:text-primary">
-                      Maison Affluency
-                    </span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Back to top</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <button onClick={scrollToTop} className="group cursor-pointer flex items-center gap-2 whitespace-nowrap">
+              <img src={logoIcon} alt="Affluency Logo" className="h-9 md:h-9 w-auto" />
+              <span className="font-serif text-lg md:text-xl font-extrabold text-foreground transition-all duration-300 group-hover:text-primary">
+                Maison Affluency
+              </span>
+            </button>
           </div>
 
           {/* Right Navigation Items */}
