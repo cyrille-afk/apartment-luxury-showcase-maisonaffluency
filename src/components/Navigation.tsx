@@ -32,7 +32,7 @@ const navItems = [{
   label: "Trade Program",
   href: "#details"
 }, {
-  label: "Contact Us - Appointment",
+  label: "Contact",
   href: "#contact"
 }];
 
