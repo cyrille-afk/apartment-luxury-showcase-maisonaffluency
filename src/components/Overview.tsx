@@ -48,7 +48,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.8,
             delay: 0.3
-          }} className="mb-8 font-display text-xl leading-tight text-foreground md:text-2xl lg:text-3xl">An exclusive{" "}
+          }} className="mb-8 font-display text-xl leading-tight text-foreground md:text-2xl lg:text-3xl">An{" "}
               <button
                 onClick={() => {
                   const gallerySection = document.getElementById("gallery");
@@ -58,7 +58,7 @@ const Overview = () => {
                 }}
                 className="inline text-primary hover:text-accent underline decoration-primary/30 hover:decoration-accent transition-all duration-300 cursor-pointer"
               >
-                2,400 sq ft showroom / gallery
+                exclusive 2,400 sq ft showroom / gallery
               </button>
               {" "}where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors
             </motion.h2>
