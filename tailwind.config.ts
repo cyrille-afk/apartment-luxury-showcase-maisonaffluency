@@ -76,7 +76,7 @@ export default {
       },
       fontFamily: {
         display: ["Playfair Display", "serif"],
-        serif: ["Cormorant Garamond", "Georgia", "serif"],
+        brand: ["Cinzel", "Georgia", "serif"],
         body: ["Inter", "sans-serif"],
       },
       keyframes: {
