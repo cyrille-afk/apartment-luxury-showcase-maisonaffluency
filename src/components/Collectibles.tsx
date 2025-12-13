@@ -62,7 +62,7 @@ const collectibleDesigners = [
         category: "Furniture",
         materials: "Patinated bronze • Raw brass • Brown cowhide leather top",
         dimensions: "H43.5 × L35 cm",
-        edition: "8 + 2 artist proofs"
+        edition: "Numbered edition of 8 + 2 APs"
       },
     ],
     links: [
