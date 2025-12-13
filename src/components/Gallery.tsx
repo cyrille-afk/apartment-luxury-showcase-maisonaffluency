@@ -221,7 +221,7 @@ const Gallery = () => {
         } : {}} transition={{
           duration: 0.8
         }} className="mb-12 md:mb-16 text-left">
-            <p className="mb-2 md:mb-3 uppercase tracking-[0.15em] md:tracking-[0.3em] text-primary text-base md:text-xl lg:text-2xl font-serif">
+            <p className="mb-2 md:mb-3 uppercase tracking-[0.15em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
               OUR GALLERY
             </p>
             <h2 className="text-sm leading-relaxed md:text-3xl text-foreground text-left px-1 md:px-2 md:text-justify font-serif lg:text-lg">
@@ -240,7 +240,7 @@ const Gallery = () => {
             duration: 0.6,
             delay: sectionIndex * 0.2
           }} className="mb-4 md:mb-6">
-                <h3 className="text-2xl md:text-3xl lg:text-4xl font-serif text-primary mb-2">
+                <h3 className="text-xl md:text-3xl lg:text-4xl font-serif text-primary mb-2">
                   {section.experience}
                 </h3>
                 <p className="text-sm md:text-base text-muted-foreground font-body italic">
