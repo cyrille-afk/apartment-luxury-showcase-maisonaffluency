@@ -22,12 +22,12 @@ const navItems = [{
   label: "Designers",
   href: "#designers"
 }, {
-  label: "Ateliers",
-  href: "#brands"
-}, {
   label: "Collectibles",
   href: "/collectibles",
   isPage: true
+}, {
+  label: "Ateliers",
+  href: "#brands"
 }, {
   label: "Trade Program",
   href: "#details"
