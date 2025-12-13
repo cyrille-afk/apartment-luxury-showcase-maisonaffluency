@@ -603,20 +603,16 @@ const FeaturedDesigners = () => {
                         <div className="flex flex-wrap gap-3 mt-4">
                           {designer.links.map((link, idx) => (
                             link.url ? (
-                              <a
-                                key={idx}
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-md transition-all duration-300 border group/link ${
-                                  link.type === "Instagram" 
-                                    ? "bg-gradient-to-r from-[#f09433]/10 via-[#dc2743]/10 to-[#bc1888]/10 hover:from-[#f09433]/20 hover:via-[#dc2743]/20 hover:to-[#bc1888]/20 border-[#dc2743]/30 hover:border-[#dc2743]/50" 
-                                    : "bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 hover:border-primary/40"
-                                }`}
-                                aria-label={link.type}
-                              >
-                                {link.type === "Instagram" ? (
-                                  <svg className="w-4 h-4 transition-transform duration-300 group-hover/link:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-btn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              link.type === "Instagram" ? (
+                                <a
+                                  key={idx}
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center p-1 transition-transform duration-300 hover:scale-110"
+                                  aria-label={link.type}
+                                >
+                                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-btn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <defs>
                                       <linearGradient id="instagram-gradient-btn" x1="0%" y1="100%" x2="100%" y2="0%">
                                         <stop offset="0%" stopColor="#f09433" />
@@ -630,18 +626,27 @@ const FeaturedDesigners = () => {
                                     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                                     <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                                   </svg>
-                                ) : (
+                                </a>
+                              ) : (
+                                <a
+                                  key={idx}
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-md transition-all duration-300 border bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 hover:border-primary/40"
+                                  aria-label={link.type}
+                                >
                                   <span>{link.type}</span>
-                                )}
-                                <svg className={`w-3 h-3 ${link.type === "Instagram" ? "" : ""}`} fill="none" stroke={link.type === "Instagram" ? "url(#instagram-gradient-btn)" : "currentColor"} viewBox="0 0 24 24">
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                  />
-                                </svg>
-                              </a>
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                    />
+                                  </svg>
+                                </a>
+                              )
                             ) : link.type === "Curators' Picks" ? (
                               <button
                                 key={idx}
