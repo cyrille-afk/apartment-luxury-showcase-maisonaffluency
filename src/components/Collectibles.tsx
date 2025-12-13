@@ -181,20 +181,20 @@ const collectibleDesigners = [
     philosophy: "Furniture should be a conversation between form and function—each piece tells a story of material and intention.",
     curatorPicks: [
       { 
-        image: nathalieZieglerImg, // Placeholder - replace with actual image
+        image: maartenVrolijkImg,
         title: "Sculptural Console", 
         category: "Furniture",
         materials: "Bronze • Oak • Hand-finished patina",
         dimensions: "H85 × W150 × D40 cm",
-        edition: "Limited Edition"
+        edition: "Unique Piece"
       },
       { 
-        image: nathalieZieglerImg, // Placeholder - replace with actual image
+        image: maartenVrolijkImg,
         title: "Organic Form Chair", 
         category: "Seating",
         materials: "Walnut • Leather upholstery",
         dimensions: "H80 × W65 × D60 cm",
-        edition: "Numbered & Signed"
+        edition: "Unique Piece"
       },
     ],
     links: [
