@@ -48,7 +48,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.8,
             delay: 0.3
-          }} className="mb-8 font-display text-2xl leading-tight text-foreground md:text-4xl lg:text-5xl">An exclusive showroom where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors
+          }} className="mb-8 font-display text-2xl leading-tight text-foreground md:text-3xl lg:text-4xl">An exclusive showroom where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors
 ​<br />
               ​
             </motion.h2>
