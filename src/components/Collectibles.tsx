@@ -219,7 +219,7 @@ const Collectibles = () => {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-4">
               Collectibles
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl mx-auto">
+            <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
               Limited edition and unique pieces
             </p>
           </motion.div>
