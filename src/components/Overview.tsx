@@ -110,10 +110,18 @@ const Overview = () => {
             duration: 0.6,
             delay: 0.6
           }} className="grid grid-cols-3 gap-6 pt-8 border-t border-border">
-              <div>
+              <button 
+                onClick={() => {
+                  const gallerySection = document.getElementById("gallery");
+                  if (gallerySection) {
+                    gallerySection.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="text-left hover:opacity-80 transition-opacity cursor-pointer"
+              >
                 <div className="mb-2 font-display text-3xl text-primary">5</div>
-                <div className="font-body text-sm uppercase tracking-wider text-muted-foreground">ATMOSPHERES</div>
-              </div>
+                <div className="font-body text-sm uppercase tracking-wider text-muted-foreground underline decoration-primary/30 hover:decoration-primary">ATMOSPHERES</div>
+              </button>
               <div>
                 <div className="mb-2 font-display text-3xl text-primary">50</div>
                 <div className="font-body text-sm uppercase tracking-wider text-muted-foreground">DESIGNERS</div>
