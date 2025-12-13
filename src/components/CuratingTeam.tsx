@@ -41,7 +41,7 @@ const CuratingTeam = () => {
         The Curating Team
       </h3>
       <p className="text-muted-foreground font-body text-center max-w-2xl mx-auto mb-12">
-        The dedicated curators behind our designer selections
+        The heart and soul of the gallery and designers selection
       </p>
 
       <div className="grid grid-cols-2 gap-3 md:gap-8 max-w-md mx-auto">
