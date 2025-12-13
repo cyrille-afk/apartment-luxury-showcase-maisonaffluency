@@ -243,37 +243,41 @@ const Navigation = () => {
             
             <SheetContent side="right" className="w-[280px] sm:w-[320px]">
               <div className="flex flex-col gap-6 mt-8">
-                {navItems.map((item) => {
-                  const isTradeProgram = item.href === "#details";
-                  
-                  return (
+                {/* Main Navigation Items */}
+                {leftNavItems.map((item) => (
+                  <button 
+                    key={item.href} 
+                    onClick={() => handleNavClick(item.href)} 
+                    className={cn(
+                      "font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30",
+                      activeSection === item.href 
+                        ? "text-primary"
+                        : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                    )}
+                  >
+                    {item.label}
+                    <span className={cn(
+                      "absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300",
+                      activeSection === item.href 
+                        ? "w-full" 
+                        : "w-0 group-hover:w-full"
+                    )} />
+                  </button>
+                ))}
+                
+                {/* Trade Program Section */}
+                <div className="pt-4 border-t border-border/50">
+                  {rightNavItems.map((item) => (
                     <button 
                       key={item.href} 
                       onClick={() => handleNavClick(item.href)} 
-                      className={cn(
-                        "font-serif text-2xl text-left transition-all duration-300 py-3 relative group",
-                        !isTradeProgram && "border-b border-border/30",
-                        isTradeProgram && "px-4 py-2 mt-2 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
-                        activeSection === item.href 
-                          ? isTradeProgram ? "text-background" : "text-primary"
-                          : isTradeProgram
-                            ? "text-background"
-                            : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
-                      )}
+                      className="font-serif text-2xl text-left transition-all duration-300 px-4 py-2 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90 w-full"
                     >
-                      {isTradeProgram && <Crown className="inline-block w-5 h-5 mr-2" />}
+                      <Crown className="inline-block w-5 h-5 mr-2" />
                       {item.label}
-                      {!isTradeProgram && (
-                        <span className={cn(
-                          "absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300",
-                          activeSection === item.href 
-                            ? "w-full" 
-                            : "w-0 group-hover:w-full"
-                        )} />
-                      )}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
                 
                 {/* Contact Us Section */}
                 <div className="pt-4 border-t border-border/30">
