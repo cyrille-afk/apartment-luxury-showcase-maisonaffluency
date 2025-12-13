@@ -730,7 +730,7 @@ const FeaturedDesigners = () => {
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
                         </span>
                       )}
-                      <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
+                      <h3 className="text-base md:text-lg font-serif text-white mb-2">
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
                       </h3>
                       {(curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions) && (
