@@ -255,7 +255,7 @@ const Navigation = () => {
                         : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
                     )}
                     style={{ 
-                      animationDelay: `${index * 75}ms`,
+                      animationDelay: `${index * 120}ms`,
                       animationFillMode: 'forwards'
                     }}
                   >
@@ -273,7 +273,7 @@ const Navigation = () => {
                 <div 
                   className="pt-4 border-t border-border/50 animate-fade-in opacity-0"
                   style={{ 
-                    animationDelay: `${leftNavItems.length * 75}ms`,
+                    animationDelay: `${leftNavItems.length * 120}ms`,
                     animationFillMode: 'forwards'
                   }}
                 >
@@ -293,7 +293,7 @@ const Navigation = () => {
                 <div 
                   className="pt-4 border-t border-border/30 animate-fade-in opacity-0"
                   style={{ 
-                    animationDelay: `${(leftNavItems.length + 1) * 75}ms`,
+                    animationDelay: `${(leftNavItems.length + 1) * 120}ms`,
                     animationFillMode: 'forwards'
                   }}
                 >
@@ -308,7 +308,7 @@ const Navigation = () => {
                         }}
                         className="flex items-center gap-3 text-left font-body text-base text-muted-foreground hover:text-primary transition-colors animate-fade-in opacity-0"
                         style={{ 
-                          animationDelay: `${(leftNavItems.length + 2 + index) * 75}ms`,
+                          animationDelay: `${(leftNavItems.length + 2 + index) * 120}ms`,
                           animationFillMode: 'forwards'
                         }}
                       >
