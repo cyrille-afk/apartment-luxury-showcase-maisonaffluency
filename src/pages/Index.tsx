@@ -21,25 +21,25 @@ const Index = () => {
         <section id="home">
           <Hero />
         </section>
-        <section id="overview">
+        <section id="overview" className="scroll-mt-20 md:scroll-mt-24">
           <Overview />
         </section>
         <section id="gallery" className="scroll-mt-20 md:scroll-mt-24">
           <Gallery />
         </section>
-        <section id="curating-team">
+        <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24">
           <CuratingTeam />
         </section>
-        <section id="designers">
+        <section id="designers" className="scroll-mt-20 md:scroll-mt-24">
           <FeaturedDesigners />
         </section>
-        <section id="brands">
+        <section id="brands" className="scroll-mt-20 md:scroll-mt-24">
           <BrandsAteliers />
         </section>
-        <section id="details">
+        <section id="details" className="scroll-mt-20 md:scroll-mt-24">
           <DesignDetails />
         </section>
-        <section id="contact">
+        <section id="contact" className="scroll-mt-20 md:scroll-mt-24">
           <ContactInquiry />
         </section>
         <Footer />
