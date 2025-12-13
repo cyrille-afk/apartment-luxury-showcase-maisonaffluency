@@ -9,17 +9,17 @@ import elsaLemarignierImg from "@/assets/team/elsa-lemarignier.jpg";
 const curatingTeam = [
   {
     id: 1,
-    name: "Elsa Lemarignier",
-    role: "Co-Founder and CPO",
-    image: elsaLemarignierImg,
-    bio: "Elsa brings her expertise in curation and design to Maison Affluency.",
-  },
-  {
-    id: 2,
     name: "Cyrille Delval",
     role: "Co-Founder and CEO",
     image: cyrilleDelvalImg,
     bio: "As a former Investment Banker, Serial Entrepreneur, long time Art and Design Collector, Cyrille leads Maison Affluency with a passion for exceptional design and craftsmanship.",
+  },
+  {
+    id: 2,
+    name: "Elsa Lemarignier",
+    role: "Co-Founder and CPO",
+    image: elsaLemarignierImg,
+    bio: "Elsa brings her expertise in curation and design to Maison Affluency.",
   },
 ];
 
