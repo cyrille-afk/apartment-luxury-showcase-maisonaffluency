@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState } from "react";
-import { Instagram, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import { useRef, useState, useMemo } from "react";
+import { Instagram, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -112,11 +113,22 @@ const Collectibles = () => {
   const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
 
-  const allDesignerIds = collectibleDesigners.map(d => d.id);
-  const isAllExpanded = openDesigners.length === allDesignerIds.length;
+  const filteredDesigners = useMemo(() => {
+    if (!searchQuery.trim()) return collectibleDesigners;
+    const query = searchQuery.toLowerCase();
+    return collectibleDesigners.filter(designer => 
+      designer.name.toLowerCase().includes(query) ||
+      designer.specialty.toLowerCase().includes(query) ||
+      designer.biography.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
+  const allDesignerIds = filteredDesigners.map(d => d.id);
+  const isAllExpanded = openDesigners.length === allDesignerIds.length && allDesignerIds.length > 0;
 
   const toggleAllDesigners = () => {
     if (isAllExpanded) {
@@ -212,7 +224,25 @@ const Collectibles = () => {
             </p>
           </motion.div>
 
-          <div className="flex justify-end mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search designers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-9 font-body text-sm bg-card/50 border-border/40 focus:border-primary/60"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
             <button
               onClick={toggleAllDesigners}
               className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1"
@@ -227,29 +257,34 @@ const Collectibles = () => {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Accordion 
-              type="multiple" 
-              value={openDesigners} 
-              onValueChange={(values) => {
-                if ('vibrate' in navigator) {
-                  navigator.vibrate(10);
-                }
-                if (window.innerWidth < 768 && values.length > openDesigners.length) {
-                  const newDesigner = values.find(v => !openDesigners.includes(v));
-                  if (newDesigner) {
-                    setTimeout(() => {
-                      const element = document.querySelector(`[data-collectible="${newDesigner}"]`);
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }
-                    }, 100);
+            {filteredDesigners.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground font-body">
+                <p>No designers found matching "{searchQuery}"</p>
+              </div>
+            ) : (
+              <Accordion 
+                type="multiple" 
+                value={openDesigners} 
+                onValueChange={(values) => {
+                  if ('vibrate' in navigator) {
+                    navigator.vibrate(10);
                   }
-                }
-                setOpenDesigners(values);
-              }} 
-              className="w-full space-y-4"
-            >
-              {collectibleDesigners.map((designer, index) => (
+                  if (window.innerWidth < 768 && values.length > openDesigners.length) {
+                    const newDesigner = values.find(v => !openDesigners.includes(v));
+                    if (newDesigner) {
+                      setTimeout(() => {
+                        const element = document.querySelector(`[data-collectible="${newDesigner}"]`);
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }, 100);
+                    }
+                  }
+                  setOpenDesigners(values);
+                }} 
+                className="w-full space-y-4"
+              >
+                {filteredDesigners.map((designer, index) => (
                 <AccordionItem
                   key={designer.id}
                   value={designer.id}
@@ -368,9 +403,10 @@ const Collectibles = () => {
                       )}
                     </div>
                   </AccordionContent>
-                </AccordionItem>
+              </AccordionItem>
               ))}
             </Accordion>
+            )}
           </motion.div>
         </div>
       </section>
