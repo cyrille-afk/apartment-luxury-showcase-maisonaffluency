@@ -185,13 +185,19 @@ const DesignDetails = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+1 234 567 8900"
-              />
+              <div className="flex">
+                <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
+                  +65
+                </span>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="XXXX XXXX"
+                  className="rounded-l-none"
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="message">Tell us about your practice *</Label>
