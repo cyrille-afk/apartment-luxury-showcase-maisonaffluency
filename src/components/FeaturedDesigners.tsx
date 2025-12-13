@@ -1,12 +1,11 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Instagram, Search, X, ChevronDown, ExternalLink, Star } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
-
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.png";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
@@ -318,7 +317,10 @@ const FeaturedDesigners = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
-
+  const [curatorPickIndex, setCuratorPickIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const minSwipeDistance = 50;
   const filteredDesigners = useMemo(() => {
     if (!searchQuery.trim()) return featuredDesigners;
     const query = searchQuery.toLowerCase();
@@ -613,65 +615,125 @@ const FeaturedDesigners = () => {
           </Accordion>
         </motion.div>
 
-        {/* Curators' Picks Dialog */}
-        <Dialog open={!!curatorPicksDesigner} onOpenChange={(open) => !open && setCuratorPicksDesigner(null)}>
-          <DialogContent className="max-w-4xl p-6" aria-describedby={undefined}>
+        {/* Curators' Picks Lightbox Dialog */}
+        <Dialog 
+          open={!!curatorPicksDesigner} 
+          onOpenChange={(open) => {
+            if (!open) {
+              setCuratorPicksDesigner(null);
+              setCuratorPickIndex(0);
+            }
+          }}
+        >
+          <DialogContent 
+            className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none" 
+            aria-describedby={undefined}
+            onKeyDown={(e) => {
+              if (!curatorPicksDesigner?.curatorPicks?.length) return;
+              if (e.key === "ArrowLeft") {
+                setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
+              }
+              if (e.key === "ArrowRight") {
+                setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+              }
+            }}
+          >
             <VisuallyHidden>
               <DialogTitle>Curators' Picks - {curatorPicksDesigner?.name}</DialogTitle>
             </VisuallyHidden>
             {curatorPicksDesigner && (
-              <div className="space-y-6">
-                <div className="text-center">
-                  <h3 className="text-2xl font-serif text-foreground mb-2">
-                    Curators' Picks
-                  </h3>
-                  <p className="text-muted-foreground font-body">
-                    Selected works by {curatorPicksDesigner.name}
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  {curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 ? (
-                    curatorPicksDesigner.curatorPicks.map((pick, idx) => (
-                      <div 
-                        key={idx}
-                        className="aspect-square bg-primary/5 rounded-lg border border-primary/10 flex items-center justify-center overflow-hidden group cursor-pointer"
-                      >
-                        <img 
-                          src={pick.image} 
-                          alt={pick.title} 
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      </div>
-                    ))
-                  ) : (
-                    [1, 2, 3, 4, 5].map((num) => (
-                      <div 
-                        key={num}
-                        className="aspect-square bg-primary/5 rounded-lg border border-primary/10 flex items-center justify-center overflow-hidden"
-                      >
-                        <div className="text-center p-4">
-                          <Star className="h-8 w-8 text-primary/30 mx-auto mb-2" />
-                          <p className="text-xs text-muted-foreground font-body">Pick {num}</p>
-                        </div>
-                      </div>
-                    ))
+              curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 ? (
+                <div 
+                  className="relative w-full h-full flex items-center justify-center"
+                  onTouchStart={(e) => {
+                    setTouchEnd(null);
+                    setTouchStart(e.targetTouches[0].clientX);
+                  }}
+                  onTouchMove={(e) => {
+                    setTouchEnd(e.targetTouches[0].clientX);
+                  }}
+                  onTouchEnd={() => {
+                    if (!touchStart || !touchEnd || !curatorPicksDesigner.curatorPicks?.length) return;
+                    const distance = touchStart - touchEnd;
+                    if (distance > minSwipeDistance) {
+                      setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+                    } else if (distance < -minSwipeDistance) {
+                      setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
+                    }
+                  }}
+                >
+                  {/* Close button */}
+                  <button 
+                    onClick={() => {
+                      setCuratorPicksDesigner(null);
+                      setCuratorPickIndex(0);
+                    }} 
+                    className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                    aria-label="Close lightbox"
+                  >
+                    <X className="h-6 w-6 text-white" />
+                  </button>
+
+                  {/* Previous button */}
+                  {curatorPicksDesigner.curatorPicks.length > 1 && (
+                    <button 
+                      onClick={() => setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1)} 
+                      className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft className="h-8 w-8 text-white" />
+                    </button>
+                  )}
+
+                  {/* Image container */}
+                  <div className="flex flex-col items-center justify-center max-w-[90vw] max-h-[85vh] px-16">
+                    <img 
+                      src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
+                      alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
+                      className="max-w-full max-h-[70vh] object-contain" 
+                    />
+                    <div className="mt-4 text-center">
+                      <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
+                        {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
+                      </h3>
+                      <p className="text-sm md:text-base text-white/70 font-body max-w-2xl">
+                        <span className="italic">by</span> {curatorPicksDesigner.name}
+                      </p>
+                      {curatorPicksDesigner.curatorPicks.length > 1 && (
+                        <p className="text-xs text-white/50 mt-3 font-body">
+                          {curatorPickIndex + 1} / {curatorPicksDesigner.curatorPicks.length}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Next button */}
+                  {curatorPicksDesigner.curatorPicks.length > 1 && (
+                    <button 
+                      onClick={() => setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1)} 
+                      className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                      aria-label="Next image"
+                    >
+                      <ChevronRight className="h-8 w-8 text-white" />
+                    </button>
                   )}
                 </div>
-                {curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 && (
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
-                      <span key={idx} className="text-xs text-muted-foreground font-body italic">
-                        {pick.title}{idx < curatorPicksDesigner.curatorPicks.length - 1 ? " • " : ""}
-                      </span>
-                    ))}
+              ) : (
+                <div className="flex items-center justify-center w-full h-full">
+                  <div className="text-center p-8">
+                    <Star className="h-16 w-16 text-white/30 mx-auto mb-4" />
+                    <h3 className="text-2xl font-serif text-white mb-2">
+                      Curators' Picks
+                    </h3>
+                    <p className="text-white/70 font-body mb-2">
+                      {curatorPicksDesigner.name}
+                    </p>
+                    <p className="text-sm text-white/50 font-body italic">
+                      Curated selections coming soon
+                    </p>
                   </div>
-                )}
-                {(!curatorPicksDesigner.curatorPicks || curatorPicksDesigner.curatorPicks.length === 0) && (
-                  <p className="text-center text-sm text-muted-foreground font-body italic">
-                    Curated selections coming soon
-                  </p>
-                )}
-              </div>
+                </div>
+              )
             )}
           </DialogContent>
         </Dialog>
