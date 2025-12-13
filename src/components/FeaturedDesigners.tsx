@@ -168,8 +168,8 @@ const featuredDesigners = [
         image: demichelisPick3, 
         title: "Table d'appoint RHINO", 
         category: "Furniture",
-        materials: "Enamelled bronze • Ultramarine blue",
-        dimensions: "H43 × Ø34 cm"
+        materials: "Patinated bronze • Raw brass • Brown cowhide leather top",
+        dimensions: "H43.5 × L35 cm"
       },
       { 
         image: demichelisPick4, 
