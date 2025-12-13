@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowUp, Search } from "lucide-react";
+import { ArrowUp, Search, Linkedin } from "lucide-react";
 import cyrilleDelvalImg from "@/assets/team/cyrille-delval.jpg";
 import elsaLemarignierImg from "@/assets/team/elsa-lemarignier.jpg";
 
@@ -13,6 +13,7 @@ const curatingTeam = [
     role: "Co-Founder and CEO",
     image: cyrilleDelvalImg,
     bio: "During a 4 year span, Cyrille studied Art History at the renown Birkbeck College in London whilst navigating a successful investment banking career in London and New York at the same time. This lead him to a serial entrepreneurship life where business and passion mingle. As Affluency co-founder, Cyrille leads Maison Affluency's development in Southeast Asia and the Middle East, sharing his passion for exceptional craftsmanship and unique design pieces.",
+    linkedin: "https://www.linkedin.com/in/cyrilledelval/",
   },
   {
     id: 2,
@@ -20,6 +21,7 @@ const curatingTeam = [
     role: "Co-Founder and CPO",
     image: elsaLemarignierImg,
     bio: "After attending the Ecole du Louvre, Elsa opened her gallery in Paris Carré Rive Gauche where she curated a unique design collection with prominent designers such as Ron Arad. As Affluency co-founder, her mission is to seek out and select exceptional design, art and collectible pieces around the world, showcasing exceptional craftsmanship.",
+    linkedin: "",
   },
 ];
 
@@ -114,6 +116,18 @@ const CuratingTeam = () => {
                   <p className="text-sm text-muted-foreground font-body text-justify max-w-sm">
                     {member.bio}
                   </p>
+                  {member.linkedin && (
+                    <a
+                      href={member.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex items-center gap-2 text-[#0077B5] hover:text-[#005582] transition-colors duration-300"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Linkedin className="w-5 h-5" />
+                      <span className="text-sm font-body">View LinkedIn Profile</span>
+                    </a>
+                  )}
                 </div>
               </DialogContent>
             </Dialog>
