@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Crown } from "lucide-react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -23,8 +22,7 @@ const navItems = [{
   href: "#designers"
 }, {
   label: "Collectibles",
-  href: "/collectibles",
-  isPage: true
+  href: "#collectibles"
 }, {
   label: "Ateliers",
   href: "#brands"
@@ -41,7 +39,7 @@ const Navigation = () => {
   const [activeSection, setActiveSection] = useState("#home");
 
   useEffect(() => {
-    const sectionIds = navItems.filter(item => !item.isPage).map(item => item.href.replace("#", ""));
+    const sectionIds = navItems.map(item => item.href.replace("#", ""));
     
     const observer = new IntersectionObserver(
       (entries) => {
@@ -103,19 +101,6 @@ const Navigation = () => {
               const isTradeProgram = item.href === "#details";
               const isContact = item.href === "#contact";
               
-              if (item.isPage) {
-                return (
-                  <Link 
-                    key={item.href}
-                    to={item.href}
-                    className="font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
-                  >
-                    {item.label}
-                    <span className="absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
-                  </Link>
-                );
-              }
-              
               return (
                 <button 
                   key={item.href} 
@@ -158,20 +143,6 @@ const Navigation = () => {
               <div className="flex flex-col gap-6 mt-8">
                 {navItems.map((item) => {
                   const isTradeProgram = item.href === "#details";
-                  
-                  if (item.isPage) {
-                    return (
-                      <Link 
-                        key={item.href}
-                        to={item.href}
-                        onClick={() => setIsOpen(false)}
-                        className="font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30 text-foreground hover:text-primary block"
-                      >
-                        {item.label}
-                        <span className="absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
-                      </Link>
-                    );
-                  }
                   
                   return (
                     <button 
