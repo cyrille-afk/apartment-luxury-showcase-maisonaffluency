@@ -32,7 +32,7 @@ import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg
 import alexanderLamontPick2 from "@/assets/curators-picks/alexander-lamont-2.jpg";
 import alexanderLamontPick3 from "@/assets/curators-picks/alexander-lamont-3.jpg";
 import alexanderLamontPick4 from "@/assets/curators-picks/alexander-lamont-4.jpg";
-import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.png";
+import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.png";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
 import yvesMacheretPick4 from "@/assets/curators-picks/yves-macheret-4.jpg";
