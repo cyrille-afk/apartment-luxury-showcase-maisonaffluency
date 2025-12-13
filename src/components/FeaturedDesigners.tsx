@@ -29,6 +29,7 @@ import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
 // Curators' Picks images
 import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
 import alexanderLamontPick2 from "@/assets/curators-picks/alexander-lamont-2.jpg";
+import alexanderLamontPick3 from "@/assets/curators-picks/alexander-lamont-3.jpg";
 
 const featuredDesigners = [
   {
@@ -55,6 +56,13 @@ const featuredDesigners = [
         category: "Lighting",
         materials: "Hammered bronze base • Rock crystal & frosted glass shades",
         dimensions: "H28 × W18 × D18 cm"
+      },
+      { 
+        image: alexanderLamontPick3, 
+        title: "Casque Bar Cabinet", 
+        category: "Furniture",
+        materials: "Straw marquetry • Hammered bronze handles • Lacquered interior",
+        dimensions: "H110 × W120 × D45 cm"
       },
     ],
     links: [
