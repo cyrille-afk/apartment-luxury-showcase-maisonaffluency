@@ -9,8 +9,6 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.png";
-import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
-import atelierDemichelisImg from "@/assets/designers/atelier-demichelis.jpg";
 import brunoDeMaistreImg from "@/assets/designers/bruno-de-maistre.jpg";
 import hamreiImg from "@/assets/designers/hamrei.jpg";
 import atelierFevrierImg from "@/assets/designers/atelier-fevrier.jpg";
@@ -20,7 +18,6 @@ import jeremyMaxwellWintrebertImg from "@/assets/designers/jeremy-maxwell-wintre
 import alexanderLamontImg from "@/assets/designers/alexander-lamont.jpg";
 import leoSentouImg from "@/assets/designers/leo-sentou.jpg";
 import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank.jpg";
-import kikoLopezImg from "@/assets/designers/kiko-lopez.jpg";
 import emanuelleLevetStenneImg from "@/assets/designers/emanuelle-levet-stenne.png";
 import milanPekarImg from "@/assets/designers/milan-pekar.png";
 import atelierPendhapaImg from "@/assets/designers/atelier-pendhapa.png";
@@ -40,10 +37,6 @@ import apparatusPick1 from "@/assets/curators-picks/apparatus-1.jpg";
 import apparatusPick2 from "@/assets/curators-picks/apparatus-2.jpg";
 import apparatusPick3 from "@/assets/curators-picks/apparatus-3.jpg";
 import apparatusPick4 from "@/assets/curators-picks/apparatus-4.jpg";
-import demichelisPick1 from "@/assets/curators-picks/demichelis-1.jpg";
-import demichelisPick2 from "@/assets/curators-picks/demichelis-2.jpg";
-import demichelisPick3 from "@/assets/curators-picks/demichelis-3.jpg";
-import demichelisPick4 from "@/assets/curators-picks/demichelis-4.jpg";
 import pendhapaPick1 from "@/assets/curators-picks/pendhapa-1.jpg";
 import pendhapaPick2 from "@/assets/curators-picks/pendhapa-2.jpg";
 import pendhapaPick4 from "@/assets/curators-picks/pendhapa-4.jpg";
@@ -139,52 +132,6 @@ const featuredDesigners = [
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/apparatusstudio" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "atelier-demichelis",
-    name: "Atelier Demichelis",
-    founder: "Laura Demichelis",
-    specialty: "Limited Edition Lighting & Artisan Craftsmanship",
-    image: atelierDemichelisImg,
-    biography:
-      "Atelier Demichelis is a contemporary design studio specializing in limited edition lighting fixtures. Each piece is meticulously handcrafted, combining traditional techniques with innovative design. Their Bud Table Lamp represents their commitment to creating functional art objects with exceptional attention to detail.",
-    notableWorks: "Limited Edition Bud Table Lamp, Artisan Lighting Collection",
-    notableWorksLink: { text: "Limited Edition Bud Table Lamp", galleryIndex: 10 },
-    philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
-    curatorPicks: [
-      { 
-        image: demichelisPick1, 
-        title: "Babel Table Lamp", 
-        category: "Lighting",
-        materials: "Bronze • Brass • Ash wood • White fabric shade",
-        dimensions: "Ø45 × H60.9 cm"
-      },
-      { 
-        image: demichelisPick4, 
-        title: "Echo Floor Lamp", 
-        category: "Lighting",
-        materials: "Patinated and varnished brass",
-        dimensions: "Ø38 × H166 cm"
-      },
-      { 
-        image: demichelisPick2, 
-        title: "Bud Table Lamp", 
-        category: "Lighting",
-        materials: "Bronze • White oak • Hand-made fabric shade",
-        dimensions: "Ø40 × H71 cm"
-      },
-      { 
-        image: demichelisPick3, 
-        title: "Table d'appoint RHINO", 
-        category: "Furniture",
-        materials: "Patinated bronze • Raw brass • Brown cowhide leather top",
-        dimensions: "H43.5 × L35 cm"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/atelier_demichelis" },
       { type: "Curators' Picks" },
     ],
   },
@@ -355,21 +302,6 @@ const featuredDesigners = [
     ],
   },
   {
-    id: "kiko-lopez",
-    name: "Kiko Lopez",
-    specialty: "Artisan Mirrors & Reflective Surfaces",
-    image: kikoLopezImg,
-    biography:
-      "Kiko Lopez is a French master mirror artisan renowned for creating extraordinary reflective surfaces that blur the line between functional object and sculptural art. Using traditional techniques combined with innovative approaches to glass and metal, his mirrors transform spaces with their unique textural qualities and light-capturing properties. His Silver Glass Hammer Mirror and Shadow Drawings Mirror exemplify his distinctive style of treating mirrors as artistic statements.",
-    notableWorks: "Silver Glass Hammer Mirror, Shadow Drawings Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
-    notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 11 },
-    philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
-    links: [
-      { type: "Instagram", url: "https://instagram.com/kikolumieres" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
     id: "leo-sentou",
     name: "Leo Sentou",
     specialty: "Contemporary Classicist Furniture Design",
@@ -396,22 +328,6 @@ const featuredDesigners = [
     philosophy: "Glass is frozen light—my work seeks to capture that ephemeral quality in permanent form.",
     links: [
       { type: "Instagram", url: "https://instagram.com/milanpekar_glass" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "nathalie-ziegler",
-    name: "Nathalie Ziegler",
-    specialty: "Bespoke Glass Art & Chandeliers",
-    image: nathalieZieglerImg,
-    biography:
-      "Nathalie Ziegler is a French glass artist known for her custom chandeliers and glass sculptures that blur the line between functional lighting and fine art. Her Saint Just Custom Glass Chandelier showcases her ability to manipulate glass into dramatic, ethereal forms that transform spaces with light and color.",
-    notableWorks: "Saint Just Custom Glass Chandelier, Gold Leaves+Glass Snake Vase, Sculptural Glass Series",
-    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 6 },
-    philosophy:
-      "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
-    links: [
-      { type: "Instagram", url: "https://instagram.com/nathaliezieglerpasqua" },
       { type: "Curators' Picks" },
     ],
   },
