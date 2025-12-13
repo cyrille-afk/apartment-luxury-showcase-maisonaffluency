@@ -563,7 +563,7 @@ const FeaturedDesigners = () => {
                         {designer.specialty}
                       </p>
                       {(designer.notableWorksLink || designer.notableWorksLinks) && (
-                        <div className="flex flex-wrap items-center gap-x-1 gap-y-1 mt-1">
+                        <div className="flex flex-wrap items-center gap-x-1 gap-y-1 mt-2 pt-2 border-t border-border/30">
                           <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
                           {designer.notableWorksLinks ? (
                             designer.notableWorksLinks.map((link, linkIdx) => (
