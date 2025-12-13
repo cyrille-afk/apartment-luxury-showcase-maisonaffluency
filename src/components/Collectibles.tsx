@@ -245,7 +245,7 @@ const Collectibles = () => {
             </div>
             <button
               onClick={toggleAllDesigners}
-              className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1"
+              className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1 ml-auto"
             >
               <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
               <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
