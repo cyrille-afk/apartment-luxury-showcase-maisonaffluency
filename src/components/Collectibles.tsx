@@ -387,12 +387,12 @@ const Collectibles = () => {
                                 }, 500);
                               }
                             }}
-                            className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation mt-1"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 mt-2 text-xs md:text-sm font-body bg-accent/10 text-accent hover:bg-accent/20 hover:text-accent rounded-full transition-all duration-300 group/link touch-manipulation border border-accent/30 hover:border-accent/50"
                           >
-                            <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                            <span className="font-medium">
                               {designer.notableWorksLink.text}
                             </span>
-                            <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                            <ExternalLink className="h-3 w-3 opacity-70 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
                           </button>
                         )}
                       </div>
