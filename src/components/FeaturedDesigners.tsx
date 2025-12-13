@@ -201,31 +201,31 @@ const featuredDesigners = [
     curatorPicks: [
       { 
         image: pendhapaPick1, 
-        title: "Mangala Onyx Coffee Table", 
+        title: "Mangala Coffee Table", 
         category: "Furniture",
-        materials: "Indonesian teak • Onyx stone top",
-        dimensions: "H40 × W120 × D80 cm"
+        materials: "Black teak • Lava stone crème brûlée tabletop",
+        dimensions: "L190 × W180 × H35 cm"
       },
       { 
         image: pendhapaPick2, 
         title: "Anemos Coffee Table", 
         category: "Furniture",
-        materials: "Solid teak wood • Hand-carved details",
-        dimensions: "H42 × W110 × D70 cm"
+        materials: "Black oak • Black lacquer tabletop",
+        dimensions: "L110 × W80 × H35 cm"
       },
       { 
         image: pendhapaPick4, 
         title: "Akar Dining Chair", 
         category: "Furniture",
-        materials: "Indonesian teak • Alpilles Camargue Trente by Elitis upholstery",
-        dimensions: "H85 × W52 × D56 cm"
+        materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery",
+        dimensions: "L49 × W52 × H85 cm"
       },
       { 
         image: pendhapaPick5, 
-        title: "Ginkgo", 
+        title: "Gingko Side Table", 
         category: "Furniture",
-        materials: "Solid teak • Hand-carved ginkgo leaf motif",
-        dimensions: "H45 × W60 × D60 cm"
+        materials: "Natural oak • White lacquer tabletop",
+        dimensions: "L75 × W48 × H50 cm"
       },
     ],
     links: [
