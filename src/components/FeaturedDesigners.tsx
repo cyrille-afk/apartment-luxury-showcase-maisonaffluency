@@ -158,6 +158,13 @@ const featuredDesigners = [
         dimensions: "Ø45 × H60.9 cm"
       },
       { 
+        image: demichelisPick4, 
+        title: "Echo Floor Lamp", 
+        category: "Lighting",
+        materials: "Patinated and varnished brass",
+        dimensions: "Ø38 × H166 cm"
+      },
+      { 
         image: demichelisPick2, 
         title: "Bud Table Lamp", 
         category: "Lighting",
@@ -170,13 +177,6 @@ const featuredDesigners = [
         category: "Furniture",
         materials: "Patinated bronze • Raw brass • Brown cowhide leather top",
         dimensions: "H43.5 × L35 cm"
-      },
-      { 
-        image: demichelisPick4, 
-        title: "Echo Floor Lamp", 
-        category: "Lighting",
-        materials: "Patinated and varnished brass",
-        dimensions: "Ø38 × H166 cm"
       },
     ],
     links: [
