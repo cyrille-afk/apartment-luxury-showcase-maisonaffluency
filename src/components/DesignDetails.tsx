@@ -45,10 +45,26 @@ const DesignDetails = () => {
     message: "",
     isCertified: false
   });
+  const [phoneError, setPhoneError] = useState("");
   const { toast } = useToast();
+
+  const validatePhone = (phone: string) => {
+    const digitsOnly = phone.replace(/\D/g, '');
+    if (phone && digitsOnly.length !== 8) {
+      return "Please enter a valid 8-digit Singapore phone number";
+    }
+    return "";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const phoneValidation = validatePhone(formData.phone);
+    if (phoneValidation) {
+      setPhoneError(phoneValidation);
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -193,11 +209,20 @@ const DesignDetails = () => {
                   id="phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^\d\s]/g, '');
+                    setFormData({ ...formData, phone: value });
+                    if (phoneError) setPhoneError(validatePhone(value));
+                  }}
+                  onBlur={() => setPhoneError(validatePhone(formData.phone))}
                   placeholder="XXXX XXXX"
-                  className="rounded-l-none"
+                  className={`rounded-l-none ${phoneError ? 'border-destructive' : ''}`}
+                  maxLength={9}
                 />
               </div>
+              {phoneError && (
+                <p className="text-xs text-destructive">{phoneError}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="message">Tell us about your practice *</Label>
