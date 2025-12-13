@@ -25,6 +25,10 @@ const navItems = [{
   label: "Ateliers",
   href: "#brands"
 }, {
+  label: "Collectibles",
+  href: "/collectibles",
+  isPage: true
+}, {
   label: "Trade Program",
   href: "#details"
 }, {
@@ -37,7 +41,7 @@ const Navigation = () => {
   const [activeSection, setActiveSection] = useState("#home");
 
   useEffect(() => {
-    const sectionIds = navItems.map(item => item.href.replace("#", ""));
+    const sectionIds = navItems.filter(item => !item.isPage).map(item => item.href.replace("#", ""));
     
     const observer = new IntersectionObserver(
       (entries) => {
@@ -73,10 +77,6 @@ const Navigation = () => {
     }
   };
 
-  const handleCollectibleClick = () => {
-    setIsOpen(false);
-    handleNavClick("#designers");
-  };
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50">
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         <div className="flex h-20 md:h-20 items-center justify-center md:justify-between relative">
@@ -99,48 +99,47 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-5 ml-8">
-            {navItems.map((item, index) => {
+            {navItems.map((item) => {
               const isTradeProgram = item.href === "#details";
-              const isBeforeTradeProgram = navItems[index + 1]?.href === "#details";
+              
+              if (item.isPage) {
+                return (
+                  <Link 
+                    key={item.href}
+                    to={item.href}
+                    className="font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                  >
+                    {item.label}
+                    <span className="absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
+                  </Link>
+                );
+              }
               
               return (
-                <>
-                  <button 
-                    key={item.href} 
-                    onClick={() => handleNavClick(item.href)} 
-                    className={cn(
-                      "font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap",
-                      isTradeProgram && "px-3 py-1.5 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
-                      activeSection === item.href 
-                        ? isTradeProgram ? "text-background font-medium" : "text-primary font-medium"
-                        : isTradeProgram
-                          ? "text-background"
-                          : "text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
-                    )}
-                  >
-                    {isTradeProgram && <Crown className="inline-block w-3.5 h-3.5 mr-1.5" />}
-                    {item.label}
-                    {!isTradeProgram && (
-                      <span className={cn(
-                        "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
-                        activeSection === item.href 
-                          ? "w-full" 
-                          : "w-0 group-hover:w-full"
-                      )} />
-                    )}
-                  </button>
-                  
-                  {/* Collectibles Link - appears before Trade Program */}
-                  {isBeforeTradeProgram && (
-                    <Link 
-                      to="/collectibles"
-                      className="font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
-                    >
-                      Collectibles
-                      <span className="absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
-                    </Link>
+                <button 
+                  key={item.href} 
+                  onClick={() => handleNavClick(item.href)} 
+                  className={cn(
+                    "font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap",
+                    isTradeProgram && "px-3 py-1.5 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
+                    activeSection === item.href 
+                      ? isTradeProgram ? "text-background font-medium" : "text-primary font-medium"
+                      : isTradeProgram
+                        ? "text-background"
+                        : "text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
                   )}
-                </>
+                >
+                  {isTradeProgram && <Crown className="inline-block w-3.5 h-3.5 mr-1.5" />}
+                  {item.label}
+                  {!isTradeProgram && (
+                    <span className={cn(
+                      "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
+                      activeSection === item.href 
+                        ? "w-full" 
+                        : "w-0 group-hover:w-full"
+                    )} />
+                  )}
+                </button>
               );
             })}
           </div>
@@ -155,50 +154,49 @@ const Navigation = () => {
             
             <SheetContent side="right" className="w-[280px] sm:w-[320px]">
               <div className="flex flex-col gap-6 mt-8">
-                {navItems.map((item, index) => {
+                {navItems.map((item) => {
                   const isTradeProgram = item.href === "#details";
-                  const isBeforeTradeProgram = navItems[index + 1]?.href === "#details";
+                  
+                  if (item.isPage) {
+                    return (
+                      <Link 
+                        key={item.href}
+                        to={item.href}
+                        onClick={() => setIsOpen(false)}
+                        className="font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30 text-foreground hover:text-primary block"
+                      >
+                        {item.label}
+                        <span className="absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
+                      </Link>
+                    );
+                  }
                   
                   return (
-                    <>
-                      <button 
-                        key={item.href} 
-                        onClick={() => handleNavClick(item.href)} 
-                        className={cn(
-                          "font-serif text-2xl text-left transition-all duration-300 py-3 relative group",
-                          !isTradeProgram && "border-b border-border/30",
-                          isTradeProgram && "px-4 py-2 mt-2 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
-                          activeSection === item.href 
-                            ? isTradeProgram ? "text-background" : "text-primary"
-                            : isTradeProgram
-                              ? "text-background"
-                              : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
-                        )}
-                      >
-                        {isTradeProgram && <Crown className="inline-block w-5 h-5 mr-2" />}
-                        {item.label}
-                        {!isTradeProgram && (
-                          <span className={cn(
-                            "absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300",
-                            activeSection === item.href 
-                              ? "w-full" 
-                              : "w-0 group-hover:w-full"
-                          )} />
-                        )}
-                      </button>
-                      
-                      {/* Collectibles Link - appears before Trade Program */}
-                      {isBeforeTradeProgram && (
-                        <Link 
-                          to="/collectibles"
-                          onClick={() => setIsOpen(false)}
-                          className="font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30 text-foreground hover:text-primary block"
-                        >
-                          Collectibles
-                          <span className="absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
-                        </Link>
+                    <button 
+                      key={item.href} 
+                      onClick={() => handleNavClick(item.href)} 
+                      className={cn(
+                        "font-serif text-2xl text-left transition-all duration-300 py-3 relative group",
+                        !isTradeProgram && "border-b border-border/30",
+                        isTradeProgram && "px-4 py-2 mt-2 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
+                        activeSection === item.href 
+                          ? isTradeProgram ? "text-background" : "text-primary"
+                          : isTradeProgram
+                            ? "text-background"
+                            : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
                       )}
-                    </>
+                    >
+                      {isTradeProgram && <Crown className="inline-block w-5 h-5 mr-2" />}
+                      {item.label}
+                      {!isTradeProgram && (
+                        <span className={cn(
+                          "absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300",
+                          activeSection === item.href 
+                            ? "w-full" 
+                            : "w-0 group-hover:w-full"
+                        )} />
+                      )}
+                    </button>
                   );
                 })}
               </div>
