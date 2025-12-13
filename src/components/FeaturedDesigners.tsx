@@ -122,6 +122,7 @@ const featuredDesigners = [
     notableWorksLink: { text: "Deepah Custom Table", galleryIndex: 3 },
     philosophy: "We create furniture that bridges the gap between ancient Indonesian craft traditions and contemporary global design.",
     links: [
+      { type: "Instagram", url: "https://instagram.com/atelierpendhapa" },
       { type: "Curators' Picks" },
     ],
   },
@@ -287,6 +288,7 @@ const featuredDesigners = [
     notableWorksLink: { text: "Crystalline Vase", galleryIndex: 3 },
     philosophy: "Glass is frozen light—my work seeks to capture that ephemeral quality in permanent form.",
     links: [
+      { type: "Instagram", url: "https://instagram.com/milanpekar_glass" },
       { type: "Curators' Picks" },
     ],
   },
