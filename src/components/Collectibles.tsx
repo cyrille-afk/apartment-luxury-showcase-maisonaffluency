@@ -169,6 +169,38 @@ const collectibleDesigners = [
       { type: "Curators' Picks" },
     ],
   },
+  {
+    id: "maarten-vrolijk",
+    name: "Maarten Vrolijk",
+    specialty: "Contemporary Sculptural Furniture",
+    image: nathalieZieglerImg, // Placeholder - replace with actual image
+    biography:
+      "Maarten Vrolijk is a Dutch designer known for his sculptural approach to furniture design. His work explores the intersection of art and functionality, creating pieces that challenge conventional forms while remaining inherently practical. Each creation reflects his deep understanding of materials and his commitment to pushing the boundaries of contemporary design.",
+    notableWorks: "Sculptural Tables, Organic Form Seating, Limited Edition Furniture Collection",
+    philosophy: "Furniture should be a conversation between form and function—each piece tells a story of material and intention.",
+    curatorPicks: [
+      { 
+        image: nathalieZieglerImg, // Placeholder - replace with actual image
+        title: "Sculptural Console", 
+        category: "Furniture",
+        materials: "Bronze • Oak • Hand-finished patina",
+        dimensions: "H85 × W150 × D40 cm",
+        edition: "Limited Edition"
+      },
+      { 
+        image: nathalieZieglerImg, // Placeholder - replace with actual image
+        title: "Organic Form Chair", 
+        category: "Seating",
+        materials: "Walnut • Leather upholstery",
+        dimensions: "H80 × W65 × D60 cm",
+        edition: "Numbered & Signed"
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/maartenvrolijk" },
+      { type: "Curators' Picks" },
+    ],
+  },
 ];
 
 const Collectibles = () => {
