@@ -790,13 +790,17 @@ const FeaturedDesigners = () => {
                         className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
                         draggable={false}
                       />
-                      <div className={`absolute bottom-3 right-3 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-opacity duration-300 ${isZoomed ? 'opacity-0' : 'opacity-70'}`}>
+                      <button 
+                        onClick={() => setIsZoomed(!isZoomed)}
+                        className={`absolute bottom-3 right-3 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
+                        aria-label={isZoomed ? "Zoom out" : "Zoom in"}
+                      >
                         {isZoomed ? (
                           <ZoomOut className="h-5 w-5 text-white" />
                         ) : (
                           <ZoomIn className="h-5 w-5 text-white" />
                         )}
-                      </div>
+                      </button>
                     </div>
                     <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
                       {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && (
