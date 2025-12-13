@@ -35,7 +35,7 @@ import alexanderLamontPick4 from "@/assets/curators-picks/alexander-lamont-4.jpg
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.png";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.png";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
-import yvesMacheretPick4 from "@/assets/curators-picks/yves-macheret-4.png";
+import yvesMacheretPick4 from "@/assets/curators-picks/yves-macheret-4.jpg";
 
 const featuredDesigners = [
   {
@@ -380,10 +380,10 @@ const featuredDesigners = [
       },
       { 
         image: yvesMacheretPick4, 
-        title: "Edru Pendant Lamp", 
+        title: "Braun 650 Wall Lamp", 
         category: "Lighting",
-        materials: "Patinated bronze/brass • Natural alabaster cylinder",
-        dimensions: "H40 × Ø12 cm"
+        materials: "Patinated bronze • Hand-carved alabaster diffuser",
+        dimensions: "H650 × W115 × D62 mm"
       },
     ],
     links: [
