@@ -601,7 +601,7 @@ const BrandsAteliers = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
-          className="mb-12 md:mb-16 text-center"
+          className="mb-12 md:mb-16 text-left"
         >
           <p className="mb-2 md:mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
             OUR PARTNERS
