@@ -119,7 +119,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.6
-          }} className="grid grid-cols-2 gap-6 pt-8 border-t border-border">
+          }} className="grid grid-cols-3 gap-6 pt-8 border-t border-border">
               <button 
                 onClick={() => {
                   const gallerySection = document.getElementById("gallery");
@@ -143,6 +143,18 @@ const Overview = () => {
               >
                 <div className="mb-2 font-display text-3xl text-primary group-hover:text-accent transition-colors duration-300">50+</div>
                 <div className="font-body text-sm uppercase tracking-wider text-muted-foreground underline decoration-primary/30 group-hover:decoration-accent group-hover:text-foreground transition-all duration-300">FEATURED DESIGNERS</div>
+              </button>
+              <button
+                onClick={() => {
+                  const collectiblesSection = document.getElementById('collectibles');
+                  if (collectiblesSection) {
+                    collectiblesSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="text-left cursor-pointer group transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+              >
+                <div className="mb-2 font-display text-3xl text-primary group-hover:text-accent transition-colors duration-300">10+</div>
+                <div className="font-body text-sm uppercase tracking-wider text-muted-foreground underline decoration-primary/30 group-hover:decoration-accent group-hover:text-foreground transition-all duration-300">FEATURED COLLECTIBLES</div>
               </button>
             </motion.div>
           </div>
