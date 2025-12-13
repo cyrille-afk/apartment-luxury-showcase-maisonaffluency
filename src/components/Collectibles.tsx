@@ -433,156 +433,156 @@ const Collectibles = () => {
         </div>
       </section>
 
-      {/* Curators' Picks Dialog */}
+      {/* Curators' Picks Dialog - Full screen dark modal like FeaturedDesigners */}
       <Dialog open={!!curatorPicksDesigner} onOpenChange={(open) => !open && closeCuratorPicks()}>
         <DialogContent 
-          className="max-w-[95vw] md:max-w-4xl max-h-[95vh] p-0 bg-background/98 backdrop-blur-sm border-border overflow-hidden" 
+          className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none" 
           onKeyDown={handleKeyDown}
           aria-describedby={undefined}
         >
           <VisuallyHidden>
             <DialogTitle>
-              {curatorPicksDesigner?.name} - Curators' Picks
+              {curatorPicksDesigner?.name} - Limited Editions
             </DialogTitle>
           </VisuallyHidden>
           
-          {curatorPicksDesigner?.curatorPicks && (
-            <div className="relative">
-              {/* Header */}
-              <div className="p-4 md:p-6 border-b border-border/50 text-center">
-                <p className="text-xs uppercase tracking-[0.2em] text-primary mb-1">Curators' Picks</p>
-                <h3 className="font-serif text-xl md:text-2xl text-foreground">{curatorPicksDesigner.name}</h3>
-              </div>
+          {curatorPicksDesigner?.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 && (
+            <div 
+              className="relative w-full h-full flex items-center justify-center"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
+              {/* Close button */}
+              <button 
+                onClick={closeCuratorPicks} 
+                className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                aria-label="Close lightbox"
+              >
+                <X className="h-6 w-6 text-white" />
+              </button>
+
+              {/* Previous button */}
+              {curatorPicksDesigner.curatorPicks.length > 1 && (
+                <button 
+                  onClick={goToPreviousPick}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="h-8 w-8 text-white" />
+                </button>
+              )}
 
               {/* Image container */}
-              <div 
-                className="relative bg-muted/20"
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-              >
-                {/* Navigation buttons */}
-                {curatorPicksDesigner.curatorPicks.length > 1 && (
-                  <>
-                    <button
-                      onClick={goToPreviousPick}
-                      className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 p-2 md:p-3 bg-background/80 hover:bg-background rounded-full shadow-lg transition-colors"
-                      aria-label="Previous pick"
-                    >
-                      <ChevronLeft className="h-5 w-5 md:h-6 md:w-6 text-foreground" />
-                    </button>
-                    <button
-                      onClick={goToNextPick}
-                      className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-10 p-2 md:p-3 bg-background/80 hover:bg-background rounded-full shadow-lg transition-colors"
-                      aria-label="Next pick"
-                    >
-                      <ChevronRight className="h-5 w-5 md:h-6 md:w-6 text-foreground" />
-                    </button>
-                  </>
-                )}
-
-                {/* Image */}
+              <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-24'}`}>
                 <div 
-                  className={`flex items-center justify-center p-4 md:p-8 ${isZoomed ? 'overflow-auto' : 'overflow-hidden'}`}
+                  className={`relative overflow-auto transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}
                   onClick={handleDoubleTap}
                 >
-                  <img
-                    src={curatorPicksDesigner.curatorPicks[curatorPickIndex].image}
-                    alt={curatorPicksDesigner.curatorPicks[curatorPickIndex].title}
-                    className={`max-h-[50vh] md:max-h-[55vh] object-contain transition-transform duration-300 ${isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'}`}
+                  <img 
+                    src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
+                    alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
+                    className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
+                    draggable={false}
                   />
-                  {/* Zoom indicator on mobile */}
-                  <button
+                  <button 
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsZoomed(!isZoomed);
                     }}
-                    className="absolute bottom-4 right-4 md:hidden p-2 bg-background/80 rounded-full shadow-lg"
+                    className={`absolute bottom-3 left-3 md:right-3 md:left-auto p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
                     aria-label={isZoomed ? "Zoom out" : "Zoom in"}
                   >
                     {isZoomed ? (
-                      <ZoomOut className="h-5 w-5 text-foreground" />
+                      <ZoomOut className="h-5 w-5 text-white" />
                     ) : (
-                      <ZoomIn className="h-5 w-5 text-foreground" />
+                      <ZoomIn className="h-5 w-5 text-white" />
                     )}
                   </button>
                 </div>
-              </div>
-
-              {/* Info */}
-              <div className="p-4 md:p-6 border-t border-border/50">
-                <div className="text-center mb-4">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary text-xs uppercase tracking-wider rounded">
-                      {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
-                    </span>
-                    {curatorPicksDesigner.curatorPicks[curatorPickIndex].edition && (
-                      <span className="inline-block px-2 py-0.5 bg-accent/20 text-accent text-xs uppercase tracking-wider rounded">
+                <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && (
+                      <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
+                        {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
+                      </span>
+                    )}
+                    {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition && (
+                      <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex].edition}
                       </span>
                     )}
                   </div>
-                  <h4 className="font-serif text-lg md:text-xl text-foreground">
-                    {curatorPicksDesigner.curatorPicks[curatorPickIndex].title}
-                  </h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials}
-                  </p>
-                  <p className="text-xs text-muted-foreground italic mt-1">
-                    {curatorPicksDesigner.curatorPicks[curatorPickIndex].dimensions}
+                  <h3 className="text-sm md:text-base font-serif text-white mb-1">
+                    {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
+                  </h3>
+                  {(curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions) && (
+                    <div className="mt-2 max-w-xl space-y-1">
+                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
+                        <p className="text-xs md:text-sm text-white/60 font-body">
+                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials}
+                        </p>
+                      )}
+                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions && (
+                        <p className="text-xs md:text-sm text-white/40 font-body italic">
+                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].dimensions}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  <p className="mt-12 text-xs text-white font-body italic">
+                    For further details, please request our catalogue at{" "}
+                    <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/80 transition-colors">
+                      concierge@myaffluency.com
+                    </a>
                   </p>
                 </div>
-
-                {/* Thumbnail navigation */}
-                {curatorPicksDesigner.curatorPicks.length > 1 && (
-                  <div className="flex justify-center gap-2 mt-4">
-                    <TooltipProvider>
-                      {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
-                        <Tooltip key={idx}>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => {
-                                setCuratorPickIndex(idx);
-                                setIsZoomed(false);
-                              }}
-                              className={`w-12 h-12 md:w-14 md:h-14 rounded overflow-hidden transition-all duration-300 ${
-                                idx === curatorPickIndex 
-                                  ? 'ring-2 ring-primary scale-105' 
-                                  : 'ring-1 ring-border/50 opacity-60 hover:opacity-100'
-                              }`}
-                            >
-                              <img
-                                src={pick.image}
-                                alt={pick.title}
-                                className="w-full h-full object-cover"
-                              />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs">{pick.title}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ))}
-                    </TooltipProvider>
-                  </div>
-                )}
-
-                {/* Counter */}
-                <p className="text-center text-xs text-muted-foreground mt-4">
-                  {curatorPickIndex + 1} / {curatorPicksDesigner.curatorPicks.length}
-                </p>
-
-                {/* Footer disclaimer */}
-                <p className="text-center text-xs text-muted-foreground mt-8">
-                  For further details, please request our catalogue at{" "}
-                  <a 
-                    href="mailto:concierge@myaffluency.com" 
-                    className="text-primary hover:underline"
-                  >
-                    concierge@myaffluency.com
-                  </a>
-                </p>
               </div>
+
+              {/* Next button */}
+              {curatorPicksDesigner.curatorPicks.length > 1 && (
+                <button 
+                  onClick={goToNextPick}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="h-8 w-8 text-white" />
+                </button>
+              )}
+
+              {/* Thumbnail navigation */}
+              {curatorPicksDesigner.curatorPicks.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                  <TooltipProvider>
+                    {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
+                      <Tooltip key={idx}>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => {
+                              setCuratorPickIndex(idx);
+                              setIsZoomed(false);
+                            }}
+                            className={`w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden transition-all duration-300 ${
+                              idx === curatorPickIndex 
+                                ? 'ring-2 ring-white scale-105' 
+                                : 'ring-1 ring-white/30 opacity-60 hover:opacity-100'
+                            }`}
+                          >
+                            <img
+                              src={pick.image}
+                              alt={pick.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">{pick.title}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </TooltipProvider>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
