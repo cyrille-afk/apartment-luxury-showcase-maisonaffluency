@@ -726,10 +726,8 @@ const FeaturedDesigners = () => {
                       const distance = touchStart - touchEnd;
                       if (distance > minSwipeDistance) {
                         setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
-                        setIsZoomed(false);
                       } else if (distance < -minSwipeDistance) {
                         setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
-                        setIsZoomed(false);
                       }
                     }
                   }}
@@ -752,8 +750,7 @@ const FeaturedDesigners = () => {
                     <button 
                       onClick={() => {
                         setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
-                        setIsZoomed(false);
-                      }} 
+                      }}
                       className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                       aria-label="Previous image"
                     >
@@ -844,7 +841,6 @@ const FeaturedDesigners = () => {
                               <button
                                 onClick={() => {
                                   setCuratorPickIndex(idx);
-                                  setIsZoomed(false);
                                 }}
                                 className={`relative w-12 h-12 md:w-14 md:h-14 rounded-md overflow-hidden transition-all duration-300 ${
                                   curatorPickIndex === idx 
@@ -874,8 +870,7 @@ const FeaturedDesigners = () => {
                     <button 
                       onClick={() => {
                         setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
-                        setIsZoomed(false);
-                      }} 
+                      }}
                       className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                       aria-label="Next image"
                     >
