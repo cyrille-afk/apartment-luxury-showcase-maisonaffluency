@@ -36,28 +36,32 @@ const collectibleDesigners = [
         title: "Babel Table Lamp", 
         category: "Lighting",
         materials: "Bronze • Brass • Ash wood • White fabric shade",
-        dimensions: "Ø45 × H60.9 cm"
+        dimensions: "Ø45 × H60.9 cm",
+        edition: "Numbered & Signed"
       },
       { 
         image: demichelisPick4, 
         title: "Echo Floor Lamp", 
         category: "Lighting",
         materials: "Patinated and varnished brass",
-        dimensions: "Ø38 × H166 cm"
+        dimensions: "Ø38 × H166 cm",
+        edition: "Numbered & Signed"
       },
       { 
         image: demichelisPick2, 
         title: "Bud Table Lamp", 
         category: "Lighting",
         materials: "Bronze • White oak • Hand-made fabric shade",
-        dimensions: "Ø40 × H71 cm"
+        dimensions: "Ø40 × H71 cm",
+        edition: "Numbered & Signed"
       },
       { 
         image: demichelisPick3, 
         title: "Table d'appoint RHINO", 
         category: "Furniture",
         materials: "Patinated bronze • Raw brass • Brown cowhide leather top",
-        dimensions: "H43.5 × L35 cm"
+        dimensions: "H43.5 × L35 cm",
+        edition: "Numbered & Signed"
       },
     ],
     links: [
@@ -450,9 +454,16 @@ const Collectibles = () => {
               {/* Info */}
               <div className="p-4 md:p-6 border-t border-border/50">
                 <div className="text-center mb-4">
-                  <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary text-xs uppercase tracking-wider rounded mb-2">
-                    {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
-                  </span>
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary text-xs uppercase tracking-wider rounded">
+                      {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
+                    </span>
+                    {curatorPicksDesigner.curatorPicks[curatorPickIndex].edition && (
+                      <span className="inline-block px-2 py-0.5 bg-accent/20 text-accent text-xs uppercase tracking-wider rounded">
+                        {curatorPicksDesigner.curatorPicks[curatorPickIndex].edition}
+                      </span>
+                    )}
+                  </div>
                   <h4 className="font-serif text-lg md:text-xl text-foreground">
                     {curatorPicksDesigner.curatorPicks[curatorPickIndex].title}
                   </h4>
