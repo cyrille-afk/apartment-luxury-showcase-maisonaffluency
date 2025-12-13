@@ -26,6 +26,9 @@ import milanPekarImg from "@/assets/designers/milan-pekar.png";
 import atelierPendhapaImg from "@/assets/designers/atelier-pendhapa.png";
 import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
 
+// Curators' Picks images
+import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
+
 const featuredDesigners = [
   {
     id: "alexander-lamont",
@@ -36,6 +39,9 @@ const featuredDesigners = [
       "Alexander Lamont is a British designer based in Bangkok whose eponymous brand has become synonymous with exceptional craftsmanship and the innovative use of traditional materials. Working with bronze, shagreen, straw marquetry, lacquer and gold leaf, his pieces marry East and West influences with a distinct sculptural presence. Winner of multiple UNESCO Awards for Excellence in Craftsmanship, his work graces prestigious interiors worldwide.",
     notableWorks: "Hammered Bowls (UNESCO Award), Brancusi Spiral Table, River Ledge Credenza, Agata Cabinet, Lune Mirrors",
     philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
+    curatorPicks: [
+      { image: alexanderLamontPick1, title: "Ondas Sconce Clear" },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
       { type: "Curators' Picks" },
@@ -624,21 +630,47 @@ const FeaturedDesigners = () => {
                   </p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <div 
-                      key={num}
-                      className="aspect-square bg-primary/5 rounded-lg border border-primary/10 flex items-center justify-center overflow-hidden"
-                    >
-                      <div className="text-center p-4">
-                        <Star className="h-8 w-8 text-primary/30 mx-auto mb-2" />
-                        <p className="text-xs text-muted-foreground font-body">Pick {num}</p>
+                  {curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 ? (
+                    curatorPicksDesigner.curatorPicks.map((pick, idx) => (
+                      <div 
+                        key={idx}
+                        className="aspect-square bg-primary/5 rounded-lg border border-primary/10 flex items-center justify-center overflow-hidden group cursor-pointer"
+                      >
+                        <img 
+                          src={pick.image} 
+                          alt={pick.title} 
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    [1, 2, 3, 4, 5].map((num) => (
+                      <div 
+                        key={num}
+                        className="aspect-square bg-primary/5 rounded-lg border border-primary/10 flex items-center justify-center overflow-hidden"
+                      >
+                        <div className="text-center p-4">
+                          <Star className="h-8 w-8 text-primary/30 mx-auto mb-2" />
+                          <p className="text-xs text-muted-foreground font-body">Pick {num}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
-                <p className="text-center text-sm text-muted-foreground font-body italic">
-                  Curated selections coming soon
-                </p>
+                {curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 && (
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
+                      <span key={idx} className="text-xs text-muted-foreground font-body italic">
+                        {pick.title}{idx < curatorPicksDesigner.curatorPicks.length - 1 ? " • " : ""}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {(!curatorPicksDesigner.curatorPicks || curatorPicksDesigner.curatorPicks.length === 0) && (
+                  <p className="text-center text-sm text-muted-foreground font-body italic">
+                    Curated selections coming soon
+                  </p>
+                )}
               </div>
             )}
           </DialogContent>
