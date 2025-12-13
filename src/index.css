@@ -141,6 +141,17 @@ All colors MUST be HSL.
     @apply bg-gradient-to-r from-[hsl(var(--jade))] to-[hsl(var(--jade-light))] bg-clip-text text-transparent;
   }
   
+  .instagram-gradient {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  }
+  
+  .instagram-gradient-text {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
   .hover-lift {
     @apply transition-transform duration-300 hover:-translate-y-1;
   }
