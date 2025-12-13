@@ -405,7 +405,7 @@ const featuredDesigners = [
       },
     ],
     links: [
-      { type: "Instagram", url: "https://instagram.com/entrelacs_creation" },
+      { type: "Instagram", url: "https://instagram.com/entrelacs_lightings" },
       { type: "Website", url: "https://www.entrelacs.fr" },
       { type: "Curators' Picks" },
     ],
