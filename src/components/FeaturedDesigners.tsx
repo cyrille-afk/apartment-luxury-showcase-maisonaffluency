@@ -857,7 +857,7 @@ const FeaturedDesigners = () => {
                       />
                       <button 
                         onClick={() => setIsZoomed(!isZoomed)}
-                        className={`absolute bottom-3 left-3 md:right-3 md:left-auto p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
+                        className={`absolute bottom-20 right-3 md:bottom-3 md:right-3 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
                         aria-label={isZoomed ? "Zoom out" : "Zoom in"}
                       >
                         {isZoomed ? (
