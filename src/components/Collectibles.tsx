@@ -373,6 +373,28 @@ const Collectibles = () => {
                           </h3>
                         </div>
                         <p className="text-sm md:text-base text-primary font-body">{designer.specialty}</p>
+                        {designer.notableWorksLink && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const gallerySection = document.getElementById('gallery');
+                              if (gallerySection) {
+                                gallerySection.scrollIntoView({ behavior: 'smooth' });
+                                setTimeout(() => {
+                                  window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                    detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` } 
+                                  }));
+                                }, 500);
+                              }
+                            }}
+                            className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation mt-1"
+                          >
+                            <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                              {designer.notableWorksLink.text}
+                            </span>
+                            <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   </AccordionTrigger>
