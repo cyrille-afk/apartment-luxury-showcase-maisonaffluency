@@ -111,10 +111,10 @@ const CuratingTeam = () => {
                 </div>
               </DialogContent>
             </Dialog>
-            <h4 className="font-display text-sm md:text-base text-primary">
+            <h4 className="font-display text-base md:text-lg text-primary font-semibold mt-2">
               {member.name}
             </h4>
-            <p className="text-xs md:text-sm text-muted-foreground font-body">
+            <p className="text-sm md:text-base text-foreground/80 font-body tracking-wide uppercase">
               {member.role}
             </p>
           </motion.div>
