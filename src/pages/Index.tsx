@@ -32,11 +32,11 @@ const Index = () => {
         <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24">
           <CuratingTeam />
         </section>
-        <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24">
-          <Collectibles />
-        </section>
         <section id="designers" className="scroll-mt-20 md:scroll-mt-24">
           <FeaturedDesigners />
+        </section>
+        <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24">
+          <Collectibles />
         </section>
         <section id="brands" className="scroll-mt-20 md:scroll-mt-24">
           <BrandsAteliers />
