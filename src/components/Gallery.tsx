@@ -276,8 +276,8 @@ const Gallery = () => {
                         {!isExpanded && <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground p-2 rounded-full flex items-center justify-center shadow-md">
                             <Eye className="w-4 h-4" />
                           </div>}
-                        {/* Expand/View indicator */}
-                        <div className="absolute bottom-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {/* Expand/View indicator - desktop only */}
+                        <div className="absolute bottom-4 right-4 hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <span className="bg-background/90 text-foreground p-2.5 rounded-full shadow-lg backdrop-blur-sm">
                             {isExpanded ? <X className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                           </span>
