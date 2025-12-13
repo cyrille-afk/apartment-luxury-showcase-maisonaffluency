@@ -602,10 +602,10 @@ const FeaturedDesigners = () => {
                               <button
                                 key={idx}
                                 onClick={() => setCuratorPicksDesigner(designer)}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-colors duration-300 border border-primary/20 hover:border-primary/40 cursor-pointer"
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-gradient-to-r from-accent/90 to-primary/80 hover:from-accent hover:to-primary text-white rounded-md transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer border border-accent/30"
                               >
-                                <Star size={16} />
-                                <span>{link.type}</span>
+                                <Star size={16} className="fill-current" />
+                                <span className="font-medium">{link.type}</span>
                               </button>
                             ) : (
                               <span
