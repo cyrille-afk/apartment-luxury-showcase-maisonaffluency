@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Instagram, Search, X, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -757,11 +757,13 @@ const FeaturedDesigners = () => {
                         className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
                         draggable={false}
                       />
-                      {!isZoomed && (
-                        <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-white/50 font-body md:hidden">
-                          Double-tap to zoom
-                        </p>
-                      )}
+                      <div className={`absolute bottom-3 right-3 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-opacity duration-300 ${isZoomed ? 'opacity-0' : 'opacity-70'}`}>
+                        {isZoomed ? (
+                          <ZoomOut className="h-5 w-5 text-white" />
+                        ) : (
+                          <ZoomIn className="h-5 w-5 text-white" />
+                        )}
+                      </div>
                     </div>
                     <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
                       {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && (
