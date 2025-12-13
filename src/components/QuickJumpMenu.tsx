@@ -118,41 +118,48 @@ const QuickJumpMenu = () => {
       </AnimatePresence>
 
       {/* Circular progress indicator around button */}
-      <div className="relative">
+      <div className="relative group">
         <svg
-          className="absolute -inset-1 w-14 h-14 -rotate-90"
-          viewBox="0 0 56 56"
+          className="absolute -inset-1.5 w-[60px] h-[60px] -rotate-90"
+          viewBox="0 0 60 60"
         >
           <circle
-            cx="28"
-            cy="28"
-            r="26"
+            cx="30"
+            cy="30"
+            r="28"
             fill="none"
-            stroke="hsl(var(--border))"
+            stroke="hsl(var(--primary) / 0.15)"
             strokeWidth="2"
-            opacity="0.3"
           />
           <circle
-            cx="28"
-            cy="28"
-            r="26"
+            cx="30"
+            cy="30"
+            r="28"
             fill="none"
             stroke="hsl(var(--primary))"
-            strokeWidth="2"
+            strokeWidth="2.5"
             strokeLinecap="round"
-            strokeDasharray={`${2 * Math.PI * 26}`}
-            strokeDashoffset={`${2 * Math.PI * 26 * (1 - scrollProgress / 100)}`}
-            className="transition-all duration-150 ease-out"
+            strokeDasharray={`${2 * Math.PI * 28}`}
+            strokeDashoffset={`${2 * Math.PI * 28 * (1 - scrollProgress / 100)}`}
+            className="transition-all duration-150 ease-out drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]"
           />
         </svg>
         
+        {/* Glow effect */}
+        <div className={`absolute inset-0 rounded-full transition-all duration-300 ${
+          isOpen 
+            ? 'bg-primary/30 blur-xl scale-150' 
+            : 'bg-primary/20 blur-lg scale-125 group-hover:bg-primary/30 group-hover:scale-150'
+        }`} />
+        
         <motion.button
           onClick={() => setIsOpen(!isOpen)}
-          whileTap={{ scale: 0.95 }}
-          className={`relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-colors duration-300 touch-manipulation ${
+          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05 }}
+          className={`relative flex items-center justify-center w-12 h-12 rounded-full shadow-xl transition-all duration-300 touch-manipulation ${
             isOpen
-              ? "bg-primary text-primary-foreground"
-              : "bg-card/95 backdrop-blur-md border border-border/40 text-foreground hover:bg-card"
+              ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-primary/30"
+              : "bg-gradient-to-br from-card to-card/90 backdrop-blur-md border border-primary/30 text-primary hover:border-primary/50 hover:shadow-primary/20"
           }`}
           aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
         >
@@ -160,22 +167,25 @@ const QuickJumpMenu = () => {
           {isOpen ? (
             <motion.div
               key="close"
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.15 }}
+              initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
             >
               <X className="h-5 w-5" />
             </motion.div>
           ) : (
             <motion.div
               key="menu"
-              initial={{ rotate: 90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: -90, opacity: 0 }}
-              transition={{ duration: 0.15 }}
+              initial={{ rotate: 90, opacity: 0, scale: 0.5 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: -90, opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="flex flex-col items-center gap-0.5"
             >
-              <ChevronUp className="h-5 w-5" />
+              <span className="w-4 h-0.5 bg-current rounded-full" />
+              <span className="w-3 h-0.5 bg-current rounded-full" />
+              <span className="w-4 h-0.5 bg-current rounded-full" />
             </motion.div>
           )}
         </AnimatePresence>
