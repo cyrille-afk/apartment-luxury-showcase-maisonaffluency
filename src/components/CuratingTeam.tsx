@@ -40,7 +40,7 @@ const CuratingTeam = () => {
       <h3 className="font-display text-2xl md:text-3xl text-primary mb-4 text-center">
         The Curating Team
       </h3>
-      <p className="text-muted-foreground font-body text-center max-w-2xl mx-auto mb-12">
+      <p className="text-muted-foreground font-body text-center max-w-2xl mx-auto mb-12 italic">
         The heart and soul of the gallery and designers selection
       </p>
 
