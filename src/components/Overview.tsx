@@ -117,10 +117,10 @@ const Overview = () => {
                     gallerySection.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
-                className="text-left hover:opacity-80 transition-opacity cursor-pointer"
+                className="text-left cursor-pointer group transition-all duration-300 hover:scale-105 hover:-translate-y-1"
               >
-                <div className="mb-2 font-display text-3xl text-primary">5</div>
-                <div className="font-body text-sm uppercase tracking-wider text-muted-foreground underline decoration-primary/30 hover:decoration-primary">ATMOSPHERES</div>
+                <div className="mb-2 font-display text-3xl text-primary group-hover:text-accent transition-colors duration-300">5</div>
+                <div className="font-body text-sm uppercase tracking-wider text-muted-foreground underline decoration-primary/30 group-hover:decoration-accent group-hover:text-foreground transition-all duration-300">ATMOSPHERES</div>
               </button>
               <button
                 onClick={() => {
@@ -129,12 +129,12 @@ const Overview = () => {
                     designersSection.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="text-left hover:opacity-80 transition-opacity cursor-pointer"
+                className="text-left cursor-pointer group transition-all duration-300 hover:scale-105 hover:-translate-y-1"
               >
-                <div className="mb-2 font-display text-3xl text-primary">50</div>
-                <div className="font-body text-sm uppercase tracking-wider text-muted-foreground underline decoration-primary/30 hover:decoration-primary">DESIGNERS</div>
+                <div className="mb-2 font-display text-3xl text-primary group-hover:text-accent transition-colors duration-300">50</div>
+                <div className="font-body text-sm uppercase tracking-wider text-muted-foreground underline decoration-primary/30 group-hover:decoration-accent group-hover:text-foreground transition-all duration-300">DESIGNERS</div>
               </button>
-              <div>
+              <div className="transition-all duration-300">
                 <div className="mb-2 font-display text-3xl text-primary">2,400</div>
                 <div className="font-body text-sm uppercase tracking-wider text-muted-foreground">
                   Sq Ft
