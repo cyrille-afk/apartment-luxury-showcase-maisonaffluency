@@ -4,6 +4,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
 import { Instagram, Search, X, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
@@ -719,26 +720,34 @@ const FeaturedDesigners = () => {
 
                   {/* Thumbnail navigation bar */}
                   {curatorPicksDesigner.curatorPicks.length > 1 && (
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-3 bg-background/30 backdrop-blur-md rounded-full">
-                      {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setCuratorPickIndex(idx)}
-                          className={`relative w-12 h-12 md:w-14 md:h-14 rounded-md overflow-hidden transition-all duration-300 ${
-                            curatorPickIndex === idx 
-                              ? 'ring-2 ring-white scale-110' 
-                              : 'ring-1 ring-white/30 opacity-60 hover:opacity-100 hover:ring-white/60'
-                          }`}
-                          aria-label={`View ${pick.title}`}
-                        >
-                          <img 
-                            src={pick.image} 
-                            alt={pick.title} 
-                            className="w-full h-full object-cover"
-                          />
-                        </button>
-                      ))}
-                    </div>
+                    <TooltipProvider delayDuration={200}>
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-3 bg-background/30 backdrop-blur-md rounded-full">
+                        {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
+                          <Tooltip key={idx}>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => setCuratorPickIndex(idx)}
+                                className={`relative w-12 h-12 md:w-14 md:h-14 rounded-md overflow-hidden transition-all duration-300 ${
+                                  curatorPickIndex === idx 
+                                    ? 'ring-2 ring-white scale-110' 
+                                    : 'ring-1 ring-white/30 opacity-60 hover:opacity-100 hover:ring-white/60'
+                                }`}
+                                aria-label={`View ${pick.title}`}
+                              >
+                                <img 
+                                  src={pick.image} 
+                                  alt={pick.title} 
+                                  className="w-full h-full object-cover"
+                                />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="bg-background/90 backdrop-blur-sm border-border/40">
+                              <p className="font-body text-sm">{pick.title}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ))}
+                      </div>
+                    </TooltipProvider>
                   )}
 
                   {/* Next button */}
