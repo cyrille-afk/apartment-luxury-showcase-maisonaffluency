@@ -11,28 +11,29 @@ import {
 } from "@/components/ui/tooltip";
 import logoIcon from "@/assets/affluency-logo-icon.jpeg";
 
-const navItems = [{
-  label: "Home",
-  href: "#home"
-}, {
+const leftNavItems = [{
   label: "Gallery",
   href: "#overview"
-}, {
-  label: "Designers",
-  href: "#designers"
 }, {
   label: "Collectibles",
   href: "#collectibles"
 }, {
+  label: "Designers",
+  href: "#designers"
+}, {
   label: "Ateliers",
   href: "#brands"
-}, {
+}];
+
+const rightNavItems = [{
   label: "Trade Program",
   href: "#details"
 }, {
   label: "Contact",
   href: "#contact"
 }];
+
+const navItems = [...leftNavItems, ...rightNavItems];
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -78,7 +79,31 @@ const Navigation = () => {
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50">
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         <div className="flex h-20 md:h-20 items-center justify-center md:justify-between relative">
-          {/* Logo/Brand */}
+          {/* Left Navigation Items */}
+          <div className="hidden md:flex items-center gap-5">
+            {leftNavItems.map((item) => (
+              <button 
+                key={item.href} 
+                onClick={() => handleNavClick(item.href)} 
+                className={cn(
+                  "font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap",
+                  activeSection === item.href 
+                    ? "text-primary font-medium"
+                    : "text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                )}
+              >
+                {item.label}
+                <span className={cn(
+                  "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
+                  activeSection === item.href 
+                    ? "w-full" 
+                    : "w-0 group-hover:w-full"
+                )} />
+              </button>
+            ))}
+          </div>
+
+          {/* Logo/Brand - Center */}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -95,9 +120,9 @@ const Navigation = () => {
             </Tooltip>
           </TooltipProvider>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-5 ml-8">
-            {navItems.map((item) => {
+          {/* Right Navigation Items */}
+          <div className="hidden md:flex items-center gap-5">
+            {rightNavItems.map((item) => {
               const isTradeProgram = item.href === "#details";
               const isContact = item.href === "#contact";
               
