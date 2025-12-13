@@ -128,12 +128,21 @@ export default {
             boxShadow: "0 0 12px 2px hsl(var(--primary) / 0.3)",
           },
         },
+        "pulse-fade": {
+          "0%, 100%": {
+            opacity: "0.5",
+          },
+          "50%": {
+            opacity: "1",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.3s ease-out",
         "accordion-up": "accordion-up 0.3s ease-out",
         "fade-in": "fade-in 0.6s ease-out",
         "slide-in": "slide-in 0.5s ease-out",
+        "pulse-fade": "pulse-fade 2.5s ease-in-out infinite",
       },
     },
   },
