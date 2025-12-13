@@ -724,13 +724,13 @@ const FeaturedDesigners = () => {
                       alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
                       className="max-w-full max-h-[55vh] object-contain" 
                     />
-                    <div className="mt-4 text-center">
+                    <div className="mt-2 text-center">
                       {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && (
-                        <span className="inline-block px-3 py-1 mb-2 text-xs uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
+                        <span className="inline-block px-2 py-0.5 mb-1 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
                         </span>
                       )}
-                      <h3 className="text-base md:text-lg font-serif text-white mb-2">
+                      <h3 className="text-sm md:text-base font-serif text-white mb-1">
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
                       </h3>
                       {(curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions) && (
