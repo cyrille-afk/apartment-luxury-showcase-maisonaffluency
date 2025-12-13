@@ -527,9 +527,36 @@ const FeaturedDesigners = () => {
                       </DialogContent>
                     </Dialog>
                     <div className="flex flex-col items-start gap-1 flex-1 min-w-0">
-                      <h3 className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 group-hover:text-primary">
-                        {designer.name}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        {designer.links?.find(l => l.type === "Instagram")?.url && (
+                          <a
+                            href={designer.links.find(l => l.type === "Instagram")?.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-0.5 transition-transform duration-300 hover:scale-110"
+                            aria-label="Instagram"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-name)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <defs>
+                                <linearGradient id="instagram-gradient-name" x1="0%" y1="100%" x2="100%" y2="0%">
+                                  <stop offset="0%" stopColor="#f09433" />
+                                  <stop offset="25%" stopColor="#e6683c" />
+                                  <stop offset="50%" stopColor="#dc2743" />
+                                  <stop offset="75%" stopColor="#cc2366" />
+                                  <stop offset="100%" stopColor="#bc1888" />
+                                </linearGradient>
+                              </defs>
+                              <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                            </svg>
+                          </a>
+                        )}
+                        <h3 className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 group-hover:text-primary">
+                          {designer.name}
+                        </h3>
+                      </div>
                       <p className="text-sm md:text-base text-primary font-body italic transition-opacity duration-300 group-hover:opacity-80">
                         {designer.specialty}
                       </p>
@@ -599,54 +626,28 @@ const FeaturedDesigners = () => {
                         "{designer.philosophy}"
                       </p>
 
-                      {designer.links && designer.links.length > 0 && (
+                      {designer.links && designer.links.filter(l => l.type !== "Instagram").length > 0 && (
                         <div className="flex flex-wrap gap-3 mt-4">
-                          {designer.links.map((link, idx) => (
+                          {designer.links.filter(l => l.type !== "Instagram").map((link, idx) => (
                             link.url ? (
-                              link.type === "Instagram" ? (
-                                <a
-                                  key={idx}
-                                  href={link.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center p-1 transition-transform duration-300 hover:scale-110"
-                                  aria-label={link.type}
-                                >
-                                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-btn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <defs>
-                                      <linearGradient id="instagram-gradient-btn" x1="0%" y1="100%" x2="100%" y2="0%">
-                                        <stop offset="0%" stopColor="#f09433" />
-                                        <stop offset="25%" stopColor="#e6683c" />
-                                        <stop offset="50%" stopColor="#dc2743" />
-                                        <stop offset="75%" stopColor="#cc2366" />
-                                        <stop offset="100%" stopColor="#bc1888" />
-                                      </linearGradient>
-                                    </defs>
-                                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                                  </svg>
-                                </a>
-                              ) : (
-                                <a
-                                  key={idx}
-                                  href={link.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-md transition-all duration-300 border bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 hover:border-primary/40"
-                                  aria-label={link.type}
-                                >
-                                  <span>{link.type}</span>
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                    />
-                                  </svg>
-                                </a>
-                              )
+                              <a
+                                key={idx}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-md transition-all duration-300 border bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 hover:border-primary/40"
+                                aria-label={link.type}
+                              >
+                                <span>{link.type}</span>
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                  />
+                                </svg>
+                              </a>
                             ) : link.type === "Curators' Picks" ? (
                               <button
                                 key={idx}
