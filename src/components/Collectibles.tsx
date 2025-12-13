@@ -214,7 +214,7 @@ const Collectibles = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8 }}
-            className="mb-12 md:mb-16 text-center"
+            className="mb-12 md:mb-16 text-left"
           >
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-4">
               Collectibles
