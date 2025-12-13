@@ -107,7 +107,7 @@ const CuratingTeam = () => {
                       </svg>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-4 mb-1">
                     <h4 className="font-display text-xl md:text-2xl text-primary">
                       {member.name}
                     </h4>
