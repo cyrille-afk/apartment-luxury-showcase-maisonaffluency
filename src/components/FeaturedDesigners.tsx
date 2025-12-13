@@ -46,7 +46,6 @@ import demichelisPick3 from "@/assets/curators-picks/demichelis-3.jpg";
 import demichelisPick4 from "@/assets/curators-picks/demichelis-4.jpg";
 import pendhapaPick1 from "@/assets/curators-picks/pendhapa-1.jpg";
 import pendhapaPick2 from "@/assets/curators-picks/pendhapa-2.jpg";
-import pendhapaPick3 from "@/assets/curators-picks/pendhapa-3.jpg";
 import pendhapaPick4 from "@/assets/curators-picks/pendhapa-4.jpg";
 import pendhapaPick5 from "@/assets/curators-picks/pendhapa-5.jpg";
 
@@ -213,13 +212,6 @@ const featuredDesigners = [
         category: "Furniture",
         materials: "Solid teak wood • Hand-carved details",
         dimensions: "H42 × W110 × D70 cm"
-      },
-      { 
-        image: pendhapaPick3, 
-        title: "Udukkai Dining Table", 
-        category: "Furniture",
-        materials: "Reclaimed teak • Bronze accents",
-        dimensions: "H76 × W240 × D100 cm"
       },
       { 
         image: pendhapaPick4, 
