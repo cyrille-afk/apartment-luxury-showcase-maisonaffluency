@@ -27,6 +27,7 @@ import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
 
 // Curators' Picks images
 import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
+import alexanderLamontPick2 from "@/assets/curators-picks/alexander-lamont-2.jpg";
 
 const featuredDesigners = [
   {
@@ -40,6 +41,7 @@ const featuredDesigners = [
     philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
     curatorPicks: [
       { image: alexanderLamontPick1, title: "Ondas Sconce Clear" },
+      { image: alexanderLamontPick2, title: "Galea Lantern Rock Crystal" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
