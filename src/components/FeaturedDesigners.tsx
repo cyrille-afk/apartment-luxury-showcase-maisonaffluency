@@ -747,6 +747,12 @@ const FeaturedDesigners = () => {
                           )}
                         </div>
                       )}
+                      <p className="mt-4 text-xs text-white/40 font-body italic">
+                        For further details, please request our catalogue at{" "}
+                        <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/60 transition-colors">
+                          concierge@myaffluency.com
+                        </a>
+                      </p>
                     </div>
                   </div>
 
