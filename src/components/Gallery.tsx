@@ -16,6 +16,7 @@ import bedroomSecondImage from "@/assets/bedroom-second.jpg";
 import intimateDiningImage from "@/assets/intimate-dining.jpg";
 import intimateTableImage from "@/assets/intimate-table-detail.jpg";
 import intimateLoungeImage from "@/assets/intimate-lounge.jpg";
+import smallRoomPersonalityImage from "@/assets/small-room-personality.jpg";
 const galleryExperiences = [{
   experience: "A Sociable Environment",
   subtitle: "Bespoke sofa, hand-knotted artisan rug, sculptural lighting and collectible furniture",
@@ -84,9 +85,9 @@ const galleryExperiences = [{
   experience: "A Small Room with Massive Personality",
   subtitle: "Bold statement pieces, artisan craftsmanship and curated collectibles",
   items: [{
-    image: bedroomAltImage,
+    image: smallRoomPersonalityImage,
     title: "Compact Elegance",
-    description: "Curated selection of statement pieces that transform intimate spaces into design destinations"
+    description: "Atelier Demichelis' sculptural table lamp, artisan ceramic side table, bold patterned upholstery headboard"
   }]
 }];
 const Gallery = () => {
