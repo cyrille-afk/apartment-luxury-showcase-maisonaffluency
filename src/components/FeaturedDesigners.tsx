@@ -686,11 +686,11 @@ const FeaturedDesigners = () => {
                   )}
 
                   {/* Image container */}
-                  <div className="flex flex-col items-center justify-center max-w-[90vw] max-h-[85vh] px-16">
+                  <div className="flex flex-col items-center justify-center max-w-[90vw] max-h-[85vh] px-16 pb-24">
                     <img 
                       src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                       alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                      className="max-w-full max-h-[70vh] object-contain" 
+                      className="max-w-full max-h-[55vh] object-contain" 
                     />
                     <div className="mt-4 text-center">
                       <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
@@ -699,13 +699,32 @@ const FeaturedDesigners = () => {
                       <p className="text-sm md:text-base text-white/70 font-body max-w-2xl">
                         <span className="italic">by</span> {curatorPicksDesigner.name}
                       </p>
-                      {curatorPicksDesigner.curatorPicks.length > 1 && (
-                        <p className="text-xs text-white/50 mt-3 font-body">
-                          {curatorPickIndex + 1} / {curatorPicksDesigner.curatorPicks.length}
-                        </p>
-                      )}
                     </div>
                   </div>
+
+                  {/* Thumbnail navigation bar */}
+                  {curatorPicksDesigner.curatorPicks.length > 1 && (
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-3 bg-background/30 backdrop-blur-md rounded-full">
+                      {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCuratorPickIndex(idx)}
+                          className={`relative w-12 h-12 md:w-14 md:h-14 rounded-md overflow-hidden transition-all duration-300 ${
+                            curatorPickIndex === idx 
+                              ? 'ring-2 ring-white scale-110' 
+                              : 'ring-1 ring-white/30 opacity-60 hover:opacity-100 hover:ring-white/60'
+                          }`}
+                          aria-label={`View ${pick.title}`}
+                        >
+                          <img 
+                            src={pick.image} 
+                            alt={pick.title} 
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Next button */}
                   {curatorPicksDesigner.curatorPicks.length > 1 && (
