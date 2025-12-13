@@ -214,18 +214,18 @@ const featuredDesigners = [
         dimensions: "L49 × W52 × H85 cm"
       },
       { 
-        image: pendhapaPick2, 
-        title: "Anemos Coffee Table", 
-        category: "Furniture",
-        materials: "Black oak • Black lacquer tabletop",
-        dimensions: "L110 × W80 × H35 cm"
-      },
-      { 
         image: pendhapaPick5, 
         title: "Gingko Side Table", 
         category: "Furniture",
         materials: "Natural oak • White lacquer tabletop",
         dimensions: "L75 × W48 × H50 cm"
+      },
+      { 
+        image: pendhapaPick2, 
+        title: "Anemos Coffee Table", 
+        category: "Furniture",
+        materials: "Black oak • Black lacquer tabletop",
+        dimensions: "L110 × W80 × H35 cm"
       },
     ],
     links: [
