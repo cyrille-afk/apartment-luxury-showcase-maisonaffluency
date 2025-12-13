@@ -26,11 +26,8 @@ const navItems = [{
   label: "Home",
   href: "#home"
 }, {
-  label: "Overview",
-  href: "#overview"
-}, {
   label: "Gallery",
-  href: "#gallery"
+  href: "#overview"
 }, {
   label: "Designers",
   href: "#designers"
