@@ -22,7 +22,7 @@ const galleryExperiences = [{
   items: [{
     image: bespokeSofaImage,
     title: "An Inviting Lounge Area",
-    description: "Thierry Lemaire's Niko 420 custom sofa, Atelier Février's Ricky custom rug, Poltrona Frau's Albero bookcase, Jindrich Halabala's lounge chair, Apparatus Studio's Median 3 Surface Alabaster lights, Alexander Lamont's Reef Vessels"
+    description: "Thierry Lemaire's Niko 420 custom sofa, Atelier Février's Ricky custom rug, Poltrona Frau's Albero bookcase, Jindrich Halabala's lounge chair, Apparatus Studio's Median 3 Surface Alabaster lights, Alexander Lamont's Reef Vessels, Maarten Vrolijk's Sakura TRP 22001"
   }, {
     image: livingRoomImage,
     title: "A Sophisticated Living Room",
