@@ -687,12 +687,17 @@ const FeaturedDesigners = () => {
                     setTouchEnd(e.targetTouches[0].clientX);
                   }}
                   onTouchEnd={() => {
-                    if (!touchStart || !touchEnd || !curatorPicksDesigner.curatorPicks?.length) return;
-                    const distance = touchStart - touchEnd;
-                    if (distance > minSwipeDistance) {
-                      setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
-                    } else if (distance < -minSwipeDistance) {
-                      setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
+                    if (!touchStart || !curatorPicksDesigner.curatorPicks?.length) return;
+                    // Only handle swipe if there was actual movement
+                    if (touchEnd !== null) {
+                      const distance = touchStart - touchEnd;
+                      if (distance > minSwipeDistance) {
+                        setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+                        setIsZoomed(false);
+                      } else if (distance < -minSwipeDistance) {
+                        setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
+                        setIsZoomed(false);
+                      }
                     }
                   }}
                 >
@@ -727,7 +732,18 @@ const FeaturedDesigners = () => {
                   <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-24'}`}>
                     <div 
                       className={`relative overflow-auto transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}
-                      onClick={() => {
+                      onTouchEnd={(e) => {
+                        // Prevent double-tap zoom if there was a swipe
+                        if (touchEnd !== null) return;
+                        e.stopPropagation();
+                        const now = Date.now();
+                        if (now - lastTapRef.current < 300) {
+                          setIsZoomed(!isZoomed);
+                        }
+                        lastTapRef.current = now;
+                      }}
+                      onClick={(e) => {
+                        // For desktop: double-click to zoom
                         const now = Date.now();
                         if (now - lastTapRef.current < 300) {
                           setIsZoomed(!isZoomed);
@@ -738,7 +754,8 @@ const FeaturedDesigners = () => {
                       <img 
                         src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                         alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                        className={`object-contain transition-all duration-300 ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
+                        className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
+                        draggable={false}
                       />
                       {!isZoomed && (
                         <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-white/50 font-body md:hidden">
