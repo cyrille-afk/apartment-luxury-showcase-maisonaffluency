@@ -35,7 +35,7 @@ const CuratingTeam = () => {
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ duration: 0.8, delay: 0.2 }}
-      className="mt-20 pt-16 border-t border-primary/10"
+      className="mt-20 pt-20 md:pt-16 border-t border-primary/10"
     >
       <h3 className="font-display text-2xl md:text-3xl text-primary mb-4 text-center">
         The Curating Team
