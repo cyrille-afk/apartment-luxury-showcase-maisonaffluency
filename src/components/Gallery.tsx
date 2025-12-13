@@ -87,7 +87,7 @@ const galleryExperiences = [{
   items: [{
     image: smallRoomPersonalityImage,
     title: "Compact Elegance",
-    description: "Apparatus Studio Lantern Table, Reda Amalou, Eggshell DOT side table, Pierre Frey Kagura and Kasimir Fabrics, Peter Reed's Riyad Double Faced Throw"
+    description: "Apparatus Studio Lantern Table, Reda Amalou Eggshell DOT side table, Pierre Frey Kagura and Kasimir Fabrics, Peter Reed's Riyad Double Faced Throw"
   }]
 }];
 const Gallery = () => {
