@@ -132,13 +132,6 @@ const Collectibles = () => {
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                    
-                    {/* Category badge */}
-                    <div className="absolute top-2 left-2">
-                      <span className="inline-block px-2 py-0.5 bg-background/90 backdrop-blur-sm text-[10px] uppercase tracking-wider text-foreground border border-border/50">
-                        {item.category}
-                      </span>
-                    </div>
 
                     {/* Mobile tap indicator */}
                     {!hasTapped && (
