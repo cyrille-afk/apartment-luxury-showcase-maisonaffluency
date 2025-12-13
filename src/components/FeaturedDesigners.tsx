@@ -36,6 +36,10 @@ import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
 import yvesMacheretPick4 from "@/assets/curators-picks/yves-macheret-4.jpg";
+import apparatusPick1 from "@/assets/curators-picks/apparatus-1.jpg";
+import apparatusPick2 from "@/assets/curators-picks/apparatus-2.jpg";
+import apparatusPick3 from "@/assets/curators-picks/apparatus-3.png";
+import apparatusPick4 from "@/assets/curators-picks/apparatus-4.jpg";
 
 const featuredDesigners = [
   {
@@ -95,6 +99,36 @@ const featuredDesigners = [
     notableWorksLink: { text: "Metronome Reading Floor Lamp", galleryIndex: 7 },
     philosophy:
       "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
+    curatorPicks: [
+      { 
+        image: apparatusPick1, 
+        title: "Lantern Table Lamp", 
+        category: "Lighting",
+        materials: "Brass armature • Pressed glass shade",
+        dimensions: "H18\" × Ø10\""
+      },
+      { 
+        image: apparatusPick2, 
+        title: "Lariat Pendant", 
+        category: "Lighting",
+        materials: "Blackened brass • Mold-blown glass",
+        dimensions: "H16\" × Ø6.5\""
+      },
+      { 
+        image: apparatusPick3, 
+        title: "Signal Y Table Lamp", 
+        category: "Lighting",
+        materials: "Brass armature • Pressed glass",
+        dimensions: "H23.5\" × Ø17.25\""
+      },
+      { 
+        image: apparatusPick4, 
+        title: "Tassel 57 Pendant", 
+        category: "Lighting",
+        materials: "Mold-blown glass cylinders • Brass dome and armature",
+        dimensions: "Ø32.5\""
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/apparatusstudio" },
       { type: "Curators' Picks" },
