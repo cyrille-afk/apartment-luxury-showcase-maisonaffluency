@@ -137,7 +137,9 @@ const CuratingTeam = () => {
           className="group inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-300 font-body text-sm"
         >
           <ArrowUp className="h-4 w-4 group-hover:-translate-y-0.5 transition-transform duration-300" />
-          <span>Back to Overview</span>
+          <span className="relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 group-hover:after:scale-x-100 group-hover:after:origin-bottom-left">
+            Back to Overview
+          </span>
         </button>
       </motion.div>
     </motion.div>
