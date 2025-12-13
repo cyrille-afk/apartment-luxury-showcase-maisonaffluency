@@ -40,8 +40,16 @@ const featuredDesigners = [
     notableWorks: "Hammered Bowls (UNESCO Award), Brancusi Spiral Table, River Ledge Credenza, Agata Cabinet, Lune Mirrors",
     philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
     curatorPicks: [
-      { image: alexanderLamontPick1, title: "Ondas Sconce Clear" },
-      { image: alexanderLamontPick2, title: "Galea Lantern Rock Crystal" },
+      { 
+        image: alexanderLamontPick1, 
+        title: "Ondas Sconce Clear", 
+        description: "Hand-cast bronze with clear glass diffuser. H45 × W12 × D14 cm" 
+      },
+      { 
+        image: alexanderLamontPick2, 
+        title: "Galea Lantern Rock Crystal", 
+        description: "Hammered bronze base with rock crystal and frosted glass shades. H28 × W18 × D18 cm" 
+      },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
@@ -701,6 +709,11 @@ const FeaturedDesigners = () => {
                       <p className="text-sm md:text-base text-white/70 font-body max-w-2xl">
                         <span className="italic">by</span> {curatorPicksDesigner.name}
                       </p>
+                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.description && (
+                        <p className="text-xs md:text-sm text-white/50 font-body mt-2 max-w-xl">
+                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].description}
+                        </p>
+                      )}
                     </div>
                   </div>
 
