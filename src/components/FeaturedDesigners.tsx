@@ -25,6 +25,7 @@ import emanuelleLevetStenneImg from "@/assets/designers/emanuelle-levet-stenne.p
 import milanPekarImg from "@/assets/designers/milan-pekar.png";
 import atelierPendhapaImg from "@/assets/designers/atelier-pendhapa.png";
 import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
+import yvesMacheretImg from "@/assets/designers/yves-macheret.jpg";
 
 // Curators' Picks images
 import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
@@ -339,6 +340,20 @@ const featuredDesigners = [
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "yves-macheret",
+    name: "Yves Macheret",
+    specialty: "Bronze Lighting & Artisan Foundry",
+    image: yvesMacheretImg,
+    biography:
+      "Yves Macheret has been running the Entrelacs family foundry in central France with his brother Paul since 2015. Trained alongside his father, Yves mastered all techniques of bronze work: modelling, mould-making, casting, chasing, and patination. His vision to create minimal lighting designs at accessible prices has naturally steered him towards a timeless aesthetic that fully expresses the beauty of bronze and alabaster—materials inherited from the origins of our world, crafted into pared-down expressions.",
+    notableWorks: "Bronze & Alabaster Lighting Collection, Timeless Foundry Pieces",
+    philosophy: "Revealing the beauty and simplicity of bronze, making exceptional craftsmanship accessible while honoring a heritage passed down from father to son.",
+    links: [
+      { type: "Instagram", url: "https://instagram.com/entrelacs_creation" },
       { type: "Curators' Picks" },
     ],
   },
