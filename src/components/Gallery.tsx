@@ -284,9 +284,6 @@ const Gallery = () => {
                         </div>
                       </div>
 
-                      <h3 className="mb-2 font-display text-xl md:text-2xl text-foreground">
-                        {item.title}
-                      </h3>
                       
                       {/* Featuring section - only visible when expanded */}
                       <motion.div 
