@@ -38,7 +38,7 @@ const CuratingTeam = () => {
       className="mt-20 pt-16 border-t border-primary/10"
     >
       <h3 className="font-display text-2xl md:text-3xl text-primary mb-4 text-center">
-        Our Curating Team
+        The Curating Team
       </h3>
       <p className="text-muted-foreground font-body text-center max-w-2xl mx-auto mb-12">
         The dedicated curators behind our designer selections
