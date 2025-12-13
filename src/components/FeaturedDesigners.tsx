@@ -32,6 +32,10 @@ import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg
 import alexanderLamontPick2 from "@/assets/curators-picks/alexander-lamont-2.jpg";
 import alexanderLamontPick3 from "@/assets/curators-picks/alexander-lamont-3.jpg";
 import alexanderLamontPick4 from "@/assets/curators-picks/alexander-lamont-4.jpg";
+import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.png";
+import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.png";
+import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
+import yvesMacheretPick4 from "@/assets/curators-picks/yves-macheret-4.png";
 
 const featuredDesigners = [
   {
@@ -352,6 +356,36 @@ const featuredDesigners = [
       "Yves Macheret has been running the Entrelacs family foundry in central France with his brother Paul since 2015. Trained alongside his father, Yves mastered all techniques of bronze work: modelling, mould-making, casting, chasing, and patination. His vision to create minimal lighting designs at accessible prices has naturally steered him towards a timeless aesthetic that fully expresses the beauty of bronze and alabaster—materials inherited from the origins of our world, crafted into pared-down expressions.",
     notableWorks: "Bronze & Alabaster Lighting Collection, Timeless Foundry Pieces",
     philosophy: "Revealing the beauty and simplicity of bronze, making exceptional craftsmanship accessible while honoring a heritage passed down from father to son.",
+    curatorPicks: [
+      { 
+        image: yvesMacheretPick1, 
+        title: "Ghost Wall Lamp", 
+        category: "Lighting",
+        materials: "Patinated bronze • Hand-carved alabaster diffuser",
+        dimensions: "H57 × W10 × D12 cm"
+      },
+      { 
+        image: yvesMacheretPick2, 
+        title: "Nomad 295 Table Lamp", 
+        category: "Lighting",
+        materials: "Patinated bronze base • Natural alabaster shade",
+        dimensions: "H29.5 × W15 × D15 cm"
+      },
+      { 
+        image: yvesMacheretPick3, 
+        title: "Toast Wall Lamp", 
+        category: "Lighting",
+        materials: "Patinated brass • Hand-carved alabaster",
+        dimensions: "H37 × W10 × D10 cm"
+      },
+      { 
+        image: yvesMacheretPick4, 
+        title: "Edru Pendant Lamp", 
+        category: "Lighting",
+        materials: "Patinated bronze/brass • Natural alabaster cylinder",
+        dimensions: "H40 × Ø12 cm"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/entrelacs_creation" },
       { type: "Curators' Picks" },
