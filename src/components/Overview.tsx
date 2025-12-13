@@ -37,7 +37,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.2
-          }} className="mb-3 uppercase tracking-[0.3em] text-primary text-xl font-serif">OVERVIEW</motion.p>
+          }} className="mb-3 uppercase tracking-[0.3em] text-primary text-base md:text-xl font-serif">OVERVIEW</motion.p>
             
             <motion.h2 initial={{
             opacity: 0,
@@ -48,7 +48,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.8,
             delay: 0.3
-          }} className="mb-8 font-display text-4xl leading-tight text-foreground md:text-5xl lg:text-base">An exclusive showroom where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors
+          }} className="mb-8 font-display text-2xl leading-tight text-foreground md:text-4xl lg:text-5xl">An exclusive showroom where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors
 ​<br />
               ​
             </motion.h2>
