@@ -220,7 +220,7 @@ const Collectibles = () => {
               Collectibles
             </h2>
             <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
-              Limited edition and unique pieces
+              Limited editions and unique pieces
             </p>
           </motion.div>
 
