@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowUp, Maximize2 } from "lucide-react";
+import { ArrowUp, Search } from "lucide-react";
 import cyrilleDelvalImg from "@/assets/team/cyrille-delval.jpg";
 import elsaLemarignierImg from "@/assets/team/elsa-lemarignier.jpg";
 
@@ -55,34 +55,34 @@ const CuratingTeam = () => {
           >
             <Dialog>
               <DialogTrigger asChild>
-                <button 
-                  className="relative group aspect-square rounded-full overflow-hidden mb-4 bg-primary/5 border border-primary/20 mx-auto w-24 h-24 md:w-32 md:h-32 cursor-pointer transition-transform duration-300 hover:scale-105 hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20 animate-pulse-glow"
-                  onClick={() => setSelectedMember(member)}
-                >
-                  {member.image ? (
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-primary/30">
-                      <svg
-                        className="w-12 h-12 md:w-16 md:h-16"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                      </svg>
-                    </div>
-                  )}
-                  {/* Expand icon overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 rounded-full flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-background/90 p-1.5 rounded-full shadow-md">
-                      <Maximize2 className="w-3.5 h-3.5 text-foreground" />
-                    </span>
+                <div className="relative flex items-center justify-center gap-2 cursor-pointer group">
+                  <button 
+                    className="relative aspect-square rounded-full overflow-hidden bg-primary/5 border border-primary/20 w-24 h-24 md:w-32 md:h-32 transition-transform duration-300 group-hover:scale-105 group-hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    onClick={() => setSelectedMember(member)}
+                  >
+                    {member.image ? (
+                      <img
+                        src={member.image}
+                        alt={member.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-primary/30">
+                        <svg
+                          className="w-12 h-12 md:w-16 md:h-16"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
+                  {/* Magnifying glass icon outside photo on right */}
+                  <div className="absolute -right-6 md:-right-8 top-1/2 -translate-y-1/2 text-primary/60 group-hover:text-primary transition-colors duration-300">
+                    <Search className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
-                </button>
+                </div>
               </DialogTrigger>
               <DialogContent className="max-w-md p-0 overflow-hidden bg-background border-primary/20">
                 <div className="flex flex-col items-center p-6">
