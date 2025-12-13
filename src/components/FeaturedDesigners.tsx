@@ -833,7 +833,7 @@ const FeaturedDesigners = () => {
                       <img 
                         src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                         alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                        className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
+                        className={`object-contain transition-all duration-300 select-none brightness-110 contrast-105 ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
                         draggable={false}
                       />
                       <button 
