@@ -53,7 +53,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-        }} className="mb-4 md:mb-6 text-2xl leading-tight text-cream md:text-4xl font-serif lg:text-2xl">We showcase the best talents of interior design and craftsmanship ​
+        }} className="mb-4 md:mb-6 text-xl leading-tight text-cream md:text-4xl font-serif lg:text-2xl">We showcase the best talents of interior design and craftsmanship ​
 ​<br />
               ​
           </motion.h1>
@@ -65,7 +65,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.8
-        }} className="max-w-2xl text-base leading-relaxed text-cream/80 text-left md:text-justify font-serif md:text-lg lg:text-xl font-medium mb-6">This is a unique opportunity for architects and interior decorators to dazzle their clientele and experience first hand couture furniture, collectibles and artworks from world reknown designers and makers</motion.p>
+        }} className="max-w-2xl text-sm leading-relaxed text-cream/80 text-left md:text-justify font-serif md:text-lg lg:text-xl font-medium mb-6">This is a unique opportunity for architects and interior decorators to dazzle their clientele and experience first hand couture furniture, collectibles and artworks from world reknown designers and makers</motion.p>
           
           
         </motion.div>

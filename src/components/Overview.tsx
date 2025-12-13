@@ -50,7 +50,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.8,
               delay: 0.3
-            }} className="font-display text-lg md:text-xl lg:text-2xl leading-tight text-foreground">An{" "}
+            }} className="font-display text-base md:text-xl lg:text-2xl leading-tight text-foreground">An{" "}
                 <button
                   onClick={() => {
                     const gallerySection = document.getElementById("gallery");
