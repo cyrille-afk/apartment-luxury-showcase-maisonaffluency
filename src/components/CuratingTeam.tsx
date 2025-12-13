@@ -55,7 +55,7 @@ const CuratingTeam = () => {
           >
             <Dialog>
               <DialogTrigger asChild>
-                <div className="relative flex items-center justify-center gap-2 cursor-pointer group">
+                <div className="relative cursor-pointer group mb-4">
                   <button 
                     className="relative aspect-square rounded-full overflow-hidden bg-primary/5 border border-primary/20 w-24 h-24 md:w-32 md:h-32 transition-transform duration-300 group-hover:scale-105 group-hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
                     onClick={() => setSelectedMember(member)}
@@ -78,9 +78,9 @@ const CuratingTeam = () => {
                       </div>
                     )}
                   </button>
-                  {/* Magnifying glass icon outside photo on right */}
-                  <div className="absolute -right-6 md:-right-8 top-1/2 -translate-y-1/2 text-primary/60 group-hover:text-primary transition-colors duration-300">
-                    <Search className="w-4 h-4 md:w-5 md:h-5" />
+                  {/* Magnifying glass icon at bottom-right corner */}
+                  <div className="absolute bottom-0 right-0 bg-background/90 p-1.5 rounded-full shadow-md text-primary/70 group-hover:text-primary transition-colors duration-300">
+                    <Search className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   </div>
                 </div>
               </DialogTrigger>
