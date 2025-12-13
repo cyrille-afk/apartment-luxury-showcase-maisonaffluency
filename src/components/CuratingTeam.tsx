@@ -12,7 +12,7 @@ const curatingTeam = [
     name: "Cyrille Delval",
     role: "Co-Founder and CEO",
     image: cyrilleDelvalImg,
-    bio: "As a former Investment Banker, Serial Entrepreneur, long time Art and Design Collector, Cyrille leads Maison Affluency with a passion for exceptional design and craftsmanship.",
+    bio: "During a 4 year span, Cyrille studied Art History at the renown Birkbeck College in London whilst navigating a successful investment banking career in London and New York at the same time. This lead him to a serial entrepreneurship life where business and passion mingle. As Affluency co-founder, Cyrille leads Maison Affluency's development in Southeast Asia and the Middle East, sharing his passion for exceptional craftsmanship and unique design pieces.",
   },
   {
     id: 2,
