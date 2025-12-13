@@ -80,6 +80,40 @@ const collectibleDesigners = [
     notableWorks: "Silver Glass Hammer Mirror, Shadow Drawings Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
     notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 11 },
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
+    curatorPicks: [
+      { 
+        image: kikoLopezImg, // Placeholder - replace with actual image
+        title: "Silver Glass Hammer Mirror", 
+        category: "Mirrors",
+        materials: "Hand-silvered glass • Hammered texture",
+        dimensions: "H120 × W80 cm",
+        edition: "Unique Piece"
+      },
+      { 
+        image: kikoLopezImg, // Placeholder - replace with actual image
+        title: "Shadow Drawings Mirror", 
+        category: "Mirrors",
+        materials: "Antiqued glass • Bronze patina frame",
+        dimensions: "H100 × W70 cm",
+        edition: "Limited Edition"
+      },
+      { 
+        image: kikoLopezImg, // Placeholder - replace with actual image
+        title: "Antiqued Console Mirror", 
+        category: "Mirrors",
+        materials: "Hand-antiqued glass • Sculptural frame",
+        dimensions: "H150 × W60 cm",
+        edition: "Numbered & Signed"
+      },
+      { 
+        image: kikoLopezImg, // Placeholder - replace with actual image
+        title: "Reflective Sculpture", 
+        category: "Decorative Objects",
+        materials: "Mercury glass • Hand-formed",
+        dimensions: "H45 × W30 × D15 cm",
+        edition: "Unique Piece"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/kikolumieres" },
       { type: "Curators' Picks" },
@@ -96,6 +130,40 @@ const collectibleDesigners = [
     notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 6 },
     philosophy:
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
+    curatorPicks: [
+      { 
+        image: nathalieZieglerImg, // Placeholder - replace with actual image
+        title: "Saint Just Custom Glass Chandelier", 
+        category: "Lighting",
+        materials: "Hand-blown glass • Brass armature",
+        dimensions: "Ø120 × H80 cm",
+        edition: "Bespoke Commission"
+      },
+      { 
+        image: nathalieZieglerImg, // Placeholder - replace with actual image
+        title: "Gold Leaves + Glass Snake Vase", 
+        category: "Decorative Objects",
+        materials: "Hand-blown glass • Gold leaf accents",
+        dimensions: "H55 × Ø25 cm",
+        edition: "Limited Edition"
+      },
+      { 
+        image: nathalieZieglerImg, // Placeholder - replace with actual image
+        title: "Amber Cascade Pendant", 
+        category: "Lighting",
+        materials: "Amber glass • Hand-formed droplets",
+        dimensions: "Ø60 × H90 cm",
+        edition: "Numbered & Signed"
+      },
+      { 
+        image: nathalieZieglerImg, // Placeholder - replace with actual image
+        title: "Crystal Wave Sconce", 
+        category: "Lighting",
+        materials: "Clear glass • Sculptural form",
+        dimensions: "H40 × W35 × D20 cm",
+        edition: "Limited Edition"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/nathaliezieglerpasqua" },
       { type: "Curators' Picks" },
