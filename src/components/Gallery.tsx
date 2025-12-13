@@ -87,7 +87,7 @@ const galleryExperiences = [{
   items: [{
     image: smallRoomPersonalityImage,
     title: "Compact Elegance",
-    description: "Atelier Demichelis' sculptural table lamp, artisan ceramic side table, bold patterned upholstery headboard"
+    description: "Apparatus Studio Lantern Table, Reda Amalou, Eggshell DOT side table, Pierre Frey Kagura and Kasimir Fabrics"
   }]
 }];
 const Gallery = () => {
