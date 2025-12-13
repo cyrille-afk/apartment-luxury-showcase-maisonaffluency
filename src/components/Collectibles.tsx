@@ -204,7 +204,7 @@ const Collectibles = () => {
               Collectibles
             </h2>
             <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl mx-auto">
-              A curated selection of exceptional pieces from our featured designers and ateliers. Each item represents the pinnacle of artisanal craftsmanship and timeless design.
+              Limited edition and unique pieces
             </p>
           </motion.div>
 
