@@ -41,7 +41,7 @@ const collectibleDesigners = [
         edition: "Numbered & Signed"
       },
       { 
-        image: demichelisPick4, 
+        image: demichelisPick3, 
         title: "Echo Floor Lamp", 
         category: "Lighting",
         materials: "Patinated and varnished brass",
@@ -57,7 +57,7 @@ const collectibleDesigners = [
         edition: "Numbered & Signed"
       },
       { 
-        image: demichelisPick3, 
+        image: demichelisPick4, 
         title: "Table d'appoint RHINO", 
         category: "Furniture",
         materials: "Patinated bronze • Raw brass • Brown cowhide leather top",
