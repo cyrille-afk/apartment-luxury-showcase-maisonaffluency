@@ -562,66 +562,67 @@ const FeaturedDesigners = () => {
                       <p className="text-sm md:text-base text-primary font-body italic transition-opacity duration-300 group-hover:opacity-80">
                         {designer.specialty}
                       </p>
+                      {(designer.notableWorksLink || designer.notableWorksLinks) && (
+                        <div className="flex flex-wrap items-center gap-x-1 gap-y-1 mt-1">
+                          <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
+                          {designer.notableWorksLinks ? (
+                            designer.notableWorksLinks.map((link, linkIdx) => (
+                              <span key={linkIdx} className="flex items-center">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const gallerySection = document.getElementById('gallery');
+                                    if (gallerySection) {
+                                      gallerySection.scrollIntoView({ behavior: 'smooth' });
+                                      setTimeout(() => {
+                                        window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                          detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` } 
+                                        }));
+                                      }, 500);
+                                    }
+                                  }}
+                                  className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                                >
+                                  <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                    {link.text}
+                                  </span>
+                                  <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                                </button>
+                                {linkIdx < designer.notableWorksLinks.length - 1 && (
+                                  <span className="text-muted-foreground mx-1">•</span>
+                                )}
+                              </span>
+                            ))
+                          ) : designer.notableWorksLink && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const gallerySection = document.getElementById('gallery');
+                                if (gallerySection) {
+                                  gallerySection.scrollIntoView({ behavior: 'smooth' });
+                                  setTimeout(() => {
+                                    window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                      detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` } 
+                                    }));
+                                  }, 500);
+                                }
+                              }}
+                              className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                            >
+                              <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                {designer.notableWorksLink.text}
+                              </span>
+                              <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="pt-2 pb-6">
                   <div className="space-y-4 text-muted-foreground font-body">
                     <p className="text-sm md:text-base leading-relaxed">{designer.biography}</p>
-
-                    {(designer.notableWorksLink || designer.notableWorksLinks) && (
-                      <div className="flex flex-wrap items-center gap-x-1 gap-y-1 pt-2">
-                        <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
-                        {designer.notableWorksLinks ? (
-                          designer.notableWorksLinks.map((link, linkIdx) => (
-                            <span key={linkIdx} className="flex items-center">
-                              <button
-                                onClick={() => {
-                                  const gallerySection = document.getElementById('gallery');
-                                  if (gallerySection) {
-                                    gallerySection.scrollIntoView({ behavior: 'smooth' });
-                                    setTimeout(() => {
-                                      window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
-                                        detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` } 
-                                      }));
-                                    }, 500);
-                                  }
-                                }}
-                                className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                              >
-                                <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                                  {link.text}
-                                </span>
-                                <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                              </button>
-                              {linkIdx < designer.notableWorksLinks.length - 1 && (
-                                <span className="text-muted-foreground mx-1">•</span>
-                              )}
-                            </span>
-                          ))
-                        ) : designer.notableWorksLink && (
-                          <button
-                            onClick={() => {
-                              const gallerySection = document.getElementById('gallery');
-                              if (gallerySection) {
-                                gallerySection.scrollIntoView({ behavior: 'smooth' });
-                                setTimeout(() => {
-                                  window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
-                                    detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` } 
-                                  }));
-                                }, 500);
-                              }
-                            }}
-                            className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                          >
-                            <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                              {designer.notableWorksLink.text}
-                            </span>
-                            <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                          </button>
-                        )}
-                      </div>
-                    )}
 
                     <div className="pt-2 border-t border-border/30 mt-4">
                       <p className="text-sm md:text-base italic leading-relaxed text-foreground/80 mb-4">
