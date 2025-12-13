@@ -701,10 +701,10 @@ const BrandsAteliers = () => {
                       href={brand.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary transition-colors duration-300 p-1 -m-1 touch-manipulation flex-shrink-0 mt-0.5"
+                      className="p-1 -m-1 touch-manipulation flex-shrink-0 mt-0.5 group/insta"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <Instagram className="h-4 w-4 md:h-5 md:w-5" />
+                      <Instagram className="h-4 w-4 md:h-5 md:w-5 text-[#E4405F] group-hover/insta:text-[#C13584] transition-colors duration-300" />
                     </a>
                   )}
                   <div className="flex-1 min-w-0">
