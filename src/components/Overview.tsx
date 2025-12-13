@@ -141,7 +141,7 @@ const Overview = () => {
                 }}
                 className="text-left cursor-pointer group transition-all duration-300 hover:scale-105 hover:-translate-y-1"
               >
-                <div className="mb-2 font-display text-3xl text-primary group-hover:text-accent transition-colors duration-300">50</div>
+                <div className="mb-2 font-display text-3xl text-primary group-hover:text-accent transition-colors duration-300">50+</div>
                 <div className="font-body text-sm uppercase tracking-wider text-muted-foreground underline decoration-primary/30 group-hover:decoration-accent group-hover:text-foreground transition-all duration-300">FEATURED DESIGNERS</div>
               </button>
             </motion.div>
