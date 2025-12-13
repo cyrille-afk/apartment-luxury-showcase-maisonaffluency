@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Crown } from "lucide-react";
+import { Menu, X, Crown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -101,6 +101,35 @@ const Navigation = () => {
                 )} />
               </button>
             ))}
+            
+            {/* Search Button */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    onClick={() => {
+                      const designersSection = document.getElementById('featured-designers');
+                      if (designersSection) {
+                        designersSection.scrollIntoView({ behavior: 'smooth' });
+                        setTimeout(() => {
+                          const searchInput = designersSection.querySelector('input[type="text"]') as HTMLInputElement;
+                          if (searchInput) {
+                            searchInput.focus();
+                          }
+                        }, 500);
+                      }
+                    }}
+                    className="p-1.5 text-foreground/70 hover:text-primary transition-all duration-300 hover:scale-110"
+                    aria-label="Search designers"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Search Designers</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
           {/* Logo/Brand - Center */}
