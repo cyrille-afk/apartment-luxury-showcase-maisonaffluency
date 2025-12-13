@@ -350,8 +350,10 @@ const FeaturedDesigners = () => {
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
   const filteredDesigners = useMemo(() => {
     if (!searchQuery.trim()) return featuredDesigners;
@@ -699,6 +701,7 @@ const FeaturedDesigners = () => {
                     onClick={() => {
                       setCuratorPicksDesigner(null);
                       setCuratorPickIndex(0);
+                      setIsZoomed(false);
                     }} 
                     className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                     aria-label="Close lightbox"
@@ -709,7 +712,10 @@ const FeaturedDesigners = () => {
                   {/* Previous button */}
                   {curatorPicksDesigner.curatorPicks.length > 1 && (
                     <button 
-                      onClick={() => setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1)} 
+                      onClick={() => {
+                        setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
+                        setIsZoomed(false);
+                      }} 
                       className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                       aria-label="Previous image"
                     >
@@ -718,13 +724,29 @@ const FeaturedDesigners = () => {
                   )}
 
                   {/* Image container */}
-                  <div className="flex flex-col items-center justify-center max-w-[90vw] max-h-[85vh] px-16 pb-24">
-                    <img 
-                      src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
-                      alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                      className="max-w-full max-h-[55vh] object-contain" 
-                    />
-                    <div className="mt-2 text-center">
+                  <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-24'}`}>
+                    <div 
+                      className={`relative overflow-auto transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}
+                      onClick={() => {
+                        const now = Date.now();
+                        if (now - lastTapRef.current < 300) {
+                          setIsZoomed(!isZoomed);
+                        }
+                        lastTapRef.current = now;
+                      }}
+                    >
+                      <img 
+                        src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
+                        alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
+                        className={`object-contain transition-all duration-300 ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
+                      />
+                      {!isZoomed && (
+                        <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-white/50 font-body md:hidden">
+                          Double-tap to zoom
+                        </p>
+                      )}
+                    </div>
+                    <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
                       {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && (
                         <span className="inline-block px-2 py-0.5 mb-1 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
@@ -764,7 +786,10 @@ const FeaturedDesigners = () => {
                           <Tooltip key={idx}>
                             <TooltipTrigger asChild>
                               <button
-                                onClick={() => setCuratorPickIndex(idx)}
+                                onClick={() => {
+                                  setCuratorPickIndex(idx);
+                                  setIsZoomed(false);
+                                }}
                                 className={`relative w-12 h-12 md:w-14 md:h-14 rounded-md overflow-hidden transition-all duration-300 ${
                                   curatorPickIndex === idx 
                                     ? 'ring-2 ring-white scale-110' 
@@ -791,7 +816,10 @@ const FeaturedDesigners = () => {
                   {/* Next button */}
                   {curatorPicksDesigner.curatorPicks.length > 1 && (
                     <button 
-                      onClick={() => setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1)} 
+                      onClick={() => {
+                        setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+                        setIsZoomed(false);
+                      }} 
                       className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                       aria-label="Next image"
                     >
