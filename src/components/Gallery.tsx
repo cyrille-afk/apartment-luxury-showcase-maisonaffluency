@@ -221,7 +221,7 @@ const Gallery = () => {
         } : {}} transition={{
           duration: 0.8
         }} className="mb-12 md:mb-16 text-center">
-            <p className="mb-2 md:mb-3 uppercase tracking-[0.15em] md:tracking-[0.3em] text-primary text-xs md:text-xl lg:text-2xl font-serif">
+            <p className="mb-2 md:mb-3 uppercase tracking-[0.15em] md:tracking-[0.3em] text-primary text-base md:text-xl lg:text-2xl font-serif">
               OUR GALLERY
             </p>
             <h2 className="text-sm leading-relaxed md:text-3xl text-foreground text-left px-1 md:px-2 md:text-justify font-serif lg:text-lg">
