@@ -19,7 +19,7 @@ const curatingTeam = [
     name: "Elsa Lemarignier",
     role: "Co-Founder and CPO",
     image: elsaLemarignierImg,
-    bio: "Elsa brings her expertise in curation and design to Maison Affluency.",
+    bio: "After studying at the École du Louvre, Elsa opened her own art and design gallery in Paris and curated her own collection of design pieces with the likes of Ron Arad. As a partner at Affluency, her mission is to seek out and select exceptional design, art and collectible pieces around the world, showcasing exceptional craftsmanship.",
   },
 ];
 
