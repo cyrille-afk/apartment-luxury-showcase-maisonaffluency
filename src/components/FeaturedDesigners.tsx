@@ -474,7 +474,7 @@ const FeaturedDesigners = () => {
           className="sticky top-0 z-40 -mx-4 px-4 md:-mx-12 md:px-12 lg:-mx-20 lg:px-20 py-3 md:py-4 mb-4 bg-background/95 backdrop-blur-md border-b border-border/20"
         >
           <div className="max-w-6xl mx-auto">
-            <div className="relative max-w-md mx-auto">
+            <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
@@ -493,7 +493,7 @@ const FeaturedDesigners = () => {
               )}
             </div>
             {searchQuery && (
-              <p className="text-center text-xs text-muted-foreground mt-2">
+              <p className="text-left text-xs text-muted-foreground mt-2">
                 {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
               </p>
             )}
