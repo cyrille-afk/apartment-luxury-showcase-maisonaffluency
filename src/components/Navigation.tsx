@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Crown } from "lucide-react";
+import { Menu, X, Crown, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import logoIcon from "@/assets/affluency-logo-icon.jpeg";
 
 const navItems = [{
@@ -33,9 +44,19 @@ const navItems = [{
   label: "Contact Us - Appointment",
   href: "#contact"
 }];
+
+const collectiblesItems = [
+  { label: "Mangala Coffee Table", designer: "Atelier Pendhapa" },
+  { label: "Akar Dining Chair", designer: "Atelier Pendhapa" },
+  { label: "Lantern Table Lamp", designer: "Apparatus Studio" },
+  { label: "Babel Table Lamp", designer: "Atelier Demichelis" },
+  { label: "Galea Lantern", designer: "Alexander Lamont" },
+  { label: "Entrelacs Chair", designer: "Yves Macheret" },
+];
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("#home");
+  const [collectiblesOpen, setCollectiblesOpen] = useState(false);
 
   useEffect(() => {
     const sectionIds = navItems.map(item => item.href.replace("#", ""));
@@ -73,6 +94,11 @@ const Navigation = () => {
       });
     }
   };
+
+  const handleCollectibleClick = () => {
+    setIsOpen(false);
+    handleNavClick("#designers");
+  };
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50">
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         <div className="flex h-20 md:h-20 items-center justify-center md:justify-between relative">
@@ -95,33 +121,60 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-5 ml-8">
-            {navItems.map(item => {
+            {navItems.map((item, index) => {
               const isTradeProgram = item.href === "#details";
+              const isBeforeTradeProgram = navItems[index + 1]?.href === "#details";
+              
               return (
-                <button 
-                  key={item.href} 
-                  onClick={() => handleNavClick(item.href)} 
-                  className={cn(
-                    "font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap",
-                    isTradeProgram && "px-3 py-1.5 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
-                    activeSection === item.href 
-                      ? isTradeProgram ? "text-background font-medium" : "text-primary font-medium"
-                      : isTradeProgram
-                        ? "text-background"
-                        : "text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
-                  )}
-                >
-                  {isTradeProgram && <Crown className="inline-block w-3.5 h-3.5 mr-1.5" />}
-                  {item.label}
-                  {!isTradeProgram && (
-                    <span className={cn(
-                      "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
+                <>
+                  <button 
+                    key={item.href} 
+                    onClick={() => handleNavClick(item.href)} 
+                    className={cn(
+                      "font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap",
+                      isTradeProgram && "px-3 py-1.5 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
                       activeSection === item.href 
-                        ? "w-full" 
-                        : "w-0 group-hover:w-full"
-                    )} />
+                        ? isTradeProgram ? "text-background font-medium" : "text-primary font-medium"
+                        : isTradeProgram
+                          ? "text-background"
+                          : "text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                    )}
+                  >
+                    {isTradeProgram && <Crown className="inline-block w-3.5 h-3.5 mr-1.5" />}
+                    {item.label}
+                    {!isTradeProgram && (
+                      <span className={cn(
+                        "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
+                        activeSection === item.href 
+                          ? "w-full" 
+                          : "w-0 group-hover:w-full"
+                      )} />
+                    )}
+                  </button>
+                  
+                  {/* Collectibles Dropdown - appears before Trade Program */}
+                  {isBeforeTradeProgram && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="font-body text-sm uppercase tracking-wider transition-all duration-300 relative group whitespace-nowrap text-foreground/80 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)] flex items-center gap-1">
+                        Collectibles
+                        <ChevronDown className="h-3 w-3" />
+                        <span className="absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
+                        {collectiblesItems.map((collectible) => (
+                          <DropdownMenuItem 
+                            key={collectible.label}
+                            onClick={handleCollectibleClick}
+                            className="cursor-pointer flex flex-col items-start py-3 px-4 hover:bg-muted"
+                          >
+                            <span className="font-medium text-foreground">{collectible.label}</span>
+                            <span className="text-xs text-muted-foreground">{collectible.designer}</span>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
-                </button>
+                </>
               );
             })}
           </div>
@@ -136,34 +189,60 @@ const Navigation = () => {
             
             <SheetContent side="right" className="w-[280px] sm:w-[320px]">
               <div className="flex flex-col gap-6 mt-8">
-                {navItems.map(item => {
+                {navItems.map((item, index) => {
                   const isTradeProgram = item.href === "#details";
+                  const isBeforeTradeProgram = navItems[index + 1]?.href === "#details";
+                  
                   return (
-                    <button 
-                      key={item.href} 
-                      onClick={() => handleNavClick(item.href)} 
-                      className={cn(
-                        "font-serif text-2xl text-left transition-all duration-300 py-3 relative group",
-                        !isTradeProgram && "border-b border-border/30",
-                        isTradeProgram && "px-4 py-2 mt-2 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
-                        activeSection === item.href 
-                          ? isTradeProgram ? "text-background" : "text-primary"
-                          : isTradeProgram
-                            ? "text-background"
-                            : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
-                      )}
-                    >
-                      {isTradeProgram && <Crown className="inline-block w-5 h-5 mr-2" />}
-                      {item.label}
-                      {!isTradeProgram && (
-                        <span className={cn(
-                          "absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300",
+                    <>
+                      <button 
+                        key={item.href} 
+                        onClick={() => handleNavClick(item.href)} 
+                        className={cn(
+                          "font-serif text-2xl text-left transition-all duration-300 py-3 relative group",
+                          !isTradeProgram && "border-b border-border/30",
+                          isTradeProgram && "px-4 py-2 mt-2 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
                           activeSection === item.href 
-                            ? "w-full" 
-                            : "w-0 group-hover:w-full"
-                        )} />
+                            ? isTradeProgram ? "text-background" : "text-primary"
+                            : isTradeProgram
+                              ? "text-background"
+                              : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+                        )}
+                      >
+                        {isTradeProgram && <Crown className="inline-block w-5 h-5 mr-2" />}
+                        {item.label}
+                        {!isTradeProgram && (
+                          <span className={cn(
+                            "absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300",
+                            activeSection === item.href 
+                              ? "w-full" 
+                              : "w-0 group-hover:w-full"
+                          )} />
+                        )}
+                      </button>
+                      
+                      {/* Collectibles Section - appears before Trade Program */}
+                      {isBeforeTradeProgram && (
+                        <Collapsible open={collectiblesOpen} onOpenChange={setCollectiblesOpen}>
+                          <CollapsibleTrigger className="font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30 w-full flex items-center justify-between text-foreground hover:text-primary">
+                            Collectibles
+                            <ChevronDown className={cn("h-5 w-5 transition-transform", collectiblesOpen && "rotate-180")} />
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="pl-4 space-y-3 mt-2">
+                            {collectiblesItems.map((collectible) => (
+                              <button 
+                                key={collectible.label}
+                                onClick={handleCollectibleClick}
+                                className="block text-left py-2 border-b border-border/20 w-full"
+                              >
+                                <span className="font-body text-lg text-foreground">{collectible.label}</span>
+                                <span className="block text-sm text-muted-foreground">{collectible.designer}</span>
+                              </button>
+                            ))}
+                          </CollapsibleContent>
+                        </Collapsible>
                       )}
-                    </button>
+                    </>
                   );
                 })}
               </div>
