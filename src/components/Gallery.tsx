@@ -229,7 +229,7 @@ const Gallery = () => {
             </h2>
           </motion.div>
 
-          {galleryExperiences.map((section, sectionIndex) => <div key={section.experience} className="mb-10 md:mb-14">
+          {galleryExperiences.map((section, sectionIndex) => <div key={section.experience} className="mb-6 md:mb-10">
               <motion.div initial={{
             opacity: 0,
             y: 20
