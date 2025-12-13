@@ -44,6 +44,13 @@ const featuredDesigners = [
     philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
     curatorPicks: [
       { 
+        image: alexanderLamontPick3, 
+        title: "Casque Bar Cabinet", 
+        category: "Furniture",
+        materials: "Straw marquetry • Hammered bronze handles • Lacquered interior",
+        dimensions: "H110 × W120 × D45 cm"
+      },
+      { 
         image: alexanderLamontPick1, 
         title: "Ondas Sconce Clear", 
         category: "Lighting",
@@ -56,13 +63,6 @@ const featuredDesigners = [
         category: "Lighting",
         materials: "Hammered bronze base • Rock crystal & frosted glass shades",
         dimensions: "H28 × W18 × D18 cm"
-      },
-      { 
-        image: alexanderLamontPick3, 
-        title: "Casque Bar Cabinet", 
-        category: "Furniture",
-        materials: "Straw marquetry • Hammered bronze handles • Lacquered interior",
-        dimensions: "H110 × W120 × D45 cm"
       },
     ],
     links: [
