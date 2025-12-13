@@ -107,26 +107,28 @@ const CuratingTeam = () => {
                       </svg>
                     </div>
                   )}
-                  <h4 className="font-display text-xl md:text-2xl text-primary mb-1">
-                    {member.name}
-                  </h4>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-display text-xl md:text-2xl text-primary">
+                      {member.name}
+                    </h4>
+                    {member.linkedin && (
+                      <a
+                        href={member.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#0077B5] hover:text-[#005582] transition-colors duration-300"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Linkedin className="w-5 h-5" />
+                      </a>
+                    )}
+                  </div>
                   <p className="text-sm md:text-base text-muted-foreground font-body mb-4">
                     {member.role}
                   </p>
                   <p className="text-sm text-muted-foreground font-body text-justify max-w-sm">
                     {member.bio}
                   </p>
-                  {member.linkedin && (
-                    <a
-                      href={member.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-4 text-[#0077B5] hover:text-[#005582] transition-colors duration-300"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Linkedin className="w-5 h-5" />
-                    </a>
-                  )}
                 </div>
               </DialogContent>
             </Dialog>
