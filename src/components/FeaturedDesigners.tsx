@@ -447,7 +447,7 @@ const FeaturedDesigners = () => {
   };
 
   return (
-    <section ref={ref} className="py-16 px-4 md:py-24 md:px-12 lg:px-20 bg-background">
+    <section ref={ref} className="py-10 px-4 md:py-24 md:px-12 lg:px-20 bg-background">
       <div className="mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
