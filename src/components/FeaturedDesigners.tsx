@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Instagram, Search, X, ChevronDown, ExternalLink } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ExternalLink, Star } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -38,7 +38,7 @@ const featuredDesigners = [
     philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
     links: [
       { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -55,7 +55,7 @@ const featuredDesigners = [
       "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
     links: [
       { type: "Instagram", url: "https://instagram.com/apparatusstudio" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -71,7 +71,7 @@ const featuredDesigners = [
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
     links: [
       { type: "Instagram", url: "https://instagram.com/atelier_demichelis" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -85,7 +85,7 @@ const featuredDesigners = [
     notableWorksLink: { text: "Deepah Custom Table", galleryIndex: 3 },
     philosophy: "We create furniture that bridges the gap between ancient Indonesian craft traditions and contemporary global design.",
     links: [
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -101,7 +101,7 @@ const featuredDesigners = [
       "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
     links: [
       { type: "Instagram", url: "https://instagram.com/atelierfevrier" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -116,7 +116,7 @@ const featuredDesigners = [
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     links: [
       { type: "Instagram", url: "https://instagram.com/bruno_de_maistre_bdm" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -131,7 +131,7 @@ const featuredDesigners = [
     philosophy: "Light should not merely illuminate—it should transform space into poetry.",
     links: [
       { type: "Instagram", url: "https://instagram.com/emanuellelevetstenne" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -146,7 +146,7 @@ const featuredDesigners = [
     philosophy: "I explore the boundaries between art and design, creating objects that challenge perception and celebrate material beauty.",
     links: [
       { type: "Instagram", url: "https://instagram.com/emmanuelbabled" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -162,7 +162,7 @@ const featuredDesigners = [
       "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
     links: [
       { type: "Instagram", url: "https://instagram.com/hamrei" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -178,7 +178,7 @@ const featuredDesigners = [
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     links: [
       { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -192,7 +192,7 @@ const featuredDesigners = [
     philosophy: "Freehand glassblowing is an emotional conversation between hands, head, heart, and material. You start with a small seed and help it grow—it is a humble process.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/jmw_studio" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -206,7 +206,7 @@ const featuredDesigners = [
     notableWorksLink: { text: "Stool 1934", galleryIndex: 1 },
     philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
     links: [
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -221,7 +221,7 @@ const featuredDesigners = [
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
     links: [
       { type: "Instagram", url: "https://instagram.com/kikolumieres" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -236,7 +236,7 @@ const featuredDesigners = [
     philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/leosentou" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -250,7 +250,7 @@ const featuredDesigners = [
     notableWorksLink: { text: "Crystalline Vase", galleryIndex: 3 },
     philosophy: "Glass is frozen light—my work seeks to capture that ephemeral quality in permanent form.",
     links: [
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -266,7 +266,7 @@ const featuredDesigners = [
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
     links: [
       { type: "Instagram", url: "https://instagram.com/nathaliezieglerpasqua" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -281,7 +281,7 @@ const featuredDesigners = [
     philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -300,7 +300,7 @@ const featuredDesigners = [
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
-      { type: "Curators' choice" },
+      { type: "Curators' Picks" },
     ],
   },
 ];
@@ -311,6 +311,7 @@ const FeaturedDesigners = () => {
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
+  const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
 
   const filteredDesigners = useMemo(() => {
     if (!searchQuery.trim()) return featuredDesigners;
@@ -578,6 +579,15 @@ const FeaturedDesigners = () => {
                                   />
                                 </svg>
                               </a>
+                            ) : link.type === "Curators' Picks" ? (
+                              <button
+                                key={idx}
+                                onClick={() => setCuratorPicksDesigner(designer)}
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-colors duration-300 border border-primary/20 hover:border-primary/40 cursor-pointer"
+                              >
+                                <Star size={16} />
+                                <span>{link.type}</span>
+                              </button>
                             ) : (
                               <span
                                 key={idx}
@@ -596,6 +606,43 @@ const FeaturedDesigners = () => {
             ))}
           </Accordion>
         </motion.div>
+
+        {/* Curators' Picks Dialog */}
+        <Dialog open={!!curatorPicksDesigner} onOpenChange={(open) => !open && setCuratorPicksDesigner(null)}>
+          <DialogContent className="max-w-4xl p-6" aria-describedby={undefined}>
+            <VisuallyHidden>
+              <DialogTitle>Curators' Picks - {curatorPicksDesigner?.name}</DialogTitle>
+            </VisuallyHidden>
+            {curatorPicksDesigner && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <h3 className="text-2xl font-serif text-foreground mb-2">
+                    Curators' Picks
+                  </h3>
+                  <p className="text-muted-foreground font-body">
+                    Selected works by {curatorPicksDesigner.name}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <div 
+                      key={num}
+                      className="aspect-square bg-primary/5 rounded-lg border border-primary/10 flex items-center justify-center overflow-hidden"
+                    >
+                      <div className="text-center p-4">
+                        <Star className="h-8 w-8 text-primary/30 mx-auto mb-2" />
+                        <p className="text-xs text-muted-foreground font-body">Pick {num}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-center text-sm text-muted-foreground font-body italic">
+                  Curated selections coming soon
+                </p>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );
