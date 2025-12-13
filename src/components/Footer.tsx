@@ -46,7 +46,14 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="mt-8 border-t border-border pt-8 text-center">
+        <div className="mt-8 border-t border-border pt-8 text-center space-y-2">
+          <p className="font-body text-xs text-muted-foreground italic">
+            For further details, please request our catalogue at{" "}
+            <a href="mailto:concierge@myaffluency.com" className="underline hover:text-foreground transition-colors">
+              concierge@myaffluency.com
+            </a>
+            .
+          </p>
           <p className="font-body text-xs text-muted-foreground">© 2026 Affluency ETC Pte Ltd. All rights reserved. For professional use only.</p>
         </div>
       </div>
