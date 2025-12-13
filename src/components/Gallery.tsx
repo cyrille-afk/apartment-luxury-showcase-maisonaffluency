@@ -272,8 +272,8 @@ const Gallery = () => {
                       >
                         <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                        {/* Mobile tap indicator */}
-                        {!hasTapped && <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground p-2 rounded-full flex items-center justify-center">
+                        {/* Mobile tap indicator - stays visible until this specific image is expanded */}
+                        {!isExpanded && <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground p-2 rounded-full flex items-center justify-center shadow-md">
                             <Eye className="w-4 h-4" />
                           </div>}
                         {/* Expand/View indicator */}
