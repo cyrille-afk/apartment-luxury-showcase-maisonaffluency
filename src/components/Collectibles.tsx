@@ -38,7 +38,7 @@ const collectibleDesigners = [
         category: "Lighting",
         materials: "Bronze • Brass • Ash wood • White fabric shade",
         dimensions: "Ø45 × H60.9 cm",
-        edition: "Numbered & Signed"
+        edition: "Numbered edition of 20"
       },
       { 
         image: demichelisPick4, 
@@ -46,7 +46,7 @@ const collectibleDesigners = [
         category: "Lighting",
         materials: "Patinated and varnished brass",
         dimensions: "Ø38 × H166 cm",
-        edition: "Numbered & Signed"
+        edition: "Numbered edition of 20"
       },
       { 
         image: demichelisPick2, 
@@ -54,7 +54,7 @@ const collectibleDesigners = [
         category: "Lighting",
         materials: "Bronze • White oak • Hand-made fabric shade",
         dimensions: "Ø40 × H71 cm",
-        edition: "Numbered & Signed"
+        edition: "Numbered edition of 20"
       },
       { 
         image: demichelisPick3, 
@@ -62,7 +62,7 @@ const collectibleDesigners = [
         category: "Furniture",
         materials: "Patinated bronze • Raw brass • Brown cowhide leather top",
         dimensions: "H43.5 × L35 cm",
-        edition: "Numbered & Signed"
+        edition: "8 + 2 artist proofs"
       },
     ],
     links: [
