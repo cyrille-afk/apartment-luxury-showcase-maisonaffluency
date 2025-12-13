@@ -28,6 +28,7 @@ const collectibleDesigners = [
     biography:
       "Atelier Demichelis is a contemporary design studio specializing in limited edition lighting fixtures. Each piece is meticulously handcrafted, combining traditional techniques with innovative design. Their Bud Table Lamp represents their commitment to creating functional art objects with exceptional attention to detail.",
     notableWorks: "Limited Edition Bud Table Lamp, Artisan Lighting Collection",
+    notableWorksLink: { text: "Limited Edition Bud Table Lamp", galleryIndex: 10 },
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
     curatorPicks: [
       { 
@@ -72,6 +73,7 @@ const collectibleDesigners = [
     biography:
       "Kiko Lopez is a French master mirror artisan renowned for creating extraordinary reflective surfaces that blur the line between functional object and sculptural art. Using traditional techniques combined with innovative approaches to glass and metal, his mirrors transform spaces with their unique textural qualities and light-capturing properties. His Silver Glass Hammer Mirror and Shadow Drawings Mirror exemplify his distinctive style of treating mirrors as artistic statements.",
     notableWorks: "Silver Glass Hammer Mirror, Shadow Drawings Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
+    notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 11 },
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
     links: [
       { type: "Instagram", url: "https://instagram.com/kikolumieres" },
@@ -86,6 +88,7 @@ const collectibleDesigners = [
     biography:
       "Nathalie Ziegler is a French glass artist known for her custom chandeliers and glass sculptures that blur the line between functional lighting and fine art. Her Saint Just Custom Glass Chandelier showcases her ability to manipulate glass into dramatic, ethereal forms that transform spaces with light and color.",
     notableWorks: "Saint Just Custom Glass Chandelier, Gold Leaves+Glass Snake Vase, Sculptural Glass Series",
+    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 6 },
     philosophy:
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
     links: [
