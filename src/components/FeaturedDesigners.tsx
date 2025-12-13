@@ -207,18 +207,18 @@ const featuredDesigners = [
         dimensions: "L190 × W180 × H35 cm"
       },
       { 
-        image: pendhapaPick2, 
-        title: "Anemos Coffee Table", 
-        category: "Furniture",
-        materials: "Black oak • Black lacquer tabletop",
-        dimensions: "L110 × W80 × H35 cm"
-      },
-      { 
         image: pendhapaPick4, 
         title: "Akar Dining Chair", 
         category: "Furniture",
         materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery",
         dimensions: "L49 × W52 × H85 cm"
+      },
+      { 
+        image: pendhapaPick2, 
+        title: "Anemos Coffee Table", 
+        category: "Furniture",
+        materials: "Black oak • Black lacquer tabletop",
+        dimensions: "L110 × W80 × H35 cm"
       },
       { 
         image: pendhapaPick5, 
