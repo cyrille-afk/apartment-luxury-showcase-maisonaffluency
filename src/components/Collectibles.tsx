@@ -197,9 +197,6 @@ const Collectibles = () => {
             transition={{ duration: 0.8 }}
             className="mb-12 md:mb-16 text-center"
           >
-            <p className="mb-2 md:mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
-              CURATED COLLECTION
-            </p>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-4">
               Collectibles
             </h2>
