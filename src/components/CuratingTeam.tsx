@@ -111,7 +111,7 @@ const CuratingTeam = () => {
                   <p className="text-sm md:text-base text-muted-foreground font-body mb-4">
                     {member.role}
                   </p>
-                  <p className="text-sm text-muted-foreground font-body text-left max-w-sm">
+                  <p className="text-sm text-muted-foreground font-body text-justify max-w-sm">
                     {member.bio}
                   </p>
                 </div>
