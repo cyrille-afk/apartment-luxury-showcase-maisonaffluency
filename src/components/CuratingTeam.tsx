@@ -134,11 +134,9 @@ const CuratingTeam = () => {
               overviewSection.scrollIntoView({ behavior: "smooth" });
             }
           }}
-          className="group inline-flex items-center gap-3 px-6 py-3 rounded-full bg-primary/5 hover:bg-primary/10 border border-primary/20 hover:border-primary/40 text-foreground hover:text-primary transition-all duration-300 font-body text-sm shadow-sm hover:shadow-md"
+          className="group inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-300 font-body text-sm"
         >
-          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300">
-            <ArrowUp className="h-4 w-4 text-primary group-hover:-translate-y-0.5 transition-transform duration-300" />
-          </span>
+          <ArrowUp className="h-4 w-4 group-hover:-translate-y-0.5 transition-transform duration-300" />
           <span>Back to Overview</span>
         </button>
       </motion.div>
