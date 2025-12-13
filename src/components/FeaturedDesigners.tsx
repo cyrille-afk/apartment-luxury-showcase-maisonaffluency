@@ -38,7 +38,7 @@ import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
 import yvesMacheretPick4 from "@/assets/curators-picks/yves-macheret-4.jpg";
 import apparatusPick1 from "@/assets/curators-picks/apparatus-1.jpg";
 import apparatusPick2 from "@/assets/curators-picks/apparatus-2.jpg";
-import apparatusPick3 from "@/assets/curators-picks/apparatus-3.png";
+import apparatusPick3 from "@/assets/curators-picks/apparatus-3.jpg";
 import apparatusPick4 from "@/assets/curators-picks/apparatus-4.jpg";
 
 const featuredDesigners = [
