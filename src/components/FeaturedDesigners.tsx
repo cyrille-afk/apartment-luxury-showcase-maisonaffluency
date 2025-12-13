@@ -608,7 +608,11 @@ const FeaturedDesigners = () => {
                                 href={link.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-colors duration-300 border border-primary/20 hover:border-primary/40"
+                                className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-md transition-colors duration-300 border ${
+                                  link.type === "Instagram" 
+                                    ? "bg-[#E4405F]/10 hover:bg-[#E4405F]/20 text-[#E4405F] border-[#E4405F]/20 hover:border-[#E4405F]/40" 
+                                    : "bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 hover:border-primary/40"
+                                }`}
                                 aria-label={link.type}
                               >
                                 {link.type === "Instagram" ? <Instagram size={16} /> : <span>{link.type}</span>}
