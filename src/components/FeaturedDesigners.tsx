@@ -176,7 +176,7 @@ const featuredDesigners = [
       },
     ],
     links: [
-      { type: "Instagram", url: "https://instagram.com/atelierpendhapa" },
+      { type: "Instagram", url: "https://instagram.com/pendhapa.architects" },
       { type: "Curators' Picks" },
     ],
   },
