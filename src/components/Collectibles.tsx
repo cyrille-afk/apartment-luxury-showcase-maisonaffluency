@@ -192,9 +192,9 @@ const collectibleDesigners = [
       { 
         image: kikoLopezImg, // Placeholder - replace with actual image
         title: "None II Table Lamp", 
-        category: "Decorative Object",
-        materials: "Hand-formed stoneware • Natural glazes",
-        dimensions: "H40 × Ø25 cm",
+        category: "Lighting",
+        materials: "Cippolino Verde Marble, Silver-Plated brass",
+        dimensions: "39 cm × 22.5 cm × H 58 cm",
         edition: "Unique Piece"
       },
     ],
