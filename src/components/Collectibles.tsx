@@ -23,6 +23,7 @@ import demichelisPick4 from "@/assets/curators-picks/demichelis-4.jpg";
 import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode.jpg";
 import maartenVrolijkVessel from "@/assets/curators-picks/maarten-vrolijk-vessel.jpg";
 import kikoLopezMirror from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
+import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
 
 const collectibleDesigners = [
   {
@@ -121,7 +122,7 @@ const collectibleDesigners = [
         edition: "Unique Piece"
       },
       { 
-        image: nathalieZieglerImg, // Placeholder - replace with actual image
+        image: nathalieZieglerSnakeVessel,
         title: "Gold & Silver Snake Vessel", 
         category: "Decorative Objects",
         materials: "Hand-blown glass • Gold & silver leaf accents",
