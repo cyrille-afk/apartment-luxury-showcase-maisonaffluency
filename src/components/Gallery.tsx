@@ -241,7 +241,7 @@ const Gallery = () => {
           duration: 0.8
         }} className="mb-12 md:mb-16 text-left">
             <p className="mb-2 md:mb-3 uppercase tracking-[0.15em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
-              OUR GALLERY
+              A UNIQUELY CURATED VENUE
             </p>
             <h2 className="text-sm leading-relaxed md:text-3xl text-foreground text-left px-1 md:px-2 md:text-justify font-serif lg:text-lg">
               From Thierry Lemaire's Orsay Mds Centre Table to Hervé van der Straeten's Chandeliers, from Hamrei's whimsical Pépé Chair to Jeremy Maxwell Wintrebert's Cloud Pendants, from Pierre Bonnefille's Bronze Painting and Stéphane CG Abstract Diasecs, Maison Affluency Singapore is a uniquely curated venue where design and art congregate
