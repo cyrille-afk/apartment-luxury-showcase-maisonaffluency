@@ -20,6 +20,7 @@ import demichelisPick1 from "@/assets/curators-picks/demichelis-1.jpg";
 import demichelisPick2 from "@/assets/curators-picks/demichelis-2.jpg";
 import demichelisPick3 from "@/assets/curators-picks/demichelis-3.jpg";
 import demichelisPick4 from "@/assets/curators-picks/demichelis-4.jpg";
+import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode.jpg";
 
 const collectibleDesigners = [
   {
@@ -216,7 +217,7 @@ const collectibleDesigners = [
     philosophy: "Each piece of glass tells a story of light, texture, and the timeless beauty of artisan craftsmanship.",
     curatorPicks: [
       { 
-        image: kikoLopezImg, // Placeholder - replace with actual image
+        image: matthieuGicquelGeode,
         title: "Texture Glass with Gold Leaf rim Géode", 
         category: "Tableware",
         materials: "Textured glass • 24k gold leaf rim",
