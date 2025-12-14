@@ -213,7 +213,7 @@ const collectibleDesigners = [
     biography:
       "Marcantonio Brandolini D'Adda is an Italian glass artist whose work represents the finest traditions of Murano glassmaking combined with contemporary artistic vision. His vessels are celebrated for their organic forms and exceptional craftsmanship.",
     notableWorks: "Cotissi Vessel, Murano Glass Sculptures",
-    notableWorksLink: { text: "Cotissi Vessel", galleryIndex: 16 },
+    notableWorksLink: { text: "Cotissi Vessel", galleryIndex: 15 },
     philosophy: "Glass is a living material that captures light and transforms space into poetry.",
     curatorPicks: [
       { 
