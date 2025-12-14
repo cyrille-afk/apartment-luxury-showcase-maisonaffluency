@@ -122,10 +122,10 @@ const collectibleDesigners = [
       },
       { 
         image: nathalieZieglerImg, // Placeholder - replace with actual image
-        title: "Gold Leaves + Glass Snake Vase", 
+        title: "Gold & Silver Snake Vessel", 
         category: "Decorative Objects",
-        materials: "Hand-blown glass • Gold leaf accents",
-        dimensions: "H55 × Ø25 cm",
+        materials: "Hand-blown glass • Gold & silver leaf accents",
+        dimensions: "H38 cm × Diam 30 cm",
         edition: "Unique Piece"
       },
       { 
