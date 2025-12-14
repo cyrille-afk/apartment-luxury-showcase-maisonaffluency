@@ -218,7 +218,7 @@ const collectibleDesigners = [
     curatorPicks: [
       { 
         image: matthieuGicquelGeode,
-        title: "Texture Glass with Gold Leaf rim Géode", 
+        title: "Géode Nbr 4: Texture Glass with Gold Leaf Rim", 
         category: "Tableware",
         materials: "Textured glass • 24k gold leaf rim",
         dimensions: "Ø32 cm",
