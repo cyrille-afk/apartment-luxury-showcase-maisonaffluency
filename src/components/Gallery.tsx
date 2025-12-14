@@ -17,6 +17,8 @@ import intimateDiningImage from "@/assets/intimate-dining.jpg";
 import intimateTableImage from "@/assets/intimate-table-detail.jpg";
 import intimateLoungeImage from "@/assets/intimate-lounge.jpg";
 import smallRoomPersonalityImage from "@/assets/small-room-personality.jpg";
+import smallRoomVaseImage from "@/assets/small-room-vase.jpg";
+import smallRoomBedroomImage from "@/assets/small-room-bedroom.jpg";
 const galleryExperiences = [{
   experience: "A Sociable Environment",
   subtitle: "Bespoke sofa, hand-knotted artisan rug, sculptural lighting and collectible furniture",
@@ -88,6 +90,14 @@ const galleryExperiences = [{
     image: smallRoomPersonalityImage,
     title: "Compact Elegance",
     description: "Apparatus Studio Lantern Table, Reda Amalou Eggshell DOT side table, Pierre Frey Kagura and Kasimir Fabrics, Pierre Frey Natte Wallcovering, Peter Reed's Riyad Double Faced Throw"
+  }, {
+    image: smallRoomVaseImage,
+    title: "A Sunlit Corner",
+    description: "Maarten Vrolijk's Handblown Glass Vase, Peter Reed's Riyad Double Faced Throw, Pierre Frey Kagura and Kasimir Fabrics"
+  }, {
+    image: smallRoomBedroomImage,
+    title: "Artistic Statement",
+    description: "Apparatus Studio Lantern Table Lamp, Apparatus Studio Median Surface Light, Pierre Frey Kagura Headboard Fabric, Pierre Frey Natte Wallcovering"
   }]
 }];
 const Gallery = () => {
