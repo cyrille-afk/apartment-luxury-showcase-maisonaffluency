@@ -106,7 +106,7 @@ const galleryExperiences = [{
   items: [{
     image: detailsSectionImage,
     title: "Curated Vignette",
-    description: "Poltrona Frau Albero Bookcase, Jindrich Halabala Lounge Chair, Sculptural Glass Lamp, Artisan Accessories"
+    description: "Alexandre Lamont's Corteza Console Table, Thierry Lemaire's Kedis Lamp, Milan Pekař's small Crystalline Vase, Marcantonio Brandolini D'Adda's Vase 'Unknown N.83', Jaime Hayon's Time Piece Ceramic for Sé Collections, Jindrich Halabala's Lounge Chair in Dedar's UKIYO MONOGATARI 003, Gianfranco Frattini's Albero Bookcase for Poltrona Frau, Maarten Vrolijk's Sakura TRP 22001 Vessel"
   }]
 }];
 const Gallery = () => {
