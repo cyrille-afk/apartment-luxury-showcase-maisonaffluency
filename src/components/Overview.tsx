@@ -91,7 +91,7 @@ const Overview = () => {
               </button>
               <button
                 onClick={() => {
-                  const designersSection = document.getElementById('featured-designers');
+                  const designersSection = document.getElementById('designers');
                   if (designersSection) {
                     designersSection.scrollIntoView({ behavior: 'smooth' });
                   }
