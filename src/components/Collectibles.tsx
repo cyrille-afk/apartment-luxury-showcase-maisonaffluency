@@ -27,6 +27,7 @@ import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler
 import rowinAtelierImg from "@/assets/designers/rowin-atelier.jpg";
 import rowinNoneIiLamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 import marcantonioBrandoliniImg from "@/assets/designers/marcantonio-brandolini-dadda.jpg";
+import marcantonioCotissiVessel from "@/assets/curators-picks/marcantonio-cotissi-vessel.jpg";
 
 const collectibleDesigners = [
   {
@@ -217,7 +218,7 @@ const collectibleDesigners = [
     philosophy: "Glass is a living material that captures light and transforms space into poetry.",
     curatorPicks: [
       { 
-        image: kikoLopezImg, // Placeholder - replace with actual image
+        image: marcantonioCotissiVessel,
         title: "Cotissi Vessel", 
         category: "Decorative Object",
         materials: "Hand-blown Murano glass",
