@@ -99,6 +99,7 @@ const featuredDesigners = [
     notableWorks: "Lantern Table Lamp, Metronome Reading Floor Lamp, Sculptural Lighting Series",
     notableWorksLinks: [
       { text: "Lantern Table Lamp", galleryIndex: 12 },
+      { text: "Median 3 Surface Alabaster Lights", galleryIndex: 0 },
       { text: "Metronome Reading Floor Lamp", galleryIndex: 7 }
     ],
     philosophy:
