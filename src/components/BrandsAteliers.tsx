@@ -522,6 +522,38 @@ const partnerBrands = [
     instagram: "https://instagram.com/saintlouiscrystal",
     galleryIndex: 17, // Light & Texture in The Details Make the Design
   },
+  {
+    id: "kerstens",
+    name: "Kerstens",
+    category: "Furniture",
+    subcategory: "Seating",
+    seatType: "Sofas & Loveseats",
+    origin: "Netherlands",
+    description: "Dutch atelier renowned for exceptional upholstery and bespoke seating, combining traditional craftsmanship with contemporary design sensibility.",
+    featured: "Custom Upholstered Seating",
+    instagram: "",
+  },
+  {
+    id: "matthieu-gicquel",
+    name: "Matthieu Gicquel",
+    category: "Decor",
+    subcategory: "Decorative Objects",
+    origin: "France",
+    description: "French artist and designer creating sculptural objects and furniture that blur the boundaries between art and functional design.",
+    featured: "Sculptural Objects",
+    instagram: "https://instagram.com/matthieugicquel",
+  },
+  {
+    id: "man-of-parts",
+    name: "Man of Parts",
+    category: "Furniture",
+    subcategory: "Seating",
+    seatType: "Sofas & Loveseats",
+    origin: "Denmark",
+    description: "Danish design house creating timeless furniture with a focus on quality materials, exceptional comfort, and understated Scandinavian elegance.",
+    featured: "Modular Seating Collection",
+    instagram: "https://instagram.com/manofparts",
+  },
 ];
 
 const BrandsAteliers = () => {
