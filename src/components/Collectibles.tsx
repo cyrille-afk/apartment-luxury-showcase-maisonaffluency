@@ -179,11 +179,11 @@ const collectibleDesigners = [
   },
   {
     id: "rowin-atelier",
-    name: "Row'in Atelier",
+    name: "Rowin' Atelier",
     specialty: "Artisan Ceramics & Sculptural Objects",
     image: kikoLopezImg, // Placeholder - replace with actual image
     biography:
-      "Row'in Atelier is a French ceramics studio renowned for creating exceptional handcrafted pieces that blend traditional techniques with contemporary design. Each creation showcases meticulous attention to detail and a deep understanding of material properties.",
+      "Rowin' Atelier is a French ceramics studio renowned for creating exceptional handcrafted pieces that blend traditional techniques with contemporary design. Each creation showcases meticulous attention to detail and a deep understanding of material properties.",
     notableWorks: "Sculptural Ceramics, Artisan Vessels",
     notableWorksLink: { text: "Sculptural Ceramics", galleryIndex: 0 },
     philosophy: "Every piece of clay holds the potential for extraordinary beauty when shaped by skilled hands.",
