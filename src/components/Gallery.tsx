@@ -89,7 +89,7 @@ const galleryExperiences = [{
   items: [{
     image: smallRoomBedroomImage,
     title: "Artistic Statement",
-    description: "Apparatus Studio Lantern Table Lamp, Apparatus Studio Median Surface Light, Pierre Frey Kagura Headboard Fabric, Pierre Frey Natte Wallcovering"
+    description: "Apparatus Studio Lantern Table Lamp, Apparatus Studio Median Surface Light, Pierre Frey Kagura Headboard Fabric, Pierre Frey Natte Wallcovering, Peter Reed's Riyad Double Faced Throw"
   }, {
     image: smallRoomPersonalityImage,
     title: "Compact Elegance",
