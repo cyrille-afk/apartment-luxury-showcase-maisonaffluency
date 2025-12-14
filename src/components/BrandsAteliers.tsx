@@ -498,6 +498,17 @@ const partnerBrands = [
     instagram: "https://instagram.com/takaokaya_en",
     galleryIndex: 5, // A Relaxed Setting
   },
+  {
+    id: "cristallerie-saint-louis",
+    name: "Cristallerie Saint-Louis",
+    category: "Lighting",
+    subcategory: "Table Lamps",
+    origin: "France",
+    description: "Founded in 1586, Cristallerie Saint-Louis is France's oldest crystal manufacturer. A crown jewel of Hermès, the maison creates exceptional lighting and decorative objects that blend centuries of savoir-faire with contemporary design.",
+    featured: "Amber Folio Portable Lamp by Noé Duchaufour Lawrance",
+    instagram: "https://instagram.com/saintlouiscrystal",
+    galleryIndex: 17, // Light & Texture in The Details Make the Design
+  },
 ];
 
 const BrandsAteliers = () => {
