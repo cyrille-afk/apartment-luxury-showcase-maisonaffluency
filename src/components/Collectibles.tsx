@@ -177,6 +177,56 @@ const collectibleDesigners = [
       { type: "Curators' Picks" },
     ],
   },
+  {
+    id: "rowin-atelier",
+    name: "Row'in Atelier",
+    specialty: "Artisan Ceramics & Sculptural Objects",
+    image: kikoLopezImg, // Placeholder - replace with actual image
+    biography:
+      "Row'in Atelier is a French ceramics studio renowned for creating exceptional handcrafted pieces that blend traditional techniques with contemporary design. Each creation showcases meticulous attention to detail and a deep understanding of material properties.",
+    notableWorks: "Sculptural Ceramics, Artisan Vessels",
+    notableWorksLink: { text: "Sculptural Ceramics", galleryIndex: 0 },
+    philosophy: "Every piece of clay holds the potential for extraordinary beauty when shaped by skilled hands.",
+    curatorPicks: [
+      { 
+        image: kikoLopezImg, // Placeholder - replace with actual image
+        title: "Sculptural Ceramic Vessel", 
+        category: "Decorative Object",
+        materials: "Hand-formed stoneware • Natural glazes",
+        dimensions: "H40 × Ø25 cm",
+        edition: "Unique Piece"
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/rowinatelier" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "marcantonio-brandolini-dadda",
+    name: "Marcantonio Brandolini D'Adda",
+    specialty: "Glass Art & Sculptural Vessels",
+    image: kikoLopezImg, // Placeholder - replace with actual image
+    biography:
+      "Marcantonio Brandolini D'Adda is an Italian glass artist whose work represents the finest traditions of Murano glassmaking combined with contemporary artistic vision. His vessels are celebrated for their organic forms and exceptional craftsmanship.",
+    notableWorks: "Cotissi Vessel, Murano Glass Sculptures",
+    notableWorksLink: { text: "Cotissi Vessel", galleryIndex: 16 },
+    philosophy: "Glass is a living material that captures light and transforms space into poetry.",
+    curatorPicks: [
+      { 
+        image: kikoLopezImg, // Placeholder - replace with actual image
+        title: "Cotissi Vessel", 
+        category: "Decorative Object",
+        materials: "Hand-blown Murano glass",
+        dimensions: "H35 × Ø20 cm",
+        edition: "Unique Piece"
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/marcantoniobrandolinidadda" },
+      { type: "Curators' Picks" },
+    ],
+  },
 ];
 
 const Collectibles = () => {
