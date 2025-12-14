@@ -186,10 +186,10 @@ const collectibleDesigners = [
     curatorPicks: [
       { 
         image: maartenVrolijkVessel,
-        title: "Sculptural Console", 
-        category: "Furniture",
-        materials: "Bronze • Oak • Hand-finished patina",
-        dimensions: "H85 × W150 × D40 cm",
+        title: "Sculptural Glass Vessel", 
+        category: "Glass Art",
+        materials: "Handblown & sculpted glass, unique piece with certificate",
+        dimensions: "H 52 cm × W 40 cm × D 41 cm",
         edition: "Unique Piece"
       },
       { 
