@@ -349,9 +349,12 @@ const Collectibles = () => {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-4">
               Collectibles
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
-              Limited Editions & Unique Pieces
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-base md:text-lg text-muted-foreground font-body">
+                Limited Editions & Unique Pieces
+              </p>
+              <Search className="h-5 w-5 text-muted-foreground" />
+            </div>
           </motion.div>
 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
