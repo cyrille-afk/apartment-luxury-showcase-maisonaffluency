@@ -97,7 +97,7 @@ const galleryExperiences = [{
   }, {
     image: smallRoomVaseImage,
     title: "A Sunlit Corner",
-    description: "Maarten Vrolijk's Handblown Glass Vase, Peter Reed's Riyad Double Faced Throw, Pierre Frey Kagura and Kasimir Fabrics"
+    description: "Milan Pekař's Crystalline Vase, Peter Reed's Riyad Double Faced Throw, Pierre Frey Kagura and Kasimir Fabrics"
   }]
 }];
 const Gallery = () => {
