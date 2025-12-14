@@ -22,6 +22,7 @@ import demichelisPick3 from "@/assets/curators-picks/demichelis-3.jpg";
 import demichelisPick4 from "@/assets/curators-picks/demichelis-4.jpg";
 import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode.jpg";
 import maartenVrolijkVessel from "@/assets/curators-picks/maarten-vrolijk-vessel.jpg";
+import kikoLopezMirror from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 
 const collectibleDesigners = [
   {
@@ -86,35 +87,11 @@ const collectibleDesigners = [
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
     curatorPicks: [
       { 
-        image: kikoLopezImg, // Placeholder - replace with actual image
-        title: "Silver Glass Hammer Mirror", 
-        category: "Mirrors",
-        materials: "Hand-silvered glass • Hammered texture",
-        dimensions: "H120 × W80 cm",
-        edition: "Unique Piece"
-      },
-      { 
-        image: kikoLopezImg, // Placeholder - replace with actual image
+        image: kikoLopezMirror,
         title: "Shadow Drawings Mirror", 
         category: "Mirrors",
         materials: "Antiqued glass • Bronze patina frame",
         dimensions: "H100 × W70 cm",
-        edition: "Limited Edition"
-      },
-      { 
-        image: kikoLopezImg, // Placeholder - replace with actual image
-        title: "Antiqued Console Mirror", 
-        category: "Mirrors",
-        materials: "Hand-antiqued glass • Sculptural frame",
-        dimensions: "H150 × W60 cm",
-        edition: "Numbered & Signed"
-      },
-      { 
-        image: kikoLopezImg, // Placeholder - replace with actual image
-        title: "Reflective Sculpture", 
-        category: "Decorative Objects",
-        materials: "Mercury glass • Hand-formed",
-        dimensions: "H45 × W30 × D15 cm",
         edition: "Unique Piece"
       },
     ],
