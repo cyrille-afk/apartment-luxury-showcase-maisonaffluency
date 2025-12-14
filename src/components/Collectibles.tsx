@@ -24,6 +24,7 @@ import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode
 import maartenVrolijkVessel from "@/assets/curators-picks/maarten-vrolijk-vessel.jpg";
 import kikoLopezMirror from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
+import rowinAtelierImg from "@/assets/designers/rowin-atelier.jpg";
 
 const collectibleDesigners = [
   {
@@ -181,7 +182,7 @@ const collectibleDesigners = [
     id: "rowin-atelier",
     name: "RoWin' Atelier",
     specialty: "Artisan Ceramics & Sculptural Objects",
-    image: kikoLopezImg, // Placeholder - replace with actual image
+    image: rowinAtelierImg,
     biography:
       "RoWin' Atelier is a French ceramics studio renowned for creating exceptional handcrafted pieces that blend traditional techniques with contemporary design. Each creation showcases meticulous attention to detail and a deep understanding of material properties.",
     notableWorks: "None II Table Lamp",
