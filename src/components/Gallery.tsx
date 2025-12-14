@@ -112,7 +112,7 @@ const galleryExperiences = [{
   }, {
     image: detailsConsoleImage,
     title: "Artisan Materials",
-    description: "Alexandre Lamont's Corteza Console Table in shagreen leather, Maarten Vrolijk's Sakura TRP 22001 Vessel, Marcantonio Brandolini D'Adda's Vase 'Unknown N.83'"
+    description: "Alexandre Lamont's Corteza Console Table featuring shagreen leather with curved bullnose edge, Maarten Vrolijk's Sakura TRP 22001 glass vessel, Yoichi Ohira's Murano glass vase"
   }, {
     image: detailsLampImage,
     title: "Light & Texture",
