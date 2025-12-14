@@ -21,6 +21,7 @@ import demichelisPick2 from "@/assets/curators-picks/demichelis-2.jpg";
 import demichelisPick3 from "@/assets/curators-picks/demichelis-3.jpg";
 import demichelisPick4 from "@/assets/curators-picks/demichelis-4.jpg";
 import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode.jpg";
+import maartenVrolijkVessel from "@/assets/curators-picks/maarten-vrolijk-vessel.jpg";
 
 const collectibleDesigners = [
   {
@@ -184,7 +185,7 @@ const collectibleDesigners = [
     philosophy: "Furniture should be a conversation between form and function—each piece tells a story of material and intention.",
     curatorPicks: [
       { 
-        image: maartenVrolijkImg,
+        image: maartenVrolijkVessel,
         title: "Sculptural Console", 
         category: "Furniture",
         materials: "Bronze • Oak • Hand-finished patina",
@@ -192,7 +193,7 @@ const collectibleDesigners = [
         edition: "Unique Piece"
       },
       { 
-        image: maartenVrolijkImg,
+        image: maartenVrolijkVessel,
         title: "Organic Form Chair", 
         category: "Seating",
         materials: "Walnut • Leather upholstery",
