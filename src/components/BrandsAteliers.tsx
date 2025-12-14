@@ -550,7 +550,6 @@ const partnerBrands = [
     seatType: "Sofas & Loveseats",
     origin: "Canada",
     description: "Canadian furniture house creating timeless pieces with a focus on quality materials, exceptional comfort, and refined contemporary design.",
-    featured: "Modular Seating Collection",
     instagram: "https://instagram.com/manofparts",
   },
 ];
