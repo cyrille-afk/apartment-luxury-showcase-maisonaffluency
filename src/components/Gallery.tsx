@@ -19,6 +19,7 @@ import intimateLoungeImage from "@/assets/intimate-lounge.jpg";
 import smallRoomPersonalityImage from "@/assets/small-room-personality.jpg";
 import smallRoomVaseImage from "@/assets/small-room-vase.jpg";
 import smallRoomBedroomImage from "@/assets/small-room-bedroom.jpg";
+import detailsSectionImage from "@/assets/details-section.jpg";
 const galleryExperiences = [{
   experience: "A Sociable Environment",
   subtitle: "Bespoke sofa, hand-knotted artisan rug, sculptural lighting and collectible furniture",
@@ -98,6 +99,14 @@ const galleryExperiences = [{
     image: smallRoomVaseImage,
     title: "A Sunlit Corner",
     description: "Milan Pekař's Crystalline Vase, Peter Reed's Riyad Double Faced Throw"
+  }]
+}, {
+  experience: "It's All About the Details",
+  subtitle: "The details are not the details. They make the design",
+  items: [{
+    image: detailsSectionImage,
+    title: "Curated Vignette",
+    description: "Poltrona Frau Albero Bookcase, Jindrich Halabala Lounge Chair, Sculptural Glass Lamp, Artisan Accessories"
   }]
 }];
 const Gallery = () => {
