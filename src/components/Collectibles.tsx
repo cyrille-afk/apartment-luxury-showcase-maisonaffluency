@@ -220,7 +220,7 @@ const collectibleDesigners = [
         category: "Tableware",
         materials: "Textured glass • 24k gold leaf rim",
         dimensions: "Ø32 cm",
-        edition: "Limited Edition"
+        edition: "Unique Piece"
       },
       { 
         image: kikoLopezImg, // Placeholder - replace with actual image
@@ -228,7 +228,7 @@ const collectibleDesigners = [
         category: "Tableware",
         materials: "Hand-blown glass • Textured surface",
         dimensions: "Ø28 × H12 cm",
-        edition: "Limited Edition"
+        edition: "Unique Piece"
       },
     ],
     links: [
