@@ -176,7 +176,7 @@ const collectibleDesigners = [
   {
     id: "maarten-vrolijk",
     name: "Maarten Vrolijk",
-    specialty: "Contemporary Glass Art & Sculptural Vessels",
+    specialty: "Contemporary Handblown Glass Art & Sculptural Vessels",
     image: maartenVrolijkImg,
     biography:
       "Maarten Vrolijk is a Dutch designer known for his sculptural approach to furniture design. His work explores the intersection of art and functionality, creating pieces that challenge conventional forms while remaining inherently practical. Each creation reflects his deep understanding of materials and his commitment to pushing the boundaries of contemporary design.",
