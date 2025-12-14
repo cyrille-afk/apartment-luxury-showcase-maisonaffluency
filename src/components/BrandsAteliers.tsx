@@ -528,7 +528,7 @@ const partnerBrands = [
     category: "Furniture",
     subcategory: "Seating",
     seatType: "Sofas & Loveseats",
-    origin: "Netherlands",
+    origin: "Belgium",
     description: "Dutch atelier renowned for exceptional upholstery and bespoke seating, combining traditional craftsmanship with contemporary design sensibility.",
     featured: "Custom Upholstered Seating",
     instagram: "",
