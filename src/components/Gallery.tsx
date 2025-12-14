@@ -112,7 +112,7 @@ const galleryExperiences = [{
   }, {
     image: detailsConsoleImage,
     title: "Artisan Materials",
-    description: "Alexandre Lamont's Corteza Console Table featuring shagreen leather with curved bullnose edge, Marcantonio Brandolini D'Adda's Vase 'Unknown N.83', Cotissi Vase"
+    description: "Alexandre Lamont's Corteza Console Table featuring shagreen leather with curved bullnose edge, Marcantonio Brandolini D'Adda's Vessel 'Unknown N.83', Cotissi Vase"
   }, {
     image: detailsLampImage,
     title: "Light & Texture",
