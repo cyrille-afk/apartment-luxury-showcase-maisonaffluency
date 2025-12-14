@@ -530,7 +530,6 @@ const partnerBrands = [
     seatType: "Sofas & Loveseats",
     origin: "Belgium",
     description: "Multidisciplinary design studio founded in 2015 with a distinct vision for architecture, interior and furniture design. The studio aims to create an atmospheric quality within a refined architectural design language.",
-    featured: "Custom Upholstered Seating",
     instagram: "",
   },
   {
