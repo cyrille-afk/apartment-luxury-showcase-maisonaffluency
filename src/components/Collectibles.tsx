@@ -118,7 +118,7 @@ const collectibleDesigners = [
         category: "Lighting",
         materials: "Hand-blown glass • Brass armature",
         dimensions: "Ø120 × H80 cm",
-        edition: "Bespoke Commission"
+        edition: "Unique Piece"
       },
       { 
         image: nathalieZieglerImg, // Placeholder - replace with actual image
@@ -126,7 +126,7 @@ const collectibleDesigners = [
         category: "Decorative Objects",
         materials: "Hand-blown glass • Gold leaf accents",
         dimensions: "H55 × Ø25 cm",
-        edition: "Limited Edition"
+        edition: "Unique Piece"
       },
       { 
         image: nathalieZieglerImg, // Placeholder - replace with actual image
@@ -134,7 +134,7 @@ const collectibleDesigners = [
         category: "Lighting",
         materials: "Amber glass • Hand-formed droplets",
         dimensions: "Ø60 × H90 cm",
-        edition: "Numbered & Signed"
+        edition: "Unique Piece"
       },
       { 
         image: nathalieZieglerImg, // Placeholder - replace with actual image
@@ -142,7 +142,7 @@ const collectibleDesigners = [
         category: "Lighting",
         materials: "Clear glass • Sculptural form",
         dimensions: "H40 × W35 × D20 cm",
-        edition: "Limited Edition"
+        edition: "Unique Piece"
       },
     ],
     links: [
