@@ -26,6 +26,7 @@ import kikoLopezMirror from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
 import rowinAtelierImg from "@/assets/designers/rowin-atelier.jpg";
 import rowinNoneIiLamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
+import marcantonioBrandoliniImg from "@/assets/designers/marcantonio-brandolini-dadda.jpg";
 
 const collectibleDesigners = [
   {
@@ -208,7 +209,7 @@ const collectibleDesigners = [
     id: "marcantonio-brandolini-dadda",
     name: "Marcantonio Brandolini D'Adda",
     specialty: "Glass Art & Sculptural Vessels",
-    image: kikoLopezImg, // Placeholder - replace with actual image
+    image: marcantonioBrandoliniImg,
     biography:
       "Marcantonio Brandolini D'Adda is an Italian glass artist whose work represents the finest traditions of Murano glassmaking combined with contemporary artistic vision. His vessels are celebrated for their organic forms and exceptional craftsmanship.",
     notableWorks: "Cotissi Vessel, Murano Glass Sculptures",
