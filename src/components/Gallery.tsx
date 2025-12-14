@@ -116,7 +116,7 @@ const galleryExperiences = [{
   }, {
     image: detailsLampImage,
     title: "Light & Texture",
-    description: "Thierry Lemaire's Kedis Lamp, Alexander Lamont's Mantle Box, Achille Salvagni design book"
+    description: "Noe Duchaufour Lawrance's Amber Folio Portable Lamp for Cristallerie Saint-Louis"
   }]
 }];
 const Gallery = () => {
