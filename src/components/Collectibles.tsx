@@ -192,14 +192,6 @@ const collectibleDesigners = [
         dimensions: "H 52 cm × W 40 cm × D 41 cm",
         edition: "Unique Piece"
       },
-      { 
-        image: maartenVrolijkVessel,
-        title: "Organic Form Chair", 
-        category: "Seating",
-        materials: "Walnut • Leather upholstery",
-        dimensions: "H80 × W65 × D60 cm",
-        edition: "Unique Piece"
-      },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/maartenvrolijk" },
