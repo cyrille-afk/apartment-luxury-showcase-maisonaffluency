@@ -41,6 +41,18 @@ const partnerBrands = [
     galleryIndex: 8, // A Design Treasure Trove
   },
   {
+    id: "alexander-lamont-corteza",
+    name: "Alexander Lamont",
+    category: "Furniture",
+    subcategory: "Tables",
+    tableType: "Console Tables",
+    origin: "Thailand",
+    description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
+    featured: "Corteza Console Table",
+    instagram: "https://instagram.com/alexanderlamont",
+    galleryIndex: 16, // Artisan Materials in The Details Make the Design
+  },
+  {
     id: "alinea-design-objects",
     name: "Alinea Design Objects",
     category: "Furniture",
