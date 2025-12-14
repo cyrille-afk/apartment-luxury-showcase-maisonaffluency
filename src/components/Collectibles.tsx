@@ -114,35 +114,11 @@ const collectibleDesigners = [
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
     curatorPicks: [
       { 
-        image: nathalieZieglerImg, // Placeholder - replace with actual image
-        title: "Saint Just Custom Glass Chandelier", 
-        category: "Lighting",
-        materials: "Hand-blown glass • Brass armature",
-        dimensions: "Ø120 × H80 cm",
-        edition: "Unique Piece"
-      },
-      { 
         image: nathalieZieglerSnakeVessel,
         title: "Gold & Silver Snake Vessel", 
         category: "Decorative Objects",
         materials: "Hand-blown glass • Gold & silver leaf accents",
         dimensions: "H38 cm × Diam 30 cm",
-        edition: "Unique Piece"
-      },
-      { 
-        image: nathalieZieglerImg, // Placeholder - replace with actual image
-        title: "Amber Cascade Pendant", 
-        category: "Lighting",
-        materials: "Amber glass • Hand-formed droplets",
-        dimensions: "Ø60 × H90 cm",
-        edition: "Unique Piece"
-      },
-      { 
-        image: nathalieZieglerImg, // Placeholder - replace with actual image
-        title: "Crystal Wave Sconce", 
-        category: "Lighting",
-        materials: "Clear glass • Sculptural form",
-        dimensions: "H40 × W35 × D20 cm",
         edition: "Unique Piece"
       },
     ],
