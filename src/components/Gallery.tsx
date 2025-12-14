@@ -103,7 +103,7 @@ const galleryExperiences = [{
     description: "Milan Pekař's Crystalline Vase, Peter Reed's Riyad Double Faced Throw"
   }]
 }, {
-  experience: "It's All About the Details",
+  experience: "The Details Make the Design",
   subtitle: "The details are not the details. They make the design",
   items: [{
     image: detailsSectionImage,
