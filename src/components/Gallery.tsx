@@ -20,6 +20,8 @@ import smallRoomPersonalityImage from "@/assets/small-room-personality.jpg";
 import smallRoomVaseImage from "@/assets/small-room-vase.jpg";
 import smallRoomBedroomImage from "@/assets/small-room-bedroom.jpg";
 import detailsSectionImage from "@/assets/details-section.jpg";
+import detailsConsoleImage from "@/assets/details-console.jpg";
+import detailsLampImage from "@/assets/details-lamp.jpg";
 const galleryExperiences = [{
   experience: "A Sociable Environment",
   subtitle: "Bespoke sofa, hand-knotted artisan rug, sculptural lighting and collectible furniture",
@@ -107,6 +109,14 @@ const galleryExperiences = [{
     image: detailsSectionImage,
     title: "Curated Vignette",
     description: "Alexandre Lamont's Corteza Console Table, Thierry Lemaire's Kedis Lamp, Milan Pekař's small Crystalline Vase, Marcantonio Brandolini D'Adda's Vase 'Unknown N.83', Jaime Hayon's Time Piece Ceramic for Sé Collections, Jindrich Halabala's Lounge Chair in Dedar's UKIYO MONOGATARI 003, Gianfranco Frattini's Albero Bookcase for Poltrona Frau, Maarten Vrolijk's Sakura TRP 22001 Vessel"
+  }, {
+    image: detailsConsoleImage,
+    title: "Artisan Materials",
+    description: "Alexandre Lamont's Corteza Console Table in shagreen leather, Maarten Vrolijk's Sakura TRP 22001 Vessel, Marcantonio Brandolini D'Adda's Vase 'Unknown N.83'"
+  }, {
+    image: detailsLampImage,
+    title: "Light & Texture",
+    description: "Thierry Lemaire's Kedis Lamp, Alexander Lamont's Mantle Box, Achille Salvagni design book"
   }]
 }];
 const Gallery = () => {
