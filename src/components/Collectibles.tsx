@@ -203,6 +203,39 @@ const collectibleDesigners = [
       { type: "Curators' Picks" },
     ],
   },
+  {
+    id: "matthieu-gicquel",
+    name: "Matthieu Gicquel",
+    specialty: "Artisan Glass & Tableware",
+    image: kikoLopezImg, // Placeholder - replace with actual image
+    biography:
+      "Matthieu Gicquel is a French glass artist renowned for his exceptional tableware and decorative objects that blend traditional craftsmanship with contemporary design. His signature pieces feature textured glass adorned with precious gold leaf details, creating functional art that elevates everyday dining into a refined experience.",
+    notableWorks: "Texture Glass with Gold Leaf rim Géode plate, Artisan Tableware Collection",
+    notableWorksLink: { text: "Géode plate", galleryIndex: 1 },
+    philosophy: "Each piece of glass tells a story of light, texture, and the timeless beauty of artisan craftsmanship.",
+    curatorPicks: [
+      { 
+        image: kikoLopezImg, // Placeholder - replace with actual image
+        title: "Géode Plate with Gold Leaf Rim", 
+        category: "Tableware",
+        materials: "Textured glass • 24k gold leaf rim",
+        dimensions: "Ø32 cm",
+        edition: "Limited Edition"
+      },
+      { 
+        image: kikoLopezImg, // Placeholder - replace with actual image
+        title: "Crystalline Bowl", 
+        category: "Tableware",
+        materials: "Hand-blown glass • Textured surface",
+        dimensions: "Ø28 × H12 cm",
+        edition: "Limited Edition"
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/matthieugicquel" },
+      { type: "Curators' Picks" },
+    ],
+  },
 ];
 
 const Collectibles = () => {
