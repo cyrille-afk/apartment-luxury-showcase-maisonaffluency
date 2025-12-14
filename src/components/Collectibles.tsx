@@ -25,6 +25,7 @@ import maartenVrolijkVessel from "@/assets/curators-picks/maarten-vrolijk-vessel
 import kikoLopezMirror from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
 import rowinAtelierImg from "@/assets/designers/rowin-atelier.jpg";
+import rowinNoneIiLamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 
 const collectibleDesigners = [
   {
@@ -190,7 +191,7 @@ const collectibleDesigners = [
     philosophy: "Every piece of clay holds the potential for extraordinary beauty when shaped by skilled hands.",
     curatorPicks: [
       { 
-        image: kikoLopezImg, // Placeholder - replace with actual image
+        image: rowinNoneIiLamp,
         title: "None II Table Lamp", 
         category: "Lighting",
         materials: "Cippolino Verde Marble, Silver-Plated brass",
