@@ -87,6 +87,10 @@ const galleryExperiences = [{
   experience: "A Small Room with Massive Personality",
   subtitle: "Bold statement pieces, artisan craftsmanship and curated collectibles",
   items: [{
+    image: smallRoomBedroomImage,
+    title: "Artistic Statement",
+    description: "Apparatus Studio Lantern Table Lamp, Apparatus Studio Median Surface Light, Pierre Frey Kagura Headboard Fabric, Pierre Frey Natte Wallcovering"
+  }, {
     image: smallRoomPersonalityImage,
     title: "Compact Elegance",
     description: "Apparatus Studio Lantern Table, Reda Amalou Eggshell DOT side table, Pierre Frey Kagura and Kasimir Fabrics, Pierre Frey Natte Wallcovering, Peter Reed's Riyad Double Faced Throw"
@@ -94,10 +98,6 @@ const galleryExperiences = [{
     image: smallRoomVaseImage,
     title: "A Sunlit Corner",
     description: "Maarten Vrolijk's Handblown Glass Vase, Peter Reed's Riyad Double Faced Throw, Pierre Frey Kagura and Kasimir Fabrics"
-  }, {
-    image: smallRoomBedroomImage,
-    title: "Artistic Statement",
-    description: "Apparatus Studio Lantern Table Lamp, Apparatus Studio Median Surface Light, Pierre Frey Kagura Headboard Fabric, Pierre Frey Natte Wallcovering"
   }]
 }];
 const Gallery = () => {
