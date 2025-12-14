@@ -13,6 +13,7 @@ import atelierDemichelisImg from "@/assets/designers/atelier-demichelis.jpg";
 import kikoLopezImg from "@/assets/designers/kiko-lopez.jpg";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
 import maartenVrolijkImg from "@/assets/designers/maarten-vrolijk.png";
+import matthieuGicquelImg from "@/assets/designers/matthieu-gicquel.jpg";
 
 // Curators' Picks images
 import demichelisPick1 from "@/assets/curators-picks/demichelis-1.jpg";
@@ -207,7 +208,7 @@ const collectibleDesigners = [
     id: "matthieu-gicquel",
     name: "Matthieu Gicquel",
     specialty: "Artisan Glass & Tableware",
-    image: kikoLopezImg, // Placeholder - replace with actual image
+    image: matthieuGicquelImg,
     biography:
       "Matthieu Gicquel is a French glass artist renowned for his exceptional tableware and decorative objects that blend traditional craftsmanship with contemporary design. His signature pieces feature textured glass adorned with precious gold leaf details, creating functional art that elevates everyday dining into a refined experience.",
     notableWorks: "Texture Glass with Gold Leaf rim Géode, Artisan Tableware Collection",
