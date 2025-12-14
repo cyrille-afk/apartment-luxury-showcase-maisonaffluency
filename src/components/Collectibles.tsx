@@ -224,14 +224,6 @@ const collectibleDesigners = [
         dimensions: "Ø32 cm",
         edition: "Unique Piece"
       },
-      { 
-        image: kikoLopezImg, // Placeholder - replace with actual image
-        title: "Crystalline Bowl", 
-        category: "Tableware",
-        materials: "Hand-blown glass • Textured surface",
-        dimensions: "Ø28 × H12 cm",
-        edition: "Unique Piece"
-      },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/matthieugicquel" },
