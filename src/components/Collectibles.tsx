@@ -145,7 +145,7 @@ const collectibleDesigners = [
       { 
         image: maartenVrolijkVessel,
         title: "Sculptural Glass Vessel", 
-        category: "Glass Art",
+        category: "Decorative Object",
         materials: "Handblown & sculpted glass, unique piece with certificate",
         dimensions: "H 52 cm × W 40 cm × D 41 cm",
         edition: "Unique Piece"
