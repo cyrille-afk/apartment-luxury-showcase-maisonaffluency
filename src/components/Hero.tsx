@@ -78,7 +78,7 @@ const Hero = () => {
     }} transition={{
       duration: 1,
       delay: 1.2
-    }} className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2">
+    }} className="absolute bottom-20 md:bottom-8 left-1/2 z-10 -translate-x-1/2">
         <div className="flex flex-col items-center gap-2">
           <span className="font-body text-xs uppercase tracking-widest text-cream/60">
             Scroll to Explore
