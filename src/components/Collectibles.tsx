@@ -184,13 +184,13 @@ const collectibleDesigners = [
     image: kikoLopezImg, // Placeholder - replace with actual image
     biography:
       "RoWin' Atelier is a French ceramics studio renowned for creating exceptional handcrafted pieces that blend traditional techniques with contemporary design. Each creation showcases meticulous attention to detail and a deep understanding of material properties.",
-    notableWorks: "Sculptural Ceramics, Artisan Vessels",
-    notableWorksLink: { text: "Sculptural Ceramics", galleryIndex: 0 },
+    notableWorks: "None II Table Lamp",
+    notableWorksLink: { text: "None II Table Lamp", galleryIndex: 0 },
     philosophy: "Every piece of clay holds the potential for extraordinary beauty when shaped by skilled hands.",
     curatorPicks: [
       { 
         image: kikoLopezImg, // Placeholder - replace with actual image
-        title: "Sculptural Ceramic Vessel", 
+        title: "None II Table Lamp", 
         category: "Decorative Object",
         materials: "Hand-formed stoneware • Natural glazes",
         dimensions: "H40 × Ø25 cm",
