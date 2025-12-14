@@ -39,7 +39,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.6,
               delay: 0.2
-            }} className="mb-2 uppercase tracking-[0.3em] text-primary text-sm md:text-lg font-serif">OVERVIEW</motion.p>
+            }} className="mb-2 uppercase tracking-[0.3em] text-primary text-sm md:text-lg font-serif">GALLERY OVERVIEW</motion.p>
               
               <motion.h2 initial={{
               opacity: 0,
