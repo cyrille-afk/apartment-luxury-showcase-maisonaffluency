@@ -41,6 +41,10 @@ import pendhapaPick1 from "@/assets/curators-picks/pendhapa-1.jpg";
 import pendhapaPick2 from "@/assets/curators-picks/pendhapa-2.jpg";
 import pendhapaPick4 from "@/assets/curators-picks/pendhapa-4.jpg";
 import pendhapaPick5 from "@/assets/curators-picks/pendhapa-5.jpg";
+import atelierFevrierPick1 from "@/assets/curators-picks/atelier-fevrier-1.png";
+import atelierFevrierPick2 from "@/assets/curators-picks/atelier-fevrier-2.png";
+import atelierFevrierPick3 from "@/assets/curators-picks/atelier-fevrier-3.png";
+import atelierFevrierPick4 from "@/assets/curators-picks/atelier-fevrier-4.png";
 
 const featuredDesigners = [
   {
@@ -195,6 +199,36 @@ const featuredDesigners = [
     notableWorksLink: { text: "Ricky Rug", galleryIndex: 0 },
     philosophy:
       "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
+    curatorPicks: [
+      { 
+        image: atelierFevrierPick1, 
+        title: "Ceramic", 
+        category: "Rug",
+        materials: "Hand-knotted wool & silk",
+        dimensions: "Custom dimensions available"
+      },
+      { 
+        image: atelierFevrierPick2, 
+        title: "Mushroom", 
+        category: "Rug",
+        materials: "Hand-knotted wool & silk",
+        dimensions: "Custom dimensions available"
+      },
+      { 
+        image: atelierFevrierPick3, 
+        title: "Nautilus", 
+        category: "Rug",
+        materials: "Hand-knotted wool & silk",
+        dimensions: "Custom dimensions available"
+      },
+      { 
+        image: atelierFevrierPick4, 
+        title: "Frequence 440", 
+        category: "Rug",
+        materials: "Hand-knotted wool & silk",
+        dimensions: "Custom dimensions available"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/atelierfevrier" },
       { type: "Curators' Picks" },
