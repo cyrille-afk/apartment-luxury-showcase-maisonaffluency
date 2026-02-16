@@ -221,7 +221,8 @@ const featuredDesigners = [
         title: "Mushroom", 
         category: "Rug",
         materials: "60% nettle, 40% silk — 100 knots/sq.inch",
-        dimensions: "Custom dimensions available"
+        dimensions: "Custom dimensions available",
+        description: "Emma Donnersberg's work embodies a delicate balance of strength and softness. Her work features playful and soft shapes and forms that exudes harmony and sophistication. The Mushroom rug beautifully captures her distinct style and Atelier Février's detailed craftsmanship and precise execution, it is a testament to a collaborative challenge put to the test and masterfully executed."
       },
       { 
         image: atelierFevrierPick4, 
