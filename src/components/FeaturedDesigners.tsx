@@ -201,6 +201,13 @@ const featuredDesigners = [
       "We honor ancient textile traditions while creating works that speak to contemporary spaces and sensibilities.",
     curatorPicks: [
       { 
+        image: atelierFevrierPick3, 
+        title: "Nautilus", 
+        category: "Rug",
+        materials: "Hand-knotted wool & silk",
+        dimensions: "Custom dimensions available"
+      },
+      { 
         image: atelierFevrierPick1, 
         title: "Ceramic", 
         category: "Rug",
@@ -210,13 +217,6 @@ const featuredDesigners = [
       { 
         image: atelierFevrierPick2, 
         title: "Mushroom", 
-        category: "Rug",
-        materials: "Hand-knotted wool & silk",
-        dimensions: "Custom dimensions available"
-      },
-      { 
-        image: atelierFevrierPick3, 
-        title: "Nautilus", 
         category: "Rug",
         materials: "Hand-knotted wool & silk",
         dimensions: "Custom dimensions available"
