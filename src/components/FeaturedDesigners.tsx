@@ -270,6 +270,13 @@ const featuredDesigners = [
     philosophy: "Light should not merely illuminate—it should transform space into poetry.",
     curatorPicks: [
       {
+        image: emmanuelLevetStennePick5,
+        title: "Alabaster Pendant",
+        category: "Lighting",
+        materials: "Alabaster and slate",
+        dimensions: "Ø56 × H165 cm"
+      },
+      {
         image: emmanuelLevetStennePick1,
         title: "Bolchoï Console Black",
         category: "Furniture",
@@ -296,13 +303,6 @@ const featuredDesigners = [
         category: "Furniture",
         materials: "Oak or walnut top and base",
         dimensions: "L280 × W120 × H74 cm"
-      },
-      {
-        image: emmanuelLevetStennePick5,
-        title: "Alabaster Pendant",
-        category: "Lighting",
-        materials: "Alabaster and slate",
-        dimensions: "Ø56 × H165 cm"
       },
     ],
     links: [
