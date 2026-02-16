@@ -890,7 +890,7 @@ const FeaturedDesigners = () => {
                       }}
                     >
                       {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && !isZoomed && (
-                        <div className="text-center mb-2">
+                        <div className="text-left mb-2">
                           <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
                             {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
                           </span>
