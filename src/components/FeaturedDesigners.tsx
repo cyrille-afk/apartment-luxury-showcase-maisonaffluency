@@ -220,7 +220,7 @@ const featuredDesigners = [
         image: atelierFevrierPick2, 
         title: "Mushroom", 
         category: "Rug",
-        materials: "Hand-knotted wool & silk",
+        materials: "60% nettle, 40% silk — 100 knots/sq.inch",
         dimensions: "Custom dimensions available"
       },
       { 
