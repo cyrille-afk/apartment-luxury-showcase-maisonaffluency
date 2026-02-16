@@ -211,7 +211,7 @@ const featuredDesigners = [
         image: atelierFevrierPick1, 
         title: "Ceramic", 
         category: "Rug",
-        materials: "Hand-knotted wool & silk",
+        materials: "90% wool, 10% silk — 100 knots/sq. inch",
         dimensions: "Custom dimensions available"
       },
       { 
