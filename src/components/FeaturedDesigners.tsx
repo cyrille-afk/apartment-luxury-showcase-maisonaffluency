@@ -50,6 +50,11 @@ import emmanuelLevetStennePick2 from "@/assets/curators-picks/emmanuel-levet-ste
 import emmanuelLevetStennePick3 from "@/assets/curators-picks/emmanuel-levet-stenne-3.jpg";
 import emmanuelLevetStennePick4 from "@/assets/curators-picks/emmanuel-levet-stenne-4.jpg";
 import emmanuelLevetStennePick5 from "@/assets/curators-picks/emmanuel-levet-stenne-5.jpg";
+import emmanuelBabledPick1 from "@/assets/curators-picks/emmanuel-babled-1.jpg";
+import emmanuelBabledPick2 from "@/assets/curators-picks/emmanuel-babled-2.jpg";
+import emmanuelBabledPick3 from "@/assets/curators-picks/emmanuel-babled-3.jpg";
+import emmanuelBabledPick4 from "@/assets/curators-picks/emmanuel-babled-4.jpg";
+import emmanuelBabledPick5 from "@/assets/curators-picks/emmanuel-babled-5.jpg";
 
 const featuredDesigners = [
   {
@@ -320,6 +325,43 @@ const featuredDesigners = [
     notableWorks: "Osmosi Series Sculptured Book Cover, Glass Sculptures, Marble Objects",
     notableWorksLink: { text: "Osmosi Series", galleryIndex: 2 },
     philosophy: "I explore the boundaries between art and design, creating objects that challenge perception and celebrate material beauty.",
+    curatorPicks: [
+      {
+        image: emmanuelBabledPick1,
+        title: "Osmosi Console",
+        category: "Furniture",
+        materials: "Carrara marble, Murano blown glass",
+        dimensions: "H80 × L160 × D35 cm"
+      },
+      {
+        image: emmanuelBabledPick2,
+        title: "Coral Coffee Table",
+        category: "Furniture",
+        materials: "Bianco Carrara marble, plexiglass",
+        dimensions: "L150 × W100 × H28 cm"
+      },
+      {
+        image: emmanuelBabledPick3,
+        title: "Pyros Marini Vase",
+        category: "Decorative Object",
+        materials: "Murano blown glass (Venini)",
+        dimensions: "H45 × Ø30 cm"
+      },
+      {
+        image: emmanuelBabledPick4,
+        title: "Quark Bronze Coffee Table",
+        category: "Furniture",
+        materials: "Bronze",
+        dimensions: "H30 × L122.5 × W83 cm"
+      },
+      {
+        image: emmanuelBabledPick5,
+        title: "Siliceaarenaria Vessels",
+        category: "Decorative Object",
+        materials: "Murano blown glass (Venini)",
+        dimensions: "Ø25 × H22 cm (each)"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/emmanuelbabled" },
       { type: "Curators' Picks" },
