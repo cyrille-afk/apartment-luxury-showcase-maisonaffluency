@@ -204,7 +204,7 @@ const featuredDesigners = [
         image: atelierFevrierPick3, 
         title: "Nautilus", 
         category: "Rug",
-        materials: "Hand-knotted wool & silk",
+        materials: "40% wool, 60% silk — 125 knots/sq.inch",
         dimensions: "Custom dimensions available"
       },
       { 
