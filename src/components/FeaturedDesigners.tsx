@@ -228,8 +228,9 @@ const featuredDesigners = [
         image: atelierFevrierPick4, 
         title: "Frequence 440", 
         category: "Rug",
-        materials: "Hand-knotted wool & silk",
-        dimensions: "Custom dimensions available"
+        materials: "15% wool, 85% silk — 125 knots/sq. inch",
+        dimensions: "Custom dimensions available",
+        description: "Designed by Sebastian Leon of Atelier d'Amis. The Fréquence rug collection is inspired by the enigmatic vibrational phenomenon called \"cymatics\", which correlates sound frequencies with geometric mandalas. The individual rugs are named after the frequencies of the A note – the standard for tuning – in three consecutive octaves."
       },
     ],
     links: [
