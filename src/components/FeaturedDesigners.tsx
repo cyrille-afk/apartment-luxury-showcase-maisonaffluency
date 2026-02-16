@@ -912,14 +912,13 @@ const FeaturedDesigners = () => {
                       )}
                       <h3 className="text-sm md:text-base font-serif text-white mb-1">
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
+                        {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
+                          <span className="text-white/60 font-body text-xs md:text-sm"> ({curatorPicksDesigner.curatorPicks[curatorPickIndex].materials})</span>
+                        )}
                       </h3>
                       {(curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions) && (
                         <div className="mt-2 max-w-xl space-y-1">
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
-                            <p className="text-xs md:text-sm text-white/60 font-body">
-                              {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials}
-                            </p>
-                          )}
+                          
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions && (
                             <p className="text-xs md:text-sm text-white/40 font-body italic">
                               {curatorPicksDesigner.curatorPicks[curatorPickIndex].dimensions}
