@@ -614,6 +614,20 @@ const Collectibles = () => {
                   className={`relative overflow-auto transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}
                   onClick={handleDoubleTap}
                 >
+                  {!isZoomed && (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition) && (
+                    <div className="flex items-center gap-2 mb-2">
+                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && (
+                        <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
+                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
+                        </span>
+                      )}
+                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition && (
+                        <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
+                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].edition}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <img 
                     src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                     alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
@@ -636,18 +650,6 @@ const Collectibles = () => {
                   </button>
                 </div>
                 <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && (
-                      <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
-                        {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
-                      </span>
-                    )}
-                    {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition && (
-                      <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
-                        {curatorPicksDesigner.curatorPicks[curatorPickIndex].edition}
-                      </span>
-                    )}
-                  </div>
                   <h3 className="text-sm md:text-base font-serif text-white mb-1">
                     {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
                   </h3>
