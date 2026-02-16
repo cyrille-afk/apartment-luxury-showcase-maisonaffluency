@@ -889,6 +889,13 @@ const FeaturedDesigners = () => {
                         lastTapRef.current = now;
                       }}
                     >
+                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && !isZoomed && (
+                        <div className="text-center mb-2">
+                          <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
+                            {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
+                          </span>
+                        </div>
+                      )}
                       <img 
                         src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                         alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
@@ -908,11 +915,6 @@ const FeaturedDesigners = () => {
                       </button>
                     </div>
                     <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
-                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && (
-                        <span className="inline-block px-2 py-0.5 mb-1 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
-                        </span>
-                      )}
                       <h3 className="text-sm md:text-base font-serif text-white mb-1">
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
