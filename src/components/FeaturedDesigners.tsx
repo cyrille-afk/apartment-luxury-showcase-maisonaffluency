@@ -45,6 +45,11 @@ import atelierFevrierPick1 from "@/assets/curators-picks/atelier-fevrier-1.png";
 import atelierFevrierPick2 from "@/assets/curators-picks/atelier-fevrier-2.png";
 import atelierFevrierPick3 from "@/assets/curators-picks/atelier-fevrier-3.png";
 import atelierFevrierPick4 from "@/assets/curators-picks/atelier-fevrier-4.png";
+import emmanuelLevetStennePick1 from "@/assets/curators-picks/emmanuel-levet-stenne-1.jpg";
+import emmanuelLevetStennePick2 from "@/assets/curators-picks/emmanuel-levet-stenne-2.jpg";
+import emmanuelLevetStennePick3 from "@/assets/curators-picks/emmanuel-levet-stenne-3.jpg";
+import emmanuelLevetStennePick4 from "@/assets/curators-picks/emmanuel-levet-stenne-4.jpg";
+import emmanuelLevetStennePick5 from "@/assets/curators-picks/emmanuel-levet-stenne-5.jpg";
 
 const featuredDesigners = [
   {
@@ -263,6 +268,43 @@ const featuredDesigners = [
     notableWorks: "Alabaster Pendant Light, Sculptural Lighting Collection",
     notableWorksLink: { text: "Alabaster Pendant Light", galleryIndex: 2 },
     philosophy: "Light should not merely illuminate—it should transform space into poetry.",
+    curatorPicks: [
+      {
+        image: emmanuelLevetStennePick1,
+        title: "Bolchoï Console Black",
+        category: "Furniture",
+        materials: "Lassa marble top • Lacquered aluminium & Lassa marble legs",
+        dimensions: "L145 × W40 × H75 cm"
+      },
+      {
+        image: emmanuelLevetStennePick2,
+        title: "Jelly Side Table",
+        category: "Furniture",
+        materials: "Alabaster and blown glass",
+        dimensions: "Ø41 × H55 cm"
+      },
+      {
+        image: emmanuelLevetStennePick3,
+        title: "Full Moon Pendant",
+        category: "Lighting",
+        materials: "Alabaster and plaster",
+        dimensions: "Ø50 cm / Ø36 cm"
+      },
+      {
+        image: emmanuelLevetStennePick4,
+        title: "Dress Up Dining Table / Wood",
+        category: "Furniture",
+        materials: "Oak or walnut top and base",
+        dimensions: "L280 × W120 × H74 cm"
+      },
+      {
+        image: emmanuelLevetStennePick5,
+        title: "Alabaster Pendant",
+        category: "Lighting",
+        materials: "Alabaster and slate",
+        dimensions: "Ø56 × H165 cm"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/emanuellelevetstenne" },
       { type: "Curators' Picks" },
