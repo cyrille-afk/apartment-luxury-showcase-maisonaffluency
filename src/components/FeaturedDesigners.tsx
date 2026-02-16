@@ -205,7 +205,8 @@ const featuredDesigners = [
         title: "Nautilus", 
         category: "Rug",
         materials: "40% wool, 60% silk — 125 knots/sq.inch",
-        dimensions: "Custom dimensions available"
+        dimensions: "Custom dimensions available",
+        description: "Inspired by and named after Nautilus, a beautiful seashell, this rug is thought provoking and possesses the power to make you think beyond the norms of ordinary. It symbolises an amalgamation of two beautiful bodies together with the mother of pearl, therefore culminating into something unique and distinct."
       },
       { 
         image: atelierFevrierPick1, 
