@@ -212,7 +212,8 @@ const featuredDesigners = [
         title: "Ceramic", 
         category: "Rug",
         materials: "90% wool, 10% silk — 100 knots/sq. inch",
-        dimensions: "Custom dimensions available"
+        dimensions: "Custom dimensions available",
+        description: "Evocative of one of the most ancient greek ceramics, the François vase, initially discovered in pieces then eagerly put back together (so it could tell its story). Its irregularity and ostensibly mended areas – resonant with the Japanese Kintsugi practice – mirror the beauty in its rawest, most vulnerable state."
       },
       { 
         image: atelierFevrierPick2, 
@@ -922,6 +923,11 @@ const FeaturedDesigners = () => {
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions && (
                             <p className="text-xs md:text-sm text-white/40 font-body italic">
                               {curatorPicksDesigner.curatorPicks[curatorPickIndex].dimensions}
+                            </p>
+                          )}
+                          {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.description && (
+                            <p className="text-xs md:text-sm text-white/50 font-body leading-relaxed max-w-lg mt-2">
+                              {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).description}
                             </p>
                           )}
                         </div>
