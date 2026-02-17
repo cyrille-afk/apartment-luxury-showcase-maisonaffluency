@@ -10,7 +10,8 @@ import {
   Mail,
   Menu,
   X,
-  ChevronUp
+  ChevronUp,
+  Gem
 } from "lucide-react";
 
 const sections = [
@@ -19,6 +20,7 @@ const sections = [
   { id: "gallery", label: "Gallery", icon: Image },
   { id: "curating-team", label: "Team", icon: Users },
   { id: "designers", label: "Designers", icon: Palette },
+  { id: "collectibles", label: "Collectibles", icon: Gem },
   { id: "brands", label: "Brands", icon: Building2 },
   { id: "details", label: "Trade", icon: FileText },
   { id: "contact", label: "Contact", icon: Mail },
