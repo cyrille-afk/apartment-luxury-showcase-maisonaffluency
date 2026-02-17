@@ -329,7 +329,18 @@ const Collectibles = () => {
 
   const openCuratorPicks = (designer: typeof collectibleDesigners[0]) => {
     if (designer.curatorPicks && designer.curatorPicks.length > 0) {
-      setCuratorPicksDesigner(designer);
+      // Filter picks based on active category/subcategory filter
+      let filteredPicks = designer.curatorPicks;
+      if (selectedSubcategory) {
+        filteredPicks = designer.curatorPicks.filter((pick: any) => pick.subcategory === selectedSubcategory);
+      } else if (selectedCategory) {
+        filteredPicks = designer.curatorPicks.filter((pick: any) => pick.category === selectedCategory);
+      }
+      if (filteredPicks.length > 0) {
+        setCuratorPicksDesigner({ ...designer, curatorPicks: filteredPicks });
+      } else {
+        setCuratorPicksDesigner(designer);
+      }
       setCuratorPickIndex(0);
       setIsZoomed(false);
     }
