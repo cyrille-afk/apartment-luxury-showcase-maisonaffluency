@@ -24,7 +24,7 @@ import demichelisPick2 from "@/assets/curators-picks/demichelis-2.jpg";
 import demichelisPick3 from "@/assets/curators-picks/demichelis-3.jpg";
 import demichelisPick4 from "@/assets/curators-picks/demichelis-4.jpg";
 import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode.jpg";
-import maartenVrolijkVessel from "@/assets/curators-picks/maarten-vrolijk-vessel.jpg";
+import maartenVrolijkVessel from "@/assets/curators-picks/maarten-vrolijk-sakura.jpg";
 import kikoLopezMirror from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
 import rowinAtelierImg from "@/assets/designers/rowin-atelier.jpg";
@@ -153,7 +153,7 @@ const collectibleDesigners = [
     curatorPicks: [
       { 
         image: maartenVrolijkVessel,
-        title: "Sculptural Glass Vessel", 
+        title: "Sakura TRP 22001", 
         category: "Decorative Object",
         subcategory: "Vessels",
         materials: "Handblown & sculpted glass, unique piece with certificate",
