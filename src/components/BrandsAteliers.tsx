@@ -743,59 +743,61 @@ const BrandsAteliers = () => {
                       </button>
                     )}
                   </div>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                  <div className="space-y-1 max-h-80 overflow-y-auto">
                     {categories.map((category) => (
-                      <label
-                        key={category}
-                        className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
-                      >
-                        <Checkbox
-                          checked={selectedCategory === category}
-                          onCheckedChange={() => {
-                            if (selectedCategory === category) {
-                              setSelectedCategory(null);
-                              setSelectedSubcategory(null);
-                            } else {
-                              setSelectedCategory(category);
-                              setSelectedSubcategory(null);
-                            }
-                          }}
-                        />
-                        <span className="text-sm text-foreground font-body">{category}</span>
-                      </label>
+                      <div key={category}>
+                        <label
+                          className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
+                        >
+                          <Checkbox
+                            checked={selectedCategory === category}
+                            onCheckedChange={() => {
+                              if (selectedCategory === category) {
+                                setSelectedCategory(null);
+                                setSelectedSubcategory(null);
+                              } else {
+                                setSelectedCategory(category);
+                                setSelectedSubcategory(null);
+                              }
+                            }}
+                          />
+                          <span className="text-sm text-foreground font-body">{category}</span>
+                        </label>
+                        {selectedCategory === category && categoryMap[category]?.length > 0 && (
+                          <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
+                            <button
+                              onClick={() => setSelectedSubcategory(null)}
+                              className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                                !selectedSubcategory
+                                  ? 'text-primary'
+                                  : 'text-muted-foreground/60 hover:text-primary'
+                              }`}
+                            >
+                              All {category}
+                            </button>
+                            {categoryMap[category].map(sub => (
+                              <button
+                                key={sub}
+                                onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
+                                className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                                  selectedSubcategory === sub
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground/60 hover:text-primary'
+                                }`}
+                              >
+                                {sub}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </PopoverContent>
               </Popover>
             </div>
             {/* Subcategories row - shown when category selected via popover */}
-            {selectedCategory && categoryMap[selectedCategory]?.length > 0 && (
-              <div className="flex flex-wrap items-center gap-3 md:gap-5 mt-3">
-                <button
-                  onClick={() => setSelectedSubcategory(null)}
-                  className={`text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 ${
-                    !selectedSubcategory
-                      ? 'text-primary'
-                      : 'text-muted-foreground/50 hover:text-primary'
-                  }`}
-                >
-                  All {selectedCategory}
-                </button>
-                {categoryMap[selectedCategory].map(sub => (
-                  <button
-                    key={sub}
-                    onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
-                    className={`text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 whitespace-nowrap ${
-                      selectedSubcategory === sub
-                        ? 'text-primary'
-                        : 'text-muted-foreground/50 hover:text-primary'
-                    }`}
-                  >
-                    {sub}
-                  </button>
-                ))}
-              </div>
-            )}
+            
             {(searchQuery || selectedCategory) && (
               <p className="text-left text-[10px] text-muted-foreground/50 mt-2 font-body tracking-wider">
                 {consolidatedBrands.length} brand{consolidatedBrands.length !== 1 ? 's' : ''} found
