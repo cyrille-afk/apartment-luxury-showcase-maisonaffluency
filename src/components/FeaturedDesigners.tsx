@@ -77,8 +77,8 @@ const featuredDesigners = [
         image: alexanderLamontPick3, 
         title: "Casque",
         subtitle: "Bar Cabinet",
-        category: "Furniture",
-        tags: ["Furniture", "Cabinet"],
+        category: "Storage",
+        tags: ["Storage", "Cabinet"],
         materials: "Straw marquetry • Hammered bronze handles • Lacquered interior",
         dimensions: "H110 × W120 × D45 cm"
       },
@@ -95,8 +95,8 @@ const featuredDesigners = [
         image: alexanderLamontPick4, 
         title: "Dais",
         subtitle: "Lounge Chair",
-        category: "Furniture",
-        tags: ["Furniture", "Chair"],
+        category: "Seating",
+        tags: ["Seating", "Chair"],
         materials: "Bouclé upholstery • Shagreen leather • Straw marquetry accents",
         dimensions: "H75 × W80 × D85 cm"
       },
@@ -189,8 +189,8 @@ const featuredDesigners = [
         image: pendhapaPick1, 
         title: "Mangala",
         subtitle: "Coffee Table",
-        category: "Furniture",
-        tags: ["Furniture", "Coffee Table"],
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
         materials: "Black teak • Lava stone crème brûlée tabletop",
         dimensions: "L190 × W180 × H35 cm"
       },
@@ -198,8 +198,8 @@ const featuredDesigners = [
         image: pendhapaPick4, 
         title: "Akar",
         subtitle: "Dining Chair",
-        category: "Furniture",
-        tags: ["Furniture", "Chair"],
+        category: "Seating",
+        tags: ["Seating", "Chair"],
         materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery",
         dimensions: "L49 × W52 × H85 cm"
       },
@@ -207,8 +207,8 @@ const featuredDesigners = [
         image: pendhapaPick5, 
         title: "Gingko",
         subtitle: "Side Table",
-        category: "Furniture",
-        tags: ["Furniture", "Side Table"],
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
         materials: "Natural oak • White lacquer tabletop",
         dimensions: "L75 × W48 × H50 cm"
       },
@@ -216,8 +216,8 @@ const featuredDesigners = [
         image: pendhapaPick2, 
         title: "Anemos",
         subtitle: "Coffee Table",
-        category: "Furniture",
-        tags: ["Furniture", "Coffee Table"],
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
         materials: "Black oak • Black lacquer tabletop",
         dimensions: "L110 × W80 × H35 cm"
       },
@@ -243,8 +243,8 @@ const featuredDesigners = [
         image: atelierFevrierPick3, 
         title: "Nautilus",
         subtitle: "Hand-knotted Rug",
-        category: "Rug",
-        tags: ["Rug", "Textile"],
+        category: "Rugs",
+        tags: ["Rugs", "Textile"],
         materials: "40% wool, 60% silk — 125 knots/sq.inch",
         dimensions: "Custom dimensions available",
         description: "Inspired by and named after Nautilus, a beautiful seashell, this rug is thought provoking and possesses the power to make you think beyond the norms of ordinary. It symbolises an amalgamation of two beautiful bodies together with the mother of pearl, therefore culminating into something unique and distinct."
@@ -253,8 +253,8 @@ const featuredDesigners = [
         image: atelierFevrierPick1, 
         title: "Ceramic",
         subtitle: "Hand-knotted Rug",
-        category: "Rug",
-        tags: ["Rug", "Textile"],
+        category: "Rugs",
+        tags: ["Rugs", "Textile"],
         materials: "90% wool, 10% silk — 100 knots/sq. inch",
         dimensions: "Custom dimensions available",
         description: "Evocative of one of the most ancient greek ceramics, the François vase, initially discovered in pieces then eagerly put back together (so it could tell its story). Its irregularity and ostensibly mended areas – resonant with the Japanese Kintsugi practice – mirror the beauty in its rawest, most vulnerable state."
@@ -263,8 +263,8 @@ const featuredDesigners = [
         image: atelierFevrierPick2, 
         title: "Mushroom",
         subtitle: "Hand-knotted Rug",
-        category: "Rug",
-        tags: ["Rug", "Textile"],
+        category: "Rugs",
+        tags: ["Rugs", "Textile"],
         materials: "60% nettle, 40% silk — 100 knots/sq.inch",
         dimensions: "Custom dimensions available",
         description: "Emma Donnersberg's work embodies a delicate balance of strength and softness. Her work features playful and soft shapes and forms that exudes harmony and sophistication. The Mushroom rug beautifully captures her distinct style and Atelier Février's detailed craftsmanship and precise execution, it is a testament to a collaborative challenge put to the test and masterfully executed."
@@ -273,8 +273,8 @@ const featuredDesigners = [
         image: atelierFevrierPick4, 
         title: "Frequence 440",
         subtitle: "Hand-knotted Rug",
-        category: "Rug",
-        tags: ["Rug", "Textile"],
+        category: "Rugs",
+        tags: ["Rugs", "Textile"],
         materials: "15% wool, 85% silk — 125 knots/sq. inch",
         dimensions: "Custom dimensions available",
         description: "Designed by Sebastian Leon of Atelier d'Amis. The Fréquence rug collection is inspired by the enigmatic vibrational phenomenon called \"cymatics\", which correlates sound frequencies with geometric mandalas. The individual rugs are named after the frequencies of the A note – the standard for tuning – in three consecutive octaves."
@@ -324,8 +324,8 @@ const featuredDesigners = [
         image: emmanuelLevetStennePick1,
         title: "Bolchoï",
         subtitle: "Console Black",
-        category: "Furniture",
-        tags: ["Furniture", "Console"],
+        category: "Tables",
+        tags: ["Tables", "Console"],
         materials: "Lassa marble top • Lacquered aluminium & Lassa marble legs",
         dimensions: "L145 × W40 × H75 cm"
       },
@@ -333,8 +333,8 @@ const featuredDesigners = [
         image: emmanuelLevetStennePick2,
         title: "Jelly",
         subtitle: "Side Table",
-        category: "Furniture",
-        tags: ["Furniture", "Side Table"],
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
         materials: "Alabaster and blown glass",
         dimensions: "Ø41 × H55 cm"
       },
@@ -351,8 +351,8 @@ const featuredDesigners = [
         image: emmanuelLevetStennePick4,
         title: "Dress Up",
         subtitle: "Dining Table / Wood",
-        category: "Furniture",
-        tags: ["Furniture", "Dining Table"],
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
         materials: "Oak or walnut top and base",
         dimensions: "L280 × W120 × H74 cm"
       },
@@ -377,8 +377,8 @@ const featuredDesigners = [
         image: emmanuelBabledPick1,
         title: "Osmosi",
         subtitle: "Console",
-        category: "Furniture",
-        tags: ["Furniture", "Console"],
+        category: "Tables",
+        tags: ["Tables", "Console"],
         materials: "Carrara marble, Murano blown glass",
         dimensions: "H80 × L160 × D35 cm"
       },
@@ -386,8 +386,8 @@ const featuredDesigners = [
         image: emmanuelBabledPick2,
         title: "Coral",
         subtitle: "Coffee Table",
-        category: "Furniture",
-        tags: ["Furniture", "Coffee Table"],
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
         materials: "Bianco Carrara marble, plexiglass",
         dimensions: "L150 × W100 × H28 cm"
       },
@@ -404,8 +404,8 @@ const featuredDesigners = [
         image: emmanuelBabledPick4,
         title: "Quark Bronze",
         subtitle: "Coffee Table",
-        category: "Furniture",
-        tags: ["Furniture", "Coffee Table"],
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
         materials: "Bronze",
         dimensions: "H30 × L122.5 × W83 cm"
       },
@@ -440,40 +440,40 @@ const featuredDesigners = [
         image: hamreiPick1,
         title: "PEDRO Coffee Table",
         subtitle: "Limited Edition Aqua",
-        category: "Furniture",
-        tags: ["Furniture", "Coffee Table"],
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
         materials: "Solid cast bronze, hand-patinated aqua finish",
         dimensions: "Ø60 × H38 cm"
       },
       {
         image: hamreiPick2,
         title: "ANJOS Sideboard",
-        category: "Furniture",
-        tags: ["Furniture", "Sideboard"],
+        category: "Storage",
+        tags: ["Storage", "Sideboard"],
         materials: "Solid gouged oak, solid-cast blackened brass",
         dimensions: "H75 × L120 × D45 cm"
       },
       {
         image: hamreiPick3,
         title: "FUN GUY Side Tables",
-        category: "Furniture",
-        tags: ["Furniture", "Side Table"],
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
         materials: "Solid cast bronze, hand-textured and finished",
         dimensions: "Small: Ø28 × H48 cm / Tall: Ø37 × H60 cm"
       },
       {
         image: hamreiPick4,
         title: "MIRRA Side Table",
-        category: "Furniture",
-        tags: ["Furniture", "Side Table"],
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
         materials: "Textured blackened brass, solid Murano glass top (Ocean Blue)",
         dimensions: "Ø36 × H48 cm (glass Ø32 cm)"
       },
       {
         image: hamreiPick5,
         title: "TRIO Dining Table",
-        category: "Furniture",
-        tags: ["Furniture", "Dining Table"],
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
         materials: "Hand-chiseled stone top, textured earthenware ceramic base",
         dimensions: "Ø120 × H75 cm (customisable)"
       },
@@ -661,14 +661,17 @@ const FeaturedDesigners = () => {
   const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
 
+  // Fixed category order
+  const CATEGORY_ORDER = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"];
+
   // Collect categories and subcategories from curators' picks
   const categoryMap = useMemo(() => {
     const map: Record<string, Set<string>> = {};
     featuredDesigners.forEach(designer => {
       designer.curatorPicks?.forEach((pick: any) => {
         if (pick.tags && pick.tags.length >= 2) {
-          const category = pick.tags[0]; // e.g. "Furniture", "Lighting"
-          const subcategory = pick.tags[1]; // e.g. "Sconce", "Table Lamp"
+          const category = pick.tags[0];
+          const subcategory = pick.tags[1];
           if (!map[category]) map[category] = new Set();
           map[category].add(subcategory);
         } else if (pick.tags && pick.tags.length === 1) {
@@ -677,15 +680,26 @@ const FeaturedDesigners = () => {
         }
       });
     });
-    // Convert sets to sorted arrays
     const result: Record<string, string[]> = {};
-    Object.keys(map).sort().forEach(cat => {
-      result[cat] = Array.from(map[cat]).sort();
+    CATEGORY_ORDER.forEach(cat => {
+      if (map[cat]) {
+        result[cat] = Array.from(map[cat]).sort();
+      }
+    });
+    // Include any categories not in the fixed order
+    Object.keys(map).forEach(cat => {
+      if (!result[cat]) {
+        result[cat] = Array.from(map[cat]).sort();
+      }
     });
     return result;
   }, []);
 
-  const categories = useMemo(() => Object.keys(categoryMap), [categoryMap]);
+  const categories = useMemo(() => {
+    const ordered = CATEGORY_ORDER.filter(cat => categoryMap[cat]);
+    const extra = Object.keys(categoryMap).filter(cat => !CATEGORY_ORDER.includes(cat));
+    return [...ordered, ...extra];
+  }, [categoryMap]);
 
   const filteredDesigners = useMemo(() => {
     let designers = featuredDesigners;
