@@ -668,7 +668,7 @@ const Collectibles = () => {
                     </div>
                   )}
                   <p className="mt-12 text-xs text-white font-body italic">
-                    For further details, please request our catalogue at{" "}
+                    For further details, please contact{" "}
                     <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/80 transition-colors">
                       concierge@myaffluency.com
                     </a>
