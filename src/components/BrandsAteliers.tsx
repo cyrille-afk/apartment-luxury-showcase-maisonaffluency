@@ -851,16 +851,6 @@ const BrandsAteliers = () => {
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-1 justify-end max-w-[120px] flex-shrink-0 ml-3">
-                  {brand.categories.map((category, catIndex) => (
-                    <span 
-                      key={catIndex}
-                      className="text-[9px] md:text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full uppercase tracking-wider"
-                    >
-                      {category}
-                    </span>
-                  ))}
-                </div>
               </div>
               
               <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-3 line-clamp-3">
