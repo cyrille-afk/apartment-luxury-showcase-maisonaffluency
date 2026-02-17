@@ -656,7 +656,8 @@ const featuredDesigners = [
         category: "Tables",
         tags: ["Tables", "Console"],
         materials: "Oak • Lacquer",
-        dimensions: "W120 × H80 × D45 cm"
+        dimensions: "W120 × H80 × D45 cm",
+        description: "The guéridon and console J.P.D are a contemporary reinterpretation of an 18th-century oval side table by master cabinetmaker Jean-Pierre Dusautoy (mastered in 1779). Entirely handcrafted in oak or lacquered wood, their deceptively simple forms blend historical reference with modern craftsmanship subtly exploring the interplay between structure and surface."
       },
       {
         image: leoSentouPickGJ,
