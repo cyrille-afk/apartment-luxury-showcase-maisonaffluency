@@ -692,7 +692,8 @@ const featuredDesigners = [
         category: "Seating",
         tags: ["Seating", "Armchair"],
         materials: "Plush upholstery • Oak or bronze feet",
-        dimensions: "W90 × H80 × D81 cm"
+        dimensions: "W90 × H80 × D81 cm",
+        description: "The Fauteuil L.D takes its inspiration from an elegant oval bergère by Parisian master menuisier Louis Delanois (1731 - 1792). Made entirely by hand in Europe by a team of skilled artisans, the seat is upholstered in mohair, and rests on a set of four gauged bronze feet. The original medallion and arm bolsters found in classical Louis XVI furniture, have been simplified as part of the armchairs plush upholstery, thus becoming a sculptural contemporary echo of what over two centuries has come to define the iconic French style."
       },
     ],
     links: [
