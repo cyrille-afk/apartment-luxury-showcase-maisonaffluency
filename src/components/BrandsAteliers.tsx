@@ -667,8 +667,11 @@ const BrandsAteliers = () => {
     const gallerySection = document.getElementById('gallery');
     if (gallerySection) {
       gallerySection.scrollIntoView({ behavior: 'smooth' });
-      sessionStorage.setItem('openGalleryIndex', galleryIndex.toString());
-      sessionStorage.setItem('gallerySourceId', `brand-${brandName.replace(/\s+/g, '-').toLowerCase()}`);
+      // Delay setting sessionStorage so the lightbox opens after the scroll completes
+      setTimeout(() => {
+        sessionStorage.setItem('openGalleryIndex', galleryIndex.toString());
+        sessionStorage.setItem('gallerySourceId', `brand-${brandName.replace(/\s+/g, '-').toLowerCase()}`);
+      }, 600);
     }
   };
 
