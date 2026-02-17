@@ -395,29 +395,37 @@ const featuredDesigners = [
       },
       {
         image: hamreiPick2,
-        title: "ANJOS Sideboard",
+        title: "ANJOS",
+        subtitle: "Sideboard",
         category: "Furniture",
+        tags: ["Furniture", "Sideboard"],
         materials: "Solid gouged oak, solid-cast blackened brass",
         dimensions: "H75 × L120 × D45 cm"
       },
       {
         image: hamreiPick3,
-        title: "FUN GUY Side Tables",
+        title: "FUN GUY",
+        subtitle: "Side Tables",
         category: "Furniture",
+        tags: ["Furniture", "Side Table"],
         materials: "Solid cast bronze, hand-textured and finished",
         dimensions: "Small: Ø28 × H48 cm / Tall: Ø37 × H60 cm"
       },
       {
         image: hamreiPick4,
-        title: "MIRRA Side Table",
+        title: "MIRRA",
+        subtitle: "Side Table",
         category: "Furniture",
+        tags: ["Furniture", "Side Table"],
         materials: "Textured blackened brass, solid Murano glass top (Ocean Blue)",
         dimensions: "Ø36 × H48 cm (glass Ø32 cm)"
       },
       {
         image: hamreiPick5,
-        title: "TRIO Dining Table",
+        title: "TRIO",
+        subtitle: "Dining Table",
         category: "Furniture",
+        tags: ["Furniture", "Dining Table"],
         materials: "Hand-chiseled stone top, textured earthenware ceramic base",
         dimensions: "Ø120 × H75 cm (customisable)"
       },
