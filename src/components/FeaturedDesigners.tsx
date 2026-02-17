@@ -447,8 +447,7 @@ const featuredDesigners = [
       },
       {
         image: hamreiPick2,
-        title: "ANJOS",
-        subtitle: "Sideboard",
+        title: "ANJOS Sideboard",
         category: "Furniture",
         tags: ["Furniture", "Sideboard"],
         materials: "Solid gouged oak, solid-cast blackened brass",
@@ -456,8 +455,7 @@ const featuredDesigners = [
       },
       {
         image: hamreiPick3,
-        title: "FUN GUY",
-        subtitle: "Side Tables",
+        title: "FUN GUY Side Tables",
         category: "Furniture",
         tags: ["Furniture", "Side Table"],
         materials: "Solid cast bronze, hand-textured and finished",
@@ -465,8 +463,7 @@ const featuredDesigners = [
       },
       {
         image: hamreiPick4,
-        title: "MIRRA",
-        subtitle: "Side Table",
+        title: "MIRRA Side Table",
         category: "Furniture",
         tags: ["Furniture", "Side Table"],
         materials: "Textured blackened brass, solid Murano glass top (Ocean Blue)",
@@ -474,8 +471,7 @@ const featuredDesigners = [
       },
       {
         image: hamreiPick5,
-        title: "TRIO",
-        subtitle: "Dining Table",
+        title: "TRIO Dining Table",
         category: "Furniture",
         tags: ["Furniture", "Dining Table"],
         materials: "Hand-chiseled stone top, textured earthenware ceramic base",
