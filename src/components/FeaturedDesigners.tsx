@@ -518,13 +518,13 @@ const featuredDesigners = [
     philosophy: "Freehand glassblowing is an emotional conversation between hands, head, heart, and material. You start with a small seed and help it grow—it is a humble process.",
     curatorPicks: [
       {
-        image: jmwPick1,
-        title: "Cloud Bulle",
+        image: jmwPick3,
+        title: "Autumn Light",
         subtitle: "Pendant",
         category: "Lighting",
         tags: ["Lighting", "Pendant"],
-        materials: "Freehand blown glass • Brass fittings",
-        dimensions: "Approx. Ø30 × H35 cm (each)"
+        materials: "Freehand blown glass • Matte & satin finishes",
+        dimensions: "Various sizes available"
       },
       {
         image: jmwPick2,
@@ -536,13 +536,13 @@ const featuredDesigners = [
         dimensions: "Ø35 × H40 cm"
       },
       {
-        image: jmwPick3,
-        title: "Autumn Light",
+        image: jmwPick1,
+        title: "Cloud Bulle",
         subtitle: "Pendant",
         category: "Lighting",
         tags: ["Lighting", "Pendant"],
-        materials: "Freehand blown glass • Matte & satin finishes",
-        dimensions: "Various sizes available"
+        materials: "Freehand blown glass • Brass fittings",
+        dimensions: "Approx. Ø30 × H35 cm (each)"
       },
       {
         image: jmwPick4,
