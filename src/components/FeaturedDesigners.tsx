@@ -386,10 +386,10 @@ const featuredDesigners = [
     curatorPicks: [
       {
         image: hamreiPick1,
-        title: "TROMPO Sculpture",
-        category: "Decorative Object",
-        materials: "Solid cast bronze, hand-patinated green verdigris",
-        dimensions: "H25 × W40 × D35 cm"
+        title: "PEDRO Coffee Table – Limited Edition Aqua",
+        category: "Furniture",
+        materials: "Solid cast bronze, hand-patinated aqua finish",
+        dimensions: "Ø60 × H38 cm"
       },
       {
         image: hamreiPick2,
