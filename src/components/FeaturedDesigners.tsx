@@ -683,7 +683,8 @@ const featuredDesigners = [
         category: "Seating",
         tags: ["Seating", "Sofa"],
         materials: "Plush upholstery • Oak feet",
-        dimensions: "W240–320 × H70 × D95 cm"
+        dimensions: "W240–320 × H70 × D95 cm",
+        description: "The canapé C.S is a reinterpretation of a canapé droit by master menuisier Jean-Baptiste Claude Sené (1748–1803). Meticulously handcrafted by a team of skilled artisans, its silhouette explores the interplay between straight and curvaceous lines, creating a balanced, contemporary profile."
       },
       {
         image: leoSentouPickLD,
