@@ -558,6 +558,7 @@ const BrandsAteliers = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   // Fixed category order matching the artisans section
   const CATEGORY_ORDER = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"];
@@ -700,7 +701,7 @@ const BrandsAteliers = () => {
               >
                 <Search className="h-5 w-5" />
               </button>
-              <Popover>
+              <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                 <PopoverTrigger asChild>
                   <button className="text-muted-foreground hover:text-primary transition-colors relative" aria-label="Filter by category">
                     <SlidersHorizontal className="h-5 w-5" />
@@ -754,7 +755,7 @@ const BrandsAteliers = () => {
                             {categoryMap[category].map(sub => (
                               <button
                                 key={sub}
-                                onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
+                                onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
                                 className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
                                   selectedSubcategory === sub ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
                                 }`}
