@@ -650,6 +650,7 @@ const FeaturedDesigners = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
@@ -658,15 +659,37 @@ const FeaturedDesigners = () => {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
+
+  // Collect all unique tags from curators' picks
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    featuredDesigners.forEach(designer => {
+      designer.curatorPicks?.forEach((pick: any) => {
+        pick.tags?.forEach((tag: string) => tagSet.add(tag));
+      });
+    });
+    return Array.from(tagSet).sort();
+  }, []);
+
   const filteredDesigners = useMemo(() => {
-    if (!searchQuery.trim()) return featuredDesigners;
-    const query = searchQuery.toLowerCase();
-    return featuredDesigners.filter(
-      (designer) =>
-        designer.name.toLowerCase().includes(query) ||
-        designer.specialty.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
+    let designers = featuredDesigners;
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      designers = designers.filter(
+        (designer) =>
+          designer.name.toLowerCase().includes(query) ||
+          designer.specialty.toLowerCase().includes(query)
+      );
+    }
+    if (selectedTag) {
+      designers = designers.filter(designer =>
+        designer.curatorPicks?.some((pick: any) =>
+          pick.tags?.includes(selectedTag)
+        )
+      );
+    }
+    return designers;
+  }, [searchQuery, selectedTag]);
 
   const allDesignerIds = useMemo(() => filteredDesigners.map(d => d.id), [filteredDesigners]);
   const isAllExpanded = openDesigners.length === allDesignerIds.length && allDesignerIds.length > 0;
@@ -725,9 +748,36 @@ const FeaturedDesigners = () => {
                 </button>
               )}
             </div>
-            {searchQuery && (
+            {/* Tag Filter Bar */}
+            <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+              <button
+                onClick={() => setSelectedTag(null)}
+                className={`flex-shrink-0 px-3 py-1 text-[11px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
+                  !selectedTag
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'bg-transparent text-muted-foreground border-border/50 hover:border-primary/40 hover:text-primary'
+                }`}
+              >
+                All
+              </button>
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                  className={`flex-shrink-0 px-3 py-1 text-[11px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
+                    selectedTag === tag
+                      ? 'bg-foreground text-background border-foreground'
+                      : 'bg-transparent text-muted-foreground border-border/50 hover:border-primary/40 hover:text-primary'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+            {(searchQuery || selectedTag) && (
               <p className="text-left text-xs text-muted-foreground mt-2">
                 {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
+                {selectedTag && <span> for "{selectedTag}"</span>}
               </p>
             )}
           </div>
