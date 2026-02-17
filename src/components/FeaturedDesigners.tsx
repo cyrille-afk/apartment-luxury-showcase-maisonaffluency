@@ -641,12 +641,12 @@ const featuredDesigners = [
     philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
     curatorPicks: [
       {
-        image: leoSentouPick5,
-        title: "AB Armchair",
+        image: leoSentouPick1,
+        title: "Fauteuil J.B.L",
         category: "Seating",
         tags: ["Seating", "Armchair"],
-        materials: "Limed oak frame • Mohair upholstery",
-        dimensions: "H78 × W68 × D72 cm"
+        materials: "Bleached & brushed solid oak • Upholstery",
+        dimensions: "W70 × H91.5 × D63.9 cm — SH 47 cm"
       },
       {
         image: leoSentouPick2,
@@ -674,12 +674,12 @@ const featuredDesigners = [
         dimensions: "H80 × W200 × D85 cm"
       },
       {
-        image: leoSentouPick1,
-        title: "Fauteuil J.B.L",
+        image: leoSentouPick5,
+        title: "AB Armchair",
         category: "Seating",
         tags: ["Seating", "Armchair"],
-        materials: "Wrought iron • Bronze patina",
-        dimensions: "H55 × Ø45 cm"
+        materials: "Limed oak frame • Mohair upholstery",
+        dimensions: "H78 × W68 × D72 cm"
       },
     ],
     links: [
