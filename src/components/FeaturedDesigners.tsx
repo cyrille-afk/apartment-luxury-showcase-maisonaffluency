@@ -769,7 +769,8 @@ const featuredDesigners = [
         category: "Lighting",
         tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated bronze • Hand-carved alabaster diffuser",
-        dimensions: "H57 × W10 × D12 cm"
+        dimensions: "H57 × W13 × D6 cm",
+        description: "The Ghost wall lamp distils the art of bronze lighting to its purest expression. Cast in patinated bronze with a hand-carved alabaster diffuser, its slender, almost ethereal silhouette seems to float against the wall—hence its name. Designed by Yves Macheret, it embodies the Entrelacs philosophy: revealing the inherent beauty of noble materials through restrained, timeless forms."
       },
       { 
         image: yvesMacheretPick2, 
@@ -778,7 +779,8 @@ const featuredDesigners = [
         category: "Lighting",
         tags: ["Lighting", "Table Lamp"],
         materials: "Patinated bronze base • Natural alabaster shade",
-        dimensions: "H29.5 × W15 × D15 cm"
+        dimensions: "H29.5 × Ø16.9 cm",
+        description: "Compact yet sculptural, the Nomad 295 is a portable table lamp that pairs a patinated cast-bronze base with a natural alabaster shade. Its dimmable light, adjusted by a simple knob, casts a warm, diffused glow through the veined stone. Available in three heights, the Nomad collection is designed to move effortlessly from room to room—a nomadic light rooted in artisan tradition."
       },
       { 
         image: yvesMacheretPick3, 
@@ -787,7 +789,8 @@ const featuredDesigners = [
         category: "Lighting",
         tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated brass • Hand-carved alabaster",
-        dimensions: "H37 × W10 × D10 cm"
+        dimensions: "H57 × W11 × D8 cm",
+        description: "The Toast wall lamp celebrates the warmth of patinated brass paired with hand-carved alabaster. Its gently rounded form evokes a raised glass—a quiet gesture of conviviality. Crafted entirely by hand at the Entrelacs foundry in central France, each piece carries the subtle variations that distinguish true artisan work from industrial production."
       },
       { 
         image: yvesMacheretPick4, 
@@ -796,7 +799,8 @@ const featuredDesigners = [
         category: "Lighting",
         tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated bronze • Hand-carved alabaster diffuser",
-        dimensions: "H650 × W115 × D62 mm"
+        dimensions: "H65 × W11.5 × D6.2 cm",
+        description: "The Braun 650 is a vertical wall lamp whose clean, elongated lines recall the rigour of mid-century industrial design. Cast in patinated bronze with an alabaster diffuser, it projects a soft, ambient light that accentuates the natural veining of the stone. Designed by Yves Macheret, it is fitted with a replaceable LED module for lasting, sustainable use."
       },
       {
         image: yvesMacheretPickHublo,
