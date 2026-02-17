@@ -665,7 +665,8 @@ const featuredDesigners = [
         category: "Seating",
         tags: ["Seating", "Chair"],
         materials: "Cerused oak frame • Cheyenne by Pierre Frey upholstery",
-        dimensions: "W45 × H92 × L54 cm"
+        dimensions: "W45 × H92 × L54 cm",
+        description: "Inspired by the works of Maître Ebeniste (master cabinet maker) Jean Baptiste Boulard (1725-1789), the dining chair J.B.B is a contemporary reinterpretation of a montgolfiere shaped base and square back chair; both quintessential motifs of late eighteenth century French design."
       },
       {
         image: leoSentouPickAB,
