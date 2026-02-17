@@ -748,11 +748,11 @@ const FeaturedDesigners = () => {
                 </button>
               )}
             </div>
-            {/* Tag Filter Bar */}
-            <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+            {/* Tag Filter Bar - Wrapping Grid */}
+            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-3">
               <button
                 onClick={() => setSelectedTag(null)}
-                className={`flex-shrink-0 px-3 py-1 text-[11px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
+                className={`px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
                   !selectedTag
                     ? 'bg-foreground text-background border-foreground'
                     : 'bg-transparent text-muted-foreground border-border/50 hover:border-primary/40 hover:text-primary'
@@ -764,7 +764,7 @@ const FeaturedDesigners = () => {
                 <button
                   key={tag}
                   onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                  className={`flex-shrink-0 px-3 py-1 text-[11px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
+                  className={`px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
                     selectedTag === tag
                       ? 'bg-foreground text-background border-foreground'
                       : 'bg-transparent text-muted-foreground border-border/50 hover:border-primary/40 hover:text-primary'
