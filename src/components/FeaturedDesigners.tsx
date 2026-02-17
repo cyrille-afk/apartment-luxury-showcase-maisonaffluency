@@ -932,49 +932,9 @@ const FeaturedDesigners = () => {
                 </PopoverContent>
               </Popover>
             </div>
-            {/* Category Navigation - Carlyle Collective style */}
-            <div className="flex flex-wrap items-center gap-3 md:gap-6 mt-4 border-b border-border/30 pb-3">
-              <button
-                onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
-                className={`text-[11px] md:text-xs uppercase tracking-[0.2em] font-body transition-all duration-300 relative pb-1 ${
-                  !selectedCategory
-                    ? 'text-foreground'
-                    : 'text-muted-foreground/60 hover:text-foreground'
-                }`}
-              >
-                All
-                {!selectedCategory && (
-                  <span className="absolute bottom-0 left-0 w-full h-px bg-foreground" />
-                )}
-              </button>
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => {
-                    if (selectedCategory === cat) {
-                      setSelectedCategory(null);
-                      setSelectedSubcategory(null);
-                    } else {
-                      setSelectedCategory(cat);
-                      setSelectedSubcategory(null);
-                    }
-                  }}
-                  className={`text-[11px] md:text-xs uppercase tracking-[0.2em] font-body transition-all duration-300 relative pb-1 whitespace-nowrap ${
-                    selectedCategory === cat
-                      ? 'text-foreground'
-                      : 'text-muted-foreground/60 hover:text-foreground'
-                  }`}
-                >
-                  {cat}
-                  {selectedCategory === cat && (
-                    <span className="absolute bottom-0 left-0 w-full h-px bg-foreground" />
-                  )}
-                </button>
-              ))}
-            </div>
-            {/* Subcategories row */}
+            {/* Subcategories row - shown when category selected via popover */}
             {selectedCategory && categoryMap[selectedCategory]?.length > 0 && (
-              <div className="flex flex-wrap items-center gap-3 md:gap-5 mt-2.5">
+              <div className="flex flex-wrap items-center gap-3 md:gap-5 mt-3">
                 <button
                   onClick={() => setSelectedSubcategory(null)}
                   className={`text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 ${
