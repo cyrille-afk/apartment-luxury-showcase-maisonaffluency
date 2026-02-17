@@ -1,12 +1,15 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Instagram, Search, X, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, SlidersHorizontal } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.png";
 import brunoDeMaistreImg from "@/assets/designers/bruno-de-maistre.jpg";
@@ -861,23 +864,73 @@ const FeaturedDesigners = () => {
           className="sticky top-0 z-40 -mx-4 px-4 md:-mx-12 md:px-12 lg:-mx-20 lg:px-20 py-3 md:py-4 mb-4 bg-background/95 backdrop-blur-md border-b border-border/20"
         >
           <div className="max-w-6xl mx-auto">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search designers..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-10 bg-card/80 border-border/40 focus:border-primary/60 h-9 text-sm"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search designers..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-10 bg-card/80 border-border/40 focus:border-primary/60 h-9 text-sm"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="bg-card/80 border-border/40 hover:bg-card h-9">
+                    <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
+                    <span className="hidden sm:inline">Categories</span>
+                    {selectedCategory && (
+                      <span className="ml-1.5 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full">
+                        1
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="end">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
+                    {selectedCategory && (
+                      <button
+                        onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
+                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {categories.map((category) => (
+                      <label
+                        key={category}
+                        className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
+                      >
+                        <Checkbox
+                          checked={selectedCategory === category}
+                          onCheckedChange={() => {
+                            if (selectedCategory === category) {
+                              setSelectedCategory(null);
+                              setSelectedSubcategory(null);
+                            } else {
+                              setSelectedCategory(category);
+                              setSelectedSubcategory(null);
+                            }
+                          }}
+                        />
+                        <span className="text-sm text-foreground font-body">{category}</span>
+                      </label>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             {/* Category Navigation - Carlyle Collective style */}
             <div className="flex flex-wrap items-center gap-3 md:gap-6 mt-4 border-b border-border/30 pb-3">
