@@ -55,6 +55,11 @@ import emmanuelBabledPick2 from "@/assets/curators-picks/emmanuel-babled-2.jpg";
 import emmanuelBabledPick3 from "@/assets/curators-picks/emmanuel-babled-3.jpg";
 import emmanuelBabledPick4 from "@/assets/curators-picks/emmanuel-babled-4.jpg";
 import emmanuelBabledPick5 from "@/assets/curators-picks/emmanuel-babled-5.jpg";
+import hamreiPick1 from "@/assets/curators-picks/hamrei-1.jpg";
+import hamreiPick2 from "@/assets/curators-picks/hamrei-2.jpg";
+import hamreiPick3 from "@/assets/curators-picks/hamrei-3.jpg";
+import hamreiPick4 from "@/assets/curators-picks/hamrei-4.jpg";
+import hamreiPick5 from "@/assets/curators-picks/hamrei-5.jpg";
 
 const featuredDesigners = [
   {
@@ -378,6 +383,43 @@ const featuredDesigners = [
     notableWorksLink: { text: "Pépé Chair", galleryIndex: 3 },
     philosophy:
       "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
+    curatorPicks: [
+      {
+        image: hamreiPick1,
+        title: "TROMPO Sculpture",
+        category: "Decorative Object",
+        materials: "Solid cast bronze, hand-patinated green verdigris",
+        dimensions: "H25 × W40 × D35 cm"
+      },
+      {
+        image: hamreiPick2,
+        title: "ANJOS Sideboard",
+        category: "Furniture",
+        materials: "Solid gouged oak, solid-cast blackened brass",
+        dimensions: "H75 × L120 × D45 cm"
+      },
+      {
+        image: hamreiPick3,
+        title: "FUN GUY Side Tables",
+        category: "Furniture",
+        materials: "Solid cast bronze, hand-textured and finished",
+        dimensions: "Small: Ø28 × H48 cm / Tall: Ø37 × H60 cm"
+      },
+      {
+        image: hamreiPick4,
+        title: "MIRRA Side Table",
+        category: "Furniture",
+        materials: "Textured blackened brass, solid Murano glass top (Ocean Blue)",
+        dimensions: "Ø36 × H48 cm (glass Ø32 cm)"
+      },
+      {
+        image: hamreiPick5,
+        title: "TRIO Dining Table",
+        category: "Furniture",
+        materials: "Hand-chiseled stone top, textured earthenware ceramic base",
+        dimensions: "Ø120 × H75 cm (customisable)"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/hamrei" },
       { type: "Curators' Picks" },
