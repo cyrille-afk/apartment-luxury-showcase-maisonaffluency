@@ -639,49 +639,7 @@ const featuredDesigners = [
     notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J, AB Armchair",
     notableWorksLink: { text: "AB Armchair", galleryIndex: 1 },
     philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
-    curatorPicks: [
-      {
-        image: leoSentouPick1,
-        title: "Fauteuil J.B.L",
-        category: "Seating",
-        tags: ["Seating", "Armchair"],
-        materials: "Bleached & brushed solid oak • Upholstery",
-        dimensions: "W70 × H91.5 × D63.9 cm — SH 47 cm"
-      },
-      {
-        image: leoSentouPick2,
-        title: "Fauteuil L.D",
-        subtitle: "Oval Bergère",
-        category: "Seating",
-        tags: ["Seating", "Armchair"],
-        materials: "Limed oak frame • Linen upholstery",
-        dimensions: "H85 × W75 × D80 cm"
-      },
-      {
-        image: leoSentouPick3,
-        title: "Chair G.J",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "Limed oak • Linen seat",
-        dimensions: "H88 × W48 × D52 cm"
-      },
-      {
-        image: leoSentouPick4,
-        title: "Sofa",
-        category: "Seating",
-        tags: ["Seating", "Sofa"],
-        materials: "Limed oak frame • Mohair upholstery",
-        dimensions: "H80 × W200 × D85 cm"
-      },
-      {
-        image: leoSentouPick5,
-        title: "AB Armchair",
-        category: "Seating",
-        tags: ["Seating", "Armchair"],
-        materials: "Limed oak frame • Mohair upholstery",
-        dimensions: "H78 × W68 × D72 cm"
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/leosentou" },
       { type: "Curators' Picks" },
