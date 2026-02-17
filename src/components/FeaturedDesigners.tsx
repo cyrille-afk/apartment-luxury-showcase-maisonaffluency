@@ -837,6 +837,7 @@ const FeaturedDesigners = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [showSearch, setShowSearch] = useState(false);
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
@@ -936,54 +937,30 @@ const FeaturedDesigners = () => {
           <p className="mb-2 md:mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
             THE ARTISANS
           </p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-4">
-            Designers & Makers
-          </h2>
-          <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
-            Discover the visionary designers and artisans whose exceptional work defines Maison Affluency. Each brings
-            their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="sticky top-0 z-40 -mx-4 px-4 md:-mx-12 md:px-12 lg:-mx-20 lg:px-20 py-3 md:py-4 mb-4 bg-background/95 backdrop-blur-md border-b border-border/20"
-        >
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search designers..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-10 bg-card/80 border-border/40 focus:border-primary/60 h-9 text-sm"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
+          <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-4">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
+              Designers & Makers
+            </h2>
+            <div className="flex items-center gap-2 pb-1">
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className="text-muted-foreground hover:text-primary transition-colors"
+                aria-label="Search designers"
+              >
+                <Search className="h-5 w-5" />
+              </button>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="bg-card/80 border-border/40 hover:bg-card h-9">
-                    <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
-                    <span className="hidden sm:inline">Categories</span>
+                  <button className="text-muted-foreground hover:text-primary transition-colors relative" aria-label="Filter by category">
+                    <SlidersHorizontal className="h-5 w-5" />
                     {selectedCategory && (
-                      <span className="ml-1.5 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full">
+                      <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
                         1
                       </span>
                     )}
-                  </Button>
+                  </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="end">
+                <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="start">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
                     {selectedCategory && (
@@ -1048,15 +1025,46 @@ const FeaturedDesigners = () => {
                 </PopoverContent>
               </Popover>
             </div>
-            {(searchQuery || selectedCategory) && (
-              <p className="text-left text-[10px] text-muted-foreground/50 mt-2 font-body tracking-wider">
-                {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
-                {selectedSubcategory && <span> · {selectedSubcategory}</span>}
-                {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
-              </p>
-            )}
           </div>
+          <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
+            Discover the visionary designers and artisans whose exceptional work defines Maison Affluency. Each brings
+            their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
+          </p>
         </motion.div>
+
+        {showSearch && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-4"
+          >
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search designers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-10 bg-card/80 border-border/40 focus:border-primary/60 h-9 text-sm"
+                autoFocus
+              />
+              <button
+                onClick={() => { setSearchQuery(""); setShowSearch(false); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+        {(searchQuery || selectedCategory) && (
+          <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
+            {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
+            {selectedSubcategory && <span> · {selectedSubcategory}</span>}
+            {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
+          </p>
+        )}
 
         <div className="flex justify-end mb-4">
           <button
