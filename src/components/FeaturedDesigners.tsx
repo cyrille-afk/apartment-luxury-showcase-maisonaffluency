@@ -73,11 +73,11 @@ import jmwPick5 from "@/assets/curators-picks/jmw-5.png";
 import jmwPick6 from "@/assets/curators-picks/jmw-6.png";
 
 import jmwPick8 from "@/assets/curators-picks/jmw-8.webp";
-import leoSentouPick1 from "@/assets/curators-picks/leo-sentou-ab-armchair.avif";
-import leoSentouPick2 from "@/assets/curators-picks/leo-sentou-ld-armchair.avif";
-import leoSentouPick3 from "@/assets/curators-picks/leo-sentou-chair-gj.avif";
-import leoSentouPick4 from "@/assets/curators-picks/leo-sentou-sofa.avif";
-import leoSentouPick5 from "@/assets/curators-picks/leo-sentou-side-table.avif";
+import leoSentouPickJBL from "@/assets/curators-picks/leo-sentou-jbl-armchair.png";
+import leoSentouPickGJ from "@/assets/curators-picks/leo-sentou-gj-chair.png";
+import leoSentouPickLA from "@/assets/curators-picks/leo-sentou-side-table-la.png";
+import leoSentouPickAB from "@/assets/curators-picks/leo-sentou-ab-armchair-new.png";
+import leoSentouPickCS from "@/assets/curators-picks/leo-sentou-cs-sofa.png";
 
 const featuredDesigners = [
   {
@@ -639,7 +639,49 @@ const featuredDesigners = [
     notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J, AB Armchair",
     notableWorksLink: { text: "AB Armchair", galleryIndex: 1 },
     philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
-    curatorPicks: [],
+    curatorPicks: [
+      {
+        image: leoSentouPickJBL,
+        title: "Fauteuil J.B.L",
+        category: "Seating",
+        tags: ["Seating", "Armchair"],
+        materials: "Bleached & brushed solid oak • Upholstery",
+        dimensions: "W70 × H91.5 × D63.9 cm — SH 47 cm"
+      },
+      {
+        image: leoSentouPickGJ,
+        title: "Chair G.J",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Cerused oak frame • Cheyenne by Pierre Frey upholstery",
+        dimensions: "W45 × H92 × L54 cm"
+      },
+      {
+        image: leoSentouPickLA,
+        title: "Side Table L.A",
+        subtitle: "Bronze",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Patinated cast brass frame • Marble top",
+        dimensions: "D30 × H60 cm"
+      },
+      {
+        image: leoSentouPickAB,
+        title: "Fauteuil A.B",
+        category: "Seating",
+        tags: ["Seating", "Armchair"],
+        materials: "Full upholstery • Solid oak or cast gouged patinated brass feet",
+        dimensions: "W90 × H70 × L93 cm"
+      },
+      {
+        image: leoSentouPickCS,
+        title: "Canapé C.S",
+        category: "Seating",
+        tags: ["Seating", "Sofa"],
+        materials: "Plush upholstery • Oak feet",
+        dimensions: "W240–320 × H70 × D95 cm"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/leosentou" },
       { type: "Curators' Picks" },
