@@ -75,29 +75,37 @@ const featuredDesigners = [
     curatorPicks: [
       { 
         image: alexanderLamontPick3, 
-        title: "Casque Bar Cabinet", 
+        title: "Casque",
+        subtitle: "Bar Cabinet",
         category: "Furniture",
+        tags: ["Furniture", "Cabinet"],
         materials: "Straw marquetry • Hammered bronze handles • Lacquered interior",
         dimensions: "H110 × W120 × D45 cm"
       },
       { 
         image: alexanderLamontPick1, 
-        title: "Ondas Sconce Clear", 
+        title: "Ondas Sconce",
+        subtitle: "Clear",
         category: "Lighting",
+        tags: ["Lighting", "Sconce"],
         materials: "Hand-cast bronze with clear glass diffuser",
         dimensions: "H45 × W12 × D14 cm"
       },
       { 
         image: alexanderLamontPick4, 
-        title: "Dais Lounge Chair", 
+        title: "Dais",
+        subtitle: "Lounge Chair",
         category: "Furniture",
+        tags: ["Furniture", "Chair"],
         materials: "Bouclé upholstery • Shagreen leather • Straw marquetry accents",
         dimensions: "H75 × W80 × D85 cm"
       },
       { 
         image: alexanderLamontPick2, 
-        title: "Galea Lantern Rock Crystal", 
+        title: "Galea Lantern",
+        subtitle: "Rock Crystal",
         category: "Lighting",
+        tags: ["Lighting", "Lantern"],
         materials: "Hammered bronze base • Rock crystal & frosted glass shades",
         dimensions: "H28 × W18 × D18 cm"
       },
@@ -126,29 +134,37 @@ const featuredDesigners = [
     curatorPicks: [
       { 
         image: apparatusPick1, 
-        title: "Lantern Table Lamp", 
+        title: "Lantern",
+        subtitle: "Table Lamp",
         category: "Lighting",
+        tags: ["Lighting", "Table Lamp"],
         materials: "Brass armature • Pressed glass shade",
         dimensions: "H18\" × Ø10\""
       },
       { 
         image: apparatusPick2, 
-        title: "Lariat Pendant", 
+        title: "Lariat",
+        subtitle: "Pendant",
         category: "Lighting",
+        tags: ["Lighting", "Pendant"],
         materials: "Blackened brass • Mold-blown glass",
         dimensions: "H16\" × Ø6.5\""
       },
       { 
         image: apparatusPick3, 
-        title: "Signal Y Table Lamp", 
+        title: "Signal Y",
+        subtitle: "Table Lamp",
         category: "Lighting",
+        tags: ["Lighting", "Table Lamp"],
         materials: "Brass armature • Pressed glass",
         dimensions: "H23.5\" × Ø17.25\""
       },
       { 
         image: apparatusPick4, 
-        title: "Tassel 57 Pendant", 
+        title: "Tassel 57",
+        subtitle: "Pendant",
         category: "Lighting",
+        tags: ["Lighting", "Pendant"],
         materials: "Mold-blown glass cylinders • Brass dome and armature",
         dimensions: "Ø32.5\""
       },
@@ -171,29 +187,37 @@ const featuredDesigners = [
     curatorPicks: [
       { 
         image: pendhapaPick1, 
-        title: "Mangala Coffee Table", 
+        title: "Mangala",
+        subtitle: "Coffee Table",
         category: "Furniture",
+        tags: ["Furniture", "Coffee Table"],
         materials: "Black teak • Lava stone crème brûlée tabletop",
         dimensions: "L190 × W180 × H35 cm"
       },
       { 
         image: pendhapaPick4, 
-        title: "Akar Dining Chair", 
+        title: "Akar",
+        subtitle: "Dining Chair",
         category: "Furniture",
+        tags: ["Furniture", "Chair"],
         materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery",
         dimensions: "L49 × W52 × H85 cm"
       },
       { 
         image: pendhapaPick5, 
-        title: "Gingko Side Table", 
+        title: "Gingko",
+        subtitle: "Side Table",
         category: "Furniture",
+        tags: ["Furniture", "Side Table"],
         materials: "Natural oak • White lacquer tabletop",
         dimensions: "L75 × W48 × H50 cm"
       },
       { 
         image: pendhapaPick2, 
-        title: "Anemos Coffee Table", 
+        title: "Anemos",
+        subtitle: "Coffee Table",
         category: "Furniture",
+        tags: ["Furniture", "Coffee Table"],
         materials: "Black oak • Black lacquer tabletop",
         dimensions: "L110 × W80 × H35 cm"
       },
@@ -217,32 +241,40 @@ const featuredDesigners = [
     curatorPicks: [
       { 
         image: atelierFevrierPick3, 
-        title: "Nautilus", 
+        title: "Nautilus",
+        subtitle: "Hand-knotted Rug",
         category: "Rug",
+        tags: ["Rug", "Textile"],
         materials: "40% wool, 60% silk — 125 knots/sq.inch",
         dimensions: "Custom dimensions available",
         description: "Inspired by and named after Nautilus, a beautiful seashell, this rug is thought provoking and possesses the power to make you think beyond the norms of ordinary. It symbolises an amalgamation of two beautiful bodies together with the mother of pearl, therefore culminating into something unique and distinct."
       },
       { 
         image: atelierFevrierPick1, 
-        title: "Ceramic", 
+        title: "Ceramic",
+        subtitle: "Hand-knotted Rug",
         category: "Rug",
+        tags: ["Rug", "Textile"],
         materials: "90% wool, 10% silk — 100 knots/sq. inch",
         dimensions: "Custom dimensions available",
         description: "Evocative of one of the most ancient greek ceramics, the François vase, initially discovered in pieces then eagerly put back together (so it could tell its story). Its irregularity and ostensibly mended areas – resonant with the Japanese Kintsugi practice – mirror the beauty in its rawest, most vulnerable state."
       },
       { 
         image: atelierFevrierPick2, 
-        title: "Mushroom", 
+        title: "Mushroom",
+        subtitle: "Hand-knotted Rug",
         category: "Rug",
+        tags: ["Rug", "Textile"],
         materials: "60% nettle, 40% silk — 100 knots/sq.inch",
         dimensions: "Custom dimensions available",
         description: "Emma Donnersberg's work embodies a delicate balance of strength and softness. Her work features playful and soft shapes and forms that exudes harmony and sophistication. The Mushroom rug beautifully captures her distinct style and Atelier Février's detailed craftsmanship and precise execution, it is a testament to a collaborative challenge put to the test and masterfully executed."
       },
       { 
         image: atelierFevrierPick4, 
-        title: "Frequence 440", 
+        title: "Frequence 440",
+        subtitle: "Hand-knotted Rug",
         category: "Rug",
+        tags: ["Rug", "Textile"],
         materials: "15% wool, 85% silk — 125 knots/sq. inch",
         dimensions: "Custom dimensions available",
         description: "Designed by Sebastian Leon of Atelier d'Amis. The Fréquence rug collection is inspired by the enigmatic vibrational phenomenon called \"cymatics\", which correlates sound frequencies with geometric mandalas. The individual rugs are named after the frequencies of the A note – the standard for tuning – in three consecutive octaves."
@@ -281,36 +313,46 @@ const featuredDesigners = [
     curatorPicks: [
       {
         image: emmanuelLevetStennePick5,
-        title: "Alabaster Pendant",
+        title: "Alabaster",
+        subtitle: "Pendant",
         category: "Lighting",
+        tags: ["Lighting", "Pendant"],
         materials: "Alabaster and slate",
         dimensions: "Ø56 × H165 cm"
       },
       {
         image: emmanuelLevetStennePick1,
-        title: "Bolchoï Console Black",
+        title: "Bolchoï",
+        subtitle: "Console Black",
         category: "Furniture",
+        tags: ["Furniture", "Console"],
         materials: "Lassa marble top • Lacquered aluminium & Lassa marble legs",
         dimensions: "L145 × W40 × H75 cm"
       },
       {
         image: emmanuelLevetStennePick2,
-        title: "Jelly Side Table",
+        title: "Jelly",
+        subtitle: "Side Table",
         category: "Furniture",
+        tags: ["Furniture", "Side Table"],
         materials: "Alabaster and blown glass",
         dimensions: "Ø41 × H55 cm"
       },
       {
         image: emmanuelLevetStennePick3,
-        title: "Full Moon Pendant",
+        title: "Full Moon",
+        subtitle: "Pendant",
         category: "Lighting",
+        tags: ["Lighting", "Pendant"],
         materials: "Alabaster and plaster",
         dimensions: "Ø50 cm / Ø36 cm"
       },
       {
         image: emmanuelLevetStennePick4,
-        title: "Dress Up Dining Table / Wood",
+        title: "Dress Up",
+        subtitle: "Dining Table / Wood",
         category: "Furniture",
+        tags: ["Furniture", "Dining Table"],
         materials: "Oak or walnut top and base",
         dimensions: "L280 × W120 × H74 cm"
       },
@@ -333,36 +375,46 @@ const featuredDesigners = [
     curatorPicks: [
       {
         image: emmanuelBabledPick1,
-        title: "Osmosi Console",
+        title: "Osmosi",
+        subtitle: "Console",
         category: "Furniture",
+        tags: ["Furniture", "Console"],
         materials: "Carrara marble, Murano blown glass",
         dimensions: "H80 × L160 × D35 cm"
       },
       {
         image: emmanuelBabledPick2,
-        title: "Coral Coffee Table",
+        title: "Coral",
+        subtitle: "Coffee Table",
         category: "Furniture",
+        tags: ["Furniture", "Coffee Table"],
         materials: "Bianco Carrara marble, plexiglass",
         dimensions: "L150 × W100 × H28 cm"
       },
       {
         image: emmanuelBabledPick3,
-        title: "Pyros Marini Vase",
+        title: "Pyros Marini",
+        subtitle: "Vase",
         category: "Decorative Object",
+        tags: ["Decorative Object", "Vase"],
         materials: "Murano blown glass (Venini)",
         dimensions: "H45 × Ø30 cm"
       },
       {
         image: emmanuelBabledPick4,
-        title: "Quark Bronze Coffee Table",
+        title: "Quark Bronze",
+        subtitle: "Coffee Table",
         category: "Furniture",
+        tags: ["Furniture", "Coffee Table"],
         materials: "Bronze",
         dimensions: "H30 × L122.5 × W83 cm"
       },
       {
         image: emmanuelBabledPick5,
-        title: "Siliceaarenaria Vessels",
+        title: "Siliceaarenaria",
+        subtitle: "Vessels",
         category: "Decorative Object",
+        tags: ["Decorative Object", "Vessel"],
         materials: "Murano blown glass (Venini)",
         dimensions: "Ø25 × H22 cm (each)"
       },
@@ -555,29 +607,37 @@ const featuredDesigners = [
     curatorPicks: [
       { 
         image: yvesMacheretPick1, 
-        title: "Ghost Wall Lamp", 
+        title: "Ghost",
+        subtitle: "Wall Lamp",
         category: "Lighting",
+        tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated bronze • Hand-carved alabaster diffuser",
         dimensions: "H57 × W10 × D12 cm"
       },
       { 
         image: yvesMacheretPick2, 
-        title: "Nomad 295 Table Lamp", 
+        title: "Nomad 295",
+        subtitle: "Table Lamp",
         category: "Lighting",
+        tags: ["Lighting", "Table Lamp"],
         materials: "Patinated bronze base • Natural alabaster shade",
         dimensions: "H29.5 × W15 × D15 cm"
       },
       { 
         image: yvesMacheretPick3, 
-        title: "Toast Wall Lamp", 
+        title: "Toast",
+        subtitle: "Wall Lamp",
         category: "Lighting",
+        tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated brass • Hand-carved alabaster",
         dimensions: "H37 × W10 × D10 cm"
       },
       { 
         image: yvesMacheretPick4, 
-        title: "Braun 650 Wall Lamp", 
+        title: "Braun 650",
+        subtitle: "Wall Lamp",
         category: "Lighting",
+        tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated bronze • Hand-carved alabaster diffuser",
         dimensions: "H650 × W115 × D62 mm"
       },
