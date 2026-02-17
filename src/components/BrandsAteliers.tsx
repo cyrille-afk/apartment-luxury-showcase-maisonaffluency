@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo } from "react";
-import { Search, X, Instagram, ExternalLink } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -732,7 +735,8 @@ const BrandsAteliers = () => {
           className="sticky top-0 z-40 -mx-4 px-4 md:-mx-12 md:px-12 lg:-mx-20 lg:px-20 py-3 md:py-4 mb-4 bg-muted/95 backdrop-blur-md border-b border-border/20"
         >
           <div className="max-w-7xl mx-auto">
-            <div className="relative w-full max-w-md">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
@@ -750,49 +754,58 @@ const BrandsAteliers = () => {
                   </button>
                 )}
               </div>
-            {/* Category Navigation - Carlyle Collective style */}
-            <div className="flex flex-wrap items-center gap-3 md:gap-6 mt-4 border-b border-border/30 pb-3">
-              <button
-                onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
-                className={`text-[11px] md:text-xs uppercase tracking-[0.2em] font-body transition-all duration-300 relative pb-1 ${
-                  !selectedCategory
-                    ? 'text-foreground'
-                    : 'text-muted-foreground/60 hover:text-foreground'
-                }`}
-              >
-                All
-                {!selectedCategory && (
-                  <span className="absolute bottom-0 left-0 w-full h-px bg-foreground" />
-                )}
-              </button>
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => {
-                    if (selectedCategory === cat) {
-                      setSelectedCategory(null);
-                      setSelectedSubcategory(null);
-                    } else {
-                      setSelectedCategory(cat);
-                      setSelectedSubcategory(null);
-                    }
-                  }}
-                  className={`text-[11px] md:text-xs uppercase tracking-[0.2em] font-body transition-all duration-300 relative pb-1 whitespace-nowrap ${
-                    selectedCategory === cat
-                      ? 'text-foreground'
-                      : 'text-muted-foreground/60 hover:text-foreground'
-                  }`}
-                >
-                  {cat}
-                  {selectedCategory === cat && (
-                    <span className="absolute bottom-0 left-0 w-full h-px bg-foreground" />
-                  )}
-                </button>
-              ))}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="bg-card/80 border-border/40 hover:bg-card h-9">
+                    <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
+                    <span className="hidden sm:inline">Categories</span>
+                    {selectedCategory && (
+                      <span className="ml-1.5 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full">
+                        1
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="end">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
+                    {selectedCategory && (
+                      <button
+                        onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
+                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {categories.map((category) => (
+                      <label
+                        key={category}
+                        className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
+                      >
+                        <Checkbox
+                          checked={selectedCategory === category}
+                          onCheckedChange={() => {
+                            if (selectedCategory === category) {
+                              setSelectedCategory(null);
+                              setSelectedSubcategory(null);
+                            } else {
+                              setSelectedCategory(category);
+                              setSelectedSubcategory(null);
+                            }
+                          }}
+                        />
+                        <span className="text-sm text-foreground font-body">{category}</span>
+                      </label>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
-            {/* Subcategories row */}
+            {/* Subcategories row - shown when category selected via popover */}
             {selectedCategory && categoryMap[selectedCategory]?.length > 0 && (
-              <div className="flex flex-wrap items-center gap-3 md:gap-5 mt-2.5">
+              <div className="flex flex-wrap items-center gap-3 md:gap-5 mt-3">
                 <button
                   onClick={() => setSelectedSubcategory(null)}
                   className={`text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 ${
