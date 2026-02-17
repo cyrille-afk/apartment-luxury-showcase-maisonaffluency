@@ -650,7 +650,8 @@ const FeaturedDesigners = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
@@ -660,16 +661,31 @@ const FeaturedDesigners = () => {
   const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
 
-  // Collect all unique tags from curators' picks
-  const allTags = useMemo(() => {
-    const tagSet = new Set<string>();
+  // Collect categories and subcategories from curators' picks
+  const categoryMap = useMemo(() => {
+    const map: Record<string, Set<string>> = {};
     featuredDesigners.forEach(designer => {
       designer.curatorPicks?.forEach((pick: any) => {
-        pick.tags?.forEach((tag: string) => tagSet.add(tag));
+        if (pick.tags && pick.tags.length >= 2) {
+          const category = pick.tags[0]; // e.g. "Furniture", "Lighting"
+          const subcategory = pick.tags[1]; // e.g. "Sconce", "Table Lamp"
+          if (!map[category]) map[category] = new Set();
+          map[category].add(subcategory);
+        } else if (pick.tags && pick.tags.length === 1) {
+          const category = pick.tags[0];
+          if (!map[category]) map[category] = new Set();
+        }
       });
     });
-    return Array.from(tagSet).sort();
+    // Convert sets to sorted arrays
+    const result: Record<string, string[]> = {};
+    Object.keys(map).sort().forEach(cat => {
+      result[cat] = Array.from(map[cat]).sort();
+    });
+    return result;
   }, []);
+
+  const categories = useMemo(() => Object.keys(categoryMap), [categoryMap]);
 
   const filteredDesigners = useMemo(() => {
     let designers = featuredDesigners;
@@ -681,15 +697,17 @@ const FeaturedDesigners = () => {
           designer.specialty.toLowerCase().includes(query)
       );
     }
-    if (selectedTag) {
+    if (selectedCategory || selectedSubcategory) {
       designers = designers.filter(designer =>
-        designer.curatorPicks?.some((pick: any) =>
-          pick.tags?.includes(selectedTag)
-        )
+        designer.curatorPicks?.some((pick: any) => {
+          if (selectedSubcategory) return pick.tags?.includes(selectedSubcategory);
+          if (selectedCategory) return pick.tags?.includes(selectedCategory);
+          return true;
+        })
       );
     }
     return designers;
-  }, [searchQuery, selectedTag]);
+  }, [searchQuery, selectedCategory, selectedSubcategory]);
 
   const allDesignerIds = useMemo(() => filteredDesigners.map(d => d.id), [filteredDesigners]);
   const isAllExpanded = openDesigners.length === allDesignerIds.length && allDesignerIds.length > 0;
@@ -748,36 +766,74 @@ const FeaturedDesigners = () => {
                 </button>
               )}
             </div>
-            {/* Tag Filter Bar - Wrapping Grid */}
+            {/* Category & Subcategory Filter */}
             <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-3">
               <button
-                onClick={() => setSelectedTag(null)}
+                onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
                 className={`px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
-                  !selectedTag
+                  !selectedCategory
                     ? 'bg-foreground text-background border-foreground'
                     : 'bg-transparent text-muted-foreground border-border/50 hover:border-primary/40 hover:text-primary'
                 }`}
               >
                 All
               </button>
-              {allTags.map(tag => (
+              {categories.map(cat => (
                 <button
-                  key={tag}
-                  onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                  key={cat}
+                  onClick={() => {
+                    if (selectedCategory === cat) {
+                      setSelectedCategory(null);
+                      setSelectedSubcategory(null);
+                    } else {
+                      setSelectedCategory(cat);
+                      setSelectedSubcategory(null);
+                    }
+                  }}
                   className={`px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
-                    selectedTag === tag
+                    selectedCategory === cat
                       ? 'bg-foreground text-background border-foreground'
                       : 'bg-transparent text-muted-foreground border-border/50 hover:border-primary/40 hover:text-primary'
                   }`}
                 >
-                  {tag}
+                  {cat}
                 </button>
               ))}
             </div>
-            {(searchQuery || selectedTag) && (
+            {/* Subcategories - shown when a category is selected */}
+            {selectedCategory && categoryMap[selectedCategory]?.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-2 pl-1">
+                <span className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-body mr-1">↳</span>
+                <button
+                  onClick={() => setSelectedSubcategory(null)}
+                  className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
+                    !selectedSubcategory
+                      ? 'bg-primary/15 text-primary border-primary/30'
+                      : 'bg-transparent text-muted-foreground border-border/40 hover:border-primary/30 hover:text-primary'
+                  }`}
+                >
+                  All {selectedCategory}
+                </button>
+                {categoryMap[selectedCategory].map(sub => (
+                  <button
+                    key={sub}
+                    onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
+                    className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
+                      selectedSubcategory === sub
+                        ? 'bg-primary/15 text-primary border-primary/30'
+                        : 'bg-transparent text-muted-foreground border-border/40 hover:border-primary/30 hover:text-primary'
+                    }`}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            )}
+            {(searchQuery || selectedCategory) && (
               <p className="text-left text-xs text-muted-foreground mt-2">
                 {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
-                {selectedTag && <span> for "{selectedTag}"</span>}
+                {selectedSubcategory && <span> for "{selectedSubcategory}"</span>}
+                {selectedCategory && !selectedSubcategory && <span> for "{selectedCategory}"</span>}
               </p>
             )}
           </div>
