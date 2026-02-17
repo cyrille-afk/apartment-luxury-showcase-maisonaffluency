@@ -55,6 +55,8 @@ import emmanuelBabledPick2 from "@/assets/curators-picks/emmanuel-babled-2.jpg";
 import emmanuelBabledPick3 from "@/assets/curators-picks/emmanuel-babled-3.jpg";
 import emmanuelBabledPick4 from "@/assets/curators-picks/emmanuel-babled-4.jpg";
 import emmanuelBabledPick5 from "@/assets/curators-picks/emmanuel-babled-5.jpg";
+import emmanuelBabledPick6 from "@/assets/curators-picks/emmanuel-babled-6.jpg";
+import emmanuelBabledPick7 from "@/assets/curators-picks/emmanuel-babled-7.jpg";
 import hamreiPick1 from "@/assets/curators-picks/hamrei-1.jpg";
 import hamreiPick2 from "@/assets/curators-picks/hamrei-2.jpg";
 import hamreiPick3 from "@/assets/curators-picks/hamrei-3.jpg";
@@ -425,6 +427,24 @@ const featuredDesigners = [
         tags: ["Decorative Object", "Vessel"],
         materials: "Murano blown glass (Venini)",
         dimensions: "Ø25 × H22 cm (each)"
+      },
+      {
+        image: emmanuelBabledPick6,
+        title: "Etna Cabinet",
+        subtitle: "Stripes",
+        category: "Storage",
+        tags: ["Storage", "Cabinet"],
+        materials: "Murano glass doors • Lava stone legs",
+        dimensions: "H85 × L120 × D45 cm"
+      },
+      {
+        image: emmanuelBabledPick7,
+        title: "Osmosi",
+        subtitle: "Side Table",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Carrara marble • Murano blown glass",
+        dimensions: "H55 × Ø60 cm"
       },
     ],
     links: [
