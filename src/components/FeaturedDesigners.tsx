@@ -780,17 +780,20 @@ const FeaturedDesigners = () => {
                 </button>
               )}
             </div>
-            {/* Category & Subcategory Filter */}
-            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-3">
+            {/* Category Navigation - Carlyle Collective style */}
+            <div className="flex items-center gap-4 md:gap-6 mt-4 border-b border-border/30 pb-3">
               <button
                 onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
-                className={`px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
+                className={`text-[11px] md:text-xs uppercase tracking-[0.2em] font-body transition-all duration-300 relative pb-1 ${
                   !selectedCategory
-                    ? 'bg-foreground text-background border-foreground'
-                    : 'bg-transparent text-muted-foreground border-border/50 hover:border-primary/40 hover:text-primary'
+                    ? 'text-foreground'
+                    : 'text-muted-foreground/60 hover:text-foreground'
                 }`}
               >
                 All
+                {!selectedCategory && (
+                  <span className="absolute bottom-0 left-0 w-full h-px bg-foreground" />
+                )}
               </button>
               {categories.map(cat => (
                 <button
@@ -804,26 +807,28 @@ const FeaturedDesigners = () => {
                       setSelectedSubcategory(null);
                     }
                   }}
-                  className={`px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
+                  className={`text-[11px] md:text-xs uppercase tracking-[0.2em] font-body transition-all duration-300 relative pb-1 whitespace-nowrap ${
                     selectedCategory === cat
-                      ? 'bg-foreground text-background border-foreground'
-                      : 'bg-transparent text-muted-foreground border-border/50 hover:border-primary/40 hover:text-primary'
+                      ? 'text-foreground'
+                      : 'text-muted-foreground/60 hover:text-foreground'
                   }`}
                 >
                   {cat}
+                  {selectedCategory === cat && (
+                    <span className="absolute bottom-0 left-0 w-full h-px bg-foreground" />
+                  )}
                 </button>
               ))}
             </div>
-            {/* Subcategories - shown when a category is selected */}
+            {/* Subcategories row */}
             {selectedCategory && categoryMap[selectedCategory]?.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-2 pl-1">
-                <span className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-body mr-1">↳</span>
+              <div className="flex items-center gap-3 md:gap-5 mt-2.5">
                 <button
                   onClick={() => setSelectedSubcategory(null)}
-                  className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
+                  className={`text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 ${
                     !selectedSubcategory
-                      ? 'bg-primary/15 text-primary border-primary/30'
-                      : 'bg-transparent text-muted-foreground border-border/40 hover:border-primary/30 hover:text-primary'
+                      ? 'text-primary'
+                      : 'text-muted-foreground/50 hover:text-primary'
                   }`}
                 >
                   All {selectedCategory}
@@ -832,10 +837,10 @@ const FeaturedDesigners = () => {
                   <button
                     key={sub}
                     onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
-                    className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-body rounded-full border transition-all duration-300 ${
+                    className={`text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 whitespace-nowrap ${
                       selectedSubcategory === sub
-                        ? 'bg-primary/15 text-primary border-primary/30'
-                        : 'bg-transparent text-muted-foreground border-border/40 hover:border-primary/30 hover:text-primary'
+                        ? 'text-primary'
+                        : 'text-muted-foreground/50 hover:text-primary'
                     }`}
                   >
                     {sub}
@@ -844,10 +849,10 @@ const FeaturedDesigners = () => {
               </div>
             )}
             {(searchQuery || selectedCategory) && (
-              <p className="text-left text-xs text-muted-foreground mt-2">
+              <p className="text-left text-[10px] text-muted-foreground/50 mt-2 font-body tracking-wider">
                 {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
-                {selectedSubcategory && <span> for "{selectedSubcategory}"</span>}
-                {selectedCategory && !selectedSubcategory && <span> for "{selectedCategory}"</span>}
+                {selectedSubcategory && <span> · {selectedSubcategory}</span>}
+                {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
               </p>
             )}
           </div>
