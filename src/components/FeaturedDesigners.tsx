@@ -641,7 +641,7 @@ const featuredDesigners = [
     philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
     curatorPicks: [
       {
-        image: leoSentouPick1,
+        image: leoSentouPick5,
         title: "AB Armchair",
         category: "Seating",
         tags: ["Seating", "Armchair"],
@@ -674,7 +674,7 @@ const featuredDesigners = [
         dimensions: "H80 × W200 × D85 cm"
       },
       {
-        image: leoSentouPick5,
+        image: leoSentouPick1,
         title: "Side Table L.A",
         category: "Tables",
         tags: ["Tables", "Side Table"],
