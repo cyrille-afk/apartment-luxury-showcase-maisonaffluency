@@ -388,6 +388,7 @@ const featuredDesigners = [
         image: hamreiPick1,
         title: "PEDRO Coffee Table – Limited Edition Aqua",
         category: "Furniture",
+        tags: ["Furniture", "Coffee Table"],
         materials: "Solid cast bronze, hand-patinated aqua finish",
         dimensions: "Ø60 × H38 cm"
       },
@@ -1016,11 +1017,13 @@ const FeaturedDesigners = () => {
                         lastTapRef.current = now;
                       }}
                     >
-                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && !isZoomed && (
-                        <div className="text-left mb-2">
-                          <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
-                            {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
-                          </span>
+                      {!isZoomed && (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category && (
+                        <div className="text-left mb-2 flex flex-wrap gap-1.5">
+                          {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags || [(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category]).map((tag: string, i: number) => (
+                            <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
+                              {tag}
+                            </span>
+                          ))}
                         </div>
                       )}
                       <img 
