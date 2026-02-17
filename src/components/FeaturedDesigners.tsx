@@ -801,7 +801,12 @@ const FeaturedDesigners = () => {
       designers = designers.filter(
         (designer) =>
           designer.name.toLowerCase().includes(query) ||
-          designer.specialty.toLowerCase().includes(query)
+          designer.specialty.toLowerCase().includes(query) ||
+          designer.curatorPicks?.some((pick: any) =>
+            pick.tags?.some((tag: string) => tag.toLowerCase().includes(query)) ||
+            pick.title?.toLowerCase().includes(query) ||
+            pick.subtitle?.toLowerCase().includes(query)
+          )
       );
     }
     if (selectedCategory || selectedSubcategory) {
