@@ -649,20 +649,20 @@ const featuredDesigners = [
         dimensions: "W70 × H91.5 × D63.9 cm — SH 47 cm"
       },
       {
-        image: leoSentouPickGJ,
-        title: "Chair G.J",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "Cerused oak frame • Cheyenne by Pierre Frey upholstery",
-        dimensions: "W45 × H92 × L54 cm"
-      },
-      {
         image: leoSentouPickLA,
         title: "Console J.P.D",
         category: "Tables",
         tags: ["Tables", "Console"],
         materials: "Oak • Lacquer",
         dimensions: "W120 × H80 × D45 cm"
+      },
+      {
+        image: leoSentouPickGJ,
+        title: "Chair G.J",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Cerused oak frame • Cheyenne by Pierre Frey upholstery",
+        dimensions: "W45 × H92 × L54 cm"
       },
       {
         image: leoSentouPickAB,
