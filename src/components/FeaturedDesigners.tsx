@@ -674,7 +674,8 @@ const featuredDesigners = [
         category: "Seating",
         tags: ["Seating", "Armchair"],
         materials: "Full upholstery • Solid oak or cast gouged patinated brass feet",
-        dimensions: "W90 × H70 × L93 cm"
+        dimensions: "W90 × H70 × L93 cm",
+        description: "The Fauteuil A.B draws inspiration from an elegant \"bergère en gondole,\" crafted by Parisian menuisier Antoine Bonnemain (received master in 1753). Expertly handcrafted in Europe by skilled artisans, this armchair boasts full upholstery and rests on four solid oak or gouged bronze feet. Its signature backrest medallion—an emblem of Louis XVI furniture—has been reinterpreted within the plush upholstery, offering a sculptural, modern tribute to the timeless elegance of French design."
       },
       {
         image: leoSentouPickCS,
