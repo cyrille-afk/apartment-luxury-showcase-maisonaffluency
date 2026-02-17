@@ -1,11 +1,14 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo } from "react";
-import { Instagram, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X } from "lucide-react";
+import { Instagram, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 // Designer images
@@ -244,18 +247,61 @@ const Collectibles = () => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
 
+  const CATEGORY_ORDER = ["Lighting", "Decorative Object", "Mirrors", "Furniture"];
+
+  // Build category → subcategory map from curator picks
+  const categoryMap = useMemo(() => {
+    const map: Record<string, Set<string>> = {};
+    collectibleDesigners.forEach(designer => {
+      designer.curatorPicks?.forEach((pick: any) => {
+        const cat = pick.category;
+        if (!map[cat]) map[cat] = new Set();
+      });
+    });
+    const result: Record<string, string[]> = {};
+    CATEGORY_ORDER.forEach(cat => {
+      if (map[cat]) result[cat] = Array.from(map[cat]).sort();
+    });
+    Object.keys(map).forEach(cat => {
+      if (!result[cat]) result[cat] = Array.from(map[cat]).sort();
+    });
+    return result;
+  }, []);
+
+  const categories = useMemo(() => {
+    const ordered = CATEGORY_ORDER.filter(cat => categoryMap[cat]);
+    const extra = Object.keys(categoryMap).filter(cat => !CATEGORY_ORDER.includes(cat));
+    return [...ordered, ...extra];
+  }, [categoryMap]);
+
   const filteredDesigners = useMemo(() => {
-    if (!searchQuery.trim()) return collectibleDesigners;
-    const query = searchQuery.toLowerCase();
-    return collectibleDesigners.filter(designer => 
-      designer.name.toLowerCase().includes(query) ||
-      designer.specialty.toLowerCase().includes(query) ||
-      designer.biography.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
+    let designers = collectibleDesigners;
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      designers = designers.filter(designer => 
+        designer.name.toLowerCase().includes(query) ||
+        designer.specialty.toLowerCase().includes(query) ||
+        designer.biography.toLowerCase().includes(query)
+      );
+    }
+    
+    if (selectedCategory) {
+      designers = designers.filter(designer =>
+        designer.curatorPicks?.some((pick: any) => {
+          if (selectedSubcategory) return pick.category === selectedSubcategory;
+          return pick.category === selectedCategory;
+        })
+      );
+    }
+    
+    return designers;
+  }, [searchQuery, selectedCategory, selectedSubcategory]);
 
   const allDesignerIds = filteredDesigners.map(d => d.id);
   const isAllExpanded = openDesigners.length === allDesignerIds.length && allDesignerIds.length > 0;
@@ -358,23 +404,101 @@ const Collectibles = () => {
           </motion.div>
 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search designers..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-9 font-body text-sm bg-card/50 border-border/40 focus:border-primary/60"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search designers..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-9 font-body text-sm bg-card/50 border-border/40 focus:border-primary/60 h-9"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="bg-card/80 border-border/40 hover:bg-card h-9">
+                    <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
+                    <span className="hidden sm:inline">Categories</span>
+                    {selectedCategory && (
+                      <span className="ml-1.5 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full">
+                        1
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="end">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
+                    {selectedCategory && (
+                      <button
+                        onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
+                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-1 max-h-80 overflow-y-auto">
+                    {categories.map((category) => (
+                      <div key={category}>
+                        <label
+                          className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
+                        >
+                          <Checkbox
+                            checked={selectedCategory === category}
+                            onCheckedChange={() => {
+                              if (selectedCategory === category) {
+                                setSelectedCategory(null);
+                                setSelectedSubcategory(null);
+                              } else {
+                                setSelectedCategory(category);
+                                setSelectedSubcategory(null);
+                              }
+                            }}
+                          />
+                          <span className="text-sm text-foreground font-body">{category}</span>
+                        </label>
+                        {selectedCategory === category && categoryMap[category]?.length > 0 && (
+                          <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
+                            <button
+                              onClick={() => setSelectedSubcategory(null)}
+                              className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                                !selectedSubcategory
+                                  ? 'text-primary'
+                                  : 'text-muted-foreground/60 hover:text-primary'
+                              }`}
+                            >
+                              All {category}
+                            </button>
+                            {categoryMap[category].map(sub => (
+                              <button
+                                key={sub}
+                                onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
+                                className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                                  selectedSubcategory === sub
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground/60 hover:text-primary'
+                                }`}
+                              >
+                                {sub}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <button
               onClick={toggleAllDesigners}
@@ -384,6 +508,13 @@ const Collectibles = () => {
               <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
             </button>
           </div>
+          {(searchQuery || selectedCategory) && (
+            <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
+              {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
+              {selectedSubcategory && <span> · {selectedSubcategory}</span>}
+              {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
+            </p>
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
