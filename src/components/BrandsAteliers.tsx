@@ -17,7 +17,7 @@ const partnerBrands = [
   {
     id: "alexander-lamont-reef",
     name: "Alexander Lamont",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Decorative Objects",
     origin: "Thailand",
     description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
@@ -28,7 +28,7 @@ const partnerBrands = [
   {
     id: "alexander-lamont-mantle",
     name: "Alexander Lamont",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Decorative Objects",
     origin: "Thailand",
     description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
@@ -39,7 +39,7 @@ const partnerBrands = [
   {
     id: "alexander-lamont-corteza",
     name: "Alexander Lamont",
-    category: "Furniture",
+    category: "Tables",
     subcategory: "Tables",
     tableType: "Console Tables",
     origin: "Thailand",
@@ -51,7 +51,7 @@ const partnerBrands = [
   {
     id: "alinea-design-objects",
     name: "Alinea Design Objects",
-    category: "Furniture",
+    category: "Tables",
     subcategory: "Tables",
     tableType: "Dining Tables",
     origin: "Belgium",
@@ -117,7 +117,7 @@ const partnerBrands = [
   {
     id: "baleri",
     name: "Baleri Italia",
-    category: "Furniture",
+    category: "Storage",
     subcategory: "Bookcases & Credenzas",
     origin: "Italy",
     description: "Italian furniture company known for innovative designs and collaborations with leading architects and designers since 1984.",
@@ -128,7 +128,7 @@ const partnerBrands = [
   {
     id: "bruno-de-maistre",
     name: "Bruno de Maistre",
-    category: "Furniture",
+    category: "Tables",
     subcategory: "Desks",
     origin: "France",
     description: "French furniture designer creating refined bespoke pieces that combine classical proportions with contemporary elegance and exceptional craftsmanship.",
@@ -139,8 +139,8 @@ const partnerBrands = [
   {
     id: "cazes-conquet",
     name: "Cazes & Conquet",
-    category: "Furniture",
-    subcategory: "Seating",
+    category: "Seating",
+    subcategory: "Chairs",
     seatType: "Chairs",
     origin: "France",
     description: "French design duo creating refined furniture pieces that blend contemporary aesthetics with traditional craftsmanship and timeless elegance.",
@@ -161,8 +161,8 @@ const partnerBrands = [
   {
     id: "delcourt-collection",
     name: "Delcourt Collection",
-    category: "Furniture",
-    subcategory: "Seating",
+    category: "Seating",
+    subcategory: "Armchairs",
     seatType: "Armchairs",
     origin: "France",
     description: "Prestigious French furniture house known for their refined approach to contemporary seating and upholstery, combining generous proportions with elegant detailing.",
@@ -173,7 +173,7 @@ const partnerBrands = [
   {
     id: "celso-de-lemos",
     name: "Celso de Lemos",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Linens",
     origin: "Portugal",
     description: "Portuguese textile house crafting exquisite bed linens and home textiles using the finest natural fibers and artisanal techniques.",
@@ -184,8 +184,8 @@ const partnerBrands = [
   {
     id: "entrelacs-creation",
     name: "Entrelacs Création",
-    category: "Furniture",
-    subcategory: "Seating",
+    category: "Seating",
+    subcategory: "Sofas & Loveseats",
     seatType: "Sofas & Loveseats",
     origin: "France",
     description: "French atelier renowned for bespoke upholstery and furniture, combining traditional savoir-faire with contemporary design to create exceptional seating pieces.",
@@ -195,7 +195,7 @@ const partnerBrands = [
   {
     id: "damien-langlois-meurinne",
     name: "Damien Langlois Meurinne Studio",
-    category: "Furniture",
+    category: "Tables",
     subcategory: "Tables",
     tableType: "Console Tables",
     origin: "France",
@@ -207,7 +207,7 @@ const partnerBrands = [
   {
     id: "ecart-paris",
     name: "Ecart Paris",
-    category: "Furniture",
+    category: "Decorative Object",
     subcategory: "Iconic Editions",
     origin: "France",
     description: "Founded by legendary designer Andrée Putman, Ecart International re-edits iconic furniture designs from the 20th century's greatest masters, including Jean-Michel Frank and Pierre Chareau. Their meticulous reproductions preserve the original craftsmanship and materials.",
@@ -218,7 +218,7 @@ const partnerBrands = [
   {
     id: "emmanuel-babled",
     name: "Babled Studio",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Decorative Objects",
     origin: "France",
     description: "French-Italian designer creating limited edition sculptural objects in glass and marble, his Osmosi Series represents the pinnacle of material exploration and artistic vision.",
@@ -229,8 +229,8 @@ const partnerBrands = [
   {
     id: "eric-schmitt-studio",
     name: "Eric Schmitt Studio",
-    category: "Furniture",
-    subcategory: "Seating",
+    category: "Seating",
+    subcategory: "Chairs",
     seatType: "Chairs",
     origin: "France",
     description: "French designer creating bold sculptural furniture in bronze and iron, each piece a statement of artistic vision and master craftsmanship.",
@@ -241,7 +241,7 @@ const partnerBrands = [
   {
     id: "garnier-linker",
     name: "Garnier & Linker",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Decorative Objects",
     origin: "France",
     description: "French artist duo creating exceptional lost-wax cast crystal sculptures and decorative objects, their work for Théorème Editions exemplifies masterful artistry.",
@@ -252,7 +252,7 @@ const partnerBrands = [
   {
     id: "matthieu-gicquel",
     name: "Matthieu Gicquel",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Tableware",
     origin: "France",
     description: "French glass artist renowned for his exceptional tableware and decorative objects that blend traditional craftsmanship with contemporary design, featuring textured glass adorned with precious gold leaf details.",
@@ -285,8 +285,8 @@ const partnerBrands = [
   {
     id: "hamrei",
     name: "Hamrei",
-    category: "Furniture",
-    subcategory: "Seating",
+    category: "Seating",
+    subcategory: "Chairs",
     seatType: "Chairs",
     origin: "France",
     description: "French design studio crafting whimsical and sculptural furniture pieces that blend playful forms with exceptional craftsmanship and artistic expression.",
@@ -297,8 +297,8 @@ const partnerBrands = [
   {
     id: "jindrich-halabala",
     name: "Jindrich Halabala",
-    category: "Furniture",
-    subcategory: "Seating",
+    category: "Seating",
+    subcategory: "Armchairs",
     seatType: "Armchairs",
     origin: "Czech Republic",
     description: "Legendary Czech furniture designer whose iconic mid-century lounge chairs represent the pinnacle of functionalist design, prized by collectors worldwide.",
@@ -309,7 +309,7 @@ const partnerBrands = [
   {
     id: "iksel-brunelleschi",
     name: "Iksel",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Wallcoverings",
     origin: "United Kingdom",
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
@@ -320,7 +320,7 @@ const partnerBrands = [
   {
     id: "iksel-white-blossom",
     name: "Iksel",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Wallcoverings",
     origin: "United Kingdom",
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
@@ -331,7 +331,7 @@ const partnerBrands = [
   {
     id: "kiko-lopez",
     name: "Kiko Lopez",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Mirrors",
     origin: "France",
     description: "French glass artist renowned for his extraordinary hand-silvered mirrors and sculptural glass works, each piece a unique testament to ancient techniques reimagined.",
@@ -342,8 +342,8 @@ const partnerBrands = [
   {
     id: "leo-sentou",
     name: "Leo Sentou",
-    category: "Furniture",
-    subcategory: "Seating",
+    category: "Seating",
+    subcategory: "Armchairs",
     seatType: "Armchairs",
     origin: "France",
     description: "French furniture designer creating refined contemporary pieces that balance sculptural presence with functional elegance and exceptional craftsmanship.",
@@ -376,8 +376,8 @@ const partnerBrands = [
   {
     id: "nika-zupanc",
     name: "Nika Zupanc Studio",
-    category: "Furniture",
-    subcategory: "Seating",
+    category: "Seating",
+    subcategory: "Sofas & Loveseats",
     seatType: "Sofas & Loveseats",
     origin: "Slovenia",
     description: "Slovenian designer known for poetic, feminine furniture and lighting that combines nostalgic elegance with contemporary sensibility.",
@@ -388,7 +388,7 @@ const partnerBrands = [
   {
     id: "okha",
     name: "Okha",
-    category: "Furniture",
+    category: "Tables",
     subcategory: "Tables",
     tableType: "Side Tables",
     origin: "South Africa",
@@ -400,7 +400,7 @@ const partnerBrands = [
   {
     id: "ooumm",
     name: "oOumm",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Decorative Objects",
     origin: "France",
     description: "French luxury brand creating sculptural marble candles and decorative objects that blend artisanal craftsmanship with contemporary design sensibility.",
@@ -422,7 +422,7 @@ const partnerBrands = [
   {
     id: "peter-reed",
     name: "Peter Reed 1861",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Linens",
     origin: "United Kingdom",
     description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
@@ -453,7 +453,7 @@ const partnerBrands = [
   {
     id: "poltrona-frau",
     name: "Poltrona Frau",
-    category: "Furniture",
+    category: "Storage",
     subcategory: "Bookcases & Credenzas",
     origin: "Italy",
     description: "Iconic Italian furniture house renowned for exceptional leather craftsmanship since 1912. Their timeless designs grace prestigious residences and institutions worldwide.",
@@ -464,7 +464,7 @@ const partnerBrands = [
   {
     id: "robicara",
     name: "Robicara",
-    category: "Furniture",
+    category: "Storage",
     subcategory: "Bookcases & Credenzas",
     origin: "Italy",
     description: "Italian design studio creating bespoke furniture and cabinetry with exceptional attention to material, proportion, and craftsmanship.",
@@ -475,7 +475,7 @@ const partnerBrands = [
   {
     id: "theoreme-editions",
     name: "Théorème Editions",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Decorative Objects",
     origin: "France",
     description: "French publisher of limited edition decorative objects, collaborating with renowned artists and designers including Garnier & Linker.",
@@ -486,8 +486,8 @@ const partnerBrands = [
   {
     id: "thierry-lemaire-sofa",
     name: "Thierry Lemaire",
-    category: "Furniture",
-    subcategory: "Seating",
+    category: "Seating",
+    subcategory: "Sofas & Loveseats",
     seatType: "Sofas & Loveseats",
     origin: "France",
     description: "Renowned French interior architect and furniture designer creating timeless bespoke pieces that blend classical elegance with contemporary refinement.",
@@ -498,7 +498,7 @@ const partnerBrands = [
   {
     id: "thierry-lemaire-table",
     name: "Thierry Lemaire",
-    category: "Furniture",
+    category: "Tables",
     subcategory: "Tables",
     tableType: "Coffee Tables",
     origin: "France",
@@ -510,7 +510,7 @@ const partnerBrands = [
   {
     id: "takayokaya",
     name: "Takayokaya",
-    category: "Decor",
+    category: "Decorative Object",
     subcategory: "Decorative Objects",
     origin: "Japan",
     description: "Japanese artisan studio specializing in traditional textile craftsmanship with a contemporary sensibility, creating pieces that represent the pinnacle of Japanese comfort design.",
@@ -532,8 +532,8 @@ const partnerBrands = [
   {
     id: "kerstens",
     name: "Kerstens",
-    category: "Furniture",
-    subcategory: "Seating",
+    category: "Seating",
+    subcategory: "Sofas & Loveseats",
     seatType: "Sofas & Loveseats",
     origin: "Belgium",
     description: "Multidisciplinary design studio founded in 2015 with a distinct vision for architecture, interior and furniture design. The studio aims to create an atmospheric quality within a refined architectural design language.",
@@ -542,8 +542,8 @@ const partnerBrands = [
   {
     id: "man-of-parts",
     name: "Man of Parts",
-    category: "Furniture",
-    subcategory: "Seating",
+    category: "Seating",
+    subcategory: "Sofas & Loveseats",
     seatType: "Sofas & Loveseats",
     origin: "Canada",
     description: "Canadian furniture house creating timeless pieces with a focus on quality materials, exceptional comfort, and refined contemporary design.",
@@ -564,28 +564,10 @@ const BrandsAteliers = () => {
   // Build category → subcategory map from brand data
   const categoryMap = useMemo(() => {
     const map: Record<string, Set<string>> = {};
-    // Map brand categories to standardized taxonomy
-    const categoryMapping: Record<string, string> = {
-      "Lighting": "Lighting",
-      "Rugs": "Rugs",
-      "Decor": "Decorative Object",
-      "Furniture": "", // Furniture maps to subcategory-based categories
-    };
     
     partnerBrands.forEach(brand => {
-      let primaryCat = categoryMapping[brand.category];
-      // For Furniture, derive primary category from subcategory
-      if (brand.category === "Furniture") {
-        const sub = (brand as any).subcategory || "";
-        if (sub === "Seating") primaryCat = "Seating";
-        else if (sub === "Tables") primaryCat = "Tables";
-        else if (sub === "Desks") primaryCat = "Tables";
-        else if (sub === "Bookcases & Credenzas") primaryCat = "Storage";
-        else primaryCat = "Decorative Object";
-      }
-      if (!primaryCat) return;
+      const primaryCat = brand.category;
       if (!map[primaryCat]) map[primaryCat] = new Set();
-      // Add specific subcategory
       const subcat = (brand as any).subcategory || (brand as any).seatType || (brand as any).tableType;
       if (subcat && subcat !== primaryCat) {
         map[primaryCat].add(subcat);
@@ -598,7 +580,6 @@ const BrandsAteliers = () => {
         result[cat] = Array.from(map[cat]).sort();
       }
     });
-    // Add any extra categories not in the fixed order
     Object.keys(map).forEach(cat => {
       if (!result[cat]) {
         result[cat] = Array.from(map[cat]).sort();
@@ -612,21 +593,6 @@ const BrandsAteliers = () => {
     const extra = Object.keys(categoryMap).filter(cat => !CATEGORY_ORDER.includes(cat));
     return [...ordered, ...extra];
   }, [categoryMap]);
-
-  // Helper to get standardized category for a brand
-  const getBrandPrimaryCategory = (brand: typeof partnerBrands[0]) => {
-    if (brand.category === "Lighting") return "Lighting";
-    if (brand.category === "Rugs") return "Rugs";
-    if (brand.category === "Decor") return "Decorative Object";
-    if (brand.category === "Furniture") {
-      const sub = (brand as any).subcategory || "";
-      if (sub === "Seating") return "Seating";
-      if (sub === "Tables" || sub === "Desks") return "Tables";
-      if (sub === "Bookcases & Credenzas") return "Storage";
-      return "Decorative Object";
-    }
-    return brand.category;
-  };
 
   const filteredBrands = useMemo(() => {
     let brands = partnerBrands;
@@ -645,12 +611,11 @@ const BrandsAteliers = () => {
     // Filter by selected category/subcategory
     if (selectedCategory || selectedSubcategory) {
       brands = brands.filter(brand => {
-        const primaryCat = getBrandPrimaryCategory(brand);
         if (selectedSubcategory) {
           const sub = (brand as any).subcategory || (brand as any).seatType || (brand as any).tableType;
-          return sub === selectedSubcategory || primaryCat === selectedSubcategory;
+          return sub === selectedSubcategory || brand.category === selectedSubcategory;
         }
-        return primaryCat === selectedCategory;
+        return brand.category === selectedCategory;
       });
     }
     
