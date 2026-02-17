@@ -440,9 +440,14 @@ const Collectibles = () => {
                       )}
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="start">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
+                   <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="start">
+                     <div className="flex items-center justify-between mb-3">
+                       <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
+                       <button onClick={() => setFilterOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors ml-2" aria-label="Close filter">
+                         <X size={16} />
+                       </button>
+                     </div>
+                     <div className="flex items-center justify-between mb-3">
                       {selectedCategory && (
                         <button
                           onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
