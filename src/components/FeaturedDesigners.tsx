@@ -854,7 +854,7 @@ const FeaturedDesigners = () => {
               )}
             </div>
             {/* Category Navigation - Carlyle Collective style */}
-            <div className="flex items-center gap-4 md:gap-6 mt-4 border-b border-border/30 pb-3">
+            <div className="flex flex-wrap items-center gap-3 md:gap-6 mt-4 border-b border-border/30 pb-3">
               <button
                 onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
                 className={`text-[11px] md:text-xs uppercase tracking-[0.2em] font-body transition-all duration-300 relative pb-1 ${
@@ -895,7 +895,7 @@ const FeaturedDesigners = () => {
             </div>
             {/* Subcategories row */}
             {selectedCategory && categoryMap[selectedCategory]?.length > 0 && (
-              <div className="flex items-center gap-3 md:gap-5 mt-2.5">
+              <div className="flex flex-wrap items-center gap-3 md:gap-5 mt-2.5">
                 <button
                   onClick={() => setSelectedSubcategory(null)}
                   className={`text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 ${
