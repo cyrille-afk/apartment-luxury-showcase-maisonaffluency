@@ -49,6 +49,7 @@ const collectibleDesigners = [
         image: demichelisPick1, 
         title: "Babel Table Lamp", 
         category: "Lighting",
+        subcategory: "Table Lamps",
         materials: "Bronze • Brass • Ash wood • White fabric shade",
         dimensions: "Ø45 × H60.9 cm",
         edition: "Numbered edition of 20"
@@ -57,6 +58,7 @@ const collectibleDesigners = [
         image: demichelisPick4, 
         title: "Echo Floor Lamp", 
         category: "Lighting",
+        subcategory: "Floor Lamps",
         materials: "Patinated and varnished brass",
         dimensions: "Ø38 × H166 cm",
         edition: "Numbered edition of 20"
@@ -65,6 +67,7 @@ const collectibleDesigners = [
         image: demichelisPick2, 
         title: "Bud Table Lamp", 
         category: "Lighting",
+        subcategory: "Table Lamps",
         materials: "Bronze • White oak • Hand-made fabric shade",
         dimensions: "Ø40 × H71 cm",
         edition: "Numbered edition of 20"
@@ -72,7 +75,8 @@ const collectibleDesigners = [
       { 
         image: demichelisPick3, 
         title: "Table d'appoint RHINO", 
-        category: "Furniture",
+        category: "Tables",
+        subcategory: "Side Tables",
         materials: "Patinated bronze • Raw brass • Brown cowhide leather top",
         dimensions: "H43.5 × L35 cm",
         edition: "Numbered edition of 8 + 2 APs"
@@ -97,7 +101,8 @@ const collectibleDesigners = [
       { 
         image: kikoLopezMirror,
         title: "Shadow Drawings Mirror", 
-        category: "Mirrors",
+        category: "Decorative Object",
+        subcategory: "Mirrors",
         materials: "Antiqued glass • Bronze patina frame",
         dimensions: "H100 × W70 cm",
         edition: "Unique Piece"
@@ -123,7 +128,8 @@ const collectibleDesigners = [
       { 
         image: nathalieZieglerSnakeVessel,
         title: "Gold & Silver Snake Vessel", 
-        category: "Decorative Objects",
+        category: "Decorative Object",
+        subcategory: "Vessels",
         materials: "Hand-blown glass • Gold & silver leaf accents",
         dimensions: "H38 cm × Diam 30 cm",
         edition: "Unique Piece"
@@ -149,6 +155,7 @@ const collectibleDesigners = [
         image: maartenVrolijkVessel,
         title: "Sculptural Glass Vessel", 
         category: "Decorative Object",
+        subcategory: "Vessels",
         materials: "Handblown & sculpted glass, unique piece with certificate",
         dimensions: "H 52 cm × W 40 cm × D 41 cm",
         edition: "Unique Piece"
@@ -174,6 +181,7 @@ const collectibleDesigners = [
         image: matthieuGicquelGeode,
         title: "Géode Nbr 4: Texture Glass with Gold Leaf Rim", 
         category: "Decorative Object",
+        subcategory: "Tableware",
         materials: "Textured glass • 24k gold leaf rim",
         dimensions: "Ø32 cm",
         edition: "Unique Piece"
@@ -199,6 +207,7 @@ const collectibleDesigners = [
         image: rowinNoneIiLamp,
         title: "None II Table Lamp", 
         category: "Lighting",
+        subcategory: "Table Lamps",
         materials: "Cippolino Verde Marble, Silver-Plated brass",
         dimensions: "39 cm × 22.5 cm × H 58 cm",
         edition: "Unique Piece"
@@ -224,6 +233,7 @@ const collectibleDesigners = [
         image: marcantonioCotissiVessel,
         title: "Cotissi Vessel", 
         category: "Decorative Object",
+        subcategory: "Vessels",
         materials: "Hand-blown Murano glass",
         dimensions: "H35 × Ø20 cm",
         edition: "Unique Piece"
@@ -252,7 +262,7 @@ const Collectibles = () => {
   const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
 
-  const CATEGORY_ORDER = ["Lighting", "Decorative Object", "Mirrors", "Furniture"];
+  const CATEGORY_ORDER = ["Lighting", "Tables", "Decorative Object"];
 
   // Build category → subcategory map from curator picks
   const categoryMap = useMemo(() => {
@@ -261,6 +271,9 @@ const Collectibles = () => {
       designer.curatorPicks?.forEach((pick: any) => {
         const cat = pick.category;
         if (!map[cat]) map[cat] = new Set();
+        if (pick.subcategory) {
+          map[cat].add(pick.subcategory);
+        }
       });
     });
     const result: Record<string, string[]> = {};
@@ -294,7 +307,7 @@ const Collectibles = () => {
     if (selectedCategory) {
       designers = designers.filter(designer =>
         designer.curatorPicks?.some((pick: any) => {
-          if (selectedSubcategory) return pick.category === selectedSubcategory;
+          if (selectedSubcategory) return pick.subcategory === selectedSubcategory;
           return pick.category === selectedCategory;
         })
       );
