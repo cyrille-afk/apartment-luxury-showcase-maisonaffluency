@@ -78,6 +78,7 @@ import leoSentouPickGJ from "@/assets/curators-picks/leo-sentou-gj-chair.png";
 import leoSentouPickLA from "@/assets/curators-picks/leo-sentou-side-table-la.png";
 import leoSentouPickAB from "@/assets/curators-picks/leo-sentou-ab-armchair-new.png";
 import leoSentouPickCS from "@/assets/curators-picks/leo-sentou-cs-sofa.png";
+import leoSentouPickLD from "@/assets/curators-picks/leo-sentou-ld-armchair.png";
 
 const featuredDesigners = [
   {
@@ -679,6 +680,14 @@ const featuredDesigners = [
         tags: ["Seating", "Sofa"],
         materials: "Plush upholstery • Oak feet",
         dimensions: "W240–320 × H70 × D95 cm"
+      },
+      {
+        image: leoSentouPickLD,
+        title: "Fauteuil L.D",
+        category: "Seating",
+        tags: ["Seating", "Armchair"],
+        materials: "Plush upholstery • Oak or bronze feet",
+        dimensions: "W90 × H80 × D81 cm"
       },
     ],
     links: [
