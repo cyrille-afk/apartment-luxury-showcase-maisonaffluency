@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 // Designer images
@@ -259,6 +259,7 @@ const Collectibles = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [showSearch, setShowSearch] = useState(false);
   const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
 
@@ -416,129 +417,137 @@ const Collectibles = () => {
             transition={{ duration: 0.8 }}
             className="mb-12 md:mb-16 text-left"
           >
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-4">
-              Collectibles
-            </h2>
-            <div className="flex items-center justify-between">
-              <p className="text-base md:text-lg text-muted-foreground font-body">
-                Limited Editions & Unique Pieces
-              </p>
-              <Search className="h-5 w-5 text-muted-foreground" />
+            <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-4">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
+                Collectibles
+              </h2>
+              <div className="flex items-center gap-2 pb-1">
+                <button
+                  onClick={() => setShowSearch(!showSearch)}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="Search designers"
+                >
+                  <Search className="h-5 w-5" />
+                </button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="text-muted-foreground hover:text-primary transition-colors relative" aria-label="Filter by category">
+                      <SlidersHorizontal className="h-5 w-5" />
+                      {selectedCategory && (
+                        <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
+                          1
+                        </span>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="start">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
+                      {selectedCategory && (
+                        <button
+                          onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
+                          className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-1 max-h-80 overflow-y-auto">
+                      {categories.map((category) => (
+                        <div key={category}>
+                          <label className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
+                            <Checkbox
+                              checked={selectedCategory === category}
+                              onCheckedChange={() => {
+                                if (selectedCategory === category) {
+                                  setSelectedCategory(null);
+                                  setSelectedSubcategory(null);
+                                } else {
+                                  setSelectedCategory(category);
+                                  setSelectedSubcategory(null);
+                                }
+                              }}
+                            />
+                            <span className="text-sm text-foreground font-body">{category}</span>
+                          </label>
+                          {selectedCategory === category && categoryMap[category]?.length > 0 && (
+                            <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
+                              <button
+                                onClick={() => setSelectedSubcategory(null)}
+                                className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                                  !selectedSubcategory ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
+                                }`}
+                              >
+                                All {category}
+                              </button>
+                              {categoryMap[category].map(sub => (
+                                <button
+                                  key={sub}
+                                  onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
+                                  className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                                    selectedSubcategory === sub ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
+                                  }`}
+                                >
+                                  {sub}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
+            <p className="text-base md:text-lg text-muted-foreground font-body">
+              Limited Editions & Unique Pieces
+            </p>
           </motion.div>
 
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-64">
+          {showSearch && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-4"
+            >
+              <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder="Search designers..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-9 font-body text-sm bg-card/50 border-border/40 focus:border-primary/60 h-9"
+                  className="pl-10 pr-10 bg-card/80 border-border/40 focus:border-primary/60 h-9 text-sm"
+                  autoFocus
                 />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
+                <button
+                  onClick={() => { setSearchQuery(""); setShowSearch(false); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="bg-card/80 border-border/40 hover:bg-card h-9">
-                    <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
-                    <span className="hidden sm:inline">Categories</span>
-                    {selectedCategory && (
-                      <span className="ml-1.5 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full">
-                        1
-                      </span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="end">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
-                    {selectedCategory && (
-                      <button
-                        onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
-                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        Clear
-                      </button>
-                    )}
-                  </div>
-                  <div className="space-y-1 max-h-80 overflow-y-auto">
-                    {categories.map((category) => (
-                      <div key={category}>
-                        <label
-                          className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
-                        >
-                          <Checkbox
-                            checked={selectedCategory === category}
-                            onCheckedChange={() => {
-                              if (selectedCategory === category) {
-                                setSelectedCategory(null);
-                                setSelectedSubcategory(null);
-                              } else {
-                                setSelectedCategory(category);
-                                setSelectedSubcategory(null);
-                              }
-                            }}
-                          />
-                          <span className="text-sm text-foreground font-body">{category}</span>
-                        </label>
-                        {selectedCategory === category && categoryMap[category]?.length > 0 && (
-                          <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
-                            <button
-                              onClick={() => setSelectedSubcategory(null)}
-                              className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                !selectedSubcategory
-                                  ? 'text-primary'
-                                  : 'text-muted-foreground/60 hover:text-primary'
-                              }`}
-                            >
-                              All {category}
-                            </button>
-                            {categoryMap[category].map(sub => (
-                              <button
-                                key={sub}
-                                onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
-                                className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                  selectedSubcategory === sub
-                                    ? 'text-primary'
-                                    : 'text-muted-foreground/60 hover:text-primary'
-                                }`}
-                              >
-                                {sub}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
+            </motion.div>
+          )}
+
+          <div className="flex items-center justify-between mb-4">
+            {(searchQuery || selectedCategory) ? (
+              <p className="text-left text-[10px] text-muted-foreground/50 font-body tracking-wider">
+                {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
+                {selectedSubcategory && <span> · {selectedSubcategory}</span>}
+                {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
+              </p>
+            ) : <div />}
             <button
               onClick={toggleAllDesigners}
-              className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1 ml-auto"
+              className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1"
             >
               <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
               <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
             </button>
           </div>
-          {(searchQuery || selectedCategory) && (
-            <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
-              {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
-              {selectedSubcategory && <span> · {selectedSubcategory}</span>}
-              {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
-            </p>
-          )}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
