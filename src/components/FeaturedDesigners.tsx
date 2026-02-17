@@ -658,12 +658,11 @@ const featuredDesigners = [
       },
       {
         image: leoSentouPickLA,
-        title: "Side Table L.A",
-        subtitle: "Bronze",
+        title: "Console J.P.D",
         category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Patinated cast brass frame • Marble top",
-        dimensions: "D30 × H60 cm"
+        tags: ["Tables", "Console"],
+        materials: "Oak • Lacquer",
+        dimensions: "W120 × H80 × D45 cm"
       },
       {
         image: leoSentouPickAB,
