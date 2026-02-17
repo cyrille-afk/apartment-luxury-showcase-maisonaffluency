@@ -66,7 +66,7 @@ import jmwPick3 from "@/assets/curators-picks/jmw-3.png";
 import jmwPick4 from "@/assets/curators-picks/jmw-4.png";
 import jmwPick5 from "@/assets/curators-picks/jmw-5.png";
 import jmwPick6 from "@/assets/curators-picks/jmw-6.png";
-import jmwPick7 from "@/assets/curators-picks/jmw-7.webp";
+
 import jmwPick8 from "@/assets/curators-picks/jmw-8.webp";
 
 const featuredDesigners = [
@@ -570,15 +570,6 @@ const featuredDesigners = [
         tags: ["Decorative Object", "Mirror"],
         materials: "Freehand blown mirrored glass",
         dimensions: "Ø55 × D18 cm"
-      },
-      {
-        image: jmwPick7,
-        title: "Gravity Rose & Géométrie Liquide Rose",
-        subtitle: "Pendant & Side Tables",
-        category: "Lighting",
-        tags: ["Lighting", "Pendant"],
-        materials: "Freehand blown glass • Rose tinted • Brass",
-        dimensions: "Pendant L120 cm / Tables H45 × Ø35 cm"
       },
       {
         image: jmwPick8,
