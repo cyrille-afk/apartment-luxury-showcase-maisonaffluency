@@ -60,6 +60,14 @@ import hamreiPick2 from "@/assets/curators-picks/hamrei-2.jpg";
 import hamreiPick3 from "@/assets/curators-picks/hamrei-3.jpg";
 import hamreiPick4 from "@/assets/curators-picks/hamrei-4.jpg";
 import hamreiPick5 from "@/assets/curators-picks/hamrei-5.jpg";
+import jmwPick1 from "@/assets/curators-picks/jmw-1.webp";
+import jmwPick2 from "@/assets/curators-picks/jmw-2.png";
+import jmwPick3 from "@/assets/curators-picks/jmw-3.png";
+import jmwPick4 from "@/assets/curators-picks/jmw-4.png";
+import jmwPick5 from "@/assets/curators-picks/jmw-5.png";
+import jmwPick6 from "@/assets/curators-picks/jmw-6.png";
+import jmwPick7 from "@/assets/curators-picks/jmw-7.webp";
+import jmwPick8 from "@/assets/curators-picks/jmw-8.webp";
 
 const featuredDesigners = [
   {
@@ -508,6 +516,80 @@ const featuredDesigners = [
       "Born in Paris and raised in Western Africa, Jeremy Maxwell Wintrebert is a French-American glass artist who established JMW Studio in 2015 beneath the historic Viaduc des Arts in Paris. After apprenticing with masters including Dale Chihuly in Seattle and Davide Salvadore in Venice, he developed his signature freehand glassblowing technique. Winner of the 2019 Prix Bettencourt pour l'Intelligence de la Main, his work graces the collections of the Victoria & Albert Museum, Palais de Tokyo, and MusVerre.",
     notableWorks: "Cloud Pendants, Autumn Light Pendants, Space Nugget Side Table, Sonde Chandelier, Dark Matter Installation",
     philosophy: "Freehand glassblowing is an emotional conversation between hands, head, heart, and material. You start with a small seed and help it grow—it is a humble process.",
+    curatorPicks: [
+      {
+        image: jmwPick1,
+        title: "Cloud Bulle",
+        subtitle: "Pendant",
+        category: "Lighting",
+        tags: ["Lighting", "Pendant"],
+        materials: "Freehand blown glass • Brass fittings",
+        dimensions: "Approx. Ø30 × H35 cm (each)"
+      },
+      {
+        image: jmwPick2,
+        title: "Sonde",
+        subtitle: "Table Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Table Lamp"],
+        materials: "3D-printed mesh shade • Blown glass diffuser • Metal base",
+        dimensions: "Ø35 × H40 cm"
+      },
+      {
+        image: jmwPick3,
+        title: "Autumn Light",
+        subtitle: "Pendant",
+        category: "Lighting",
+        tags: ["Lighting", "Pendant"],
+        materials: "Freehand blown glass • Matte & satin finishes",
+        dimensions: "Various sizes available"
+      },
+      {
+        image: jmwPick4,
+        title: "Totem",
+        subtitle: "Pendant",
+        category: "Lighting",
+        tags: ["Lighting", "Pendant"],
+        materials: "Stacked blown glass discs • Brass armature",
+        dimensions: "H90 × Ø10 cm"
+      },
+      {
+        image: jmwPick5,
+        title: "Space Nugget",
+        subtitle: "Side Table",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Freehand blown mirrored glass",
+        dimensions: "H42 × Ø38 cm"
+      },
+      {
+        image: jmwPick6,
+        title: "Zenith",
+        subtitle: "Wall Mirror",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Mirror"],
+        materials: "Freehand blown mirrored glass",
+        dimensions: "Ø55 × D18 cm"
+      },
+      {
+        image: jmwPick7,
+        title: "Gravity Rose & Géométrie Liquide Rose",
+        subtitle: "Pendant & Side Tables",
+        category: "Lighting",
+        tags: ["Lighting", "Pendant"],
+        materials: "Freehand blown glass • Rose tinted • Brass",
+        dimensions: "Pendant L120 cm / Tables H45 × Ø35 cm"
+      },
+      {
+        image: jmwPick8,
+        title: "Gravity",
+        subtitle: "Coffee Table",
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
+        materials: "Blown glass spheres • Lacquered wood top",
+        dimensions: "L150 × W60 × H30 cm"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/jmw_studio" },
       { type: "Curators' Picks" },
