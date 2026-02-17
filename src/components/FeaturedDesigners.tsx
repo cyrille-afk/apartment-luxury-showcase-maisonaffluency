@@ -36,6 +36,8 @@ import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
 import yvesMacheretPick4 from "@/assets/curators-picks/yves-macheret-4.jpg";
+import yvesMacheretPickHublo from "@/assets/curators-picks/yves-macheret-hublo.png";
+import yvesMacheretPickConsole1925 from "@/assets/curators-picks/yves-macheret-console-1925.jpg";
 import apparatusPick1 from "@/assets/curators-picks/apparatus-1.jpg";
 import apparatusPick2 from "@/assets/curators-picks/apparatus-2.jpg";
 import apparatusPick3 from "@/assets/curators-picks/apparatus-3.jpg";
@@ -795,6 +797,25 @@ const featuredDesigners = [
         tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated bronze • Hand-carved alabaster diffuser",
         dimensions: "H650 × W115 × D62 mm"
+      },
+      {
+        image: yvesMacheretPickHublo,
+        title: "Hublot 600",
+        subtitle: "Mirror",
+        category: "Lighting",
+        tags: ["Lighting", "Mirror"],
+        materials: "Patinated bronze • Alabaster diffuser",
+        dimensions: "Ø60 × D3 cm",
+        description: "The Hublot is a luminous mirror inspired by the porthole motif. Hand-cast in patinated bronze with a hand-carved alabaster diffuser, it combines lighting and reflection in a single sculptural object. Available in multiple bronze patinas and alabaster vein options, it is dimmable and IP44 rated."
+      },
+      {
+        image: yvesMacheretPickConsole1925,
+        title: "Console 1925",
+        category: "Tables",
+        tags: ["Tables", "Console"],
+        materials: "Patinated cast bronze • Calacatta Oro marble",
+        dimensions: "L160 × D35 × H81 cm",
+        description: "Designed by Arnaud Leman for Entrelacs, the Console 1925 is a refined tribute to early twentieth-century decorative arts. Its slender cast-bronze frame supports a Calacatta Oro marble top, blending structural elegance with the warmth and weight of natural stone. Also available in custom sizes and alternative marble finishes."
       },
     ],
     links: [
