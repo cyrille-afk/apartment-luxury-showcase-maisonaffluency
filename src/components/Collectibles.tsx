@@ -263,7 +263,7 @@ const Collectibles = () => {
   const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
 
-  const CATEGORY_ORDER = ["Lighting", "Tables", "Decorative Object"];
+  const CATEGORY_ORDER = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"];
 
   // Build category → subcategory map from curator picks
   const categoryMap = useMemo(() => {
@@ -288,9 +288,8 @@ const Collectibles = () => {
   }, []);
 
   const categories = useMemo(() => {
-    const ordered = CATEGORY_ORDER.filter(cat => categoryMap[cat]);
     const extra = Object.keys(categoryMap).filter(cat => !CATEGORY_ORDER.includes(cat));
-    return [...ordered, ...extra];
+    return [...CATEGORY_ORDER, ...extra];
   }, [categoryMap]);
 
   const filteredDesigners = useMemo(() => {
