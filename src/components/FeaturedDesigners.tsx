@@ -73,6 +73,11 @@ import jmwPick5 from "@/assets/curators-picks/jmw-5.png";
 import jmwPick6 from "@/assets/curators-picks/jmw-6.png";
 
 import jmwPick8 from "@/assets/curators-picks/jmw-8.webp";
+import leoSentouPick1 from "@/assets/curators-picks/leo-sentou-ab-armchair.avif";
+import leoSentouPick2 from "@/assets/curators-picks/leo-sentou-ld-armchair.avif";
+import leoSentouPick3 from "@/assets/curators-picks/leo-sentou-chair-gj.avif";
+import leoSentouPick4 from "@/assets/curators-picks/leo-sentou-sofa.avif";
+import leoSentouPick5 from "@/assets/curators-picks/leo-sentou-side-table.avif";
 
 const featuredDesigners = [
   {
@@ -634,6 +639,49 @@ const featuredDesigners = [
     notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J, AB Armchair",
     notableWorksLink: { text: "AB Armchair", galleryIndex: 1 },
     philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
+    curatorPicks: [
+      {
+        image: leoSentouPick1,
+        title: "AB Armchair",
+        category: "Seating",
+        tags: ["Seating", "Armchair"],
+        materials: "Limed oak frame • Mohair upholstery",
+        dimensions: "H78 × W68 × D72 cm"
+      },
+      {
+        image: leoSentouPick2,
+        title: "Fauteuil L.D",
+        subtitle: "Oval Bergère",
+        category: "Seating",
+        tags: ["Seating", "Armchair"],
+        materials: "Limed oak frame • Linen upholstery",
+        dimensions: "H85 × W75 × D80 cm"
+      },
+      {
+        image: leoSentouPick3,
+        title: "Chair G.J",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Limed oak • Linen seat",
+        dimensions: "H88 × W48 × D52 cm"
+      },
+      {
+        image: leoSentouPick4,
+        title: "Sofa",
+        category: "Seating",
+        tags: ["Seating", "Sofa"],
+        materials: "Limed oak frame • Mohair upholstery",
+        dimensions: "H80 × W200 × D85 cm"
+      },
+      {
+        image: leoSentouPick5,
+        title: "Side Table L.A",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Wrought iron • Bronze patina",
+        dimensions: "H55 × Ø45 cm"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/leosentou" },
       { type: "Curators' Picks" },
