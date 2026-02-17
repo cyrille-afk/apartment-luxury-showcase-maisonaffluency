@@ -675,9 +675,9 @@ const featuredDesigners = [
       },
       {
         image: leoSentouPick1,
-        title: "Side Table L.A",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
+        title: "Fauteuil J.B.L",
+        category: "Seating",
+        tags: ["Seating", "Armchair"],
         materials: "Wrought iron • Bronze patina",
         dimensions: "H55 × Ø45 cm"
       },
