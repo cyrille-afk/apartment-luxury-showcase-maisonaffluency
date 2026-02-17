@@ -1292,7 +1292,21 @@ const FeaturedDesigners = () => {
                             ) : link.type === "Curators' Picks" ? (
                               <button
                                 key={idx}
-                                onClick={() => setCuratorPicksDesigner(designer)}
+                                onClick={() => {
+                                  // Filter curator picks by active subcategory/category
+                                  let filteredPicks = designer.curatorPicks || [];
+                                  if (selectedSubcategory) {
+                                    filteredPicks = filteredPicks.filter((pick: any) => pick.tags?.includes(selectedSubcategory));
+                                  } else if (selectedCategory) {
+                                    filteredPicks = filteredPicks.filter((pick: any) => pick.tags?.includes(selectedCategory));
+                                  }
+                                  if (filteredPicks.length > 0) {
+                                    setCuratorPicksDesigner({ ...designer, curatorPicks: filteredPicks } as any);
+                                  } else {
+                                    setCuratorPicksDesigner(designer);
+                                  }
+                                  setCuratorPickIndex(0);
+                                }}
                                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-gradient-to-r from-accent/90 to-primary/80 hover:from-accent hover:to-primary text-white rounded-md transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer border border-accent/30"
                               >
                                 <Star size={16} className="fill-current" />
