@@ -647,7 +647,8 @@ const featuredDesigners = [
         category: "Seating",
         tags: ["Seating", "Armchair"],
         materials: "Bleached & brushed solid oak • Upholstery",
-        dimensions: "W70 × H91.5 × D63.9 cm — SH 47 cm"
+        dimensions: "W70 × H91.5 × D63.9 cm — SH 47 cm",
+        description: "The Fauteuil J.B.L takes its inspiration from an elegant yet unusual armchair by Maître Ebeniste Jean Baptiste Lelarge (1743-1802). The design is an echo of classical canons treated in a contemporary manner. Entirely handcrafted by a team of skilled artisans, the original \"ecusson\" back, typical arched armrests and bolsters found in Louis XVI furniture have been simplified, thus becoming sculptural."
       },
       {
         image: leoSentouPickLA,
