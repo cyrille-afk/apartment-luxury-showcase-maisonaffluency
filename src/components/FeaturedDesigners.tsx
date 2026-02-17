@@ -386,7 +386,8 @@ const featuredDesigners = [
     curatorPicks: [
       {
         image: hamreiPick1,
-        title: "PEDRO Coffee Table – Limited Edition Aqua",
+        title: "PEDRO Coffee Table",
+        subtitle: "Limited Edition Aqua",
         category: "Furniture",
         tags: ["Furniture", "Coffee Table"],
         materials: "Solid cast bronze, hand-patinated aqua finish",
@@ -1047,6 +1048,12 @@ const FeaturedDesigners = () => {
                     <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
                       <h3 className="text-sm md:text-base font-serif text-white mb-1">
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
+                        {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.subtitle && (
+                          <>
+                            <br />
+                            <span className="text-white/70 text-xs md:text-sm font-body">{(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).subtitle}</span>
+                          </>
+                        )}
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
                           <span className="text-white/60 font-body text-xs md:text-sm"> ({curatorPicksDesigner.curatorPicks[curatorPickIndex].materials})</span>
                         )}
