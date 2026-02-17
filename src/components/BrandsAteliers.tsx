@@ -1,15 +1,8 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo } from "react";
-import { Search, X, Instagram, ExternalLink, SlidersHorizontal } from "lucide-react";
+import { Search, X, Instagram, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -559,13 +552,78 @@ const BrandsAteliers = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategoryFilters, setSelectedCategoryFilters] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
-  // Get all unique categories from partner brands
-  const allUniqueCategories = useMemo(() => {
-    const categories = [...new Set(partnerBrands.map(brand => brand.category))];
-    return categories.sort((a, b) => a.localeCompare(b));
+  // Fixed category order matching the artisans section
+  const CATEGORY_ORDER = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"];
+
+  // Build category → subcategory map from brand data
+  const categoryMap = useMemo(() => {
+    const map: Record<string, Set<string>> = {};
+    // Map brand categories to standardized taxonomy
+    const categoryMapping: Record<string, string> = {
+      "Lighting": "Lighting",
+      "Rugs": "Rugs",
+      "Decor": "Decorative Object",
+      "Furniture": "", // Furniture maps to subcategory-based categories
+    };
+    
+    partnerBrands.forEach(brand => {
+      let primaryCat = categoryMapping[brand.category];
+      // For Furniture, derive primary category from subcategory
+      if (brand.category === "Furniture") {
+        const sub = (brand as any).subcategory || "";
+        if (sub === "Seating") primaryCat = "Seating";
+        else if (sub === "Tables") primaryCat = "Tables";
+        else if (sub === "Desks") primaryCat = "Tables";
+        else if (sub === "Bookcases & Credenzas") primaryCat = "Storage";
+        else primaryCat = "Decorative Object";
+      }
+      if (!primaryCat) return;
+      if (!map[primaryCat]) map[primaryCat] = new Set();
+      // Add specific subcategory
+      const subcat = (brand as any).subcategory || (brand as any).seatType || (brand as any).tableType;
+      if (subcat && subcat !== primaryCat) {
+        map[primaryCat].add(subcat);
+      }
+    });
+    
+    const result: Record<string, string[]> = {};
+    CATEGORY_ORDER.forEach(cat => {
+      if (map[cat]) {
+        result[cat] = Array.from(map[cat]).sort();
+      }
+    });
+    // Add any extra categories not in the fixed order
+    Object.keys(map).forEach(cat => {
+      if (!result[cat]) {
+        result[cat] = Array.from(map[cat]).sort();
+      }
+    });
+    return result;
   }, []);
+
+  const categories = useMemo(() => {
+    const ordered = CATEGORY_ORDER.filter(cat => categoryMap[cat]);
+    const extra = Object.keys(categoryMap).filter(cat => !CATEGORY_ORDER.includes(cat));
+    return [...ordered, ...extra];
+  }, [categoryMap]);
+
+  // Helper to get standardized category for a brand
+  const getBrandPrimaryCategory = (brand: typeof partnerBrands[0]) => {
+    if (brand.category === "Lighting") return "Lighting";
+    if (brand.category === "Rugs") return "Rugs";
+    if (brand.category === "Decor") return "Decorative Object";
+    if (brand.category === "Furniture") {
+      const sub = (brand as any).subcategory || "";
+      if (sub === "Seating") return "Seating";
+      if (sub === "Tables" || sub === "Desks") return "Tables";
+      if (sub === "Bookcases & Credenzas") return "Storage";
+      return "Decorative Object";
+    }
+    return brand.category;
+  };
 
   const filteredBrands = useMemo(() => {
     let brands = partnerBrands;
@@ -581,13 +639,20 @@ const BrandsAteliers = () => {
       );
     }
     
-    // Filter by selected categories
-    if (selectedCategoryFilters.length > 0) {
-      brands = brands.filter(brand => selectedCategoryFilters.includes(brand.category));
+    // Filter by selected category/subcategory
+    if (selectedCategory || selectedSubcategory) {
+      brands = brands.filter(brand => {
+        const primaryCat = getBrandPrimaryCategory(brand);
+        if (selectedSubcategory) {
+          const sub = (brand as any).subcategory || (brand as any).seatType || (brand as any).tableType;
+          return sub === selectedSubcategory || primaryCat === selectedSubcategory;
+        }
+        return primaryCat === selectedCategory;
+      });
     }
     
     return brands;
-  }, [searchQuery, selectedCategoryFilters]);
+  }, [searchQuery, selectedCategory, selectedSubcategory]);
 
   // Consolidate brands by name and sort alphabetically
   const consolidatedBrands = useMemo(() => {
@@ -627,17 +692,7 @@ const BrandsAteliers = () => {
     return Object.values(brandMap).sort((a, b) => a.name.localeCompare(b.name));
   }, [filteredBrands]);
 
-  const toggleCategoryFilter = (category: string) => {
-    setSelectedCategoryFilters(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
-    );
-  };
-
-  const clearCategoryFilters = () => {
-    setSelectedCategoryFilters([]);
-  };
+  // No longer needed - removed toggle/clear functions for old popover UI
 
   const scrollToGallery = (galleryIndex: number, brandName: string) => {
     const gallerySection = document.getElementById('gallery');
@@ -677,8 +732,7 @@ const BrandsAteliers = () => {
           className="sticky top-0 z-40 -mx-4 px-4 md:-mx-12 md:px-12 lg:-mx-20 lg:px-20 py-3 md:py-4 mb-4 bg-muted/95 backdrop-blur-md border-b border-border/20"
         >
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-              <div className="relative w-full sm:w-auto sm:flex-1 sm:max-w-md">
+            <div className="relative w-full max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
@@ -696,55 +750,79 @@ const BrandsAteliers = () => {
                   </button>
                 )}
               </div>
-              
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="bg-card/80 border-border/40 hover:bg-card h-9">
-                      <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
-                      <span className="hidden sm:inline">Categories</span>
-                      {selectedCategoryFilters.length > 0 && (
-                        <span className="ml-1.5 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full">
-                          {selectedCategoryFilters.length}
-                        </span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="end">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
-                      {selectedCategoryFilters.length > 0 && (
-                        <button
-                          onClick={clearCategoryFilters}
-                          className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                        >
-                          Clear all
-                        </button>
-                      )}
-                    </div>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {allUniqueCategories.map((category) => (
-                        <label
-                          key={category}
-                          className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
-                        >
-                          <Checkbox
-                            checked={selectedCategoryFilters.includes(category)}
-                            onCheckedChange={() => toggleCategoryFilter(category)}
-                          />
-                          <span className="text-sm text-foreground font-body">{category}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
+            {/* Category Navigation - Carlyle Collective style */}
+            <div className="flex flex-wrap items-center gap-3 md:gap-6 mt-4 border-b border-border/30 pb-3">
+              <button
+                onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
+                className={`text-[11px] md:text-xs uppercase tracking-[0.2em] font-body transition-all duration-300 relative pb-1 ${
+                  !selectedCategory
+                    ? 'text-foreground'
+                    : 'text-muted-foreground/60 hover:text-foreground'
+                }`}
+              >
+                All
+                {!selectedCategory && (
+                  <span className="absolute bottom-0 left-0 w-full h-px bg-foreground" />
+                )}
+              </button>
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => {
+                    if (selectedCategory === cat) {
+                      setSelectedCategory(null);
+                      setSelectedSubcategory(null);
+                    } else {
+                      setSelectedCategory(cat);
+                      setSelectedSubcategory(null);
+                    }
+                  }}
+                  className={`text-[11px] md:text-xs uppercase tracking-[0.2em] font-body transition-all duration-300 relative pb-1 whitespace-nowrap ${
+                    selectedCategory === cat
+                      ? 'text-foreground'
+                      : 'text-muted-foreground/60 hover:text-foreground'
+                  }`}
+                >
+                  {cat}
+                  {selectedCategory === cat && (
+                    <span className="absolute bottom-0 left-0 w-full h-px bg-foreground" />
+                  )}
+                </button>
+              ))}
             </div>
-            
-            {(searchQuery || selectedCategoryFilters.length > 0) && (
-              <p className="text-center text-xs text-muted-foreground mt-2">
+            {/* Subcategories row */}
+            {selectedCategory && categoryMap[selectedCategory]?.length > 0 && (
+              <div className="flex flex-wrap items-center gap-3 md:gap-5 mt-2.5">
+                <button
+                  onClick={() => setSelectedSubcategory(null)}
+                  className={`text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 ${
+                    !selectedSubcategory
+                      ? 'text-primary'
+                      : 'text-muted-foreground/50 hover:text-primary'
+                  }`}
+                >
+                  All {selectedCategory}
+                </button>
+                {categoryMap[selectedCategory].map(sub => (
+                  <button
+                    key={sub}
+                    onClick={() => setSelectedSubcategory(selectedSubcategory === sub ? null : sub)}
+                    className={`text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 whitespace-nowrap ${
+                      selectedSubcategory === sub
+                        ? 'text-primary'
+                        : 'text-muted-foreground/50 hover:text-primary'
+                    }`}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            )}
+            {(searchQuery || selectedCategory) && (
+              <p className="text-left text-[10px] text-muted-foreground/50 mt-2 font-body tracking-wider">
                 {consolidatedBrands.length} brand{consolidatedBrands.length !== 1 ? 's' : ''} found
-                {selectedCategoryFilters.length > 0 && ` in ${selectedCategoryFilters.length} categor${selectedCategoryFilters.length !== 1 ? 'ies' : 'y'}`}
+                {selectedSubcategory && <span> · {selectedSubcategory}</span>}
+                {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
               </p>
             )}
           </div>
