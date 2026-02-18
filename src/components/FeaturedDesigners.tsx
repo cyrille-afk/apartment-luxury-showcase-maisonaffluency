@@ -958,12 +958,12 @@ const featuredDesigners = [
       },
       {
         image: leoAertsOutdoorChair,
-        title: "Dining Chair",
+        title: "Twin",
         subtitle: "Solid Walnut",
         category: "Seating",
         tags: ["Seating", "Chair"],
         materials: "Solid American walnut",
-        dimensions: "W54 × H79 × D55 cm"
+        dimensions: "52 × 51 × 74 cm H"
       },
     ],
     links: [
