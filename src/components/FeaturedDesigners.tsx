@@ -953,7 +953,8 @@ const featuredDesigners = [
         category: "Storage",
         tags: ["Storage", "Cabinet"],
         materials: "Glass doors • Steel & wood frame",
-        dimensions: "Glass: 120 × 45 × 45 cm / Overall: 120 × 45 × 125 cm"
+        dimensions: "Glass: 120 × 45 × 45 cm / Overall: 120 × 45 × 125 cm",
+        description: "Also available in VHS/M 120-60 / VHS/M 150-45 / VHS/M 150-60"
       },
       {
         image: leoAertsOutdoorChair,
