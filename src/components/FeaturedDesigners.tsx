@@ -1436,15 +1436,21 @@ const FeaturedDesigners = () => {
   const filteredDesigners = useMemo(() => {
     let designers = featuredDesigners;
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+      // Normalize accents so "Eric" matches "Éric", "ateliers" matches "Ateliers", etc.
+      const normalize = (s: string) =>
+        s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const query = normalize(searchQuery);
       designers = designers.filter(
         (designer) =>
-          designer.name.toLowerCase().includes(query) ||
-          designer.specialty.toLowerCase().includes(query) ||
+          normalize(designer.name).includes(query) ||
+          normalize(designer.specialty).includes(query) ||
+          (designer.biography && normalize(designer.biography).includes(query)) ||
+          (designer.notableWorks && normalize(designer.notableWorks).includes(query)) ||
           designer.curatorPicks?.some((pick: any) =>
-            pick.tags?.some((tag: string) => tag.toLowerCase().includes(query)) ||
-            pick.title?.toLowerCase().includes(query) ||
-            pick.subtitle?.toLowerCase().includes(query)
+            pick.tags?.some((tag: string) => normalize(tag).includes(query)) ||
+            (pick.title && normalize(pick.title).includes(query)) ||
+            (pick.subtitle && normalize(pick.subtitle).includes(query)) ||
+            (pick.description && normalize(pick.description).includes(query))
           )
       );
     }
