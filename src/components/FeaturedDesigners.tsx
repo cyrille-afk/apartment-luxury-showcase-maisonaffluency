@@ -961,7 +961,7 @@ const featuredDesigners = [
         category: "Tables",
         tags: ["Tables", "Side Table"],
         materials: "Hand-picked natural stone — multiple varieties",
-        dimensions: "Ø45 × H55 cm (standard)"
+        dimensions: "Angelo M/SR 45: Ø 45 × 62 cm H — Angelo M/SR 55: Ø 55 × 48 cm H — Angelo M/SR 80: Ø 80 × 36 cm H",
       },
       {
         image: leoAertsAngeloMDining,
