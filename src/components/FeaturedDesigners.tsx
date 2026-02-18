@@ -990,12 +990,12 @@ const featuredDesigners = [
     curatorPicks: [
       {
         image: adamCourtsVoidTable,
-        title: "CLASH",
+        title: "Tectra 2",
         subtitle: "Coffee Table",
         category: "Tables",
-        tags: ["Tables", "Coffee Table", "Limited Edition"],
-        materials: "Two Calacatta Viola marble tops with contrasting grain directions, solid American walnut bases",
-        dimensions: "126 × 87.5 × 43 cm H",
+        tags: ["Tables", "Coffee Table"],
+        materials: "Two solid timber tops with hand-carved geometric surface texture",
+        dimensions: "166.5 × 147.5 × 38 cm H",
       },
       {
         image: adamCourtsVoidChair,
