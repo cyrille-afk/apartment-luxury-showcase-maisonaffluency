@@ -32,6 +32,7 @@ import leoAertsAngeloMCollection from "@/assets/curators-picks/leo-aerts-angelo-
 import leoAertsAngeloMDining from "@/assets/curators-picks/leo-aerts-angelo-m-dining.jpg";
 import leoAertsVitrineCabinet from "@/assets/curators-picks/leo-aerts-vitrine-cabinet.jpg";
 import leoAertsOutdoorChair from "@/assets/curators-picks/leo-aerts-outdoor-chair.jpg";
+import leoAertsTwinChairOutdoor from "@/assets/curators-picks/leo-aerts-twin-chair-outdoor.jpg";
 import leoAertsAngeloMMacassar from "@/assets/curators-picks/leo-aerts-angelo-m-macassar.jpg";
 import adamCourtsOkhaImg from "@/assets/designers/adam-courts-okha.jpg";
 import adamCourtsVoidTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
@@ -973,11 +974,11 @@ const featuredDesigners = [
         dimensions: "52 × 51 × 74 cm H"
       },
       {
-        image: leoAertsOutdoorChair,
+        image: leoAertsTwinChairOutdoor,
         title: "Twin Chair",
-        subtitle: "Solid Walnut — Detail",
+        subtitle: "Outdoor — Solid Walnut",
         category: "Seating",
-        tags: ["Seating", "Chair"],
+        tags: ["Seating", "Chair", "Outdoor"],
         materials: "Solid American walnut",
         dimensions: "52 × 51 × 74 cm H"
       },
