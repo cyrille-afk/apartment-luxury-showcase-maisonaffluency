@@ -727,6 +727,18 @@ const featuredDesigners = [
     notableWorks: "Table Soleil 1930, Stool 1934 (with Adolphe Chanaux), Parchment-covered furniture, Shagreen desks",
     notableWorksLink: { text: "Stool 1934", galleryIndex: 1 },
     philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
+    curatorPicks: [
+      {
+        image: jmfStool1934,
+        title: "Stool",
+        subtitle: "1934 — with Adolphe Chanaux",
+        category: "Seating",
+        tags: ["Seating", "Stool"],
+        materials: "Parchment-covered wood • Brass sabots",
+        dimensions: "H45 × Ø35 cm",
+        description: "Jean-Michel Frank's 1934 stool, created in collaboration with Adolphe Chanaux, is among the most iconic pieces of the Art Deco period. Covered in natural parchment and finished with brass sabots, its understated luxury encapsulates Frank's revolutionary philosophy: that refined simplicity is the highest form of elegance. Now produced under Écart Paris reissue."
+      },
+    ],
     links: [
       { type: "Curators' Picks" },
     ],
@@ -812,6 +824,18 @@ const featuredDesigners = [
     notableWorks: "Crystalline Vase Collection, Sculptural Glass Vessels",
     notableWorksLink: { text: "Crystalline Vase", galleryIndex: 3 },
     philosophy: "Glass is frozen light—my work seeks to capture that ephemeral quality in permanent form.",
+    curatorPicks: [
+      {
+        image: milanPekarCrystalline,
+        title: "Crystalline",
+        subtitle: "Sculptural Vase",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Vessel"],
+        materials: "Hand-blown crystalline glass — Bohemian technique",
+        dimensions: "H35 × Ø18 cm (approx.)",
+        description: "Milan Pekař's Crystalline vases are the result of an extraordinarily demanding glassblowing process that produces spontaneous crystal formations on the surface of the glass. No two pieces are alike — each is a unique collaboration between the artist's hand and the alchemy of fire and mineral."
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/milanpekar_glass" },
       { type: "Curators' Picks" },
@@ -827,6 +851,18 @@ const featuredDesigners = [
     notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
     notableWorksLink: { text: "Vallauris floor lamp", galleryIndex: 1 },
     philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
+    curatorPicks: [
+      {
+        image: oliviaCognetVallauris,
+        title: "Vallauris",
+        subtitle: "Ceramic Floor Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Floor Lamp"],
+        materials: "Hand-thrown ceramic — custom blue glaze",
+        dimensions: "H165 × Ø30 cm (approx.)",
+        description: "Olivia Cognet's Vallauris floor lamp in custom blue glazed ceramic is a testament to her search for balance between art and design. Hand-thrown in the tradition of the Vallauris masters — from Picasso to Roger Capron — it transforms a functional object into a sculptural statement."
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
       { type: "Curators' Picks" },
@@ -846,6 +882,18 @@ const featuredDesigners = [
       { text: "Niko 420 Custom Sofa", galleryIndex: 0 },
     ],
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
+    curatorPicks: [
+      {
+        image: thierryLemaireOrsay,
+        title: "Orsay",
+        subtitle: "Centre Table — Limited Edition (12 copies)",
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
+        materials: "Lacquered wood • Solid bronze base",
+        dimensions: "L140 × W70 × H35 cm",
+        description: "The Orsay Centre Table is Thierry Lemaire's most celebrated collectible design — a sculptural coffee table produced in a strictly limited and numbered edition of 12 copies. Its organic lacquered surface rests on a solid bronze base, embodying his philosophy of transforming functional furniture into lasting works of art."
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
       { type: "Curators' Picks" },
