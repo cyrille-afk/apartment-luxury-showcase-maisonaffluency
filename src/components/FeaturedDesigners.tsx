@@ -920,12 +920,12 @@ const featuredDesigners = [
     curatorPicks: [
       {
         image: leoAertsAngeloMMacassar,
-        title: "Angelo M",
+        title: "Angelo W",
         subtitle: "Dining Table — Macassar",
         category: "Tables",
         tags: ["Tables", "Dining Table"],
         materials: "Macassar ebony veneer top & base",
-        dimensions: "Oval top, custom dimensions available"
+        dimensions: "Ø 160 × H 75 cm"
       },
       {
         image: leoAertsAngeloMCollection,
