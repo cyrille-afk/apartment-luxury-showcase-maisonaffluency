@@ -34,6 +34,13 @@ import leoAertsVitrineCabinet from "@/assets/curators-picks/leo-aerts-vitrine-ca
 import leoAertsOutdoorChair from "@/assets/curators-picks/leo-aerts-outdoor-chair.jpg";
 import leoAertsAngeloMMacassar from "@/assets/curators-picks/leo-aerts-angelo-m-macassar.jpg";
 import adamCourtsOkhaImg from "@/assets/designers/adam-courts-okha.jpg";
+import adamCourtsVoidTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
+import adamCourtsVoidChair from "@/assets/curators-picks/adam-courts-void-chair.jpg";
+import adamCourtsGeometerChair from "@/assets/curators-picks/adam-courts-geometer-chair.jpg";
+import adamCourtsSofaFront from "@/assets/curators-picks/adam-courts-sofa-front.jpg";
+import adamCourtsSofaAerial from "@/assets/curators-picks/adam-courts-sofa-aerial.jpg";
+import adamCourtsSideboard from "@/assets/curators-picks/adam-courts-sideboard.jpg";
+import adamCourtsGeometerBench from "@/assets/curators-picks/adam-courts-geometer-bench.jpg";
 
 // Curators' Picks images
 import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
@@ -980,8 +987,69 @@ const featuredDesigners = [
     notableWorks: "Void Chair, Geometer Desk, Adam Court Villa Pedestal Nightstand, OKHA Collectible Collections",
     notableWorksLink: { text: "Villa Pedestal Nightstand", galleryIndex: 10 },
     philosophy: "My designs inadvertently become a narrative of my own experiences. I find beauty in imperfect harmony—in the natural world, in raw materials, in the unhurried act of making.",
+    curatorPicks: [
+      {
+        image: adamCourtsVoidTable,
+        title: "Void Coffee Table",
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
+        materials: "Calacatta Viola marble top, blackened steel bases",
+        dimensions: "140 × 100 × 35 cm H",
+      },
+      {
+        image: adamCourtsVoidChair,
+        title: "Void Chair",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Fumed oak frame, white bouclé upholstery",
+        dimensions: "62 × 60 × 80 cm H",
+      },
+      {
+        image: adamCourtsGeometerChair,
+        title: "Geometer Chair",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Solid American black walnut, tan leather seat",
+        dimensions: "55 × 58 × 78 cm H",
+      },
+      {
+        image: adamCourtsSofaFront,
+        title: "Void Sofa",
+        subtitle: "Front View",
+        category: "Seating",
+        tags: ["Seating", "Sofa"],
+        materials: "Bespoke curved frame, ivory bouclé, brushed brass feet",
+        dimensions: "280 × 90 × 72 cm H",
+      },
+      {
+        image: adamCourtsSofaAerial,
+        title: "Void Sofa",
+        subtitle: "Aerial View",
+        category: "Seating",
+        tags: ["Seating", "Sofa"],
+        materials: "Bespoke curved frame, ivory bouclé, brushed brass feet",
+        dimensions: "280 × 90 × 72 cm H",
+      },
+      {
+        image: adamCourtsSideboard,
+        title: "Geometer Sideboard",
+        category: "Storage",
+        tags: ["Storage", "Sideboard"],
+        materials: "American black walnut, grey marble top",
+        dimensions: "180 × 55 × 80 cm H",
+      },
+      {
+        image: adamCourtsGeometerBench,
+        title: "Geometer Bench",
+        category: "Seating",
+        tags: ["Seating", "Bench"],
+        materials: "Cerused oak frame, black leather cushion",
+        dimensions: "150 × 40 × 45 cm H",
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/okha_design/" },
+      { type: "Curators' Picks" },
     ],
   },
   {
