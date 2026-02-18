@@ -28,6 +28,27 @@ import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
 import yvesMacheretImg from "@/assets/designers/yves-macheret.jpg";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
 import leoAertsAlineaImg from "@/assets/designers/leo-aerts-alinea.jpg";
+import ericSchmittImg from "@/assets/designers/eric-schmitt.jpg";
+import pierreBonnefulleImg from "@/assets/designers/pierre-bonnefille.jpg";
+import ccTapisImg from "@/assets/designers/cc-tapis.jpg";
+import haymannEditionsImg from "@/assets/designers/haymann-editions.jpg";
+import theoremeEditionsImg from "@/assets/designers/theoreme-editions.jpg";
+import robicaraImg from "@/assets/designers/robicara.jpg";
+import redaAmalouImg from "@/assets/designers/reda-amalou.jpg";
+import noeDuchaufourImg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
+import binaBAitelImg from "@/assets/designers/bina-baitel.jpg";
+import tristanAuerImg from "@/assets/designers/tristan-auer.jpg";
+import sergeMouilleImg from "@/assets/designers/serge-mouille.jpg";
+import manOfPartsImg from "@/assets/designers/man-of-parts.jpg";
+import kerstensImg from "@/assets/designers/kerstens.jpg";
+import felixAgostiniImg from "@/assets/designers/felix-agostini.jpg";
+import ecartParisImg from "@/assets/designers/ecart-paris.jpg";
+import kiraImg from "@/assets/designers/kira.jpg";
+import kikoLopezImg from "@/assets/designers/kiko-lopez.jpg";
+import maartenVrolijkImg from "@/assets/designers/maarten-vrolijk.png";
+import marcantonioImg from "@/assets/designers/marcantonio-brandolini-dadda.jpg";
+import matthieuGicquelImg from "@/assets/designers/matthieu-gicquel.jpg";
+import rowinAtelierImg from "@/assets/designers/rowin-atelier.jpg";
 import leoAertsAngeloMCollection from "@/assets/curators-picks/leo-aerts-angelo-m-collection.jpg";
 import leoAertsAngeloMDining from "@/assets/curators-picks/leo-aerts-angelo-m-dining.jpg";
 import leoAertsVitrineCabinet from "@/assets/curators-picks/leo-aerts-vitrine-cabinet.jpg";
@@ -98,6 +119,43 @@ import leoSentouPickLA from "@/assets/curators-picks/leo-sentou-side-table-la.pn
 import leoSentouPickAB from "@/assets/curators-picks/leo-sentou-ab-armchair-new.png";
 import leoSentouPickCS from "@/assets/curators-picks/leo-sentou-cs-sofa.png";
 import leoSentouPickLD from "@/assets/curators-picks/leo-sentou-ld-armchair.png";
+
+// Additional curator picks images
+import ericSchmittChairie from "@/assets/curators-picks/eric-schmitt-chairie.jpg";
+import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
+import ccTapisGiudecca from "@/assets/curators-picks/cc-tapis-giudecca.jpg";
+import haymannMarieLamp from "@/assets/curators-picks/haymann-marie-lamp.jpg";
+import theoremeGarnierLinker from "@/assets/curators-picks/theoreme-garnier-linker.jpg";
+import robicaraSiraCredenza from "@/assets/curators-picks/robicara-sira-credenza.jpg";
+import redaAmalouDotTable from "@/assets/curators-picks/reda-amalou-dot-table.jpg";
+import noeFolioLamp from "@/assets/curators-picks/noe-folio-lamp.jpg";
+import rowinNoneIILampDetail from "@/assets/curators-picks/rowin-none-ii-lamp-detail.jpg";
+import matthieuGicquelGoldGeode from "@/assets/curators-picks/matthieu-gicquel-gold-geode.jpg";
+import kikoLopezSilverHammer from "@/assets/curators-picks/kiko-lopez-silver-hammer.jpg";
+import maartenVrolijkBloomingTerra from "@/assets/curators-picks/maarten-vrolijk-blooming-terra.jpg";
+import marcantonioDetail from "@/assets/curators-picks/marcantonio-cotissi-detail.jpg";
+import sergeMouilleTripod from "@/assets/curators-picks/serge-mouille-tripod.jpg";
+import binaBAitelObject from "@/assets/curators-picks/bina-baitel-object.jpg";
+import kerstensConsole from "@/assets/curators-picks/kerstens-console.jpg";
+import manOfPartsSofa from "@/assets/curators-picks/man-of-parts-sofa.jpg";
+import felixAgostiniCaryatide from "@/assets/curators-picks/felix-agostini-caryatide.jpg";
+import kiraToshiroLamp from "@/assets/curators-picks/kira-toshiro-lamp.jpg";
+import tristanAuerVeronese from "@/assets/curators-picks/tristan-auer-veronese.jpg";
+import brunoDeMaistreLyricDesk from "@/assets/curators-picks/bruno-de-maistre-lyric-desk.jpg";
+import herveVdsMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
+import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
+import oliviaCognetVallauris from "@/assets/curators-picks/olivia-cognet-vallauris.jpg";
+import milanPekarCrystalline from "@/assets/curators-picks/milan-pekar-crystalline.jpg";
+import nathalieZieglerChandelier from "@/assets/curators-picks/nathalie-ziegler-chandelier.jpg";
+import jmfStool1934 from "@/assets/curators-picks/jmf-stool-1934.jpg";
+import ecartPierreChareau from "@/assets/curators-picks/ecart-pierre-chareau.jpg";
+import kikoLopezMirrorImg from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
+import maartenVrolijkSakura from "@/assets/curators-picks/maarten-vrolijk-sakura.jpg";
+import maartenVrolijkVessel from "@/assets/curators-picks/maarten-vrolijk-vessel.jpg";
+import marcantonioVessel from "@/assets/curators-picks/marcantonio-cotissi-vessel.jpg";
+import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode.jpg";
+import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
+import rowinNoneIILamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 
 const featuredDesigners = [
   {
@@ -333,6 +391,18 @@ const featuredDesigners = [
     notableWorks: "Lyric Desk, Contemporary Furniture Series",
     notableWorksLink: { text: "Lyric Desk", galleryIndex: 6 },
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
+    curatorPicks: [
+      {
+        image: brunoDeMaistreLyricDesk,
+        title: "Lyric",
+        subtitle: "Writing Desk",
+        category: "Tables",
+        tags: ["Tables", "Desk"],
+        materials: "Ebonized oak with straw marquetry inlay",
+        dimensions: "L140 × W70 × H76 cm",
+        description: "Bruno de Maistre's Lyric desk is a poetic meditation on the art of writing. Its surface of intricate straw marquetry inlay brings warmth and craft to a form of understated elegance — a piece conceived as much for contemplation as for work."
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/bruno_de_maistre_bdm" },
       { type: "Curators' Picks" },
@@ -550,6 +620,18 @@ const featuredDesigners = [
     notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 9 },
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
+    curatorPicks: [
+      {
+        image: herveVdsMicmac,
+        title: "MicMac",
+        subtitle: "Chandelier",
+        category: "Lighting",
+        tags: ["Lighting", "Chandelier"],
+        materials: "Patinated bronze • Frosted glass globes",
+        dimensions: "Ø80 × H70 cm (approx.)",
+        description: "The MicMac chandelier is Hervé van der Straeten's most celebrated lighting design — an explosion of bronze branches tipped with frosted glass globes that recalls both organic growth and haute couture jewelry. Each piece is hand-crafted at his Paris atelier."
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
       { type: "Curators' Picks" },
@@ -848,348 +930,368 @@ const featuredDesigners = [
   {
     id: "eric-schmitt-studio",
     name: "Éric Schmitt Studio",
-    specialty: "Sculptural Bronze & Decorative Objects",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    specialty: "Sculptural Bronze & Marble Design",
+    image: ericSchmittImg,
+    biography: "French designer Éric Schmitt believes that 'a piece of furniture needs to exude silence so it can be loved for a long time.' Rather than explaining his work, he prefers to let his objects speak for themselves. His sculptural forms—from the graceful arch of a marble cabinet to the enduring silhouette of a Jarre table—echo the Romanesque churches and medieval architecture of his native Burgundy region. Represented by Carpenters Workshop Gallery, his pieces blur the line between collectible design and fine art.",
+    notableWorks: "Chairie (dining chair featured at Maison Affluency), Jarre Table, Marble Cabinet Series, Table Soleil",
+    notableWorksLink: { text: "Chairie dining chair", galleryIndex: 2 },
+    philosophy: "A piece of furniture needs to exude silence so it can be loved for a long time.",
+    curatorPicks: [
+      {
+        image: ericSchmittChairie,
+        title: "Chairie",
+        subtitle: "Dining Chair",
+        category: "Seating",
+        tags: ["Seating", "Dining Chair"],
+        materials: "Patinated bronze — solid cast",
+        dimensions: "H90 × W55 × D55 cm",
+        description: "Éric Schmitt's Chairie is a patinated bronze dining chair of extraordinary sculptural presence. Cast entirely in solid bronze, its organic flowing form softens the material's inherent weight, creating a piece that is simultaneously monumental and intimate."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/ericschmittstudio/" },
+      { type: "Curators' Picks" },
+    ],
   },
   {
     id: "nathalie-ziegler",
     name: "Nathalie Ziegler",
     specialty: "Bespoke Glass Art & Chandeliers",
     image: nathalieZieglerImg,
-    biography: "Nathalie Ziegler is a French glass artist known for her custom chandeliers and glass sculptures that blur the line between functional lighting and fine art. Her Saint Just Custom Glass Chandelier showcases her ability to manipulate glass into dramatic, ethereal forms that transform spaces with light and color.",
-    notableWorks: "Saint Just Custom Glass Chandelier, Gold Leaves+Glass Snake Vase, Sculptural Glass Series",
-    philosophy: "",
+    biography: "Nathalie Ziegler is a French glass artist who creates bespoke chandeliers and glass sculptures that blur the line between functional lighting and fine art. Drawing on traditional Murano and Saint-Just glassmaking techniques, she manipulates light through hand-blown glass to create dramatic, ethereal forms that transform spaces. Her chandeliers and vessels are entirely unique — each a one-of-a-kind commission conceived in close collaboration with her clients.",
+    notableWorks: "Saint Just Custom Glass Chandelier (Maison Affluency), Gold Leaves+Glass Snake Vase, Sculptural Glass Lighting",
+    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 6 },
+    philosophy: "Glass holds light the way memory holds experience — transforming it into something luminous and lasting.",
+    curatorPicks: [
+      {
+        image: nathalieZieglerChandelier,
+        title: "Custom Chandelier",
+        subtitle: "Bespoke Commission",
+        category: "Lighting",
+        tags: ["Lighting", "Chandelier"],
+        materials: "Hand-blown glass • Custom gold leaf inclusions",
+        dimensions: "Bespoke — dimensions upon commission",
+        description: "Each chandelier by Nathalie Ziegler is entirely unique, conceived as a bespoke commission. Her signature technique involves hand-blowing individual glass elements that are then assembled into dramatic sculptural compositions, where light plays through amber, gold and translucent tones."
+      },
+      {
+        image: nathalieZieglerSnakeVessel,
+        title: "Snake Vessel",
+        subtitle: "Gold Leaves + Glass",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Vessel"],
+        materials: "Hand-blown glass • 24k gold leaf",
+        dimensions: "H55 × Ø20 cm (approx.)",
+        description: "The Snake Vessel is a signature work by Nathalie Ziegler — a sinuous, hand-blown glass form with 24k gold leaf inclusions that catch and diffuse light in ever-changing ways. Each piece is unique and unrepeatable."
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://instagram.com/nathaliezieglerpasqua" },
+      { type: "Curators' Picks" },
     ],
   },
   {
     id: "pierre-bonnefille",
     name: "Pierre Bonnefille",
-    specialty: "Patinated Surfaces & Decorative Finishes",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
-  },
-  {
-    id: "delcourt-collection",
-    name: "Forest & Giaconia",
-    specialty: "Contemporary Furniture & Lighting Design",
-    image: null,
-    biography: "Frédéric Forest and Clémentine Giaconia are a Paris-based duo — he a product designer, she an interior designer — whose creative partnership yields furniture of rare refinement. Their work is edited by Delcourt Collection, the prestigious French furniture house founded by Christophe Delcourt, known for combining generous proportions, natural materials and elegant detailing in pieces that feel both contemporary and enduring.",
-    notableWorks: "BOB Armchair (Delcourt Collection), BOB Sofa Collection",
-    notableWorksLink: { text: "BOB Armchair", galleryIndex: 5 },
-    philosophy: "We believe in furniture that feels alive — generous in form, refined in detail, and grounded in natural materials.",
+    specialty: "Patinated Surfaces, Paintings & Furniture",
+    image: pierreBonnefulleImg,
+    biography: "Pierre Bonnefille is a French artist, painter, designer and 'Maître d'Art' — a title awarded by the French Ministry of Culture to masters of exceptional craft. A graduate of École Boulle and École Nationale Supérieure des Arts Décoratifs, he creates his own materials from mineral powder, limestone, lava, marble, earth, natural pigments and metallic powders. His Bronze Paintings are monumental works where material and color become inseparable. His collaboration with Olivier Gagnère on the Café Marly at the Musée du Louvre first brought him widespread international attention.",
+    notableWorks: "Bronze Painting 204 (Maison Affluency), Café Marly at the Louvre, Mineral Painting Series",
+    notableWorksLink: { text: "Bronze Painting 204", galleryIndex: 8 },
+    philosophy: "The material, colors and light are inseparable in my work. I create my own textures from the earth itself.",
     curatorPicks: [
       {
-        image: forestGiaconiaIhiLamp,
-        title: "IHI Floor Lamp",
-        category: "Lighting",
-        tags: ["Lighting", "Floor Lamp"],
-        materials: "Walnut wood, PMMA",
-        dimensions: "40 × 40 × 187 cm H",
+        image: pierreBonnefilleBronzePainting,
+        title: "Bronze Painting",
+        subtitle: "Mineral pigments on canvas",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Art"],
+        materials: "Mineral powder, limestone, lava, metallic pigments on canvas",
+        dimensions: "Various — bespoke commissions available",
+        description: "Pierre Bonnefille's Bronze Paintings are unique works where he creates his own materials from mineral powder, limestone, lava, earth, natural and metallic pigments. The result is a surface of extraordinary depth and luminosity — simultaneously painting, relief and material exploration."
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/forest.giaconia/" },
-      { type: "Gallery Featured", galleryIndex: 5 },
-    ],
-  },
-  {
-    id: "cc-tapis",
-    name: "CC-Tapis",
-    specialty: "Hand-knotted Rugs & Textile Design",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
-  },
-  {
-    id: "ecart-paris",
-    name: "Écart Paris",
-    specialty: "Re-editions of JM Frank, Pierre Chareau, etc.",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
-  },
-  {
-    id: "haymann-editions",
-    name: "Haymann Éditions",
-    specialty: "Limited Edition Furniture & Objects",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
-  },
-  {
-    id: "alinea",
-    name: "Léo Aerts - Alinea Design Objects",
-    specialty: "Stone Furniture & Design Objects",
-    image: leoAertsAlineaImg,
-    biography: "For over thirty years, Belgian designer and interior architect Léo Aerts has committed his work to sustainability and longevity in design—creating timeless silhouettes with simple lines that emphasize craftsmanship precision and materials quality. Following numerous collaborations with European manufacturers, Aerts founded Alinea in 1995: a signature collection of furniture pieces and objects hand-crafted in Northern Italy with hand-picked stones. A professor of interior design architecture at UHasselt, his work has earned the Red Dot Design Award, German Design Award, Good Design Award (Chicago), and AZ Award (Toronto).",
-    notableWorks: "Meta Coffee Table (B&B Italia, 1987), Angelo M Table (Good Design Award 2018), Alinea Stone Furniture Collection",
-    notableWorksLink: { text: "Custom Angelo M Table", galleryIndex: 2 },
-    philosophy: "Designing has become part of my lifestyle. I swear by soberly designed, functional and timeless objects—pieces that address ongoing concerns for sustainability and longevity.",
-    curatorPicks: [
-      {
-        image: leoAertsOutdoorChair,
-        title: "Angelo M/R 130 + Twin Indoor Leather Seat",
-        subtitle: "",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Natural stone top & base • Solid American walnut",
-        dimensions: "Angelo M/R 130: Ø 130 × 75 cm H — Twin Indoor: 52 × 51 × 74 cm H",
-      },
-      {
-        image: leoAertsTwinChairOutdoor,
-        title: "Twin Chair",
-        subtitle: "Outdoor — Solid Walnut",
-        category: "Seating",
-        tags: ["Seating", "Chair", "Outdoor"],
-        materials: "Solid American walnut",
-        dimensions: "52 × 51 × 74 cm H"
-      },
-      {
-        image: leoAertsAngeloMMacassar,
-        title: "Angelo W",
-        subtitle: "Dining Table — Macassar",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Macassar ebony veneer top & base",
-        dimensions: "Ø 160 × H 75 cm",
-        description: "The Angelo W is a limited edition dining table, with only 7 pieces available. Offered exclusively as a round dining table, the Angelo W is defined by its iconic hourglass base and the striking natural grain of its Macassar ebony veneer. Other sizes are possible upon request."
-      },
-      {
-        image: leoAertsAngeloMCollection,
-        title: "Angelo M",
-        subtitle: "Side Table Collection",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Hand-picked natural stone — multiple varieties",
-        dimensions: "Angelo M/SR 45: Ø 45 × 62 cm H — Angelo M/SR 55: Ø 55 × 48 cm H — Angelo M/SR 80: Ø 80 × 36 cm H",
-      },
-      {
-        image: leoAertsAngeloMDining,
-        title: "Angelo M",
-        subtitle: "Dining Table in situ",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Natural stone top & base",
-        dimensions: "Custom dimensions available"
-      },
-      {
-        image: leoAertsVitrineCabinet,
-        title: "Visible M Horizontal",
-        subtitle: "VHS/M 120-45 — Display Cabinet",
-        category: "Storage",
-        tags: ["Storage", "Cabinet"],
-        materials: "Glass doors • Steel & wood frame",
-        dimensions: "Glass: 120 × 45 × 45 cm / Overall: 120 × 45 × 125 cm",
-        description: "Also available in VHS/M 120-60 / VHS/M 150-45 / VHS/M 150-60"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/alinea_design_objects/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "okha",
-    name: "Adam Courts - Okha Design Studio",
-    specialty: "Collectible Furniture & Contemporary African Design",
-    image: adamCourtsOkhaImg,
-    biography: "Adam Court has been the Creative Director of OKHA since 2007, profoundly transforming the landscape of African design and catapulting the studio onto the global stage—with collections gracing showrooms from Dubai to London. Imbued with influences from music, cinema, and fashion, his designs transcend conventional furniture making: each piece narrates part of his own life, weaving personal history into form through sophisticated texture and materiality. His creations are a homage to the raw, unfiltered beauty of Africa, whose rugged and vibrant nature profoundly influences his choice of materials. Adam advocates for 'Slow Time'—a design ethos that prioritizes contemplation and thoroughness over speed.",
-    notableWorks: "Void Chair, Geometer Desk, Adam Court Villa Pedestal Nightstand, OKHA Collectible Collections",
-    notableWorksLink: { text: "Villa Pedestal Nightstand", galleryIndex: 10 },
-    philosophy: "My designs inadvertently become a narrative of my own experiences. I find beauty in imperfect harmony—in the natural world, in raw materials, in the unhurried act of making.",
-    curatorPicks: [
-      {
-        image: adamCourtsVoidTable,
-        title: "Tectra 2",
-        subtitle: "Coffee Table",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table"],
-        materials: "Custom stone top, gun metal base",
-        dimensions: "166.5 × 147.5 × 38 cm H",
-      },
-      {
-        image: adamCourtsVoidChair,
-        title: "BNVO",
-        subtitle: "Dining Chair",
-        category: "Seating",
-        tags: ["Seating", "Dining Chair"],
-        materials: "Solid timber frame, fully upholstered seat & back",
-        dimensions: "65.5 × 58 × 79 cm H — Seat H: 47 cm",
-      },
-      {
-        image: adamCourtsGeometerChair,
-        title: "Void",
-        subtitle: "Dining Chair",
-        category: "Seating",
-        tags: ["Seating", "Dining Chair"],
-        materials: "Natural walnut frame, leather seat",
-        dimensions: "47 × 50.5 × 81 cm H — Seat H: 47 cm",
-      },
-      {
-        image: adamCourtsSofaFront,
-        title: "REVERB",
-        subtitle: "Front View",
-        category: "Seating",
-        tags: ["Seating", "Sofa"],
-        materials: "Sculpted upholstered frame, bouclé fabric, solid walnut legs",
-        dimensions: "288.5 × 178.5 × 72 cm H — Seat H: 41 cm",
-      },
-      {
-        image: adamCourtsSofaAerial,
-        title: "Repose Sofa A",
-        subtitle: "With Ottoman",
-        category: "Seating",
-        tags: ["Seating", "Sofa"],
-        materials: "Sculpted upholstered frame, fully upholstered ottoman",
-        dimensions: "371.5 × 171.5 × 69 cm H — Seat H: 37 cm",
-      },
-      {
-        image: adamCourtsSideboard,
-        title: "OVD",
-        subtitle: "Server",
-        category: "Storage",
-        tags: ["Storage", "Server", "Sideboard"],
-        materials: "Natural ash veneer, stone top",
-        dimensions: "140 × 46.6 × 70 cm H",
-      },
-      {
-        image: adamCourtsGeometerBench,
-        title: "Bench Bed",
-        category: "Seating",
-        tags: ["Seating", "Bench"],
-        materials: "Solid timber frame, upholstered leather cushion",
-        dimensions: "179.3 × 38 × 41 cm H",
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/okha_design/" },
+      { type: "Instagram", url: "https://www.instagram.com/pierre_bonnefille/" },
       { type: "Curators' Picks" },
     ],
   },
   {
     id: "theoreme",
-    name: "Théorème",
-    specialty: "Bespoke Furniture & Interior Objects",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    name: "Théorème Éditions",
+    specialty: "Collectible Design Objects & Limited Editions",
+    image: theoremeEditionsImg,
+    biography: "Théorème Éditions is a French maison d'édition that collaborates with contemporary designers and the finest European craftsmen to create poetic works of furniture and objects. Founded with offices in Paris and London, they champion a philosophy of refined simplicity — commissioning pieces that combine technical mastery with genuine artistic vision. Their Garnier & Linker lost-wax cast crystal centerpiece is a masterpiece of French decorative art.",
+    notableWorks: "Garnier & Linker Crystal Centerpiece (Maison Affluency), Sistema Modular Sofa, Design Collection",
+    notableWorksLink: { text: "Garnier & Linker Centerpiece", galleryIndex: 1 },
+    philosophy: "We believe in the enduring power of objects — commissioning works that transcend fashion to become part of a lasting interior story.",
+    curatorPicks: [
+      {
+        image: theoremeGarnierLinker,
+        title: "Lost-Wax Crystal Centerpiece",
+        subtitle: "Garnier & Linker for Théorème",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Vessel"],
+        materials: "Lost-wax cast crystal with gold detailing",
+        dimensions: "H35 × Ø22 cm",
+        description: "This extraordinary centerpiece was created by Garnier & Linker for Théorème Éditions using the ancient lost-wax casting technique applied to crystal — a remarkable technical feat that results in a vessel of unsurpassed clarity and precision."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/theoreme.editions/" },
+      { type: "Curators' Picks" },
+    ],
   },
   {
     id: "bina-baitel",
     name: "Bina Baitel",
-    specialty: "Product Design & Furniture",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    specialty: "Product Design & Sculptural Objects",
+    image: binaBAitelImg,
+    biography: "Bina Baitel Studio creates interior and industrial design projects as well as unique creations in collaboration with museums and galleries. The Paris-based studio conducts a global creative approach ranging from artistic direction to technical studies, with a constant focus on timeless projects and a search for innovation. Bina Baitel's work has been exhibited at the Grand Palais, Milan Design Week, and leading design galleries worldwide.",
+    notableWorks: "Sublime Collection (Mobilier National), Design Objects for Galleries and Museums",
+    philosophy: "Design is always about finding the right balance between tradition and innovation, between the handmade and the industrial.",
+    curatorPicks: [
+      {
+        image: binaBAitelObject,
+        title: "Sculptural Vessel",
+        subtitle: "Collectible Edition",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Vessel"],
+        materials: "Unglazed ceramic — hand-built",
+        dimensions: "H35 × W25 cm (approx.)",
+        description: "This sculptural vessel by Bina Baitel exemplifies her practice of exploring the boundary between design and fine art. Hand-built in unglazed ceramic, its flowing organic form combines classical technique with a distinctly contemporary sensibility."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/binabaitelstudio/" },
+      { type: "Curators' Picks" },
+    ],
   },
   {
     id: "felix-agostini",
     name: "Felix Agostini (Charles Paris)",
-    specialty: "Bronze Lighting & Decorative Objects",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    specialty: "Figural Bronze Lighting & Decorative Objects",
+    image: felixAgostiniImg,
+    biography: "Felix Agostini is a mid-twentieth century French designer renowned for his highly refined figural bronze lighting, created under the Charles Paris imprint. Working primarily in the 1950s and 1960s, his Grande Caryatide sconces and candelabra draw on the classical tradition of architectural figural sculpture while expressing a distinctly French post-war elegance. His pieces are now highly sought after by collectors and museums worldwide.",
+    notableWorks: "Grande Caryatide Sconce (Charles Paris), Figural Bronze Candelabra, Table Lamps",
+    philosophy: "The figure has always been at the heart of decorative art — my work honors that tradition with modern sensibility.",
+    curatorPicks: [
+      {
+        image: felixAgostiniCaryatide,
+        title: "Grande Caryatide",
+        subtitle: "Wall Sconce — Charles Paris",
+        category: "Lighting",
+        tags: ["Lighting", "Wall Sconce"],
+        materials: "Patinated gilded bronze — hand-cast",
+        dimensions: "H70 × W35 × D20 cm",
+        description: "The Grande Caryatide is Felix Agostini's most iconic creation — a wall sconce featuring a full-figure female caryatid in patinated gilded bronze. Each piece is hand-cast and finished, representing the pinnacle of mid-century French decorative bronzework."
+      },
+    ],
+    links: [
+      { type: "Curators' Picks" },
+    ],
   },
   {
     id: "kira",
-    name: "Kira",
-    specialty: "Contemporary Furniture & Design",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    name: "Made in Kira",
+    specialty: "Hand-crafted Ceramic Lamps & Objects",
+    image: kiraImg,
+    biography: "Made in Kira is a Spanish atelier specializing in hand-crafted ceramic lamps and objects that fuse artisanal tradition with contemporary design. Founded by designer Kira, the studio's pieces are entirely hand-thrown and hand-glazed, with each lamp a unique object that celebrates the beauty of imperfection. Their Toshiro Lamp has become a collector's piece, prized for its sculptural form and exceptional glaze quality.",
+    notableWorks: "Toshiro Lamp (Maison Affluency), Hand-thrown Ceramic Collection",
+    notableWorksLink: { text: "Toshiro Lamp", galleryIndex: 6 },
+    philosophy: "Each piece is a unique conversation between the hand, the clay and the fire — no two are ever alike.",
+    curatorPicks: [
+      {
+        image: kiraToshiroLamp,
+        title: "Toshiro",
+        subtitle: "Ceramic Table Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Table Lamp"],
+        materials: "Hand-thrown ceramic — custom glaze",
+        dimensions: "H60 × Ø30 cm (approx.)",
+        description: "The Toshiro is Made in Kira's signature piece — a hand-thrown ceramic table lamp whose layered glazes create rich tonal variations that shift with the light. Every Toshiro is unique, reflecting the particular moment and hand that shaped it."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/madeinkira/" },
+      { type: "Curators' Picks" },
+    ],
   },
   {
     id: "tristan-auer",
     name: "Tristan Auer (Veronese)",
-    specialty: "Interior Architecture & Luxury Design",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    specialty: "Interior Architecture & Luxury Furniture",
+    image: tristanAuerImg,
+    biography: "Tristan Auer is a Paris-based interior architect and designer who trained at ESAG Paris before collaborating with Christian Liaigre and Philippe Starck on landmark international projects. In 2002 he founded his own agency, going on to design the lobbies of leading luxury hotels across Europe. His Veronese furniture collection — produced by the prestigious French manufacturer of the same name — distils his signature aesthetic: architectural rigour, noble materials, and a quietly bold luxury.",
+    notableWorks: "Veronese Furniture Collection, Hotel Wilson — Paris, Les Ambassadeurs — Paris",
+    philosophy: "Luxury is not about excess. It's about the perfect choice of material, proportion and light — doing more with less.",
+    curatorPicks: [
+      {
+        image: tristanAuerVeronese,
+        title: "Veronese Console",
+        subtitle: "Walnut & Brass",
+        category: "Tables",
+        tags: ["Tables", "Console"],
+        materials: "Solid walnut • Brushed brass hardware",
+        dimensions: "L160 × W40 × H80 cm",
+        description: "This console from Tristan Auer's Veronese collection embodies his approach to luxury furniture: clean architectural lines, impeccable craftsmanship and noble materials. The combination of solid walnut and brushed brass creates a piece that is simultaneously timeless and distinctly contemporary."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/tristanauer_studio/" },
+      { type: "Curators' Picks" },
+    ],
   },
   {
     id: "robicara",
     name: "Robicara",
-    specialty: "Contemporary Furniture & Objects",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    specialty: "Italian-crafted Luxury Furniture",
+    image: robicaraImg,
+    biography: "Robicara was founded by Sam Robin, an interior architect, and Francesco Caracciolo, an Italian furniture designer — a transatlantic creative partnership uniting her flair for bespoke residential interiors with his deep expertise in Italian luxury furniture manufacturing. The brand combines the finest Italian craftsmanship with a modern aesthetic sensibility, producing pieces that express sophisticated restraint through exceptional materials and precision construction.",
+    notableWorks: "Sira Credenza (Maison Affluency), Dama Coffee Table, CS1 Sofa Collection",
+    notableWorksLink: { text: "Sira Credenza", galleryIndex: 1 },
+    philosophy: "We believe true luxury lies in the integrity of craft — in the quality of materials and the precision of execution.",
+    curatorPicks: [
+      {
+        image: robicaraSiraCredenza,
+        title: "Sira",
+        subtitle: "Credenza",
+        category: "Storage",
+        tags: ["Storage", "Credenza"],
+        materials: "Calacatta marble • Blackened steel frame",
+        dimensions: "L200 × D45 × H80 cm",
+        description: "The Sira Credenza marries Italian craftsmanship with architectural simplicity. Its Calacatta marble panels — veined in warm terracotta and ivory — rest in a precise blackened steel frame, creating a piece of quiet drama suitable for both residential and hospitality interiors."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/robicara_official/" },
+      { type: "Curators' Picks" },
+    ],
   },
   {
     id: "serge-mouille",
     name: "Serge Mouille",
     specialty: "Mid-Century Lighting Design",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    image: sergeMouilleImg,
+    biography: "Serge Mouille (1922–1988) is considered the most important French lighting designer of the 1950s. Trained as a silversmith under Gilbert LaCroix, he brought the precision of jewelry-making to the larger scale of lighting design. Preoccupied with the beauty of natural forms and fascinated by movement and function, his tripod floor lamps and spider wall lights have become icons of mid-century design — now part of the permanent collections of the Museum of Modern Art (MoMA) and the Musée des Arts Décoratifs in Paris.",
+    notableWorks: "Tripod Floor Lamp, Spider Wall Lamp, Three-Arm Ceiling Lamp",
+    philosophy: "Light should follow natural forms — the bird in flight, the insect's wing, the movement of branches in wind.",
+    curatorPicks: [
+      {
+        image: sergeMouilleTripod,
+        title: "Tripod Floor Lamp",
+        subtitle: "Re-edition",
+        category: "Lighting",
+        tags: ["Lighting", "Floor Lamp"],
+        materials: "Painted aluminium shade • Brass tripod base",
+        dimensions: "H170 × Ø40 cm",
+        description: "The Serge Mouille Tripod Floor Lamp is one of the most iconic pieces of mid-century French design. Originally created in 1953, its elegant tripod base and adjustable painted aluminium shade continue to define sophisticated interiors worldwide. Available as an authorized re-edition."
+      },
+    ],
+    links: [
+      { type: "Curators' Picks" },
+    ],
   },
   {
     id: "reda-amalou",
     name: "Reda Amalou",
-    specialty: "Architecture & Furniture Design",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    specialty: "Architecture & Collectible Furniture Design",
+    image: redaAmalouImg,
+    biography: "Reda Amalou is a French architect and designer who founded the architectural agency AW2 over 25 years ago with the ambition of transcending the boundaries between architecture and design. A true creator of experiences, his work spans luxury hospitality architecture (Six Senses, Coucoo Cabanes) to collectible furniture editions. His DOT side table — a perfect geometric sphere in lacquered wood — has become one of the most recognized pieces in contemporary French design.",
+    notableWorks: "DOT Side Table (Maison Affluency), Eggshell Collection, AW2 Hospitality Projects",
+    notableWorksLink: { text: "DOT Side Table", galleryIndex: 12 },
+    philosophy: "Architecture and design are the same discipline — both are about creating places that stimulate the mind and mobilize the senses.",
+    curatorPicks: [
+      {
+        image: redaAmalouDotTable,
+        title: "DOT",
+        subtitle: "Side Table — Eggshell",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Lacquered wood — eggshell finish",
+        dimensions: "Ø45 × H45 cm",
+        description: "The DOT side table is Reda Amalou's most celebrated design object — a perfect geometric sphere in lacquered wood with an eggshell finish. Its flawless form and tactile surface make it simultaneously a functional table and a sculptural collectible."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/redaamalou/" },
+      { type: "Curators' Picks" },
+    ],
   },
   {
     id: "man-of-parts",
     name: "Man of Parts",
-    specialty: "Contemporary Furniture & Design",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    specialty: "Curated Contemporary Furniture Collections",
+    image: manOfPartsImg,
+    biography: "Man of Parts is a Hamburg-based design brand founded by Stephan Weishaupt, co-founder of the design magazine Wallpaper*. The brand commissions furniture and objects from leading international designers — including Yabu Pushelberg, Sebastian Herkner, and Osvaldo Tenório — producing pieces of exceptional quality that bridge the gallery and the home. Each collection reflects a distinct design vision united by the pursuit of craft excellence.",
+    notableWorks: "Lombard Street Sofa (Yabu Pushelberg), Mainkai Lamp (Sebastian Herkner), Rua Tucumã Tables",
+    philosophy: "We believe in furniture made with integrity — pieces conceived by great designers and realized by the best craftspeople in the world.",
+    curatorPicks: [
+      {
+        image: manOfPartsSofa,
+        title: "Lombard Street",
+        subtitle: "Sofa — Yabu Pushelberg for Man of Parts",
+        category: "Seating",
+        tags: ["Seating", "Sofa"],
+        materials: "Premium upholstery — solid oak legs",
+        dimensions: "L270 × D95 × H75 cm (standard)",
+        description: "Designed by Yabu Pushelberg for Man of Parts, the Lombard Street sofa combines generous proportions with exceptional upholstery quality. Its clean silhouette and solid oak legs give it an architectural presence suited to the most discerning residential interiors."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/manofparts/" },
+      { type: "Curators' Picks" },
+    ],
   },
   {
     id: "noe-duchaufour-lawrance",
     name: "Noé Duchaufour Lawrance",
-    specialty: "Organic Furniture & Product Design",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    specialty: "Organic Furniture & Crystal Design",
+    image: noeDuchaufourImg,
+    biography: "Noé Duchaufour-Lawrance is a French designer based in Paris known for his organic, biomorphic approach to furniture and objects. His work explores the intersection of natural forms and industrial materials, creating pieces of rare tactile and visual poetry. He has collaborated with Saint-Louis crystal, Bernhardt Design, and leading European manufacturers. His Amber Folio Portable Lamp for Cristallerie Saint-Louis — featured at Maison Affluency — showcases his mastery of translucent materials and organic form.",
+    notableWorks: "Amber Folio Portable Lamp for Saint-Louis (Maison Affluency), Refine Console, Steinway Collaboration",
+    notableWorksLink: { text: "Amber Folio Lamp", galleryIndex: 17 },
+    philosophy: "Nature has already designed everything. My role is to find those forms and translate them into objects that resonate with the human hand and eye.",
+    curatorPicks: [
+      {
+        image: noeFolioLamp,
+        title: "Folio",
+        subtitle: "Portable Lamp — Amber • Cristallerie Saint-Louis",
+        category: "Lighting",
+        tags: ["Lighting", "Table Lamp"],
+        materials: "Mouth-blown amber crystal — Saint-Louis",
+        dimensions: "H28 × Ø14 cm",
+        description: "Created by Noé Duchaufour-Lawrance for the prestigious Cristallerie Saint-Louis, the Folio portable lamp takes the form of an unfurling leaf in mouth-blown amber crystal. When lit, the amber glass radiates a warm, intimate glow — simultaneously a light source and a sculptural object."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/noeduchaufourlawrance/" },
+      { type: "Curators' Picks" },
+    ],
   },
   {
     id: "kerstens",
     name: "Kerstens",
-    specialty: "Contemporary Design & Objects",
-    image: null,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
-    links: [],
+    specialty: "Architectural Furniture & Objects",
+    image: kerstensImg,
+    biography: "Kerstens is a multidisciplinary design studio founded by Andy Kerstens in Antwerp, Belgium, in 2015. A graduate of the University of Antwerp in interior architecture, Andy Kerstens combines a thorough architectural design language with a passion for craftsmanship and the atmospheric qualities of materials. The studio's work spans furniture, objects and interiors — always defined by aesthetic purity, refined proportion and true artisan quality.",
+    notableWorks: "Stone & Steel Console, Architectural Furniture Collection",
+    philosophy: "We strive for a refined, timeless and architectural approach, with a desire for craftsmanship and affinity for the atmospheric — creating pieces that improve with age.",
+    curatorPicks: [
+      {
+        image: kerstensConsole,
+        title: "Console",
+        subtitle: "Marble & Patinated Steel",
+        category: "Tables",
+        tags: ["Tables", "Console"],
+        materials: "White Carrara marble • Patinated steel frame",
+        dimensions: "L180 × W40 × H80 cm",
+        description: "This console by Kerstens demonstrates the studio's signature approach: pure architectural geometry, exceptional material quality and precise craft. The Carrara marble top and monolithic support rest in a patinated steel frame — a composition of restrained sophistication."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/kerstens.studio/" },
+      { type: "Curators' Picks" },
+    ],
   },
 ];
 
