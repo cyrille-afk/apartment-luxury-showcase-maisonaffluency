@@ -34,6 +34,7 @@ import leoAertsVitrineCabinet from "@/assets/curators-picks/leo-aerts-vitrine-ca
 import leoAertsOutdoorChair from "@/assets/curators-picks/leo-aerts-outdoor-chair.jpg";
 import leoAertsTwinChairOutdoor from "@/assets/curators-picks/leo-aerts-twin-chair-outdoor.jpg";
 import leoAertsAngeloMMacassar from "@/assets/curators-picks/leo-aerts-angelo-m-macassar.jpg";
+import forestGiaconiaIhiLamp from "@/assets/curators-picks/forest-giaconia-ihi-floor-lamp.jpg";
 import adamCourtsOkhaImg from "@/assets/designers/adam-courts-okha.jpg";
 import adamCourtsVoidTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
 import adamCourtsVoidChair from "@/assets/curators-picks/adam-courts-void-chair.jpg";
@@ -885,6 +886,16 @@ const featuredDesigners = [
     notableWorks: "BOB Armchair (Delcourt Collection), BOB Sofa Collection",
     notableWorksLink: { text: "BOB Armchair", galleryIndex: 5 },
     philosophy: "We believe in furniture that feels alive — generous in form, refined in detail, and grounded in natural materials.",
+    curatorPicks: [
+      {
+        image: forestGiaconiaIhiLamp,
+        title: "IHI Floor Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Floor Lamp"],
+        materials: "Walnut wood, PMMA",
+        dimensions: "40 × 40 × 187 cm H",
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/forest.giaconia/" },
     ],
