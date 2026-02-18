@@ -999,12 +999,12 @@ const featuredDesigners = [
       },
       {
         image: adamCourtsVoidChair,
-        title: "Void",
+        title: "BNVO",
         subtitle: "Dining Chair",
         category: "Seating",
         tags: ["Seating", "Dining Chair"],
-        materials: "Solid blackened steel frame, fully upholstered seat & back",
-        dimensions: "47 × 50.5 × 81 cm H — Seat H: 47 cm",
+        materials: "Solid timber frame, fully upholstered seat & back",
+        dimensions: "65.5 × 58 × 79 cm H — Seat H: 47 cm",
       },
       {
         image: adamCourtsGeometerChair,
