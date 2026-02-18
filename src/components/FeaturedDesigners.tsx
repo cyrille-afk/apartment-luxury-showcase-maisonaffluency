@@ -27,6 +27,7 @@ import atelierPendhapaImg from "@/assets/designers/atelier-pendhapa.png";
 import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
 import yvesMacheretImg from "@/assets/designers/yves-macheret.jpg";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
+import leoAertsAlineaImg from "@/assets/designers/leo-aerts-alinea.jpg";
 
 // Curators' Picks images
 import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
@@ -903,13 +904,15 @@ const featuredDesigners = [
   },
   {
     id: "alinea",
-    name: "Alinéa",
+    name: "Léo Aerts - Alinea Design Objects",
     specialty: "Contemporary Design & Furniture",
-    image: null,
+    image: leoAertsAlineaImg,
     biography: "",
     notableWorks: "",
     philosophy: "",
-    links: [],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/alinea_design_objects/" },
+    ],
   },
   {
     id: "okha",
