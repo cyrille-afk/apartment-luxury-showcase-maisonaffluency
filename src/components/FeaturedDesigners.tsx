@@ -273,59 +273,6 @@ const featuredDesigners = [
     ],
   },
   {
-    id: "atelier-pendhapa",
-    name: "Atelier Pendhapa",
-    specialty: "Bespoke Furniture & Indonesian Craftsmanship",
-    image: atelierPendhapaImg,
-    biography:
-      "Atelier Pendhapa is an Indonesian design atelier specializing in bespoke furniture that celebrates the rich tradition of Indonesian woodworking and craftsmanship. Their Deepah custom table exemplifies their philosophy of creating pieces that honor traditional techniques while embracing contemporary design sensibilities. Each piece is handcrafted by master artisans using sustainably sourced materials.",
-    notableWorks: "Deepah Custom Table, Bespoke Dining Collection",
-    notableWorksLink: { text: "Deepah Custom Table", galleryIndex: 3 },
-    philosophy: "We create furniture that bridges the gap between ancient Indonesian craft traditions and contemporary global design.",
-    curatorPicks: [
-      { 
-        image: pendhapaPick1, 
-        title: "Mangala",
-        subtitle: "Coffee Table",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table"],
-        materials: "Black teak • Lava stone crème brûlée tabletop",
-        dimensions: "L190 × W180 × H35 cm"
-      },
-      { 
-        image: pendhapaPick4, 
-        title: "Akar",
-        subtitle: "Dining Chair",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery",
-        dimensions: "L49 × W52 × H85 cm"
-      },
-      { 
-        image: pendhapaPick5, 
-        title: "Gingko",
-        subtitle: "Side Table",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Natural oak • White lacquer tabletop",
-        dimensions: "L75 × W48 × H50 cm"
-      },
-      { 
-        image: pendhapaPick2, 
-        title: "Anemos",
-        subtitle: "Coffee Table",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table"],
-        materials: "Black oak • Black lacquer tabletop",
-        dimensions: "L110 × W80 × H35 cm"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/pendhapa.architects" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
     id: "atelier-fevrier",
     name: "Atelier Fevrier",
     specialty: "Hand-knotted Rugs & Textile Art",
@@ -380,6 +327,84 @@ const featuredDesigners = [
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/atelierfevrier" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "atelier-pendhapa",
+    name: "Atelier Pendhapa",
+    specialty: "Bespoke Furniture & Indonesian Craftsmanship",
+    image: atelierPendhapaImg,
+    biography:
+      "Atelier Pendhapa is an Indonesian design atelier specializing in bespoke furniture that celebrates the rich tradition of Indonesian woodworking and craftsmanship. Their Deepah custom table exemplifies their philosophy of creating pieces that honor traditional techniques while embracing contemporary design sensibilities. Each piece is handcrafted by master artisans using sustainably sourced materials.",
+    notableWorks: "Deepah Custom Table, Bespoke Dining Collection",
+    notableWorksLink: { text: "Deepah Custom Table", galleryIndex: 3 },
+    philosophy: "We create furniture that bridges the gap between ancient Indonesian craft traditions and contemporary global design.",
+    curatorPicks: [
+      { 
+        image: pendhapaPick1, 
+        title: "Mangala",
+        subtitle: "Coffee Table",
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
+        materials: "Black teak • Lava stone crème brûlée tabletop",
+        dimensions: "L190 × W180 × H35 cm"
+      },
+      { 
+        image: pendhapaPick4, 
+        title: "Akar",
+        subtitle: "Dining Chair",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery",
+        dimensions: "L49 × W52 × H85 cm"
+      },
+      { 
+        image: pendhapaPick5, 
+        title: "Gingko",
+        subtitle: "Side Table",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Natural oak • White lacquer tabletop",
+        dimensions: "L75 × W48 × H50 cm"
+      },
+      { 
+        image: pendhapaPick2, 
+        title: "Anemos",
+        subtitle: "Coffee Table",
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
+        materials: "Black oak • Black lacquer tabletop",
+        dimensions: "L110 × W80 × H35 cm"
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/pendhapa.architects" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "bina-baitel",
+    name: "Bina Baitel",
+    specialty: "Product Design & Sculptural Objects",
+    image: binaBAitelImg,
+    biography: "Bina Baitel Studio creates interior and industrial design projects as well as unique creations in collaboration with museums and galleries. The Paris-based studio conducts a global creative approach ranging from artistic direction to technical studies, with a constant focus on timeless projects and a search for innovation. Bina Baitel's work has been exhibited at the Grand Palais, Milan Design Week, and leading design galleries worldwide.",
+    notableWorks: "Sublime Collection (Mobilier National), Design Objects for Galleries and Museums",
+    philosophy: "Design is always about finding the right balance between tradition and innovation, between the handmade and the industrial.",
+    curatorPicks: [
+      {
+        image: binaBAitelObject,
+        title: "Sculptural Vessel",
+        subtitle: "Collectible Edition",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Vessel"],
+        materials: "Unglazed ceramic — hand-built",
+        dimensions: "H35 × W25 cm (approx.)",
+        description: "This sculptural vessel by Bina Baitel exemplifies her practice of exploring the boundary between design and fine art. Hand-built in unglazed ceramic, its flowing organic form combines classical technique with a distinctly contemporary sensibility."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/binabaitelstudio/" },
       { type: "Curators' Picks" },
     ],
   },
@@ -553,355 +578,6 @@ const featuredDesigners = [
     ],
   },
   {
-    id: "hamrei",
-    name: "Hamrei",
-    specialty: "Whimsical Furniture & Collectible Design",
-    image: hamreiImg,
-    biography:
-      "Hamrei brings a playful yet sophisticated approach to contemporary design. Their Pépé Chair showcases their signature style of combining comfort with unexpected visual delight. Each piece demonstrates a mastery of form and craftsmanship while maintaining a sense of joy and personality.",
-    notableWorks: "Pépé Chair, Whimsical Furniture Collection",
-    notableWorksLink: { text: "Pépé Chair", galleryIndex: 3 },
-    philosophy:
-      "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
-    curatorPicks: [
-      {
-        image: hamreiPick1,
-        title: "PEDRO Coffee Table",
-        subtitle: "Limited Edition Aqua",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table"],
-        materials: "Solid cast bronze, hand-patinated aqua finish",
-        dimensions: "Ø60 × H38 cm"
-      },
-      {
-        image: hamreiPick2,
-        title: "ANJOS Sideboard",
-        category: "Storage",
-        tags: ["Storage", "Sideboard"],
-        materials: "Solid gouged oak, solid-cast blackened brass",
-        dimensions: "H75 × L120 × D45 cm"
-      },
-      {
-        image: hamreiPick3,
-        title: "FUN GUY Side Tables",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Solid cast bronze, hand-textured and finished",
-        dimensions: "Small: Ø28 × H48 cm / Tall: Ø37 × H60 cm"
-      },
-      {
-        image: hamreiPick4,
-        title: "MIRRA Side Table",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Textured blackened brass, solid Murano glass top (Ocean Blue)",
-        dimensions: "Ø36 × H48 cm (glass Ø32 cm)"
-      },
-      {
-        image: hamreiPick5,
-        title: "TRIO Dining Table",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Hand-chiseled stone top, textured earthenware ceramic base",
-        dimensions: "Ø120 × H75 cm (customisable)"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/hamrei" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "herve-van-der-straeten",
-    name: "Hervé van der Straeten",
-    specialty: "Bronze Sculpture & Lighting Design",
-    image: herveVanDerStraetenImg,
-    biography:
-      "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
-    notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
-    notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 9 },
-    philosophy:
-      "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
-    curatorPicks: [
-      {
-        image: herveVdsMicmac,
-        title: "MicMac",
-        subtitle: "Chandelier",
-        category: "Lighting",
-        tags: ["Lighting", "Chandelier"],
-        materials: "Patinated bronze • Frosted glass globes",
-        dimensions: "Ø80 × H70 cm (approx.)",
-        description: "The MicMac chandelier is Hervé van der Straeten's most celebrated lighting design — an explosion of bronze branches tipped with frosted glass globes that recalls both organic growth and haute couture jewelry. Each piece is hand-crafted at his Paris atelier."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "jeremy-maxwell-wintrebert",
-    name: "Jeremy Maxwell Wintrebert",
-    specialty: "Freehand Glassblown Lights & Sculptures",
-    image: jeremyMaxwellWintrebertImg,
-    biography:
-      "Born in Paris and raised in Western Africa, Jeremy Maxwell Wintrebert is a French-American glass artist who established JMW Studio in 2015 beneath the historic Viaduc des Arts in Paris. After apprenticing with masters including Dale Chihuly in Seattle and Davide Salvadore in Venice, he developed his signature freehand glassblowing technique. Winner of the 2019 Prix Bettencourt pour l'Intelligence de la Main, his work graces the collections of the Victoria & Albert Museum, Palais de Tokyo, and MusVerre.",
-    notableWorks: "Cloud Bulle Pendants, Autumn Light Pendants, Space Nugget Side Table, Sonde Chandelier, Dark Matter Installation",
-    notableWorksLink: { text: "Cloud Bulle Pendants", galleryIndex: 3 },
-    philosophy: "Freehand glassblowing is an emotional conversation between hands, head, heart, and material. You start with a small seed and help it grow—it is a humble process.",
-    curatorPicks: [
-      {
-        image: jmwPick3,
-        title: "Autumn Light",
-        subtitle: "Pendant",
-        category: "Lighting",
-        tags: ["Lighting", "Pendant"],
-        materials: "Freehand blown glass • Matte & satin finishes",
-        dimensions: "Various sizes available"
-      },
-      {
-        image: jmwPick2,
-        title: "Sonde",
-        subtitle: "Table Lamp",
-        category: "Lighting",
-        tags: ["Lighting", "Table Lamp"],
-        materials: "3D-printed mesh shade • Blown glass diffuser • Metal base",
-        dimensions: "Ø35 × H40 cm"
-      },
-      {
-        image: jmwPick1,
-        title: "Cloud Bulle",
-        subtitle: "Pendant",
-        category: "Lighting",
-        tags: ["Lighting", "Pendant"],
-        materials: "Freehand blown glass • Brass fittings",
-        dimensions: "Approx. Ø30 × H35 cm (each)"
-      },
-      {
-        image: jmwPick4,
-        title: "Totem",
-        subtitle: "Pendant",
-        category: "Lighting",
-        tags: ["Lighting", "Pendant"],
-        materials: "Stacked blown glass discs • Brass armature",
-        dimensions: "H90 × Ø10 cm"
-      },
-      {
-        image: jmwPick5,
-        title: "Space Nugget",
-        subtitle: "Side Table",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Freehand blown mirrored glass",
-        dimensions: "H42 × Ø38 cm"
-      },
-      {
-        image: jmwPick6,
-        title: "Zenith",
-        subtitle: "Wall Mirror",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Mirror"],
-        materials: "Freehand blown mirrored glass",
-        dimensions: "Ø55 × D18 cm"
-      },
-      {
-        image: jmwPick8,
-        title: "Gravity",
-        subtitle: "Coffee Table",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table"],
-        materials: "Blown glass spheres • Lacquered wood top",
-        dimensions: "L150 × W60 × H30 cm"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/jmw_studio" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "jean-michel-frank",
-    name: "Jean-Michel Frank",
-    specialty: "Minimalist Luxury & Art Deco Pioneer",
-    image: jeanMichelFrankImg,
-    biography:
-      "Jean-Michel Frank (1895–1941) was a legendary French interior decorator and furniture designer who pioneered the luxurious minimalist aesthetic of the Art Deco era. His work emphasized refined simplicity, using the finest materials—parchment, shagreen, straw marquetry, and bronze—to create pieces of understated elegance. Collaborating with artists like Alberto Giacometti and Christian Bérard, Frank created iconic designs that continue to influence contemporary luxury interiors.",
-    notableWorks: "Table Soleil 1930, Stool 1934 (with Adolphe Chanaux), Parchment-covered furniture, Shagreen desks",
-    notableWorksLink: { text: "Stool 1934", galleryIndex: 1 },
-    philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
-    curatorPicks: [
-      {
-        image: jmfStool1934,
-        title: "Stool",
-        subtitle: "1934 — with Adolphe Chanaux",
-        category: "Seating",
-        tags: ["Seating", "Stool"],
-        materials: "Parchment-covered wood • Brass sabots",
-        dimensions: "H45 × Ø35 cm",
-        description: "Jean-Michel Frank's 1934 stool, created in collaboration with Adolphe Chanaux, is among the most iconic pieces of the Art Deco period. Covered in natural parchment and finished with brass sabots, its understated luxury encapsulates Frank's revolutionary philosophy: that refined simplicity is the highest form of elegance. Now produced under Écart Paris reissue."
-      },
-    ],
-    links: [
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "leo-sentou",
-    name: "Leo Sentou",
-    specialty: "Contemporary Classicist Furniture Design",
-    image: leoSentouImg,
-    biography:
-      "French designer Leo Sentou is a contemporary classicist whose debut capsule collection pays homage to the elegance and sophistication of eighteenth-century French decorative arts. His pieces are rooted in tradition yet unequivocally modern, reducing classical forms to their essential shapes while elevating them with a refined palette of limed oak, wrought iron, bronze, mohair, linen and lacquer.",
-    notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J, AB Armchair",
-    notableWorksLink: { text: "AB Armchair", galleryIndex: 1 },
-    philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
-    curatorPicks: [
-      {
-        image: leoSentouPickJBL,
-        title: "Fauteuil J.B.L",
-        category: "Seating",
-        tags: ["Seating", "Armchair"],
-        materials: "Bleached & brushed solid oak • Upholstery",
-        dimensions: "W70 × H91.5 × D63.9 cm — SH 47 cm",
-        description: "The Fauteuil J.B.L takes its inspiration from an elegant yet unusual armchair by Maître Ebeniste Jean Baptiste Lelarge (1743-1802). The design is an echo of classical canons treated in a contemporary manner. Entirely handcrafted by a team of skilled artisans, the original \"ecusson\" back, typical arched armrests and bolsters found in Louis XVI furniture have been simplified, thus becoming sculptural."
-      },
-      {
-        image: leoSentouPickLA,
-        title: "Console J.P.D",
-        category: "Tables",
-        tags: ["Tables", "Console"],
-        materials: "Oak • Lacquer",
-        dimensions: "W120 × H80 × D45 cm",
-        description: "The guéridon and console J.P.D are a contemporary reinterpretation of an 18th-century oval side table by master cabinetmaker Jean-Pierre Dusautoy (mastered in 1779). Entirely handcrafted in oak or lacquered wood, their deceptively simple forms blend historical reference with modern craftsmanship subtly exploring the interplay between structure and surface."
-      },
-      {
-        image: leoSentouPickGJ,
-        title: "Chair G.J",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "Cerused oak frame • Cheyenne by Pierre Frey upholstery",
-        dimensions: "W45 × H92 × L54 cm",
-        description: "Inspired by the works of Maître Ebeniste (master cabinet maker) Jean Baptiste Boulard (1725-1789), the dining chair J.B.B is a contemporary reinterpretation of a montgolfiere shaped base and square back chair; both quintessential motifs of late eighteenth century French design."
-      },
-      {
-        image: leoSentouPickAB,
-        title: "Fauteuil A.B",
-        category: "Seating",
-        tags: ["Seating", "Armchair"],
-        materials: "Full upholstery • Solid oak or cast gouged patinated brass feet",
-        dimensions: "W90 × H70 × L93 cm",
-        description: "The Fauteuil A.B draws inspiration from an elegant \"bergère en gondole,\" crafted by Parisian menuisier Antoine Bonnemain (received master in 1753). Expertly handcrafted in Europe by skilled artisans, this armchair boasts full upholstery and rests on four solid oak or gouged bronze feet. Its signature backrest medallion—an emblem of Louis XVI furniture—has been reinterpreted within the plush upholstery, offering a sculptural, modern tribute to the timeless elegance of French design."
-      },
-      {
-        image: leoSentouPickCS,
-        title: "Canapé C.S",
-        category: "Seating",
-        tags: ["Seating", "Sofa"],
-        materials: "Plush upholstery • Oak feet",
-        dimensions: "W240–320 × H70 × D95 cm",
-        description: "The canapé C.S is a reinterpretation of a canapé droit by master menuisier Jean-Baptiste Claude Sené (1748–1803). Meticulously handcrafted by a team of skilled artisans, its silhouette explores the interplay between straight and curvaceous lines, creating a balanced, contemporary profile."
-      },
-      {
-        image: leoSentouPickLD,
-        title: "Fauteuil L.D",
-        category: "Seating",
-        tags: ["Seating", "Armchair"],
-        materials: "Plush upholstery • Oak or bronze feet",
-        dimensions: "W90 × H80 × D81 cm",
-        description: "The Fauteuil L.D takes its inspiration from an elegant oval bergère by Parisian master menuisier Louis Delanois (1731 - 1792). Made entirely by hand in Europe by a team of skilled artisans, the seat is upholstered in mohair, and rests on a set of four gauged bronze feet. The original medallion and arm bolsters found in classical Louis XVI furniture, have been simplified as part of the armchairs plush upholstery, thus becoming a sculptural contemporary echo of what over two centuries has come to define the iconic French style."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/leosentou" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "milan-pekar",
-    name: "Milan Pekař",
-    specialty: "Crystalline Glass Art & Sculptural Vessels",
-    image: milanPekarImg,
-    biography:
-      "Milan Pekař is a Czech glass artist renowned for his mastery of crystalline glass techniques. His Crystalline Vase collection showcases his exceptional skill in creating pieces that capture and refract light in mesmerizing ways. Working in the tradition of Bohemian glassmaking while pushing contemporary boundaries, his work transforms functional vessels into sculptural art.",
-    notableWorks: "Crystalline Vase Collection, Sculptural Glass Vessels",
-    notableWorksLink: { text: "Crystalline Vase", galleryIndex: 3 },
-    philosophy: "Glass is frozen light—my work seeks to capture that ephemeral quality in permanent form.",
-    curatorPicks: [
-      {
-        image: milanPekarCrystalline,
-        title: "Crystalline",
-        subtitle: "Sculptural Vase",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Vessel"],
-        materials: "Hand-blown crystalline glass — Bohemian technique",
-        dimensions: "H35 × Ø18 cm (approx.)",
-        description: "Milan Pekař's Crystalline vases are the result of an extraordinarily demanding glassblowing process that produces spontaneous crystal formations on the surface of the glass. No two pieces are alike — each is a unique collaboration between the artist's hand and the alchemy of fire and mineral."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/milanpekar_glass" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "olivia-cognet",
-    name: "Olivia Cognet",
-    specialty: "Ceramic Artist & Designer",
-    image: oliviaCognetImg,
-    biography:
-      "Olivia Cognet is a French ceramic artist that draws her inspiration from the South of France where she grew up and and was nourished by the brilliant masters from the school of Vallauris, from Picasso to Roger Capron. Her Vallauris floor lamp in a custom blue glazed ceramic, is a testimony of her constant search for the balance between art & design. ",
-    notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
-    notableWorksLink: { text: "Vallauris floor lamp", galleryIndex: 1 },
-    philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
-    curatorPicks: [
-      {
-        image: oliviaCognetVallauris,
-        title: "Vallauris",
-        subtitle: "Ceramic Floor Lamp",
-        category: "Lighting",
-        tags: ["Lighting", "Floor Lamp"],
-        materials: "Hand-thrown ceramic — custom blue glaze",
-        dimensions: "H165 × Ø30 cm (approx.)",
-        description: "Olivia Cognet's Vallauris floor lamp in custom blue glazed ceramic is a testament to her search for balance between art and design. Hand-thrown in the tradition of the Vallauris masters — from Picasso to Roger Capron — it transforms a functional object into a sculptural statement."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "thierry-lemaire",
-    name: "Thierry Lemaire",
-    specialty: "Sculptural Furniture & Limited Editions",
-    image: thierryLemaireImg,
-    biography:
-      "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
-    notableWorks:
-      "Orsay Centre Table, Niko 420 Custom Sofa. \nLimited and numbered edition (12 copies).",
-    notableWorksLinks: [
-      { text: "Orsay Centre Table", galleryIndex: 1 },
-      { text: "Niko 420 Custom Sofa", galleryIndex: 0 },
-    ],
-    philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
-    curatorPicks: [
-      {
-        image: thierryLemaireOrsay,
-        title: "Orsay",
-        subtitle: "Centre Table — Limited Edition (12 copies)",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table"],
-        materials: "Lacquered wood • Solid bronze base",
-        dimensions: "L140 × W70 × H35 cm",
-        description: "The Orsay Centre Table is Thierry Lemaire's most celebrated collectible design — a sculptural coffee table produced in a strictly limited and numbered edition of 12 copies. Its organic lacquered surface rests on a solid bronze base, embodying his philosophy of transforming functional furniture into lasting works of art."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
     id: "entrelacs-creation",
     name: "Entrelacs Creation",
     specialty: "Bronze Lighting & Artisan Foundry",
@@ -1004,6 +680,449 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "felix-agostini",
+    name: "Felix Agostini (Charles Paris)",
+    specialty: "Figural Bronze Lighting & Decorative Objects",
+    image: felixAgostiniImg,
+    biography: "Felix Agostini is a mid-twentieth century French designer renowned for his highly refined figural bronze lighting, created under the Charles Paris imprint. Working primarily in the 1950s and 1960s, his Grande Caryatide sconces and candelabra draw on the classical tradition of architectural figural sculpture while expressing a distinctly French post-war elegance. His pieces are now highly sought after by collectors and museums worldwide.",
+    notableWorks: "Grande Caryatide Sconce (Charles Paris), Figural Bronze Candelabra, Table Lamps",
+    philosophy: "The figure has always been at the heart of decorative art — my work honors that tradition with modern sensibility.",
+    curatorPicks: [
+      {
+        image: felixAgostiniCaryatide,
+        title: "Grande Caryatide",
+        subtitle: "Wall Sconce — Charles Paris",
+        category: "Lighting",
+        tags: ["Lighting", "Wall Sconce"],
+        materials: "Patinated gilded bronze — hand-cast",
+        dimensions: "H70 × W35 × D20 cm",
+        description: "The Grande Caryatide is Felix Agostini's most iconic creation — a wall sconce featuring a full-figure female caryatid in patinated gilded bronze. Each piece is hand-cast and finished, representing the pinnacle of mid-century French decorative bronzework."
+      },
+    ],
+    links: [
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "forest-giaconia",
+    name: "Forest & Giaconia",
+    specialty: "Contemporary Furniture & Lighting Design",
+    image: forestGiaconiaImg,
+    biography: "Forest & Giaconia is a French design duo known for their refined approach to contemporary furniture and lighting. Their work combines natural materials — notably walnut wood — with innovative technical elements such as PMMA, resulting in pieces of sculptural clarity and tactile warmth. The IHI Floor Lamp exemplifies their ability to create objects that are simultaneously minimal and deeply considered.",
+    notableWorks: "IHI Floor Lamp (walnut & PMMA), Contemporary Furniture Collection",
+    notableWorksLink: { text: "BOB Armchair - Delcourt Collection", galleryIndex: 5 },
+    philosophy: "We design objects that inhabit space with quiet presence — functional forms that reward close attention.",
+    curatorPicks: [
+      {
+        image: forestGiaconiaIhiLamp,
+        title: "IHI",
+        subtitle: "Floor Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Floor Lamp"],
+        materials: "Walnut wood • PMMA",
+        dimensions: "40 × 40 × H187 cm",
+        description: "The IHI Floor Lamp by Forest & Giaconia pairs the natural warmth of solid walnut with a PMMA diffuser to create a striking yet understated floor lamp. Its precise geometry and material contrast make it a standout piece in any interior."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/forest.giaconia/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "garnier-linker",
+    name: "Garnier & Linker",
+    specialty: "Lost-Wax Crystal & Sculptural Glass Objects",
+    image: garnierLinkerImg,
+    biography: "Garnier & Linker is a French design duo whose practice is defined by an obsessive mastery of the lost-wax casting technique applied to crystal — one of the most technically demanding processes in contemporary decorative art. Working at the intersection of ancient craft and contemporary design, they create unique vessels and objects of extraordinary clarity and sculptural presence. Their centerpiece produced for Théorème Éditions has become one of the most celebrated pieces in the French collectible design scene.",
+    notableWorks: "Lost-Wax Crystal Centerpiece for Théorème Éditions (Maison Affluency), Sculptural Crystal Vessels",
+    notableWorksLink: { text: "Crystal Centerpiece", galleryIndex: 1 },
+    philosophy: "Crystal is the most unforgiving of materials — it demands complete mastery and rewards it with unmatched luminosity.",
+    curatorPicks: [
+      {
+        image: theoremeGarnierLinker,
+        title: "Lost-Wax Crystal Centerpiece",
+        subtitle: "For Théorème Éditions",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Vessel"],
+        materials: "Lost-wax cast crystal with gold detailing",
+        dimensions: "H35 × Ø22 cm",
+        description: "This extraordinary centerpiece was created by Garnier & Linker for Théorème Éditions using the ancient lost-wax casting technique applied to crystal — a remarkable technical feat that results in a vessel of unsurpassed clarity and precision. Each piece is unique, bearing the subtle marks of the hand that shaped it."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/garnier_linker/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "hamrei",
+    name: "Hamrei",
+    specialty: "Whimsical Furniture & Collectible Design",
+    image: hamreiImg,
+    biography:
+      "Hamrei brings a playful yet sophisticated approach to contemporary design. Their Pépé Chair showcases their signature style of combining comfort with unexpected visual delight. Each piece demonstrates a mastery of form and craftsmanship while maintaining a sense of joy and personality.",
+    notableWorks: "Pépé Chair, Whimsical Furniture Collection",
+    notableWorksLink: { text: "Pépé Chair", galleryIndex: 3 },
+    philosophy:
+      "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
+    curatorPicks: [
+      {
+        image: hamreiPick1,
+        title: "PEDRO Coffee Table",
+        subtitle: "Limited Edition Aqua",
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
+        materials: "Solid cast bronze, hand-patinated aqua finish",
+        dimensions: "Ø60 × H38 cm"
+      },
+      {
+        image: hamreiPick2,
+        title: "ANJOS Sideboard",
+        category: "Storage",
+        tags: ["Storage", "Sideboard"],
+        materials: "Solid gouged oak, solid-cast blackened brass",
+        dimensions: "H75 × L120 × D45 cm"
+      },
+      {
+        image: hamreiPick3,
+        title: "FUN GUY Side Tables",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Solid cast bronze, hand-textured and finished",
+        dimensions: "Small: Ø28 × H48 cm / Tall: Ø37 × H60 cm"
+      },
+      {
+        image: hamreiPick4,
+        title: "MIRRA Side Table",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Textured blackened brass, solid Murano glass top (Ocean Blue)",
+        dimensions: "Ø36 × H48 cm (glass Ø32 cm)"
+      },
+      {
+        image: hamreiPick5,
+        title: "TRIO Dining Table",
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
+        materials: "Hand-chiseled stone top, textured earthenware ceramic base",
+        dimensions: "Ø120 × H75 cm (customisable)"
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/hamrei" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "herve-van-der-straeten",
+    name: "Hervé van der Straeten",
+    specialty: "Bronze Sculpture & Lighting Design",
+    image: herveVanDerStraetenImg,
+    biography:
+      "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
+    notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
+    notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 9 },
+    philosophy:
+      "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
+    curatorPicks: [
+      {
+        image: herveVdsMicmac,
+        title: "MicMac",
+        subtitle: "Chandelier",
+        category: "Lighting",
+        tags: ["Lighting", "Chandelier"],
+        materials: "Patinated bronze • Frosted glass globes",
+        dimensions: "Ø80 × H70 cm (approx.)",
+        description: "The MicMac chandelier is Hervé van der Straeten's most celebrated lighting design — an explosion of bronze branches tipped with frosted glass globes that recalls both organic growth and haute couture jewelry. Each piece is hand-crafted at his Paris atelier."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "jean-michel-frank",
+    name: "Jean-Michel Frank",
+    specialty: "Minimalist Luxury & Art Deco Pioneer",
+    image: jeanMichelFrankImg,
+    biography:
+      "Jean-Michel Frank (1895–1941) was a legendary French interior decorator and furniture designer who pioneered the luxurious minimalist aesthetic of the Art Deco era. His work emphasized refined simplicity, using the finest materials—parchment, shagreen, straw marquetry, and bronze—to create pieces of understated elegance. Collaborating with artists like Alberto Giacometti and Christian Bérard, Frank created iconic designs that continue to influence contemporary luxury interiors.",
+    notableWorks: "Table Soleil 1930, Stool 1934 (with Adolphe Chanaux), Parchment-covered furniture, Shagreen desks",
+    notableWorksLink: { text: "Stool 1934", galleryIndex: 1 },
+    philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
+    curatorPicks: [
+      {
+        image: jmfStool1934,
+        title: "Stool",
+        subtitle: "1934 — with Adolphe Chanaux",
+        category: "Seating",
+        tags: ["Seating", "Stool"],
+        materials: "Parchment-covered wood • Brass sabots",
+        dimensions: "H45 × Ø35 cm",
+        description: "Jean-Michel Frank's 1934 stool, created in collaboration with Adolphe Chanaux, is among the most iconic pieces of the Art Deco period. Covered in natural parchment and finished with brass sabots, its understated luxury encapsulates Frank's revolutionary philosophy: that refined simplicity is the highest form of elegance. Now produced under Écart Paris reissue."
+      },
+    ],
+    links: [
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "jeremy-maxwell-wintrebert",
+    name: "Jeremy Maxwell Wintrebert",
+    specialty: "Freehand Glassblown Lights & Sculptures",
+    image: jeremyMaxwellWintrebertImg,
+    biography:
+      "Born in Paris and raised in Western Africa, Jeremy Maxwell Wintrebert is a French-American glass artist who established JMW Studio in 2015 beneath the historic Viaduc des Arts in Paris. After apprenticing with masters including Dale Chihuly in Seattle and Davide Salvadore in Venice, he developed his signature freehand glassblowing technique. Winner of the 2019 Prix Bettencourt pour l'Intelligence de la Main, his work graces the collections of the Victoria & Albert Museum, Palais de Tokyo, and MusVerre.",
+    notableWorks: "Cloud Bulle Pendants, Autumn Light Pendants, Space Nugget Side Table, Sonde Chandelier, Dark Matter Installation",
+    notableWorksLink: { text: "Cloud Bulle Pendants", galleryIndex: 3 },
+    philosophy: "Freehand glassblowing is an emotional conversation between hands, head, heart, and material. You start with a small seed and help it grow—it is a humble process.",
+    curatorPicks: [
+      {
+        image: jmwPick3,
+        title: "Autumn Light",
+        subtitle: "Pendant",
+        category: "Lighting",
+        tags: ["Lighting", "Pendant"],
+        materials: "Freehand blown glass • Matte & satin finishes",
+        dimensions: "Various sizes available"
+      },
+      {
+        image: jmwPick2,
+        title: "Sonde",
+        subtitle: "Table Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Table Lamp"],
+        materials: "3D-printed mesh shade • Blown glass diffuser • Metal base",
+        dimensions: "Ø35 × H40 cm"
+      },
+      {
+        image: jmwPick1,
+        title: "Cloud Bulle",
+        subtitle: "Pendant",
+        category: "Lighting",
+        tags: ["Lighting", "Pendant"],
+        materials: "Freehand blown glass • Brass fittings",
+        dimensions: "Approx. Ø30 × H35 cm (each)"
+      },
+      {
+        image: jmwPick4,
+        title: "Totem",
+        subtitle: "Pendant",
+        category: "Lighting",
+        tags: ["Lighting", "Pendant"],
+        materials: "Stacked blown glass discs • Brass armature",
+        dimensions: "H90 × Ø10 cm"
+      },
+      {
+        image: jmwPick5,
+        title: "Space Nugget",
+        subtitle: "Side Table",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Freehand blown mirrored glass",
+        dimensions: "H42 × Ø38 cm"
+      },
+      {
+        image: jmwPick6,
+        title: "Zenith",
+        subtitle: "Wall Mirror",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Mirror"],
+        materials: "Freehand blown mirrored glass",
+        dimensions: "Ø55 × D18 cm"
+      },
+      {
+        image: jmwPick8,
+        title: "Gravity",
+        subtitle: "Coffee Table",
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
+        materials: "Blown glass spheres • Lacquered wood top",
+        dimensions: "L150 × W60 × H30 cm"
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/jmw_studio" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "kerstens",
+    name: "Kerstens",
+    specialty: "Architectural Furniture & Objects",
+    image: kerstensImg,
+    biography: "Kerstens is a multidisciplinary design studio founded by Andy Kerstens in Antwerp, Belgium, in 2015. A graduate of the University of Antwerp in interior architecture, Andy Kerstens combines a thorough architectural design language with a passion for craftsmanship and the atmospheric qualities of materials. The studio's work spans furniture, objects and interiors — always defined by aesthetic purity, refined proportion and true artisan quality.",
+    notableWorks: "Stone & Steel Console, Architectural Furniture Collection",
+    philosophy: "We strive for a refined, timeless and architectural approach, with a desire for craftsmanship and affinity for the atmospheric — creating pieces that improve with age.",
+    curatorPicks: [
+      {
+        image: kerstensConsole,
+        title: "Console",
+        subtitle: "Marble & Patinated Steel",
+        category: "Tables",
+        tags: ["Tables", "Console"],
+        materials: "White Carrara marble • Patinated steel frame",
+        dimensions: "L180 × W40 × H80 cm",
+        description: "This console by Kerstens demonstrates the studio's signature approach: pure architectural geometry, exceptional material quality and precise craft. The Carrara marble top and monolithic support rest in a patinated steel frame — a composition of restrained sophistication."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/kerstens.studio/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "leo-sentou",
+    name: "Leo Sentou",
+    specialty: "Contemporary Classicist Furniture Design",
+    image: leoSentouImg,
+    biography:
+      "French designer Leo Sentou is a contemporary classicist whose debut capsule collection pays homage to the elegance and sophistication of eighteenth-century French decorative arts. His pieces are rooted in tradition yet unequivocally modern, reducing classical forms to their essential shapes while elevating them with a refined palette of limed oak, wrought iron, bronze, mohair, linen and lacquer.",
+    notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J, AB Armchair",
+    notableWorksLink: { text: "AB Armchair", galleryIndex: 1 },
+    philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
+    curatorPicks: [
+      {
+        image: leoSentouPickJBL,
+        title: "Fauteuil J.B.L",
+        category: "Seating",
+        tags: ["Seating", "Armchair"],
+        materials: "Bleached & brushed solid oak • Upholstery",
+        dimensions: "W70 × H91.5 × D63.9 cm — SH 47 cm",
+        description: "The Fauteuil J.B.L takes its inspiration from an elegant yet unusual armchair by Maître Ebeniste Jean Baptiste Lelarge (1743-1802). The design is an echo of classical canons treated in a contemporary manner. Entirely handcrafted by a team of skilled artisans, the original \"ecusson\" back, typical arched armrests and bolsters found in Louis XVI furniture have been simplified, thus becoming sculptural."
+      },
+      {
+        image: leoSentouPickLA,
+        title: "Console J.P.D",
+        category: "Tables",
+        tags: ["Tables", "Console"],
+        materials: "Oak • Lacquer",
+        dimensions: "W120 × H80 × D45 cm",
+        description: "The guéridon and console J.P.D are a contemporary reinterpretation of an 18th-century oval side table by master cabinetmaker Jean-Pierre Dusautoy (mastered in 1779). Entirely handcrafted in oak or lacquered wood, their deceptively simple forms blend historical reference with modern craftsmanship subtly exploring the interplay between structure and surface."
+      },
+      {
+        image: leoSentouPickGJ,
+        title: "Chair G.J",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Cerused oak frame • Cheyenne by Pierre Frey upholstery",
+        dimensions: "W45 × H92 × L54 cm",
+        description: "Inspired by the works of Maître Ebeniste (master cabinet maker) Jean Baptiste Boulard (1725-1789), the dining chair J.B.B is a contemporary reinterpretation of a montgolfiere shaped base and square back chair; both quintessential motifs of late eighteenth century French design."
+      },
+      {
+        image: leoSentouPickAB,
+        title: "Fauteuil A.B",
+        category: "Seating",
+        tags: ["Seating", "Armchair"],
+        materials: "Full upholstery • Solid oak or cast gouged patinated brass feet",
+        dimensions: "W90 × H70 × L93 cm",
+        description: "The Fauteuil A.B draws inspiration from an elegant \"bergère en gondole,\" crafted by Parisian menuisier Antoine Bonnemain (received master in 1753). Expertly handcrafted in Europe by skilled artisans, this armchair boasts full upholstery and rests on four solid oak or gouged bronze feet. Its signature backrest medallion—an emblem of Louis XVI furniture—has been reinterpreted within the plush upholstery, offering a sculptural, modern tribute to the timeless elegance of French design."
+      },
+      {
+        image: leoSentouPickCS,
+        title: "Canapé C.S",
+        category: "Seating",
+        tags: ["Seating", "Sofa"],
+        materials: "Plush upholstery • Oak feet",
+        dimensions: "W240–320 × H70 × D95 cm",
+        description: "The canapé C.S is a reinterpretation of a canapé droit by master menuisier Jean-Baptiste Claude Sené (1748–1803). Meticulously handcrafted by a team of skilled artisans, its silhouette explores the interplay between straight and curvaceous lines, creating a balanced, contemporary profile."
+      },
+      {
+        image: leoSentouPickLD,
+        title: "Fauteuil L.D",
+        category: "Seating",
+        tags: ["Seating", "Armchair"],
+        materials: "Plush upholstery • Oak or bronze feet",
+        dimensions: "W90 × H80 × D81 cm",
+        description: "The Fauteuil L.D takes its inspiration from an elegant oval bergère by Parisian master menuisier Louis Delanois (1731 - 1792). Made entirely by hand in Europe by a team of skilled artisans, the seat is upholstered in mohair, and rests on a set of four gauged bronze feet. The original medallion and arm bolsters found in classical Louis XVI furniture, have been simplified as part of the armchairs plush upholstery, thus becoming a sculptural contemporary echo of what over two centuries has come to define the iconic French style."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/leosentou" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "kira",
+    name: "Made in Kira",
+    specialty: "Hand-crafted Ceramic Lamps & Objects",
+    image: kiraImg,
+    biography: "Made in Kira is a Spanish atelier specializing in hand-crafted ceramic lamps and objects that fuse artisanal tradition with contemporary design. Founded by designer Kira, the studio's pieces are entirely hand-thrown and hand-glazed, with each lamp a unique object that celebrates the beauty of imperfection. Their Toshiro Lamp has become a collector's piece, prized for its sculptural form and exceptional glaze quality.",
+    notableWorks: "Toshiro Lamp (Maison Affluency), Hand-thrown Ceramic Collection",
+    notableWorksLink: { text: "Toshiro Lamp", galleryIndex: 6 },
+    philosophy: "Each piece is a unique conversation between the hand, the clay and the fire — no two are ever alike.",
+    curatorPicks: [
+      {
+        image: kiraToshiroLamp,
+        title: "Toshiro",
+        subtitle: "Ceramic Table Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Table Lamp"],
+        materials: "Hand-thrown ceramic — custom glaze",
+        dimensions: "H60 × Ø30 cm (approx.)",
+        description: "The Toshiro is Made in Kira's signature piece — a hand-thrown ceramic table lamp whose layered glazes create rich tonal variations that shift with the light. Every Toshiro is unique, reflecting the particular moment and hand that shaped it."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/madeinkira/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "man-of-parts",
+    name: "Man of Parts",
+    specialty: "Curated Contemporary Furniture Collections",
+    image: manOfPartsImg,
+    biography: "Man of Parts is a Hamburg-based design brand founded by Stephan Weishaupt, co-founder of the design magazine Wallpaper*. The brand commissions furniture and objects from leading international designers — including Yabu Pushelberg, Sebastian Herkner, and Osvaldo Tenório — producing pieces of exceptional quality that bridge the gallery and the home. Each collection reflects a distinct design vision united by the pursuit of craft excellence.",
+    notableWorks: "Lombard Street Sofa (Yabu Pushelberg), Mainkai Lamp (Sebastian Herkner), Rua Tucumã Tables",
+    philosophy: "We believe in furniture made with integrity — pieces conceived by great designers and realized by the best craftspeople in the world.",
+    curatorPicks: [
+      {
+        image: manOfPartsSofa,
+        title: "Lombard Street",
+        subtitle: "Sofa — Yabu Pushelberg for Man of Parts",
+        category: "Seating",
+        tags: ["Seating", "Sofa"],
+        materials: "Premium upholstery — solid oak legs",
+        dimensions: "L270 × D95 × H75 cm (standard)",
+        description: "Designed by Yabu Pushelberg for Man of Parts, the Lombard Street sofa combines generous proportions with exceptional upholstery quality. Its clean silhouette and solid oak legs give it an architectural presence suited to the most discerning residential interiors."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/manofparts/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "milan-pekar",
+    name: "Milan Pekař",
+    specialty: "Crystalline Glass Art & Sculptural Vessels",
+    image: milanPekarImg,
+    biography:
+      "Milan Pekař is a Czech glass artist renowned for his mastery of crystalline glass techniques. His Crystalline Vase collection showcases his exceptional skill in creating pieces that capture and refract light in mesmerizing ways. Working in the tradition of Bohemian glassmaking while pushing contemporary boundaries, his work transforms functional vessels into sculptural art.",
+    notableWorks: "Crystalline Vase Collection, Sculptural Glass Vessels",
+    notableWorksLink: { text: "Crystalline Vase", galleryIndex: 3 },
+    philosophy: "Glass is frozen light—my work seeks to capture that ephemeral quality in permanent form.",
+    curatorPicks: [
+      {
+        image: milanPekarCrystalline,
+        title: "Crystalline",
+        subtitle: "Sculptural Vase",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Vessel"],
+        materials: "Hand-blown crystalline glass — Bohemian technique",
+        dimensions: "H35 × Ø18 cm (approx.)",
+        description: "Milan Pekař's Crystalline vases are the result of an extraordinarily demanding glassblowing process that produces spontaneous crystal formations on the surface of the glass. No two pieces are alike — each is a unique collaboration between the artist's hand and the alchemy of fire and mineral."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/milanpekar_glass" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
     id: "nathalie-ziegler",
     name: "Nathalie Ziegler",
     specialty: "Bespoke Glass Art & Chandeliers",
@@ -1040,6 +1159,59 @@ const featuredDesigners = [
     ],
   },
   {
+    id: "noe-duchaufour-lawrance",
+    name: "Noé Duchaufour Lawrance",
+    specialty: "Organic Furniture & Crystal Design",
+    image: noeDuchaufourImg,
+    biography: "Noé Duchaufour-Lawrance is a French designer based in Paris known for his organic, biomorphic approach to furniture and objects. His work explores the intersection of natural forms and industrial materials, creating pieces of rare tactile and visual poetry. He has collaborated with Saint-Louis crystal, Bernhardt Design, and leading European manufacturers. His Amber Folio Portable Lamp for Cristallerie Saint-Louis — featured at Maison Affluency — showcases his mastery of translucent materials and organic form.",
+    notableWorks: "Amber Folio Portable Lamp for Saint-Louis (Maison Affluency), Refine Console, Steinway Collaboration",
+    notableWorksLink: { text: "Amber Folio Lamp", galleryIndex: 17 },
+    philosophy: "Nature has already designed everything. My role is to find those forms and translate them into objects that resonate with the human hand and eye.",
+    curatorPicks: [
+      {
+        image: noeFolioLamp,
+        title: "Folio",
+        subtitle: "Portable Lamp — Amber • Cristallerie Saint-Louis",
+        category: "Lighting",
+        tags: ["Lighting", "Table Lamp"],
+        materials: "Mouth-blown amber crystal — Saint-Louis",
+        dimensions: "H28 × Ø14 cm",
+        description: "Created by Noé Duchaufour-Lawrance for the prestigious Cristallerie Saint-Louis, the Folio portable lamp takes the form of an unfurling leaf in mouth-blown amber crystal. When lit, the amber glass radiates a warm, intimate glow — simultaneously a light source and a sculptural object."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/noeduchaufourlawrance/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "olivia-cognet",
+    name: "Olivia Cognet",
+    specialty: "Ceramic Artist & Designer",
+    image: oliviaCognetImg,
+    biography:
+      "Olivia Cognet is a French ceramic artist that draws her inspiration from the South of France where she grew up and and was nourished by the brilliant masters from the school of Vallauris, from Picasso to Roger Capron. Her Vallauris floor lamp in a custom blue glazed ceramic, is a testimony of her constant search for the balance between art & design. ",
+    notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
+    notableWorksLink: { text: "Vallauris floor lamp", galleryIndex: 1 },
+    philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
+    curatorPicks: [
+      {
+        image: oliviaCognetVallauris,
+        title: "Vallauris",
+        subtitle: "Ceramic Floor Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Floor Lamp"],
+        materials: "Hand-thrown ceramic — custom blue glaze",
+        dimensions: "H165 × Ø30 cm (approx.)",
+        description: "Olivia Cognet's Vallauris floor lamp in custom blue glazed ceramic is a testament to her search for balance between art and design. Hand-thrown in the tradition of the Vallauris masters — from Picasso to Roger Capron — it transforms a functional object into a sculptural statement."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
     id: "pierre-bonnefille",
     name: "Pierre Bonnefille",
     specialty: "Patinated Surfaces, Paintings & Furniture",
@@ -1066,128 +1238,28 @@ const featuredDesigners = [
     ],
   },
   {
-    id: "garnier-linker",
-    name: "Garnier & Linker",
-    specialty: "Lost-Wax Crystal & Sculptural Glass Objects",
-    image: garnierLinkerImg,
-    biography: "Garnier & Linker is a French design duo whose practice is defined by an obsessive mastery of the lost-wax casting technique applied to crystal — one of the most technically demanding processes in contemporary decorative art. Working at the intersection of ancient craft and contemporary design, they create unique vessels and objects of extraordinary clarity and sculptural presence. Their centerpiece produced for Théorème Éditions has become one of the most celebrated pieces in the French collectible design scene.",
-    notableWorks: "Lost-Wax Crystal Centerpiece for Théorème Éditions (Maison Affluency), Sculptural Crystal Vessels",
-    notableWorksLink: { text: "Crystal Centerpiece", galleryIndex: 1 },
-    philosophy: "Crystal is the most unforgiving of materials — it demands complete mastery and rewards it with unmatched luminosity.",
+    id: "reda-amalou",
+    name: "Reda Amalou",
+    specialty: "Architecture & Collectible Furniture Design",
+    image: redaAmalouImg,
+    biography: "Reda Amalou is a French architect and designer who founded the architectural agency AW2 over 25 years ago with the ambition of transcending the boundaries between architecture and design. A true creator of experiences, his work spans luxury hospitality architecture (Six Senses, Coucoo Cabanes) to collectible furniture editions. His DOT side table — a perfect geometric sphere in lacquered wood — has become one of the most recognized pieces in contemporary French design.",
+    notableWorks: "DOT Side Table (Maison Affluency), Eggshell Collection, AW2 Hospitality Projects",
+    notableWorksLink: { text: "DOT Side Table", galleryIndex: 12 },
+    philosophy: "Architecture and design are the same discipline — both are about creating places that stimulate the mind and mobilize the senses.",
     curatorPicks: [
       {
-        image: theoremeGarnierLinker,
-        title: "Lost-Wax Crystal Centerpiece",
-        subtitle: "For Théorème Éditions",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Vessel"],
-        materials: "Lost-wax cast crystal with gold detailing",
-        dimensions: "H35 × Ø22 cm",
-        description: "This extraordinary centerpiece was created by Garnier & Linker for Théorème Éditions using the ancient lost-wax casting technique applied to crystal — a remarkable technical feat that results in a vessel of unsurpassed clarity and precision. Each piece is unique, bearing the subtle marks of the hand that shaped it."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/garnier_linker/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "bina-baitel",
-    name: "Bina Baitel",
-    specialty: "Product Design & Sculptural Objects",
-    image: binaBAitelImg,
-    biography: "Bina Baitel Studio creates interior and industrial design projects as well as unique creations in collaboration with museums and galleries. The Paris-based studio conducts a global creative approach ranging from artistic direction to technical studies, with a constant focus on timeless projects and a search for innovation. Bina Baitel's work has been exhibited at the Grand Palais, Milan Design Week, and leading design galleries worldwide.",
-    notableWorks: "Sublime Collection (Mobilier National), Design Objects for Galleries and Museums",
-    philosophy: "Design is always about finding the right balance between tradition and innovation, between the handmade and the industrial.",
-    curatorPicks: [
-      {
-        image: binaBAitelObject,
-        title: "Sculptural Vessel",
-        subtitle: "Collectible Edition",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Vessel"],
-        materials: "Unglazed ceramic — hand-built",
-        dimensions: "H35 × W25 cm (approx.)",
-        description: "This sculptural vessel by Bina Baitel exemplifies her practice of exploring the boundary between design and fine art. Hand-built in unglazed ceramic, its flowing organic form combines classical technique with a distinctly contemporary sensibility."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/binabaitelstudio/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "felix-agostini",
-    name: "Felix Agostini (Charles Paris)",
-    specialty: "Figural Bronze Lighting & Decorative Objects",
-    image: felixAgostiniImg,
-    biography: "Felix Agostini is a mid-twentieth century French designer renowned for his highly refined figural bronze lighting, created under the Charles Paris imprint. Working primarily in the 1950s and 1960s, his Grande Caryatide sconces and candelabra draw on the classical tradition of architectural figural sculpture while expressing a distinctly French post-war elegance. His pieces are now highly sought after by collectors and museums worldwide.",
-    notableWorks: "Grande Caryatide Sconce (Charles Paris), Figural Bronze Candelabra, Table Lamps",
-    philosophy: "The figure has always been at the heart of decorative art — my work honors that tradition with modern sensibility.",
-    curatorPicks: [
-      {
-        image: felixAgostiniCaryatide,
-        title: "Grande Caryatide",
-        subtitle: "Wall Sconce — Charles Paris",
-        category: "Lighting",
-        tags: ["Lighting", "Wall Sconce"],
-        materials: "Patinated gilded bronze — hand-cast",
-        dimensions: "H70 × W35 × D20 cm",
-        description: "The Grande Caryatide is Felix Agostini's most iconic creation — a wall sconce featuring a full-figure female caryatid in patinated gilded bronze. Each piece is hand-cast and finished, representing the pinnacle of mid-century French decorative bronzework."
-      },
-    ],
-    links: [
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "kira",
-    name: "Made in Kira",
-    specialty: "Hand-crafted Ceramic Lamps & Objects",
-    image: kiraImg,
-    biography: "Made in Kira is a Spanish atelier specializing in hand-crafted ceramic lamps and objects that fuse artisanal tradition with contemporary design. Founded by designer Kira, the studio's pieces are entirely hand-thrown and hand-glazed, with each lamp a unique object that celebrates the beauty of imperfection. Their Toshiro Lamp has become a collector's piece, prized for its sculptural form and exceptional glaze quality.",
-    notableWorks: "Toshiro Lamp (Maison Affluency), Hand-thrown Ceramic Collection",
-    notableWorksLink: { text: "Toshiro Lamp", galleryIndex: 6 },
-    philosophy: "Each piece is a unique conversation between the hand, the clay and the fire — no two are ever alike.",
-    curatorPicks: [
-      {
-        image: kiraToshiroLamp,
-        title: "Toshiro",
-        subtitle: "Ceramic Table Lamp",
-        category: "Lighting",
-        tags: ["Lighting", "Table Lamp"],
-        materials: "Hand-thrown ceramic — custom glaze",
-        dimensions: "H60 × Ø30 cm (approx.)",
-        description: "The Toshiro is Made in Kira's signature piece — a hand-thrown ceramic table lamp whose layered glazes create rich tonal variations that shift with the light. Every Toshiro is unique, reflecting the particular moment and hand that shaped it."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/madeinkira/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "tristan-auer",
-    name: "Tristan Auer (Veronese)",
-    specialty: "Interior Architecture & Luxury Furniture",
-    image: tristanAuerImg,
-    biography: "Tristan Auer is a Paris-based interior architect and designer who trained at ESAG Paris before collaborating with Christian Liaigre and Philippe Starck on landmark international projects. In 2002 he founded his own agency, going on to design the lobbies of leading luxury hotels across Europe. His Veronese furniture collection — produced by the prestigious French manufacturer of the same name — distils his signature aesthetic: architectural rigour, noble materials, and a quietly bold luxury.",
-    notableWorks: "Veronese Furniture Collection, Hotel Wilson — Paris, Les Ambassadeurs — Paris",
-    philosophy: "Luxury is not about excess. It's about the perfect choice of material, proportion and light — doing more with less.",
-    curatorPicks: [
-      {
-        image: tristanAuerVeronese,
-        title: "Veronese Console",
-        subtitle: "Walnut & Brass",
+        image: redaAmalouDotTable,
+        title: "DOT",
+        subtitle: "Side Table — Eggshell",
         category: "Tables",
-        tags: ["Tables", "Console"],
-        materials: "Solid walnut • Brushed brass hardware",
-        dimensions: "L160 × W40 × H80 cm",
-        description: "This console from Tristan Auer's Veronese collection embodies his approach to luxury furniture: clean architectural lines, impeccable craftsmanship and noble materials. The combination of solid walnut and brushed brass creates a piece that is simultaneously timeless and distinctly contemporary."
+        tags: ["Tables", "Side Table"],
+        materials: "Lacquered wood — eggshell finish",
+        dimensions: "Ø45 × H45 cm",
+        description: "The DOT side table is Reda Amalou's most celebrated design object — a perfect geometric sphere in lacquered wood with an eggshell finish. Its flawless form and tactile surface make it simultaneously a functional table and a sculptural collectible."
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/tristanauer_studio/" },
+      { type: "Instagram", url: "https://www.instagram.com/redaamalou/" },
       { type: "Curators' Picks" },
     ],
   },
@@ -1242,130 +1314,58 @@ const featuredDesigners = [
     ],
   },
   {
-    id: "reda-amalou",
-    name: "Reda Amalou",
-    specialty: "Architecture & Collectible Furniture Design",
-    image: redaAmalouImg,
-    biography: "Reda Amalou is a French architect and designer who founded the architectural agency AW2 over 25 years ago with the ambition of transcending the boundaries between architecture and design. A true creator of experiences, his work spans luxury hospitality architecture (Six Senses, Coucoo Cabanes) to collectible furniture editions. His DOT side table — a perfect geometric sphere in lacquered wood — has become one of the most recognized pieces in contemporary French design.",
-    notableWorks: "DOT Side Table (Maison Affluency), Eggshell Collection, AW2 Hospitality Projects",
-    notableWorksLink: { text: "DOT Side Table", galleryIndex: 12 },
-    philosophy: "Architecture and design are the same discipline — both are about creating places that stimulate the mind and mobilize the senses.",
+    id: "thierry-lemaire",
+    name: "Thierry Lemaire",
+    specialty: "Sculptural Furniture & Limited Editions",
+    image: thierryLemaireImg,
+    biography:
+      "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
+    notableWorks:
+      "Orsay Centre Table, Niko 420 Custom Sofa. \nLimited and numbered edition (12 copies).",
+    notableWorksLinks: [
+      { text: "Orsay Centre Table", galleryIndex: 1 },
+      { text: "Niko 420 Custom Sofa", galleryIndex: 0 },
+    ],
+    philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
     curatorPicks: [
       {
-        image: redaAmalouDotTable,
-        title: "DOT",
-        subtitle: "Side Table — Eggshell",
+        image: thierryLemaireOrsay,
+        title: "Orsay",
+        subtitle: "Centre Table — Limited Edition (12 copies)",
         category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Lacquered wood — eggshell finish",
-        dimensions: "Ø45 × H45 cm",
-        description: "The DOT side table is Reda Amalou's most celebrated design object — a perfect geometric sphere in lacquered wood with an eggshell finish. Its flawless form and tactile surface make it simultaneously a functional table and a sculptural collectible."
+        tags: ["Tables", "Coffee Table"],
+        materials: "Lacquered wood • Solid bronze base",
+        dimensions: "L140 × W70 × H35 cm",
+        description: "The Orsay Centre Table is Thierry Lemaire's most celebrated collectible design — a sculptural coffee table produced in a strictly limited and numbered edition of 12 copies. Its organic lacquered surface rests on a solid bronze base, embodying his philosophy of transforming functional furniture into lasting works of art."
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/redaamalou/" },
+      { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
       { type: "Curators' Picks" },
     ],
   },
   {
-    id: "man-of-parts",
-    name: "Man of Parts",
-    specialty: "Curated Contemporary Furniture Collections",
-    image: manOfPartsImg,
-    biography: "Man of Parts is a Hamburg-based design brand founded by Stephan Weishaupt, co-founder of the design magazine Wallpaper*. The brand commissions furniture and objects from leading international designers — including Yabu Pushelberg, Sebastian Herkner, and Osvaldo Tenório — producing pieces of exceptional quality that bridge the gallery and the home. Each collection reflects a distinct design vision united by the pursuit of craft excellence.",
-    notableWorks: "Lombard Street Sofa (Yabu Pushelberg), Mainkai Lamp (Sebastian Herkner), Rua Tucumã Tables",
-    philosophy: "We believe in furniture made with integrity — pieces conceived by great designers and realized by the best craftspeople in the world.",
+    id: "tristan-auer",
+    name: "Tristan Auer (Veronese)",
+    specialty: "Interior Architecture & Luxury Furniture",
+    image: tristanAuerImg,
+    biography: "Tristan Auer is a Paris-based interior architect and designer who trained at ESAG Paris before collaborating with Christian Liaigre and Philippe Starck on landmark international projects. In 2002 he founded his own agency, going on to design the lobbies of leading luxury hotels across Europe. His Veronese furniture collection — produced by the prestigious French manufacturer of the same name — distils his signature aesthetic: architectural rigour, noble materials, and a quietly bold luxury.",
+    notableWorks: "Veronese Furniture Collection, Hotel Wilson — Paris, Les Ambassadeurs — Paris",
+    philosophy: "Luxury is not about excess. It's about the perfect choice of material, proportion and light — doing more with less.",
     curatorPicks: [
       {
-        image: manOfPartsSofa,
-        title: "Lombard Street",
-        subtitle: "Sofa — Yabu Pushelberg for Man of Parts",
-        category: "Seating",
-        tags: ["Seating", "Sofa"],
-        materials: "Premium upholstery — solid oak legs",
-        dimensions: "L270 × D95 × H75 cm (standard)",
-        description: "Designed by Yabu Pushelberg for Man of Parts, the Lombard Street sofa combines generous proportions with exceptional upholstery quality. Its clean silhouette and solid oak legs give it an architectural presence suited to the most discerning residential interiors."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/manofparts/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "noe-duchaufour-lawrance",
-    name: "Noé Duchaufour Lawrance",
-    specialty: "Organic Furniture & Crystal Design",
-    image: noeDuchaufourImg,
-    biography: "Noé Duchaufour-Lawrance is a French designer based in Paris known for his organic, biomorphic approach to furniture and objects. His work explores the intersection of natural forms and industrial materials, creating pieces of rare tactile and visual poetry. He has collaborated with Saint-Louis crystal, Bernhardt Design, and leading European manufacturers. His Amber Folio Portable Lamp for Cristallerie Saint-Louis — featured at Maison Affluency — showcases his mastery of translucent materials and organic form.",
-    notableWorks: "Amber Folio Portable Lamp for Saint-Louis (Maison Affluency), Refine Console, Steinway Collaboration",
-    notableWorksLink: { text: "Amber Folio Lamp", galleryIndex: 17 },
-    philosophy: "Nature has already designed everything. My role is to find those forms and translate them into objects that resonate with the human hand and eye.",
-    curatorPicks: [
-      {
-        image: noeFolioLamp,
-        title: "Folio",
-        subtitle: "Portable Lamp — Amber • Cristallerie Saint-Louis",
-        category: "Lighting",
-        tags: ["Lighting", "Table Lamp"],
-        materials: "Mouth-blown amber crystal — Saint-Louis",
-        dimensions: "H28 × Ø14 cm",
-        description: "Created by Noé Duchaufour-Lawrance for the prestigious Cristallerie Saint-Louis, the Folio portable lamp takes the form of an unfurling leaf in mouth-blown amber crystal. When lit, the amber glass radiates a warm, intimate glow — simultaneously a light source and a sculptural object."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/noeduchaufourlawrance/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "kerstens",
-    name: "Kerstens",
-    specialty: "Architectural Furniture & Objects",
-    image: kerstensImg,
-    biography: "Kerstens is a multidisciplinary design studio founded by Andy Kerstens in Antwerp, Belgium, in 2015. A graduate of the University of Antwerp in interior architecture, Andy Kerstens combines a thorough architectural design language with a passion for craftsmanship and the atmospheric qualities of materials. The studio's work spans furniture, objects and interiors — always defined by aesthetic purity, refined proportion and true artisan quality.",
-    notableWorks: "Stone & Steel Console, Architectural Furniture Collection",
-    philosophy: "We strive for a refined, timeless and architectural approach, with a desire for craftsmanship and affinity for the atmospheric — creating pieces that improve with age.",
-    curatorPicks: [
-      {
-        image: kerstensConsole,
-        title: "Console",
-        subtitle: "Marble & Patinated Steel",
+        image: tristanAuerVeronese,
+        title: "Veronese Console",
+        subtitle: "Walnut & Brass",
         category: "Tables",
         tags: ["Tables", "Console"],
-        materials: "White Carrara marble • Patinated steel frame",
-        dimensions: "L180 × W40 × H80 cm",
-        description: "This console by Kerstens demonstrates the studio's signature approach: pure architectural geometry, exceptional material quality and precise craft. The Carrara marble top and monolithic support rest in a patinated steel frame — a composition of restrained sophistication."
+        materials: "Solid walnut • Brushed brass hardware",
+        dimensions: "L160 × W40 × H80 cm",
+        description: "This console from Tristan Auer's Veronese collection embodies his approach to luxury furniture: clean architectural lines, impeccable craftsmanship and noble materials. The combination of solid walnut and brushed brass creates a piece that is simultaneously timeless and distinctly contemporary."
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/kerstens.studio/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "forest-giaconia",
-    name: "Forest & Giaconia",
-    specialty: "Contemporary Furniture & Lighting Design",
-    image: forestGiaconiaImg,
-    biography: "Forest & Giaconia is a French design duo known for their refined approach to contemporary furniture and lighting. Their work combines natural materials — notably walnut wood — with innovative technical elements such as PMMA, resulting in pieces of sculptural clarity and tactile warmth. The IHI Floor Lamp exemplifies their ability to create objects that are simultaneously minimal and deeply considered.",
-    notableWorks: "IHI Floor Lamp (walnut & PMMA), Contemporary Furniture Collection",
-    notableWorksLink: { text: "BOB Armchair - Delcourt Collection", galleryIndex: 5 },
-    philosophy: "We design objects that inhabit space with quiet presence — functional forms that reward close attention.",
-    curatorPicks: [
-      {
-        image: forestGiaconiaIhiLamp,
-        title: "IHI",
-        subtitle: "Floor Lamp",
-        category: "Lighting",
-        tags: ["Lighting", "Floor Lamp"],
-        materials: "Walnut wood • PMMA",
-        dimensions: "40 × 40 × H187 cm",
-        description: "The IHI Floor Lamp by Forest & Giaconia pairs the natural warmth of solid walnut with a PMMA diffuser to create a striking yet understated floor lamp. Its precise geometry and material contrast make it a standout piece in any interior."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/forest.giaconia/" },
+      { type: "Instagram", url: "https://www.instagram.com/tristanauer_studio/" },
       { type: "Curators' Picks" },
     ],
   },
