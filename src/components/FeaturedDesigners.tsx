@@ -994,7 +994,7 @@ const featuredDesigners = [
         subtitle: "Coffee Table",
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
-        materials: "Two solid timber tops with hand-carved geometric surface texture",
+        materials: "Custom stone top, gun metal base",
         dimensions: "166.5 × 147.5 × 38 cm H",
       },
       {
