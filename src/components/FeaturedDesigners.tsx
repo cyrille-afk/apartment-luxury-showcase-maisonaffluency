@@ -1039,7 +1039,7 @@ const featuredDesigners = [
         subtitle: "Server",
         category: "Storage",
         tags: ["Storage", "Server", "Sideboard"],
-        materials: "Solid oak with relief-carved door & drawer fronts, solid brass feet",
+        materials: "Natural ash veneer, stone top",
         dimensions: "140 × 46.6 × 70 cm H",
       },
       {
