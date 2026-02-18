@@ -928,12 +928,12 @@ const featuredDesigners = [
     curatorPicks: [
       {
         image: leoAertsOutdoorChair,
-        title: "Twin Chair",
-        subtitle: "Solid Walnut",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "Solid American walnut",
-        dimensions: "52 × 51 × 74 cm H"
+        title: "Angelo M/R 130",
+        subtitle: "Round Table with Twin Indoor Leather Seat",
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
+        materials: "Natural stone top & base",
+        dimensions: "Ø 130 cm"
       },
       {
         image: leoAertsTwinChairOutdoor,
