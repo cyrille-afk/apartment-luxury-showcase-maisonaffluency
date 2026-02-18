@@ -57,6 +57,7 @@ import leoAertsOutdoorChair from "@/assets/curators-picks/leo-aerts-outdoor-chai
 import leoAertsTwinChairOutdoor from "@/assets/curators-picks/leo-aerts-twin-chair-outdoor.jpg";
 import leoAertsAngeloMMacassar from "@/assets/curators-picks/leo-aerts-angelo-m-macassar.jpg";
 import forestGiaconiaIhiLamp from "@/assets/curators-picks/forest-giaconia-ihi-floor-lamp.jpg";
+import forestGiaconiaImg from "@/assets/designers/forest-giaconia.jpg";
 import adamCourtsOkhaImg from "@/assets/designers/adam-courts-okha.jpg";
 import adamCourtsVoidTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
 import adamCourtsVoidChair from "@/assets/curators-picks/adam-courts-void-chair.jpg";
@@ -1346,7 +1347,7 @@ const featuredDesigners = [
     id: "forest-giaconia",
     name: "Forest & Giaconia",
     specialty: "Contemporary Furniture & Lighting Design",
-    image: null,
+    image: forestGiaconiaImg,
     biography: "Forest & Giaconia is a French design duo known for their refined approach to contemporary furniture and lighting. Their work combines natural materials — notably walnut wood — with innovative technical elements such as PMMA, resulting in pieces of sculptural clarity and tactile warmth. The IHI Floor Lamp exemplifies their ability to create objects that are simultaneously minimal and deeply considered.",
     notableWorks: "IHI Floor Lamp (walnut & PMMA), Contemporary Furniture Collection",
     philosophy: "We design objects that inhabit space with quiet presence — functional forms that reward close attention.",
