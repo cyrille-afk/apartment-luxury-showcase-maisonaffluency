@@ -972,6 +972,15 @@ const featuredDesigners = [
         materials: "Solid American walnut",
         dimensions: "52 × 51 × 74 cm H"
       },
+      {
+        image: leoAertsOutdoorChair,
+        title: "Twin Chair",
+        subtitle: "Solid Walnut — Detail",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Solid American walnut",
+        dimensions: "52 × 51 × 74 cm H"
+      },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/alinea_design_objects/" },
