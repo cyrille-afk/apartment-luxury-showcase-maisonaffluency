@@ -110,7 +110,7 @@ const Navigation = () => {
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         <div className="flex h-20 md:h-20 items-center justify-center md:justify-between relative">
           {/* Left Navigation Items */}
-          <div className="hidden md:flex items-center gap-4 lg:gap-5 pr-12">
+          <div className="hidden md:flex items-center gap-3 lg:gap-4 flex-1 justify-start">
             {leftNavItems.map((item) => (
               <button 
                 key={item.href} 
@@ -143,7 +143,7 @@ const Navigation = () => {
           </div>
 
           {/* Right Navigation Items */}
-          <div className="hidden md:flex items-center gap-4 lg:gap-5 pl-12">
+          <div className="hidden md:flex items-center gap-3 lg:gap-4 flex-1 justify-end">
             {rightNavItems.map((item) => {
               const isTradeProgram = item.href === "#details";
               
