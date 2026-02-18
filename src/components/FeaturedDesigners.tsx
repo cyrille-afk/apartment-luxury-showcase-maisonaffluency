@@ -958,7 +958,7 @@ const featuredDesigners = [
       },
       {
         image: leoAertsOutdoorChair,
-        title: "Twin",
+        title: "Twin Chair",
         subtitle: "Solid Walnut",
         category: "Seating",
         tags: ["Seating", "Chair"],
