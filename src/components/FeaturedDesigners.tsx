@@ -680,7 +680,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/ericschmittstudio/" },
+      { type: "Instagram", url: "https://www.instagram.com/studio_eric_schmitt_/" },
       { type: "Curators' Picks" },
     ],
   },
