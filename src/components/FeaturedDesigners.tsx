@@ -734,7 +734,7 @@ const featuredDesigners = [
     name: "Garnier & Linker",
     specialty: "Lost-Wax Crystal & Sculptural Glass Objects",
     image: garnierLinkerImg,
-    biography: "Garnier & Linker is a French design duo whose practice is defined by an obsessive mastery of the lost-wax casting technique applied to crystal — one of the most technically demanding processes in contemporary decorative art. Working at the intersection of ancient craft and contemporary design, they create unique vessels and objects of extraordinary clarity and sculptural presence. Their centerpiece produced for Théorème Éditions has become one of the most celebrated pieces in the French collectible design scene.",
+    biography: "Guillaume Garnier and Florent Linker are two French creators based in Paris. Their work is about giving a contemporary design to rare materials and savoir-faire. All pieces are handmade in small series by French master craftsmen. As designers, they draw inspiration from both decorative arts and sculpture to create pure-shaped forms that reveal their materiality. With their background in interior design, they offer objects that are as comfortable in a gallery as in a private home.",
     notableWorks: "Lost-Wax Crystal Centerpiece for Théorème Éditions (Maison Affluency), Sculptural Crystal Vessels",
     notableWorksLink: { text: "Crystal Centerpiece", galleryIndex: 1 },
     philosophy: "Crystal is the most unforgiving of materials — it demands complete mastery and rewards it with unmatched luminosity.",
