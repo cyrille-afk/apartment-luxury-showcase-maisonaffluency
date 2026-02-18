@@ -33,6 +33,7 @@ import leoAertsAngeloMDining from "@/assets/curators-picks/leo-aerts-angelo-m-di
 import leoAertsVitrineCabinet from "@/assets/curators-picks/leo-aerts-vitrine-cabinet.jpg";
 import leoAertsOutdoorChair from "@/assets/curators-picks/leo-aerts-outdoor-chair.jpg";
 import leoAertsAngeloMMacassar from "@/assets/curators-picks/leo-aerts-angelo-m-macassar.jpg";
+import adamCourtsOkhaImg from "@/assets/designers/adam-courts-okha.jpg";
 
 // Curators' Picks images
 import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
@@ -970,9 +971,9 @@ const featuredDesigners = [
   },
   {
     id: "okha",
-    name: "Okha",
+    name: "Adam Courts - Okha Design Studio",
     specialty: "Contemporary Furniture & Lighting",
-    image: null,
+    image: adamCourtsOkhaImg,
     biography: "",
     notableWorks: "",
     philosophy: "",
