@@ -1440,18 +1440,22 @@ const FeaturedDesigners = () => {
       // Normalize accents so "Eric" matches "Éric", "ateliers" matches "Ateliers", etc.
       const normalize = (s: string) =>
         s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-      const query = normalize(searchQuery);
+      const query = normalize(searchQuery.trim());
+      // Escape special regex characters in the query, then match whole words only
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const wordRegex = new RegExp(`\\b${escapedQuery}`, "i");
+      const matchesWord = (s: string) => wordRegex.test(normalize(s));
       designers = designers.filter(
         (designer) =>
-          normalize(designer.name).includes(query) ||
-          normalize(designer.specialty).includes(query) ||
-          (designer.biography && normalize(designer.biography).includes(query)) ||
-          (designer.notableWorks && normalize(designer.notableWorks).includes(query)) ||
+          matchesWord(designer.name) ||
+          matchesWord(designer.specialty) ||
+          (designer.biography && matchesWord(designer.biography)) ||
+          (designer.notableWorks && matchesWord(designer.notableWorks)) ||
           designer.curatorPicks?.some((pick: any) =>
-            pick.tags?.some((tag: string) => normalize(tag).includes(query)) ||
-            (pick.title && normalize(pick.title).includes(query)) ||
-            (pick.subtitle && normalize(pick.subtitle).includes(query)) ||
-            (pick.description && normalize(pick.description).includes(query))
+            pick.tags?.some((tag: string) => matchesWord(tag)) ||
+            (pick.title && matchesWord(pick.title)) ||
+            (pick.subtitle && matchesWord(pick.subtitle)) ||
+            (pick.description && matchesWord(pick.description))
           )
       );
     }
