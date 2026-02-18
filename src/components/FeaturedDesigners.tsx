@@ -1370,7 +1370,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/tristanauer_studio/" },
+      { type: "Instagram", url: "https://www.instagram.com/tristanauer/" },
       { type: "Curators' Picks" },
     ],
   },
