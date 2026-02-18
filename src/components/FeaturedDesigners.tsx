@@ -1044,11 +1044,11 @@ const featuredDesigners = [
       },
       {
         image: adamCourtsGeometerBench,
-        title: "Tribe Double Bench",
+        title: "Bench Bed",
         category: "Seating",
         tags: ["Seating", "Bench"],
-        materials: "Solid timber frame, split upholstered leather cushion",
-        dimensions: "182 × 40 × 43 cm H",
+        materials: "Solid timber frame, upholstered leather cushion",
+        dimensions: "179.3 × 38 × 41 cm H",
       },
     ],
     links: [
