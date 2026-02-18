@@ -1351,7 +1351,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
   },
   {
     id: "tristan-auer",
-    name: "Tristan Auer (Veronese)",
+    name: "Tristan Auer - Vénosèse",
     specialty: "Interior Architecture & Luxury Furniture",
     image: tristanAuerImg,
     biography: "Tristan Auer is a Paris-based interior architect and designer who trained at ESAG Paris before collaborating with Christian Liaigre and Philippe Starck on landmark international projects. In 2002 he founded his own agency, going on to design the lobbies of leading luxury hotels across Europe. His Veronese furniture collection — produced by the prestigious French manufacturer of the same name — distils his signature aesthetic: architectural rigour, noble materials, and a quietly bold luxury.",
