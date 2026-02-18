@@ -736,7 +736,7 @@ const featuredDesigners = [
     image: garnierLinkerImg,
     biography: "Guillaume Garnier and Florent Linker are two French creators based in Paris. Their work is about giving a contemporary design to rare materials and savoir-faire. All pieces are handmade in small series by French master craftsmen. As designers, they draw inspiration from both decorative arts and sculpture to create pure-shaped forms that reveal their materiality. With their background in interior design, they offer objects that are as comfortable in a gallery as in a private home.",
     notableWorks: "Lost-Wax Crystal Centerpiece for Théorème Éditions (Maison Affluency), Sculptural Crystal Vessels",
-    notableWorksLink: { text: "Crystal Centerpiece", galleryIndex: 1 },
+    notableWorksLink: { text: "Crystal Centerpiece - Théorème Editions", galleryIndex: 1 },
     philosophy: "Crystal is the most unforgiving of materials — it demands complete mastery and rewards it with unmatched luminosity.",
     curatorPicks: [
       {
