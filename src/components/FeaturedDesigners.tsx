@@ -879,7 +879,7 @@ const featuredDesigners = [
   {
     id: "delcourt-collection",
     name: "Forest & Giaconia",
-    specialty: "Contemporary Furniture & Edited Design",
+    specialty: "BOB Armchair by Delcourt Collection",
     image: null,
     biography: "Frédéric Forest and Clémentine Giaconia are a Paris-based duo — he a product designer, she an interior designer — whose creative partnership yields furniture of rare refinement. Their work is edited by Delcourt Collection, the prestigious French furniture house founded by Christophe Delcourt, known for combining generous proportions, natural materials and elegant detailing in pieces that feel both contemporary and enduring.",
     notableWorks: "BOB Armchair (Delcourt Collection), BOB Sofa Collection",
