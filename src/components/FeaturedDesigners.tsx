@@ -1026,12 +1026,12 @@ const featuredDesigners = [
       },
       {
         image: adamCourtsSofaAerial,
-        title: "REVERB",
-        subtitle: "Aerial View",
+        title: "Repose Sofa A",
+        subtitle: "With Ottoman",
         category: "Seating",
         tags: ["Seating", "Sofa"],
-        materials: "Sculpted upholstered frame, bouclé fabric, solid walnut legs",
-        dimensions: "288.5 × 178.5 × 72 cm H — Seat H: 41 cm",
+        materials: "Sculpted upholstered frame, fully upholstered ottoman",
+        dimensions: "371.5 × 171.5 × 69 cm H — Seat H: 37 cm",
       },
       {
         image: adamCourtsSideboard,
