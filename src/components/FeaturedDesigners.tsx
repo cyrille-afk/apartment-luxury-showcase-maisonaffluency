@@ -945,15 +945,6 @@ const featuredDesigners = [
         dimensions: "52 × 51 × 74 cm H"
       },
       {
-        image: leoAertsTwinChairOutdoor,
-        title: "Angelo M/R 130",
-        subtitle: "With Twin Chair",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Natural stone top & base",
-        dimensions: "Ø 130 cm"
-      },
-      {
         image: leoAertsAngeloMMacassar,
         title: "Angelo W",
         subtitle: "Dining Table — Macassar",
