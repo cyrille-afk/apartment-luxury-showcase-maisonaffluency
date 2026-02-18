@@ -166,6 +166,81 @@ type CuratorPick = { image: string; title: string; subtitle?: string; category?:
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; links?: DesignerLink[] })[] = [
   {
+    id: "adam-courts-okha",
+    name: "Adam Courts - Okha Design Studio",
+    specialty: "Collectible Furniture & Contemporary African Design",
+    image: adamCourtsOkhaImg,
+    biography: "Adam Courts is the founder and creative director of Okha, a Johannesburg-based design studio at the vanguard of contemporary collectible furniture. Drawing on the rich material culture and craft traditions of southern Africa, Courts creates pieces of sculptural authority and refined restraint. His work — spanning seating, cabinetry, tables and lighting — is distinguished by its precision joinery, architect's rigour and a deep sensitivity to texture and form. Okha is represented in landmark private collections and leading design galleries internationally.",
+    notableWorks: "Tectra Coffee Table, Void Dining Chair, Geometer Chair, BNVO Dining Chair, Repose Sofa, OVD Server",
+    philosophy: "Good design is fearless. It should command a room without shouting — and reward the hand that touches it.",
+    curatorPicks: [
+      {
+        image: adamCourtsVoidTable,
+        title: "Void Dining Table",
+        subtitle: "Natural Walnut & Steel",
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
+        materials: "Natural walnut top • Brushed steel base",
+        dimensions: "L220 × W100 × H75 cm",
+        description: "The Void Dining Table pairs a generous walnut top with a precisely engineered brushed steel base, creating a piece of architectural clarity. A signature work that anchors any dining environment with quiet authority."
+      },
+      {
+        image: adamCourtsVoidChair,
+        title: "Void Dining Chair",
+        subtitle: "Walnut Frame, Leather Seat",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Natural walnut frame • Full-grain leather seat",
+        dimensions: "W52 × D56 × H80 cm",
+        description: "The Void Dining Chair distils Okha's design philosophy into a single object: minimal form, maximal craft. Its natural walnut frame and leather seat create an understated elegance that rewards daily use."
+      },
+      {
+        image: adamCourtsGeometerChair,
+        title: "Geometer Chair",
+        subtitle: "Upholstered",
+        category: "Seating",
+        tags: ["Seating", "Lounge Chair"],
+        materials: "Solid timber frame • Fully upholstered",
+        dimensions: "W70 × D75 × H78 cm",
+        description: "The Geometer Chair is a study in geometry and comfort — its angular frame and fully upholstered seat and back creating a piece that is as striking as it is inviting."
+      },
+      {
+        image: adamCourtsSofaFront,
+        title: "Repose Sofa A",
+        subtitle: "With Ottoman",
+        category: "Seating",
+        tags: ["Seating", "Sofa"],
+        materials: "Solid timber frame • Upholstered cushions • Optional ottoman",
+        dimensions: "L240 × D95 × H72 cm",
+        description: "The Repose Sofa is Okha's most expansive seating statement — generous proportions and immaculate upholstery combine to create a centrepiece for any living environment."
+      },
+      {
+        image: adamCourtsSideboard,
+        title: "OVD Server",
+        subtitle: "Natural Ash Veneer, Stone Top",
+        category: "Storage",
+        tags: ["Storage", "Sideboard"],
+        materials: "Natural ash veneer • Stone top",
+        dimensions: "L180 × D45 × H80 cm",
+        description: "The OVD Server brings Okha's mastery of joinery and material to storage design — its natural ash veneer case topped with cool stone, offering a surface as beautiful as it is functional."
+      },
+      {
+        image: adamCourtsGeometerBench,
+        title: "Geometer Bench",
+        subtitle: "Solid Timber",
+        category: "Seating",
+        tags: ["Seating", "Bench"],
+        materials: "Solid timber",
+        dimensions: "L160 × D40 × H45 cm",
+        description: "A companion piece to the Geometer Chair, this bench demonstrates the geometric rigour that defines the Okha aesthetic. Solid timber construction ensures lasting quality."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/okha_design/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
     id: "alexander-lamont",
     name: "Alexander Lamont",
     specialty: "Artisan Furniture & Luxury Craftsmanship",
@@ -979,6 +1054,81 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
   },
   {
+    id: "leo-aerts-alinea",
+    name: "Léo Aerts - Alinea Design Objects",
+    specialty: "Stone Furniture & Design Objects",
+    image: leoAertsAlineaImg,
+    biography: "Léo Aerts is a Belgian designer and the founder of Alinea Design Objects, a studio renowned for its mastery of natural stone and its ability to transform one of the earth's oldest materials into contemporary design objects of exceptional refinement. Each piece is conceived as a sculptural statement: monolithic yet precise, elemental yet deeply considered. Working closely with Belgian and Italian quarries, Aerts selects his stones for their geological character, ensuring that every table, shelf and object carries the unique signature of its material. His Angelo series has earned international recognition for its fusion of natural stone with solid American walnut.",
+    notableWorks: "Angelo M/R Dining Table, Angelo M Side Table Collection, Angelo W Limited Edition, Visible M Horizontal Display Cabinet, Twin Chair",
+    philosophy: "Stone is the slowest material on earth. That patience is what I bring to every design.",
+    curatorPicks: [
+      {
+        image: leoAertsAngeloMCollection,
+        title: "Angelo M/R 130",
+        subtitle: "Dining Table + Twin Indoor Leather Seat",
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
+        materials: "Natural stone top & base • Solid American walnut",
+        dimensions: "Angelo M/R 130: Ø 130 × 75 cm H — Twin Indoor: 52 × 51 × 74 cm H",
+        description: "The Angelo M/R 130 dining table is Léo Aerts' most celebrated work — a circular form in natural stone whose monolithic presence is softened by precise joinery and the warmth of solid American walnut. Shown here with the Twin Indoor Leather Seat."
+      },
+      {
+        image: leoAertsAngeloMDining,
+        title: "Angelo M Side Table Collection",
+        subtitle: "Three Heights",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Natural stone • Solid American walnut",
+        dimensions: "Angelo M/SR 45: Ø 45 × 62 cm H — Angelo M/SR 55: Ø 55 × 48 cm H — Angelo M/SR 80: Ø 80 × 36 cm H",
+        description: "Available in three complementary heights, the Angelo M Side Table Collection offers a family of stone objects that work independently or together — their geological variation making each a unique specimen."
+      },
+      {
+        image: leoAertsVitrineCabinet,
+        title: "Visible M Horizontal",
+        subtitle: "Display Cabinet",
+        category: "Storage",
+        tags: ["Storage", "Cabinet"],
+        materials: "Natural stone • Solid walnut",
+        dimensions: "Custom dimensions available",
+        description: "The Visible M Horizontal display cabinet is a study in material honesty — its stone surfaces and walnut structure creating a piece that showcases objects as beautifully as it stores them."
+      },
+      {
+        image: leoAertsOutdoorChair,
+        title: "Twin Chair",
+        subtitle: "Outdoor",
+        category: "Seating",
+        tags: ["Seating", "Chair", "Outdoor"],
+        materials: "Weather-resistant materials • Stone base",
+        dimensions: "W52 × D55 × H76 cm",
+        description: "The Twin Outdoor Chair extends Alinea's material sensibility to the exterior — its robust construction and considered proportions making it as much at home on a terrace as in an interior."
+      },
+      {
+        image: leoAertsTwinChairOutdoor,
+        title: "Twin Chair",
+        subtitle: "Indoor Detail",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Natural stone base • Upholstered seat",
+        dimensions: "W52 × D55 × H76 cm",
+        description: "A detail view of the Twin Indoor Chair reveals the quality of Alinea's stonework — the precise cuts, the geological variation, the weight of material that grounds every piece."
+      },
+      {
+        image: leoAertsAngeloMMacassar,
+        title: "Angelo W",
+        subtitle: "Limited Edition of 7",
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
+        materials: "Macassar ebony veneer • Natural stone",
+        dimensions: "Custom",
+        description: "The Angelo W is a strictly limited edition of seven pieces — its Macassar ebony veneer surface paired with a natural stone base to create a collectible of extraordinary rarity and beauty."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/alinea.design.objects/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
     id: "leo-sentou",
     name: "Leo Sentou",
     specialty: "Contemporary Classicist Furniture Design",
@@ -1371,156 +1521,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/tristanauer/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "adam-courts-okha",
-    name: "Adam Courts - Okha Design Studio",
-    specialty: "Collectible Furniture & Contemporary African Design",
-    image: adamCourtsOkhaImg,
-    biography: "Adam Courts is the founder and creative director of Okha, a Johannesburg-based design studio at the vanguard of contemporary collectible furniture. Drawing on the rich material culture and craft traditions of southern Africa, Courts creates pieces of sculptural authority and refined restraint. His work — spanning seating, cabinetry, tables and lighting — is distinguished by its precision joinery, architect's rigour and a deep sensitivity to texture and form. Okha is represented in landmark private collections and leading design galleries internationally.",
-    notableWorks: "Tectra Coffee Table, Void Dining Chair, Geometer Chair, BNVO Dining Chair, Repose Sofa, OVD Server",
-    philosophy: "Good design is fearless. It should command a room without shouting — and reward the hand that touches it.",
-    curatorPicks: [
-      {
-        image: adamCourtsVoidTable,
-        title: "Void Dining Table",
-        subtitle: "Natural Walnut & Steel",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Natural walnut top • Brushed steel base",
-        dimensions: "L220 × W100 × H75 cm",
-        description: "The Void Dining Table pairs a generous walnut top with a precisely engineered brushed steel base, creating a piece of architectural clarity. A signature work that anchors any dining environment with quiet authority."
-      },
-      {
-        image: adamCourtsVoidChair,
-        title: "Void Dining Chair",
-        subtitle: "Walnut Frame, Leather Seat",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "Natural walnut frame • Full-grain leather seat",
-        dimensions: "W52 × D56 × H80 cm",
-        description: "The Void Dining Chair distils Okha's design philosophy into a single object: minimal form, maximal craft. Its natural walnut frame and leather seat create an understated elegance that rewards daily use."
-      },
-      {
-        image: adamCourtsGeometerChair,
-        title: "Geometer Chair",
-        subtitle: "Upholstered",
-        category: "Seating",
-        tags: ["Seating", "Lounge Chair"],
-        materials: "Solid timber frame • Fully upholstered",
-        dimensions: "W70 × D75 × H78 cm",
-        description: "The Geometer Chair is a study in geometry and comfort — its angular frame and fully upholstered seat and back creating a piece that is as striking as it is inviting."
-      },
-      {
-        image: adamCourtsSofaFront,
-        title: "Repose Sofa A",
-        subtitle: "With Ottoman",
-        category: "Seating",
-        tags: ["Seating", "Sofa"],
-        materials: "Solid timber frame • Upholstered cushions • Optional ottoman",
-        dimensions: "L240 × D95 × H72 cm",
-        description: "The Repose Sofa is Okha's most expansive seating statement — generous proportions and immaculate upholstery combine to create a centrepiece for any living environment."
-      },
-      {
-        image: adamCourtsSideboard,
-        title: "OVD Server",
-        subtitle: "Natural Ash Veneer, Stone Top",
-        category: "Storage",
-        tags: ["Storage", "Sideboard"],
-        materials: "Natural ash veneer • Stone top",
-        dimensions: "L180 × D45 × H80 cm",
-        description: "The OVD Server brings Okha's mastery of joinery and material to storage design — its natural ash veneer case topped with cool stone, offering a surface as beautiful as it is functional."
-      },
-      {
-        image: adamCourtsGeometerBench,
-        title: "Geometer Bench",
-        subtitle: "Solid Timber",
-        category: "Seating",
-        tags: ["Seating", "Bench"],
-        materials: "Solid timber",
-        dimensions: "L160 × D40 × H45 cm",
-        description: "A companion piece to the Geometer Chair, this bench demonstrates the geometric rigour that defines the Okha aesthetic. Solid timber construction ensures lasting quality."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/okha_design/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "leo-aerts-alinea",
-    name: "Léo Aerts - Alinea Design Objects",
-    specialty: "Stone Furniture & Design Objects",
-    image: leoAertsAlineaImg,
-    biography: "Léo Aerts is a Belgian designer and the founder of Alinea Design Objects, a studio renowned for its mastery of natural stone and its ability to transform one of the earth's oldest materials into contemporary design objects of exceptional refinement. Each piece is conceived as a sculptural statement: monolithic yet precise, elemental yet deeply considered. Working closely with Belgian and Italian quarries, Aerts selects his stones for their geological character, ensuring that every table, shelf and object carries the unique signature of its material. His Angelo series has earned international recognition for its fusion of natural stone with solid American walnut.",
-    notableWorks: "Angelo M/R Dining Table, Angelo M Side Table Collection, Angelo W Limited Edition, Visible M Horizontal Display Cabinet, Twin Chair",
-    philosophy: "Stone is the slowest material on earth. That patience is what I bring to every design.",
-    curatorPicks: [
-      {
-        image: leoAertsAngeloMCollection,
-        title: "Angelo M/R 130",
-        subtitle: "Dining Table + Twin Indoor Leather Seat",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Natural stone top & base • Solid American walnut",
-        dimensions: "Angelo M/R 130: Ø 130 × 75 cm H — Twin Indoor: 52 × 51 × 74 cm H",
-        description: "The Angelo M/R 130 dining table is Léo Aerts' most celebrated work — a circular form in natural stone whose monolithic presence is softened by precise joinery and the warmth of solid American walnut. Shown here with the Twin Indoor Leather Seat."
-      },
-      {
-        image: leoAertsAngeloMDining,
-        title: "Angelo M Side Table Collection",
-        subtitle: "Three Heights",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Natural stone • Solid American walnut",
-        dimensions: "Angelo M/SR 45: Ø 45 × 62 cm H — Angelo M/SR 55: Ø 55 × 48 cm H — Angelo M/SR 80: Ø 80 × 36 cm H",
-        description: "Available in three complementary heights, the Angelo M Side Table Collection offers a family of stone objects that work independently or together — their geological variation making each a unique specimen."
-      },
-      {
-        image: leoAertsVitrineCabinet,
-        title: "Visible M Horizontal",
-        subtitle: "Display Cabinet",
-        category: "Storage",
-        tags: ["Storage", "Cabinet"],
-        materials: "Natural stone • Solid walnut",
-        dimensions: "Custom dimensions available",
-        description: "The Visible M Horizontal display cabinet is a study in material honesty — its stone surfaces and walnut structure creating a piece that showcases objects as beautifully as it stores them."
-      },
-      {
-        image: leoAertsOutdoorChair,
-        title: "Twin Chair",
-        subtitle: "Outdoor",
-        category: "Seating",
-        tags: ["Seating", "Chair", "Outdoor"],
-        materials: "Weather-resistant materials • Stone base",
-        dimensions: "W52 × D55 × H76 cm",
-        description: "The Twin Outdoor Chair extends Alinea's material sensibility to the exterior — its robust construction and considered proportions making it as much at home on a terrace as in an interior."
-      },
-      {
-        image: leoAertsTwinChairOutdoor,
-        title: "Twin Chair",
-        subtitle: "Indoor Detail",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "Natural stone base • Upholstered seat",
-        dimensions: "W52 × D55 × H76 cm",
-        description: "A detail view of the Twin Indoor Chair reveals the quality of Alinea's stonework — the precise cuts, the geological variation, the weight of material that grounds every piece."
-      },
-      {
-        image: leoAertsAngeloMMacassar,
-        title: "Angelo W",
-        subtitle: "Limited Edition of 7",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table"],
-        materials: "Macassar ebony veneer • Natural stone",
-        dimensions: "Custom",
-        description: "The Angelo W is a strictly limited edition of seven pieces — its Macassar ebony veneer surface paired with a natural stone base to create a collectible of extraordinary rarity and beauty."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/alinea.design.objects/" },
       { type: "Curators' Picks" },
     ],
   },
