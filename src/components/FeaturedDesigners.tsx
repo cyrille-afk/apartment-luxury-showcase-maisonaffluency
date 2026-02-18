@@ -974,7 +974,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/kerstens.studio/" },
+      { type: "Instagram", url: "https://www.instagram.com/_kerstens/" },
       { type: "Curators' Picks" },
     ],
   },
