@@ -33,6 +33,7 @@ import pierreBonnefulleImg from "@/assets/designers/pierre-bonnefille.jpg";
 import ccTapisImg from "@/assets/designers/cc-tapis.jpg";
 import haymannEditionsImg from "@/assets/designers/haymann-editions.jpg";
 import theoremeEditionsImg from "@/assets/designers/theoreme-editions.jpg";
+import garnierLinkerImg from "@/assets/designers/garnier-linker.jpg";
 import robicaraImg from "@/assets/designers/robicara.jpg";
 import redaAmalouImg from "@/assets/designers/reda-amalou.jpg";
 import noeDuchaufourImg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
@@ -1064,28 +1065,28 @@ const featuredDesigners = [
     ],
   },
   {
-    id: "theoreme",
-    name: "Théorème Éditions",
-    specialty: "Collectible Design Objects & Limited Editions",
-    image: theoremeEditionsImg,
-    biography: "Théorème Éditions is a French maison d'édition that collaborates with contemporary designers and the finest European craftsmen to create poetic works of furniture and objects. Founded with offices in Paris and London, they champion a philosophy of refined simplicity — commissioning pieces that combine technical mastery with genuine artistic vision. Their Garnier & Linker lost-wax cast crystal centerpiece is a masterpiece of French decorative art.",
-    notableWorks: "Garnier & Linker Crystal Centerpiece (Maison Affluency), Sistema Modular Sofa, Design Collection",
-    notableWorksLink: { text: "Garnier & Linker Centerpiece", galleryIndex: 1 },
-    philosophy: "We believe in the enduring power of objects — commissioning works that transcend fashion to become part of a lasting interior story.",
+    id: "garnier-linker",
+    name: "Garnier & Linker",
+    specialty: "Lost-Wax Crystal & Sculptural Glass Objects",
+    image: garnierLinkerImg,
+    biography: "Garnier & Linker is a French design duo whose practice is defined by an obsessive mastery of the lost-wax casting technique applied to crystal — one of the most technically demanding processes in contemporary decorative art. Working at the intersection of ancient craft and contemporary design, they create unique vessels and objects of extraordinary clarity and sculptural presence. Their centerpiece produced for Théorème Éditions has become one of the most celebrated pieces in the French collectible design scene.",
+    notableWorks: "Lost-Wax Crystal Centerpiece for Théorème Éditions (Maison Affluency), Sculptural Crystal Vessels",
+    notableWorksLink: { text: "Crystal Centerpiece", galleryIndex: 1 },
+    philosophy: "Crystal is the most unforgiving of materials — it demands complete mastery and rewards it with unmatched luminosity.",
     curatorPicks: [
       {
         image: theoremeGarnierLinker,
         title: "Lost-Wax Crystal Centerpiece",
-        subtitle: "Garnier & Linker for Théorème",
+        subtitle: "For Théorème Éditions",
         category: "Decorative Object",
         tags: ["Decorative Object", "Vessel"],
         materials: "Lost-wax cast crystal with gold detailing",
         dimensions: "H35 × Ø22 cm",
-        description: "This extraordinary centerpiece was created by Garnier & Linker for Théorème Éditions using the ancient lost-wax casting technique applied to crystal — a remarkable technical feat that results in a vessel of unsurpassed clarity and precision."
+        description: "This extraordinary centerpiece was created by Garnier & Linker for Théorème Éditions using the ancient lost-wax casting technique applied to crystal — a remarkable technical feat that results in a vessel of unsurpassed clarity and precision. Each piece is unique, bearing the subtle marks of the hand that shaped it."
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/theoreme.editions/" },
+      { type: "Instagram", url: "https://www.instagram.com/garnier_linker/" },
       { type: "Curators' Picks" },
     ],
   },
