@@ -932,8 +932,8 @@ const featuredDesigners = [
         subtitle: "",
         category: "Tables",
         tags: ["Tables", "Dining Table"],
-        materials: "Natural stone top & base",
-        dimensions: "Ø 130 cm"
+        materials: "Natural stone top & base • Solid American walnut",
+        dimensions: "Angelo M/R 130: Ø 130 × 75 cm H — Twin Indoor: 52 × 51 × 74 cm H",
       },
       {
         image: leoAertsTwinChairOutdoor,
