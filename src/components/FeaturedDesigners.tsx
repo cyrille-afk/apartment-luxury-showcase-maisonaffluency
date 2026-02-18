@@ -978,6 +978,7 @@ const featuredDesigners = [
     image: adamCourtsOkhaImg,
     biography: "Adam Court has been the Creative Director of OKHA since 2007, profoundly transforming the landscape of African design and catapulting the studio onto the global stage—with collections gracing showrooms from Dubai to London. Imbued with influences from music, cinema, and fashion, his designs transcend conventional furniture making: each piece narrates part of his own life, weaving personal history into form through sophisticated texture and materiality. His creations are a homage to the raw, unfiltered beauty of Africa, whose rugged and vibrant nature profoundly influences his choice of materials. Adam advocates for 'Slow Time'—a design ethos that prioritizes contemplation and thoroughness over speed.",
     notableWorks: "Void Chair, Geometer Desk, Adam Court Villa Pedestal Nightstand, OKHA Collectible Collections",
+    notableWorksLink: { text: "Villa Pedestal Nightstand", galleryIndex: 10 },
     philosophy: "My designs inadvertently become a narrative of my own experiences. I find beauty in imperfect harmony—in the natural world, in raw materials, in the unhurried act of making.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/okha_design/" },
