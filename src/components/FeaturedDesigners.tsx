@@ -1012,7 +1012,7 @@ const featuredDesigners = [
         subtitle: "Dining Chair",
         category: "Seating",
         tags: ["Seating", "Dining Chair"],
-        materials: "Solid blackened steel frame, fully upholstered seat & back",
+        materials: "Natural walnut frame, leather seat",
         dimensions: "47 × 50.5 × 81 cm H — Seat H: 47 cm",
       },
       {
