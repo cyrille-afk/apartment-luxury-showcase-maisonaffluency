@@ -110,7 +110,7 @@ const Navigation = () => {
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         <div className="flex h-20 md:h-20 items-center justify-center md:justify-between relative">
           {/* Left Navigation Items */}
-          <div className="hidden md:flex items-center gap-3 lg:gap-4 flex-1 justify-start">
+          <div className="hidden md:flex items-center gap-4 lg:gap-5 pr-12">
             {leftNavItems.map((item) => (
               <button 
                 key={item.href} 
@@ -133,17 +133,17 @@ const Navigation = () => {
             ))}
           </div>
 
-          {/* Brand - Center */}
-          <div className="flex-shrink-0 px-4 lg:px-8">
+          {/* Brand - Center (absolutely positioned on desktop for true centering) */}
+          <div className="md:absolute md:left-1/2 md:-translate-x-1/2 z-10">
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-[1.4rem] md:text-xl lg:text-2xl font-medium tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+              <span className="font-brand text-[1.4rem] md:text-2xl font-medium tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                 MAISON AFFLUENCY
               </span>
             </button>
           </div>
 
           {/* Right Navigation Items */}
-          <div className="hidden md:flex items-center gap-3 lg:gap-4 flex-1 justify-end">
+          <div className="hidden md:flex items-center gap-4 lg:gap-5 pl-12">
             {rightNavItems.map((item) => {
               const isTradeProgram = item.href === "#details";
               
