@@ -905,11 +905,11 @@ const featuredDesigners = [
   {
     id: "alinea",
     name: "Léo Aerts - Alinea Design Objects",
-    specialty: "Contemporary Design & Furniture",
+    specialty: "Stone Furniture & Design Objects",
     image: leoAertsAlineaImg,
-    biography: "",
-    notableWorks: "",
-    philosophy: "",
+    biography: "For over thirty years, Belgian designer and interior architect Léo Aerts has committed his work to sustainability and longevity in design—creating timeless silhouettes with simple lines that emphasize craftsmanship precision and materials quality. Following numerous collaborations with European manufacturers, Aerts founded Alinea in 1995: a signature collection of furniture pieces and objects hand-crafted in Northern Italy with hand-picked stones. A professor of interior design architecture at UHasselt, his work has earned the Red Dot Design Award, German Design Award, Good Design Award (Chicago), and AZ Award (Toronto).",
+    notableWorks: "Meta Coffee Table (B&B Italia, 1987), Angelo M Table (Good Design Award 2018), Alinea Stone Furniture Collection",
+    philosophy: "Designing has become part of my lifestyle. I swear by soberly designed, functional and timeless objects—pieces that address ongoing concerns for sustainability and longevity.",
     links: [
       { type: "Instagram", url: "https://www.instagram.com/alinea_design_objects/" },
     ],
