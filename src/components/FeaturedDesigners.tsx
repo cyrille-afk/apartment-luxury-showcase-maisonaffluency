@@ -828,6 +828,206 @@ const featuredDesigners = [
       { type: "Curators' Picks" },
     ],
   },
+  {
+    id: "eric-schmitt-studio",
+    name: "Éric Schmitt Studio",
+    specialty: "Sculptural Bronze & Decorative Objects",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "nathalie-ziegler",
+    name: "Nathalie Ziegler",
+    specialty: "Ceramic & Decorative Art",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "pierre-bonnefille",
+    name: "Pierre Bonnefille",
+    specialty: "Patinated Surfaces & Decorative Finishes",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "christophe-delcourt",
+    name: "Christophe Delcourt",
+    specialty: "Contemporary Furniture & Interior Design",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "cc-tapis",
+    name: "CC-Tapis",
+    specialty: "Hand-knotted Rugs & Textile Design",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "ecart-paris",
+    name: "Écart Paris",
+    specialty: "Re-editions of JM Frank, Pierre Chareau, etc.",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "haymann-editions",
+    name: "Haymann Éditions",
+    specialty: "Limited Edition Furniture & Objects",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "alinea",
+    name: "Alinéa",
+    specialty: "Contemporary Design & Furniture",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "okha",
+    name: "Okha",
+    specialty: "Contemporary Furniture & Lighting",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "theoreme",
+    name: "Théorème",
+    specialty: "Bespoke Furniture & Interior Objects",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "bina-baitel",
+    name: "Bina Baitel",
+    specialty: "Product Design & Furniture",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "felix-agostini",
+    name: "Felix Agostini (Charles Paris)",
+    specialty: "Bronze Lighting & Decorative Objects",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "kira",
+    name: "Kira",
+    specialty: "Contemporary Furniture & Design",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "tristan-auer",
+    name: "Tristan Auer (Veronese)",
+    specialty: "Interior Architecture & Luxury Design",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "robicara",
+    name: "Robicara",
+    specialty: "Contemporary Furniture & Objects",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "serge-mouille",
+    name: "Serge Mouille",
+    specialty: "Mid-Century Lighting Design",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "reda-amalou",
+    name: "Reda Amalou",
+    specialty: "Architecture & Furniture Design",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "man-of-parts",
+    name: "Man of Parts",
+    specialty: "Contemporary Furniture & Design",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "noe-duchaufour-lawrance",
+    name: "Noé Duchaufour Lawrance",
+    specialty: "Organic Furniture & Product Design",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
+  {
+    id: "kerstens",
+    name: "Kerstens",
+    specialty: "Contemporary Design & Objects",
+    image: null,
+    biography: "",
+    notableWorks: "",
+    philosophy: "",
+    links: [],
+  },
 ];
 
 const FeaturedDesigners = () => {
@@ -1120,13 +1320,14 @@ const FeaturedDesigners = () => {
               >
                 <AccordionTrigger className="hover:no-underline py-4 md:py-6 group active:scale-[0.99] touch-manipulation">
                   <div className="flex items-center gap-4 md:gap-6 text-left w-full">
+                    {designer.image ? (
                     <Dialog>
                       <DialogTrigger asChild>
                         <div
                           className="relative flex-shrink-0 cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedImage({ name: designer.name, image: designer.image });
+                            setSelectedImage({ name: designer.name, image: designer.image! });
                           }}
                         >
                           <img
@@ -1157,7 +1358,7 @@ const FeaturedDesigners = () => {
                         </VisuallyHidden>
                         <div className="relative w-full h-full">
                           <img
-                            src={selectedImage?.image || designer.image}
+                            src={selectedImage?.image || designer.image!}
                             alt={selectedImage?.name || designer.name}
                             className="w-full h-auto rounded-lg object-contain"
                           />
@@ -1167,6 +1368,11 @@ const FeaturedDesigners = () => {
                         </div>
                       </DialogContent>
                     </Dialog>
+                    ) : (
+                    <div className="flex-shrink-0 w-24 h-24 md:w-32 md:h-32 rounded-full bg-muted ring-2 ring-border/40 flex items-center justify-center">
+                      <span className="text-2xl font-serif text-muted-foreground">{designer.name.charAt(0)}</span>
+                    </div>
+                    )}
                     <div className="flex flex-col items-start gap-1 flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         {designer.links?.find(l => l.type === "Instagram")?.url && (
