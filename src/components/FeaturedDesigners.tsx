@@ -928,8 +928,8 @@ const featuredDesigners = [
     curatorPicks: [
       {
         image: leoAertsOutdoorChair,
-        title: "Angelo M/R 130",
-        subtitle: "Round Table with Twin Indoor Leather Seat",
+        title: "Angelo M/R 130 + Twin Indoor Leather Seat",
+        subtitle: "",
         category: "Tables",
         tags: ["Tables", "Dining Table"],
         materials: "Natural stone top & base",
