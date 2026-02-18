@@ -219,6 +219,31 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
   },
   {
+    id: "kerstens",
+    name: "Andy Kerstens",
+    specialty: "Architectural Furniture & Objects",
+    image: kerstensImg,
+    biography: "Kerstens is a multidisciplinary design studio founded by Andy Kerstens in Antwerp, Belgium, in 2015. A graduate of the University of Antwerp in interior architecture, Andy Kerstens combines a thorough architectural design language with a passion for craftsmanship and the atmospheric qualities of materials. The studio's work spans furniture, objects and interiors — always defined by aesthetic purity, refined proportion and true artisan quality.",
+    notableWorks: "Stone & Steel Console, Architectural Furniture Collection",
+    philosophy: "We strive for a refined, timeless and architectural approach, with a desire for craftsmanship and affinity for the atmospheric — creating pieces that improve with age.",
+    curatorPicks: [
+      {
+        image: kerstensConsole,
+        title: "Console",
+        subtitle: "Marble & Patinated Steel",
+        category: "Tables",
+        tags: ["Tables", "Console"],
+        materials: "White Carrara marble • Patinated steel frame",
+        dimensions: "L180 × W40 × H80 cm",
+        description: "This console by Kerstens demonstrates the studio's signature approach: pure architectural geometry, exceptional material quality and precise craft. The Carrara marble top and monolithic support rest in a patinated steel frame — a composition of restrained sophistication."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/_kerstens/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
     id: "apparatus-studio",
     name: "Apparatus Studio",
     founder: "Gabriel Hendifar",
@@ -950,31 +975,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/jmw_studio" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "kerstens",
-    name: "Andy Kerstens",
-    specialty: "Architectural Furniture & Objects",
-    image: kerstensImg,
-    biography: "Kerstens is a multidisciplinary design studio founded by Andy Kerstens in Antwerp, Belgium, in 2015. A graduate of the University of Antwerp in interior architecture, Andy Kerstens combines a thorough architectural design language with a passion for craftsmanship and the atmospheric qualities of materials. The studio's work spans furniture, objects and interiors — always defined by aesthetic purity, refined proportion and true artisan quality.",
-    notableWorks: "Stone & Steel Console, Architectural Furniture Collection",
-    philosophy: "We strive for a refined, timeless and architectural approach, with a desire for craftsmanship and affinity for the atmospheric — creating pieces that improve with age.",
-    curatorPicks: [
-      {
-        image: kerstensConsole,
-        title: "Console",
-        subtitle: "Marble & Patinated Steel",
-        category: "Tables",
-        tags: ["Tables", "Console"],
-        materials: "White Carrara marble • Patinated steel frame",
-        dimensions: "L180 × W40 × H80 cm",
-        description: "This console by Kerstens demonstrates the studio's signature approach: pure architectural geometry, exceptional material quality and precise craft. The Carrara marble top and monolithic support rest in a patinated steel frame — a composition of restrained sophistication."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/_kerstens/" },
       { type: "Curators' Picks" },
     ],
   },
