@@ -1008,12 +1008,12 @@ const featuredDesigners = [
       },
       {
         image: adamCourtsGeometerChair,
-        title: "Toro A Frame",
+        title: "Void",
         subtitle: "Dining Chair",
         category: "Seating",
         tags: ["Seating", "Dining Chair"],
-        materials: "Solid American walnut A-frame base, fully upholstered seat & back",
-        dimensions: "61 × 68 × 83.5 cm H — Seat H: 45.7 cm",
+        materials: "Solid blackened steel frame, fully upholstered seat & back",
+        dimensions: "47 × 50.5 × 81 cm H — Seat H: 47 cm",
       },
       {
         image: adamCourtsSofaFront,
