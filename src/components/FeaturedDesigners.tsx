@@ -160,7 +160,11 @@ import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode
 import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
 import rowinNoneIILamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 
-const featuredDesigners = [
+type DesignerLink = { type: string; url?: string };
+type CuratorPick = { image: string; title: string; subtitle?: string; category?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; links?: DesignerLink[] })[] = [
   {
     id: "alexander-lamont",
     name: "Alexander Lamont",
@@ -665,7 +669,7 @@ const featuredDesigners = [
     philosophy: "A piece of furniture needs to exude silence so it can be loved for a long time.",
     curatorPicks: [
       {
-        image: undefined,
+        image: "",
         title: "Chairie",
         subtitle: "Dining Chair",
         category: "Seating",
@@ -682,7 +686,7 @@ const featuredDesigners = [
   },
   {
     id: "felix-agostini",
-    name: "Felix Agostini (Charles Paris)",
+    name: "Felix Agostini - Charles Paris",
     specialty: "Figural Bronze Lighting & Decorative Objects",
     image: felixAgostiniImg,
     biography: "Felix Agostini is a mid-twentieth century French designer renowned for his highly refined figural bronze lighting, created under the Charles Paris imprint. Working primarily in the 1950s and 1960s, his Grande Caryatide sconces and candelabra draw on the classical tradition of architectural figural sculpture while expressing a distinctly French post-war elegance. His pieces are now highly sought after by collectors and museums worldwide.",
@@ -694,7 +698,6 @@ const featuredDesigners = [
         title: "Grande Caryatide",
         subtitle: "Wall Sconce — Charles Paris",
         category: "Lighting",
-        tags: ["Lighting", "Wall Sconce"],
         materials: "Patinated gilded bronze — hand-cast",
         dimensions: "H70 × W35 × D20 cm",
         description: "The Grande Caryatide is Felix Agostini's most iconic creation — a wall sconce featuring a full-figure female caryatid in patinated gilded bronze. Each piece is hand-cast and finished, representing the pinnacle of mid-century French decorative bronzework."
