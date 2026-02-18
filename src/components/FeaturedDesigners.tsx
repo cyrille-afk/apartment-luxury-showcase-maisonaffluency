@@ -28,6 +28,11 @@ import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
 import yvesMacheretImg from "@/assets/designers/yves-macheret.jpg";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
 import leoAertsAlineaImg from "@/assets/designers/leo-aerts-alinea.jpg";
+import leoAertsAngeloMCollection from "@/assets/curators-picks/leo-aerts-angelo-m-collection.jpg";
+import leoAertsAngeloMDining from "@/assets/curators-picks/leo-aerts-angelo-m-dining.jpg";
+import leoAertsVitrineCabinet from "@/assets/curators-picks/leo-aerts-vitrine-cabinet.jpg";
+import leoAertsOutdoorChair from "@/assets/curators-picks/leo-aerts-outdoor-chair.jpg";
+import leoAertsAngeloMMacassar from "@/assets/curators-picks/leo-aerts-angelo-m-macassar.jpg";
 
 // Curators' Picks images
 import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
@@ -911,8 +916,56 @@ const featuredDesigners = [
     notableWorks: "Meta Coffee Table (B&B Italia, 1987), Angelo M Table (Good Design Award 2018), Alinea Stone Furniture Collection",
     notableWorksLink: { text: "Custom Angelo M Table", galleryIndex: 2 },
     philosophy: "Designing has become part of my lifestyle. I swear by soberly designed, functional and timeless objects—pieces that address ongoing concerns for sustainability and longevity.",
+    curatorPicks: [
+      {
+        image: leoAertsAngeloMMacassar,
+        title: "Angelo M",
+        subtitle: "Dining Table — Macassar",
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
+        materials: "Macassar ebony veneer top & base",
+        dimensions: "Oval top, custom dimensions available"
+      },
+      {
+        image: leoAertsAngeloMCollection,
+        title: "Angelo M",
+        subtitle: "Side Table Collection",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Hand-picked natural stone — multiple varieties",
+        dimensions: "Ø45 × H55 cm (standard)"
+      },
+      {
+        image: leoAertsAngeloMDining,
+        title: "Angelo M",
+        subtitle: "Dining Table in situ",
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
+        materials: "Natural stone top & base",
+        dimensions: "Custom dimensions available"
+      },
+      {
+        image: leoAertsVitrineCabinet,
+        title: "Vitrine",
+        subtitle: "Display Cabinet",
+        category: "Storage",
+        tags: ["Storage", "Cabinet"],
+        materials: "Glass doors • Steel & wood frame",
+        dimensions: "W130 × H160 × D40 cm"
+      },
+      {
+        image: leoAertsOutdoorChair,
+        title: "Dining Chair",
+        subtitle: "Solid Walnut",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Solid American walnut",
+        dimensions: "W54 × H79 × D55 cm"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/alinea_design_objects/" },
+      { type: "Curators' Picks" },
     ],
   },
   {
