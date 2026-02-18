@@ -128,6 +128,7 @@ import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonne
 import ccTapisGiudecca from "@/assets/curators-picks/cc-tapis-giudecca.jpg";
 import haymannMarieLamp from "@/assets/curators-picks/haymann-marie-lamp.jpg";
 import theoremeGarnierLinker from "@/assets/curators-picks/theoreme-garnier-linker.jpg";
+import garnierLinkerCenterpiece from "@/assets/curators-picks/garnier-linker-centerpiece.jpg";
 import robicaraSiraCredenza from "@/assets/curators-picks/robicara-sira-credenza.jpg";
 import redaAmalouDotTable from "@/assets/curators-picks/reda-amalou-dot-table.jpg";
 import noeFolioLamp from "@/assets/curators-picks/noe-folio-lamp.jpg";
@@ -740,14 +741,14 @@ const featuredDesigners = [
     philosophy: "Crystal is the most unforgiving of materials — it demands complete mastery and rewards it with unmatched luminosity.",
     curatorPicks: [
       {
-        image: theoremeGarnierLinker,
+        image: garnierLinkerCenterpiece,
+        category: "Decorative Object",
         title: "Lost-Wax Crystal Centerpiece",
         subtitle: "For Théorème Éditions",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Vessel"],
-        materials: "Lost-wax cast crystal with gold detailing",
-        dimensions: "H35 × Ø22 cm",
-        description: "This extraordinary centerpiece was created by Garnier & Linker for Théorème Éditions using the ancient lost-wax casting technique applied to crystal — a remarkable technical feat that results in a vessel of unsurpassed clarity and precision. Each piece is unique, bearing the subtle marks of the hand that shaped it."
+        materials: "Lost-wax cast crystal",
+        dimensions: "Diameter 30 cm",
+        tags: ["Decorative Object"],
+        description: "This extraordinary centerpiece was created by Garnier & Linker for Théorème Éditions using the ancient lost-wax casting technique applied to crystal — a remarkable technical feat that results in a piece of unsurpassed clarity and precision. Each piece is unique, bearing the subtle marks of the hand that shaped it.",
       },
     ],
     links: [
