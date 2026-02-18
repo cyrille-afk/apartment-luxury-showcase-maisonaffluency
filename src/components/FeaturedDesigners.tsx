@@ -925,7 +925,8 @@ const featuredDesigners = [
         category: "Tables",
         tags: ["Tables", "Dining Table"],
         materials: "Macassar ebony veneer top & base",
-        dimensions: "Ø 160 × H 75 cm"
+        dimensions: "Ø 160 × H 75 cm",
+        description: "The Angelo W is a limited edition dining table, with only 7 pieces available. Offered exclusively as a round dining table, the Angelo W is defined by its iconic hourglass base and the striking natural grain of its Macassar ebony veneer. Other sizes are possible upon request."
       },
       {
         image: leoAertsAngeloMCollection,
