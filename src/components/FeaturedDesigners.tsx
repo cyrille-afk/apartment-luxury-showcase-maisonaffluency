@@ -948,12 +948,12 @@ const featuredDesigners = [
       },
       {
         image: leoAertsVitrineCabinet,
-        title: "Vitrine",
-        subtitle: "Display Cabinet",
+        title: "Visible M Horizontal",
+        subtitle: "VHS/M 120-45 — Display Cabinet",
         category: "Storage",
         tags: ["Storage", "Cabinet"],
         materials: "Glass doors • Steel & wood frame",
-        dimensions: "W130 × H160 × D40 cm"
+        dimensions: "Glass: 120 × 45 × 45 cm / Overall: 120 × 45 × 125 cm"
       },
       {
         image: leoAertsOutdoorChair,
