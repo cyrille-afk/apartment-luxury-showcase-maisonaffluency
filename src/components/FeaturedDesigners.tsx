@@ -886,8 +886,7 @@ const featuredDesigners = [
     notableWorksLink: { text: "BOB Armchair", galleryIndex: 5 },
     philosophy: "We believe in furniture that feels alive — generous in form, refined in detail, and grounded in natural materials.",
     links: [
-      { type: "Website", url: "https://www.forestgiaconia.com" },
-      { type: "Gallery Featured", galleryIndex: 5 },
+      { type: "Instagram", url: "https://www.instagram.com/forest.giaconia/" },
     ],
   },
   {
