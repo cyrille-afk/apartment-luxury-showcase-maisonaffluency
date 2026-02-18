@@ -665,7 +665,7 @@ const featuredDesigners = [
     philosophy: "A piece of furniture needs to exude silence so it can be loved for a long time.",
     curatorPicks: [
       {
-        image: ericSchmittChairie,
+        image: undefined,
         title: "Chairie",
         subtitle: "Dining Chair",
         category: "Seating",
@@ -1991,12 +1991,14 @@ const FeaturedDesigners = () => {
                           ))}
                         </div>
                       )}
-                      <img 
-                        src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
-                        alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                        className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
-                        draggable={false}
-                      />
+                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image && (
+                        <img 
+                          src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
+                          alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
+                          className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
+                          draggable={false}
+                        />
+                      )}
                       <button 
                         onClick={() => setIsZoomed(!isZoomed)}
                         className={`absolute bottom-24 right-3 md:bottom-3 md:right-3 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
@@ -2064,11 +2066,15 @@ const FeaturedDesigners = () => {
                                 }`}
                                 aria-label={`View ${pick.title}`}
                               >
-                                <img 
-                                  src={pick.image} 
-                                  alt={pick.title} 
-                                  className="w-full h-full object-cover"
-                                />
+                                {pick.image ? (
+                                  <img 
+                                    src={pick.image} 
+                                    alt={pick.title} 
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center bg-white/10 text-white/40 text-xs text-center px-1">{pick.title}</div>
+                                )}
                               </button>
                             </TooltipTrigger>
                             <TooltipContent side="top" className="bg-background/90 backdrop-blur-sm border-border/40">
