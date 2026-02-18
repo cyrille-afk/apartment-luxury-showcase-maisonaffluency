@@ -927,6 +927,33 @@ const featuredDesigners = [
     philosophy: "Designing has become part of my lifestyle. I swear by soberly designed, functional and timeless objects—pieces that address ongoing concerns for sustainability and longevity.",
     curatorPicks: [
       {
+        image: leoAertsOutdoorChair,
+        title: "Twin Chair",
+        subtitle: "Solid Walnut",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Solid American walnut",
+        dimensions: "52 × 51 × 74 cm H"
+      },
+      {
+        image: leoAertsTwinChairOutdoor,
+        title: "Twin Chair",
+        subtitle: "Outdoor — Solid Walnut",
+        category: "Seating",
+        tags: ["Seating", "Chair", "Outdoor"],
+        materials: "Solid American walnut",
+        dimensions: "52 × 51 × 74 cm H"
+      },
+      {
+        image: leoAertsTwinChairOutdoor,
+        title: "Angelo M/R 130",
+        subtitle: "With Twin Chair",
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
+        materials: "Natural stone top & base",
+        dimensions: "Ø 130 cm"
+      },
+      {
         image: leoAertsAngeloMMacassar,
         title: "Angelo W",
         subtitle: "Dining Table — Macassar",
@@ -963,24 +990,6 @@ const featuredDesigners = [
         materials: "Glass doors • Steel & wood frame",
         dimensions: "Glass: 120 × 45 × 45 cm / Overall: 120 × 45 × 125 cm",
         description: "Also available in VHS/M 120-60 / VHS/M 150-45 / VHS/M 150-60"
-      },
-      {
-        image: leoAertsOutdoorChair,
-        title: "Twin Chair",
-        subtitle: "Solid Walnut",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "Solid American walnut",
-        dimensions: "52 × 51 × 74 cm H"
-      },
-      {
-        image: leoAertsTwinChairOutdoor,
-        title: "Twin Chair",
-        subtitle: "Outdoor — Solid Walnut",
-        category: "Seating",
-        tags: ["Seating", "Chair", "Outdoor"],
-        materials: "Solid American walnut",
-        dimensions: "52 × 51 × 74 cm H"
       },
     ],
     links: [
