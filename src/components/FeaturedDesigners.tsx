@@ -756,7 +756,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/garnier_linker/" },
+      { type: "Instagram", url: "https://www.instagram.com/garnieretlinker/" },
       { type: "Curators' Picks" },
     ],
   },
