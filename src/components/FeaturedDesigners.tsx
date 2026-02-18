@@ -716,7 +716,7 @@ const featuredDesigners = [
     curatorPicks: [
       {
         image: forestGiaconiaIhiLamp,
-        title: "IHI",
+        title: "IHI - Delcourt Collection",
         subtitle: "Floor Lamp",
         category: "Lighting",
         tags: ["Lighting", "Floor Lamp"],
