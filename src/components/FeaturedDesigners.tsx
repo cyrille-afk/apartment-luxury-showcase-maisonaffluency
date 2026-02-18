@@ -1341,6 +1341,31 @@ const featuredDesigners = [
       { type: "Curators' Picks" },
     ],
   },
+  {
+    id: "forest-giaconia",
+    name: "Forest & Giaconia",
+    specialty: "Contemporary Furniture & Lighting Design",
+    image: null,
+    biography: "Forest & Giaconia is a French design duo known for their refined approach to contemporary furniture and lighting. Their work combines natural materials — notably walnut wood — with innovative technical elements such as PMMA, resulting in pieces of sculptural clarity and tactile warmth. The IHI Floor Lamp exemplifies their ability to create objects that are simultaneously minimal and deeply considered.",
+    notableWorks: "IHI Floor Lamp (walnut & PMMA), Contemporary Furniture Collection",
+    philosophy: "We design objects that inhabit space with quiet presence — functional forms that reward close attention.",
+    curatorPicks: [
+      {
+        image: forestGiaconiaIhiLamp,
+        title: "IHI",
+        subtitle: "Floor Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Floor Lamp"],
+        materials: "Walnut wood • PMMA",
+        dimensions: "40 × 40 × H187 cm",
+        description: "The IHI Floor Lamp by Forest & Giaconia pairs the natural warmth of solid walnut with a PMMA diffuser to create a striking yet understated floor lamp. Its precise geometry and material contrast make it a standout piece in any interior."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/forest.giaconia/" },
+      { type: "Curators' Picks" },
+    ],
+  },
 ];
 
 const FeaturedDesigners = () => {
