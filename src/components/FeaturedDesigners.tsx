@@ -315,6 +315,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
   {
     id: "kerstens",
     name: "Andy Kerstens",
+    displayName: "Kerstens",
     specialty: "Architectural Furniture & Objects",
     image: kerstensImg,
     biography: "Kerstens is a multidisciplinary design studio founded by Andy Kerstens in Antwerp, Belgium, in 2015. A graduate of the University of Antwerp in interior architecture, Andy Kerstens combines a thorough architectural design language with a passion for craftsmanship and the atmospheric qualities of materials. The studio's work spans furniture, objects and interiors — always defined by aesthetic purity, refined proportion and true artisan quality.",
@@ -1996,7 +1997,7 @@ const FeaturedDesigners = () => {
                           </a>
                         )}
                         <h3 className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 group-hover:text-primary">
-                          {designer.name}
+                          {(designer as any).displayName || designer.name}
                         </h3>
                       </div>
                       <p className="text-sm md:text-base text-primary font-body italic transition-opacity duration-300 group-hover:opacity-80">
