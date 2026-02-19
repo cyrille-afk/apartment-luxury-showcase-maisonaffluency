@@ -176,13 +176,13 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [
       {
         image: adamCourtsVoidTable,
-        title: "Void Dining Table",
-        subtitle: "Natural Walnut & Steel",
+        title: "Tectra 2",
+        subtitle: "Gun Metal Base & Custom Stone Top",
         category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Natural walnut top • Brushed steel base",
-        dimensions: "L220 × W100 × H75 cm",
-        description: "The Void Dining Table pairs a generous walnut top with a precisely engineered brushed steel base, creating a piece of architectural clarity. A signature work that anchors any dining environment with quiet authority."
+        tags: ["Tables", "Coffee Table"],
+        materials: "Gun metal base • Custom stone top",
+        dimensions: "166.5W × 147.5D × 38H cm",
+        description: ""
       },
       {
         image: adamCourtsVoidChair,
