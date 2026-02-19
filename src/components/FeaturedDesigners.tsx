@@ -367,9 +367,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         title: "Rift CTS",
         subtitle: "White washed oak, brown travertine",
         category: "Tables",
-        tags: ["Tables", "Coffee Table"],
+        tags: ["Tables", "Open Edition + 2 AP"],
         materials: "",
-        dimensions: "108 × 108 × H 28 cm — 399 kg",
+        dimensions: "",
         description: ""
       },
       {
