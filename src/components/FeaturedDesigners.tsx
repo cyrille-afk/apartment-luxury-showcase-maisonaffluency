@@ -254,7 +254,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/okha_design/" },
+      { type: "Instagram", url: "https://www.instagram.com/__okha/" },
       { type: "Curators' Picks" },
     ],
   },
