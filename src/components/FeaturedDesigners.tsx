@@ -347,7 +347,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         title: "Mono CLS",
         subtitle: "Grand Antique Marble",
         category: "Tables",
-        tags: ["Tables", "Console"],
+        tags: ["Tables", "Console", "Open edition + 1 AP"],
         materials: "",
         dimensions: "160 × 42 × H 80 cm — 383 kg",
         description: ""
