@@ -324,8 +324,8 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [
       {
         image: kertensPick1,
-        title: "",
-        subtitle: "",
+        title: "Mono Collection",
+        subtitle: "Available in White Onyx, Grand Antique Marble, Muschel Type 'S' and Brown Travertine",
         category: "Tables",
         tags: ["Tables"],
         materials: "",
