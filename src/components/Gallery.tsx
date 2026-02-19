@@ -286,7 +286,7 @@ const Gallery = () => {
                 </p>
               </motion.div>
 
-              <div className={`grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3 ${sectionIndex === 0 ? 'grid-cols-3 gap-2' : ''}`}>
+              <div className={sectionIndex === 0 ? 'grid grid-cols-3 gap-2 md:gap-8 md:grid-cols-2 lg:grid-cols-3' : 'grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3'}>
                 {section.items.map((item, index) => {
                   const itemKey = `${sectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
