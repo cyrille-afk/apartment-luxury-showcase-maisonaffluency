@@ -186,13 +186,13 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: adamCourtsVoidChair,
-        title: "Void Dining Chair",
-        subtitle: "Walnut Frame, Leather Seat",
+        title: "BNVO",
+        subtitle: "Carbon Ash Frame & Custom Fabric Upholstery",
         category: "Seating",
         tags: ["Seating", "Chair"],
-        materials: "Natural walnut frame • Full-grain leather seat",
-        dimensions: "W52 × D56 × H80 cm",
-        description: "The Void Dining Chair distils Okha's design philosophy into a single object: minimal form, maximal craft. Its natural walnut frame and leather seat create an understated elegance that rewards daily use."
+        materials: "",
+        dimensions: "65.5W × 58D × 79H cm · Seat Height: 47 cm",
+        description: ""
       },
       {
         image: adamCourtsGeometerChair,
