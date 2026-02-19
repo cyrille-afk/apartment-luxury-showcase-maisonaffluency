@@ -644,7 +644,8 @@ function AlphaStrip({
               style={bg ? {
                 backgroundImage: `url(${bg})`,
                 backgroundSize: "cover",
-                backgroundPosition: "center",
+                backgroundPosition: "center top",
+                minHeight: "220px",
               } : {}}
             >
               <div className={`absolute inset-0 transition-colors duration-300 ${hasBg ? "bg-card/80 group-hover:bg-card/70" : "bg-card/50 group-hover:bg-card/80"}`} />
