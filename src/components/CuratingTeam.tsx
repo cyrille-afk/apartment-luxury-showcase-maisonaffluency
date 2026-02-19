@@ -150,9 +150,9 @@ const CuratingTeam = () => {
       >
         <button
           onClick={() => {
-            const gallerySection = document.getElementById("gallery");
-            if (gallerySection) {
-              gallerySection.scrollIntoView({ behavior: "smooth" });
+            const overviewSection = document.getElementById("overview");
+            if (overviewSection) {
+              overviewSection.scrollIntoView({ behavior: "smooth" });
             }
           }}
           className="group inline-flex items-center gap-4 text-muted-foreground hover:text-primary transition-all duration-300 font-body text-sm"
