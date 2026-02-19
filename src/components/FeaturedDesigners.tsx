@@ -344,12 +344,12 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: kertensPick3,
-        title: "",
-        subtitle: "",
+        title: "Mono CLS",
+        subtitle: "Grand Antique Marble",
         category: "Tables",
-        tags: ["Tables"],
+        tags: ["Tables", "Console"],
         materials: "",
-        dimensions: "",
+        dimensions: "160 × 42 × H 80 cm — 383 kg",
         description: ""
       },
       {
