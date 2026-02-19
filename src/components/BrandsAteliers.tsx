@@ -232,6 +232,17 @@ const partnerBrands = [
     instagram: "https://instagram.com/entrelacs_creation",
   },
   {
+    id: "entrelacs-creation-kheops",
+    name: "Entrelacs Création",
+    category: "Lighting",
+    subcategory: "Wall Lights",
+    origin: "France",
+    description: "French atelier renowned for bespoke upholstery and furniture, combining traditional savoir-faire with contemporary design to create exceptional seating pieces.",
+    featured: "Kheops Bronze & Alabaster Wall Light",
+    instagram: "https://instagram.com/entrelacs_creation",
+    galleryIndex: 15, // A Workspace of Distinction - Home Office with a View
+  },
+  {
     id: "damien-langlois-meurinne",
     name: "Damien Langlois Meurinne Studio",
     category: "Tables",
