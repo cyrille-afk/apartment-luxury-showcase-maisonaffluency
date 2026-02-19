@@ -4,6 +4,7 @@ import { useRef, useState, useMemo } from "react";
 import { Search, X, Instagram, ExternalLink, SlidersHorizontal } from "lucide-react";
 import alexanderLamontBg from "@/assets/designers/alexander-lamont-bg.png";
 import leoAertsBg from "@/assets/designers/leo-aerts-alinea-bg.jpg";
+import apparatusBg from "@/assets/designers/apparatus-studio-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -835,9 +836,13 @@ const BrandsAteliers = () => {
                 backgroundImage: `url(${leoAertsBg})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
+              } : brand.name === "Apparatus Studio" ? {
+                backgroundImage: `url(${apparatusBg})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
               } : {}}
             >
-              <div className={`absolute inset-0 transition-colors duration-300 ${brand.name === "Alexander Lamont" || brand.name === "Alinea Design Objects" ? "bg-card/80 group-hover:bg-card/70" : "bg-card/50 group-hover:bg-card/80"}`} />
+              <div className={`absolute inset-0 transition-colors duration-300 ${brand.name === "Alexander Lamont" || brand.name === "Alinea Design Objects" || brand.name === "Apparatus Studio" ? "bg-card/80 group-hover:bg-card/70" : "bg-card/50 group-hover:bg-card/80"}`} />
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2">
