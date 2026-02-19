@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState, useMemo, useEffect } from "react";
+import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -132,6 +132,23 @@ const Gallery = () => {
   const [hasTapped, setHasTapped] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
+  // Track active dot per mobile scroll strip (one index per section)
+  const [activeScrollIndices, setActiveScrollIndices] = useState<number[]>(
+    galleryExperiences.map(() => 0)
+  );
+  const scrollStripRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const handleStripScroll = useCallback((sectionIndex: number) => {
+    const strip = scrollStripRefs.current[sectionIndex];
+    if (!strip) return;
+    const cardWidth = strip.scrollWidth / galleryExperiences[sectionIndex].items.length;
+    const index = Math.round(strip.scrollLeft / cardWidth);
+    setActiveScrollIndices(prev => {
+      const next = [...prev];
+      next[sectionIndex] = index;
+      return next;
+    });
+  }, []);
 
   // Minimum swipe distance required (in px)
   const minSwipeDistance = 50;
@@ -287,7 +304,11 @@ const Gallery = () => {
               </motion.div>
 
               {/* Mobile: horizontal scroll strip */}
-              <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 md:hidden scrollbar-hide -mx-4 px-4">
+              <div
+                ref={el => { scrollStripRefs.current[sectionIndex] = el; }}
+                onScroll={() => handleStripScroll(sectionIndex)}
+                className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 md:hidden scrollbar-hide -mx-4 px-4"
+              >
                 {section.items.map((item, index) => {
                   const itemKey = `${sectionIndex}-${index}`;
                   return (
@@ -311,6 +332,27 @@ const Gallery = () => {
                     </motion.div>
                   );
                 })}
+              </div>
+
+              {/* Dot indicators — mobile only */}
+              <div className="flex justify-center gap-2 mt-3 md:hidden">
+                {section.items.map((_, dotIndex) => (
+                  <button
+                    key={dotIndex}
+                    aria-label={`Go to photo ${dotIndex + 1}`}
+                    onClick={() => {
+                      const strip = scrollStripRefs.current[sectionIndex];
+                      if (!strip) return;
+                      const cardWidth = strip.scrollWidth / section.items.length;
+                      strip.scrollTo({ left: cardWidth * dotIndex, behavior: 'smooth' });
+                    }}
+                    className={`rounded-full transition-all duration-300 ${
+                      activeScrollIndices[sectionIndex] === dotIndex
+                        ? 'w-4 h-2 bg-primary'
+                        : 'w-2 h-2 bg-primary/30'
+                    }`}
+                  />
+                ))}
               </div>
 
               {/* Desktop: regular grid */}
