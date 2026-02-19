@@ -217,13 +217,13 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: adamCourtsSideboard,
-        title: "OVD Server",
-        subtitle: "Natural Ash Veneer, Stone Top",
+        title: "OVD",
+        subtitle: "Natural Ash Veneer",
         category: "Storage",
         tags: ["Storage", "Sideboard"],
-        materials: "Natural ash veneer • Stone top",
-        dimensions: "L180 × D45 × H80 cm",
-        description: "The OVD Server brings Okha's mastery of joinery and material to storage design — its natural ash veneer case topped with cool stone, offering a surface as beautiful as it is functional."
+        materials: "",
+        dimensions: "140W × 46.6D × 70H cm",
+        description: ""
       },
       {
         image: adamCourtsGeometerBench,
