@@ -374,7 +374,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: kertensPick6,
-        title: "YOMA CLW",
+        title: "Yoma CLW",
         subtitle: "Bleach Oak, Patinated Bronze, Brown Travertine",
         category: "Storage",
         tags: ["Storage", "Cabinet", "limited edition of 20 + 1 CP + 1 AP"],
@@ -384,7 +384,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: kertensPick7,
-        title: "YOMA CLW (details)",
+        title: "Yoma CLW (Details)",
         subtitle: "Bleach Oak, Patinated Bronze, Brown Travertine",
         category: "Storage",
         tags: ["Storage", "Cabinet", "limited edition of 20 + 1 CP + 1 AP"],
