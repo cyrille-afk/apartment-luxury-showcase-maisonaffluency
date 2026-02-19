@@ -15,6 +15,7 @@ import erstensBg from "@/assets/designers/kerstens-bg.jpg";
 import ccTapisBg from "@/assets/designers/cc-tapis-bg.jpg";
 import cristallerieSaintLouisBg from "@/assets/designers/cristallerie-saint-louis-bg.jpg";
 import delcourtBg from "@/assets/designers/delcourt-bg.jpg";
+import entrelacsBg from "@/assets/designers/entrelacs-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -579,6 +580,7 @@ const brandBgMap: Record<string, string> = {
   "CC-Tapis": ccTapisBg,
   "Cristallerie Saint-Louis": cristallerieSaintLouisBg,
   "Delcourt Collection": delcourtBg,
+  "Entrelacs Creation": entrelacsBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
