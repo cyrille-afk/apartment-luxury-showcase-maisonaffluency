@@ -284,7 +284,7 @@ const Gallery = () => {
             </h2>
           </motion.div>
 
-          {galleryExperiences.map((section, sectionIndex) => <div key={section.experience} id={sectionIndex === 0 ? "sociable-environment" : undefined} className="mb-6 md:mb-10">
+          {galleryExperiences.map((section, sectionIndex) => <div key={section.experience} id={sectionIndex === 0 ? "sociable-environment" : undefined} className={`mb-6 md:mb-10${sectionIndex === 0 ? " scroll-mt-24" : ""}`}>
               <motion.div initial={{
             opacity: 0,
             y: 20
