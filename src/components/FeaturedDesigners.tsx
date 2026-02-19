@@ -211,9 +211,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         subtitle: "With Ottoman",
         category: "Seating",
         tags: ["Seating", "Sofa"],
-        materials: "Solid timber frame • Upholstered cushions • Optional ottoman",
+        materials: "",
         dimensions: "L240 × D95 × H72 cm",
-        description: "The Repose Sofa is Okha's most expansive seating statement — generous proportions and immaculate upholstery combine to create a centrepiece for any living environment."
+        description: ""
       },
       {
         image: adamCourtsSideboard,
