@@ -384,7 +384,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: kertensPick7,
-        title: "YOMA CLW",
+        title: "YOMA CLW (details)",
         subtitle: "Bleach Oak, Patinated Bronze, Brown Travertine",
         category: "",
         tags: [],
