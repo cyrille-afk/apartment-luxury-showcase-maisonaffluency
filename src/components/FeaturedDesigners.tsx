@@ -364,12 +364,12 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: kertensPick5,
-        title: "",
-        subtitle: "",
+        title: "CTS low table",
+        subtitle: "White washed oak, brown travertine",
         category: "",
         tags: [],
         materials: "",
-        dimensions: "",
+        dimensions: "108 × 108 × H 28 cm — 399 kg",
         description: ""
       },
       {
