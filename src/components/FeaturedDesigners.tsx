@@ -2190,7 +2190,7 @@ const FeaturedDesigners = () => {
                   </button>
 
                   {/* Image container */}
-                  <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-24'}`}>
+                  <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
                     <div className="relative">
                       {!isZoomed && ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category || ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags?.length > 0)) && (
                         <div className="text-left mb-2 flex flex-wrap gap-1.5">
@@ -2265,9 +2265,30 @@ const FeaturedDesigners = () => {
                               {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).description}
                             </p>
                           )}
+                         </div>
+                       )}
+
+                      {/* Thumbnail strip — inline, above contact line */}
+                      {curatorPicksDesigner.curatorPicks.length > 1 && (
+                        <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
+                          {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => { setCuratorPickIndex(idx); setIsZoomed(false); }}
+                              aria-label={`View ${pick.title}`}
+                              className={`flex-none relative w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden transition-all duration-300 ${
+                                curatorPickIndex === idx
+                                  ? 'ring-2 ring-white scale-110 opacity-100'
+                                  : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'
+                              }`}
+                            >
+                              <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" />
+                            </button>
+                          ))}
                         </div>
                       )}
-                      <p className="mt-8 text-xs text-white font-body italic">
+
+                      <p className="mt-6 text-xs text-white font-body italic">
                         For further details, please contact{" "}
                         <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/80 transition-colors">
                           concierge@myaffluency.com
@@ -2275,28 +2296,6 @@ const FeaturedDesigners = () => {
                       </p>
                     </div>
                   </div>
-
-                  {/* Thumbnail strip — always visible at the bottom */}
-                  {curatorPicksDesigner.curatorPicks.length > 1 && !isZoomed && (
-                    <div className="absolute bottom-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-md px-4 py-3">
-                      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
-                        {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => { setCuratorPickIndex(idx); setIsZoomed(false); }}
-                            aria-label={`View ${pick.title}`}
-                            className={`flex-none relative w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden transition-all duration-300 ${
-                              curatorPickIndex === idx
-                                ? 'ring-2 ring-white scale-110 opacity-100'
-                                : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'
-                            }`}
-                          >
-                            <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="flex items-center justify-center w-full h-full">
