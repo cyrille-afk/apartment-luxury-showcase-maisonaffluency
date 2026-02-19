@@ -111,15 +111,15 @@ const galleryExperiences = [{
   items: [{
     image: homeOfficeDeskImage,
     title: "A Workspace of Distinction",
-    description: "Coming soon"
+    description: "Bernt Petersen 4-Drawer Executive Desk"
   }, {
     image: homeOfficeDesk2Image,
     title: "Refined Details",
-    description: "Coming soon"
+    description: "Bernt Petersen 4-Drawer Executive Desk"
   }, {
     image: homeOffice3Image,
     title: "Light & Focus",
-    description: "Coming soon"
+    description: "Bernt Petersen 4-Drawer Executive Desk"
   }]
 }, {
   experience: "The Details Make the Design",
