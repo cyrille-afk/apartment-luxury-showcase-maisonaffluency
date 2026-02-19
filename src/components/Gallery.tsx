@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import bedroomImage from "@/assets/master-suite.jpg";
@@ -326,6 +326,10 @@ const Gallery = () => {
                         className="h-full w-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      {/* Eye icon — pulsing to signal tap-to-expand */}
+                      <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm p-1.5 rounded-full animate-pulse-fade">
+                        <Eye className="w-3.5 h-3.5 text-white" />
+                      </div>
                       <p className="absolute bottom-3 left-3 right-3 text-white text-xs font-body leading-snug line-clamp-2">
                         {item.title}
                       </p>
