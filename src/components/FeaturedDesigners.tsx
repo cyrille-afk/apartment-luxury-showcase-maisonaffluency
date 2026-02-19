@@ -2226,9 +2226,9 @@ const FeaturedDesigners = () => {
                         lastTapRef.current = now;
                       }}
                     >
-                      {!isZoomed && (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category && (
+                      {!isZoomed && ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category || ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags?.length > 0)) && (
                         <div className="text-left mb-2 flex flex-wrap gap-1.5">
-                          {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags || [(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category]).map((tag: string, i: number) => (
+                          {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags?.length > 0 ? (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags : [(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category]).map((tag: string, i: number) => (
                             <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
                               {tag}
                             </span>
