@@ -651,8 +651,9 @@ function AlphaStrip({
               className="group flex-none w-[80vw] md:w-[340px] snap-start border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden p-5 md:p-6"
               style={bg ? {
                 backgroundImage: `url(${bg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center top",
+                backgroundSize: brand.name === "Baleri Italia" ? "80%" : "cover",
+                backgroundPosition: brand.name === "Baleri Italia" ? "center 20%" : "center top",
+                backgroundRepeat: "no-repeat",
                 minHeight: "220px",
               } : {}}
             >
