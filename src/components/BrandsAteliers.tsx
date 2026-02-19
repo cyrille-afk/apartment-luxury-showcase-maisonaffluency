@@ -156,6 +156,7 @@ const partnerBrands = [
   },
   {
     id: "bruno-de-maistre",
+    name: "Bruno de Maistre",
     category: "Tables",
     subcategory: "Desks",
     origin: "France",
