@@ -827,9 +827,9 @@ const BrandsAteliers = () => {
             <motion.div
               key={brand.name}
               id={`brand-${brand.name.replace(/\s+/g, '-').toLowerCase()}`}
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 60 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: brandIndex * 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
+              transition={{ duration: 0.6, delay: brandIndex * 0.12, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="group p-5 md:p-6 border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden"
               style={brand.name === "Alexander Lamont" ? {
                 backgroundImage: `url(${alexanderLamontBg})`,
