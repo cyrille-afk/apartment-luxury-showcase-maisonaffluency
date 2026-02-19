@@ -150,9 +150,9 @@ const CuratingTeam = () => {
       >
         <button
           onClick={() => {
-            const overviewSection = document.getElementById("overview");
-            if (overviewSection) {
-              overviewSection.scrollIntoView({ behavior: "smooth" });
+            const gallerySection = document.getElementById("gallery");
+            if (gallerySection) {
+              gallerySection.scrollIntoView({ behavior: "smooth" });
             }
           }}
           className="group inline-flex items-center gap-4 text-muted-foreground hover:text-primary transition-all duration-300 font-body text-sm"
@@ -160,7 +160,7 @@ const CuratingTeam = () => {
           <span className="w-12 md:w-20 h-px bg-border group-hover:bg-primary/50 transition-colors duration-300" />
           <span className="flex items-center gap-2">
             <ArrowUp className="h-4 w-4 group-hover:-translate-y-0.5 transition-transform duration-300" />
-            <span>Back to Overview</span>
+            <span>Back to Gallery</span>
           </span>
           <span className="w-12 md:w-20 h-px bg-border group-hover:bg-primary/50 transition-colors duration-300" />
         </button>
