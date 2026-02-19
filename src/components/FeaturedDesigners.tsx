@@ -334,12 +334,12 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: kertensPick2,
-        title: "",
-        subtitle: "",
+        title: "MONO STS",
+        subtitle: "Brown Travertine",
         category: "Tables",
-        tags: ["Tables"],
-        materials: "",
-        dimensions: "",
+        tags: ["Tables", "Side Table", "open edition + 1 CP + 3 AP"],
+        materials: "Available in White Onyx, Grand Antique Marble, Muschel Type 'S'",
+        dimensions: "42 × 32 × H 44 cm — 75 kg",
         description: ""
       },
       {
