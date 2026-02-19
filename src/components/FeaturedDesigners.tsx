@@ -180,7 +180,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         subtitle: "Gun Metal Base & Custom Stone Top",
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
-        materials: "Gun metal base • Custom stone top",
+        materials: "",
         dimensions: "166.5W × 147.5D × 38H cm",
         description: ""
       },
