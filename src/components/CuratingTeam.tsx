@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowUp, Search, Linkedin } from "lucide-react";
+import { Search, Linkedin } from "lucide-react";
 import cyrilleDelvalImg from "@/assets/team/cyrille-delval.jpg";
 import elsaLemarignierImg from "@/assets/team/elsa-lemarignier.jpg";
 
@@ -146,7 +146,7 @@ const CuratingTeam = () => {
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : { opacity: 0 }}
         transition={{ duration: 0.6, delay: 0.5 }}
-        className="mt-12 text-center"
+        className="mt-14 text-center"
       >
         <button
           onClick={() => {
@@ -155,14 +155,16 @@ const CuratingTeam = () => {
               overviewSection.scrollIntoView({ behavior: "smooth" });
             }
           }}
-          className="group inline-flex items-center gap-4 text-muted-foreground hover:text-primary transition-all duration-300 font-body text-sm"
+          className="flex flex-col items-center gap-2 cursor-pointer group mx-auto"
         >
-          <span className="w-12 md:w-20 h-px bg-border group-hover:bg-primary/50 transition-colors duration-300" />
-          <span className="flex items-center gap-2">
-            <ArrowUp className="h-4 w-4 group-hover:-translate-y-0.5 transition-transform duration-300" />
-            <span>Back to Gallery</span>
+          <motion.div
+            className="h-10 w-[1px] bg-gradient-to-t from-primary/50 to-transparent"
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <span className="font-body text-xs uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors duration-300">
+            Back to Gallery
           </span>
-          <span className="w-12 md:w-20 h-px bg-border group-hover:bg-primary/50 transition-colors duration-300" />
         </button>
       </motion.div>
     </motion.div>
