@@ -286,7 +286,7 @@ const Gallery = () => {
                 </p>
               </motion.div>
 
-              <div className="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <div className={`grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3 ${sectionIndex === 0 ? 'grid-cols-3 gap-2' : ''}`}>
                 {section.items.map((item, index) => {
                   const itemKey = `${sectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
@@ -301,7 +301,7 @@ const Gallery = () => {
                       className="group cursor-pointer"
                     >
                       <div 
-                        className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm"
+                        className={`relative mb-4 md:mb-6 overflow-hidden rounded-sm ${sectionIndex === 0 ? 'aspect-[2/3] md:aspect-[4/5]' : 'aspect-[4/5]'}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           setHasTapped(true);
@@ -310,8 +310,8 @@ const Gallery = () => {
                       >
                         <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                        {/* Mobile tap indicator - always visible on mobile with pulse animation */}
-                        <div className="absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground p-2 rounded-full flex items-center justify-center shadow-md animate-pulse-fade">
+                        {/* Mobile tap indicator - hidden in 3-col layout, visible elsewhere on mobile */}
+                        <div className={`absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground p-2 rounded-full flex items-center justify-center shadow-md animate-pulse-fade ${sectionIndex === 0 ? 'hidden' : ''}`}>
                           <Eye className="w-4 h-4" />
                         </div>
                         {/* Expand/View indicator - desktop only */}
