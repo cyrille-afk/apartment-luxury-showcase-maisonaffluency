@@ -5,6 +5,7 @@ import { Search, X, Instagram, ExternalLink, SlidersHorizontal } from "lucide-re
 import alexanderLamontBg from "@/assets/designers/alexander-lamont-bg.png";
 import leoAertsBg from "@/assets/designers/leo-aerts-alinea-bg.jpg";
 import apparatusBg from "@/assets/designers/apparatus-studio-bg.jpg";
+import atelierFevrierBg from "@/assets/designers/atelier-fevrier-bg.jpg";
 import atelierDemichelisBg from "@/assets/designers/atelier-demichelis-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -845,9 +846,13 @@ const BrandsAteliers = () => {
                 backgroundImage: `url(${atelierDemichelisBg})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
+              } : brand.name === "Atelier Février" ? {
+                backgroundImage: `url(${atelierFevrierBg})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
               } : {}}
             >
-              <div className={`absolute inset-0 transition-colors duration-300 ${["Alexander Lamont", "Alinea Design Objects", "Apparatus Studio", "Atelier DeMichelis"].includes(brand.name) ? "bg-card/80 group-hover:bg-card/70" : "bg-card/50 group-hover:bg-card/80"}`} />
+              <div className={`absolute inset-0 transition-colors duration-300 ${["Alexander Lamont", "Alinea Design Objects", "Apparatus Studio", "Atelier DeMichelis", "Atelier Février"].includes(brand.name) ? "bg-card/80 group-hover:bg-card/70" : "bg-card/50 group-hover:bg-card/80"}`} />
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2">
