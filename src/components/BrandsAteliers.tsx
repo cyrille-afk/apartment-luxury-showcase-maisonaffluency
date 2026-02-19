@@ -189,6 +189,16 @@ const partnerBrands = [
     galleryIndex: 15, // A Workspace of Distinction - Home Office with a View
   },
   {
+    id: "de-la-espada",
+    name: "De La Espada",
+    category: "Tables",
+    subcategory: "Tables",
+    origin: "United Kingdom",
+    description: "Anglo-Portuguese furniture studio creating refined contemporary pieces rooted in the craft traditions of Portugal, combining natural materials with precise joinery and enduring form.",
+    instagram: "https://www.instagram.com/delaespada/",
+  },
+  {
+    id: "delcourt",
     name: "Delcourt Collection",
     category: "Seating",
     subcategory: "Armchairs",
