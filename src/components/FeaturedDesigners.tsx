@@ -377,7 +377,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         title: "YOMA CLW",
         subtitle: "Bleach Oak, Patinated Bronze, Brown Travertine",
         category: "",
-        tags: [],
+        tags: ["limited edition of 20 + 1 CP + 1 AP"],
         materials: "",
         dimensions: "255 × 70 × H 100 cm — 810 kg",
         description: ""
@@ -387,7 +387,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         title: "YOMA CLW (details)",
         subtitle: "Bleach Oak, Patinated Bronze, Brown Travertine",
         category: "",
-        tags: [],
+        tags: ["limited edition of 20 + 1 CP + 1 AP"],
         materials: "",
         dimensions: "255 × 70 × H 100 cm — 810 kg",
         description: ""
