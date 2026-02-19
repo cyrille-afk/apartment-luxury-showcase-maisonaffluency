@@ -79,12 +79,15 @@ const Hero = () => {
       duration: 1,
       delay: 1.2
     }} className="absolute bottom-44 md:bottom-8 left-1/2 z-10 -translate-x-1/2">
-        <div className="flex flex-col items-center gap-2">
-          <span className="font-body text-xs uppercase tracking-widest text-cream/60">
+        <button
+          onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
+          className="flex flex-col items-center gap-2 cursor-pointer group"
+        >
+          <span className="font-body text-xs uppercase tracking-widest text-cream/60 group-hover:text-cream/90 transition-colors">
             Scroll to Explore
           </span>
           <div className="h-12 w-[1px] bg-gradient-to-b from-cream/60 to-transparent" />
-        </div>
+        </button>
       </motion.div>
     </section>;
 };
