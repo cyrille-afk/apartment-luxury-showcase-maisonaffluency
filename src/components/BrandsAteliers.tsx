@@ -154,7 +154,7 @@ const partnerBrands = [
     galleryIndex: 15, // A Workspace of Distinction - Home Office with a View
   },
   {
-    name: "Bruno de Maistre",
+    id: "bruno-de-maistre",
     category: "Tables",
     subcategory: "Desks",
     origin: "France",
