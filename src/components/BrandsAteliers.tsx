@@ -1006,7 +1006,10 @@ const BrandsAteliers = () => {
             </motion.div>
           )}
           {/* Alphabet jump bar — large serif display */}
-          <div className="flex flex-wrap gap-x-2 gap-y-1 mb-6">
+          <div
+            className="flex md:flex-wrap gap-x-3 md:gap-x-2 gap-y-1 mb-6 overflow-x-auto md:overflow-x-visible pb-1 md:pb-0"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
             {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
               const available = alphaGroups.some(([l]) => l === letter);
               return (
@@ -1017,7 +1020,7 @@ const BrandsAteliers = () => {
                     const el = document.getElementById(`alpha-group-${letter}`);
                     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
-                  className={`font-serif text-base md:text-lg leading-none transition-all duration-200 ${
+                  className={`flex-none font-serif text-base md:text-lg leading-none transition-all duration-200 ${
                     available
                       ? "text-primary/70 hover:text-primary hover:scale-110 cursor-pointer"
                       : "text-muted-foreground/15 cursor-default"
