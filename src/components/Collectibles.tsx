@@ -777,7 +777,7 @@ const Collectibles = () => {
               )}
 
               {/* Image container */}
-              <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-24'}`}>
+              <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
                 <div 
                   className={`relative overflow-auto transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}
                   onClick={handleDoubleTap}
@@ -835,7 +835,27 @@ const Collectibles = () => {
                       )}
                     </div>
                   )}
-                  <p className="mt-12 text-xs text-white font-body italic">
+                  {/* Thumbnail strip — inline, above contact line */}
+                  {curatorPicksDesigner.curatorPicks.length > 1 && (
+                    <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
+                      {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => { setCuratorPickIndex(idx); setIsZoomed(false); }}
+                          aria-label={`View ${pick.title}`}
+                          className={`flex-none relative w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden transition-all duration-300 ${
+                            curatorPickIndex === idx
+                              ? 'ring-2 ring-white scale-110 opacity-100'
+                              : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'
+                          }`}
+                        >
+                          <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  <p className="mt-6 text-xs text-white font-body italic">
                     For further details, please contact{" "}
                     <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/80 transition-colors">
                       concierge@myaffluency.com
@@ -853,40 +873,6 @@ const Collectibles = () => {
                 >
                   <ChevronRight className="h-8 w-8 text-white" />
                 </button>
-              )}
-
-              {/* Thumbnail navigation */}
-              {curatorPicksDesigner.curatorPicks.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                  <TooltipProvider>
-                    {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
-                      <Tooltip key={idx}>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => {
-                              setCuratorPickIndex(idx);
-                              setIsZoomed(false);
-                            }}
-                            className={`w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden transition-all duration-300 ${
-                              idx === curatorPickIndex 
-                                ? 'ring-2 ring-white scale-105' 
-                                : 'ring-1 ring-white/30 opacity-60 hover:opacity-100'
-                            }`}
-                          >
-                            <img
-                              src={pick.image}
-                              alt={pick.title}
-                              className="w-full h-full object-cover"
-                            />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">{pick.title}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    ))}
-                  </TooltipProvider>
-                </div>
               )}
             </div>
           )}
