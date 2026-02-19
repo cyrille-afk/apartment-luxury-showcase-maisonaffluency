@@ -180,7 +180,7 @@ const partnerBrands = [
     subcategory: "Sofas & Loveseats",
     origin: "United Kingdom",
     description: "London-based house founded in 2014, producing classic 20th century Scandinavian furniture for the modern home — celebrating the golden era of Scandinavian Modern design from 1930 to 1970.",
-    featured: "Bespoke Upholstered Collection",
+    
     instagram: "https://www.instagram.com/dagmarlondon/",
   },
   {
