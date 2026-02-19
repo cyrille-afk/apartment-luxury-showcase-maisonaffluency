@@ -354,7 +354,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: kertensPick4,
-        title: "CTW",
+        title: "Rift CTW",
         subtitle: "Ebonised oak",
         category: "Tables",
         tags: ["Tables", "Coffee Table", "open edition + 1 AP"],
