@@ -615,7 +615,7 @@ const brandBgMap: Record<string, string> = {
   "Celso de Lemos": celsoDeLemosBg,
   "Baleri Italia": baleriItaliaBg,
   "De La Espada": delaEspadaBg,
-  "Damien Langlois Meurinne": damienLangloisMeurinneBg,
+  "Damien Langlois Meurinne Studio": damienLangloisMeurinneBg,
   "Dagmar London": berntPetersenBg,
   "Kerstens": erstensBg,
   "CC-Tapis": ccTapisBg,
