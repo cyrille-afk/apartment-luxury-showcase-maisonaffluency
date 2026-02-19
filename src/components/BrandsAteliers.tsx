@@ -15,6 +15,7 @@ import erstensBg from "@/assets/designers/kerstens-bg.jpg";
 import ccTapisBg from "@/assets/designers/cc-tapis-bg.jpg";
 import cristallerieSaintLouisBg from "@/assets/designers/cristallerie-saint-louis-bg.jpg";
 import delcourtBg from "@/assets/designers/delcourt-bg.jpg";
+import ecartParisBg from "@/assets/designers/ecart-paris-bg.jpg";
 import entrelacsBg from "@/assets/designers/entrelacs-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -580,6 +581,7 @@ const brandBgMap: Record<string, string> = {
   "CC-Tapis": ccTapisBg,
   "Cristallerie Saint-Louis": cristallerieSaintLouisBg,
   "Delcourt Collection": delcourtBg,
+  "Ecart Paris": ecartParisBg,
   "Entrelacs Création": entrelacsBg,
 };
 
