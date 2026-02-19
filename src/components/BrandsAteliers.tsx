@@ -1004,7 +1004,7 @@ const BrandsAteliers = () => {
                     const el = document.getElementById(`alpha-group-${letter}`);
                     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
-                  className={`font-serif text-2xl md:text-3xl leading-none transition-all duration-200 ${
+                  className={`font-serif text-base md:text-lg leading-none transition-all duration-200 ${
                     available
                       ? "text-primary/70 hover:text-primary hover:scale-110 cursor-pointer"
                       : "text-muted-foreground/15 cursor-default"
