@@ -334,7 +334,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: kertensPick2,
-        title: "MONO STS",
+        title: "Mono STS",
         subtitle: "Brown Travertine",
         category: "Tables",
         tags: ["Tables", "Side Table", "open edition + 1 CP + 3 AP"],
