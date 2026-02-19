@@ -741,7 +741,7 @@ function AlphaStrip({
                   {brand.description}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                <div className="flex flex-wrap items-center justify-start gap-x-1 gap-y-1">
                   <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
                   {brand.featuredItems.map((item, itemIndex) => (
                     <span key={itemIndex} className="flex items-center">
