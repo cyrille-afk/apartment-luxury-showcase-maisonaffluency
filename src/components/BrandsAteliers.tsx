@@ -150,7 +150,7 @@ const partnerBrands = [
     subcategory: "Desks",
     origin: "Denmark",
     description: "Danish furniture designer celebrated for his refined mid-century modernist sensibility, creating elegant and functional pieces of enduring quality.",
-    featured: "4-Drawer Executive Desk",
+    featured: "4-Drawer Executive Desk, c1960s",
     galleryIndex: 15, // A Workspace of Distinction - Home Office with a View
   },
   {
