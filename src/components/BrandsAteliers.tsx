@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { Search, X, Instagram, ExternalLink, SlidersHorizontal } from "lucide-react";
 import alexanderLamontBg from "@/assets/designers/alexander-lamont-bg.png";
 import leoAertsBg from "@/assets/designers/leo-aerts-alinea-bg.jpg";
@@ -558,6 +558,189 @@ const partnerBrands = [
   },
 ];
 
+// Background image map
+const brandBgMap: Record<string, string> = {
+  "Alexander Lamont": alexanderLamontBg,
+  "Alinea Design Objects": leoAertsBg,
+  "Apparatus Studio": apparatusBg,
+  "Atelier DeMichelis": atelierDemichelisBg,
+  "Atelier Février": atelierFevrierBg,
+  "Babled Studio": emmanuelBabledBg,
+  "Bruno de Maistre": brunoDeMaistreBg,
+};
+
+// ─── Horizontal scroll strip for one letter group ───────────────────────────
+type ConsolidatedBrand = {
+  name: string;
+  origin: string;
+  description: string;
+  instagram: string;
+  categories: string[];
+  featuredItems: Array<{ featured?: string; galleryIndex?: number; category: string }>;
+};
+
+function AlphaStrip({
+  letter,
+  brands,
+  isInView,
+  scrollToGallery,
+}: {
+  letter: string;
+  brands: ConsolidatedBrand[];
+  isInView: boolean;
+  scrollToGallery: (idx: number, name: string) => void;
+}) {
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const el = stripRef.current;
+    if (!el) return;
+    const cardWidth = el.scrollWidth / brands.length;
+    const idx = Math.round(el.scrollLeft / cardWidth);
+    setActiveIndex(Math.min(idx, brands.length - 1));
+  }, [brands.length]);
+
+  const scrollTo = useCallback((idx: number) => {
+    const el = stripRef.current;
+    if (!el) return;
+    const cardWidth = el.scrollWidth / brands.length;
+    el.scrollTo({ left: cardWidth * idx, behavior: "smooth" });
+  }, [brands.length]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5 }}
+      className="mb-8"
+    >
+      {/* Letter heading */}
+      <div className="flex items-center gap-3 mb-3 px-1">
+        <span className="font-serif text-2xl text-primary/60">{letter}</span>
+        <div className="flex-1 h-px bg-border/30" />
+        <span className="text-[10px] text-muted-foreground/40 tracking-widest font-body uppercase">
+          {brands.length} {brands.length === 1 ? "brand" : "brands"}
+        </span>
+      </div>
+
+      {/* Scrollable strip */}
+      <div
+        ref={stripRef}
+        onScroll={handleScroll}
+        className="flex gap-4 overflow-x-auto scroll-smooth pb-2 snap-x snap-mandatory"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {brands.map((brand) => {
+          const bg = brandBgMap[brand.name];
+          const hasBg = !!bg;
+          return (
+            <div
+              key={brand.name}
+              id={`brand-${brand.name.replace(/\s+/g, "-").toLowerCase()}`}
+              className="group flex-none w-[80vw] md:w-[340px] snap-start border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden p-5 md:p-6"
+              style={bg ? {
+                backgroundImage: `url(${bg})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              } : {}}
+            >
+              <div className={`absolute inset-0 transition-colors duration-300 ${hasBg ? "bg-card/80 group-hover:bg-card/70" : "bg-card/50 group-hover:bg-card/80"}`} />
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start gap-2">
+                    {brand.instagram && (
+                      <a
+                        href={brand.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 -m-1 touch-manipulation flex-shrink-0 mt-0.5 group/insta"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <svg className="h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover/insta:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-strip)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <defs>
+                            <linearGradient id="instagram-gradient-strip" x1="0%" y1="100%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#f09433" />
+                              <stop offset="25%" stopColor="#e6683c" />
+                              <stop offset="50%" stopColor="#dc2743" />
+                              <stop offset="75%" stopColor="#cc2366" />
+                              <stop offset="100%" stopColor="#bc1888" />
+                            </linearGradient>
+                          </defs>
+                          <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                        </svg>
+                      </a>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-primary transition-colors duration-300 mb-1">
+                        {brand.name}
+                      </h3>
+                      <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
+                        {brand.origin}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-3 line-clamp-3">
+                  {brand.description}
+                </p>
+
+                <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                  <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
+                  {brand.featuredItems.map((item, itemIndex) => (
+                    <span key={itemIndex} className="flex items-center">
+                      {item.featured && item.galleryIndex !== undefined ? (
+                        <button
+                          onClick={() => scrollToGallery(item.galleryIndex!, brand.name)}
+                          className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                        >
+                          <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                            {item.featured}
+                          </span>
+                          <svg className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </button>
+                      ) : item.featured ? (
+                        <span className="text-xs md:text-sm text-foreground/80 font-body">
+                          {item.featured}
+                        </span>
+                      ) : null}
+                      {itemIndex < brand.featuredItems.length - 1 && item.featured && (
+                        <span className="text-muted-foreground mx-1">•</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Dot indicators — only show when more than 1 card */}
+      {brands.length > 1 && (
+        <div className="flex justify-center gap-1.5 mt-3">
+          {brands.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => scrollTo(i)}
+              className={`rounded-full transition-all duration-300 ${
+                i === activeIndex
+                  ? "w-5 h-1.5 bg-primary"
+                  : "w-1.5 h-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/60"
+              }`}
+              aria-label={`Go to brand ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+// ─── Main component ──────────────────────────────────────────────────────────
 const BrandsAteliers = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -606,7 +789,6 @@ const BrandsAteliers = () => {
   const filteredBrands = useMemo(() => {
     let brands = partnerBrands;
     
-    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       brands = brands.filter(
@@ -617,7 +799,6 @@ const BrandsAteliers = () => {
       );
     }
     
-    // Filter by selected category/subcategory
     if (selectedCategory || selectedSubcategory) {
       brands = brands.filter(brand => {
         if (selectedSubcategory) {
@@ -631,17 +812,8 @@ const BrandsAteliers = () => {
     return brands;
   }, [searchQuery, selectedCategory, selectedSubcategory]);
 
-  // Consolidate brands by name and sort alphabetically
-  const consolidatedBrands = useMemo(() => {
-    type ConsolidatedBrand = {
-      name: string;
-      origin: string;
-      description: string;
-      instagram: string;
-      categories: string[];
-      featuredItems: Array<{ featured: string; galleryIndex?: number; category: string }>;
-    };
-    
+  // Consolidate brands by name, sort alphabetically, then group by first letter
+  const alphaGroups = useMemo(() => {
     const brandMap: Record<string, ConsolidatedBrand> = {};
     
     filteredBrands.forEach((brand) => {
@@ -665,24 +837,31 @@ const BrandsAteliers = () => {
       });
     });
     
-    // Return sorted array of brands
-    return Object.values(brandMap).sort((a, b) => a.name.localeCompare(b.name));
+    const sorted = Object.values(brandMap).sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Group by first letter
+    const groups: Record<string, ConsolidatedBrand[]> = {};
+    sorted.forEach(brand => {
+      const letter = brand.name[0].toUpperCase();
+      if (!groups[letter]) groups[letter] = [];
+      groups[letter].push(brand);
+    });
+    
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
   }, [filteredBrands]);
 
-  // No longer needed - removed toggle/clear functions for old popover UI
+  const totalBrands = alphaGroups.reduce((sum, [, brands]) => sum + brands.length, 0);
 
   const scrollToGallery = (galleryIndex: number, brandName: string) => {
     const gallerySection = document.getElementById('gallery');
     if (gallerySection) {
       gallerySection.scrollIntoView({ behavior: 'smooth' });
-      // Delay setting sessionStorage so the lightbox opens after the scroll completes
       setTimeout(() => {
         sessionStorage.setItem('openGalleryIndex', galleryIndex.toString());
         sessionStorage.setItem('gallerySourceId', `brand-${brandName.replace(/\s+/g, '-').toLowerCase()}`);
       }, 600);
     }
   };
-
 
   return (
     <section ref={ref} className="py-10 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30">
@@ -719,14 +898,14 @@ const BrandsAteliers = () => {
                     )}
                   </button>
                 </PopoverTrigger>
-                 <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="start">
-                   <div className="flex items-center justify-between mb-3">
-                     <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
-                     <button onClick={() => setFilterOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors ml-2" aria-label="Close filter">
-                       <X size={16} />
-                     </button>
-                   </div>
-                   <div className="flex items-center justify-between mb-3">
+                <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="start">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
+                    <button onClick={() => setFilterOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors ml-2" aria-label="Close filter">
+                      <X size={16} />
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between mb-3">
                     {selectedCategory && (
                       <button
                         onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
@@ -815,123 +994,25 @@ const BrandsAteliers = () => {
             to bring exceptional pieces to discerning collectors and design professionals.
           </p>
         </motion.div>
+
         {(searchQuery || selectedCategory) && (
-          <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
-            {consolidatedBrands.length} brand{consolidatedBrands.length !== 1 ? 's' : ''} found
+          <p className="text-left text-[10px] text-muted-foreground/50 mb-6 font-body tracking-wider">
+            {totalBrands} brand{totalBrands !== 1 ? "s" : ""} found
             {selectedSubcategory && <span> · {selectedSubcategory}</span>}
             {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
           </p>
         )}
 
-        <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {consolidatedBrands.map((brand, brandIndex) => (
-            <motion.div
-              key={brand.name}
-              id={`brand-${brand.name.replace(/\s+/g, '-').toLowerCase()}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.4, delay: brandIndex * 0.02 }}
-              className="group p-5 md:p-6 border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden"
-              style={brand.name === "Alexander Lamont" ? {
-                backgroundImage: `url(${alexanderLamontBg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              } : brand.name === "Alinea Design Objects" ? {
-                backgroundImage: `url(${leoAertsBg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              } : brand.name === "Apparatus Studio" ? {
-                backgroundImage: `url(${apparatusBg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              } : brand.name === "Atelier DeMichelis" ? {
-                backgroundImage: `url(${atelierDemichelisBg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              } : brand.name === "Atelier Février" ? {
-                backgroundImage: `url(${atelierFevrierBg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-               } : brand.name === "Babled Studio" ? {
-                backgroundImage: `url(${emmanuelBabledBg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-               } : brand.name === "Bruno de Maistre" ? {
-                backgroundImage: `url(${brunoDeMaistreBg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-               } : {}}
-            >
-              <div className={`absolute inset-0 transition-colors duration-300 ${["Alexander Lamont", "Alinea Design Objects", "Apparatus Studio", "Atelier DeMichelis", "Atelier Février", "Babled Studio", "Bruno de Maistre"].includes(brand.name) ? "bg-card/80 group-hover:bg-card/70" : "bg-card/50 group-hover:bg-card/80"}`} />
-              <div className="relative z-10">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-start gap-2">
-                    {brand.instagram && (
-                      <a
-                        href={brand.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1 -m-1 touch-manipulation flex-shrink-0 mt-0.5 group/insta"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <svg className="h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover/insta:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <defs>
-                            <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                              <stop offset="0%" stopColor="#f09433" />
-                              <stop offset="25%" stopColor="#e6683c" />
-                              <stop offset="50%" stopColor="#dc2743" />
-                              <stop offset="75%" stopColor="#cc2366" />
-                              <stop offset="100%" stopColor="#bc1888" />
-                            </linearGradient>
-                          </defs>
-                          <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                        </svg>
-                      </a>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-primary transition-colors duration-300 mb-1">
-                        {brand.name}
-                      </h3>
-                      <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
-                        {brand.origin}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-3 line-clamp-3">
-                  {brand.description}
-                </p>
-
-                <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                  <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
-                  {brand.featuredItems.map((item, itemIndex) => (
-                    <span key={itemIndex} className="flex items-center">
-                      {item.galleryIndex !== undefined ? (
-                        <button
-                          onClick={() => scrollToGallery(item.galleryIndex!, brand.name)}
-                          className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                        >
-                          <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
-                            {item.featured}
-                          </span>
-                          <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                        </button>
-                      ) : (
-                        <span className="text-xs md:text-sm text-foreground/80 font-body">
-                          {item.featured}
-                        </span>
-                      )}
-                      {itemIndex < brand.featuredItems.length - 1 && (
-                        <span className="text-muted-foreground mx-1">•</span>
-                      )}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
+        {/* Alphabetical strips */}
+        <div>
+          {alphaGroups.map(([letter, brands]) => (
+            <AlphaStrip
+              key={letter}
+              letter={letter}
+              brands={brands}
+              isInView={isInView}
+              scrollToGallery={scrollToGallery}
+            />
           ))}
         </div>
       </div>
@@ -940,3 +1021,4 @@ const BrandsAteliers = () => {
 };
 
 export default BrandsAteliers;
+
