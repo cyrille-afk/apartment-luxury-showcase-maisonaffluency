@@ -11,6 +11,7 @@ import emmanuelBabledBg from "@/assets/designers/emmanuel-babled-bg.jpg";
 import brunoDeMaistreBg from "@/assets/designers/bruno-de-maistre-bg.jpg";
 import celsoDeLemosBg from "@/assets/designers/celso-de-lemos-bg.jpg";
 import baleriItaliaBg from "@/assets/designers/baleri-italia-bg.jpg";
+import berntPetersenBg from "@/assets/designers/bernt-petersen-bg.jpg";
 import erstensBg from "@/assets/designers/kerstens-bg.jpg";
 import ccTapisBg from "@/assets/designers/cc-tapis-bg.jpg";
 import cristallerieSaintLouisBg from "@/assets/designers/cristallerie-saint-louis-bg.jpg";
@@ -598,6 +599,7 @@ const brandBgMap: Record<string, string> = {
   "Bruno de Maistre": brunoDeMaistreBg,
   "Celso de Lemos": celsoDeLemosBg,
   "Baleri Italia": baleriItaliaBg,
+  "Bernt Petersen": berntPetersenBg,
   "Kerstens": erstensBg,
   "CC-Tapis": ccTapisBg,
   "Cristallerie Saint-Louis": cristallerieSaintLouisBg,
