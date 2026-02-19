@@ -869,6 +869,7 @@ const BrandsAteliers = () => {
     const brandMap: Record<string, ConsolidatedBrand> = {};
     
     filteredBrands.forEach((brand) => {
+      if (!brand.name) return; // skip entries with no name
       if (!brandMap[brand.name]) {
         brandMap[brand.name] = {
           name: brand.name,
@@ -889,17 +890,22 @@ const BrandsAteliers = () => {
       });
     });
     
-    const sorted = Object.values(brandMap).sort((a, b) => a.name.localeCompare(b.name));
+    const sorted = Object.values(brandMap).sort((a, b) =>
+      (a.name || '').localeCompare(b.name || '')
+    );
     
     // Group by first letter
     const groups: Record<string, ConsolidatedBrand[]> = {};
     sorted.forEach(brand => {
+      if (!brand.name) return;
       const letter = brand.name[0].toUpperCase();
       if (!groups[letter]) groups[letter] = [];
       groups[letter].push(brand);
     });
     
-    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+    return Object.entries(groups).sort(([a], [b]) =>
+      (a || '').localeCompare(b || '')
+    );
   }, [filteredBrands]);
 
   const totalBrands = alphaGroups.reduce((sum, [, brands]) => sum + brands.length, 0);
