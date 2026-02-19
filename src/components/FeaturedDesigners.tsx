@@ -227,13 +227,13 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: adamCourtsGeometerBench,
-        title: "Geometer Bench",
-        subtitle: "Solid Timber",
+        title: "BENCH BED",
+        subtitle: "Natural Ash & Custom Leather",
         category: "Seating",
         tags: ["Seating", "Bench"],
-        materials: "Solid timber",
-        dimensions: "L160 × D40 × H45 cm",
-        description: "A companion piece to the Geometer Chair, this bench demonstrates the geometric rigour that defines the Okha aesthetic. Solid timber construction ensures lasting quality."
+        materials: "",
+        dimensions: "179.3W × 38D × 41H cm",
+        description: ""
       },
     ],
     links: [
