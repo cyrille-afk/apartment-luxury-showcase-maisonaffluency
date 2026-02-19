@@ -217,6 +217,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         description: ""
       },
       {
+        image: adamCourtsReverbSofa,
+        title: "REVERB",
+        subtitle: "Brushed Brass Plinth & Custom Fabric",
+        category: "Seating",
+        tags: ["Seating", "Sofa"],
+        materials: "",
+        dimensions: "288.5W × 178.5D × 72H cm · Seat Height: 41 cm",
+        description: ""
+      },
+      {
         image: adamCourtsSideboard,
         title: "OVD",
         subtitle: "Natural Ash Veneer",
@@ -234,16 +244,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         tags: ["Seating", "Bench"],
         materials: "",
         dimensions: "179.3W × 38D × 41H cm",
-        description: ""
-      },
-      {
-        image: adamCourtsReverbSofa,
-        title: "REVERB",
-        subtitle: "Brushed Brass Plinth & Custom Fabric",
-        category: "Seating",
-        tags: ["Seating", "Sofa"],
-        materials: "",
-        dimensions: "288.5W × 178.5D × 72H cm · Seat Height: 41 cm",
         description: ""
       },
     ],
