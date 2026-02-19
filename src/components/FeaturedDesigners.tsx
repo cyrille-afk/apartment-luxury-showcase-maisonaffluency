@@ -323,16 +323,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     philosophy: "We strive for a refined, timeless and architectural approach, with a desire for craftsmanship and affinity for the atmospheric — creating pieces that improve with age.",
     curatorPicks: [
       {
-        image: kerstensConsole,
-        title: "Console",
-        subtitle: "Marble & Patinated Steel",
-        category: "Tables",
-        tags: ["Tables", "Console"],
-        materials: "White Carrara marble • Patinated steel frame",
-        dimensions: "L180 × W40 × H80 cm",
-        description: "This console by Kerstens demonstrates the studio's signature approach: pure architectural geometry, exceptional material quality and precise craft. The Carrara marble top and monolithic support rest in a patinated steel frame — a composition of restrained sophistication."
-      },
-      {
         image: kertensPick1,
         title: "",
         subtitle: "",
