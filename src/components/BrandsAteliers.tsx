@@ -12,6 +12,7 @@ import brunoDeMaistreBg from "@/assets/designers/bruno-de-maistre-bg.jpg";
 import celsoDeLemosBg from "@/assets/designers/celso-de-lemos-bg.jpg";
 import baleriItaliaBg from "@/assets/designers/baleri-italia-bg.jpg";
 import delaEspadaBg from "@/assets/designers/de-la-espada-bg.jpg";
+import damienLangloisMeurinneBg from "@/assets/designers/damien-langlois-meurinne-bg.jpg";
 import berntPetersenBg from "@/assets/designers/bernt-petersen-bg.jpg";
 import erstensBg from "@/assets/designers/kerstens-bg.jpg";
 import ccTapisBg from "@/assets/designers/cc-tapis-bg.jpg";
@@ -614,6 +615,7 @@ const brandBgMap: Record<string, string> = {
   "Celso de Lemos": celsoDeLemosBg,
   "Baleri Italia": baleriItaliaBg,
   "De La Espada": delaEspadaBg,
+  "Damien Langlois Meurinne": damienLangloisMeurinneBg,
   "Dagmar London": berntPetersenBg,
   "Kerstens": erstensBg,
   "CC-Tapis": ccTapisBg,
