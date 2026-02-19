@@ -875,9 +875,14 @@ const BrandsAteliers = () => {
           transition={{ duration: 0.8 }}
           className="mb-12 md:mb-16 text-left"
         >
-          <p className="mb-2 md:mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
-            OUR PARTNERS
-          </p>
+          <div className="flex items-center gap-3 mb-2 md:mb-3">
+            <p className="uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
+              OUR PARTNERS
+            </p>
+            <span className="text-xs md:text-sm text-muted-foreground/50 font-body tracking-widest border border-border/30 rounded-full px-2.5 py-0.5">
+              {totalBrands}
+            </span>
+          </div>
           <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-4">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
               Brands & Ateliers
