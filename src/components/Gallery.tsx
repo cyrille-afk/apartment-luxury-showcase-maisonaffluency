@@ -119,6 +119,7 @@ const galleryExperiences = [{
     description: "Coming soon"
   }]
 }, {
+  experience: "The Details Make the Design",
   subtitle: "The details are not the details. They make the design",
   items: [{
     image: detailsSectionImage,
