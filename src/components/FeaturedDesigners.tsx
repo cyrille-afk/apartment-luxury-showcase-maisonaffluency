@@ -64,6 +64,7 @@ import adamCourtsVoidChair from "@/assets/curators-picks/adam-courts-void-chair.
 import adamCourtsGeometerChair from "@/assets/curators-picks/adam-courts-geometer-chair.jpg";
 import adamCourtsSofaFront from "@/assets/curators-picks/adam-courts-sofa-front.jpg";
 import adamCourtsReposeSofa from "@/assets/curators-picks/adam-courts-repose-sofa.jpg";
+import adamCourtsReverbSofa from "@/assets/curators-picks/adam-courts-reverb-sofa.jpg";
 import adamCourtsSofaAerial from "@/assets/curators-picks/adam-courts-sofa-aerial.jpg";
 import adamCourtsSideboard from "@/assets/curators-picks/adam-courts-sideboard.jpg";
 import adamCourtsGeometerBench from "@/assets/curators-picks/adam-courts-geometer-bench.jpg";
@@ -233,6 +234,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         tags: ["Seating", "Bench"],
         materials: "",
         dimensions: "179.3W × 38D × 41H cm",
+        description: ""
+      },
+      {
+        image: adamCourtsReverbSofa,
+        title: "REVERB",
+        subtitle: "Brushed Brass Plinth & Custom Fabric",
+        category: "Seating",
+        tags: ["Seating", "Sofa"],
+        materials: "",
+        dimensions: "288.5W × 178.5D × 72H cm · Seat Height: 41 cm",
         description: ""
       },
     ],
