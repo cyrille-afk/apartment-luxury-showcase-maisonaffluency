@@ -79,9 +79,9 @@ const Overview = () => {
           }} className="flex gap-4 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
               <button 
                 onClick={() => {
-                  const gallerySection = document.getElementById("gallery");
-                  if (gallerySection) {
-                    gallerySection.scrollIntoView({ behavior: "smooth" });
+                  const target = document.getElementById("sociable-environment");
+                  if (target) {
+                    target.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
                 className="text-left cursor-pointer group transition-all duration-300 hover:scale-105"
