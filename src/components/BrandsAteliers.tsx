@@ -649,14 +649,24 @@ function AlphaStrip({
               key={brand.name}
               id={`brand-${brand.name.replace(/\s+/g, "-").toLowerCase()}`}
               className="group flex-none w-[80vw] md:w-[340px] snap-start border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden p-5 md:p-6"
-              style={bg ? {
-                backgroundImage: `url(${bg})`,
-                backgroundSize: brand.name === "Baleri Italia" ? "80%" : "cover",
-                backgroundPosition: brand.name === "Baleri Italia" ? "center 20%" : "center top",
-                backgroundRepeat: "no-repeat",
-                minHeight: "220px",
-              } : {}}
+              style={{ minHeight: hasBg ? "220px" : undefined }}
             >
+              {/* Lazy-loaded background image */}
+              {bg && (
+                <img
+                  src={bg}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full pointer-events-none select-none"
+                  style={{
+                    objectFit: brand.name === "Baleri Italia" ? "contain" : "cover",
+                    objectPosition: brand.name === "Baleri Italia" ? "center 20%" : "center top",
+                    padding: brand.name === "Baleri Italia" ? "10%" : "0",
+                  }}
+                />
+              )}
               <div className={`absolute inset-0 transition-colors duration-300 ${hasBg ? "bg-card/80 group-hover:bg-card/70" : "bg-card/50 group-hover:bg-card/80"}`} />
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-3">
