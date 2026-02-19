@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo } from "react";
 import { Search, X, Instagram, ExternalLink, SlidersHorizontal } from "lucide-react";
+import alexanderLamontBg from "@/assets/designers/alexander-lamont-bg.png";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -824,73 +825,81 @@ const BrandsAteliers = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.4, delay: brandIndex * 0.02 }}
-              className="group p-5 md:p-6 bg-card/50 border border-border/40 rounded-lg hover:bg-card/80 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default"
+              className="group p-5 md:p-6 border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden"
+              style={brand.name === "Alexander Lamont" ? {
+                backgroundImage: `url(${alexanderLamontBg})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              } : {}}
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-start gap-2">
-                  {brand.instagram && (
-                    <a
-                      href={brand.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1 -m-1 touch-manipulation flex-shrink-0 mt-0.5 group/insta"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <svg className="h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover/insta:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <defs>
-                          <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#f09433" />
-                            <stop offset="25%" stopColor="#e6683c" />
-                            <stop offset="50%" stopColor="#dc2743" />
-                            <stop offset="75%" stopColor="#cc2366" />
-                            <stop offset="100%" stopColor="#bc1888" />
-                          </linearGradient>
-                        </defs>
-                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                      </svg>
-                    </a>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-primary transition-colors duration-300 mb-1">
-                      {brand.name}
-                    </h3>
-                    <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
-                      {brand.origin}
-                    </span>
+              <div className={`absolute inset-0 transition-colors duration-300 ${brand.name === "Alexander Lamont" ? "bg-card/80 group-hover:bg-card/70" : "bg-card/50 group-hover:bg-card/80"}`} />
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start gap-2">
+                    {brand.instagram && (
+                      <a
+                        href={brand.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 -m-1 touch-manipulation flex-shrink-0 mt-0.5 group/insta"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <svg className="h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover/insta:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <defs>
+                            <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#f09433" />
+                              <stop offset="25%" stopColor="#e6683c" />
+                              <stop offset="50%" stopColor="#dc2743" />
+                              <stop offset="75%" stopColor="#cc2366" />
+                              <stop offset="100%" stopColor="#bc1888" />
+                            </linearGradient>
+                          </defs>
+                          <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                        </svg>
+                      </a>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-primary transition-colors duration-300 mb-1">
+                        {brand.name}
+                      </h3>
+                      <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
+                        {brand.origin}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-3 line-clamp-3">
-                {brand.description}
-              </p>
-              
-              <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
-                {brand.featuredItems.map((item, itemIndex) => (
-                  <span key={itemIndex} className="flex items-center">
-                    {item.galleryIndex !== undefined ? (
-                      <button
-                        onClick={() => scrollToGallery(item.galleryIndex!, brand.name)}
-                        className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
-                      >
-                        <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+
+                <p className="text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-3 line-clamp-3">
+                  {brand.description}
+                </p>
+
+                <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                  <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Featured:</span>
+                  {brand.featuredItems.map((item, itemIndex) => (
+                    <span key={itemIndex} className="flex items-center">
+                      {item.galleryIndex !== undefined ? (
+                        <button
+                          onClick={() => scrollToGallery(item.galleryIndex!, brand.name)}
+                          className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                        >
+                          <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                            {item.featured}
+                          </span>
+                          <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                        </button>
+                      ) : (
+                        <span className="text-xs md:text-sm text-foreground/80 font-body">
                           {item.featured}
                         </span>
-                        <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                      </button>
-                    ) : (
-                      <span className="text-xs md:text-sm text-foreground/80 font-body">
-                        {item.featured}
-                      </span>
-                    )}
-                    {itemIndex < brand.featuredItems.length - 1 && (
-                      <span className="text-muted-foreground mx-1">•</span>
-                    )}
-                  </span>
-                ))}
+                      )}
+                      {itemIndex < brand.featuredItems.length - 1 && (
+                        <span className="text-muted-foreground mx-1">•</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
               </div>
             </motion.div>
           ))}
