@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import bedroomImage from "@/assets/master-suite.jpg";
@@ -286,22 +286,50 @@ const Gallery = () => {
                 </p>
               </motion.div>
 
-              <div className={sectionIndex === 0 ? 'grid grid-cols-3 gap-2 md:gap-8 md:grid-cols-2 lg:grid-cols-3' : 'grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3'}>
+              {/* Mobile: horizontal scroll strip */}
+              <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 md:hidden scrollbar-hide -mx-4 px-4">
+                {section.items.map((item, index) => {
+                  const itemKey = `${sectionIndex}-${index}`;
+                  return (
+                    <motion.div
+                      key={`${item.title}-${index}-mobile`}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={isInView ? { opacity: 1, x: 0 } : {}}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      className="relative flex-none w-[72vw] snap-start overflow-hidden rounded-sm aspect-[4/5] cursor-pointer"
+                      onClick={() => openLightbox(sectionIndex, index)}
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      <p className="absolute bottom-3 left-3 right-3 text-white text-xs font-body leading-snug line-clamp-2">
+                        {item.title}
+                      </p>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Desktop: regular grid */}
+              <div className="hidden md:grid md:gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {section.items.map((item, index) => {
                   const itemKey = `${sectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
-                  
+
                   return (
-                    <motion.div 
+                    <motion.div
                       key={`${item.title}-${index}`}
                       id={`gallery-item-${itemKey}`}
-                      initial={{ opacity: 0, y: 40 }} 
-                      animate={isInView ? { opacity: 1, y: 0 } : {}} 
-                      transition={{ duration: 0.6, delay: sectionIndex * 0.2 + index * 0.1 }} 
+                      initial={{ opacity: 0, y: 40 }}
+                      animate={isInView ? { opacity: 1, y: 0 } : {}}
+                      transition={{ duration: 0.6, delay: sectionIndex * 0.2 + index * 0.1 }}
                       className="group cursor-pointer"
                     >
-                      <div 
-                        className={`relative mb-4 md:mb-6 overflow-hidden rounded-sm ${sectionIndex === 0 ? 'aspect-[2/3] md:aspect-[4/5]' : 'aspect-[4/5]'}`}
+                      <div
+                        className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           setHasTapped(true);
@@ -310,25 +338,20 @@ const Gallery = () => {
                       >
                         <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                        {/* Mobile tap indicator - hidden in 3-col layout, visible elsewhere on mobile */}
-                        <div className={`absolute bottom-3 right-3 md:hidden bg-background/80 text-foreground p-2 rounded-full flex items-center justify-center shadow-md animate-pulse-fade ${sectionIndex === 0 ? 'hidden' : ''}`}>
-                          <Eye className="w-4 h-4" />
-                        </div>
                         {/* Expand/View indicator - desktop only */}
-                        <div className="absolute bottom-4 right-4 hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="absolute bottom-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <span className="bg-background/90 text-foreground p-2.5 rounded-full shadow-lg backdrop-blur-sm">
                             {isExpanded ? <X className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                           </span>
                         </div>
                       </div>
 
-                      
                       {/* Featuring section - only visible when expanded */}
-                      <motion.div 
+                      <motion.div
                         initial={false}
-                        animate={{ 
-                          height: isExpanded ? "auto" : 0, 
-                          opacity: isExpanded ? 1 : 0 
+                        animate={{
+                          height: isExpanded ? "auto" : 0,
+                          opacity: isExpanded ? 1 : 0
                         }}
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                         className="overflow-hidden"
@@ -338,7 +361,7 @@ const Gallery = () => {
                           <ul className="mt-2 space-y-1">
                             {item.description.split(', ').map((feature, idx) => <li key={idx} className="pl-2 border-l-2 border-primary/30">{feature}</li>)}
                           </ul>
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               openLightbox(sectionIndex, index);
