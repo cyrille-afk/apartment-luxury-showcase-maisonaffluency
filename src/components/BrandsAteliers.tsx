@@ -580,7 +580,7 @@ const brandBgMap: Record<string, string> = {
   "CC-Tapis": ccTapisBg,
   "Cristallerie Saint-Louis": cristallerieSaintLouisBg,
   "Delcourt Collection": delcourtBg,
-  "Entrelacs Creation": entrelacsBg,
+  "Entrelacs Création": entrelacsBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
