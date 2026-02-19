@@ -384,12 +384,19 @@ const Gallery = () => {
                       >
                         <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                        {/* Expand/View indicator - desktop only */}
-                        <div className="absolute bottom-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <span className="bg-background/90 text-foreground p-2.5 rounded-full shadow-lg backdrop-blur-sm">
-                            {isExpanded ? <X className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                        {/* Expand/View indicator - desktop only — opens lightbox directly */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openLightbox(sectionIndex, index);
+                          }}
+                          className="absolute bottom-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          aria-label="View full image"
+                        >
+                          <span className="bg-background/90 text-foreground p-2.5 rounded-full shadow-lg backdrop-blur-sm hover:bg-background transition-colors">
+                            <Maximize2 className="w-4 h-4" />
                           </span>
-                        </div>
+                        </button>
                       </div>
 
                       {/* Featuring section - only visible when expanded */}
