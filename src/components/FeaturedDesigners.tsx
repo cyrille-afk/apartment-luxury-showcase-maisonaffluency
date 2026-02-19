@@ -63,6 +63,7 @@ import adamCourtsVoidTable from "@/assets/curators-picks/adam-courts-void-table.
 import adamCourtsVoidChair from "@/assets/curators-picks/adam-courts-void-chair.jpg";
 import adamCourtsGeometerChair from "@/assets/curators-picks/adam-courts-geometer-chair.jpg";
 import adamCourtsSofaFront from "@/assets/curators-picks/adam-courts-sofa-front.jpg";
+import adamCourtsReposeSofa from "@/assets/curators-picks/adam-courts-repose-sofa.jpg";
 import adamCourtsSofaAerial from "@/assets/curators-picks/adam-courts-sofa-aerial.jpg";
 import adamCourtsSideboard from "@/assets/curators-picks/adam-courts-sideboard.jpg";
 import adamCourtsGeometerBench from "@/assets/curators-picks/adam-courts-geometer-bench.jpg";
@@ -205,7 +206,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         description: ""
       },
       {
-        image: adamCourtsSofaFront,
+        image: adamCourtsReposeSofa,
         title: "Repose Sofa A",
         subtitle: "With Ottoman",
         category: "Seating",
