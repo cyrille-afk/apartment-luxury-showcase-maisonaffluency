@@ -364,7 +364,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: kertensPick5,
-        title: "CTS low table",
+        title: "Rift CTS",
         subtitle: "White washed oak, brown travertine",
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
