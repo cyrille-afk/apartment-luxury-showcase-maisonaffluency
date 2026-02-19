@@ -27,6 +27,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 // 3: A Dreamy Tuscan Landscape, 4: A Highly Customised Table, 5: A Relaxed Setting
 // 6: A Sophisticated Boudoir, 7: A Serene Decor, 8: A Design Treasure Trove
 // 9: A Masterful Suite, 10: Unique by Design, 11: Design Icons and Collectibles
+// 12: Artistic Statement, 13: Compact Elegance, 14: A Sunlit Corner
+// 15: A Workspace of Distinction, 16: Refined Details, 17: Light & Focus
+// 18: Curated Vignette, 19: Artisan Materials, 20: Light & Texture
 
 const partnerBrands = [
   {
@@ -141,7 +144,16 @@ const partnerBrands = [
     galleryIndex: 8, // A Design Treasure Trove
   },
   {
-    id: "bruno-de-maistre",
+    id: "bernt-petersen",
+    name: "Bernt Petersen",
+    category: "Tables",
+    subcategory: "Desks",
+    origin: "Denmark",
+    description: "Danish furniture designer celebrated for his refined mid-century modernist sensibility, creating elegant and functional pieces of enduring quality.",
+    featured: "4-Drawer Executive Desk",
+    galleryIndex: 15, // A Workspace of Distinction - Home Office with a View
+  },
+  {
     name: "Bruno de Maistre",
     category: "Tables",
     subcategory: "Desks",
