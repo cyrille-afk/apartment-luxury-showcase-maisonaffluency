@@ -23,6 +23,7 @@ import detailsSectionImage from "@/assets/details-section.jpg";
 import detailsConsoleImage from "@/assets/details-console.jpg";
 import detailsLampImage from "@/assets/details-lamp.jpg";
 import homeOfficeDeskImage from "@/assets/home-office-desk.jpg";
+import homeOfficeDesk2Image from "@/assets/home-office-desk-2.jpg";
 const galleryExperiences = [{
   experience: "A Sociable Environment",
   subtitle: "Bespoke sofa, hand-knotted artisan rug, sculptural lighting and collectible furniture",
@@ -111,7 +112,7 @@ const galleryExperiences = [{
     title: "A Workspace of Distinction",
     description: "Coming soon"
   }, {
-    image: detailsConsoleImage,
+    image: homeOfficeDesk2Image,
     title: "Refined Details",
     description: "Coming soon"
   }, {
