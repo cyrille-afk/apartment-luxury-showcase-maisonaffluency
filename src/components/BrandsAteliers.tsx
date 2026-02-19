@@ -8,6 +8,7 @@ import apparatusBg from "@/assets/designers/apparatus-studio-bg.jpg";
 import atelierFevrierBg from "@/assets/designers/atelier-fevrier-bg.jpg";
 import atelierDemichelisBg from "@/assets/designers/atelier-demichelis-bg.jpg";
 import emmanuelBabledBg from "@/assets/designers/emmanuel-babled-bg.jpg";
+import brunoDeMaistreBg from "@/assets/designers/bruno-de-maistre-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -851,13 +852,17 @@ const BrandsAteliers = () => {
                 backgroundImage: `url(${atelierFevrierBg})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-              } : brand.name === "Babled Studio" ? {
+               } : brand.name === "Babled Studio" ? {
                 backgroundImage: `url(${emmanuelBabledBg})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-              } : {}}
+               } : brand.name === "Bruno de Maistre" ? {
+                backgroundImage: `url(${brunoDeMaistreBg})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+               } : {}}
             >
-              <div className={`absolute inset-0 transition-colors duration-300 ${["Alexander Lamont", "Alinea Design Objects", "Apparatus Studio", "Atelier DeMichelis", "Atelier Février", "Babled Studio"].includes(brand.name) ? "bg-card/80 group-hover:bg-card/70" : "bg-card/50 group-hover:bg-card/80"}`} />
+              <div className={`absolute inset-0 transition-colors duration-300 ${["Alexander Lamont", "Alinea Design Objects", "Apparatus Studio", "Atelier DeMichelis", "Atelier Février", "Babled Studio", "Bruno de Maistre"].includes(brand.name) ? "bg-card/80 group-hover:bg-card/70" : "bg-card/50 group-hover:bg-card/80"}`} />
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2">
