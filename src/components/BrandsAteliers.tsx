@@ -175,7 +175,7 @@ const partnerBrands = [
   },
   {
     id: "dagmar",
-    name: "Dagmar",
+    name: "Dagmar London",
     category: "Seating",
     subcategory: "Sofas & Loveseats",
     origin: "United Kingdom",
