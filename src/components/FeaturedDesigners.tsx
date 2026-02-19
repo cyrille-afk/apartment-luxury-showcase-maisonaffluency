@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Instagram, Search, X, ChevronDown, ExternalLink, Star, Maximize2, SlidersHorizontal } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ExternalLink, Star, Maximize2, Minimize2, SlidersHorizontal } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -1617,6 +1617,7 @@ const FeaturedDesigners = () => {
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const minSwipeDistance = 50;
@@ -2131,6 +2132,7 @@ const FeaturedDesigners = () => {
             if (!open) {
               setCuratorPicksDesigner(null);
               setCuratorPickIndex(0);
+              setIsZoomed(false);
             }
           }}
         >
@@ -2179,7 +2181,8 @@ const FeaturedDesigners = () => {
                     onClick={() => {
                       setCuratorPicksDesigner(null);
                       setCuratorPickIndex(0);
-                    }} 
+                      setIsZoomed(false);
+                    }}
                     className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                     aria-label="Close lightbox"
                   >
@@ -2187,9 +2190,9 @@ const FeaturedDesigners = () => {
                   </button>
 
                   {/* Image container */}
-                  <div className="flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 max-h-[85vh] pb-20">
+                  <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-20'}`}>
                     <div className="relative">
-                      {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category || ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags?.length > 0)) && (
+                      {!isZoomed && ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category || ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags?.length > 0)) && (
                         <div className="text-left mb-2 flex flex-wrap gap-1.5">
                           {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags?.length > 0 ? (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags : [(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category]).map((tag: string, i: number) => (
                             <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
@@ -2202,16 +2205,23 @@ const FeaturedDesigners = () => {
                         <img 
                           src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                           alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                          className="object-contain max-w-full max-h-[55vh] select-none"
+                          className={`object-contain select-none transition-all duration-300 ${isZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[55vh]'}`}
                           draggable={false}
                         />
                       )}
-                      {/* Maximize icon — gallery style, bottom-right */}
-                      <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm p-1.5 rounded-full pointer-events-none">
-                        <Maximize2 className="w-3.5 h-3.5 text-white" />
-                      </div>
+                      {/* Maximize/Minimize icon — clickable, bottom-right */}
+                      <button
+                        onClick={() => setIsZoomed(!isZoomed)}
+                        className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                        aria-label={isZoomed ? "Minimize image" : "Maximize image"}
+                      >
+                        {isZoomed
+                          ? <Minimize2 className="w-3.5 h-3.5 text-white" />
+                          : <Maximize2 className="w-3.5 h-3.5 text-white" />
+                        }
+                      </button>
                     </div>
-                    <div className="mt-2 text-center">
+                    <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
                       <h3 className="text-sm md:text-base font-serif text-white mb-1">
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
                         {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.subtitle && (
@@ -2254,7 +2264,7 @@ const FeaturedDesigners = () => {
                         <button
                           key={idx}
                           aria-label={`Go to image ${idx + 1}`}
-                          onClick={() => setCuratorPickIndex(idx)}
+                          onClick={() => { setCuratorPickIndex(idx); setIsZoomed(false); }}
                           className={`rounded-full transition-all duration-300 ${
                             curatorPickIndex === idx
                               ? 'w-4 h-2 bg-white'
