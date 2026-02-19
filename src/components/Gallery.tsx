@@ -376,15 +376,10 @@ const Gallery = () => {
                     >
                       <div
                         className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setHasTapped(true);
-                          setExpandedItem(isExpanded ? null : itemKey);
-                        }}
                       >
                         <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                        {/* Expand/View indicator - desktop only — opens lightbox directly */}
+                        {/* Expand icon - opens lightbox directly */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -398,34 +393,6 @@ const Gallery = () => {
                           </span>
                         </button>
                       </div>
-
-                      {/* Featuring section - only visible when expanded */}
-                      <motion.div
-                        initial={false}
-                        animate={{
-                          height: isExpanded ? "auto" : 0,
-                          opacity: isExpanded ? 1 : 0
-                        }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="overflow-hidden"
-                      >
-                        <div className="font-body text-sm md:text-base leading-relaxed text-muted-foreground pb-4">
-                          <span className="font-semibold italic text-primary">Featuring:</span>
-                          <ul className="mt-2 space-y-1">
-                            {item.description.split(', ').map((feature, idx) => <li key={idx} className="pl-2 border-l-2 border-primary/30">{feature}</li>)}
-                          </ul>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openLightbox(sectionIndex, index);
-                            }}
-                            className="mt-4 text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1 transition-colors"
-                          >
-                            <Maximize2 className="w-3.5 h-3.5" />
-                            View Full Image
-                          </button>
-                        </div>
-                      </motion.div>
                     </motion.div>
                   );
                 })}
