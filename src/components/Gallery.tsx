@@ -317,7 +317,7 @@ const Gallery = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={isInView ? { opacity: 1, x: 0 } : {}}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
-                      className="relative flex-none w-[72vw] snap-start overflow-hidden rounded-sm aspect-[4/5] cursor-pointer"
+                      className="relative flex-none w-[72vw] snap-start overflow-hidden rounded-sm aspect-[3/4] cursor-pointer"
                       onClick={() => openLightbox(sectionIndex, index)}
                     >
                       <img
