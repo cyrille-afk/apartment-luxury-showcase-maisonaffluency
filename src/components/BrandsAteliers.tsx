@@ -174,7 +174,16 @@ const partnerBrands = [
     galleryIndex: 9, // A Masterful Suite
   },
   {
-    id: "delcourt-collection",
+    id: "dagmar",
+    name: "Dagmar",
+    category: "Seating",
+    subcategory: "Sofas & Loveseats",
+    origin: "Czech Republic",
+    description: "Prague-based design studio renowned for bespoke upholstered furniture of exceptional quality, blending Central European craft traditions with refined contemporary aesthetics.",
+    featured: "Bespoke Upholstered Collection",
+    instagram: "https://instagram.com/dagmar_studio",
+  },
+  {
     name: "Delcourt Collection",
     category: "Seating",
     subcategory: "Armchairs",
