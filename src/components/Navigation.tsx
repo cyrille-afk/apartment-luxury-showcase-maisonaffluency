@@ -70,22 +70,46 @@ const Navigation = () => {
   const [activeSection, setActiveSection] = useState("#home");
 
   useEffect(() => {
-    const sectionIds = navItems.map(item => item.href.replace("#", ""));
-    
+    // All page section IDs in order
+    const allSectionIds = ["home", "overview", "gallery", "curating-team", "designers", "collectibles", "brands", "details", "contact"];
+
+    // Map each nav item href to the section(s) it should highlight for
+    const sectionToNav: Record<string, string> = {
+      home: "#overview",
+      overview: "#overview",
+      gallery: "#overview",
+      "curating-team": "#overview",
+      designers: "#designers",
+      collectibles: "#collectibles",
+      brands: "#brands",
+      details: "#details",
+      contact: "#details",
+    };
+
+    const visibleSections = new Set<string>();
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveSection(`#${entry.target.id}`);
+            visibleSections.add(entry.target.id);
+          } else {
+            visibleSections.delete(entry.target.id);
           }
         });
+
+        // Pick the topmost visible section (first in page order)
+        const topmost = allSectionIds.find((id) => visibleSections.has(id));
+        if (topmost) {
+          setActiveSection(sectionToNav[topmost] ?? `#${topmost}`);
+        }
       },
-      { rootMargin: "-20% 0px -70% 0px", threshold: 0 }
+      { rootMargin: "-10% 0px -60% 0px", threshold: 0 }
     );
 
-    sectionIds.forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) observer.observe(element);
+    allSectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
     });
 
     return () => observer.disconnect();
