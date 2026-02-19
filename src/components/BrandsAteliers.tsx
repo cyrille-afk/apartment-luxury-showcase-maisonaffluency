@@ -1006,16 +1006,46 @@ const BrandsAteliers = () => {
           </p>
         )}
 
+        {/* Alphabet jump bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex flex-wrap gap-1.5 mb-10"
+        >
+          {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
+            const available = alphaGroups.some(([l]) => l === letter);
+            return (
+              <button
+                key={letter}
+                disabled={!available}
+                onClick={() => {
+                  const el = document.getElementById(`alpha-group-${letter}`);
+                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className={`w-7 h-7 rounded text-xs font-serif transition-all duration-200 ${
+                  available
+                    ? "text-primary border border-primary/30 hover:bg-primary hover:text-primary-foreground hover:border-primary cursor-pointer"
+                    : "text-muted-foreground/25 border border-border/20 cursor-default"
+                }`}
+              >
+                {letter}
+              </button>
+            );
+          })}
+        </motion.div>
+
         {/* Alphabetical strips */}
         <div>
           {alphaGroups.map(([letter, brands]) => (
-            <AlphaStrip
-              key={letter}
-              letter={letter}
-              brands={brands}
-              isInView={isInView}
-              scrollToGallery={scrollToGallery}
-            />
+            <div key={letter} id={`alpha-group-${letter}`} className="scroll-mt-24">
+              <AlphaStrip
+                letter={letter}
+                brands={brands}
+                isInView={isInView}
+                scrollToGallery={scrollToGallery}
+              />
+            </div>
           ))}
         </div>
       </div>
