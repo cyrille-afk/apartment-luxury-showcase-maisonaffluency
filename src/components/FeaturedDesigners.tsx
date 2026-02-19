@@ -196,13 +196,13 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: adamCourtsGeometerChair,
-        title: "Geometer Chair",
-        subtitle: "Upholstered",
+        title: "VOID",
+        subtitle: "Natural Walnut",
         category: "Seating",
-        tags: ["Seating", "Lounge Chair"],
-        materials: "Solid timber frame • Fully upholstered",
-        dimensions: "W70 × D75 × H78 cm",
-        description: "The Geometer Chair is a study in geometry and comfort — its angular frame and fully upholstered seat and back creating a piece that is as striking as it is inviting."
+        tags: ["Seating", "Chair"],
+        materials: "",
+        dimensions: "47W × 50.5D × 81H cm · Seat Height: 47 cm",
+        description: ""
       },
       {
         image: adamCourtsSofaFront,
