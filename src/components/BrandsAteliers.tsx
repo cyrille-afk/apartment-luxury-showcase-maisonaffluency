@@ -181,7 +181,7 @@ const partnerBrands = [
     origin: "Czech Republic",
     description: "Prague-based design studio renowned for bespoke upholstered furniture of exceptional quality, blending Central European craft traditions with refined contemporary aesthetics.",
     featured: "Bespoke Upholstered Collection",
-    instagram: "https://instagram.com/dagmar_studio",
+    instagram: "https://www.instagram.com/dagmarlondon/",
   },
   {
     name: "Delcourt Collection",
