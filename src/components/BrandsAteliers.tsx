@@ -145,16 +145,6 @@ const partnerBrands = [
     galleryIndex: 8, // A Design Treasure Trove
   },
   {
-    id: "bernt-petersen",
-    name: "Bernt Petersen",
-    category: "Tables",
-    subcategory: "Desks",
-    origin: "Denmark",
-    description: "Danish furniture designer celebrated for his refined mid-century modernist sensibility, creating elegant and functional pieces of enduring quality.",
-    featured: "4-Drawer Executive Desk, c1960s",
-    galleryIndex: 15, // A Workspace of Distinction - Home Office with a View
-  },
-  {
     id: "bruno-de-maistre",
     name: "Bruno de Maistre",
     category: "Tables",
@@ -190,12 +180,13 @@ const partnerBrands = [
   {
     id: "dagmar",
     name: "Dagmar London",
-    category: "Seating",
-    subcategory: "Sofas & Loveseats",
+    category: "Tables",
+    subcategory: "Desks",
     origin: "United Kingdom",
     description: "London-based house founded in 2014, producing classic 20th century Scandinavian furniture for the modern home — celebrating the golden era of Scandinavian Modern design from 1930 to 1970.",
-    
+    featured: "Bernt Petersen 4-Drawer Executive Desk, c1960s",
     instagram: "https://www.instagram.com/dagmarlondon/",
+    galleryIndex: 15, // A Workspace of Distinction - Home Office with a View
   },
   {
     name: "Delcourt Collection",
@@ -600,7 +591,7 @@ const brandBgMap: Record<string, string> = {
   "Bruno de Maistre": brunoDeMaistreBg,
   "Celso de Lemos": celsoDeLemosBg,
   "Baleri Italia": baleriItaliaBg,
-  "Bernt Petersen": berntPetersenBg,
+  "Dagmar London": berntPetersenBg,
   "Kerstens": erstensBg,
   "CC-Tapis": ccTapisBg,
   "Cristallerie Saint-Louis": cristallerieSaintLouisBg,
