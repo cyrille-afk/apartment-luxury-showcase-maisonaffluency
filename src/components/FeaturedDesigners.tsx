@@ -354,12 +354,12 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: kertensPick4,
-        title: "",
-        subtitle: "",
+        title: "CTW",
+        subtitle: "Ebonised oak",
         category: "",
-        tags: [],
+        tags: ["open edition + 1 AP"],
         materials: "",
-        dimensions: "",
+        dimensions: "180 × 82 × H 28 cm",
         description: ""
       },
       {
