@@ -250,7 +250,7 @@ const partnerBrands = [
     tableType: "Console Tables",
     origin: "France",
     description: "French designer creating bold, sculptural furniture and lighting that combines artistic vision with masterful craftsmanship and luxurious materials.",
-    featured: "Ooh La La Console",
+    featured: "Ooh La La Console for Sé Collections",
     instagram: "https://instagram.com/damienlangloismeurinne_studio",
     galleryIndex: 11, // Design Icons and Collectibles
   },
