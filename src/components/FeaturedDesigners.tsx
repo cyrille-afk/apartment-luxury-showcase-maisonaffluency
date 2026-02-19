@@ -197,16 +197,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         description: ""
       },
       {
-        image: adamCourtsGeometerChair,
-        title: "VOID",
-        subtitle: "Natural Walnut",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "",
-        dimensions: "47W × 50.5D × 81H cm · Seat Height: 47 cm",
-        description: ""
-      },
-      {
         image: adamCourtsReposeSofa,
         title: "Repose Sofa A",
         subtitle: "With Ottoman",
@@ -214,6 +204,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         tags: ["Seating", "Sofa"],
         materials: "",
         dimensions: "L240 × D95 × H72 cm",
+        description: ""
+      },
+      {
+        image: adamCourtsGeometerChair,
+        title: "VOID",
+        subtitle: "Natural Walnut",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "",
+        dimensions: "47W × 50.5D × 81H cm · Seat Height: 47 cm",
         description: ""
       },
       {
