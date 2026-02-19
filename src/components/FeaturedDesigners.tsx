@@ -142,6 +142,13 @@ import marcantonioDetail from "@/assets/curators-picks/marcantonio-cotissi-detai
 import sergeMouilleTripod from "@/assets/curators-picks/serge-mouille-tripod.jpg";
 import binaBAitelObject from "@/assets/curators-picks/bina-baitel-object.jpg";
 import kerstensConsole from "@/assets/curators-picks/kerstens-console.jpg";
+import kertensPick1 from "@/assets/curators-picks/kerstens-1.jpg";
+import kertensPick2 from "@/assets/curators-picks/kerstens-2.jpg";
+import kertensPick3 from "@/assets/curators-picks/kerstens-3.jpg";
+import kertensPick4 from "@/assets/curators-picks/kerstens-4.jpg";
+import kertensPick5 from "@/assets/curators-picks/kerstens-5.jpg";
+import kertensPick6 from "@/assets/curators-picks/kerstens-6.jpg";
+import kertensPick7 from "@/assets/curators-picks/kerstens-7.jpg";
 import manOfPartsSofa from "@/assets/curators-picks/man-of-parts-sofa.jpg";
 import felixAgostiniCaryatide from "@/assets/curators-picks/felix-agostini-caryatide.jpg";
 import kiraToshiroLamp from "@/assets/curators-picks/kira-toshiro-lamp.jpg";
@@ -323,6 +330,76 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         materials: "White Carrara marble • Patinated steel frame",
         dimensions: "L180 × W40 × H80 cm",
         description: "This console by Kerstens demonstrates the studio's signature approach: pure architectural geometry, exceptional material quality and precise craft. The Carrara marble top and monolithic support rest in a patinated steel frame — a composition of restrained sophistication."
+      },
+      {
+        image: kertensPick1,
+        title: "",
+        subtitle: "",
+        category: "",
+        tags: [],
+        materials: "",
+        dimensions: "",
+        description: ""
+      },
+      {
+        image: kertensPick2,
+        title: "",
+        subtitle: "",
+        category: "",
+        tags: [],
+        materials: "",
+        dimensions: "",
+        description: ""
+      },
+      {
+        image: kertensPick3,
+        title: "",
+        subtitle: "",
+        category: "",
+        tags: [],
+        materials: "",
+        dimensions: "",
+        description: ""
+      },
+      {
+        image: kertensPick4,
+        title: "",
+        subtitle: "",
+        category: "",
+        tags: [],
+        materials: "",
+        dimensions: "",
+        description: ""
+      },
+      {
+        image: kertensPick5,
+        title: "",
+        subtitle: "",
+        category: "",
+        tags: [],
+        materials: "",
+        dimensions: "",
+        description: ""
+      },
+      {
+        image: kertensPick6,
+        title: "",
+        subtitle: "",
+        category: "",
+        tags: [],
+        materials: "",
+        dimensions: "",
+        description: ""
+      },
+      {
+        image: kertensPick7,
+        title: "",
+        subtitle: "",
+        category: "",
+        tags: [],
+        materials: "",
+        dimensions: "",
+        description: ""
       },
     ],
     links: [
