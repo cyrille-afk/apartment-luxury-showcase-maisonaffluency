@@ -103,7 +103,22 @@ const galleryExperiences = [{
     description: "Milan Pekař's Crystalline Vase, Peter Reed's Riyad Double Faced Throw"
   }]
 }, {
-  experience: "The Details Make the Design",
+  experience: "Home Office with a View",
+  subtitle: "Sculptural desk, refined lighting and curated accessories for a workspace of distinction",
+  items: [{
+    image: detailsSectionImage,
+    title: "A Workspace of Distinction",
+    description: "Coming soon"
+  }, {
+    image: detailsConsoleImage,
+    title: "Refined Details",
+    description: "Coming soon"
+  }, {
+    image: detailsLampImage,
+    title: "Light & Focus",
+    description: "Coming soon"
+  }]
+}, {
   subtitle: "The details are not the details. They make the design",
   items: [{
     image: detailsSectionImage,
