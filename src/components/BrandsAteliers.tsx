@@ -13,6 +13,7 @@ import celsoDeLemosBg from "@/assets/designers/celso-de-lemos-bg.jpg";
 import baleriItaliaBg from "@/assets/designers/baleri-italia-bg.jpg";
 import erstensBg from "@/assets/designers/kerstens-bg.jpg";
 import ccTapisBg from "@/assets/designers/cc-tapis-bg.jpg";
+import cristallerieSaintLouisBg from "@/assets/designers/cristallerie-saint-louis-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -575,6 +576,7 @@ const brandBgMap: Record<string, string> = {
   "Baleri Italia": baleriItaliaBg,
   "Kerstens": erstensBg,
   "CC-Tapis": ccTapisBg,
+  "Cristallerie Saint-Louis": cristallerieSaintLouisBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
