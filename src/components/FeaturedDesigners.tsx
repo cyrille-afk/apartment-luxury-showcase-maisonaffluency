@@ -2190,7 +2190,7 @@ const FeaturedDesigners = () => {
                   </button>
 
                   {/* Image container */}
-                  <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-20'}`}>
+                  <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
                     <div className="relative">
                       {!isZoomed && ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category || ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags?.length > 0)) && (
                         <div className="text-left mb-2 flex flex-wrap gap-1.5">
@@ -2221,7 +2221,26 @@ const FeaturedDesigners = () => {
                         }
                       </button>
                     </div>
-                    <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
+
+                    {/* Scroll dots — directly under the image */}
+                    {curatorPicksDesigner.curatorPicks.length > 1 && !isZoomed && (
+                      <div className="flex items-center gap-2 mt-3">
+                        {curatorPicksDesigner.curatorPicks.map((_, idx) => (
+                          <button
+                            key={idx}
+                            aria-label={`Go to image ${idx + 1}`}
+                            onClick={() => { setCuratorPickIndex(idx); setIsZoomed(false); }}
+                            className={`rounded-full transition-all duration-300 ${
+                              curatorPickIndex === idx
+                                ? 'w-4 h-2 bg-white'
+                                : 'w-2 h-2 bg-white/30 hover:bg-white/60'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    <div className={`mt-3 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
                       <h3 className="text-sm md:text-base font-serif text-white mb-1">
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
                         {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.subtitle && (
@@ -2248,7 +2267,7 @@ const FeaturedDesigners = () => {
                           )}
                         </div>
                       )}
-                      <p className="mt-12 text-xs text-white font-body italic">
+                      <p className="mt-8 text-xs text-white font-body italic">
                         For further details, please contact{" "}
                         <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/80 transition-colors">
                           concierge@myaffluency.com
@@ -2256,24 +2275,6 @@ const FeaturedDesigners = () => {
                       </p>
                     </div>
                   </div>
-
-                  {/* Scroll dots — gallery style */}
-                  {curatorPicksDesigner.curatorPicks.length > 1 && (
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2">
-                      {curatorPicksDesigner.curatorPicks.map((_, idx) => (
-                        <button
-                          key={idx}
-                          aria-label={`Go to image ${idx + 1}`}
-                          onClick={() => { setCuratorPickIndex(idx); setIsZoomed(false); }}
-                          className={`rounded-full transition-all duration-300 ${
-                            curatorPickIndex === idx
-                              ? 'w-4 h-2 bg-white'
-                              : 'w-2 h-2 bg-white/30 hover:bg-white/60'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="flex items-center justify-center w-full h-full">
