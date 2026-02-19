@@ -22,6 +22,7 @@ import smallRoomBedroomImage from "@/assets/small-room-bedroom.jpg";
 import detailsSectionImage from "@/assets/details-section.jpg";
 import detailsConsoleImage from "@/assets/details-console.jpg";
 import detailsLampImage from "@/assets/details-lamp.jpg";
+import homeOfficeDeskImage from "@/assets/home-office-desk.jpg";
 const galleryExperiences = [{
   experience: "A Sociable Environment",
   subtitle: "Bespoke sofa, hand-knotted artisan rug, sculptural lighting and collectible furniture",
@@ -106,7 +107,7 @@ const galleryExperiences = [{
   experience: "Home Office with a View",
   subtitle: "Sculptural desk, refined lighting and curated accessories for a workspace of distinction",
   items: [{
-    image: detailsSectionImage,
+    image: homeOfficeDeskImage,
     title: "A Workspace of Distinction",
     description: "Coming soon"
   }, {
