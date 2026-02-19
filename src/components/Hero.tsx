@@ -17,7 +17,7 @@ const Hero = () => {
         <motion.img 
           src={heroImage} 
           alt="Luxury living room with Asian-inspired murals and designer furniture" 
-          className="h-[130%] w-full object-cover"
+          className="h-full w-full object-cover object-[50%_40%] md:h-[130%] md:object-center"
           style={{ opacity }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
