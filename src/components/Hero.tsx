@@ -86,7 +86,11 @@ const Hero = () => {
           <span className="font-body text-xs uppercase tracking-widest text-cream/60 group-hover:text-cream/90 transition-colors">
             Scroll to Explore
           </span>
-          <div className="h-12 w-[1px] bg-gradient-to-b from-cream/60 to-transparent" />
+          <motion.div
+            className="h-12 w-[1px] bg-gradient-to-b from-cream/60 to-transparent"
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          />
         </button>
       </motion.div>
     </section>;
