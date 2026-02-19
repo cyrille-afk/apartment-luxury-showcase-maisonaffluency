@@ -760,7 +760,7 @@ function AlphaStrip({
                           {item.featured}
                         </span>
                       ) : null}
-                      {itemIndex < brand.featuredItems.length - 1 && item.featured && (
+                      {itemIndex < brand.featuredItems.length - 1 && item.featured && brand.featuredItems[itemIndex + 1]?.featured && (
                         <span className="text-muted-foreground mx-1">•</span>
                       )}
                     </span>
