@@ -321,7 +321,7 @@ const partnerBrands = [
     subcategory: "Table Lamps",
     origin: "France",
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
-    featured: "Carved Marble Marie Lamp",
+    featured: "Carved Marble Marie Lamp by Toni Grilo",
     instagram: "https://instagram.com/haymanneditions",
     galleryIndex: 11, // Design Icons and Collectibles
   },
