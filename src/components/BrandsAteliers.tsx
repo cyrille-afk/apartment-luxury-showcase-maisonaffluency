@@ -22,6 +22,7 @@ import ecartParisBg from "@/assets/designers/ecart-paris-bg.jpg";
 import entrelacsBg from "@/assets/designers/entrelacs-bg.jpg";
 import garnierLinkerBg from "@/assets/designers/garnier-linker-bg.jpg";
 import haymannEditionsBg from "@/assets/designers/haymann-editions-bg.jpg";
+import kiraBg from "@/assets/designers/kira-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -638,6 +639,7 @@ const brandBgMap: Record<string, string> = {
   "Baleri Italia": baleriItaliaBg,
   "Garnier & Linker": garnierLinkerBg,
   "Haymann Editions": haymannEditionsBg,
+  "Made in Kira": kiraBg,
   "De La Espada": delaEspadaBg,
   "Damien Langlois Meurinne Studio": damienLangloisMeurinneBg,
   "Dagmar London": berntPetersenBg,
