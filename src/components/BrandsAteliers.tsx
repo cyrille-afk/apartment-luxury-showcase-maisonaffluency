@@ -611,6 +611,16 @@ const partnerBrands = [
     featured: "Tripod Floor Lamp",
     instagram: "https://instagram.com/sergemouille_official",
   },
+  {
+    id: "pouenat",
+    name: "Pouenat",
+    category: "Lighting",
+    subcategory: "Floor Lamps",
+    origin: "France",
+    description: "Founded in 1880, Pouenat is a Parisian atelier of master metalworkers (bronziers) specializing in bespoke lighting and furniture. Collaborating with leading designers including Tristan Auer, the house produces exceptional limited-edition pieces where artisanal metalwork meets contemporary design vision.",
+    featured: "Tee Floor Lamp, Wall Light H, Table Lamp H",
+    instagram: "https://instagram.com/pouenat_paris",
+  },
 ];
 
 // Background image map
