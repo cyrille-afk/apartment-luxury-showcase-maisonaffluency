@@ -130,7 +130,7 @@ import ccTapisGiudecca from "@/assets/curators-picks/cc-tapis-giudecca.jpg";
 import haymannMarieLamp from "@/assets/curators-picks/haymann-marie-lamp.jpg";
 import theoremeGarnierLinker from "@/assets/curators-picks/theoreme-garnier-linker.jpg";
 import garnierLinkerCenterpiece from "@/assets/curators-picks/garnier-linker-centerpiece.jpg";
-import robicaraSiraCredenza from "@/assets/curators-picks/robicara-sira-credenza.jpg";
+import robicaraSiraCredenza from "@/assets/curators-picks/robicara-sira-credenza-new.jpg";
 import robicaraArmchair from "@/assets/curators-picks/robicara-armchair.jpg";
 import robicaraHighbackChair from "@/assets/curators-picks/robicara-highback-chair.jpg";
 import robicaraSideboard from "@/assets/curators-picks/robicara-sideboard.jpg";
@@ -1539,13 +1539,14 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         description: "A rare limited edition of 23 pieces — each chair is a wearable painting, its fabric hand-worked to reproduce Gregory Robin's Primordial Vibration, an abstract canvas of layered pigment and movement. Mounted on polished brass legs, the RC Club Chair stands as a singular intersection of furniture and fine art."
       },
       {
-        image: robicaraSideboard,
-        title: "Sideboard",
-        subtitle: "Robicara",
+        image: robicaraSiraCredenza,
+        title: "Sira Credenza",
+        subtitle: "5 Doors",
         category: "Storage",
         tags: ["Storage", "Sideboards"],
-        materials: "Shagreen-effect lacquered doors • Burnished brass legs & frame • Black marble base shelf",
-        description: "A monumental sideboard of four doors finished in a deep charcoal shagreen-effect lacquer, framed in burnished brass uprights and anchored by a black marble lower shelf. A masterclass in material restraint and architectural proportion."
+        materials: "Patinated metal legs • Wood panels • Marble top",
+        dimensions: "W 213.4 × D 48.2 × H 81.1 cm (5 doors) — Also available: W 172.4 × D 48.2 × H 81.1 cm (4 doors) · W 340.2 × D 48.2 × H 76.0 cm (6 doors)",
+        description: "The Sira Credenza pairs sculptural patinated metal legs with richly grained wood panel doors and a dramatic marble top. Available in 4, 5, or 6-door configurations to suit any scale of interior."
       },
       {
         image: robicaraChestDrawers,
