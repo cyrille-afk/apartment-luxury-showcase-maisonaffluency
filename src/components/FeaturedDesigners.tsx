@@ -1521,12 +1521,12 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [
       {
         image: robicaraArmchair,
-        title: "Round Armchair",
-        subtitle: "Robicara",
+        title: "Roxi Chair",
         category: "Seating",
         tags: ["Seating", "Armchairs"],
-        materials: "Mosaic bouclé upholstery • Blackened steel legs",
-        description: "A voluminous tub armchair wrapped in a mosaic-patterned bouclé fabric, combining tactile richness with a bold, sculptural silhouette. The blackened steel legs provide a precise, minimal contrast to the softly rounded body."
+        materials: "Bronze patinated feet • Fabric upholstered",
+        dimensions: "W 86.4 × D 92.7 × H 78.7 cm — Seat H 40.6 cm — COM 6.4 M",
+        description: "The Roxi Chair combines sculptural bronze patinated feet with generous fabric upholstery, offering a refined balance of material contrast and comfort."
       },
       {
         image: robicaraHighbackChair,
