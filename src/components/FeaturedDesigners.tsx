@@ -134,7 +134,7 @@ import robicaraSiraCredenza from "@/assets/curators-picks/robicara-sira-credenza
 import robicaraArmchair from "@/assets/curators-picks/robicara-armchair.jpg";
 import robicaraHighbackChair from "@/assets/curators-picks/robicara-highback-chair.jpg";
 import robicaraSideboard from "@/assets/curators-picks/robicara-sideboard.jpg";
-import robicaraChestDrawers from "@/assets/curators-picks/robicara-chest-drawers.jpg";
+import robicaraSiraNightstand from "@/assets/curators-picks/robicara-sira-nightstand.jpg";
 import robicaraMarbleTable from "@/assets/curators-picks/robicara-marble-table.jpg";
 import robicaraMartiniTable from "@/assets/curators-picks/robicara-martini-table.jpg";
 import redaAmalouDotTable from "@/assets/curators-picks/reda-amalou-dot-table.jpg";
@@ -1549,13 +1549,14 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         description: "A rare limited edition of 23 pieces — each chair is a wearable painting, its fabric hand-worked to reproduce Gregory Robin's Primordial Vibration, an abstract canvas of layered pigment and movement. Mounted on polished brass legs, the RC Club Chair stands as a singular intersection of furniture and fine art."
       },
       {
-        image: robicaraChestDrawers,
-        title: "Chest of Drawers",
-        subtitle: "Robicara",
+        image: robicaraSiraNightstand,
+        title: "Sira Nightstand",
+        subtitle: "",
         category: "Storage",
-        tags: ["Storage", "Chests"],
-        materials: "Brushed bronze panels • Lacquered drawers • Nero Marquina marble top & base shelf",
-        description: "A refined chest of drawers where brushed bronze side panels frame a set of seamless lacquered drawer fronts, topped and grounded by slabs of Nero Marquina marble. The interplay of warm metal and cool stone gives the piece a quiet, architectural gravitas."
+        tags: ["Storage", "Nightstands"],
+        materials: "Solid metal patina • Laser-cut solid metal decorative handles • Interiors and door in special metal liquid lacquer or wood",
+        dimensions: "SIN30 W 76 × D 45.7 × H 55.8 cm · SIN42 W 106.5 × D 45.7 × H 60.8 cm · SIN50 W 126.8 × D 55.8 × H 76 cm",
+        description: "The Sira Nightstand is defined by its precision-cut solid metal handles and a body finished in a rich metal liquid lacquer or wood. Available in three sizes — SIN30, SIN42, and SIN50 — each version maintains the same refined material language while scaling elegantly to suit the room."
       },
       {
         image: robicaraMarbleTable,
