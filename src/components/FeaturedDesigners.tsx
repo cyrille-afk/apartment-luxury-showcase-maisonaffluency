@@ -1577,13 +1577,13 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: tristanAuerYsaWallLightH,
-        title: "YSA Wall Light H",
-        subtitle: "Véronèse",
+        title: "Wall Light H for Pouenat",
+        subtitle: "Tristan Auer",
         category: "Lighting",
         tags: ["Lighting", "Wall Lights"],
         materials: "Patinated steel • Alabaster",
         dimensions: "L21 × P9 × H50 cm",
-        description: "The YSA Wall Light H is part of Tristan Auer's Véronèse collection, combining patinated steel with sculpted alabaster to create a luminaire of quiet architectural power. The alabaster diffuses light with a warm, mineral glow that speaks to Auer's mastery of material and proportion."
+        description: "The Wall Light H for Pouenat is designed by Tristan Auer, combining patinated steel with sculpted alabaster to create a luminaire of quiet architectural power. The alabaster diffuses light with a warm, mineral glow that speaks to Auer's mastery of material and proportion."
       },
     ],
     links: [
