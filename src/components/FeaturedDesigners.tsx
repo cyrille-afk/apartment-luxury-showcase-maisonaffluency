@@ -154,6 +154,7 @@ import kiraToshiroLamp from "@/assets/curators-picks/kira-toshiro-lamp.jpg";
 
 import tristanAuerYsaWallLightH from "@/assets/curators-picks/tristan-auer-ysa-wall-light-h.jpg";
 import tristanAuerPedestalSuzanne from "@/assets/curators-picks/tristan-auer-pedestal-suzanne.jpg";
+import tristanAuerTableLampH from "@/assets/curators-picks/tristan-auer-table-lamp-h.jpg";
 import brunoDeMaistreLyricDesk from "@/assets/curators-picks/bruno-de-maistre-lyric-desk.jpg";
 import herveVdsMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
@@ -1585,6 +1586,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         materials: "Mirror-polished stainless steel • Copper • Copper tray • Turquoise patinated brass",
         dimensions: "L70 × P60 × H63 cm",
         description: "The Pedestal Suzanne for Pouenat by Tristan Auer is a tour de force in material contrasts — mirror-polished stainless steel meets a weathered copper surface and turquoise patinated brass accents. The result is a side table of sculptural boldness, where industrial precision and artisanal oxidation coexist."
+      },
+      {
+        image: tristanAuerTableLampH,
+        title: "Table Lamp H for Pouenat",
+        subtitle: "Tristan Auer",
+        category: "Lighting",
+        tags: ["Lighting", "Table Lamps"],
+        materials: "Patinated steel • Copper leaf hammered steel • Alabaster",
+        dimensions: "L28 × P18 × H50 cm",
+        description: "The Table Lamp H for Pouenat by Tristan Auer marries patinated steel with copper leaf hammered steel and alabaster diffusers, creating a luminaire of rare material depth. When lit, the alabaster emits a warm glow that highlights the textured copper interior — a sculptural object as much as a light source."
       },
     ],
     links: [
