@@ -775,7 +775,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
   },
   {
     id: "entrelacs-creation",
-    name: "Entrelacs Creation",
+    name: "Yves Macheret - Entrelacs Creation",
     specialty: "Bronze Lighting & Artisan Foundry",
     image: yvesMacheretImg,
     biography:
