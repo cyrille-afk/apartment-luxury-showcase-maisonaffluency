@@ -119,7 +119,7 @@ const galleryExperiences = [{
   }, {
     image: homeOffice3Image,
     title: "Light & Focus",
-    description: "Bernt Petersen 4-Drawer Executive Desk, Vitra Eames Soft Pad EA 219 Office Chair by Charles & Ray Eames, Tristan Auer's YSA Wall Lamp"
+    description: "Bernt Petersen 4-Drawer Executive Desk, Vitra Eames Soft Pad EA 219 Office Chair by Charles & Ray Eames, Tristan Auer's YSA Wall Lamp for Véronèse"
   }]
 }, {
   experience: "The Details Make the Design",
