@@ -155,6 +155,7 @@ import kiraToshiroLamp from "@/assets/curators-picks/kira-toshiro-lamp.jpg";
 import tristanAuerYsaWallLightH from "@/assets/curators-picks/tristan-auer-ysa-wall-light-h.jpg";
 import tristanAuerPedestalSuzanne from "@/assets/curators-picks/tristan-auer-pedestal-suzanne.jpg";
 import tristanAuerTableLampH from "@/assets/curators-picks/tristan-auer-table-lamp-h.jpg";
+import tristanAuerTeeFloorLamp from "@/assets/curators-picks/tristan-auer-tee-floor-lamp.jpg";
 import brunoDeMaistreLyricDesk from "@/assets/curators-picks/bruno-de-maistre-lyric-desk.jpg";
 import herveVdsMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
@@ -1596,6 +1597,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         materials: "Patinated steel • Copper leaf hammered steel • Alabaster",
         dimensions: "L28 × P18 × H50 cm",
         description: "The Table Lamp H for Pouenat by Tristan Auer marries patinated steel with copper leaf hammered steel and alabaster diffusers, creating a luminaire of rare material depth. When lit, the alabaster emits a warm glow that highlights the textured copper interior — a sculptural object as much as a light source."
+      },
+      {
+        image: tristanAuerTeeFloorLamp,
+        title: "Tee Floor Lamp for Pouenat",
+        subtitle: "16/100 • Scala Silk Lamp Shade",
+        category: "Lighting",
+        tags: ["Lighting", "Floor Lamps"],
+        materials: "Brushed brass • Marble • Scala silk lamp shade",
+        dimensions: "D50 × H170 cm",
+        description: "The Tee Floor Lamp for Pouenat by Tristan Auer is a limited edition piece (16/100) that combines brushed brass, sculptural marble and a custom Scala silk shade. Its refined material layering — warm brass base, tactile marble column, crisp silk shade — embodies Auer's philosophy of doing more with less."
       },
     ],
     links: [
