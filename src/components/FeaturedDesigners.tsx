@@ -2284,14 +2284,14 @@ const FeaturedDesigners = () => {
                         <p className="text-white/60 font-body text-xs md:text-sm mb-1">{curatorPicksDesigner.curatorPicks[curatorPickIndex].materials}</p>
                       )}
                       {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions && (
-                        <div className="mt-2 max-w-xl space-y-1">
+                        <div className="mt-2 max-w-xl space-y-1 mx-auto text-center">
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions && (
                             <p className="text-xs md:text-sm text-white/40 font-body italic">
                               {curatorPicksDesigner.curatorPicks[curatorPickIndex].dimensions}
                             </p>
                           )}
                           {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.description && (
-                            <p className="text-xs md:text-sm text-white/50 font-body leading-relaxed max-w-lg mt-2">
+                            <p className="text-xs md:text-sm text-white/50 font-body leading-relaxed max-w-lg mt-2 mx-auto text-center">
                               {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).description}
                             </p>
                           )}
