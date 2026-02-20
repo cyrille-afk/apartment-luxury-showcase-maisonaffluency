@@ -601,6 +601,16 @@ const partnerBrands = [
     description: "Canadian furniture house creating timeless pieces with a focus on quality materials, exceptional comfort, and refined contemporary design.",
     instagram: "https://instagram.com/manofparts",
   },
+  {
+    id: "serge-mouille",
+    name: "Serge Mouille",
+    category: "Lighting",
+    subcategory: "Floor Lamps",
+    origin: "France",
+    description: "Serge Mouille (1922–1988) is considered the most important French lighting designer of the 1950s. Trained as a silversmith, he brought the precision of jewelry-making to lighting design. His tripod floor lamps and spider wall lights are now part of MoMA's permanent collection.",
+    featured: "Tripod Floor Lamp",
+    instagram: "https://instagram.com/sergemouille_official",
+  },
 ];
 
 // Background image map
