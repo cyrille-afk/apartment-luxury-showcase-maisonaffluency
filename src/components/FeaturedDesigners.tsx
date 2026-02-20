@@ -1572,7 +1572,8 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [
       {
         image: tristanAuerYsaWallLightH,
-        title: "Wall Light H for Pouenat",
+        title: "Wall Light H",
+        subtitle: "for Pouenat",
         category: "Lighting",
         tags: ["Lighting", "Wall Lights"],
         materials: "Patinated steel • Alabaster",
@@ -1581,7 +1582,8 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: tristanAuerPedestalSuzanne,
-        title: "Pedestal Suzanne for Pouenat",
+        title: "Pedestal Suzanne",
+        subtitle: "for Pouenat",
         category: "Tables",
         tags: ["Tables", "Side Tables"],
         materials: "Mirror-polished stainless steel • Copper • Copper tray • Turquoise patinated brass",
@@ -1590,8 +1592,8 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: tristanAuerTableLampH,
-        title: "Table Lamp H for Pouenat",
-        
+        title: "Table Lamp H",
+        subtitle: "for Pouenat",
         category: "Lighting",
         tags: ["Lighting", "Table Lamps"],
         materials: "Patinated steel • Copper leaf hammered steel • Alabaster",
@@ -1600,8 +1602,8 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: tristanAuerTeeFloorLamp,
-        title: "Tee Floor Lamp for Pouenat",
-        subtitle: "16/100 • Scala Silk Lamp Shade",
+        title: "Tee Floor Lamp",
+        subtitle: "for Pouenat — 16/100 • Scala Silk Lamp Shade",
         category: "Lighting",
         tags: ["Lighting", "Floor Lamps"],
         materials: "Brushed brass • Marble • Scala silk lamp shade",
@@ -1610,8 +1612,8 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: tristanAuerEclipseWallLight,
-        title: "Eclipse Wall Light for Pouenat",
-        subtitle: "100/30/31/32/33",
+        title: "Eclipse Wall Light",
+        subtitle: "for Pouenat — 100/30/31/32/33",
         category: "Lighting",
         tags: ["Lighting", "Wall Lights"],
         materials: "Gunmetal patinated steel • Shiny varnish",
@@ -1620,8 +1622,8 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: tristanAuerYsaWallLightVeronese,
-        title: "YSA Wall Light for Véronèse",
-        subtitle: "Murano glass",
+        title: "YSA Wall Light",
+        subtitle: "for Véronèse — Murano glass",
         category: "Lighting",
         tags: ["Lighting", "Wall Lights"],
         materials: "Polished mirror frame • Streaked frosted crystal • Smoked glass with stripe motif • Mirror application glass",
