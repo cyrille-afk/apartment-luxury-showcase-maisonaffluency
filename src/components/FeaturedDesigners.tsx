@@ -1933,20 +1933,8 @@ const FeaturedDesigners = () => {
                 value={designer.id}
                 id={`designer-${designer.id}`}
                 data-designer={designer.id}
-                className="relative border border-border/40 rounded-lg px-4 md:px-6 bg-card/30 hover:bg-card/50 transition-colors duration-300 scroll-mt-16"
+                className="border border-border/40 rounded-lg px-4 md:px-6 bg-card/30 hover:bg-card/50 transition-colors duration-300 scroll-mt-16"
               >
-                {openDesigners.includes(designer.id) && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenDesigners(prev => prev.filter(id => id !== designer.id));
-                    }}
-                    className="absolute top-3 right-4 z-10 p-1.5 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200"
-                    aria-label="Close"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
                 <AccordionTrigger className="hover:no-underline py-4 md:py-6 group active:scale-[0.99] touch-manipulation">
                   <div className="flex items-center gap-4 md:gap-6 text-left w-full">
                     {designer.image ? (
