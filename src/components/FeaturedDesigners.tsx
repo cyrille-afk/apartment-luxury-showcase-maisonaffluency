@@ -1560,12 +1560,13 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: robicaraMarbleTable,
-        title: "Round Side Table",
-        subtitle: "Robicara",
+        title: "Enzo Side Table",
+        subtitle: "",
         category: "Tables",
         tags: ["Tables", "Side Tables"],
-        materials: "Calacatta Viola marble • Burnished brass ring detail",
-        description: "A sculptural side table cut entirely from Calacatta Viola marble — its deep burgundy veining swirling across both the thick circular top and the angular pedestal base. A burnished brass ring mediates between top and base, adding a jewel-like precision to the stone's raw drama."
+        materials: "Sculptural marble or wood top • Metal patina support • Available in all Robicara metal finishes",
+        dimensions: "ENZ26 W 65.9 × D 40.6 × H 50.7 cm",
+        description: "A symphony of sculptural marble or wood, the Enzo Side Table pairs a richly veined or grained top with a refined metal patina support. Available in the full range of Robicara metal finishes, each piece is a unique dialogue between natural material and artisanal metalwork."
       },
       {
         image: robicaraMartiniTable,
