@@ -1570,12 +1570,13 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: robicaraMartiniTable,
-        title: "Martini Side Table",
-        subtitle: "Robicara",
+        title: "Ara Side Table",
+        subtitle: "",
         category: "Tables",
         tags: ["Tables", "Side Tables"],
-        materials: "Patinated bronze top • Shagreen-textured bronze base",
-        description: "A martini-form side table in two textures of bronze — a smooth, hammered disc top balanced on a shagreen-textured bottle-shaped base. The contrast between the polished surface and the tactile base creates an object of refined sculptural tension."
+        materials: "Moulded shagreen liquid metal • Bronzed finish • Fiber",
+        dimensions: "ARA20 D 50.8 × H 91.3 cm · ARA23 D 60 × H 60 cm",
+        description: "The Ara Side Table is a study in material transformation — moulded shagreen liquid metal takes on the texture and depth of natural hide, finished in a warm bronzed patina over a fiber-reinforced form. Available in two proportions, from a slender tall pedestal to a more generous low table."
       },
     ],
     links: [
