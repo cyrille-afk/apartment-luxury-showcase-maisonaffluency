@@ -33,7 +33,7 @@ import ccTapisImg from "@/assets/designers/cc-tapis.jpg";
 import haymannEditionsImg from "@/assets/designers/haymann-editions.jpg";
 import theoremeEditionsImg from "@/assets/designers/theoreme-editions.jpg";
 import garnierLinkerImg from "@/assets/designers/garnier-linker.jpg";
-import robicaraImg from "@/assets/designers/robicara.jpg";
+import robicaraImg from "@/assets/designers/robicara-v2.jpg";
 import redaAmalouImg from "@/assets/designers/reda-amalou.jpg";
 import noeDuchaufourImg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
 import binaBAitelImg from "@/assets/designers/bina-baitel.jpg";
