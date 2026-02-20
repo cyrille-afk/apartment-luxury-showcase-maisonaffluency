@@ -1505,7 +1505,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
   },
   {
     id: "robicara",
-    name: "Robicara",
+    name: "Francesco Caracciolo di Marano - Robicara",
     specialty: "Italian-crafted Luxury Furniture",
     image: robicaraImg,
     biography: "Robicara was founded by Sam Robin, an interior architect, and Francesco Caracciolo, an Italian furniture designer — a transatlantic creative partnership uniting her flair for bespoke residential interiors with his deep expertise in Italian luxury furniture manufacturing. The brand combines the finest Italian craftsmanship with a modern aesthetic sensibility, producing pieces that express sophisticated restraint through exceptional materials and precision construction.",
