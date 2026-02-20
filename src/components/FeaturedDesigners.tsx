@@ -1571,6 +1571,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     philosophy: "Luxury is not about excess. It's about the perfect choice of material, proportion and light — doing more with less.",
     curatorPicks: [
       {
+        image: tristanAuerYsaWallLightVeronese,
+        title: "YSA Wall Light",
+        subtitle: "for Véronèse",
+        category: "Lighting",
+        tags: ["Lighting", "Wall Lights"],
+        materials: "Polished mirror frame • Streaked frosted crystal • Smoked glass with stripe motif • Mirror application glass",
+        dimensions: "W40 × D15 × H52 cm",
+        description: "The YSA Wall Light for Véronèse by Tristan Auer is an extraordinary essay in Murano glass craftsmanship. Layers of streaked frosted crystal, smoked glass and mirrored glass are held within a polished mirror frame, creating a luminaire of exceptional material depth and luminous complexity."
+      },
+      {
         image: tristanAuerYsaWallLightH,
         title: "Wall Light H",
         subtitle: "for Pouenat",
@@ -1619,16 +1629,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         materials: "Gunmetal patinated steel • Shiny varnish",
         dimensions: "L27 × P9 × H27 cm",
         description: "The Eclipse Wall Light for Pouenat by Tristan Auer is a sculptural study in circular geometry — a brushed copper disc framing a deep painted steel recess. Its minimal, planetary form generates a warm, grazing light that animates the wall surface with shadow and material depth."
-      },
-      {
-        image: tristanAuerYsaWallLightVeronese,
-        title: "YSA Wall Light",
-        subtitle: "for Véronèse",
-        category: "Lighting",
-        tags: ["Lighting", "Wall Lights"],
-        materials: "Polished mirror frame • Streaked frosted crystal • Smoked glass with stripe motif • Mirror application glass",
-        dimensions: "W40 × D15 × H52 cm",
-        description: "The YSA Wall Light for Véronèse by Tristan Auer is an extraordinary essay in Murano glass craftsmanship. Layers of streaked frosted crystal, smoked glass and mirrored glass are held within a polished mirror frame, creating a luminaire of exceptional material depth and luminous complexity."
       },
     ],
     links: [
