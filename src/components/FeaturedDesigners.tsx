@@ -1623,7 +1623,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       {
         image: tristanAuerYsaWallLightVeronese,
         title: "YSA Wall Light",
-        subtitle: "for Véronèse — Murano glass",
+        subtitle: "for Véronèse",
         category: "Lighting",
         tags: ["Lighting", "Wall Lights"],
         materials: "Polished mirror frame • Streaked frosted crystal • Smoked glass with stripe motif • Mirror application glass",
