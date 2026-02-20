@@ -1530,12 +1530,13 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
       {
         image: robicaraHighbackChair,
-        title: "High-Back Chair",
-        subtitle: "Robicara",
+        title: "RC Club Chair",
+        subtitle: "Limited Edition 23 of 23",
         category: "Seating",
-        tags: ["Seating", "Chairs"],
-        materials: "Bouclé fabric with hand-painted back detail • Burnished brass feet",
-        description: "A dramatic high-back chair where the outer face is treated as a canvas — a graphic, hand-applied ink pattern dissolves across a pale bouclé ground, creating a piece that reads as both furniture and art object."
+        tags: ["Seating", "Limited Edition"],
+        materials: "Brass legs • Hand-worked fabric with reproduction of Gregory Robin's Primordial Vibration Painting",
+        dimensions: "W 86.4 × D 86.4 × H 103.9 cm",
+        description: "A rare limited edition of 23 pieces — each chair is a wearable painting, its fabric hand-worked to reproduce Gregory Robin's Primordial Vibration, an abstract canvas of layered pigment and movement. Mounted on polished brass legs, the RC Club Chair stands as a singular intersection of furniture and fine art."
       },
       {
         image: robicaraSideboard,
