@@ -1529,16 +1529,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         description: "The Roxi Chair combines sculptural bronze patinated feet with generous fabric upholstery, offering a refined balance of material contrast and comfort."
       },
       {
-        image: robicaraHighbackChair,
-        title: "RC Club Chair",
-        subtitle: "Limited Edition 23 of 23",
-        category: "Seating",
-        tags: ["Seating", "Limited Edition"],
-        materials: "Brass legs • Hand-worked fabric with reproduction of Gregory Robin's Primordial Vibration Painting",
-        dimensions: "W 86.4 × D 86.4 × H 103.9 cm",
-        description: "A rare limited edition of 23 pieces — each chair is a wearable painting, its fabric hand-worked to reproduce Gregory Robin's Primordial Vibration, an abstract canvas of layered pigment and movement. Mounted on polished brass legs, the RC Club Chair stands as a singular intersection of furniture and fine art."
-      },
-      {
         image: robicaraSiraCredenza,
         title: "Sira Credenza",
         subtitle: "5 Doors",
@@ -1547,6 +1537,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         materials: "Patinated metal legs • Wood panels • Marble top",
         dimensions: "W 213.4 × D 48.2 × H 81.1 cm (5 doors) — Also available: W 172.4 × D 48.2 × H 81.1 cm (4 doors) · W 340.2 × D 48.2 × H 76.0 cm (6 doors)",
         description: "The Sira Credenza pairs sculptural patinated metal legs with richly grained wood panel doors and a dramatic marble top. Available in 4, 5, or 6-door configurations to suit any scale of interior."
+      },
+      {
+        image: robicaraHighbackChair,
+        title: "RC Club Chair",
+        subtitle: "Limited Edition 23 of 23",
+        category: "Seating",
+        tags: ["Seating", "Limited Edition"],
+        materials: "Brass legs • Hand-worked fabric with reproduction of Gregory Robin's Primordial Vibration Painting",
+        dimensions: "W 86.4 × D 86.4 × H 103.9 cm",
+        description: "A rare limited edition of 23 pieces — each chair is a wearable painting, its fabric hand-worked to reproduce Gregory Robin's Primordial Vibration, an abstract canvas of layered pigment and movement. Mounted on polished brass legs, the RC Club Chair stands as a singular intersection of furniture and fine art."
       },
       {
         image: robicaraChestDrawers,
