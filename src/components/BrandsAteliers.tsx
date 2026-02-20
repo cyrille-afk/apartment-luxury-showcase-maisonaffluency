@@ -302,15 +302,6 @@ const partnerBrands = [
     galleryIndex: 1, // A Sophisticated Living Room
   },
   {
-    id: "giopato-coombes",
-    name: "Giopato & Coombes",
-    category: "Lighting",
-    subcategory: "Chandeliers",
-    origin: "Italy",
-    description: "Italian-British design studio founded by Cristiana Giopato and Christopher Coombes, creating poetic lighting installations that blend precision engineering with organic, nature-inspired forms.",
-    instagram: "https://instagram.com/giopatoandcoombes",
-  },
-  {
     id: "matthieu-gicquel",
     name: "Matthieu Gicquel",
     category: "Decorative Object",
