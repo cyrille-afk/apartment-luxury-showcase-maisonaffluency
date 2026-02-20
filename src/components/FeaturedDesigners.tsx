@@ -1603,9 +1603,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       {
         image: tristanAuerTeeFloorLamp,
         title: "Tee Floor Lamp",
-        subtitle: "for Pouenat — 16/100 • Scala Silk Lamp Shade",
+        subtitle: "for Pouenat",
         category: "Lighting",
-        tags: ["Lighting", "Floor Lamps"],
+        tags: ["Lighting", "Limited Edition 16/100"],
         materials: "Brushed brass • Marble • Scala silk lamp shade",
         dimensions: "D50 × H170 cm",
         description: "The Tee Floor Lamp for Pouenat by Tristan Auer is a limited edition piece (16/100) that combines brushed brass, sculptural marble and a custom Scala silk shade. Its refined material layering — warm brass base, tactile marble column, crisp silk shade — embodies Auer's philosophy of doing more with less."
