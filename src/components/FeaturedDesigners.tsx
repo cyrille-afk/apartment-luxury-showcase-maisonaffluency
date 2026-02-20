@@ -152,6 +152,7 @@ import manOfPartsSofa from "@/assets/curators-picks/man-of-parts-sofa.jpg";
 import felixAgostiniCaryatide from "@/assets/curators-picks/felix-agostini-caryatide.jpg";
 import kiraToshiroLamp from "@/assets/curators-picks/kira-toshiro-lamp.jpg";
 import tristanAuerVeronese from "@/assets/curators-picks/tristan-auer-veronese.jpg";
+import tristanAuerYsaWallLightH from "@/assets/curators-picks/tristan-auer-ysa-wall-light-h.jpg";
 import brunoDeMaistreLyricDesk from "@/assets/curators-picks/bruno-de-maistre-lyric-desk.jpg";
 import herveVdsMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
@@ -1573,6 +1574,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         materials: "Solid walnut • Brushed brass hardware",
         dimensions: "L160 × W40 × H80 cm",
         description: "This console from Tristan Auer's Veronese collection embodies his approach to luxury furniture: clean architectural lines, impeccable craftsmanship and noble materials. The combination of solid walnut and brushed brass creates a piece that is simultaneously timeless and distinctly contemporary."
+      },
+      {
+        image: tristanAuerYsaWallLightH,
+        title: "YSA Wall Light H",
+        subtitle: "Véronèse",
+        category: "Lighting",
+        tags: ["Lighting", "Wall Lights"],
+        materials: "Patinated steel • Alabaster",
+        dimensions: "L21 × P9 × H50 cm",
+        description: "The YSA Wall Light H is part of Tristan Auer's Véronèse collection, combining patinated steel with sculpted alabaster to create a luminaire of quiet architectural power. The alabaster diffuses light with a warm, mineral glow that speaks to Auer's mastery of material and proportion."
       },
     ],
     links: [
