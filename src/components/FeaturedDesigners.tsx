@@ -151,7 +151,7 @@ import kertensPick7 from "@/assets/curators-picks/kerstens-7.jpg";
 import manOfPartsSofa from "@/assets/curators-picks/man-of-parts-sofa.jpg";
 import felixAgostiniCaryatide from "@/assets/curators-picks/felix-agostini-caryatide.jpg";
 import kiraToshiroLamp from "@/assets/curators-picks/kira-toshiro-lamp.jpg";
-import tristanAuerVeronese from "@/assets/curators-picks/tristan-auer-veronese.jpg";
+
 import tristanAuerYsaWallLightH from "@/assets/curators-picks/tristan-auer-ysa-wall-light-h.jpg";
 import tristanAuerPedestalSuzanne from "@/assets/curators-picks/tristan-auer-pedestal-suzanne.jpg";
 import brunoDeMaistreLyricDesk from "@/assets/curators-picks/bruno-de-maistre-lyric-desk.jpg";
@@ -1566,16 +1566,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorksLink: { text: "YSA Wall Lamp for Véronèse", galleryIndex: 17 },
     philosophy: "Luxury is not about excess. It's about the perfect choice of material, proportion and light — doing more with less.",
     curatorPicks: [
-      {
-        image: tristanAuerVeronese,
-        title: "Veronese Console",
-        subtitle: "Walnut & Brass",
-        category: "Tables",
-        tags: ["Tables", "Console"],
-        materials: "Solid walnut • Brushed brass hardware",
-        dimensions: "L160 × W40 × H80 cm",
-        description: "This console from Tristan Auer's Veronese collection embodies his approach to luxury furniture: clean architectural lines, impeccable craftsmanship and noble materials. The combination of solid walnut and brushed brass creates a piece that is simultaneously timeless and distinctly contemporary."
-      },
       {
         image: tristanAuerYsaWallLightH,
         title: "Wall Light H for Pouenat",
