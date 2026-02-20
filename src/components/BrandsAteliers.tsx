@@ -20,6 +20,7 @@ import cristallerieSaintLouisBg from "@/assets/designers/cristallerie-saint-loui
 import delcourtBg from "@/assets/designers/delcourt-bg.jpg";
 import ecartParisBg from "@/assets/designers/ecart-paris-bg.jpg";
 import entrelacsBg from "@/assets/designers/entrelacs-bg.jpg";
+import garnierLinkerBg from "@/assets/designers/garnier-linker-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -634,6 +635,7 @@ const brandBgMap: Record<string, string> = {
   "Bruno de Maistre": brunoDeMaistreBg,
   "Celso de Lemos": celsoDeLemosBg,
   "Baleri Italia": baleriItaliaBg,
+  "Garnier & Linker": garnierLinkerBg,
   "De La Espada": delaEspadaBg,
   "Damien Langlois Meurinne Studio": damienLangloisMeurinneBg,
   "Dagmar London": berntPetersenBg,
