@@ -38,7 +38,7 @@ import redaAmalouImg from "@/assets/designers/reda-amalou.jpg";
 import noeDuchaufourImg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
 import binaBAitelImg from "@/assets/designers/bina-baitel.jpg";
 import tristanAuerImg from "@/assets/designers/tristan-auer.jpg";
-import sergeMouilleImg from "@/assets/designers/serge-mouille.jpg";
+
 import manOfPartsImg from "@/assets/designers/man-of-parts.jpg";
 import kerstensImg from "@/assets/designers/kerstens.jpg";
 import felixAgostiniImg from "@/assets/designers/felix-agostini.jpg";
@@ -138,7 +138,7 @@ import matthieuGicquelGoldGeode from "@/assets/curators-picks/matthieu-gicquel-g
 import kikoLopezSilverHammer from "@/assets/curators-picks/kiko-lopez-silver-hammer.jpg";
 import maartenVrolijkBloomingTerra from "@/assets/curators-picks/maarten-vrolijk-blooming-terra.jpg";
 import marcantonioDetail from "@/assets/curators-picks/marcantonio-cotissi-detail.jpg";
-import sergeMouilleTripod from "@/assets/curators-picks/serge-mouille-tripod.jpg";
+
 import binaBAitelObject from "@/assets/curators-picks/bina-baitel-object.jpg";
 import kerstensConsole from "@/assets/curators-picks/kerstens-console.jpg";
 import kertensPick1 from "@/assets/curators-picks/kerstens-1.jpg";
@@ -1520,30 +1520,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/robicara_official/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "serge-mouille",
-    name: "Serge Mouille",
-    specialty: "Mid-Century Lighting Design",
-    image: sergeMouilleImg,
-    biography: "Serge Mouille (1922–1988) is considered the most important French lighting designer of the 1950s. Trained as a silversmith under Gilbert LaCroix, he brought the precision of jewelry-making to the larger scale of lighting design. Preoccupied with the beauty of natural forms and fascinated by movement and function, his tripod floor lamps and spider wall lights have become icons of mid-century design — now part of the permanent collections of the Museum of Modern Art (MoMA) and the Musée des Arts Décoratifs in Paris.",
-    notableWorks: "Tripod Floor Lamp, Spider Wall Lamp, Three-Arm Ceiling Lamp",
-    philosophy: "Light should follow natural forms — the bird in flight, the insect's wing, the movement of branches in wind.",
-    curatorPicks: [
-      {
-        image: sergeMouilleTripod,
-        title: "Tripod Floor Lamp",
-        subtitle: "Re-edition",
-        category: "Lighting",
-        tags: ["Lighting", "Floor Lamp"],
-        materials: "Painted aluminium shade • Brass tripod base",
-        dimensions: "H170 × Ø40 cm",
-        description: "The Serge Mouille Tripod Floor Lamp is one of the most iconic pieces of mid-century French design. Originally created in 1953, its elegant tripod base and adjustable painted aluminium shade continue to define sophisticated interiors worldwide. Available as an authorized re-edition."
-      },
-    ],
-    links: [
       { type: "Curators' Picks" },
     ],
   },
