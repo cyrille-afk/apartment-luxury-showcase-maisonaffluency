@@ -153,6 +153,7 @@ import felixAgostiniCaryatide from "@/assets/curators-picks/felix-agostini-carya
 import kiraToshiroLamp from "@/assets/curators-picks/kira-toshiro-lamp.jpg";
 import tristanAuerVeronese from "@/assets/curators-picks/tristan-auer-veronese.jpg";
 import tristanAuerYsaWallLightH from "@/assets/curators-picks/tristan-auer-ysa-wall-light-h.jpg";
+import tristanAuerPedestalSuzanne from "@/assets/curators-picks/tristan-auer-pedestal-suzanne.jpg";
 import brunoDeMaistreLyricDesk from "@/assets/curators-picks/bruno-de-maistre-lyric-desk.jpg";
 import herveVdsMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
@@ -1584,6 +1585,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         materials: "Patinated steel • Alabaster",
         dimensions: "L21 × P9 × H50 cm",
         description: "The Wall Light H for Pouenat is designed by Tristan Auer, combining patinated steel with sculpted alabaster to create a luminaire of quiet architectural power. The alabaster diffuses light with a warm, mineral glow that speaks to Auer's mastery of material and proportion."
+      },
+      {
+        image: tristanAuerPedestalSuzanne,
+        title: "Pedestal Suzanne for Pouenat",
+        subtitle: "Tristan Auer",
+        category: "Tables",
+        tags: ["Tables", "Side Tables"],
+        materials: "Mirror-polished stainless steel • Copper • Copper tray • Turquoise patinated brass",
+        dimensions: "L70 × P60 × H63 cm",
+        description: "The Pedestal Suzanne for Pouenat by Tristan Auer is a tour de force in material contrasts — mirror-polished stainless steel meets a weathered copper surface and turquoise patinated brass accents. The result is a side table of sculptural boldness, where industrial precision and artisanal oxidation coexist."
       },
     ],
     links: [
