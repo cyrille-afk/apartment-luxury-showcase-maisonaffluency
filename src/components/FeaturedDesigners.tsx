@@ -900,6 +900,81 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
   },
   {
+    id: "robicara",
+    name: "Francesco Caracciolo di Marano - Robicara",
+    specialty: "Italian-crafted Luxury Furniture",
+    image: robicaraImg,
+    biography: "Robicara was founded by Sam Robin, an interior architect, and Francesco Caracciolo, an Italian furniture designer — a transatlantic creative partnership uniting her flair for bespoke residential interiors with his deep expertise in Italian luxury furniture manufacturing. The brand combines the finest Italian craftsmanship with a modern aesthetic sensibility, producing pieces that express sophisticated restraint through exceptional materials and precision construction.",
+    notableWorks: "Sira Credenza (Maison Affluency), Dama Coffee Table, CS1 Sofa Collection",
+    notableWorksLink: { text: "Sira Credenza", galleryIndex: 1 },
+    philosophy: "We believe true luxury lies in the integrity of craft — in the quality of materials and the precision of execution.",
+    curatorPicks: [
+      {
+        image: robicaraArmchair,
+        title: "Roxi Chair",
+        category: "Seating",
+        tags: ["Seating", "Armchairs"],
+        materials: "Bronze patinated feet • Fabric upholstered",
+        dimensions: "W 86.4 × D 92.7 × H 78.7 cm — Seat H 40.6 cm — COM 6.4 M",
+        description: "The Roxi Chair combines sculptural bronze patinated feet with generous fabric upholstery, offering a refined balance of material contrast and comfort."
+      },
+      {
+        image: robicaraSiraCredenza,
+        title: "Sira Credenza",
+        subtitle: "5 Doors",
+        category: "Storage",
+        tags: ["Storage", "Sideboards"],
+        materials: "Patinated metal legs • Wood panels • Marble top",
+        dimensions: "W 213.4 × D 48.2 × H 81.1 cm (5 doors) — Also available: W 172.4 × D 48.2 × H 81.1 cm (4 doors) · W 340.2 × D 48.2 × H 76.0 cm (6 doors)",
+        description: "The Sira Credenza pairs sculptural patinated metal legs with richly grained wood panel doors and a dramatic marble top. Available in 4, 5, or 6-door configurations to suit any scale of interior."
+      },
+      {
+        image: robicaraHighbackChair,
+        title: "RC Club Chair",
+        subtitle: "Limited Edition 23 of 23",
+        category: "Seating",
+        tags: ["Seating", "Limited Edition"],
+        materials: "Brass legs • Hand-worked fabric with reproduction of Gregory Robin's Primordial Vibration Painting",
+        dimensions: "W 86.4 × D 86.4 × H 103.9 cm",
+        description: "A rare limited edition of 23 pieces — each chair is a wearable painting, its fabric hand-worked to reproduce Gregory Robin's Primordial Vibration, an abstract canvas of layered pigment and movement. Mounted on polished brass legs, the RC Club Chair stands as a singular intersection of furniture and fine art."
+      },
+      {
+        image: robicaraSiraNightstand,
+        title: "Sira Nightstand",
+        subtitle: "",
+        category: "Storage",
+        tags: ["Storage", "Nightstands"],
+        materials: "Solid metal patina • Laser-cut solid metal decorative handles • Interiors and door in special metal liquid lacquer or wood",
+        dimensions: "SIN30 W 76 × D 45.7 × H 55.8 cm · SIN42 W 106.5 × D 45.7 × H 60.8 cm · SIN50 W 126.8 × D 55.8 × H 76 cm",
+        description: "The Sira Nightstand is defined by its precision-cut solid metal handles and a body finished in a rich metal liquid lacquer or wood. Available in three sizes — SIN30, SIN42, and SIN50 — each version maintains the same refined material language while scaling elegantly to suit the room."
+      },
+      {
+        image: robicaraMarbleTable,
+        title: "Enzo Side Table",
+        subtitle: "",
+        category: "Tables",
+        tags: ["Tables", "Side Tables"],
+        materials: "Sculptural marble or wood top • Metal patina support • Available in all Robicara metal finishes",
+        dimensions: "ENZ26 W 65.9 × D 40.6 × H 50.7 cm",
+        description: "A symphony of sculptural marble or wood, the Enzo Side Table pairs a richly veined or grained top with a refined metal patina support. Available in the full range of Robicara metal finishes, each piece is a unique dialogue between natural material and artisanal metalwork."
+      },
+      {
+        image: robicaraMartiniTable,
+        title: "Ara Side Table",
+        subtitle: "",
+        category: "Tables",
+        tags: ["Tables", "Side Tables"],
+        materials: "Moulded shagreen liquid metal • Bronzed finish • Fiber",
+        dimensions: "ARA20 D 50.8 × H 91.3 cm · ARA23 D 60 × H 60 cm",
+        description: "The Ara Side Table is a study in material transformation — moulded shagreen liquid metal takes on the texture and depth of natural hide, finished in a warm bronzed patina over a fiber-reinforced form. Available in two proportions, from a slender tall pedestal to a more generous low table."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/robicaradesign/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
     id: "forest-giaconia",
     name: "Forest & Giaconia",
     specialty: "Contemporary Furniture & Lighting Design",
@@ -1506,81 +1581,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/redaamalou/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "robicara",
-    name: "Francesco Caracciolo di Marano - Robicara",
-    specialty: "Italian-crafted Luxury Furniture",
-    image: robicaraImg,
-    biography: "Robicara was founded by Sam Robin, an interior architect, and Francesco Caracciolo, an Italian furniture designer — a transatlantic creative partnership uniting her flair for bespoke residential interiors with his deep expertise in Italian luxury furniture manufacturing. The brand combines the finest Italian craftsmanship with a modern aesthetic sensibility, producing pieces that express sophisticated restraint through exceptional materials and precision construction.",
-    notableWorks: "Sira Credenza (Maison Affluency), Dama Coffee Table, CS1 Sofa Collection",
-    notableWorksLink: { text: "Sira Credenza", galleryIndex: 1 },
-    philosophy: "We believe true luxury lies in the integrity of craft — in the quality of materials and the precision of execution.",
-    curatorPicks: [
-      {
-        image: robicaraArmchair,
-        title: "Roxi Chair",
-        category: "Seating",
-        tags: ["Seating", "Armchairs"],
-        materials: "Bronze patinated feet • Fabric upholstered",
-        dimensions: "W 86.4 × D 92.7 × H 78.7 cm — Seat H 40.6 cm — COM 6.4 M",
-        description: "The Roxi Chair combines sculptural bronze patinated feet with generous fabric upholstery, offering a refined balance of material contrast and comfort."
-      },
-      {
-        image: robicaraSiraCredenza,
-        title: "Sira Credenza",
-        subtitle: "5 Doors",
-        category: "Storage",
-        tags: ["Storage", "Sideboards"],
-        materials: "Patinated metal legs • Wood panels • Marble top",
-        dimensions: "W 213.4 × D 48.2 × H 81.1 cm (5 doors) — Also available: W 172.4 × D 48.2 × H 81.1 cm (4 doors) · W 340.2 × D 48.2 × H 76.0 cm (6 doors)",
-        description: "The Sira Credenza pairs sculptural patinated metal legs with richly grained wood panel doors and a dramatic marble top. Available in 4, 5, or 6-door configurations to suit any scale of interior."
-      },
-      {
-        image: robicaraHighbackChair,
-        title: "RC Club Chair",
-        subtitle: "Limited Edition 23 of 23",
-        category: "Seating",
-        tags: ["Seating", "Limited Edition"],
-        materials: "Brass legs • Hand-worked fabric with reproduction of Gregory Robin's Primordial Vibration Painting",
-        dimensions: "W 86.4 × D 86.4 × H 103.9 cm",
-        description: "A rare limited edition of 23 pieces — each chair is a wearable painting, its fabric hand-worked to reproduce Gregory Robin's Primordial Vibration, an abstract canvas of layered pigment and movement. Mounted on polished brass legs, the RC Club Chair stands as a singular intersection of furniture and fine art."
-      },
-      {
-        image: robicaraSiraNightstand,
-        title: "Sira Nightstand",
-        subtitle: "",
-        category: "Storage",
-        tags: ["Storage", "Nightstands"],
-        materials: "Solid metal patina • Laser-cut solid metal decorative handles • Interiors and door in special metal liquid lacquer or wood",
-        dimensions: "SIN30 W 76 × D 45.7 × H 55.8 cm · SIN42 W 106.5 × D 45.7 × H 60.8 cm · SIN50 W 126.8 × D 55.8 × H 76 cm",
-        description: "The Sira Nightstand is defined by its precision-cut solid metal handles and a body finished in a rich metal liquid lacquer or wood. Available in three sizes — SIN30, SIN42, and SIN50 — each version maintains the same refined material language while scaling elegantly to suit the room."
-      },
-      {
-        image: robicaraMarbleTable,
-        title: "Enzo Side Table",
-        subtitle: "",
-        category: "Tables",
-        tags: ["Tables", "Side Tables"],
-        materials: "Sculptural marble or wood top • Metal patina support • Available in all Robicara metal finishes",
-        dimensions: "ENZ26 W 65.9 × D 40.6 × H 50.7 cm",
-        description: "A symphony of sculptural marble or wood, the Enzo Side Table pairs a richly veined or grained top with a refined metal patina support. Available in the full range of Robicara metal finishes, each piece is a unique dialogue between natural material and artisanal metalwork."
-      },
-      {
-        image: robicaraMartiniTable,
-        title: "Ara Side Table",
-        subtitle: "",
-        category: "Tables",
-        tags: ["Tables", "Side Tables"],
-        materials: "Moulded shagreen liquid metal • Bronzed finish • Fiber",
-        dimensions: "ARA20 D 50.8 × H 91.3 cm · ARA23 D 60 × H 60 cm",
-        description: "The Ara Side Table is a study in material transformation — moulded shagreen liquid metal takes on the texture and depth of natural hide, finished in a warm bronzed patina over a fiber-reinforced form. Available in two proportions, from a slender tall pedestal to a more generous low table."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/robicaradesign/" },
       { type: "Curators' Picks" },
     ],
   },
