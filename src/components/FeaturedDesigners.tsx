@@ -1520,16 +1520,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     philosophy: "We believe true luxury lies in the integrity of craft — in the quality of materials and the precision of execution.",
     curatorPicks: [
       {
-        image: robicaraSiraCredenza,
-        title: "Sira",
-        subtitle: "Credenza",
-        category: "Storage",
-        tags: ["Storage", "Credenza"],
-        materials: "Calacatta marble • Blackened steel frame",
-        dimensions: "L200 × D45 × H80 cm",
-        description: "The Sira Credenza marries Italian craftsmanship with architectural simplicity. Its Calacatta marble panels — veined in warm terracotta and ivory — rest in a precise blackened steel frame, creating a piece of quiet drama suitable for both residential and hospitality interiors."
-      },
-      {
         image: robicaraArmchair,
         title: "Round Armchair",
         subtitle: "Robicara",
