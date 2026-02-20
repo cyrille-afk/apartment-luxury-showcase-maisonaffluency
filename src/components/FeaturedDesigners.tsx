@@ -1367,7 +1367,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
   },
   {
     id: "kira",
-    name: "Made in Kira",
+    name: "Roman Frankel - Made in Kira",
     specialty: "Hand-crafted Ceramic Lamps & Objects",
     image: kiraImg,
     biography: "Made in Kira is a Spanish atelier specializing in hand-crafted ceramic lamps and objects that fuse artisanal tradition with contemporary design. Founded by designer Kira, the studio's pieces are entirely hand-thrown and hand-glazed, with each lamp a unique object that celebrates the beauty of imperfection. Their Toshiro Lamp has become a collector's piece, prized for its sculptural form and exceptional glaze quality.",
