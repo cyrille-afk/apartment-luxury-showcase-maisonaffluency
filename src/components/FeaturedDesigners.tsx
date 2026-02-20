@@ -1613,7 +1613,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         subtitle: "100/30/31/32/33",
         category: "Lighting",
         tags: ["Lighting", "Wall Lights"],
-        materials: "Painted steel • Copper sheet steel",
+        materials: "Gunmetal patinated steel • Shiny varnish",
         dimensions: "L27 × P9 × H27 cm",
         description: "The Eclipse Wall Light for Pouenat by Tristan Auer is a sculptural study in circular geometry — a brushed copper disc framing a deep painted steel recess. Its minimal, planetary form generates a warm, grazing light that animates the wall surface with shadow and material depth."
       },
