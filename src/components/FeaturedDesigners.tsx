@@ -1525,7 +1525,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/robicara_official/" },
+      { type: "Instagram", url: "https://www.instagram.com/robicaradesign/" },
       { type: "Curators' Picks" },
     ],
   },
