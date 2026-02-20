@@ -1621,9 +1621,10 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       {
         image: tristanAuerYsaWallLightVeronese,
         title: "YSA Wall Light for Véronèse",
+        subtitle: "Murano glass",
         category: "Lighting",
         tags: ["Lighting", "Wall Lights"],
-        materials: "Polished mirror frame • Streaked frosted crystal • Smoked glass with stripe motif • Glass with mirror application — all in Murano glass",
+        materials: "Polished mirror frame • Streaked frosted crystal • Smoked glass with stripe motif • Mirror application glass",
         dimensions: "W40 × D15 × H52 cm",
         description: "The YSA Wall Light for Véronèse by Tristan Auer is an extraordinary essay in Murano glass craftsmanship. Layers of streaked frosted crystal, smoked glass and mirrored glass are held within a polished mirror frame, creating a luminaire of exceptional material depth and luminous complexity."
       },
