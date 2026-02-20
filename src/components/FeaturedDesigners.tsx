@@ -156,6 +156,7 @@ import tristanAuerYsaWallLightH from "@/assets/curators-picks/tristan-auer-ysa-w
 import tristanAuerPedestalSuzanne from "@/assets/curators-picks/tristan-auer-pedestal-suzanne.jpg";
 import tristanAuerTableLampH from "@/assets/curators-picks/tristan-auer-table-lamp-h.jpg";
 import tristanAuerTeeFloorLamp from "@/assets/curators-picks/tristan-auer-tee-floor-lamp.jpg";
+import tristanAuerEclipseWallLight from "@/assets/curators-picks/tristan-auer-eclipse-wall-light.jpg";
 import brunoDeMaistreLyricDesk from "@/assets/curators-picks/bruno-de-maistre-lyric-desk.jpg";
 import herveVdsMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
@@ -1605,6 +1606,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         materials: "Brushed brass • Marble • Scala silk lamp shade",
         dimensions: "D50 × H170 cm",
         description: "The Tee Floor Lamp for Pouenat by Tristan Auer is a limited edition piece (16/100) that combines brushed brass, sculptural marble and a custom Scala silk shade. Its refined material layering — warm brass base, tactile marble column, crisp silk shade — embodies Auer's philosophy of doing more with less."
+      },
+      {
+        image: tristanAuerEclipseWallLight,
+        title: "Eclipse Wall Light for Pouenat",
+        subtitle: "100/30/31/32/33",
+        category: "Lighting",
+        tags: ["Lighting", "Wall Lights"],
+        materials: "Painted steel • Copper sheet steel",
+        dimensions: "L27 × P9 × H27 cm",
+        description: "The Eclipse Wall Light for Pouenat by Tristan Auer is a sculptural study in circular geometry — a brushed copper disc framing a deep painted steel recess. Its minimal, planetary form generates a warm, grazing light that animates the wall surface with shadow and material depth."
       },
     ],
     links: [
