@@ -131,6 +131,12 @@ import haymannMarieLamp from "@/assets/curators-picks/haymann-marie-lamp.jpg";
 import theoremeGarnierLinker from "@/assets/curators-picks/theoreme-garnier-linker.jpg";
 import garnierLinkerCenterpiece from "@/assets/curators-picks/garnier-linker-centerpiece.jpg";
 import robicaraSiraCredenza from "@/assets/curators-picks/robicara-sira-credenza.jpg";
+import robicaraArmchair from "@/assets/curators-picks/robicara-armchair.jpg";
+import robicaraHighbackChair from "@/assets/curators-picks/robicara-highback-chair.jpg";
+import robicaraSideboard from "@/assets/curators-picks/robicara-sideboard.jpg";
+import robicaraChestDrawers from "@/assets/curators-picks/robicara-chest-drawers.jpg";
+import robicaraMarbleTable from "@/assets/curators-picks/robicara-marble-table.jpg";
+import robicaraMartiniTable from "@/assets/curators-picks/robicara-martini-table.jpg";
 import redaAmalouDotTable from "@/assets/curators-picks/reda-amalou-dot-table.jpg";
 import noeFolioLamp from "@/assets/curators-picks/noe-folio-lamp.jpg";
 import rowinNoneIILampDetail from "@/assets/curators-picks/rowin-none-ii-lamp-detail.jpg";
@@ -1522,6 +1528,60 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         materials: "Calacatta marble • Blackened steel frame",
         dimensions: "L200 × D45 × H80 cm",
         description: "The Sira Credenza marries Italian craftsmanship with architectural simplicity. Its Calacatta marble panels — veined in warm terracotta and ivory — rest in a precise blackened steel frame, creating a piece of quiet drama suitable for both residential and hospitality interiors."
+      },
+      {
+        image: robicaraArmchair,
+        title: "Round Armchair",
+        subtitle: "Robicara",
+        category: "Seating",
+        tags: ["Seating", "Armchairs"],
+        materials: "Mosaic bouclé upholstery • Blackened steel legs",
+        description: "A voluminous tub armchair wrapped in a mosaic-patterned bouclé fabric, combining tactile richness with a bold, sculptural silhouette. The blackened steel legs provide a precise, minimal contrast to the softly rounded body."
+      },
+      {
+        image: robicaraHighbackChair,
+        title: "High-Back Chair",
+        subtitle: "Robicara",
+        category: "Seating",
+        tags: ["Seating", "Chairs"],
+        materials: "Bouclé fabric with hand-painted back detail • Burnished brass feet",
+        description: "A dramatic high-back chair where the outer face is treated as a canvas — a graphic, hand-applied ink pattern dissolves across a pale bouclé ground, creating a piece that reads as both furniture and art object."
+      },
+      {
+        image: robicaraSideboard,
+        title: "Sideboard",
+        subtitle: "Robicara",
+        category: "Storage",
+        tags: ["Storage", "Sideboards"],
+        materials: "Shagreen-effect lacquered doors • Burnished brass legs & frame • Black marble base shelf",
+        description: "A monumental sideboard of four doors finished in a deep charcoal shagreen-effect lacquer, framed in burnished brass uprights and anchored by a black marble lower shelf. A masterclass in material restraint and architectural proportion."
+      },
+      {
+        image: robicaraChestDrawers,
+        title: "Chest of Drawers",
+        subtitle: "Robicara",
+        category: "Storage",
+        tags: ["Storage", "Chests"],
+        materials: "Brushed bronze panels • Lacquered drawers • Nero Marquina marble top & base shelf",
+        description: "A refined chest of drawers where brushed bronze side panels frame a set of seamless lacquered drawer fronts, topped and grounded by slabs of Nero Marquina marble. The interplay of warm metal and cool stone gives the piece a quiet, architectural gravitas."
+      },
+      {
+        image: robicaraMarbleTable,
+        title: "Round Side Table",
+        subtitle: "Robicara",
+        category: "Tables",
+        tags: ["Tables", "Side Tables"],
+        materials: "Calacatta Viola marble • Burnished brass ring detail",
+        description: "A sculptural side table cut entirely from Calacatta Viola marble — its deep burgundy veining swirling across both the thick circular top and the angular pedestal base. A burnished brass ring mediates between top and base, adding a jewel-like precision to the stone's raw drama."
+      },
+      {
+        image: robicaraMartiniTable,
+        title: "Martini Side Table",
+        subtitle: "Robicara",
+        category: "Tables",
+        tags: ["Tables", "Side Tables"],
+        materials: "Patinated bronze top • Shagreen-textured bronze base",
+        description: "A martini-form side table in two textures of bronze — a smooth, hammered disc top balanced on a shagreen-textured bottle-shaped base. The contrast between the polished surface and the tactile base creates an object of refined sculptural tension."
       },
     ],
     links: [
