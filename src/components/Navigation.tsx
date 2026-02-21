@@ -355,7 +355,7 @@ const Navigation = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-5 lg:gap-8 pb-3">
+          <div className="flex items-center gap-8 lg:gap-14 pb-3">
             {leftNavItems.map((item) => (
               <button 
                 key={item.href} 
