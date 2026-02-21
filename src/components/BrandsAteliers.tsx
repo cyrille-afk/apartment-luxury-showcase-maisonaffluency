@@ -240,7 +240,7 @@ const partnerBrands = [
     name: "De La Espada",
     category: "Tables",
     subcategory: "Tables",
-    origin: "United Kingdom",
+    origin: "Portugal",
     description: "Anglo-Portuguese furniture studio creating refined contemporary pieces rooted in the craft traditions of Portugal, combining natural materials with precise joinery and enduring form.",
     instagram: "https://www.instagram.com/delaespada/",
   },
