@@ -1870,24 +1870,34 @@ const FeaturedDesigners = () => {
               })}
             </div>
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="relative flex-1 sm:flex-none sm:w-56">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search by designer..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-8 h-9 text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
-                />
-                {searchQuery && (
+              {!showSearch ? (
+                <button
+                  onClick={() => setShowSearch(true)}
+                  className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="Open search"
+                >
+                  <span className="text-xs font-body uppercase tracking-wider">Search</span>
+                  <Search className="h-5 w-5" />
+                </button>
+              ) : (
+                <div className="relative flex-1 sm:flex-none sm:w-56">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search by designer..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 pr-8 h-9 text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
+                    autoFocus
+                  />
                   <button
-                    onClick={() => setSearchQuery("")}
+                    onClick={() => { setSearchQuery(""); setShowSearch(false); }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
-                )}
-              </div>
+                </div>
+              )}
               <Popover open={filterOpen} onOpenChange={setFilterOpen}>
               <PopoverTrigger asChild>
                 <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none flex items-center gap-1.5" aria-label="Filter">
