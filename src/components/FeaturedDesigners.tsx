@@ -1842,9 +1842,9 @@ const FeaturedDesigners = () => {
             </h2>
           </div>
           {/* A-Z alphabet jump bar + Search + Filter */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-3">
+          <div className="flex flex-row items-center gap-4 mb-3 overflow-x-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}>
             <div
-              className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto max-w-full"
+              className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto flex-shrink-0"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
             >
               {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
@@ -1869,7 +1869,7 @@ const FeaturedDesigners = () => {
                 );
               })}
             </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-4 flex-shrink-0">
               {!showSearch ? (
                 <button
                   onClick={() => setShowSearch(true)}
