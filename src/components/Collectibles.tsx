@@ -34,7 +34,7 @@ import marcantonioBrandoliniImg from "@/assets/designers/marcantonio-brandolini-
 import marcantonioCotissiVessel from "@/assets/curators-picks/marcantonio-cotissi-vessel.jpg";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
-import pierreBonnefilleImg from "@/assets/designers/pierre-bonnefille.jpg";
+import pierreBonnefilleImg from "@/assets/designers/pierre-bonnefille-collectibles.jpg";
 import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
 
 const collectibleDesigners = [
