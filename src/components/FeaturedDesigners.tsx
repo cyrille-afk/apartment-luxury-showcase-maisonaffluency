@@ -1841,13 +1841,6 @@ const FeaturedDesigners = () => {
               Designers & Makers
             </h2>
             <div className="flex items-center gap-4 pb-1">
-              <button
-                onClick={() => setShowSearch(!showSearch)}
-                className="text-muted-foreground hover:text-primary transition-colors"
-                aria-label="Search designers"
-              >
-                <Search className="h-5 w-5" />
-              </button>
               <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
                 <SheetTrigger asChild>
                   <button className="text-muted-foreground hover:text-primary transition-colors relative" aria-label="Filter by category">
@@ -1940,32 +1933,6 @@ const FeaturedDesigners = () => {
               ))}
             </div>
           </div>
-          {showSearch && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-4"
-            >
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search designers..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-10 bg-card/80 border-border/40 focus:border-primary/60 h-9 text-sm"
-                  autoFocus
-                />
-                <button
-                  onClick={() => { setSearchQuery(""); setShowSearch(false); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </motion.div>
-          )}
           <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
             Discover the visionary designers and artisans whose exceptional work defines Maison Affluency. Each brings
             their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
