@@ -188,7 +188,7 @@ const collectibleDesigners = [
       },
     ],
     links: [
-      { type: "Instagram", url: "https://instagram.com/matthieugicquel" },
+      { type: "Instagram", url: "https://www.instagram.com/matthieu_gicquel/?hl=en" },
       { type: "Curators' Picks" },
     ],
   },
