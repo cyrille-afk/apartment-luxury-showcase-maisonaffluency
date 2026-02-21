@@ -992,13 +992,15 @@ const BrandsAteliers = () => {
   const filteredBrands = useMemo(() => {
     let brands = partnerBrands;
     
+    const normalizeSearch = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+      const query = normalizeSearch(searchQuery);
       brands = brands.filter(
         (brand) =>
-          brand.name.toLowerCase().includes(query) ||
-          brand.category.toLowerCase().includes(query) ||
-          brand.origin.toLowerCase().includes(query)
+          normalizeSearch(brand.name).includes(query) ||
+          normalizeSearch(brand.category).includes(query) ||
+          normalizeSearch(brand.origin).includes(query)
       );
     }
     
@@ -1126,7 +1128,7 @@ const BrandsAteliers = () => {
                   })}
                 </div>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <div className="relative flex-1 sm:flex-none sm:w-56">
+                  <div className="relative flex-1 sm:flex-none sm:w-48">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="text"

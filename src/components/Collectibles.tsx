@@ -296,12 +296,14 @@ const Collectibles = () => {
   const filteredDesigners = useMemo(() => {
     let designers = collectibleDesigners;
     
+    const normalizeSearch = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+      const query = normalizeSearch(searchQuery);
       designers = designers.filter(designer => 
-        designer.name.toLowerCase().includes(query) ||
-        designer.specialty.toLowerCase().includes(query) ||
-        designer.biography.toLowerCase().includes(query)
+        normalizeSearch(designer.name).includes(query) ||
+        normalizeSearch(designer.specialty).includes(query) ||
+        normalizeSearch(designer.biography).includes(query)
       );
     }
     
@@ -455,7 +457,7 @@ const Collectibles = () => {
                     })}
                   </div>
                   <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <div className="relative flex-1 sm:flex-none sm:w-56">
+                    <div className="relative flex-1 sm:flex-none sm:w-48">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         type="text"
