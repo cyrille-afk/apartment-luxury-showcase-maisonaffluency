@@ -55,6 +55,7 @@ import andreePutmanBg from "@/assets/designers/andree-putman-bg.jpg";
 import noomBg from "@/assets/designers/noom-bg.png";
 import nicolasAubagnacBg from "@/assets/designers/nicolas-aubagnac-bg.png";
 import ozoneLightBg from "@/assets/designers/ozone-light-bg.jpg";
+import collectionParticuliereBg from "@/assets/designers/collection-particuliere-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -801,6 +802,7 @@ const brandBgMap: Record<string, string> = {
   "Noom": noomBg,
   "Nicolas Aubagnac": nicolasAubagnacBg,
   "Ozone Light": ozoneLightBg,
+  "Collection Particulière": collectionParticuliereBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
