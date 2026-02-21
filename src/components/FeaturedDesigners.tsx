@@ -1913,8 +1913,8 @@ const FeaturedDesigners = () => {
               </Sheet>
             </div>
           </div>
-          {/* A-Z alphabet jump bar */}
-          <div className="flex justify-start mb-3">
+          {/* A-Z alphabet jump bar + Search */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-3">
             <div
               className="inline-flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -1931,6 +1931,24 @@ const FeaturedDesigners = () => {
                   {letter}
                 </button>
               ))}
+            </div>
+            <div className="relative w-full sm:w-56">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search by designer..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-8 h-9 text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
           </div>
           <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
