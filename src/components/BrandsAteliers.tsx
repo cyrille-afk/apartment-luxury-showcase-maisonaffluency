@@ -30,6 +30,7 @@ import ikselBg from "@/assets/designers/iksel-bg.jpg";
 import kikoLopezBg from "@/assets/designers/kiko-lopez-bg.jpg";
 import leoSentouBg from "@/assets/designers/leo-sentou-bg.jpg";
 import manOfPartsBg from "@/assets/designers/man-of-parts-bg.jpg";
+import takayokayaBg from "@/assets/designers/takayokaya-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -663,6 +664,7 @@ const brandBgMap: Record<string, string> = {
   "Kiko Lopez": kikoLopezBg,
   "Leo Sentou": leoSentouBg,
   "Man of Parts": manOfPartsBg,
+  "Takayokaya": takayokayaBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
