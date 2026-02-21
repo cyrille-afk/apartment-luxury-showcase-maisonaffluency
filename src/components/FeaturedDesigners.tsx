@@ -1585,35 +1585,15 @@ const FeaturedDesigners = () => {
   const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
 
   // Collect categories and subcategories from curators' picks
-  const categoryMap = useMemo(() => {
-    const map: Record<string, Set<string>> = {};
-    featuredDesigners.forEach(designer => {
-      designer.curatorPicks?.forEach((pick: any) => {
-        if (pick.tags && pick.tags.length >= 2) {
-          const category = pick.tags[0];
-          const subcategory = pick.tags[1];
-          if (!map[category]) map[category] = new Set();
-          map[category].add(subcategory);
-        } else if (pick.tags && pick.tags.length === 1) {
-          const category = pick.tags[0];
-          if (!map[category]) map[category] = new Set();
-        }
-      });
-    });
-    const result: Record<string, string[]> = {};
-    CATEGORY_ORDER.forEach(cat => {
-      if (map[cat]) {
-        result[cat] = Array.from(map[cat]).sort();
-      }
-    });
-    // Include any categories not in the fixed order
-    Object.keys(map).forEach(cat => {
-      if (!result[cat]) {
-        result[cat] = Array.from(map[cat]).sort();
-      }
-    });
-    return result;
-  }, []);
+  // Use the same subcategory names as the All Categories navigation
+  const categoryMap = useMemo<Record<string, string[]>>(() => ({
+    "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
+    "Tables": ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables"],
+    "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
+    "Storage": ["Bookcases", "Cabinets"],
+    "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
+    "Décor": ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
+  }), []);
 
   const categories = useMemo(() => {
     const ordered = CATEGORY_ORDER.filter(cat => categoryMap[cat]);
