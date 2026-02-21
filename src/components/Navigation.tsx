@@ -314,7 +314,7 @@ const Navigation = () => {
                 <button 
                   key={item.href} 
                   onClick={() => handleNavClick(item.href)} 
-                  className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap px-3 py-1.5 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90"
+                  className="font-body text-[10px] uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap px-2.5 py-1 border border-foreground rounded-sm bg-foreground text-background hover:bg-background hover:text-foreground"
                 >
                   
                   {item.label}
