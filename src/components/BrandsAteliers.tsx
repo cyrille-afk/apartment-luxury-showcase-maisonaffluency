@@ -241,7 +241,7 @@ const partnerBrands = [
     origin: "France",
     description: "French atelier renowned for bespoke upholstery and furniture, combining traditional savoir-faire with contemporary design to create exceptional seating pieces.",
     featured: "Custom Upholstered Sofa",
-    instagram: "https://instagram.com/entrelacs_creation",
+    instagram: "https://www.instagram.com/entrelacs_lightings/",
   },
   {
     id: "entrelacs-creation-kheops",
@@ -251,7 +251,7 @@ const partnerBrands = [
     origin: "France",
     description: "French atelier renowned for bespoke upholstery and furniture, combining traditional savoir-faire with contemporary design to create exceptional seating pieces.",
     featured: "Kheops Bronze & Alabaster Wall Light",
-    instagram: "https://instagram.com/entrelacs_creation",
+    instagram: "https://www.instagram.com/entrelacs_lightings/",
     galleryIndex: 15, // A Workspace of Distinction - Home Office with a View
   },
   {
