@@ -34,6 +34,7 @@ import takayokayaBg from "@/assets/designers/takayokaya-bg.jpg";
 import theoremeEditionsBg from "@/assets/designers/theoreme-editions-bg.jpg";
 import thierryLemaireBg from "@/assets/designers/thierry-lemaire-bg.jpg";
 import sergeMouilleBg from "@/assets/designers/serge-mouille-bg.jpg";
+import robicaraBg from "@/assets/designers/robicara-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -671,6 +672,7 @@ const brandBgMap: Record<string, string> = {
   "Théorème Editions": theoremeEditionsBg,
   "Thierry Lemaire": thierryLemaireBg,
   "Serge Mouille": sergeMouilleBg,
+  "Robicara": robicaraBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
