@@ -20,7 +20,7 @@ const Hero = () => {
           className="h-full w-full object-cover object-[50%_40%] md:h-[130%] md:object-[50%_30%]"
           style={{ opacity }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </motion.div>
       
       <div className="relative z-10 h-full px-4 pb-32 pt-32 md:px-12 md:pb-20 md:pt-20 lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-center">

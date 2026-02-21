@@ -378,7 +378,7 @@ const Gallery = () => {
                         alt={item.title}
                         className="h-full w-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                       {/* Eye icon — pulsing to signal tap-to-expand */}
                       <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm p-1.5 rounded-full animate-pulse-fade">
                         <Maximize2 className="w-3.5 h-3.5 text-white" />
@@ -431,7 +431,7 @@ const Gallery = () => {
                         className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm"
                       >
                         <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         {/* Expand icon - opens lightbox directly */}
                         <button
                           onClick={(e) => {
