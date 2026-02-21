@@ -797,7 +797,7 @@ function AlphaStrip({
                   }}
                 />
               )}
-              <div className={`absolute inset-0 transition-all duration-300 ${hasBg ? "bg-card/80 group-hover:bg-black/35" : "bg-card/50 group-hover:bg-card/80"}`} />
+              <div className={`absolute inset-0 transition-all duration-300 ${hasBg ? "bg-black/35 md:bg-card/80 md:group-hover:bg-black/35" : "bg-card/50 group-hover:bg-card/80"}`} />
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2">
@@ -826,30 +826,30 @@ function AlphaStrip({
                       </a>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className={`font-serif text-lg md:text-xl text-foreground transition-colors duration-300 mb-1 ${hasBg ? "group-hover:text-white" : "group-hover:text-primary"}`}>
+                      <h3 className={`font-serif text-lg md:text-xl transition-colors duration-300 mb-1 ${hasBg ? "text-white md:text-foreground md:group-hover:text-white" : "text-foreground group-hover:text-primary"}`}>
                         {brand.name}
                       </h3>
-                      <span className={`text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider transition-colors duration-300 ${hasBg ? "group-hover:text-white/80" : ""}`}>
+                      <span className={`text-[10px] md:text-xs uppercase tracking-wider transition-colors duration-300 ${hasBg ? "text-white/80 md:text-muted-foreground md:group-hover:text-white/80" : "text-muted-foreground"}`}>
                         {brand.origin}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <p className={`text-xs md:text-sm text-muted-foreground font-body leading-relaxed mb-3 line-clamp-3 transition-colors duration-300 ${hasBg ? "group-hover:text-white/90" : ""}`}>
+                <p className={`text-xs md:text-sm font-body leading-relaxed mb-3 line-clamp-3 transition-colors duration-300 ${hasBg ? "text-white/90 md:text-muted-foreground md:group-hover:text-white/90" : "text-muted-foreground"}`}>
                   {brand.description}
                 </p>
 
                 {brand.featuredItems.some(item => item.featured) && (
                 <div className="space-y-1">
-                  <span className={`text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider block transition-colors duration-300 ${hasBg ? "group-hover:text-white/70" : ""}`}>Featured</span>
+                  <span className={`text-[10px] md:text-xs uppercase tracking-wider block transition-colors duration-300 ${hasBg ? "text-white/70 md:text-muted-foreground md:group-hover:text-white/70" : "text-muted-foreground"}`}>Featured</span>
                   <ul className="space-y-0.5">
                     {brand.featuredItems.map((item, itemIndex) => (
                       <li key={itemIndex}>
                         {item.featured && item.galleryIndex !== undefined ? (
                           <button
                             onClick={() => scrollToGallery(item.galleryIndex!, brand.name)}
-                            className={`text-xs md:text-sm text-foreground font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation text-left ${hasBg ? "group-hover:text-white" : ""}`}
+                            className={`text-xs md:text-sm font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation text-left ${hasBg ? "text-white md:text-foreground md:group-hover:text-white" : "text-foreground"}`}
                           >
                             <span className={`underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary ${hasBg ? "group-hover:decoration-white/60" : ""}`}>
                               {item.featured}
@@ -857,7 +857,7 @@ function AlphaStrip({
                             <svg className={`h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0 ${hasBg ? "group-hover:text-white/80" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                           </button>
                         ) : item.featured ? (
-                          <span className={`text-xs md:text-sm text-foreground font-body transition-colors duration-300 ${hasBg ? "group-hover:text-white/90" : ""}`}>
+                          <span className={`text-xs md:text-sm font-body transition-colors duration-300 ${hasBg ? "text-white/90 md:text-foreground md:group-hover:text-white/90" : "text-foreground"}`}>
                             {item.featured}
                           </span>
                         ) : null}
