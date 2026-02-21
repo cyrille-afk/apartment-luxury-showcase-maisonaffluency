@@ -30,18 +30,13 @@ const QuickJumpMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isVisible, setIsVisible] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  
 
   useEffect(() => {
     const handleScroll = () => {
       // Show menu only after scrolling past the hero section (full viewport height)
       // This keeps it hidden when the main navigation is most prominent
       setIsVisible(window.scrollY > window.innerHeight);
-
-      // Calculate scroll progress (0-100)
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = scrollHeight > 0 ? (window.scrollY / scrollHeight) * 100 : 0;
-      setScrollProgress(Math.min(100, Math.max(0, progress)));
 
       // Determine active section
       const scrollPosition = window.scrollY + window.innerHeight / 3;
@@ -119,33 +114,7 @@ const QuickJumpMenu = () => {
         )}
       </AnimatePresence>
 
-      {/* Circular progress indicator around button */}
       <div className="relative group">
-        <svg
-          className="absolute -inset-2 w-[68px] h-[68px] -rotate-90"
-          viewBox="0 0 60 60"
-        >
-          <circle
-            cx="30"
-            cy="30"
-            r="28"
-            fill="none"
-            stroke="hsl(var(--primary) / 0.15)"
-            strokeWidth="2"
-          />
-          <circle
-            cx="30"
-            cy="30"
-            r="28"
-            fill="none"
-            stroke="hsl(var(--primary))"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeDasharray={`${2 * Math.PI * 28}`}
-            strokeDashoffset={`${2 * Math.PI * 28 * (1 - scrollProgress / 100)}`}
-            className="transition-all duration-150 ease-out drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]"
-          />
-        </svg>
         
         {/* Glow effect */}
         <div className={`absolute inset-0 rounded-full transition-all duration-300 ${
