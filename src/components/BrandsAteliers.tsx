@@ -770,7 +770,7 @@ function AlphaStrip({
                   className="absolute inset-0 w-full h-full pointer-events-none select-none"
                   style={{
                     objectFit: brand.name === "Baleri Italia" ? "contain" : "cover",
-                    objectPosition: brand.name === "Baleri Italia" ? "center 20%" : brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : "center top",
+                    objectPosition: brand.name === "Baleri Italia" ? "center 20%" : brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : brand.name === "Robicara" ? "center 30%" : "center top",
                     padding: brand.name === "Baleri Italia" ? "10%" : "0",
                   }}
                 />
