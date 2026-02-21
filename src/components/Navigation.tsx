@@ -180,12 +180,12 @@ const Navigation = () => {
           {/* Mobile Hamburger Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-12 w-12 absolute right-0" aria-label="Toggle menu">
+              <Button variant="ghost" size="icon" className="h-12 w-12 absolute left-0" aria-label="Toggle menu">
                 {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
               </Button>
             </SheetTrigger>
             
-            <SheetContent side="right" className="w-full overflow-y-auto" aria-describedby={undefined}>
+            <SheetContent side="left" className="w-full overflow-y-auto" aria-describedby={undefined}>
               <div className="sr-only">
                 <h2>Navigation Menu</h2>
               </div>
