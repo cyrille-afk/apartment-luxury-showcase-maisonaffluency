@@ -81,9 +81,9 @@ const Hero = () => {
     }} className="absolute bottom-24 md:bottom-8 left-1/2 z-10 -translate-x-1/2">
         <button
           onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
-          className="flex flex-col items-center gap-2 cursor-pointer group"
+          className="flex flex-col items-center gap-2 cursor-pointer group px-6 py-3 rounded-full bg-black/20 backdrop-blur-sm"
         >
-          <span className="font-body text-xs uppercase tracking-widest text-cream/60 group-hover:text-cream/90 transition-colors">
+          <span className="font-body text-xs uppercase tracking-widest text-cream/80 group-hover:text-cream transition-colors">
             Scroll to Explore
           </span>
           <motion.div
