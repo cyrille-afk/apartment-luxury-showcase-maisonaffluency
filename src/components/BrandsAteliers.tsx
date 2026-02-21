@@ -384,7 +384,7 @@ const partnerBrands = [
     category: "Seating",
     subcategory: "Chairs",
     seatType: "Chairs",
-    origin: "France",
+    origin: "Portugal",
     description: "French design studio crafting whimsical and sculptural furniture pieces that blend playful forms with exceptional craftsmanship and artistic expression.",
     featured: "Pépé Chair",
     instagram: "https://instagram.com/hamrei",
