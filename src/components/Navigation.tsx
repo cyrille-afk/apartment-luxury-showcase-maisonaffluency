@@ -227,36 +227,27 @@ const Navigation = () => {
                   <p className="font-body text-[10px] uppercase tracking-[0.25em] text-foreground/40 mb-3">All Categories</p>
                   <div className="flex flex-col gap-0">
                     {CATEGORY_ORDER.map(cat => (
-                      <div key={cat}>
+                      <div key={cat} className="mb-3">
                         <button
                           onClick={() => {
-                            if (SUBCATEGORY_MAP[cat]?.length > 0) {
-                              setExpandedCategory(expandedCategory === cat ? null : cat);
-                            } else {
-                              setIsOpen(false); setExpandedCategory(null);
-                              window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                              handleNavClick('#designers');
-                            }
+                            setIsOpen(false); 
+                            window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
+                            handleNavClick('#designers');
                           }}
-                          className={`text-left font-body text-[13px] uppercase tracking-wide transition-colors py-2.5 w-full flex items-center justify-between ${expandedCategory === cat ? 'text-primary' : 'text-foreground/70 hover:text-primary'}`}
+                          className="text-left font-body text-[13px] uppercase tracking-wide transition-colors py-1.5 w-full text-foreground/70 hover:text-primary font-medium"
                         >
                           {cat}
-                          {SUBCATEGORY_MAP[cat]?.length > 0 && (
-                            <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedCategory === cat ? "rotate-90" : ""}`} />
-                          )}
                         </button>
-                        {expandedCategory === cat && SUBCATEGORY_MAP[cat]?.length > 0 && (
-                          <div className="ml-4 mb-1 space-y-0 border-l border-border/30 pl-4">
-                            <button
-                              onClick={() => { setIsOpen(false); setExpandedCategory(null); window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } })); handleNavClick('#designers'); }}
-                              className="block text-[11px] uppercase tracking-[0.15em] font-body text-primary/70 hover:text-primary transition-colors py-1.5"
-                            >
-                              All {cat}
-                            </button>
+                        {SUBCATEGORY_MAP[cat]?.length > 0 && (
+                          <div className="ml-4 space-y-0 border-l border-border/30 pl-4">
                             {SUBCATEGORY_MAP[cat].map(sub => (
                               <button
                                 key={sub}
-                                onClick={() => { setIsOpen(false); setExpandedCategory(null); window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } })); handleNavClick('#designers'); }}
+                                onClick={() => { 
+                                  setIsOpen(false); 
+                                  window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } })); 
+                                  handleNavClick('#designers'); 
+                                }}
                                 className="block text-[11px] uppercase tracking-[0.15em] font-body text-foreground/50 hover:text-primary transition-colors py-1.5"
                               >
                                 {sub}
@@ -415,54 +406,32 @@ const Navigation = () => {
             >
               <div className="flex justify-center gap-8 lg:gap-12">
                 {CATEGORY_ORDER.map(cat => (
-                  <div
-                    key={cat}
-                    className="relative group"
-                    onMouseEnter={() => setMegaMenuHoverCat(cat)}
-                    onMouseLeave={() => setMegaMenuHoverCat(null)}
-                  >
+                  <div key={cat} className="flex flex-col">
                     <button
                       onClick={() => {
                         window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
                         setMegaMenuOpen(false);
                         handleNavClick('#designers');
                       }}
-                      className={cn(
-                        "font-body text-[10px] uppercase tracking-[0.2em] transition-all duration-300 pb-1",
-                        megaMenuHoverCat === cat ? "text-primary" : "text-foreground/70 hover:text-primary"
-                      )}
+                      className="font-body text-[10px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 text-foreground/70 hover:text-primary font-medium text-left"
                     >
                       {cat}
                     </button>
-
-                    {/* Subcategories dropdown */}
-                    {megaMenuHoverCat === cat && SUBCATEGORY_MAP[cat]?.length > 0 && (
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50">
-                        <div className="bg-background border border-border shadow-lg rounded-sm py-2 min-w-[160px]">
+                    {SUBCATEGORY_MAP[cat]?.length > 0 && (
+                      <div className="flex flex-col gap-0.5">
+                        {SUBCATEGORY_MAP[cat].map(sub => (
                           <button
+                            key={sub}
                             onClick={() => {
-                              window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
+                              window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
                               setMegaMenuOpen(false);
                               handleNavClick('#designers');
                             }}
-                            className="block w-full text-left px-4 py-1.5 text-[10px] uppercase tracking-[0.15em] font-body text-primary hover:bg-muted transition-colors"
+                            className="text-left text-[10px] uppercase tracking-[0.15em] font-body text-muted-foreground hover:text-primary transition-colors py-1"
                           >
-                            All {cat}
+                            {sub}
                           </button>
-                          {SUBCATEGORY_MAP[cat].map(sub => (
-                            <button
-                              key={sub}
-                              onClick={() => {
-                                window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
-                                setMegaMenuOpen(false);
-                                handleNavClick('#designers');
-                              }}
-                              className="block w-full text-left px-4 py-1.5 text-[10px] uppercase tracking-[0.15em] font-body text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
-                            >
-                              {sub}
-                            </button>
-                          ))}
-                        </div>
+                        ))}
                       </div>
                     )}
                   </div>
