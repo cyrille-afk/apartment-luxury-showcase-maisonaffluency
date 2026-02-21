@@ -629,7 +629,6 @@ const partnerBrands = [
     subcategory: "Floor Lamps",
     origin: "France",
     description: "Serge Mouille (1922–1988) is considered the most important French lighting designer of the 1950s. Trained as a silversmith, he brought the precision of jewelry-making to lighting design. His tripod floor lamps and spider wall lights are now part of MoMA's permanent collection.",
-    featured: "Tripod Floor Lamp",
     instagram: "https://www.instagram.com/sergemouilleofficial/?hl=en",
   },
   {
