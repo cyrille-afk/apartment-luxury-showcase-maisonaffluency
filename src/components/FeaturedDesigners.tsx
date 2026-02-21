@@ -1840,80 +1840,8 @@ const FeaturedDesigners = () => {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
               Designers & Makers
             </h2>
-            <div className="flex items-center gap-4 pb-1">
-              <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
-                <SheetTrigger asChild>
-                  <button className="text-muted-foreground hover:text-primary transition-colors relative" aria-label="Filter by category">
-                    <SlidersHorizontal className="h-5 w-5" />
-                    {selectedCategory && (
-                      <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
-                        1
-                      </span>
-                    )}
-                  </button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[280px] sm:w-[320px] overflow-y-auto" aria-describedby={undefined}>
-                  <div className="sr-only"><h2>Filter by Category</h2></div>
-                  <div className="flex items-center justify-between mb-6 mt-4">
-                    <h4 className="font-serif text-lg text-foreground">Filter by Category</h4>
-                    {selectedCategory && (
-                      <button
-                        onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
-                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        Clear
-                      </button>
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    {categories.map((category) => (
-                      <div key={category}>
-                        <label className="flex items-center gap-3 py-2 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
-                          <Checkbox
-                            checked={selectedCategory === category}
-                            onCheckedChange={() => {
-                              if (selectedCategory === category) {
-                                setSelectedCategory(null);
-                                setSelectedSubcategory(null);
-                              } else {
-                                setSelectedCategory(category);
-                                setSelectedSubcategory(null);
-                              }
-                            }}
-                          />
-                          <span className="text-sm text-foreground font-body">{category}</span>
-                        </label>
-                        {selectedCategory === category && categoryMap[category]?.length > 0 && (
-                          <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
-                            <button
-                              onClick={() => setSelectedSubcategory(null)}
-                              className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                !selectedSubcategory ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
-                              }`}
-                            >
-                              All {category}
-                            </button>
-                            {categoryMap[category].map(sub => (
-                              <button
-                                key={sub}
-                                onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
-                                className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                  selectedSubcategory === sub ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
-                                }`}
-                              >
-                                {sub}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
           </div>
-          {/* A-Z alphabet jump bar + Search */}
+          {/* A-Z alphabet jump bar + Search + Filter */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-3">
             <div
               className="inline-flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto"
@@ -1950,6 +1878,76 @@ const FeaturedDesigners = () => {
                 </button>
               )}
             </div>
+            <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
+              <SheetTrigger asChild>
+                <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none" aria-label="Filter by category">
+                  <SlidersHorizontal className="h-5 w-5" />
+                  {selectedCategory && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
+                      1
+                    </span>
+                  )}
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] sm:w-[320px] overflow-y-auto" aria-describedby={undefined}>
+                <div className="sr-only"><h2>Filter by Category</h2></div>
+                <div className="flex items-center justify-between mb-6 mt-4">
+                  <h4 className="font-serif text-lg text-foreground">Filter by Category</h4>
+                  {selectedCategory && (
+                    <button
+                      onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
+                      className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  {categories.map((category) => (
+                    <div key={category}>
+                      <label className="flex items-center gap-3 py-2 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
+                        <Checkbox
+                          checked={selectedCategory === category}
+                          onCheckedChange={() => {
+                            if (selectedCategory === category) {
+                              setSelectedCategory(null);
+                              setSelectedSubcategory(null);
+                            } else {
+                              setSelectedCategory(category);
+                              setSelectedSubcategory(null);
+                            }
+                          }}
+                        />
+                        <span className="text-sm text-foreground font-body">{category}</span>
+                      </label>
+                      {selectedCategory === category && categoryMap[category]?.length > 0 && (
+                        <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
+                          <button
+                            onClick={() => setSelectedSubcategory(null)}
+                            className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                              !selectedSubcategory ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
+                            }`}
+                          >
+                            All {category}
+                          </button>
+                          {categoryMap[category].map(sub => (
+                            <button
+                              key={sub}
+                              onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
+                              className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                                selectedSubcategory === sub ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
+                              }`}
+                            >
+                              {sub}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
           <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
             Discover the visionary designers and artisans whose exceptional work defines Maison Affluency. Each brings
