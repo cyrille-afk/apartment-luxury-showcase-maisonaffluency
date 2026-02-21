@@ -1804,7 +1804,7 @@ const FeaturedDesigners = () => {
   const designerAlphaGroups = useMemo(() => {
     const groups: Record<string, typeof filteredDesigners> = {};
     filteredDesigners.forEach(d => {
-      const letter = d.name.charAt(0).toUpperCase();
+      const letter = d.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
       if (!groups[letter]) groups[letter] = [];
       groups[letter].push(d);
     });
@@ -1836,7 +1836,7 @@ const FeaturedDesigners = () => {
           <p className="mb-2 md:mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
             THE ARTISANS
           </p>
-          <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-4">
+          <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
               Designers & Makers
             </h2>
@@ -1920,6 +1920,26 @@ const FeaturedDesigners = () => {
               </Sheet>
             </div>
           </div>
+          {/* A-Z alphabet jump bar */}
+          <div className="flex justify-start mb-3">
+            <div
+              className="inline-flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {activeLetters.map((letter) => (
+                <button
+                  key={letter}
+                  onClick={() => {
+                    const el = document.getElementById(`designer-alpha-${letter}`);
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                  className="flex-none font-serif text-xs md:text-sm leading-none px-2 py-1 rounded-full transition-all duration-200 text-foreground/60 hover:text-primary hover:bg-primary/10 cursor-pointer"
+                >
+                  {letter}
+                </button>
+              ))}
+            </div>
+          </div>
           {showSearch && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -1952,26 +1972,6 @@ const FeaturedDesigners = () => {
           </p>
         </motion.div>
 
-        {/* A-Z alphabet jump bar */}
-        <div className="sticky top-[6.5rem] z-30 flex justify-center mb-6">
-          <div
-            className="inline-flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto md:overflow-x-visible"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {activeLetters.map((letter) => (
-              <button
-                key={letter}
-                onClick={() => {
-                  const el = document.getElementById(`designer-alpha-${letter}`);
-                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-                className="flex-none font-serif text-xs md:text-sm leading-none px-2 py-1 rounded-full transition-all duration-200 text-foreground/60 hover:text-primary hover:bg-primary/10 cursor-pointer"
-              >
-                {letter}
-              </button>
-            ))}
-          </div>
-        </div>
         {(searchQuery || selectedCategory) && (
           <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
             {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
