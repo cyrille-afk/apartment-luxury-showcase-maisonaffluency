@@ -1880,8 +1880,9 @@ const FeaturedDesigners = () => {
             </div>
             <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
               <SheetTrigger asChild>
-                <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none" aria-label="Filter by category">
+                <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none flex items-center gap-1.5" aria-label="Filter">
                   <SlidersHorizontal className="h-5 w-5" />
+                  <span className="text-xs font-body uppercase tracking-wider">Filter</span>
                   {selectedCategory && (
                     <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
                       1
@@ -1890,9 +1891,9 @@ const FeaturedDesigners = () => {
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[320px] overflow-y-auto" aria-describedby={undefined}>
-                <div className="sr-only"><h2>Filter by Category</h2></div>
+                <div className="sr-only"><h2>Filter</h2></div>
                 <div className="flex items-center justify-between mb-6 mt-4">
-                  <h4 className="font-serif text-lg text-foreground">Filter by Category</h4>
+                  <h4 className="font-serif text-lg text-foreground flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" /> Filter</h4>
                   {selectedCategory && (
                     <button
                       onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
