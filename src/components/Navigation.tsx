@@ -162,12 +162,19 @@ const Navigation = () => {
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50">
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         {/* Mobile: single row */}
-        <div className="flex h-20 items-center justify-center md:hidden relative">
-          <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-            <span className="font-brand text-[1.4rem] font-medium tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
-              MAISON AFFLUENCY
-            </span>
-          </button>
+        <div className="flex h-24 items-center justify-center md:hidden relative">
+          <div className="flex flex-col items-center">
+            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
+              <span className="font-brand text-[1.4rem] font-medium tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+                MAISON AFFLUENCY
+              </span>
+            </button>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="h-px w-6 bg-foreground/30" />
+              <span className="font-body text-[7px] uppercase tracking-[0.3em] text-foreground/50">Since 2017</span>
+              <span className="h-px w-6 bg-foreground/30" />
+            </div>
+          </div>
 
           {/* Mobile Hamburger Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
