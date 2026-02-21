@@ -1647,15 +1647,43 @@ const FeaturedDesigners = () => {
       );
     }
     if (selectedCategory || selectedSubcategory) {
-      // Normalize subcategory for matching: nav uses plurals ("Sofas") but tags use singulars ("Sofa")
-      const matchesTag = (tag: string, filter: string) => {
-        const t = tag.toLowerCase();
-        const f = filter.toLowerCase();
-        return t === f || t + 's' === f || t === f + 's' || f.endsWith(t) || t.endsWith(f);
+      // Map nav subcategory names to tag values used in data
+      const SUBCATEGORY_TO_TAGS: Record<string, string[]> = {
+        "Sofas": ["Sofa"],
+        "Armchairs": ["Armchair", "Armchairs"],
+        "Chairs": ["Chair"],
+        "Daybeds & Benches": ["Daybed", "Bench"],
+        "Ottomans & Stools": ["Ottoman", "Stool"],
+        "Bar Stools": ["Bar Stool"],
+        "Consoles": ["Console"],
+        "Coffee Tables": ["Coffee Table"],
+        "Desks": ["Desk"],
+        "Dining Tables": ["Dining Table"],
+        "Side Tables": ["Side Table"],
+        "Wall Lights": ["Wall Light", "Sconce"],
+        "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant"],
+        "Floor Lights": ["Floor Light", "Floor Lamp"],
+        "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+        "Bookcases": ["Bookcase"],
+        "Cabinets": ["Cabinet"],
+        "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"],
+        "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+        "Hand-Woven Rugs": ["Hand-Woven Rug"],
+        "Vases & Vessels": ["Vase", "Vessel"],
+        "Mirrors": ["Mirror"],
+        "Books": ["Book"],
+        "Candle Holders": ["Candle Holder"],
+        "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
       };
       designers = designers.filter(designer =>
         designer.curatorPicks?.some((pick: any) => {
-          if (selectedSubcategory) return pick.tags?.some((tag: string) => matchesTag(tag, selectedSubcategory));
+          if (selectedSubcategory) {
+            const mappedTags = SUBCATEGORY_TO_TAGS[selectedSubcategory];
+            if (mappedTags) {
+              return pick.tags?.some((tag: string) => mappedTags.some(mt => tag.toLowerCase() === mt.toLowerCase()));
+            }
+            return pick.tags?.includes(selectedSubcategory);
+          }
           if (selectedCategory) return pick.tags?.includes(selectedCategory);
           return true;
         })
