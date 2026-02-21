@@ -46,7 +46,7 @@ import matthieuGicquelBg from "@/assets/designers/matthieu-gicquel-bg.png";
 import poltronaFrauBg from "@/assets/designers/poltrona-frau-bg.jpg";
 import nathalieZieglerBg from "@/assets/designers/nathalie-ziegler-bg.png";
 import seCollectionsBg from "@/assets/designers/se-collections-bg.png";
-
+import maisonWecraftBg from "@/assets/designers/maison-wecraft-bg.jpg";
 import herveVanDerStraetenBg from "@/assets/designers/herve-van-der-straeten-bg.png";
 import pouenatBg from "@/assets/designers/pouenat-bg.png";
 import valeriaNascimentoBg from "@/assets/designers/valeria-nascimento-bg.png";
@@ -455,6 +455,33 @@ const partnerBrands = [
     galleryIndex: 6, // A Sophisticated Boudoir
   },
   {
+    id: "maison-wecraft",
+    name: "Maison WeCraft",
+    category: "Lighting",
+    subcategory: "Lighting",
+    origin: "Singapore",
+    description: "Singapore-based atelier bridging artisanal craftsmanship with contemporary design across lighting, rugs, and bespoke storage solutions.",
+    instagram: "https://instagram.com/maisonwecraft",
+  },
+  {
+    id: "maison-wecraft-rugs",
+    name: "Maison WeCraft",
+    category: "Rugs",
+    subcategory: "Rugs",
+    origin: "Singapore",
+    description: "Singapore-based atelier bridging artisanal craftsmanship with contemporary design across lighting, rugs, and bespoke storage solutions.",
+    instagram: "https://instagram.com/maisonwecraft",
+  },
+  {
+    id: "maison-wecraft-storage",
+    name: "Maison WeCraft",
+    category: "Storage",
+    subcategory: "Storage",
+    origin: "Singapore",
+    description: "Singapore-based atelier bridging artisanal craftsmanship with contemporary design across lighting, rugs, and bespoke storage solutions.",
+    instagram: "https://instagram.com/maisonwecraft",
+  },
+  {
     id: "okha",
     name: "Okha",
     category: "Tables",
@@ -704,7 +731,7 @@ const brandBgMap: Record<string, string> = {
   "Matthieu Gicquel": matthieuGicquelBg,
   "Nathalie Ziegler": nathalieZieglerBg,
   "Sé Collections": seCollectionsBg,
-  
+  "Maison WeCraft": maisonWecraftBg,
   "Hervé van der Straeten": herveVanDerStraetenBg,
   "Pouenat": pouenatBg,
   "Poltrona Frau": poltronaFrauBg,
