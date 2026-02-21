@@ -502,21 +502,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     biography: "Bina Baitel Studio creates interior and industrial design projects as well as unique creations in collaboration with museums and galleries. The Paris-based studio conducts a global creative approach ranging from artistic direction to technical studies, with a constant focus on timeless projects and a search for innovation. Bina Baitel's work has been exhibited at the Grand Palais, Milan Design Week, and leading design galleries worldwide.",
     notableWorks: "Sublime Collection (Mobilier National), Design Objects for Galleries and Museums",
     philosophy: "Design is always about finding the right balance between tradition and innovation, between the handmade and the industrial.",
-    curatorPicks: [
-      {
-        image: binaBAitelObject,
-        title: "Sculptural Vessel",
-        subtitle: "Collectible Edition",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Vessel"],
-        materials: "Unglazed ceramic — hand-built",
-        dimensions: "H35 × W25 cm (approx.)",
-        description: "This sculptural vessel by Bina Baitel exemplifies her practice of exploring the boundary between design and fine art. Hand-built in unglazed ceramic, its flowing organic form combines classical technique with a distinctly contemporary sensibility."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/binabaitel/" },
-      { type: "Curators' Picks" },
     ],
   },
   {
@@ -529,21 +517,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorks: "Lyric Desk, Contemporary Furniture Series",
     notableWorksLink: { text: "Lyric Desk", galleryIndex: 6 },
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
-    curatorPicks: [
-      {
-        image: brunoDeMaistreLyricDesk,
-        title: "Lyric",
-        subtitle: "Writing Desk",
-        category: "Tables",
-        tags: ["Tables", "Desk"],
-        materials: "Ebonized oak with straw marquetry inlay",
-        dimensions: "L140 × W70 × H76 cm",
-        description: "Bruno de Maistre's Lyric desk is a poetic meditation on the art of writing. Its surface of intricate straw marquetry inlay brings warmth and craft to a form of understated elegance — a piece conceived as much for contemplation as for work."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://instagram.com/bruno_de_maistre_bdm" },
-      { type: "Curators' Picks" },
     ],
   },
   {
@@ -773,21 +749,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorks: "Chairie (dining chair featured at Maison Affluency), Jarre Table, Marble Cabinet Series, Table Soleil",
     notableWorksLink: { text: "Chairie dining chair", galleryIndex: 2 },
     philosophy: "A piece of furniture needs to exude silence so it can be loved for a long time.",
-    curatorPicks: [
-      {
-        image: "",
-        title: "Chairie",
-        subtitle: "Dining Chair",
-        category: "Seating",
-        tags: ["Seating", "Dining Chair"],
-        materials: "Patinated bronze — solid cast",
-        dimensions: "H90 × W55 × D55 cm",
-        description: "Éric Schmitt's Chairie is a patinated bronze dining chair of extraordinary sculptural presence. Cast entirely in solid bronze, its organic flowing form softens the material's inherent weight, creating a piece that is simultaneously monumental and intimate."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/studio_eric_schmitt_/" },
-      { type: "Curators' Picks" },
     ],
   },
   {
@@ -798,20 +762,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     biography: "Felix Agostini is a mid-twentieth century French designer renowned for his highly refined figural bronze lighting, created under the Charles Paris imprint. Working primarily in the 1950s and 1960s, his Grande Caryatide sconces and candelabra draw on the classical tradition of architectural figural sculpture while expressing a distinctly French post-war elegance. His pieces are now highly sought after by collectors and museums worldwide.",
     notableWorks: "Grande Caryatide Sconce (Charles Paris), Figural Bronze Candelabra, Table Lamps",
     philosophy: "The figure has always been at the heart of decorative art — my work honors that tradition with modern sensibility.",
-    curatorPicks: [
-      {
-        image: felixAgostiniCaryatide,
-        title: "Grande Caryatide",
-        subtitle: "Wall Sconce — Charles Paris",
-        category: "Lighting",
-        materials: "Patinated gilded bronze — hand-cast",
-        dimensions: "H70 × W35 × D20 cm",
-        description: "The Grande Caryatide is Felix Agostini's most iconic creation — a wall sconce featuring a full-figure female caryatid in patinated gilded bronze. Each piece is hand-cast and finished, representing the pinnacle of mid-century French decorative bronzework."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/maisoncharlesparis/" },
-      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1011,21 +964,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 9 },
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
-    curatorPicks: [
-      {
-        image: herveVdsMicmac,
-        title: "MicMac",
-        subtitle: "Chandelier",
-        category: "Lighting",
-        tags: ["Lighting", "Chandelier"],
-        materials: "Patinated bronze • Frosted glass globes",
-        dimensions: "Ø80 × H70 cm (approx.)",
-        description: "The MicMac chandelier is Hervé van der Straeten's most celebrated lighting design — an explosion of bronze branches tipped with frosted glass globes that recalls both organic growth and haute couture jewelry. Each piece is hand-crafted at his Paris atelier."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
-      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1038,20 +979,8 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorks: "Table Soleil 1930, Stool 1934 (with Adolphe Chanaux), Parchment-covered furniture, Shagreen desks",
     notableWorksLink: { text: "Stool 1934", galleryIndex: 1 },
     philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
-    curatorPicks: [
-      {
-        image: jmfStool1934,
-        title: "Stool",
-        subtitle: "1934 — with Adolphe Chanaux",
-        category: "Seating",
-        tags: ["Seating", "Stool"],
-        materials: "Parchment-covered wood • Brass sabots",
-        dimensions: "H45 × Ø35 cm",
-        description: "Jean-Michel Frank's 1934 stool, created in collaboration with Adolphe Chanaux, is among the most iconic pieces of the Art Deco period. Covered in natural parchment and finished with brass sabots, its understated luxury encapsulates Frank's revolutionary philosophy: that refined simplicity is the highest form of elegance. Now produced under Écart Paris reissue."
-      },
-    ],
+    curatorPicks: [],
     links: [
-      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1375,21 +1304,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorks: "Toshiro Lamp (Maison Affluency), Hand-thrown Ceramic Collection",
     notableWorksLink: { text: "Toshiro Lamp", galleryIndex: 6 },
     philosophy: "Each piece is a unique conversation between the hand, the clay and the fire — no two are ever alike.",
-    curatorPicks: [
-      {
-        image: kiraToshiroLamp,
-        title: "Toshiro",
-        subtitle: "Ceramic Table Lamp",
-        category: "Lighting",
-        tags: ["Lighting", "Table Lamp"],
-        materials: "Hand-thrown ceramic — custom glaze",
-        dimensions: "H60 × Ø30 cm (approx.)",
-        description: "The Toshiro is Made in Kira's signature piece — a hand-thrown ceramic table lamp whose layered glazes create rich tonal variations that shift with the light. Every Toshiro is unique, reflecting the particular moment and hand that shaped it."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/madeinkira/" },
-      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1400,21 +1317,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     biography: "Man of Parts is a Hamburg-based design brand founded by Stephan Weishaupt, co-founder of the design magazine Wallpaper*. The brand commissions furniture and objects from leading international designers — including Yabu Pushelberg, Sebastian Herkner, and Osvaldo Tenório — producing pieces of exceptional quality that bridge the gallery and the home. Each collection reflects a distinct design vision united by the pursuit of craft excellence.",
     notableWorks: "Lombard Street Sofa (Yabu Pushelberg), Mainkai Lamp (Sebastian Herkner), Rua Tucumã Tables",
     philosophy: "We believe in furniture made with integrity — pieces conceived by great designers and realized by the best craftspeople in the world.",
-    curatorPicks: [
-      {
-        image: manOfPartsSofa,
-        title: "Lombard Street",
-        subtitle: "Sofa — Yabu Pushelberg for Man of Parts",
-        category: "Seating",
-        tags: ["Seating", "Sofa"],
-        materials: "Premium upholstery — solid oak legs",
-        dimensions: "L270 × D95 × H75 cm (standard)",
-        description: "Designed by Yabu Pushelberg for Man of Parts, the Lombard Street sofa combines generous proportions with exceptional upholstery quality. Its clean silhouette and solid oak legs give it an architectural presence suited to the most discerning residential interiors."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/manofparts/" },
-      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1491,21 +1396,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorks: "Amber Folio Portable Lamp for Saint-Louis (Maison Affluency), Refine Console, Steinway Collaboration",
     notableWorksLink: { text: "Amber Folio Lamp for Cristallerie Saint-Louis", galleryIndex: 20 },
     philosophy: "Nature has already designed everything. My role is to find those forms and translate them into objects that resonate with the human hand and eye.",
-    curatorPicks: [
-      {
-        image: noeFolioLamp,
-        title: "Folio",
-        subtitle: "Portable Lamp — Amber • Cristallerie Saint-Louis",
-        category: "Lighting",
-        tags: ["Lighting", "Table Lamp"],
-        materials: "Mouth-blown amber crystal — Saint-Louis",
-        dimensions: "H28 × Ø14 cm",
-        description: "Created by Noé Duchaufour-Lawrance for the prestigious Cristallerie Saint-Louis, the Folio portable lamp takes the form of an unfurling leaf in mouth-blown amber crystal. When lit, the amber glass radiates a warm, intimate glow — simultaneously a light source and a sculptural object."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/noeduchaufourlawrance/" },
-      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1518,21 +1411,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
     notableWorksLink: { text: "Vallauris floor lamp", galleryIndex: 1 },
     philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
-    curatorPicks: [
-      {
-        image: oliviaCognetVallauris,
-        title: "Vallauris",
-        subtitle: "Ceramic Floor Lamp",
-        category: "Lighting",
-        tags: ["Lighting", "Floor Lamp"],
-        materials: "Hand-thrown ceramic — custom blue glaze",
-        dimensions: "H165 × Ø30 cm (approx.)",
-        description: "Olivia Cognet's Vallauris floor lamp in custom blue glazed ceramic is a testament to her search for balance between art and design. Hand-thrown in the tradition of the Vallauris masters — from Picasso to Roger Capron — it transforms a functional object into a sculptural statement."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
-      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1570,21 +1451,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorks: "DOT Side Table (Maison Affluency), Eggshell Collection, AW2 Hospitality Projects",
     notableWorksLink: { text: "DOT Side Table", galleryIndex: 12 },
     philosophy: "Architecture and design are the same discipline — both are about creating places that stimulate the mind and mobilize the senses.",
-    curatorPicks: [
-      {
-        image: redaAmalouDotTable,
-        title: "DOT",
-        subtitle: "Side Table — Eggshell",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Lacquered wood — eggshell finish",
-        dimensions: "Ø45 × H45 cm",
-        description: "The DOT side table is Reda Amalou's most celebrated design object — a perfect geometric sphere in lacquered wood with an eggshell finish. Its flawless form and tactile surface make it simultaneously a functional table and a sculptural collectible."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/redaamalou/" },
-      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1601,21 +1470,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       { text: "Niko 420 Custom Sofa", galleryIndex: 0 },
     ],
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
-    curatorPicks: [
-      {
-        image: thierryLemaireOrsay,
-        title: "Orsay",
-        subtitle: "Centre Table — Limited Edition (12 copies)",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table"],
-        materials: "Lacquered wood • Solid bronze base",
-        dimensions: "L140 × W70 × H35 cm",
-        description: "The Orsay Centre Table is Thierry Lemaire's most celebrated collectible design — a sculptural coffee table produced in a strictly limited and numbered edition of 12 copies. Its organic lacquered surface rests on a solid bronze base, embodying his philosophy of transforming functional furniture into lasting works of art."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
-      { type: "Curators' Picks" },
     ],
   },
   {
