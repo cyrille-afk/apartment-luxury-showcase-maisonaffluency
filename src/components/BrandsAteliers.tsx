@@ -828,7 +828,7 @@ function AlphaStrip({
                       {item.featured && item.galleryIndex !== undefined ? (
                         <button
                           onClick={() => scrollToGallery(item.galleryIndex!, brand.name)}
-                          className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                          className="text-xs md:text-sm text-foreground font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
                         >
                           <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
                             {item.featured}
@@ -836,7 +836,7 @@ function AlphaStrip({
                           <svg className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                         </button>
                       ) : item.featured ? (
-                        <span className="text-xs md:text-sm text-foreground/80 font-body">
+                        <span className="text-xs md:text-sm text-foreground font-body">
                           {item.featured}
                         </span>
                       ) : null}
