@@ -413,7 +413,7 @@ const Navigation = () => {
                         setMegaMenuOpen(false);
                         handleNavClick('#designers');
                       }}
-                      className="font-body text-[10px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 text-foreground/70 hover:text-primary font-medium text-left"
+                      className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 text-foreground hover:text-primary font-semibold text-left"
                     >
                       {cat}
                     </button>
