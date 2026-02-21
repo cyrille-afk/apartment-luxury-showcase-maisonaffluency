@@ -56,6 +56,7 @@ import noomBg from "@/assets/designers/noom-bg.png";
 import nicolasAubagnacBg from "@/assets/designers/nicolas-aubagnac-bg.png";
 import ozoneLightBg from "@/assets/designers/ozone-light-bg.jpg";
 import collectionParticuliereBg from "@/assets/designers/collection-particuliere-bg.jpg";
+import biekeCasteleynBg from "@/assets/designers/bieke-casteleyn-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -181,6 +182,15 @@ const partnerBrands = [
     featured: "Plato Bookcase",
     instagram: "https://instagram.com/baleriitalia",
     galleryIndex: 8, // A Design Treasure Trove
+  },
+  {
+    id: "bieke-casteleyn",
+    name: "Bieke Casteleyn",
+    category: "Tables",
+    subcategory: "Tables",
+    origin: "Belgium",
+    description: "Belgian designer of refined interiors and sculptural furniture, handcrafted in Belgium. Trained at Sint-Lucas School of Arts in Ghent and Domus Academy in Milan, her collections bring high-end serenity through innovative materials and harmonious forms.",
+    instagram: "https://www.instagram.com/biekecasteleyn/",
   },
   {
     id: "bruno-de-maistre",
@@ -803,6 +813,7 @@ const brandBgMap: Record<string, string> = {
   "Nicolas Aubagnac": nicolasAubagnacBg,
   "Ozone Light": ozoneLightBg,
   "Collection Particulière": collectionParticuliereBg,
+  "Bieke Casteleyn": biekeCasteleynBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
