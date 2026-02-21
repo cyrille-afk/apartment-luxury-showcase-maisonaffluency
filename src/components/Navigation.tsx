@@ -201,23 +201,17 @@ const Navigation = () => {
                   <span className="h-px w-6 bg-foreground/30" />
                 </div>
               </div>
-              <div className="flex flex-col gap-6 pb-8">
+              <div className="flex flex-col gap-0 pb-8">
                 {leftNavItems.map((item, index) => (
                   <button 
                     key={item.href} 
                     onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
-                    className={cn(
-                      "font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30 animate-fade-in opacity-0",
-                      activeSection === item.href ? "text-primary" : "text-foreground hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
-                    )}
+                    className="font-body text-[13px] tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground/70 hover:text-primary animate-fade-in opacity-0"
                     style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
                   >
                     {item.label}
-                    <span className={cn(
-                      "absolute bottom-2 left-0 h-0.5 bg-primary transition-all duration-300",
-                      activeSection === item.href ? "w-full" : "w-0 group-hover:w-full"
-                    )} />
+                    <ChevronRight className="h-4 w-4" />
                   </button>
                 ))}
 
