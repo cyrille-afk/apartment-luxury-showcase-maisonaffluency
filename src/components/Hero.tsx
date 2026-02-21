@@ -78,7 +78,7 @@ const Hero = () => {
     }} transition={{
       duration: 1,
       delay: 1.2
-    }} className="absolute bottom-44 md:bottom-8 left-1/2 z-10 -translate-x-1/2">
+    }} className="absolute bottom-28 md:bottom-8 left-1/2 z-10 -translate-x-1/2">
         <button
           onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
           className="flex flex-col items-center gap-2 cursor-pointer group"
