@@ -703,7 +703,7 @@ const partnerBrands = [
     subcategory: "Lighting",
     origin: "France",
     description: "French designer creating refined lighting and furniture pieces that blend Art Deco influences with contemporary sensibility, celebrated for their sculptural elegance and luxurious materials.",
-    instagram: "https://www.instagram.com/nicolasaubagnac/",
+    instagram: "https://www.instagram.com/nicolas_aubagnac/",
   },
   {
     id: "noom",
