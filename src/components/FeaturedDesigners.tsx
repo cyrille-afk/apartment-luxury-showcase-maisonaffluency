@@ -324,92 +324,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
   },
   {
-    id: "kerstens",
-    name: "Andy Kerstens",
-    displayName: "Kerstens",
-    specialty: "Architectural Furniture & Objects",
-    image: kerstensImg,
-    biography: "Kerstens is a multidisciplinary design studio founded by Andy Kerstens in Antwerp, Belgium, in 2015. A graduate of the University of Antwerp in interior architecture, Andy Kerstens combines a thorough architectural design language with a passion for craftsmanship and the atmospheric qualities of materials. The studio's work spans furniture, objects and interiors — always defined by aesthetic purity, refined proportion and true artisan quality.",
-    notableWorks: "Stone & Steel Console, Architectural Furniture Collection",
-    philosophy: "We strive for a refined, timeless and architectural approach, with a desire for craftsmanship and affinity for the atmospheric — creating pieces that improve with age.",
-    curatorPicks: [
-      {
-        image: kertensPick1,
-        title: "Mono Collection",
-        subtitle: "Available in White Onyx, Grand Antique Marble, Muschel Type 'S' and Brown Travertine",
-        category: "Tables",
-        tags: ["Tables"],
-        materials: "",
-        dimensions: "",
-        description: ""
-      },
-      {
-        image: kertensPick2,
-        title: "Mono STS",
-        subtitle: "Brown Travertine",
-        category: "Tables",
-        tags: ["Tables", "Side Table", "open edition + 1 CP + 3 AP"],
-        materials: "Available in White Onyx, Grand Antique Marble, Muschel Type 'S'",
-        dimensions: "42 × 32 × H 44 cm — 75 kg",
-        description: ""
-      },
-      {
-        image: kertensPick3,
-        title: "Mono CLS",
-        subtitle: "Grand Antique Marble",
-        category: "Tables",
-        tags: ["Tables", "Console", "Open edition + 1 AP"],
-        materials: "",
-        dimensions: "160 × 42 × H 80 cm — 383 kg",
-        description: ""
-      },
-      {
-        image: kertensPick4,
-        title: "Rift CTW",
-        subtitle: "Ebonised oak",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table", "open edition + 1 AP"],
-        materials: "",
-        dimensions: "180 × 82 × H 28 cm",
-        description: ""
-      },
-      {
-        image: kertensPick5,
-        title: "Rift CTS",
-        subtitle: "White washed oak, brown travertine",
-        category: "Tables",
-        tags: ["Tables", "Open Edition + 2 AP"],
-        materials: "",
-        dimensions: "",
-        description: ""
-      },
-      {
-        image: kertensPick6,
-        title: "Yoma CLW",
-        subtitle: "Bleach Oak, Patinated Bronze, Brown Travertine",
-        category: "Storage",
-        tags: ["Storage", "Cabinet", "limited edition of 20 + 1 CP + 1 AP"],
-        materials: "",
-        dimensions: "255 × 70 × H 100 cm — 810 kg",
-        description: ""
-      },
-      {
-        image: kertensPick7,
-        title: "Yoma CLW (Details)",
-        subtitle: "Bleach Oak, Patinated Bronze, Brown Travertine",
-        category: "Storage",
-        tags: ["Storage", "Cabinet", "limited edition of 20 + 1 CP + 1 AP"],
-        materials: "",
-        dimensions: "255 × 70 × H 100 cm — 810 kg",
-        description: ""
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/_kerstens/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
     id: "apparatus-studio",
     name: "Apparatus Studio",
     founder: "Gabriel Hendifar",
@@ -1216,6 +1130,92 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/jmw_studio" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "kerstens",
+    name: "Andy Kerstens",
+    displayName: "Kerstens",
+    specialty: "Architectural Furniture & Objects",
+    image: kerstensImg,
+    biography: "Kerstens is a multidisciplinary design studio founded by Andy Kerstens in Antwerp, Belgium, in 2015. A graduate of the University of Antwerp in interior architecture, Andy Kerstens combines a thorough architectural design language with a passion for craftsmanship and the atmospheric qualities of materials. The studio's work spans furniture, objects and interiors — always defined by aesthetic purity, refined proportion and true artisan quality.",
+    notableWorks: "Stone & Steel Console, Architectural Furniture Collection",
+    philosophy: "We strive for a refined, timeless and architectural approach, with a desire for craftsmanship and affinity for the atmospheric — creating pieces that improve with age.",
+    curatorPicks: [
+      {
+        image: kertensPick1,
+        title: "Mono Collection",
+        subtitle: "Available in White Onyx, Grand Antique Marble, Muschel Type 'S' and Brown Travertine",
+        category: "Tables",
+        tags: ["Tables"],
+        materials: "",
+        dimensions: "",
+        description: ""
+      },
+      {
+        image: kertensPick2,
+        title: "Mono STS",
+        subtitle: "Brown Travertine",
+        category: "Tables",
+        tags: ["Tables", "Side Table", "open edition + 1 CP + 3 AP"],
+        materials: "Available in White Onyx, Grand Antique Marble, Muschel Type 'S'",
+        dimensions: "42 × 32 × H 44 cm — 75 kg",
+        description: ""
+      },
+      {
+        image: kertensPick3,
+        title: "Mono CLS",
+        subtitle: "Grand Antique Marble",
+        category: "Tables",
+        tags: ["Tables", "Console", "Open edition + 1 AP"],
+        materials: "",
+        dimensions: "160 × 42 × H 80 cm — 383 kg",
+        description: ""
+      },
+      {
+        image: kertensPick4,
+        title: "Rift CTW",
+        subtitle: "Ebonised oak",
+        category: "Tables",
+        tags: ["Tables", "Coffee Table", "open edition + 1 AP"],
+        materials: "",
+        dimensions: "180 × 82 × H 28 cm",
+        description: ""
+      },
+      {
+        image: kertensPick5,
+        title: "Rift CTS",
+        subtitle: "White washed oak, brown travertine",
+        category: "Tables",
+        tags: ["Tables", "Open Edition + 2 AP"],
+        materials: "",
+        dimensions: "",
+        description: ""
+      },
+      {
+        image: kertensPick6,
+        title: "Yoma CLW",
+        subtitle: "Bleach Oak, Patinated Bronze, Brown Travertine",
+        category: "Storage",
+        tags: ["Storage", "Cabinet", "limited edition of 20 + 1 CP + 1 AP"],
+        materials: "",
+        dimensions: "255 × 70 × H 100 cm — 810 kg",
+        description: ""
+      },
+      {
+        image: kertensPick7,
+        title: "Yoma CLW (Details)",
+        subtitle: "Bleach Oak, Patinated Bronze, Brown Travertine",
+        category: "Storage",
+        tags: ["Storage", "Cabinet", "limited edition of 20 + 1 CP + 1 AP"],
+        materials: "",
+        dimensions: "255 × 70 × H 100 cm — 810 kg",
+        description: ""
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/_kerstens/" },
       { type: "Curators' Picks" },
     ],
   },
