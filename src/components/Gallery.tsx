@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2, SlidersHorizontal } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import bedroomImage from "@/assets/master-suite.jpg";
@@ -162,7 +161,15 @@ const Gallery = () => {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false);
+
+  // Listen for category changes from Navigation
+  useEffect(() => {
+    const handleCategoryChange = (e: CustomEvent<string | null>) => {
+      setActiveCategory(e.detail);
+    };
+    window.addEventListener('setGalleryCategory', handleCategoryChange as EventListener);
+    return () => window.removeEventListener('setGalleryCategory', handleCategoryChange as EventListener);
+  }, []);
 
   const filteredExperiences = useMemo(() => {
     if (!activeCategory) return galleryExperiences;
@@ -312,47 +319,10 @@ const Gallery = () => {
         } : {}} transition={{
           duration: 0.8
         }} className="mb-12 md:mb-16 text-left">
-            <div className="flex items-center gap-3 mb-2 md:mb-3">
+            <div className="mb-2 md:mb-3">
               <p className="uppercase tracking-[0.15em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
                 A UNIQUELY CURATED VENUE
               </p>
-              <Popover open={categoryPopoverOpen} onOpenChange={setCategoryPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <button className="flex items-center gap-1.5 text-[10px] md:text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors border border-border/60 rounded-sm px-2 py-1">
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>Categories</span>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="start" className="w-48 p-0">
-                  <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-body">Filter by Category</span>
-                    <button onClick={() => setCategoryPopoverOpen(false)} className="text-muted-foreground hover:text-foreground">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  <div className="py-1">
-                    <button
-                      onClick={() => { setActiveCategory(null); setCategoryPopoverOpen(false); }}
-                      className={`w-full text-left px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] font-body transition-colors ${
-                        !activeCategory ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      All Categories
-                    </button>
-                    {galleryCategories.map(cat => (
-                      <button
-                        key={cat}
-                        onClick={() => { setActiveCategory(cat); setCategoryPopoverOpen(false); }}
-                        className={`w-full text-left px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] font-body transition-colors ${
-                          activeCategory === cat ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
             </div>
             {activeCategory && (
               <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-body mb-2">
