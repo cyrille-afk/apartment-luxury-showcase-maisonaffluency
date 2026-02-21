@@ -1800,6 +1800,19 @@ const FeaturedDesigners = () => {
     return designers;
   }, [searchQuery, selectedCategory, selectedSubcategory]);
 
+  // Group filtered designers by first letter for A-Z navigation
+  const designerAlphaGroups = useMemo(() => {
+    const groups: Record<string, typeof filteredDesigners> = {};
+    filteredDesigners.forEach(d => {
+      const letter = d.name.charAt(0).toUpperCase();
+      if (!groups[letter]) groups[letter] = [];
+      groups[letter].push(d);
+    });
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [filteredDesigners]);
+
+  const activeLetters = useMemo(() => designerAlphaGroups.map(([l]) => l), [designerAlphaGroups]);
+
   const allDesignerIds = useMemo(() => filteredDesigners.map(d => d.id), [filteredDesigners]);
   const isAllExpanded = openDesigners.length === allDesignerIds.length && allDesignerIds.length > 0;
 
@@ -1938,6 +1951,27 @@ const FeaturedDesigners = () => {
             their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
           </p>
         </motion.div>
+
+        {/* A-Z alphabet jump bar */}
+        <div className="sticky top-[6.5rem] z-30 flex justify-center mb-6">
+          <div
+            className="inline-flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto md:overflow-x-visible"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {activeLetters.map((letter) => (
+              <button
+                key={letter}
+                onClick={() => {
+                  const el = document.getElementById(`designer-alpha-${letter}`);
+                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="flex-none font-serif text-xs md:text-sm leading-none px-2 py-1 rounded-full transition-all duration-200 text-foreground/60 hover:text-primary hover:bg-primary/10 cursor-pointer"
+              >
+                {letter}
+              </button>
+            ))}
+          </div>
+        </div>
         {(searchQuery || selectedCategory) && (
           <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
             {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
@@ -1985,7 +2019,12 @@ const FeaturedDesigners = () => {
             }} 
             className="w-full space-y-4"
           >
-            {filteredDesigners.map((designer, index) => (
+            {designerAlphaGroups.map(([letter, designers]) => (
+              <div key={letter}>
+                <div id={`designer-alpha-${letter}`} className="scroll-mt-32 pt-4 pb-2">
+                  <span className="font-serif text-lg text-foreground/30">{letter}</span>
+                </div>
+                {designers.map((designer, index) => (
               <AccordionItem
                 key={designer.id}
                 value={designer.id}
@@ -2212,6 +2251,8 @@ const FeaturedDesigners = () => {
                   </div>
                 </AccordionContent>
               </AccordionItem>
+            ))}
+              </div>
             ))}
           </Accordion>
         </motion.div>
