@@ -777,7 +777,7 @@ function AlphaStrip({
                         className="p-1 -m-1 touch-manipulation flex-shrink-0 mt-0.5 group/insta"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <svg className="h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover/insta:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-strip)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg className="h-6 w-6 md:h-7 md:w-7 transition-transform duration-300 group-hover/insta:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-strip)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <defs>
                             <linearGradient id="instagram-gradient-strip" x1="0%" y1="100%" x2="100%" y2="0%">
                               <stop offset="0%" stopColor="#f09433" />
