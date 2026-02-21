@@ -115,10 +115,14 @@ const Navigation = () => {
           }
         });
 
-        // Pick the topmost visible section (first in page order)
-        const topmost = allSectionIds.find((id) => visibleSections.has(id));
-        if (topmost) {
-          setActiveSection(sectionToNav[topmost] ?? `#${topmost}`);
+        // Pick the bottommost visible section (last in page order) so the
+        // section you just scrolled into takes priority
+        let current: string | undefined;
+        for (const id of allSectionIds) {
+          if (visibleSections.has(id)) current = id;
+        }
+        if (current) {
+          setActiveSection(sectionToNav[current] ?? `#${current}`);
         }
       },
       { rootMargin: "-10% 0px -60% 0px", threshold: 0 }
