@@ -169,7 +169,7 @@ const Navigation = () => {
         <div className="flex h-24 items-center justify-center md:hidden relative">
           <div className="flex flex-col items-center">
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-[1.65rem] font-medium tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+              <span className="font-brand text-[1.4rem] font-medium tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                 MAISON AFFLUENCY
               </span>
             </button>
