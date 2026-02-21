@@ -63,7 +63,7 @@ const contactOptions = [
   },
 ];
 
-const CATEGORY_ORDER = ["Seating", "Tables", "Storage", "Lighting", "Rugs", "Décor"];
+const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
 
 const SUBCATEGORY_MAP: Record<string, string[]> = {
   "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
