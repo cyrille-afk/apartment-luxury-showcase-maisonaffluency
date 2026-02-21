@@ -173,7 +173,7 @@ const Navigation = () => {
         <div className="flex h-24 items-center justify-center md:hidden relative">
           <div className="flex flex-col items-center">
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-[1.4rem] font-medium tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+              <span className="font-brand text-[1.4rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                 MAISON AFFLUENCY
               </span>
             </button>
@@ -199,7 +199,7 @@ const Navigation = () => {
               {/* Header branding visible in menu */}
               <div className="flex flex-col items-center pt-2 pb-4 border-b border-border/30 mb-6">
                 <button onClick={() => { setIsOpen(false); scrollToTop(); }} className="group cursor-pointer whitespace-nowrap">
-                  <span className="font-brand text-[1.4rem] font-medium tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+                  <span className="font-brand text-[1.4rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                     MAISON AFFLUENCY
                   </span>
                 </button>
@@ -338,7 +338,7 @@ const Navigation = () => {
             </div>
             <div className="flex flex-col items-center">
               <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-                <span className="font-brand text-3xl lg:text-4xl font-medium tracking-[0.25em] text-foreground transition-all duration-300 group-hover:text-primary">
+                <span className="font-brand text-3xl lg:text-4xl font-bold tracking-[0.25em] text-foreground transition-all duration-300 group-hover:text-primary">
                   MAISON AFFLUENCY
                 </span>
               </button>
