@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
@@ -1834,8 +1835,8 @@ const FeaturedDesigners = () => {
               >
                 <Search className="h-5 w-5" />
               </button>
-              <Popover open={filterOpen} onOpenChange={setFilterOpen}>
-                <PopoverTrigger asChild>
+              <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
+                <SheetTrigger asChild>
                   <button className="text-muted-foreground hover:text-primary transition-colors relative" aria-label="Filter by category">
                     <SlidersHorizontal className="h-5 w-5" />
                     {selectedCategory && (
@@ -1844,15 +1845,11 @@ const FeaturedDesigners = () => {
                       </span>
                     )}
                   </button>
-                </PopoverTrigger>
-                 <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="start">
-                   <div className="flex items-center justify-between mb-3">
-                     <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
-                     <button onClick={() => setFilterOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors ml-2" aria-label="Close filter">
-                       <X size={16} />
-                     </button>
-                   </div>
-                   <div className="flex items-center justify-between mb-3">
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[280px] sm:w-[320px] overflow-y-auto" aria-describedby={undefined}>
+                  <div className="sr-only"><h2>Filter by Category</h2></div>
+                  <div className="flex items-center justify-between mb-6 mt-4">
+                    <h4 className="font-serif text-lg text-foreground">Filter by Category</h4>
                     {selectedCategory && (
                       <button
                         onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
@@ -1862,12 +1859,10 @@ const FeaturedDesigners = () => {
                       </button>
                     )}
                   </div>
-                  <div className="space-y-1 max-h-80 overflow-y-auto">
+                  <div className="space-y-1">
                     {categories.map((category) => (
                       <div key={category}>
-                        <label
-                          className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
-                        >
+                        <label className="flex items-center gap-3 py-2 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
                           <Checkbox
                             checked={selectedCategory === category}
                             onCheckedChange={() => {
@@ -1887,9 +1882,7 @@ const FeaturedDesigners = () => {
                             <button
                               onClick={() => setSelectedSubcategory(null)}
                               className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                !selectedSubcategory
-                                  ? 'text-primary'
-                                  : 'text-muted-foreground/60 hover:text-primary'
+                                !selectedSubcategory ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
                               }`}
                             >
                               All {category}
@@ -1899,9 +1892,7 @@ const FeaturedDesigners = () => {
                                 key={sub}
                                 onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
                                 className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                  selectedSubcategory === sub
-                                    ? 'text-primary'
-                                    : 'text-muted-foreground/60 hover:text-primary'
+                                  selectedSubcategory === sub ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
                                 }`}
                               >
                                 {sub}
@@ -1912,8 +1903,8 @@ const FeaturedDesigners = () => {
                       </div>
                     ))}
                   </div>
-                </PopoverContent>
-              </Popover>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
           {showSearch && (
