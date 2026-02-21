@@ -252,7 +252,6 @@ const partnerBrands = [
     seatType: "Sofas & Loveseats",
     origin: "France",
     description: "French atelier renowned for bespoke upholstery and furniture, combining traditional savoir-faire with contemporary design to create exceptional seating pieces.",
-    featured: "Custom Upholstered Sofa",
     instagram: "https://www.instagram.com/entrelacs_lightings/",
   },
   {
