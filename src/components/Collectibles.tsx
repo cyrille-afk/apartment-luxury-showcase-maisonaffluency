@@ -50,42 +50,10 @@ const collectibleDesigners = [
     notableWorksLink: { text: "Bud Table Lamp", galleryIndex: 10 },
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
     curatorPicks: [
-      { 
-        image: demichelisPick1, 
-        title: "Babel Table Lamp", 
-        category: "Lighting",
-        subcategory: "Table Lamps",
-        materials: "Bronze • Brass • Ash wood • White fabric shade",
-        dimensions: "Ø45 × H60.9 cm",
-        edition: "Numbered edition of 20"
-      },
-      { 
-        image: demichelisPick4, 
-        title: "Echo Floor Lamp", 
-        category: "Lighting",
-        subcategory: "Floor Lamps",
-        materials: "Patinated and varnished brass",
-        dimensions: "Ø38 × H166 cm",
-        edition: "Numbered edition of 20"
-      },
-      { 
-        image: demichelisPick2, 
-        title: "Bud Table Lamp", 
-        category: "Lighting",
-        subcategory: "Table Lamps",
-        materials: "Bronze • White oak • Hand-made fabric shade",
-        dimensions: "Ø40 × H71 cm",
-        edition: "Numbered edition of 20"
-      },
-      { 
-        image: demichelisPick3, 
-        title: "Table d'appoint RHINO", 
-        category: "Tables",
-        subcategory: "Side Tables",
-        materials: "Patinated bronze • Raw brass • Brown cowhide leather top",
-        dimensions: "H43.5 × L35 cm",
-        edition: "Numbered edition of 8 + 2 APs"
-      },
+      { image: demichelisPick1, title: "Babel Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze • Brass • Ash wood • White fabric shade", dimensions: "Ø45 × H60.9 cm", edition: "Numbered edition of 20" },
+      { image: demichelisPick4, title: "Echo Floor Lamp", category: "Lighting", subcategory: "Floor Lamps", materials: "Patinated and varnished brass", dimensions: "Ø38 × H166 cm", edition: "Numbered edition of 20" },
+      { image: demichelisPick2, title: "Bud Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze • White oak • Hand-made fabric shade", dimensions: "Ø40 × H71 cm", edition: "Numbered edition of 20" },
+      { image: demichelisPick3, title: "Table d'appoint RHINO", category: "Tables", subcategory: "Side Tables", materials: "Patinated bronze • Raw brass • Brown cowhide leather top", dimensions: "H43.5 × L35 cm", edition: "Numbered edition of 8 + 2 APs" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/atelier_demichelis" },
@@ -103,18 +71,64 @@ const collectibleDesigners = [
     notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 11 },
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
     curatorPicks: [
-      { 
-        image: kikoLopezMirror,
-        title: "Shadow Drawings Mirror", 
-        category: "Decorative Object",
-        subcategory: "Mirrors",
-        materials: "Antiqued glass • Bronze patina frame",
-        dimensions: "H100 × W70 cm",
-        edition: "Unique Piece"
-      },
+      { image: kikoLopezMirror, title: "Shadow Drawings Mirror", category: "Decorative Object", subcategory: "Mirrors", materials: "Antiqued glass • Bronze patina frame", dimensions: "H100 × W70 cm", edition: "Unique Piece" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/kikolumieres" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "maarten-vrolijk",
+    name: "Maarten Vrolijk",
+    specialty: "Contemporary Handblown Glass Art & Sculptural Vessels",
+    image: maartenVrolijkImg,
+    biography:
+      "Maarten Vrolijk is a Dutch designer known for his sculptural approach to furniture design. His work explores the intersection of art and functionality, creating pieces that challenge conventional forms while remaining inherently practical. Each creation reflects his deep understanding of materials and his commitment to pushing the boundaries of contemporary design.",
+    notableWorks: "Sakura TRP 22001, Sculptural Glass Vessels, Unique Art Pieces",
+    notableWorksLink: { text: "Sakura TRP 22001", galleryIndex: 15 },
+    philosophy: "Furniture should be a conversation between form and function—each piece tells a story of material and intention.",
+    curatorPicks: [
+      { image: maartenVrolijkVessel, title: "Sakura TRP 22001", category: "Decorative Object", subcategory: "Vessels", materials: "Handblown & sculpted glass, unique piece with certificate", dimensions: "H 52 cm × W 40 cm × D 41 cm", edition: "Unique Piece" },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/maartenvrolijk" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "marcantonio-brandolini-dadda",
+    name: "Marcantonio Brandolini D'Adda",
+    specialty: "Glass Art & Sculptural Vessels",
+    image: marcantonioBrandoliniImg,
+    biography:
+      "Marcantonio Brandolini D'Adda is an Italian glass artist whose work represents the finest traditions of Murano glassmaking combined with contemporary artistic vision. His vessels are celebrated for their organic forms and exceptional craftsmanship.",
+    notableWorks: "Cotissi Vessel, Murano Glass Sculptures",
+    notableWorksLink: { text: "Cotissi Vessel", galleryIndex: 15 },
+    philosophy: "Glass is a living material that captures light and transforms space into poetry.",
+    curatorPicks: [
+      { image: marcantonioCotissiVessel, title: "Cotissi Vessel", category: "Decorative Object", subcategory: "Vessels", materials: "Hand-blown Murano glass", dimensions: "H35 × Ø20 cm", edition: "Unique Piece" },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/marcantoniobrandolinidadda" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "matthieu-gicquel",
+    name: "Matthieu Gicquel",
+    specialty: "Artisan Glass & Tableware",
+    image: matthieuGicquelImg,
+    biography:
+      "Matthieu Gicquel is a French glass artist renowned for his exceptional tableware and decorative objects that blend traditional craftsmanship with contemporary design. His signature pieces feature textured glass adorned with precious gold leaf details, creating functional art that elevates everyday dining into a refined experience.",
+    notableWorks: "Texture Glass with Gold Leaf rim Géode, Artisan Tableware Collection",
+    notableWorksLink: { text: "Texture Glass with Gold Leaf rim Géode", galleryIndex: 1 },
+    philosophy: "Each piece of glass tells a story of light, texture, and the timeless beauty of artisan craftsmanship.",
+    curatorPicks: [
+      { image: matthieuGicquelGeode, title: "Géode Nbr 4: Texture Glass with Gold Leaf Rim", category: "Decorative Object", subcategory: "Tableware", materials: "Textured glass • 24k gold leaf rim", dimensions: "Ø32 cm", edition: "Unique Piece" },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/matthieu_gicquel/?hl=en" },
       { type: "Curators' Picks" },
     ],
   },
@@ -130,148 +144,10 @@ const collectibleDesigners = [
     philosophy:
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
     curatorPicks: [
-      { 
-        image: nathalieZieglerSnakeVessel,
-        title: "Gold & Silver Snake Vessel", 
-        category: "Decorative Object",
-        subcategory: "Vessels",
-        materials: "Hand-blown glass • Gold & silver leaf accents",
-        dimensions: "H38 cm × Diam 30 cm",
-        edition: "Unique Piece"
-      },
+      { image: nathalieZieglerSnakeVessel, title: "Gold & Silver Snake Vessel", category: "Decorative Object", subcategory: "Vessels", materials: "Hand-blown glass • Gold & silver leaf accents", dimensions: "H38 cm × Diam 30 cm", edition: "Unique Piece" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/nathaliezieglerpasqua" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "maarten-vrolijk",
-    name: "Maarten Vrolijk",
-    specialty: "Contemporary Handblown Glass Art & Sculptural Vessels",
-    image: maartenVrolijkImg,
-    biography:
-      "Maarten Vrolijk is a Dutch designer known for his sculptural approach to furniture design. His work explores the intersection of art and functionality, creating pieces that challenge conventional forms while remaining inherently practical. Each creation reflects his deep understanding of materials and his commitment to pushing the boundaries of contemporary design.",
-    notableWorks: "Sakura TRP 22001, Sculptural Glass Vessels, Unique Art Pieces",
-    notableWorksLink: { text: "Sakura TRP 22001", galleryIndex: 15 },
-    philosophy: "Furniture should be a conversation between form and function—each piece tells a story of material and intention.",
-    curatorPicks: [
-      { 
-        image: maartenVrolijkVessel,
-        title: "Sakura TRP 22001", 
-        category: "Decorative Object",
-        subcategory: "Vessels",
-        materials: "Handblown & sculpted glass, unique piece with certificate",
-        dimensions: "H 52 cm × W 40 cm × D 41 cm",
-        edition: "Unique Piece"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/maartenvrolijk" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "matthieu-gicquel",
-    name: "Matthieu Gicquel",
-    specialty: "Artisan Glass & Tableware",
-    image: matthieuGicquelImg,
-    biography:
-      "Matthieu Gicquel is a French glass artist renowned for his exceptional tableware and decorative objects that blend traditional craftsmanship with contemporary design. His signature pieces feature textured glass adorned with precious gold leaf details, creating functional art that elevates everyday dining into a refined experience.",
-    notableWorks: "Texture Glass with Gold Leaf rim Géode, Artisan Tableware Collection",
-    notableWorksLink: { text: "Texture Glass with Gold Leaf rim Géode", galleryIndex: 1 },
-    philosophy: "Each piece of glass tells a story of light, texture, and the timeless beauty of artisan craftsmanship.",
-    curatorPicks: [
-      { 
-        image: matthieuGicquelGeode,
-        title: "Géode Nbr 4: Texture Glass with Gold Leaf Rim", 
-        category: "Decorative Object",
-        subcategory: "Tableware",
-        materials: "Textured glass • 24k gold leaf rim",
-        dimensions: "Ø32 cm",
-        edition: "Unique Piece"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/matthieu_gicquel/?hl=en" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "rowin-atelier",
-    name: "RoWin' Atelier",
-    specialty: "Artisan Ceramics & Sculptural Objects",
-    image: rowinAtelierImg,
-    biography:
-      "RoWin' Atelier is a French ceramics studio renowned for creating exceptional handcrafted pieces that blend traditional techniques with contemporary design. Each creation showcases meticulous attention to detail and a deep understanding of material properties.",
-    notableWorks: "None II Table Lamp",
-    notableWorksLink: { text: "None II Table Lamp", galleryIndex: 16 },
-    philosophy: "Every piece of clay holds the potential for extraordinary beauty when shaped by skilled hands.",
-    curatorPicks: [
-      { 
-        image: rowinNoneIiLamp,
-        title: "None II Table Lamp", 
-        category: "Lighting",
-        subcategory: "Table Lamps",
-        materials: "Cippolino Verde Marble, Silver-Plated brass",
-        dimensions: "39 cm × 22.5 cm × H 58 cm",
-        edition: "Unique Piece"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/rowinatelier" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "marcantonio-brandolini-dadda",
-    name: "Marcantonio Brandolini D'Adda",
-    specialty: "Glass Art & Sculptural Vessels",
-    image: marcantonioBrandoliniImg,
-    biography:
-      "Marcantonio Brandolini D'Adda is an Italian glass artist whose work represents the finest traditions of Murano glassmaking combined with contemporary artistic vision. His vessels are celebrated for their organic forms and exceptional craftsmanship.",
-    notableWorks: "Cotissi Vessel, Murano Glass Sculptures",
-    notableWorksLink: { text: "Cotissi Vessel", galleryIndex: 15 },
-    philosophy: "Glass is a living material that captures light and transforms space into poetry.",
-    curatorPicks: [
-      { 
-        image: marcantonioCotissiVessel,
-        title: "Cotissi Vessel", 
-        category: "Decorative Object",
-        subcategory: "Vessels",
-        materials: "Hand-blown Murano glass",
-        dimensions: "H35 × Ø20 cm",
-        edition: "Unique Piece"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/marcantoniobrandolinidadda" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "thierry-lemaire",
-    name: "Thierry Lemaire",
-    specialty: "Sculptural Furniture & Limited Editions",
-    image: thierryLemaireImg,
-    biography:
-      "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
-    notableWorks: "Orsay Centre Table. Limited and numbered edition (12 copies).",
-    notableWorksLink: { text: "Orsay Centre Table", galleryIndex: 1 },
-    philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
-    curatorPicks: [
-      {
-        image: thierryLemaireOrsay,
-        title: "Orsay Mds Centre Table",
-        category: "Tables",
-        subcategory: "Centre Tables",
-        materials: "Patinated bronze • Marble top",
-        dimensions: "Ø120 × H40 cm",
-        edition: "Numbered edition of 12"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
       { type: "Curators' Picks" },
     ],
   },
@@ -286,18 +162,46 @@ const collectibleDesigners = [
     notableWorksLink: { text: "Bronze Painting 204", galleryIndex: 8 },
     philosophy: "The material, colors and light are inseparable in my work. I create my own textures from the earth itself.",
     curatorPicks: [
-      {
-        image: pierreBonnefilleBronzePainting,
-        title: "Bronze Painting",
-        category: "Decorative Object",
-        subcategory: "Decorative Objects",
-        materials: "Mineral powder, limestone, lava, metallic pigments on canvas",
-        dimensions: "Various — bespoke commissions available",
-        edition: "Unique Piece"
-      },
+      { image: pierreBonnefilleBronzePainting, title: "Bronze Painting", category: "Decorative Object", subcategory: "Decorative Objects", materials: "Mineral powder, limestone, lava, metallic pigments on canvas", dimensions: "Various — bespoke commissions available", edition: "Unique Piece" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/pierre_bonnefille/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "rowin-atelier",
+    name: "RoWin' Atelier",
+    specialty: "Artisan Ceramics & Sculptural Objects",
+    image: rowinAtelierImg,
+    biography:
+      "RoWin' Atelier is a French ceramics studio renowned for creating exceptional handcrafted pieces that blend traditional techniques with contemporary design. Each creation showcases meticulous attention to detail and a deep understanding of material properties.",
+    notableWorks: "None II Table Lamp",
+    notableWorksLink: { text: "None II Table Lamp", galleryIndex: 16 },
+    philosophy: "Every piece of clay holds the potential for extraordinary beauty when shaped by skilled hands.",
+    curatorPicks: [
+      { image: rowinNoneIiLamp, title: "None II Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Cippolino Verde Marble, Silver-Plated brass", dimensions: "39 cm × 22.5 cm × H 58 cm", edition: "Unique Piece" },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/rowinatelier" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "thierry-lemaire",
+    name: "Thierry Lemaire",
+    specialty: "Sculptural Furniture & Limited Editions",
+    image: thierryLemaireImg,
+    biography:
+      "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
+    notableWorks: "Orsay Centre Table. Limited and numbered edition (12 copies).",
+    notableWorksLink: { text: "Orsay Centre Table", galleryIndex: 1 },
+    philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
+    curatorPicks: [
+      { image: thierryLemaireOrsay, title: "Orsay Mds Centre Table", category: "Tables", subcategory: "Centre Tables", materials: "Patinated bronze • Marble top", dimensions: "Ø120 × H40 cm", edition: "Numbered edition of 12" },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
       { type: "Curators' Picks" },
     ],
   },
