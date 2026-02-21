@@ -795,26 +795,28 @@ const Collectibles = () => {
                       )}
                     </div>
                   )}
-                  <img 
-                    src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
-                    alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                    className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
-                    draggable={false}
-                  />
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsZoomed(!isZoomed);
-                    }}
-                    className={`absolute top-3 right-3 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
-                    aria-label={isZoomed ? "Zoom out" : "Zoom in"}
-                  >
-                    {isZoomed ? (
-                      <ZoomOut className="h-5 w-5 text-white" />
-                    ) : (
-                      <ZoomIn className="h-5 w-5 text-white" />
-                    )}
-                  </button>
+                  <div className="relative inline-block">
+                    <img 
+                      src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
+                      alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
+                      className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
+                      draggable={false}
+                    />
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsZoomed(!isZoomed);
+                      }}
+                      className={`absolute top-2 right-2 z-10 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
+                      aria-label={isZoomed ? "Zoom out" : "Zoom in"}
+                    >
+                      {isZoomed ? (
+                        <ZoomOut className="h-5 w-5 text-white" />
+                      ) : (
+                        <ZoomIn className="h-5 w-5 text-white" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
                   <h3 className="text-sm md:text-base font-serif text-white mb-1">

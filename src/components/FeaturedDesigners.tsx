@@ -2290,25 +2290,27 @@ const FeaturedDesigners = () => {
                           ))}
                         </div>
                       )}
-                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image && (
-                        <img 
-                          src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
-                          alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                          className={`object-contain select-none transition-all duration-300 ${isZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[55vh]'}`}
-                          draggable={false}
-                        />
-                      )}
-                      {/* Maximize/Minimize icon — clickable, top-right */}
-                      <button
-                        onClick={() => setIsZoomed(!isZoomed)}
-                        className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
-                        aria-label={isZoomed ? "Minimize image" : "Maximize image"}
-                      >
-                        {isZoomed
-                          ? <Minimize2 className="w-3.5 h-3.5 text-white" />
-                          : <Maximize2 className="w-3.5 h-3.5 text-white" />
-                        }
-                      </button>
+                      <div className="relative inline-block">
+                        {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image && (
+                          <img 
+                            src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
+                            alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
+                            className={`object-contain select-none transition-all duration-300 ${isZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[55vh]'}`}
+                            draggable={false}
+                          />
+                        )}
+                        {/* Maximize/Minimize icon — clickable, top-right */}
+                        <button
+                          onClick={() => setIsZoomed(!isZoomed)}
+                          className="absolute top-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                          aria-label={isZoomed ? "Minimize image" : "Maximize image"}
+                        >
+                          {isZoomed
+                            ? <Minimize2 className="w-3.5 h-3.5 text-white" />
+                            : <Maximize2 className="w-3.5 h-3.5 text-white" />
+                          }
+                        </button>
+                      </div>
                     </div>
 
                     {/* Scroll dots — directly under the image */}
