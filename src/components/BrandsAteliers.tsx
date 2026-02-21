@@ -37,6 +37,7 @@ import sergeMouilleBg from "@/assets/designers/serge-mouille-bg.jpg";
 import robicaraBg from "@/assets/designers/robicara-bg.jpg";
 import peterReedBg from "@/assets/designers/peter-reed-bg.jpg";
 import pierreBonnefilleBg from "@/assets/designers/pierre-bonnefille-bg.jpg";
+import pinton1867Bg from "@/assets/designers/pinton-1867-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -677,6 +678,7 @@ const brandBgMap: Record<string, string> = {
   "Robicara": robicaraBg,
   "Peter Reed 1861": peterReedBg,
   "Pierre Bonnefille": pierreBonnefilleBg,
+  "Pinton 1867": pinton1867Bg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
