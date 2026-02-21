@@ -657,6 +657,15 @@ const partnerBrands = [
     description: "London-based luxury furniture house collaborating with visionary designers including Nika Zupanc, Jaime Hayon and Damien Langlois-Meurinne to create bold, sculptural pieces that push the boundaries of contemporary design.",
     instagram: "https://www.instagram.com/se_collections/",
   },
+  {
+    id: "valeria-nascimento",
+    name: "Valeria Nascimento",
+    category: "Decorative Object",
+    subcategory: "Decorative Objects",
+    origin: "United Kingdom",
+    description: "Portuguese-born, London-based artist renowned for her intricate ceramic botanical sculptures and wall installations, blending nature-inspired forms with meticulous craftsmanship.",
+    instagram: "https://www.instagram.com/valerianascimento/",
+  },
 ];
 
 // Background image map
