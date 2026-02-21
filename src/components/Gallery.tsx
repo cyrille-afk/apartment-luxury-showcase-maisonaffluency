@@ -396,8 +396,14 @@ const Gallery = () => {
                 })}
               </div>
 
+              {/* Photo credit — mobile only */}
+              <p className="text-[9px] text-muted-foreground/40 font-body tracking-wider mt-3 md:hidden flex items-center gap-1">
+                Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 hover:text-muted-foreground/70 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-2.5 h-2.5" style={{ stroke: "url(#ig-gradient-gallery)" }} />Thanawat Chu</a>
+                <svg width="0" height="0"><defs><linearGradient id="ig-gradient-gallery" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f9ce34" /><stop offset="50%" stopColor="#ee2a7b" /><stop offset="100%" stopColor="#6228d7" /></linearGradient></defs></svg>
+              </p>
+
               {/* Dot indicators — mobile only */}
-              <div className="flex justify-center gap-2 mt-3 md:hidden">
+              <div className="flex justify-center gap-2 mt-2 md:hidden">
                 {section.items.map((_, dotIndex) => (
                   <button
                     key={dotIndex}
@@ -416,12 +422,6 @@ const Gallery = () => {
                   />
                 ))}
               </div>
-
-              {/* Photo credit — mobile only */}
-              <p className="text-[9px] text-muted-foreground/40 font-body tracking-wider mt-2 md:hidden flex items-center gap-1">
-                Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 hover:text-muted-foreground/70 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-2.5 h-2.5" style={{ stroke: "url(#ig-gradient-gallery)" }} />Thanawat Chu</a>
-                <svg width="0" height="0"><defs><linearGradient id="ig-gradient-gallery" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f9ce34" /><stop offset="50%" stopColor="#ee2a7b" /><stop offset="100%" stopColor="#6228d7" /></linearGradient></defs></svg>
-              </p>
 
               <div className="hidden md:grid md:gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {section.items.map((item, index) => {
