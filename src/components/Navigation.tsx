@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Menu, X, Crown, Search, ChevronDown, Calendar, MessageCircle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -81,6 +81,9 @@ const Navigation = () => {
   const [activeSection, setActiveSection] = useState("#home");
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const [megaMenuHoverCat, setMegaMenuHoverCat] = useState<string | null>(null);
+  const megaMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // All page section IDs in order
@@ -127,6 +130,19 @@ const Navigation = () => {
 
     return () => observer.disconnect();
   }, []);
+
+  // Close mega menu on outside click
+  useEffect(() => {
+    if (!megaMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      const nav = document.querySelector('nav');
+      if (nav && !nav.contains(e.target as Node)) {
+        setMegaMenuOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [megaMenuOpen]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -359,51 +375,88 @@ const Navigation = () => {
               </button>
             ))}
 
-            {/* Categories dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground/70 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)] flex items-center gap-1 whitespace-nowrap outline-none relative group">
-                Categories
-                <ChevronDown className="h-3 w-3" />
-                <span className="absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="bg-background border border-border shadow-lg z-50 min-w-[220px] max-h-[70vh] overflow-y-auto">
-                <DropdownMenuItem
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
-                    handleNavClick('#designers');
-                  }}
-                  className="px-4 py-2 cursor-pointer hover:bg-muted transition-colors font-body text-[10px] uppercase tracking-[0.2em]"
-                >
-                  All Categories
-                </DropdownMenuItem>
+            {/* Categories mega menu trigger */}
+            <button
+              onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
+              className={cn(
+                "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1 whitespace-nowrap outline-none relative group",
+                megaMenuOpen
+                  ? "text-primary font-medium"
+                  : "text-foreground/70 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
+              )}
+            >
+              Categories
+              <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
+              <span className={cn(
+                "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
+                megaMenuOpen ? "w-full" : "w-0 group-hover:w-full"
+              )} />
+            </button>
+          </div>
+
+          {/* Horizontal mega menu */}
+          {megaMenuOpen && (
+            <div
+              ref={megaMenuRef}
+              className="w-full border-t border-border/30 bg-background py-4 animate-in slide-in-from-top-1 duration-200"
+            >
+              <div className="flex justify-center gap-8 lg:gap-12">
                 {CATEGORY_ORDER.map(cat => (
-                  <div key={cat}>
-                    <DropdownMenuItem
+                  <div
+                    key={cat}
+                    className="relative group"
+                    onMouseEnter={() => setMegaMenuHoverCat(cat)}
+                    onMouseLeave={() => setMegaMenuHoverCat(null)}
+                  >
+                    <button
                       onClick={() => {
                         window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
+                        setMegaMenuOpen(false);
                         handleNavClick('#designers');
                       }}
-                      className="px-4 py-2 cursor-pointer hover:bg-muted transition-colors font-body text-[10px] uppercase tracking-[0.2em] font-medium"
+                      className={cn(
+                        "font-body text-[10px] uppercase tracking-[0.2em] transition-all duration-300 pb-1",
+                        megaMenuHoverCat === cat ? "text-primary" : "text-foreground/70 hover:text-primary"
+                      )}
                     >
                       {cat}
-                    </DropdownMenuItem>
-                    {SUBCATEGORY_MAP[cat]?.map(sub => (
-                      <DropdownMenuItem
-                        key={sub}
-                        onClick={() => {
-                          window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
-                          handleNavClick('#designers');
-                        }}
-                        className="pl-8 pr-4 py-1.5 cursor-pointer hover:bg-muted transition-colors font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground"
-                      >
-                        {sub}
-                      </DropdownMenuItem>
-                    ))}
+                    </button>
+
+                    {/* Subcategories dropdown */}
+                    {megaMenuHoverCat === cat && SUBCATEGORY_MAP[cat]?.length > 0 && (
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50">
+                        <div className="bg-background border border-border shadow-lg rounded-sm py-2 min-w-[160px]">
+                          <button
+                            onClick={() => {
+                              window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
+                              setMegaMenuOpen(false);
+                              handleNavClick('#designers');
+                            }}
+                            className="block w-full text-left px-4 py-1.5 text-[10px] uppercase tracking-[0.15em] font-body text-primary hover:bg-muted transition-colors"
+                          >
+                            All {cat}
+                          </button>
+                          {SUBCATEGORY_MAP[cat].map(sub => (
+                            <button
+                              key={sub}
+                              onClick={() => {
+                                window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
+                                setMegaMenuOpen(false);
+                                handleNavClick('#designers');
+                              }}
+                              className="block w-full text-left px-4 py-1.5 text-[10px] uppercase tracking-[0.15em] font-body text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
+                            >
+                              {sub}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </nav>;
