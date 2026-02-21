@@ -38,6 +38,7 @@ import robicaraBg from "@/assets/designers/robicara-bg.jpg";
 import peterReedBg from "@/assets/designers/peter-reed-bg.jpg";
 import pierreBonnefilleBg from "@/assets/designers/pierre-bonnefille-bg.jpg";
 import pinton1867Bg from "@/assets/designers/pinton-1867-bg.jpg";
+import ericSchmittBg from "@/assets/designers/eric-schmitt-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -679,6 +680,7 @@ const brandBgMap: Record<string, string> = {
   "Peter Reed 1861": peterReedBg,
   "Pierre Bonnefille": pierreBonnefilleBg,
   "Pinton 1867": pinton1867Bg,
+  "Eric Schmitt Studio": ericSchmittBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
