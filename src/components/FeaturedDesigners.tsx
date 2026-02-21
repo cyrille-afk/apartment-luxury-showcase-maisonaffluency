@@ -1878,8 +1878,8 @@ const FeaturedDesigners = () => {
                 </button>
               )}
             </div>
-            <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
-              <SheetTrigger asChild>
+            <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+              <PopoverTrigger asChild>
                 <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none flex items-center gap-1.5" aria-label="Filter">
                   <SlidersHorizontal className="h-5 w-5" />
                   <span className="text-xs font-body uppercase tracking-wider">Filter</span>
@@ -1889,11 +1889,10 @@ const FeaturedDesigners = () => {
                     </span>
                   )}
                 </button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] sm:w-[320px] overflow-y-auto" aria-describedby={undefined}>
-                <div className="sr-only"><h2>Filter</h2></div>
-                <div className="flex items-center justify-between mb-6 mt-4">
-                  <h4 className="font-serif text-lg text-foreground flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" /> Filter</h4>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-[260px] p-4 max-h-[400px] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-serif text-sm text-foreground flex items-center gap-2"><SlidersHorizontal className="h-3.5 w-3.5" /> Filter</h4>
                   {selectedCategory && (
                     <button
                       onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
@@ -1906,7 +1905,7 @@ const FeaturedDesigners = () => {
                 <div className="space-y-1">
                   {categories.map((category) => (
                     <div key={category}>
-                      <label className="flex items-center gap-3 py-2 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
+                      <label className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
                         <Checkbox
                           checked={selectedCategory === category}
                           onCheckedChange={() => {
@@ -1947,8 +1946,8 @@ const FeaturedDesigners = () => {
                     </div>
                   ))}
                 </div>
-              </SheetContent>
-            </Sheet>
+              </PopoverContent>
+            </Popover>
           </div>
           <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
             Discover the visionary designers and artisans whose exceptional work defines Maison Affluency. Each brings
