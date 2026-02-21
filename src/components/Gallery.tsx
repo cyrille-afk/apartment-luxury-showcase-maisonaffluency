@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, SlidersHorizontal } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import bedroomImage from "@/assets/master-suite.jpg";
@@ -25,9 +26,12 @@ import detailsLampImage from "@/assets/details-lamp.jpg";
 import homeOfficeDeskImage from "@/assets/home-office-desk.jpg";
 import homeOfficeDesk2Image from "@/assets/home-office-desk-2.jpg";
 import homeOffice3Image from "@/assets/home-office-3.jpg";
+const galleryCategories = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"] as const;
+
 const galleryExperiences = [{
   experience: "A Sociable Environment",
   subtitle: "Bespoke sofa, hand-knotted artisan rug, sculptural lighting and collectible furniture",
+  categories: ["Seating", "Lighting", "Rugs", "Tables", "Decorative Object"] as string[],
   items: [{
     image: bespokeSofaImage,
     title: "An Inviting Lounge Area",
@@ -44,6 +48,7 @@ const galleryExperiences = [{
 }, {
   experience: "An Intimate Setting",
   subtitle: "Custom dining furniture, hand-blown glass pendants, sculptural seating and artisan accessories",
+  categories: ["Tables", "Lighting", "Seating", "Decorative Object"] as string[],
   items: [{
     image: intimateDiningImage,
     title: "A Dreamy Tuscan Landscape",
@@ -60,6 +65,7 @@ const galleryExperiences = [{
 }, {
   experience: "A Personal Sanctuary",
   subtitle: "Bespoke marquetry desk, hand-blown glass chandelier, artisan suede lamp and bronze painting",
+  categories: ["Lighting", "Seating", "Tables", "Decorative Object"] as string[],
   items: [{
     image: boudoirImage,
     title: "A Sophisticated Boudoir",
@@ -76,6 +82,7 @@ const galleryExperiences = [{
 }, {
   experience: "A Calming and Dreamy Environment",
   subtitle: "Curated collectibles, hand-carved furniture and hand-knotted silk rugs",
+  categories: ["Rugs", "Lighting", "Seating", "Decorative Object", "Storage"] as string[],
   items: [{
     image: bedroomImage,
     title: "A Masterful Suite",
@@ -92,6 +99,7 @@ const galleryExperiences = [{
 }, {
   experience: "A Small Room with Massive Personality",
   subtitle: "Bold statement pieces, artisan craftsmanship and curated collectibles",
+  categories: ["Lighting", "Tables", "Decorative Object"] as string[],
   items: [{
     image: smallRoomBedroomImage,
     title: "Artistic Statement",
@@ -108,6 +116,7 @@ const galleryExperiences = [{
 }, {
   experience: "Home Office with a View",
   subtitle: "Sculptural desk, refined lighting and curated accessories for a workspace of distinction",
+  categories: ["Tables", "Lighting", "Seating"] as string[],
   items: [{
     image: homeOfficeDeskImage,
     title: "A Workspace of Distinction",
@@ -124,6 +133,7 @@ const galleryExperiences = [{
 }, {
   experience: "The Details Make the Design",
   subtitle: "The details are not the details. They make the design",
+  categories: ["Decorative Object", "Lighting", "Storage", "Tables"] as string[],
   items: [{
     image: detailsSectionImage,
     title: "Curated Vignette",
@@ -151,6 +161,13 @@ const Gallery = () => {
   const [hasTapped, setHasTapped] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false);
+
+  const filteredExperiences = useMemo(() => {
+    if (!activeCategory) return galleryExperiences;
+    return galleryExperiences.filter(section => section.categories.includes(activeCategory));
+  }, [activeCategory]);
   // Track active dot per mobile scroll strip (one index per section)
   const [activeScrollIndices, setActiveScrollIndices] = useState<number[]>(
     galleryExperiences.map(() => 0)
@@ -295,15 +312,62 @@ const Gallery = () => {
         } : {}} transition={{
           duration: 0.8
         }} className="mb-12 md:mb-16 text-left">
-            <p className="mb-2 md:mb-3 uppercase tracking-[0.15em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
-              A UNIQUELY CURATED VENUE
-            </p>
+            <div className="flex items-center gap-3 mb-2 md:mb-3">
+              <p className="uppercase tracking-[0.15em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
+                A UNIQUELY CURATED VENUE
+              </p>
+              <Popover open={categoryPopoverOpen} onOpenChange={setCategoryPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span className="hidden md:inline">Categories</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-48 p-0">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-body">Filter by Category</span>
+                    <button onClick={() => setCategoryPopoverOpen(false)} className="text-muted-foreground hover:text-foreground">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="py-1">
+                    <button
+                      onClick={() => { setActiveCategory(null); setCategoryPopoverOpen(false); }}
+                      className={`w-full text-left px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] font-body transition-colors ${
+                        !activeCategory ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      All Categories
+                    </button>
+                    {galleryCategories.map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => { setActiveCategory(cat); setCategoryPopoverOpen(false); }}
+                        className={`w-full text-left px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] font-body transition-colors ${
+                          activeCategory === cat ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+            {activeCategory && (
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-body mb-2">
+                {filteredExperiences.length} {filteredExperiences.length === 1 ? "scene" : "scenes"} · {activeCategory}
+              </p>
+            )}
             <h2 className="text-sm leading-relaxed md:text-3xl text-foreground text-left px-1 md:px-2 md:text-justify font-serif lg:text-lg">
               From Thierry Lemaire's Orsay Mds Centre Table to Hervé van der Straeten's MicMac Chandelier, from Hamrei's whimsical Pépé Chair to Jeremy Maxwell Wintrebert's Cloud Bulle Pendants, from Pierre Bonnefille's Bronze Painting and Stéphane CG Abstract Diasecs, Maison Affluency Singapore is a uniquely curated venue where design and art congregate
             </h2>
           </motion.div>
 
-          {galleryExperiences.map((section, sectionIndex) => <div key={section.experience} id={sectionIndex === 0 ? "sociable-environment" : undefined} className={`mb-6 md:mb-10${sectionIndex === 0 ? " scroll-mt-24" : ""}`}>
+          {filteredExperiences.map((section, sectionIndex) => {
+            // Find original index for proper lightbox mapping
+            const originalSectionIndex = galleryExperiences.indexOf(section);
+            return <div key={section.experience} id={originalSectionIndex === 0 ? "sociable-environment" : undefined} className={`mb-6 md:mb-10${originalSectionIndex === 0 ? " scroll-mt-24" : ""}`}>
               <motion.div initial={{
             opacity: 0,
             y: 20
@@ -312,7 +376,7 @@ const Gallery = () => {
             y: 0
           } : {}} transition={{
             duration: 0.6,
-            delay: sectionIndex * 0.2
+            delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
                 <h3 className="text-xl md:text-3xl lg:text-4xl font-serif text-primary mb-2">
                   {section.experience}
@@ -324,12 +388,12 @@ const Gallery = () => {
 
               {/* Mobile: horizontal scroll strip */}
               <div
-                ref={el => { scrollStripRefs.current[sectionIndex] = el; }}
-                onScroll={() => handleStripScroll(sectionIndex)}
+                ref={el => { scrollStripRefs.current[originalSectionIndex] = el; }}
+                onScroll={() => handleStripScroll(originalSectionIndex)}
                 className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 md:hidden scrollbar-hide -mx-4 px-4"
               >
                 {section.items.map((item, index) => {
-                  const itemKey = `${sectionIndex}-${index}`;
+                  const itemKey = `${originalSectionIndex}-${index}`;
                   return (
                     <motion.div
                       key={`${item.title}-${index}-mobile`}
@@ -337,7 +401,7 @@ const Gallery = () => {
                       animate={isInView ? { opacity: 1, x: 0 } : {}}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                       className="relative flex-none w-[72vw] snap-start overflow-hidden rounded-sm aspect-[3/4] cursor-pointer"
-                      onClick={() => openLightbox(sectionIndex, index)}
+                      onClick={() => openLightbox(originalSectionIndex, index)}
                     >
                       <img
                         src={item.image}
@@ -364,13 +428,13 @@ const Gallery = () => {
                     key={dotIndex}
                     aria-label={`Go to photo ${dotIndex + 1}`}
                     onClick={() => {
-                      const strip = scrollStripRefs.current[sectionIndex];
+                      const strip = scrollStripRefs.current[originalSectionIndex];
                       if (!strip) return;
                       const cardWidth = strip.scrollWidth / section.items.length;
                       strip.scrollTo({ left: cardWidth * dotIndex, behavior: 'smooth' });
                     }}
                     className={`rounded-full transition-all duration-300 ${
-                      activeScrollIndices[sectionIndex] === dotIndex
+                      activeScrollIndices[originalSectionIndex] === dotIndex
                         ? 'w-4 h-2 bg-primary'
                         : 'w-2 h-2 bg-primary/30'
                     }`}
@@ -381,7 +445,7 @@ const Gallery = () => {
               {/* Desktop: regular grid */}
               <div className="hidden md:grid md:gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {section.items.map((item, index) => {
-                  const itemKey = `${sectionIndex}-${index}`;
+                  const itemKey = `${originalSectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
 
                   return (
@@ -390,7 +454,7 @@ const Gallery = () => {
                       id={`gallery-item-${itemKey}`}
                       initial={{ opacity: 0, y: 40 }}
                       animate={isInView ? { opacity: 1, y: 0 } : {}}
-                      transition={{ duration: 0.6, delay: sectionIndex * 0.2 + index * 0.1 }}
+                      transition={{ duration: 0.6, delay: originalSectionIndex * 0.2 + index * 0.1 }}
                       className="group cursor-pointer"
                     >
                       <div
@@ -402,7 +466,7 @@ const Gallery = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            openLightbox(sectionIndex, index);
+                            openLightbox(originalSectionIndex, index);
                           }}
                           className="absolute bottom-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                           aria-label="View full image"
@@ -416,7 +480,8 @@ const Gallery = () => {
                   );
                 })}
               </div>
-            </div>)}
+            </div>;
+          })}
         </div>
       </section>
 
