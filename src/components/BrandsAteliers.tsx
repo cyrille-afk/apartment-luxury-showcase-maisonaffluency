@@ -50,6 +50,7 @@ import maisonWecraftBg from "@/assets/designers/maison-wecraft-bg.jpg";
 import herveVanDerStraetenBg from "@/assets/designers/herve-van-der-straeten-bg.png";
 import pouenatBg from "@/assets/designers/pouenat-bg.png";
 import valeriaNascimentoBg from "@/assets/designers/valeria-nascimento-bg.png";
+import simonCabrolBg from "@/assets/designers/simon-cabrol-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -684,6 +685,15 @@ const partnerBrands = [
     description: "Portuguese-born, London-based artist renowned for her intricate ceramic botanical sculptures and wall installations, blending nature-inspired forms with meticulous craftsmanship.",
     instagram: "https://www.instagram.com/valerianascimento_studio/",
   },
+  {
+    id: "simon-cabrol",
+    name: "Simon Cabrol",
+    category: "Storage",
+    subcategory: "Cabinets",
+    origin: "France",
+    description: "French artisan designer and cabinetmaker whose style is a delicate balance between form, color, and detail. Trained with the Compagnons du Devoir, his work captivates the imagination, eliciting tactile and visual emotion.",
+    featured: "Boo Buffet",
+  },
 ];
 
 // Background image map
@@ -736,6 +746,7 @@ const brandBgMap: Record<string, string> = {
   "Pouenat": pouenatBg,
   "Poltrona Frau": poltronaFrauBg,
   "Valeria Nascimento": valeriaNascimentoBg,
+  "Simon Cabrol": simonCabrolBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
