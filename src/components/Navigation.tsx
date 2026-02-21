@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, Crown, Search, ChevronDown, Calendar, MessageCircle, Mail } from "lucide-react";
+import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -184,11 +184,24 @@ const Navigation = () => {
               </Button>
             </SheetTrigger>
             
-            <SheetContent side="right" className="w-[280px] sm:w-[320px] overflow-y-auto" aria-describedby={undefined}>
+            <SheetContent side="right" className="w-full overflow-y-auto" aria-describedby={undefined}>
               <div className="sr-only">
                 <h2>Navigation Menu</h2>
               </div>
-              <div className="flex flex-col gap-6 mt-8 pb-8">
+              {/* Header branding visible in menu */}
+              <div className="flex flex-col items-center pt-2 pb-4 border-b border-border/30 mb-6">
+                <button onClick={() => { setIsOpen(false); scrollToTop(); }} className="group cursor-pointer whitespace-nowrap">
+                  <span className="font-brand text-[1.4rem] font-medium tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+                    MAISON AFFLUENCY
+                  </span>
+                </button>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="h-px w-6 bg-foreground/30" />
+                  <span className="font-body text-[7px] uppercase tracking-[0.3em] text-foreground/50">Since 2017</span>
+                  <span className="h-px w-6 bg-foreground/30" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-6 pb-8">
                 {leftNavItems.map((item, index) => (
                   <button 
                     key={item.href} 
@@ -208,66 +221,54 @@ const Navigation = () => {
                   </button>
                 ))}
 
-                {/* Categories dropdown in mobile menu */}
+                {/* Categories list — always visible, small font, left-aligned with > chevron */}
                 <div 
-                  className="animate-fade-in opacity-0"
+                  className="animate-fade-in opacity-0 border-t border-border/30 pt-4"
                   style={{ animationDelay: `${leftNavItems.length * 120}ms`, animationFillMode: 'forwards' }}
                 >
-                  <button
-                    onClick={() => setCategoriesExpanded(!categoriesExpanded)}
-                    className="font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30 w-full flex items-center justify-between text-foreground hover:text-primary"
-                  >
-                    All Categories
-                    <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${categoriesExpanded ? "rotate-180" : ""}`} />
-                  </button>
-                  {categoriesExpanded && (
-                    <div className="flex flex-col gap-1 pl-4 pt-3 pb-2 bg-background border border-border/30 rounded-b-lg shadow-sm">
-                      <button
-                        onClick={() => { setIsOpen(false); setCategoriesExpanded(false); setExpandedCategory(null); window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } })); handleNavClick('#designers'); }}
-                        className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors py-1"
-                      >
-                        All
-                      </button>
-                      {CATEGORY_ORDER.map(cat => (
-                        <div key={cat}>
-                          <button
-                            onClick={() => {
-                              if (expandedCategory === cat) {
-                                setExpandedCategory(null);
-                              } else {
-                                setExpandedCategory(cat);
-                              }
-                            }}
-                            className={`text-left font-body text-base transition-colors py-1.5 w-full flex items-center justify-between ${expandedCategory === cat ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}
-                          >
-                            {cat}
-                            {SUBCATEGORY_MAP[cat]?.length > 0 && (
-                              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${expandedCategory === cat ? "rotate-180" : ""}`} />
-                            )}
-                          </button>
-                          {expandedCategory === cat && SUBCATEGORY_MAP[cat]?.length > 0 && (
-                            <div className="ml-4 mb-2 space-y-0.5 border-l border-border/40 pl-3">
-                              <button
-                                onClick={() => { setIsOpen(false); setCategoriesExpanded(false); setExpandedCategory(null); window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } })); handleNavClick('#designers'); }}
-                                className="block text-[11px] uppercase tracking-[0.15em] font-body text-muted-foreground/60 hover:text-primary transition-all duration-300 py-1"
-                              >
-                                All {cat}
-                              </button>
-                              {SUBCATEGORY_MAP[cat].map(sub => (
-                                <button
-                                  key={sub}
-                                  onClick={() => { setIsOpen(false); setCategoriesExpanded(false); setExpandedCategory(null); window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } })); handleNavClick('#designers'); }}
-                                  className="block text-[11px] uppercase tracking-[0.15em] font-body text-muted-foreground/60 hover:text-primary transition-all duration-300 py-1"
-                                >
-                                  {sub}
-                                </button>
-                              ))}
-                            </div>
+                  <p className="font-body text-[10px] uppercase tracking-[0.25em] text-foreground/40 mb-3">All Categories</p>
+                  <div className="flex flex-col gap-0">
+                    {CATEGORY_ORDER.map(cat => (
+                      <div key={cat}>
+                        <button
+                          onClick={() => {
+                            if (SUBCATEGORY_MAP[cat]?.length > 0) {
+                              setExpandedCategory(expandedCategory === cat ? null : cat);
+                            } else {
+                              setIsOpen(false); setExpandedCategory(null);
+                              window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
+                              handleNavClick('#designers');
+                            }
+                          }}
+                          className={`text-left font-body text-[13px] tracking-wide transition-colors py-2.5 w-full flex items-center justify-between ${expandedCategory === cat ? 'text-primary' : 'text-foreground/70 hover:text-primary'}`}
+                        >
+                          {cat}
+                          {SUBCATEGORY_MAP[cat]?.length > 0 && (
+                            <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedCategory === cat ? "rotate-90" : ""}`} />
                           )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        </button>
+                        {expandedCategory === cat && SUBCATEGORY_MAP[cat]?.length > 0 && (
+                          <div className="ml-4 mb-1 space-y-0 border-l border-border/30 pl-4">
+                            <button
+                              onClick={() => { setIsOpen(false); setExpandedCategory(null); window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } })); handleNavClick('#designers'); }}
+                              className="block text-[11px] uppercase tracking-[0.15em] font-body text-primary/70 hover:text-primary transition-colors py-1.5"
+                            >
+                              All {cat}
+                            </button>
+                            {SUBCATEGORY_MAP[cat].map(sub => (
+                              <button
+                                key={sub}
+                                onClick={() => { setIsOpen(false); setExpandedCategory(null); window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } })); handleNavClick('#designers'); }}
+                                className="block text-[11px] uppercase tracking-[0.15em] font-body text-foreground/50 hover:text-primary transition-colors py-1.5"
+                              >
+                                {sub}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 
                 <div 
