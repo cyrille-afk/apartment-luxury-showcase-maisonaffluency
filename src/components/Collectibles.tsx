@@ -34,6 +34,8 @@ import marcantonioBrandoliniImg from "@/assets/designers/marcantonio-brandolini-
 import marcantonioCotissiVessel from "@/assets/curators-picks/marcantonio-cotissi-vessel.jpg";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
+import pierreBonnefilleImg from "@/assets/designers/pierre-bonnefille.jpg";
+import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
 
 const collectibleDesigners = [
   {
@@ -270,6 +272,32 @@ const collectibleDesigners = [
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "pierre-bonnefille",
+    name: "Pierre Bonnefille",
+    specialty: "Patinated Surfaces, Paintings & Furniture",
+    image: pierreBonnefilleImg,
+    biography:
+      "Pierre Bonnefille is a French artist, painter, designer and 'Maître d'Art' — a title awarded by the French Ministry of Culture to masters of exceptional craft. A graduate of École Boulle and École Nationale Supérieure des Arts Décoratifs, he creates his own materials from mineral powder, limestone, lava, marble, earth, natural pigments and metallic powders. His Bronze Paintings are monumental works where material and color become inseparable.",
+    notableWorks: "Bronze Painting 204 (Maison Affluency), Café Marly at the Louvre, Mineral Painting Series",
+    notableWorksLink: { text: "Bronze Painting 204", galleryIndex: 8 },
+    philosophy: "The material, colors and light are inseparable in my work. I create my own textures from the earth itself.",
+    curatorPicks: [
+      {
+        image: pierreBonnefilleBronzePainting,
+        title: "Bronze Painting",
+        category: "Decorative Object",
+        subcategory: "Decorative Objects",
+        materials: "Mineral powder, limestone, lava, metallic pigments on canvas",
+        dimensions: "Various — bespoke commissions available",
+        edition: "Unique Piece"
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/pierre_bonnefille/" },
       { type: "Curators' Picks" },
     ],
   },
