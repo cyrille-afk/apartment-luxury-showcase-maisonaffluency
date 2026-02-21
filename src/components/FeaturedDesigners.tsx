@@ -37,7 +37,7 @@ import garnierLinkerImg from "@/assets/designers/garnier-linker.jpg";
 import robicaraImg from "@/assets/designers/robicara-v2.jpg";
 import redaAmalouImg from "@/assets/designers/reda-amalou.jpg";
 import noeDuchaufourImg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
-import binaBAitelImg from "@/assets/designers/bina-baitel.jpg";
+import binaBAitelImg from "@/assets/designers/bina-baitel.png";
 import tristanAuerImg from "@/assets/designers/tristan-auer.jpg";
 
 import manOfPartsImg from "@/assets/designers/man-of-parts.png";
@@ -515,7 +515,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/binabaitelstudio/" },
+      { type: "Instagram", url: "https://www.instagram.com/binabaitel/" },
       { type: "Curators' Picks" },
     ],
   },
