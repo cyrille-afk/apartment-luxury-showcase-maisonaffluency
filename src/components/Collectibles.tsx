@@ -430,9 +430,9 @@ const Collectibles = () => {
               const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
               const designerLetters = [...new Set(filteredDesigners.map(d => normalize(d.name)[0]))].sort();
               return (
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-3">
+                <div className="flex flex-row items-center gap-4 mb-3 overflow-x-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}>
                   <div
-                    className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto max-w-full"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto flex-shrink-0"
                     style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}
                   >
                     {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
@@ -457,7 +457,7 @@ const Collectibles = () => {
                       );
                     })}
                   </div>
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="flex items-center gap-4 flex-shrink-0">
                     {searchOpen ? (
                       <div className="relative flex-1 sm:flex-none sm:w-48 animate-in slide-in-from-right-2 duration-200">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -479,9 +479,10 @@ const Collectibles = () => {
                     ) : (
                       <button
                         onClick={() => setSearchOpen(true)}
-                        className="text-muted-foreground hover:text-primary transition-colors p-1.5"
+                        className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
                         aria-label="Search"
                       >
+                        <span className="text-xs font-body uppercase tracking-wider">Search</span>
                         <Search className="h-5 w-5" />
                       </button>
                     )}
