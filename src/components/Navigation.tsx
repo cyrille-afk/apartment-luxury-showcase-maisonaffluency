@@ -385,7 +385,7 @@ const Navigation = () => {
                   : "text-foreground/70 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
               )}
             >
-              Categories
+              All Categories
               <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
               <span className={cn(
                 "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
