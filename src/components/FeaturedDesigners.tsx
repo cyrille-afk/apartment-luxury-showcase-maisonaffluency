@@ -1882,8 +1882,8 @@ const FeaturedDesigners = () => {
               <Popover open={filterOpen} onOpenChange={setFilterOpen}>
               <PopoverTrigger asChild>
                 <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none flex items-center gap-1.5" aria-label="Filter">
-                  <SlidersHorizontal className="h-5 w-5" />
                   <span className="text-xs font-body uppercase tracking-wider">Filter</span>
+                  <SlidersHorizontal className="h-5 w-5" />
                   {selectedCategory && (
                     <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
                       1
