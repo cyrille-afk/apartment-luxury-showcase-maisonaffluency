@@ -505,6 +505,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/binabaitel/" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -520,6 +521,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://instagram.com/bruno_de_maistre_bdm" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -752,6 +754,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/studio_eric_schmitt_/" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -765,6 +768,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/maisoncharlesparis/" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -967,6 +971,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -981,6 +986,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
     curatorPicks: [],
     links: [
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1308,6 +1314,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/madeinkira/" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1321,6 +1328,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/manofparts/" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1400,6 +1408,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/noeduchaufourlawrance/" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1415,6 +1424,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1454,6 +1464,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/redaamalou/" },
+      { type: "Curators' Picks" },
     ],
   },
   {
@@ -1472,6 +1483,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
+      { type: "Curators' Picks" },
     ],
   },
   {
