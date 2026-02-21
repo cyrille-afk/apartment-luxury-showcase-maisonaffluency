@@ -386,6 +386,11 @@ const Gallery = () => {
                       <p className="absolute bottom-3 left-3 right-3 text-white text-xs font-body leading-snug line-clamp-2">
                         {item.title}
                       </p>
+                      {index === 2 && (
+                        <p className="absolute top-2 right-2 text-[8px] text-white/40 font-body tracking-wider flex items-center gap-1">
+                          Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 hover:text-white/60 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-2.5 h-2.5" style={{ stroke: "url(#ig-gradient-gallery)" }} />Thanawat Chu</a>
+                        </p>
+                      )}
                     </motion.div>
                   );
                 })}
