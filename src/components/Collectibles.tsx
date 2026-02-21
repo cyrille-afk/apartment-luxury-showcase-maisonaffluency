@@ -161,9 +161,7 @@ const collectibleDesigners = [
     notableWorks: "Bronze Painting 204 (Maison Affluency), Café Marly at the Louvre, Mineral Painting Series",
     notableWorksLink: { text: "Bronze Painting 204", galleryIndex: 8 },
     philosophy: "The material, colors and light are inseparable in my work. I create my own textures from the earth itself.",
-    curatorPicks: [
-      { image: pierreBonnefilleBronzePainting, title: "Bronze Painting", category: "Decorative Object", subcategory: "Decorative Objects", materials: "Mineral powder, limestone, lava, metallic pigments on canvas", dimensions: "Various — bespoke commissions available", edition: "Unique Piece" },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/pierre_bonnefille/" },
       { type: "Curators' Picks" },
