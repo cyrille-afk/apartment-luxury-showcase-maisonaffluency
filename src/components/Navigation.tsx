@@ -63,15 +63,15 @@ const contactOptions = [
   },
 ];
 
-const CATEGORY_ORDER = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"];
+const CATEGORY_ORDER = ["Lighting", "Seating", "Tables", "Storage", "Rugs", "Décor"];
 
 const SUBCATEGORY_MAP: Record<string, string[]> = {
-  "Lighting": ["Chandelier", "Floor Lamp", "Lantern", "Pendant", "Sconce", "Table Lamp", "Wall Light"],
-  "Seating": ["Bench", "Chair", "Sofa", "Stool"],
-  "Storage": ["Cabinet", "Chest of Drawers", "Console", "Credenza", "Sideboard"],
-  "Tables": ["Coffee Table", "Console Table", "Desk", "Dining Table", "Side Table"],
-  "Rugs": ["Textile"],
-  "Decorative Object": ["Mirror", "Sculpture", "Tableware", "Vase", "Vessel"],
+  "Lighting": ["Ceiling Lights", "Floor Lights", "Table Lights", "Wall Lights"],
+  "Seating": ["Armchairs", "Bar Stools", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Sofas"],
+  "Tables": ["Coffee Tables", "Consoles", "Desks", "Dining Tables", "Side Tables"],
+  "Storage": ["Bookcases", "Cabinets"],
+  "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
+  "Décor": ["Boxes", "Candle Holders", "Cushions & Throws", "Decorative Objects", "Desk Accessories", "Folding Screens & Window Décor", "Magazine Holders", "Mirrors", "Tableware & Linens", "Trays & Change Trays", "Vases & Vessels"],
 };
 
 const navItems = [...leftNavItems, ...rightNavItems];

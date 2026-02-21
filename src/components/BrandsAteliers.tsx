@@ -904,7 +904,7 @@ const BrandsAteliers = () => {
   const [filterOpen, setFilterOpen] = useState(false);
 
   // Fixed category order matching the artisans section
-  const CATEGORY_ORDER = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"];
+  const CATEGORY_ORDER = ["Lighting", "Seating", "Tables", "Storage", "Rugs", "Décor"];
 
   // Build category → subcategory map from brand data
   const categoryMap = useMemo(() => {
