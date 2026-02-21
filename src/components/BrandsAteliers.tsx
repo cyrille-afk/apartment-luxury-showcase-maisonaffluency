@@ -54,6 +54,7 @@ import simonCabrolBg from "@/assets/designers/simon-cabrol-bg.jpg";
 import andreePutmanBg from "@/assets/designers/andree-putman-bg.jpg";
 import noomBg from "@/assets/designers/noom-bg.png";
 import nicolasAubagnacBg from "@/assets/designers/nicolas-aubagnac-bg.png";
+import ozoneLightBg from "@/assets/designers/ozone-light-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -725,6 +726,15 @@ const partnerBrands = [
     description: "Iconic French designer who reset and expanded our visual culture in interior decoration. Her passion for craftsmanship, knowledge of French Arts Décoratifs tradition, and eye for minimalist shapes made her a legend. Her designs are re-issued by Ecart International.",
     instagram: "https://www.instagram.com/andreeputman_/?hl=en",
   },
+  {
+    id: "ozone-light",
+    name: "Ozone Light",
+    category: "Lighting",
+    subcategory: "Lighting",
+    origin: "France",
+    description: "Parisian lighting atelier founded in 2000 by Etienne Gounot and Eric Jähnke, creating refined luminaires that fuse artisanal craftsmanship with the technology of light.",
+    instagram: "https://www.instagram.com/ozone_light/?hl=en",
+  },
 ];
 
 // Background image map
@@ -781,6 +791,7 @@ const brandBgMap: Record<string, string> = {
   "Andrée Putman": andreePutmanBg,
   "Noom": noomBg,
   "Nicolas Aubagnac": nicolasAubagnacBg,
+  "Ozone Light": ozoneLightBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
