@@ -233,17 +233,24 @@ const Navigation = () => {
                     {CATEGORY_ORDER.map(cat => (
                       <div key={cat} className="mb-3">
                         <button
-                          onClick={() => {
-                            setIsOpen(false); 
-                            window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                            handleNavClick('#designers');
-                          }}
-                          className="text-left font-body text-[13px] uppercase tracking-wide transition-colors py-1.5 w-full text-foreground hover:text-primary font-semibold"
+                          onClick={() => setExpandedCategory(expandedCategory === cat ? null : cat)}
+                          className="text-left font-body text-[13px] uppercase tracking-wide transition-colors py-1.5 w-full text-foreground hover:text-primary font-semibold flex items-center justify-between"
                         >
                           {cat}
+                          <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedCategory === cat ? "rotate-90" : ""}`} />
                         </button>
-                        {SUBCATEGORY_MAP[cat]?.length > 0 && (
+                        {expandedCategory === cat && SUBCATEGORY_MAP[cat]?.length > 0 && (
                           <div className="ml-4 space-y-0 border-l border-border/30 pl-4">
+                            <button
+                              onClick={() => {
+                                setIsOpen(false);
+                                window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
+                                handleNavClick('#designers');
+                              }}
+                              className="block text-[11px] uppercase tracking-[0.15em] font-body text-foreground/50 hover:text-primary transition-colors py-1.5"
+                            >
+                              All {cat}
+                            </button>
                             {SUBCATEGORY_MAP[cat].map(sub => (
                               <button
                                 key={sub}
