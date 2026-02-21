@@ -318,9 +318,9 @@ const Gallery = () => {
               </p>
               <Popover open={categoryPopoverOpen} onOpenChange={setCategoryPopoverOpen}>
                 <PopoverTrigger asChild>
-                  <button className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">
+                  <button className="flex items-center gap-1.5 text-[10px] md:text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors border border-border/60 rounded-sm px-2 py-1">
                     <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span className="hidden md:inline">Categories</span>
+                    <span>Categories</span>
                   </button>
                 </PopoverTrigger>
                 <PopoverContent align="start" className="w-48 p-0">
