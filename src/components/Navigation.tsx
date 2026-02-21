@@ -305,11 +305,18 @@ const Navigation = () => {
                 </button>
               ))}
             </div>
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-3xl lg:text-4xl font-medium tracking-[0.25em] text-foreground transition-all duration-300 group-hover:text-primary">
-                MAISON AFFLUENCY
-              </span>
-            </button>
+            <div className="flex flex-col items-center">
+              <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
+                <span className="font-brand text-3xl lg:text-4xl font-medium tracking-[0.25em] text-foreground transition-all duration-300 group-hover:text-primary">
+                  MAISON AFFLUENCY
+                </span>
+              </button>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="h-px w-10 bg-foreground/30" />
+                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-foreground/50">Since 2017</span>
+                <span className="h-px w-10 bg-foreground/30" />
+              </div>
+            </div>
             <div className="flex justify-end">
               <DropdownMenu>
                 <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground/70 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)] flex items-center gap-1 whitespace-nowrap outline-none">
