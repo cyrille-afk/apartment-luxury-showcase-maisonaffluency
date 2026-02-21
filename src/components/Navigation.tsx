@@ -234,7 +234,7 @@ const Navigation = () => {
                             window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
                             handleNavClick('#designers');
                           }}
-                          className="text-left font-body text-[13px] uppercase tracking-wide transition-colors py-1.5 w-full text-foreground/70 hover:text-primary font-medium"
+                          className="text-left font-body text-[13px] uppercase tracking-wide transition-colors py-1.5 w-full text-foreground hover:text-primary font-semibold"
                         >
                           {cat}
                         </button>
