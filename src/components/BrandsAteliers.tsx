@@ -24,6 +24,7 @@ import garnierLinkerBg from "@/assets/designers/garnier-linker-bg.jpg";
 import haymannEditionsBg from "@/assets/designers/haymann-editions-bg.jpg";
 import kiraBg from "@/assets/designers/kira-bg.jpg";
 import okhaBg from "@/assets/designers/okha-bg.jpg";
+import cazesConquetBg from "@/assets/designers/cazes-conquet-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -651,6 +652,7 @@ const brandBgMap: Record<string, string> = {
   "Delcourt Collection": delcourtBg,
   "Ecart Paris": ecartParisBg,
   "Entrelacs Création": entrelacsBg,
+  "Cazes & Conquet": cazesConquetBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
