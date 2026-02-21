@@ -171,6 +171,31 @@ const Navigation = () => {
                     )} />
                   </button>
                 ))}
+
+                {/* Categories in mobile menu */}
+                <div 
+                  className="animate-fade-in opacity-0"
+                  style={{ animationDelay: `${leftNavItems.length * 120}ms`, animationFillMode: 'forwards' }}
+                >
+                  <p className="font-serif text-xl text-foreground mb-3 border-b border-border/30 pb-2">Categories</p>
+                  <div className="flex flex-col gap-2 pl-2">
+                    <button
+                      onClick={() => { setIsOpen(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: null })); handleNavClick('#gallery'); }}
+                      className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      All Categories
+                    </button>
+                    {["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => { setIsOpen(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: cat })); handleNavClick('#gallery'); }}
+                        className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 
                 <div 
                   className="pt-4 border-t border-border/50 animate-fade-in opacity-0"
@@ -276,6 +301,38 @@ const Navigation = () => {
                 )} />
               </button>
             ))}
+
+            {/* Categories dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground/70 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)] flex items-center gap-1 whitespace-nowrap outline-none relative group">
+                Categories
+                <ChevronDown className="h-3 w-3" />
+                <span className="absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="bg-background border border-border shadow-lg z-50 min-w-[180px]">
+                <DropdownMenuItem
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: null }));
+                    handleNavClick('#gallery');
+                  }}
+                  className="px-4 py-2 cursor-pointer hover:bg-muted transition-colors font-body text-[10px] uppercase tracking-[0.2em]"
+                >
+                  All Categories
+                </DropdownMenuItem>
+                {["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"].map(cat => (
+                  <DropdownMenuItem
+                    key={cat}
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: cat }));
+                      handleNavClick('#gallery');
+                    }}
+                    className="px-4 py-2 cursor-pointer hover:bg-muted transition-colors font-body text-[10px] uppercase tracking-[0.2em]"
+                  >
+                    {cat}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
