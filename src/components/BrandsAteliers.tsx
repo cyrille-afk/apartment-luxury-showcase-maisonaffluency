@@ -775,7 +775,7 @@ function AlphaStrip({
                   }}
                 />
               )}
-              <div className={`absolute inset-0 transition-colors duration-300 ${hasBg ? "bg-card/80 group-hover:bg-card/40" : "bg-card/50 group-hover:bg-card/80"}`} />
+              <div className={`absolute inset-0 transition-all duration-300 ${hasBg ? "bg-card/80 group-hover:bg-card/55" : "bg-card/50 group-hover:bg-card/80"}`} />
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2">
