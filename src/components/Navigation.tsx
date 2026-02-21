@@ -183,7 +183,7 @@ const Navigation = () => {
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
                       className="font-serif text-2xl text-left transition-all duration-300 px-4 py-2 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90 w-full"
                     >
-                      <Crown className="inline-block w-5 h-5 mr-2" />
+                      
                       {item.label}
                     </button>
                   ))}
@@ -225,7 +225,7 @@ const Navigation = () => {
                   onClick={() => handleNavClick(item.href)} 
                   className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap px-3 py-1.5 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90"
                 >
-                  <Crown className="inline-block w-3.5 h-3.5 mr-1.5" />
+                  
                   {item.label}
                 </button>
               ))}
