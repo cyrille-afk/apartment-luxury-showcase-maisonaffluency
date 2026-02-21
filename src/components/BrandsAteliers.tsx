@@ -696,6 +696,16 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/simoncabrol/?hl=en",
   },
   {
+    id: "noom",
+    name: "Noom",
+    category: "Seating",
+    subcategory: "Sofas & Loveseats",
+    seatType: "Sofas & Loveseats",
+    origin: "Ukraine",
+    description: "Ukrainian design studio creating bold, sculptural furniture that fuses modernist geometry with artisanal craftsmanship and rich material palettes.",
+    instagram: "https://www.instagram.com/naborfrniture/",
+  },
+  {
     id: "andree-putman",
     name: "Andrée Putman",
     category: "Tables",
