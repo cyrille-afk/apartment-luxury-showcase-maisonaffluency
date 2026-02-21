@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, Instagram } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import bedroomImage from "@/assets/master-suite.jpg";
@@ -387,8 +387,9 @@ const Gallery = () => {
                         {item.title}
                       </p>
                       {index === 2 && (
-                        <p className="absolute top-2 right-2 text-[8px] text-white/40 font-body tracking-wider">
-                          Photo: Thanawat Chu
+                        <p className="absolute top-2 right-2 text-[8px] text-white/40 font-body tracking-wider flex items-center gap-1">
+                          Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 hover:text-white/60 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-2.5 h-2.5" style={{ stroke: "url(#ig-gradient-gallery)" }} />Thanawat Chu</a>
+                          <svg width="0" height="0"><defs><linearGradient id="ig-gradient-gallery" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f9ce34" /><stop offset="50%" stopColor="#ee2a7b" /><stop offset="100%" stopColor="#6228d7" /></linearGradient></defs></svg>
                         </p>
                       )}
                     </motion.div>
@@ -452,8 +453,8 @@ const Gallery = () => {
                         </button>
                       </div>
                       {index === 2 && (
-                        <p className="text-[10px] text-muted-foreground/50 font-body tracking-wider text-right mt-1">
-                          Photo: Thanawat Chu
+                        <p className="text-[10px] text-muted-foreground/50 font-body tracking-wider text-right mt-1 flex items-center gap-1 justify-end">
+                          Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-muted-foreground transition-colors"><Instagram className="w-3 h-3" style={{ stroke: "url(#ig-gradient-gallery)" }} />Thanawat Chu</a>
                         </p>
                       )}
                     </motion.div>

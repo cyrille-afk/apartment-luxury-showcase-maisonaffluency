@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { Instagram } from "lucide-react";
 import heroImage from "@/assets/living-room-hero.jpg";
 
 const Hero = () => {
@@ -83,8 +84,8 @@ const Hero = () => {
       </div>
 
       {/* Photo credit */}
-      <p className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10 text-[10px] md:text-xs text-cream/50 font-body tracking-wider">
-        Photo: Thanawat Chu
+      <p className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10 text-[10px] md:text-xs text-cream/50 font-body tracking-wider flex items-center gap-1">
+        Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-cream/80 transition-colors"><Instagram className="w-3 h-3" style={{ stroke: "url(#ig-gradient-hero)" }} /><svg width="0" height="0"><defs><linearGradient id="ig-gradient-hero" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f9ce34" /><stop offset="50%" stopColor="#ee2a7b" /><stop offset="100%" stopColor="#6228d7" /></linearGradient></defs></svg>Thanawat Chu</a>
       </p>
       
       <motion.div initial={{
