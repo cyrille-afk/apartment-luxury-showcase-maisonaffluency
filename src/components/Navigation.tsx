@@ -187,16 +187,16 @@ const Navigation = () => {
                   </button>
                   {categoriesExpanded && (
                     <div className="flex flex-col gap-2 pl-4 pt-3 pb-2 bg-background border border-border/30 rounded-b-lg shadow-sm">
+                    <button
+                      onClick={() => { setIsOpen(false); setCategoriesExpanded(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: null })); handleNavClick('#designers'); }}
+                      className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors py-1"
+                    >
+                      All
+                    </button>
+                    {["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"].map(cat => (
                       <button
-                        onClick={() => { setIsOpen(false); setCategoriesExpanded(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: null })); handleNavClick('#gallery'); }}
-                        className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors py-1"
-                      >
-                        All
-                      </button>
-                      {["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"].map(cat => (
-                        <button
-                          key={cat}
-                          onClick={() => { setIsOpen(false); setCategoriesExpanded(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: cat })); handleNavClick('#gallery'); }}
+                        key={cat}
+                        onClick={() => { setIsOpen(false); setCategoriesExpanded(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: cat })); handleNavClick('#designers'); }}
                           className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors py-1"
                         >
                           {cat}
@@ -322,7 +322,7 @@ const Navigation = () => {
                 <DropdownMenuItem
                   onClick={() => {
                     window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: null }));
-                    handleNavClick('#gallery');
+                    handleNavClick('#designers');
                   }}
                   className="px-4 py-2 cursor-pointer hover:bg-muted transition-colors font-body text-[10px] uppercase tracking-[0.2em]"
                 >
@@ -333,7 +333,7 @@ const Navigation = () => {
                     key={cat}
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: cat }));
-                      handleNavClick('#gallery');
+                      handleNavClick('#designers');
                     }}
                     className="px-4 py-2 cursor-pointer hover:bg-muted transition-colors font-body text-[10px] uppercase tracking-[0.2em]"
                   >
