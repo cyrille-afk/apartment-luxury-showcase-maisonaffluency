@@ -386,12 +386,6 @@ const Gallery = () => {
                       <p className="absolute bottom-3 left-3 right-3 text-white text-xs font-body leading-snug line-clamp-2">
                         {item.title}
                       </p>
-                      {index === 2 && (
-                        <p className="absolute top-2 right-2 text-[8px] text-white/40 font-body tracking-wider flex items-center gap-1">
-                          Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 hover:text-white/60 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-2.5 h-2.5" style={{ stroke: "url(#ig-gradient-gallery)" }} />Thanawat Chu</a>
-                          <svg width="0" height="0"><defs><linearGradient id="ig-gradient-gallery" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f9ce34" /><stop offset="50%" stopColor="#ee2a7b" /><stop offset="100%" stopColor="#6228d7" /></linearGradient></defs></svg>
-                        </p>
-                      )}
                     </motion.div>
                   );
                 })}
@@ -418,7 +412,12 @@ const Gallery = () => {
                 ))}
               </div>
 
-              {/* Desktop: regular grid */}
+              {/* Photo credit — mobile only */}
+              <p className="text-[9px] text-muted-foreground/40 font-body tracking-wider mt-2 md:hidden flex items-center gap-1">
+                Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 hover:text-muted-foreground/70 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-2.5 h-2.5" style={{ stroke: "url(#ig-gradient-gallery)" }} />Thanawat Chu</a>
+                <svg width="0" height="0"><defs><linearGradient id="ig-gradient-gallery" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f9ce34" /><stop offset="50%" stopColor="#ee2a7b" /><stop offset="100%" stopColor="#6228d7" /></linearGradient></defs></svg>
+              </p>
+
               <div className="hidden md:grid md:gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {section.items.map((item, index) => {
                   const itemKey = `${originalSectionIndex}-${index}`;
