@@ -81,7 +81,7 @@ const QuickJumpMenu = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed right-4 bottom-6 md:right-6 md:bottom-24 z-50"
+          className="fixed right-4 bottom-20 md:right-6 md:bottom-24 z-50"
         >
           <AnimatePresence>
         {isOpen && (
@@ -122,7 +122,7 @@ const QuickJumpMenu = () => {
       {/* Circular progress indicator around button */}
       <div className="relative group">
         <svg
-          className="absolute -inset-1.5 w-[60px] h-[60px] -rotate-90"
+          className="absolute -inset-2 w-[68px] h-[68px] -rotate-90"
           viewBox="0 0 60 60"
         >
           <circle
@@ -158,7 +158,7 @@ const QuickJumpMenu = () => {
           onClick={() => setIsOpen(!isOpen)}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
-          className={`relative flex items-center justify-center w-12 h-12 rounded-full shadow-xl transition-all duration-300 touch-manipulation ${
+          className={`relative flex items-center justify-center w-14 h-14 rounded-full shadow-2xl transition-all duration-300 touch-manipulation ${
             isOpen
               ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-primary/30"
               : "bg-gradient-to-br from-card to-card/90 backdrop-blur-md border border-primary/30 text-primary hover:border-primary/50 hover:shadow-primary/20"
