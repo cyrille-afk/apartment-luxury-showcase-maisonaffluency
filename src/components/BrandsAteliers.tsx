@@ -1089,148 +1089,135 @@ const BrandsAteliers = () => {
               {totalBrands}
             </span>
           </div>
-          <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-4">
+          <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
               Brands & Ateliers
             </h2>
-            <div className="flex items-center gap-2 pb-1">
-              <button
-                onClick={() => setShowSearch(!showSearch)}
-                className="text-muted-foreground hover:text-primary transition-colors"
-                aria-label="Search brands"
-              >
-                <Search className="h-5 w-5" />
-              </button>
-              <Popover open={filterOpen} onOpenChange={setFilterOpen}>
-                <PopoverTrigger asChild>
-                  <button className="text-muted-foreground hover:text-primary transition-colors relative" aria-label="Filter by category">
-                    <SlidersHorizontal className="h-5 w-5" />
-                    {selectedCategory && (
-                      <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
-                        1
-                      </span>
-                    )}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-72 p-4 bg-card border-border z-50" align="start">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-serif text-sm text-foreground">Filter by Category</h4>
-                    <button onClick={() => setFilterOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors ml-2" aria-label="Close filter">
-                      <X size={16} />
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between mb-3">
-                    {selectedCategory && (
+          </div>
+          {/* A-Z alphabet jump bar + Search + Filter */}
+          {(() => {
+            const activeLettersArr = alphaGroups.map(([l]) => l);
+            return (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-3">
+                <div
+                  className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto max-w-full"
+                  style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}
+                >
+                  {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
+                    const isActive = activeLettersArr.includes(letter);
+                    return (
                       <button
-                        onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
-                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                        key={letter}
+                        onClick={() => {
+                          if (isActive) {
+                            const el = document.getElementById(`alpha-group-${letter}`);
+                            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                          }
+                        }}
+                        className={`flex-none font-serif text-xs md:text-sm leading-none px-1.5 py-1 rounded-full transition-all duration-200 ${
+                          isActive
+                            ? "text-foreground/60 hover:text-primary hover:bg-primary/10 cursor-pointer"
+                            : "text-foreground/20 cursor-default"
+                        }`}
                       >
-                        Clear
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:flex-none sm:w-56">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Search by brand..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 pr-8 h-9 text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <X className="h-3.5 w-3.5" />
                       </button>
                     )}
                   </div>
-                  <div className="space-y-1 max-h-80 overflow-y-auto">
-                    {categories.map((category) => (
-                      <div key={category}>
-                        <label className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
-                          <Checkbox
-                            checked={selectedCategory === category}
-                            onCheckedChange={() => {
-                              if (selectedCategory === category) {
-                                setSelectedCategory(null);
-                                setSelectedSubcategory(null);
-                              } else {
-                                setSelectedCategory(category);
-                                setSelectedSubcategory(null);
-                              }
-                            }}
-                          />
-                          <span className="text-sm text-foreground font-body">{category}</span>
-                        </label>
-                        {selectedCategory === category && categoryMap[category]?.length > 0 && (
-                          <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
-                            <button
-                              onClick={() => setSelectedSubcategory(null)}
-                              className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                !selectedSubcategory ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
-                              }`}
-                            >
-                              All {category}
-                            </button>
-                            {categoryMap[category].map(sub => (
-                              <button
-                                key={sub}
-                                onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
-                                className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                  selectedSubcategory === sub ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
-                                }`}
-                              >
-                                {sub}
-                              </button>
-                            ))}
-                          </div>
+                  <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+                    <PopoverTrigger asChild>
+                      <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none flex items-center gap-1.5" aria-label="Filter">
+                        <span className="text-xs font-body uppercase tracking-wider">Filter</span>
+                        <SlidersHorizontal className="h-5 w-5" />
+                        {selectedCategory && (
+                          <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
+                            1
+                          </span>
+                        )}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-[260px] p-4 max-h-[400px] overflow-y-auto">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-serif text-sm text-foreground flex items-center gap-2"><SlidersHorizontal className="h-3.5 w-3.5" /> Filter</h4>
+                        {selectedCategory && (
+                          <button
+                            onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
+                            className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            Clear
+                          </button>
                         )}
                       </div>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-          {showSearch && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-4"
-            >
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search brands..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-10 bg-card/80 border-border/40 focus:border-primary/60 h-9 text-sm"
-                  autoFocus
-                />
-                <button
-                  onClick={() => { setSearchQuery(""); setShowSearch(false); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </motion.div>
-          )}
-          {/* Alphabet jump bar — floating pill style, only active letters */}
-          {(() => {
-            const activeLetters = alphaGroups.map(([l]) => l);
-            return (
-              <div
-                className="sticky top-[6.5rem] z-30 flex justify-center mb-6"
-              >
-                <div
-                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto md:overflow-x-visible"
-                  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-                >
-                  {activeLetters.map((letter) => (
-                    <button
-                      key={letter}
-                      onClick={() => {
-                        const el = document.getElementById(`alpha-group-${letter}`);
-                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                      }}
-                      className="flex-none font-serif text-xs md:text-sm leading-none px-2 py-1 rounded-full transition-all duration-200 text-foreground/60 hover:text-primary hover:bg-primary/10 cursor-pointer"
-                    >
-                      {letter}
-                    </button>
-                  ))}
+                      <div className="space-y-1">
+                        {categories.map((category) => (
+                          <div key={category}>
+                            <label className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
+                              <Checkbox
+                                checked={selectedCategory === category}
+                                onCheckedChange={() => {
+                                  if (selectedCategory === category) {
+                                    setSelectedCategory(null);
+                                    setSelectedSubcategory(null);
+                                  } else {
+                                    setSelectedCategory(category);
+                                    setSelectedSubcategory(null);
+                                  }
+                                }}
+                              />
+                              <span className="text-sm text-foreground font-body">{category}</span>
+                            </label>
+                            {selectedCategory === category && categoryMap[category]?.length > 0 && (
+                              <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
+                                <button
+                                  onClick={() => setSelectedSubcategory(null)}
+                                  className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                                    !selectedSubcategory ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
+                                  }`}
+                                >
+                                  All {category}
+                                </button>
+                                {categoryMap[category].map(sub => (
+                                  <button
+                                    key={sub}
+                                    onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
+                                    className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                                      selectedSubcategory === sub ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
+                                    }`}
+                                  >
+                                    {sub}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             );
           })()}
-          <div className="w-full h-px bg-border/30 mb-6" />
           <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
             We collaborate with the world's most distinguished furniture houses, textile ateliers, and artisan workshops 
             to bring exceptional pieces to discerning collectors and design professionals.
