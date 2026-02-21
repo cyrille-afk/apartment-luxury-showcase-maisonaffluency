@@ -184,11 +184,11 @@ const Navigation = () => {
               </Button>
             </SheetTrigger>
             
-            <SheetContent side="right" className="w-[280px] sm:w-[320px]" aria-describedby={undefined}>
+            <SheetContent side="right" className="w-[280px] sm:w-[320px] overflow-y-auto" aria-describedby={undefined}>
               <div className="sr-only">
                 <h2>Navigation Menu</h2>
               </div>
-              <div className="flex flex-col gap-6 mt-8">
+              <div className="flex flex-col gap-6 mt-8 pb-8">
                 {leftNavItems.map((item, index) => (
                   <button 
                     key={item.href} 
