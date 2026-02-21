@@ -386,6 +386,11 @@ const Gallery = () => {
                       <p className="absolute bottom-3 left-3 right-3 text-white text-xs font-body leading-snug line-clamp-2">
                         {item.title}
                       </p>
+                      {index === 2 && (
+                        <p className="absolute top-2 right-2 text-[8px] text-white/40 font-body tracking-wider">
+                          Photo: Thanawat Chu
+                        </p>
+                      )}
                     </motion.div>
                   );
                 })}
@@ -446,6 +451,11 @@ const Gallery = () => {
                           </span>
                         </button>
                       </div>
+                      {index === 2 && (
+                        <p className="text-[10px] text-muted-foreground/60 font-body tracking-wider text-right -mt-3 mb-2">
+                          Photo: Thanawat Chu
+                        </p>
+                      )}
                     </motion.div>
                   );
                 })}
