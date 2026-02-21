@@ -71,7 +71,7 @@ const SUBCATEGORY_MAP: Record<string, string[]> = {
   "Storage": ["Bookcases", "Cabinets"],
   "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
   "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-  "Décor": ["Desk Accessories", "Magazine Holders", "Tableware & Linens", "Trays & Change Trays", "Vases & Vessels", "Mirrors", "Folding Screens & Window Décor", "Books", "Boxes", "Candle Holders", "Cushions & Throws", "Decorative Objects"],
+  "Décor": ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
 };
 
 const navItems = [...leftNavItems, ...rightNavItems];
