@@ -1647,9 +1647,15 @@ const FeaturedDesigners = () => {
       );
     }
     if (selectedCategory || selectedSubcategory) {
+      // Normalize subcategory for matching: nav uses plurals ("Sofas") but tags use singulars ("Sofa")
+      const matchesTag = (tag: string, filter: string) => {
+        const t = tag.toLowerCase();
+        const f = filter.toLowerCase();
+        return t === f || t + 's' === f || t === f + 's' || f.endsWith(t) || t.endsWith(f);
+      };
       designers = designers.filter(designer =>
         designer.curatorPicks?.some((pick: any) => {
-          if (selectedSubcategory) return pick.tags?.includes(selectedSubcategory);
+          if (selectedSubcategory) return pick.tags?.some((tag: string) => matchesTag(tag, selectedSubcategory));
           if (selectedCategory) return pick.tags?.includes(selectedCategory);
           return true;
         })
