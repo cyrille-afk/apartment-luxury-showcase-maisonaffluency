@@ -46,6 +46,7 @@ import matthieuGicquelBg from "@/assets/designers/matthieu-gicquel-bg.png";
 import nathalieZieglerBg from "@/assets/designers/nathalie-ziegler-bg.png";
 import seCollectionsBg from "@/assets/designers/se-collections-bg.png";
 import nikaZupancBg from "@/assets/designers/nika-zupanc-bg.png";
+import herveVanDerStraetenBg from "@/assets/designers/herve-van-der-straeten-bg.png";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -703,6 +704,7 @@ const brandBgMap: Record<string, string> = {
   "Nathalie Ziegler": nathalieZieglerBg,
   "Sé Collections": seCollectionsBg,
   "Nika Zupanc Studio": nikaZupancBg,
+  "Hervé van der Straeten": herveVanDerStraetenBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
