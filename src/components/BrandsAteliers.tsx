@@ -685,7 +685,7 @@ const partnerBrands = [
     category: "Decorative Object",
     subcategory: "Decorative Objects",
     origin: "United Kingdom",
-    description: "Brazilian-born, London-based artist renowned for her intricate ceramic botanical sculptures and wall installations, blending nature-inspired forms with meticulous craftsmanship.",
+    description: "Brazilian-born, London-based artist inspired by the exuberant landscapes of her native Goiânia and the works of Burle Marx and Niemeyer. Trained in architecture, she creates intricate ceramic botanical sculptures that fuse natural forms with urban sensibility.",
     instagram: "https://www.instagram.com/valerianascimento_studio/",
   },
   {
