@@ -682,7 +682,7 @@ const partnerBrands = [
     subcategory: "Decorative Objects",
     origin: "United Kingdom",
     description: "Portuguese-born, London-based artist renowned for her intricate ceramic botanical sculptures and wall installations, blending nature-inspired forms with meticulous craftsmanship.",
-    instagram: "https://www.instagram.com/valerianascimento/",
+    instagram: "https://www.instagram.com/valerianascimento_studio/",
   },
 ];
 
