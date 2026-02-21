@@ -702,6 +702,7 @@ const partnerBrands = [
     subcategory: "Desks",
     origin: "France",
     description: "Iconic French designer who reset and expanded our visual culture in interior decoration. Her passion for craftsmanship, knowledge of French Arts Décoratifs tradition, and eye for minimalist shapes made her a legend. Her designs are re-issued by Ecart International.",
+    instagram: "https://www.instagram.com/andreeputman_/?hl=en",
   },
 ];
 
@@ -841,7 +842,7 @@ function AlphaStrip({
                   className="absolute inset-0 w-full h-full pointer-events-none select-none"
                   style={{
                     objectFit: brand.name === "Baleri Italia" ? "contain" : "cover",
-                    objectPosition: brand.name === "Baleri Italia" ? "center 20%" : brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : brand.name === "Robicara" ? "center 45%" : brand.name === "Okha" ? "center 30%" : brand.name === "Sé Collections" ? "center center" : "center top",
+                    objectPosition: brand.name === "Baleri Italia" ? "center 20%" : brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : brand.name === "Robicara" ? "center 45%" : brand.name === "Okha" ? "center 30%" : brand.name === "Sé Collections" ? "center center" : brand.name === "Andrée Putman" ? "center 60%" : "center top",
                     padding: brand.name === "Baleri Italia" ? "10%" : "0",
                   }}
                 />
