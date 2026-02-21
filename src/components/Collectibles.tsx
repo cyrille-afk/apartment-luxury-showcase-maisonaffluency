@@ -32,7 +32,7 @@ import rowinAtelierImg from "@/assets/designers/rowin-atelier.jpg";
 import rowinNoneIiLamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 import marcantonioBrandoliniImg from "@/assets/designers/marcantonio-brandolini-dadda.jpg";
 import marcantonioCotissiVessel from "@/assets/curators-picks/marcantonio-cotissi-vessel.jpg";
-import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
+import thierryLemaireCollectiblesImg from "@/assets/designers/thierry-lemaire-collectibles.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
 import pierreBonnefilleImg from "@/assets/designers/pierre-bonnefille.jpg";
 import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
@@ -191,7 +191,7 @@ const collectibleDesigners = [
     id: "thierry-lemaire",
     name: "Thierry Lemaire",
     specialty: "Sculptural Furniture & Limited Editions",
-    image: thierryLemaireImg,
+    image: thierryLemaireCollectiblesImg,
     biography:
       "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
     notableWorks: "Orsay Centre Table. Limited and numbered edition (12 copies).",
