@@ -215,6 +215,15 @@ const partnerBrands = [
     galleryIndex: 9, // A Masterful Suite
   },
   {
+    id: "collection-particuliere",
+    name: "Collection Particulière",
+    category: "Seating",
+    subcategory: "Sofas & Loveseats",
+    origin: "France",
+    description: "Launched in Paris in 2014 by Jérôme Aumont, Collection Particulière invites renowned designers to create contemporary furniture firmly rooted in French and European craftsmanship, blurring the line between furniture, object and collectible design.",
+    instagram: "https://www.instagram.com/collection_particuliere/",
+  },
+  {
     id: "dagmar",
     name: "Dagmar London",
     category: "Tables",
