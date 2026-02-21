@@ -207,7 +207,7 @@ const Navigation = () => {
                     key={item.href} 
                     onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
-                    className="font-body text-[13px] tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground/70 hover:text-primary animate-fade-in opacity-0"
+                    className="font-body text-[13px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground/70 hover:text-primary animate-fade-in opacity-0"
                     style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
                   >
                     {item.label}
@@ -234,7 +234,7 @@ const Navigation = () => {
                               handleNavClick('#designers');
                             }
                           }}
-                          className={`text-left font-body text-[13px] tracking-wide transition-colors py-2.5 w-full flex items-center justify-between ${expandedCategory === cat ? 'text-primary' : 'text-foreground/70 hover:text-primary'}`}
+                          className={`text-left font-body text-[13px] uppercase tracking-wide transition-colors py-2.5 w-full flex items-center justify-between ${expandedCategory === cat ? 'text-primary' : 'text-foreground/70 hover:text-primary'}`}
                         >
                           {cat}
                           {SUBCATEGORY_MAP[cat]?.length > 0 && (
@@ -274,10 +274,10 @@ const Navigation = () => {
                       key={item.href} 
                       onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
-                      className="font-serif text-2xl text-left transition-all duration-300 px-4 py-2 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90 w-full"
+                      className="font-body text-[13px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground/70 hover:text-primary"
                     >
-                      
                       {item.label}
+                      <ChevronRight className="h-4 w-4" />
                     </button>
                   ))}
                 </div>
