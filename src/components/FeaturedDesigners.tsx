@@ -40,7 +40,7 @@ import noeDuchaufourImg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
 import binaBAitelImg from "@/assets/designers/bina-baitel.jpg";
 import tristanAuerImg from "@/assets/designers/tristan-auer.jpg";
 
-import manOfPartsImg from "@/assets/designers/man-of-parts.jpg";
+import manOfPartsImg from "@/assets/designers/man-of-parts.png";
 import kerstensImg from "@/assets/designers/kerstens.jpg";
 import felixAgostiniImg from "@/assets/designers/felix-agostini.jpg";
 import ecartParisImg from "@/assets/designers/ecart-paris.jpg";
