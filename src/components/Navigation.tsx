@@ -216,12 +216,45 @@ const Navigation = () => {
 
         {/* Desktop: stacked layout */}
         <div className="hidden md:flex flex-col items-center">
-          <div className="pt-4 pb-2">
+          {/* Top row: Trade Program | MAISON AFFLUENCY | Contact Us */}
+          <div className="w-full grid grid-cols-[1fr_auto_1fr] items-center pt-4 pb-2">
+            <div className="flex justify-start">
+              {rightNavItems.map((item) => (
+                <button 
+                  key={item.href} 
+                  onClick={() => handleNavClick(item.href)} 
+                  className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap px-3 py-1.5 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90"
+                >
+                  <Crown className="inline-block w-3.5 h-3.5 mr-1.5" />
+                  {item.label}
+                </button>
+              ))}
+            </div>
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
               <span className="font-brand text-3xl lg:text-4xl font-medium tracking-[0.25em] text-foreground transition-all duration-300 group-hover:text-primary">
                 MAISON AFFLUENCY
               </span>
             </button>
+            <div className="flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground/70 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)] flex items-center gap-1 whitespace-nowrap outline-none">
+                  Contact Us
+                  <ChevronDown className="h-3 w-3" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
+                  {contactOptions.map((option) => (
+                    <DropdownMenuItem 
+                      key={option.label}
+                      onClick={option.action}
+                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                    >
+                      <option.icon className="h-4 w-4 text-primary" />
+                      <span className="font-body text-sm">{option.label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           <div className="flex items-center gap-5 lg:gap-8 pb-3">
@@ -243,53 +276,6 @@ const Navigation = () => {
                 )} />
               </button>
             ))}
-
-            <span className="text-border/50 text-xs">|</span>
-
-            {rightNavItems.map((item) => {
-              const isTradeProgram = item.href === "#details";
-              return (
-                <button 
-                  key={item.href} 
-                  onClick={() => handleNavClick(item.href)} 
-                  className={cn(
-                    "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap",
-                    isTradeProgram && "px-3 py-1.5 border border-foreground rounded-sm bg-foreground text-background hover:bg-foreground/90",
-                    activeSection === item.href 
-                      ? isTradeProgram ? "text-background font-medium" : "text-primary font-medium"
-                      : isTradeProgram ? "text-background" : "text-foreground/70 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
-                  )}
-                >
-                  {isTradeProgram && <Crown className="inline-block w-3.5 h-3.5 mr-1.5" />}
-                  {item.label}
-                  {!isTradeProgram && (
-                    <span className={cn(
-                      "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
-                      activeSection === item.href ? "w-full" : "w-0 group-hover:w-full"
-                    )} />
-                  )}
-                </button>
-              );
-            })}
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground/70 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)] flex items-center gap-1 whitespace-nowrap outline-none">
-                Contact Us
-                <ChevronDown className="h-3 w-3" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
-                {contactOptions.map((option) => (
-                  <DropdownMenuItem 
-                    key={option.label}
-                    onClick={option.action}
-                    className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                  >
-                    <option.icon className="h-4 w-4 text-primary" />
-                    <span className="font-body text-sm">{option.label}</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>
