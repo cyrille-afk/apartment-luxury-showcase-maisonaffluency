@@ -778,8 +778,7 @@ function AlphaStrip({
             <div
               key={brand.name}
               id={`brand-${brand.name.replace(/\s+/g, "-").toLowerCase()}`}
-              className="group flex-none w-[80vw] md:w-[340px] snap-start border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden p-5 md:p-6"
-              style={{ minHeight: "220px" }}
+              className="group flex-none w-[80vw] md:w-[340px] h-[280px] md:h-[300px] snap-start border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden p-5 md:p-6"
             >
               {/* Lazy-loaded background image */}
               {bg && (
