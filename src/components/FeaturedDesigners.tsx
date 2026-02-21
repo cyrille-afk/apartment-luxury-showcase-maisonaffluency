@@ -1826,7 +1826,7 @@ const FeaturedDesigners = () => {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
               Designers & Makers
             </h2>
-            <div className="flex items-center gap-2 pb-1">
+            <div className="flex items-center gap-4 pb-1">
               <button
                 onClick={() => setShowSearch(!showSearch)}
                 className="text-muted-foreground hover:text-primary transition-colors"
