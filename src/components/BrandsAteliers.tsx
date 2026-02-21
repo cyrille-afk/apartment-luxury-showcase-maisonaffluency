@@ -49,6 +49,7 @@ import seCollectionsBg from "@/assets/designers/se-collections-bg.png";
 import nikaZupancBg from "@/assets/designers/nika-zupanc-bg.png";
 import herveVanDerStraetenBg from "@/assets/designers/herve-van-der-straeten-bg.png";
 import pouenatBg from "@/assets/designers/pouenat-bg.png";
+import valeriaNascimentoBg from "@/assets/designers/valeria-nascimento-bg.png";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -717,6 +718,7 @@ const brandBgMap: Record<string, string> = {
   "Hervé van der Straeten": herveVanDerStraetenBg,
   "Pouenat": pouenatBg,
   "Poltrona Frau": poltronaFrauBg,
+  "Valeria Nascimento": valeriaNascimentoBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
