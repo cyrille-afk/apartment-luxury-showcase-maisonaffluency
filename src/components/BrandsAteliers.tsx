@@ -712,7 +712,7 @@ const partnerBrands = [
     seatType: "Sofas & Loveseats",
     origin: "Ukraine",
     description: "Ukrainian design studio creating bold, sculptural furniture that fuses modernist geometry with artisanal craftsmanship and rich material palettes.",
-    instagram: "https://www.instagram.com/naborfrniture/",
+    instagram: "https://www.instagram.com/noomhome/",
   },
   {
     id: "andree-putman",
