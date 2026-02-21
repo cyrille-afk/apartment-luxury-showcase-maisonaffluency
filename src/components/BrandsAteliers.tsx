@@ -43,6 +43,7 @@ import jindrichHalabalaBg from "@/assets/designers/jindrich-halabala-bg.jpg";
 import oliviaCognetBg from "@/assets/designers/olivia-cognet-bg.jpg";
 import ooummBg from "@/assets/designers/ooumm-bg.png";
 import matthieuGicquelBg from "@/assets/designers/matthieu-gicquel-bg.png";
+import poltronaFrauBg from "@/assets/designers/poltrona-frau-bg.jpg";
 import nathalieZieglerBg from "@/assets/designers/nathalie-ziegler-bg.png";
 import seCollectionsBg from "@/assets/designers/se-collections-bg.png";
 import nikaZupancBg from "@/assets/designers/nika-zupanc-bg.png";
@@ -707,6 +708,7 @@ const brandBgMap: Record<string, string> = {
   "Nika Zupanc Studio": nikaZupancBg,
   "Hervé van der Straeten": herveVanDerStraetenBg,
   "Pouenat": pouenatBg,
+  "Poltrona Frau": poltronaFrauBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
