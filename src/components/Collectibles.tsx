@@ -263,7 +263,7 @@ const Collectibles = () => {
   const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
 
-  const CATEGORY_ORDER = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"];
+  const CATEGORY_ORDER = ["Lighting", "Seating", "Tables", "Storage", "Rugs", "Décor"];
 
   // Build category → subcategory map from curator picks
   const categoryMap = useMemo(() => {
