@@ -63,15 +63,15 @@ const contactOptions = [
   },
 ];
 
-const CATEGORY_ORDER = ["Lighting", "Seating", "Tables", "Storage", "Rugs", "Décor"];
+const CATEGORY_ORDER = ["Seating", "Tables", "Storage", "Lighting", "Rugs", "Décor"];
 
 const SUBCATEGORY_MAP: Record<string, string[]> = {
-  "Lighting": ["Ceiling Lights", "Floor Lights", "Table Lights", "Wall Lights"],
-  "Seating": ["Armchairs", "Bar Stools", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Sofas"],
-  "Tables": ["Coffee Tables", "Consoles", "Desks", "Dining Tables", "Side Tables"],
+  "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
+  "Tables": ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables"],
   "Storage": ["Bookcases", "Cabinets"],
+  "Lighting": ["Wall Lights", "Floor Lights", "Table Lights", "Ceiling Lights"],
   "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-  "Décor": ["Boxes", "Candle Holders", "Cushions & Throws", "Decorative Objects", "Desk Accessories", "Folding Screens & Window Décor", "Magazine Holders", "Mirrors", "Tableware & Linens", "Trays & Change Trays", "Vases & Vessels"],
+  "Décor": ["Desk Accessories", "Magazine Holders", "Tableware & Linens", "Trays & Change Trays", "Vases & Vessels", "Mirrors", "Folding Screens & Window Décor", "Books", "Boxes", "Candle Holders", "Cushions & Throws", "Decorative Objects"],
 };
 
 const navItems = [...leftNavItems, ...rightNavItems];
