@@ -19,7 +19,7 @@ const Index = () => {
     <>
       <ScrollProgress />
       <Navigation />
-      <main className="min-h-screen">
+      <main className="min-h-screen overflow-x-hidden">
         <section id="home">
           <Hero />
         </section>
