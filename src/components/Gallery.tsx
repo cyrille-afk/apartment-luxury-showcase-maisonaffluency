@@ -332,6 +332,9 @@ const Gallery = () => {
             <h2 className="text-sm leading-relaxed md:text-3xl text-foreground text-left px-1 md:px-2 md:text-justify font-serif lg:text-lg">
               From Thierry Lemaire's Orsay Mds Centre Table to Hervé van der Straeten's MicMac Chandelier, from Hamrei's whimsical Pépé Chair to Jeremy Maxwell Wintrebert's Cloud Bulle Pendants, from Pierre Bonnefille's Bronze Painting and Stéphane CG Abstract Diasecs, Maison Affluency Singapore is a uniquely curated venue where design and art congregate
             </h2>
+            <p className="text-[10px] md:text-xs text-muted-foreground/50 font-body tracking-wider text-right mt-3">
+              Photo: Thanawat Chu
+            </p>
           </motion.div>
 
           {filteredExperiences.map((section, sectionIndex) => {
@@ -386,11 +389,6 @@ const Gallery = () => {
                       <p className="absolute bottom-3 left-3 right-3 text-white text-xs font-body leading-snug line-clamp-2">
                         {item.title}
                       </p>
-                      {index === 2 && (
-                        <p className="absolute top-2 right-2 text-[8px] text-white/40 font-body tracking-wider">
-                          Photo: Thanawat Chu
-                        </p>
-                      )}
                     </motion.div>
                   );
                 })}
@@ -451,11 +449,6 @@ const Gallery = () => {
                           </span>
                         </button>
                       </div>
-                      {index === 2 && (
-                        <p className="text-[10px] text-muted-foreground/60 font-body tracking-wider text-right -mt-3 mb-2">
-                          Photo: Thanawat Chu
-                        </p>
-                      )}
                     </motion.div>
                   );
                 })}
