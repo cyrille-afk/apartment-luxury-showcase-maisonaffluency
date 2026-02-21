@@ -1422,6 +1422,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     name: "Milan Pekař",
     specialty: "Crystalline Glass Art & Sculptural Vessels",
     image: milanPekarImg,
+    imagePosition: "center 30%",
     biography:
       "Milan Pekař is a Czech glass artist renowned for his mastery of crystalline glass techniques. His Crystalline Vase collection showcases his exceptional skill in creating pieces that capture and refract light in mesmerizing ways. Working in the tradition of Bohemian glassmaking while pushing contemporary boundaries, his work transforms functional vessels into sculptural art.",
     notableWorks: "Crystalline Vase Collection, Sculptural Glass Vessels",
@@ -2052,6 +2053,7 @@ const FeaturedDesigners = () => {
                             src={designer.image}
                             alt={designer.name}
                             className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
+                            style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined}
                           />
                           <div className="absolute inset-0 rounded-full bg-primary/0 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center">
                             <svg
