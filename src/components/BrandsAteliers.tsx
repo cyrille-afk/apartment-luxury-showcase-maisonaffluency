@@ -46,7 +46,7 @@ import matthieuGicquelBg from "@/assets/designers/matthieu-gicquel-bg.png";
 import poltronaFrauBg from "@/assets/designers/poltrona-frau-bg.jpg";
 import nathalieZieglerBg from "@/assets/designers/nathalie-ziegler-bg.png";
 import seCollectionsBg from "@/assets/designers/se-collections-bg.png";
-import nikaZupancBg from "@/assets/designers/nika-zupanc-bg.png";
+
 import herveVanDerStraetenBg from "@/assets/designers/herve-van-der-straeten-bg.png";
 import pouenatBg from "@/assets/designers/pouenat-bg.png";
 import valeriaNascimentoBg from "@/assets/designers/valeria-nascimento-bg.png";
@@ -455,18 +455,6 @@ const partnerBrands = [
     galleryIndex: 6, // A Sophisticated Boudoir
   },
   {
-    id: "nika-zupanc",
-    name: "Nika Zupanc Studio",
-    category: "Seating",
-    subcategory: "Sofas & Loveseats",
-    seatType: "Sofas & Loveseats",
-    origin: "Slovenia",
-    description: "Slovenian designer known for poetic, feminine furniture and lighting that combines nostalgic elegance with contemporary sensibility.",
-    featured: "Stardust Loveseat",
-    instagram: "https://instagram.com/nikazupancstudio",
-    galleryIndex: 7, // A Serene Decor (Personal Sanctuary)
-  },
-  {
     id: "okha",
     name: "Okha",
     category: "Tables",
@@ -716,7 +704,7 @@ const brandBgMap: Record<string, string> = {
   "Matthieu Gicquel": matthieuGicquelBg,
   "Nathalie Ziegler": nathalieZieglerBg,
   "Sé Collections": seCollectionsBg,
-  "Nika Zupanc Studio": nikaZupancBg,
+  
   "Hervé van der Straeten": herveVanDerStraetenBg,
   "Pouenat": pouenatBg,
   "Poltrona Frau": poltronaFrauBg,
