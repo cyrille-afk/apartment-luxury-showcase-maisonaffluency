@@ -1847,18 +1847,27 @@ const FeaturedDesigners = () => {
               className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto max-w-full"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
             >
-              {activeLetters.map((letter) => (
-                <button
-                  key={letter}
-                  onClick={() => {
-                    const el = document.getElementById(`designer-alpha-${letter}`);
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
-                  className="flex-none font-serif text-xs md:text-sm leading-none px-2 py-1 rounded-full transition-all duration-200 text-foreground/60 hover:text-primary hover:bg-primary/10 cursor-pointer"
-                >
-                  {letter}
-                </button>
-              ))}
+              {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
+                const isActive = activeLetters.includes(letter);
+                return (
+                  <button
+                    key={letter}
+                    onClick={() => {
+                      if (isActive) {
+                        const el = document.getElementById(`designer-alpha-${letter}`);
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }}
+                    className={`flex-none font-serif text-xs md:text-sm leading-none px-1.5 py-1 rounded-full transition-all duration-200 ${
+                      isActive
+                        ? "text-foreground/60 hover:text-primary hover:bg-primary/10 cursor-pointer"
+                        : "text-foreground/20 cursor-default"
+                    }`}
+                  >
+                    {letter}
+                  </button>
+                );
+              })}
             </div>
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <div className="relative flex-1 sm:flex-none sm:w-56">
