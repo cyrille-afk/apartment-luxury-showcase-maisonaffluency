@@ -2057,7 +2057,7 @@ const FeaturedDesigners = () => {
                             aria-label="Instagram"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-name)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-name)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <defs>
                                 <linearGradient id="instagram-gradient-name" x1="0%" y1="100%" x2="100%" y2="0%">
                                   <stop offset="0%" stopColor="#f09433" />
