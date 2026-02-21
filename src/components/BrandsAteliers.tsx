@@ -1101,7 +1101,7 @@ const BrandsAteliers = () => {
           {(() => {
             const activeLettersArr = alphaGroups.map(([l]) => l);
             return (
-              <div className="flex flex-row items-center gap-4 mb-3">
+              <div className="flex flex-col gap-3 mb-3">
                 <div
                   className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto flex-shrink min-w-0"
                   style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}
