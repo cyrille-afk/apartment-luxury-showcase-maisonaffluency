@@ -643,6 +643,16 @@ const partnerBrands = [
     featured: "Tee Floor Lamp, Wall Light H, Table Lamp H",
     instagram: "https://www.instagram.com/pouenat.official/?hl=en",
   },
+  {
+    id: "se-collections",
+    name: "Sé Collections",
+    category: "Seating",
+    subcategory: "Sofas & Loveseats",
+    seatType: "Sofas & Loveseats",
+    origin: "United Kingdom",
+    description: "London-based luxury furniture house collaborating with visionary designers including Nika Zupanc, Jaime Hayon and Damien Langlois-Meurinne to create bold, sculptural pieces that push the boundaries of contemporary design.",
+    instagram: "https://www.instagram.com/se_collections/",
+  },
 ];
 
 // Background image map
