@@ -183,7 +183,7 @@ const Navigation = () => {
           {/* Mobile Hamburger Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-10 w-10 absolute left-0 bottom-1" aria-label="Toggle menu">
+              <Button variant="ghost" size="icon" className="h-12 w-12 absolute left-0" aria-label="Toggle menu">
                 {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
               </Button>
             </SheetTrigger>
