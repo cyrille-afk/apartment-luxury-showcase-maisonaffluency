@@ -81,6 +81,11 @@ const Hero = () => {
           
         </motion.div>
       </div>
+
+      {/* Photo credit */}
+      <p className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10 text-[10px] md:text-xs text-cream/50 font-body tracking-wider">
+        Photo: Thanawat Chu
+      </p>
       
       <motion.div initial={{
       opacity: 0
