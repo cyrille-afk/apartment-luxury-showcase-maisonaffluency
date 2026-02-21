@@ -44,6 +44,7 @@ import oliviaCognetBg from "@/assets/designers/olivia-cognet-bg.jpg";
 import ooummBg from "@/assets/designers/ooumm-bg.png";
 import matthieuGicquelBg from "@/assets/designers/matthieu-gicquel-bg.png";
 import nathalieZieglerBg from "@/assets/designers/nathalie-ziegler-bg.png";
+import seCollectionsBg from "@/assets/designers/se-collections-bg.png";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -699,6 +700,7 @@ const brandBgMap: Record<string, string> = {
   "oOumm": ooummBg,
   "Matthieu Gicquel": matthieuGicquelBg,
   "Nathalie Ziegler": nathalieZieglerBg,
+  "Sé Collections": seCollectionsBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
@@ -784,7 +786,7 @@ function AlphaStrip({
                   className="absolute inset-0 w-full h-full pointer-events-none select-none"
                   style={{
                     objectFit: brand.name === "Baleri Italia" ? "contain" : "cover",
-                    objectPosition: brand.name === "Baleri Italia" ? "center 20%" : brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : brand.name === "Robicara" ? "center 45%" : brand.name === "Okha" ? "center 30%" : "center top",
+                    objectPosition: brand.name === "Baleri Italia" ? "center 20%" : brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : brand.name === "Robicara" ? "center 45%" : brand.name === "Okha" ? "center 30%" : brand.name === "Sé Collections" ? "center center" : "center top",
                     padding: brand.name === "Baleri Italia" ? "10%" : "0",
                   }}
                 />
