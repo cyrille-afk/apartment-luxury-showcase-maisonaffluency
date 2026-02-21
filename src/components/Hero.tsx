@@ -1,9 +1,18 @@
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import heroImage from "@/assets/living-room-hero.jpg";
 
 const Hero = () => {
   const ref = useRef<HTMLElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"]
@@ -13,7 +22,7 @@ const Hero = () => {
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.3]);
 
   return <section ref={ref} className="relative h-screen w-full overflow-hidden">
-      <motion.div className="absolute inset-0" style={{ y }}>
+      <motion.div className="absolute inset-0" style={isMobile ? {} : { y }}>
         <motion.img 
           src={heroImage} 
           alt="Luxury living room with Asian-inspired murals and designer furniture" 
