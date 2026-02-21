@@ -82,6 +82,7 @@ const Navigation = () => {
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const [contactExpanded, setContactExpanded] = useState(false);
   const [megaMenuHoverCat, setMegaMenuHoverCat] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
 
@@ -283,24 +284,31 @@ const Navigation = () => {
                 </div>
                 
                 <div 
-                  className="pt-4 border-t border-border/30 animate-fade-in opacity-0"
+                  className="animate-fade-in opacity-0"
                   style={{ animationDelay: `${(leftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
                 >
-                  <p className="font-serif text-xl text-foreground mb-4">Contact Us</p>
-                  <div className="flex flex-col gap-3">
-                    {contactOptions.map((option, index) => (
-                      <button
-                        key={option.label}
-                        onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); option.action(); }}
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); option.action(); }}
-                        className="flex items-center gap-3 text-left font-body text-base text-muted-foreground hover:text-primary transition-colors animate-fade-in opacity-0"
-                        style={{ animationDelay: `${(leftNavItems.length + 2 + index) * 120}ms`, animationFillMode: 'forwards' }}
-                      >
-                        <option.icon className="h-5 w-5 text-primary" />
-                        <span>{option.label}</span>
-                      </button>
-                    ))}
-                  </div>
+                  <button
+                    onClick={() => setContactExpanded(!contactExpanded)}
+                    className="font-body text-[13px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground/70 hover:text-primary"
+                  >
+                    Contact Us
+                    <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${contactExpanded ? "rotate-90" : ""}`} />
+                  </button>
+                  {contactExpanded && (
+                    <div className="ml-4 mb-1 space-y-0 border-l border-border/30 pl-4">
+                      {contactOptions.map((option) => (
+                        <button
+                          key={option.label}
+                          onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); option.action(); }}
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); option.action(); }}
+                          className="flex items-center gap-3 text-left font-body text-[11px] uppercase tracking-[0.15em] text-foreground/50 hover:text-primary transition-colors py-1.5"
+                        >
+                          <option.icon className="h-4 w-4 text-primary" />
+                          <span>{option.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </SheetContent>
