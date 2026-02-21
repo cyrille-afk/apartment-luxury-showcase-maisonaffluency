@@ -51,6 +51,7 @@ import herveVanDerStraetenBg from "@/assets/designers/herve-van-der-straeten-bg.
 import pouenatBg from "@/assets/designers/pouenat-bg.png";
 import valeriaNascimentoBg from "@/assets/designers/valeria-nascimento-bg.png";
 import simonCabrolBg from "@/assets/designers/simon-cabrol-bg.jpg";
+import andreePutmanBg from "@/assets/designers/andree-putman-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -694,6 +695,14 @@ const partnerBrands = [
     description: "French artisan designer and cabinetmaker whose style is a delicate balance between form, color, and detail. Trained with the Compagnons du Devoir, his work captivates the imagination, eliciting tactile and visual emotion.",
     instagram: "https://www.instagram.com/simoncabrol/?hl=en",
   },
+  {
+    id: "andree-putman",
+    name: "Andrée Putman",
+    category: "Tables",
+    subcategory: "Desks",
+    origin: "France",
+    description: "Iconic French designer who reset and expanded our visual culture in interior decoration. Her passion for craftsmanship, knowledge of French Arts Décoratifs tradition, and eye for minimalist shapes made her a legend. Her designs are re-issued by Ecart International.",
+  },
 ];
 
 // Background image map
@@ -747,6 +756,7 @@ const brandBgMap: Record<string, string> = {
   "Poltrona Frau": poltronaFrauBg,
   "Valeria Nascimento": valeriaNascimentoBg,
   "Simon Cabrol": simonCabrolBg,
+  "Andrée Putman": andreePutmanBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
