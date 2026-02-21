@@ -32,6 +32,8 @@ import rowinAtelierImg from "@/assets/designers/rowin-atelier.jpg";
 import rowinNoneIiLamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 import marcantonioBrandoliniImg from "@/assets/designers/marcantonio-brandolini-dadda.jpg";
 import marcantonioCotissiVessel from "@/assets/curators-picks/marcantonio-cotissi-vessel.jpg";
+import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
+import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
 
 const collectibleDesigners = [
   {
@@ -241,6 +243,32 @@ const collectibleDesigners = [
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/marcantoniobrandolinidadda" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "thierry-lemaire",
+    name: "Thierry Lemaire",
+    specialty: "Sculptural Furniture & Limited Editions",
+    image: thierryLemaireImg,
+    biography:
+      "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
+    notableWorks: "Orsay Centre Table. Limited and numbered edition (12 copies).",
+    notableWorksLink: { text: "Orsay Centre Table", galleryIndex: 1 },
+    philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
+    curatorPicks: [
+      {
+        image: thierryLemaireOrsay,
+        title: "Orsay Mds Centre Table",
+        category: "Tables",
+        subcategory: "Centre Tables",
+        materials: "Patinated bronze • Marble top",
+        dimensions: "Ø120 × H40 cm",
+        edition: "Numbered edition of 12"
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
       { type: "Curators' Picks" },
     ],
   },
