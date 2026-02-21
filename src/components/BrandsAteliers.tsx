@@ -1193,32 +1193,33 @@ const BrandsAteliers = () => {
               </div>
             </motion.div>
           )}
-          {/* Alphabet jump bar — large serif display */}
-          <div
-            className="flex md:flex-wrap gap-x-3 md:gap-x-2 gap-y-1 mb-6 overflow-x-auto md:overflow-x-visible pb-1 md:pb-0"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
-              const available = alphaGroups.some(([l]) => l === letter);
-              return (
-                <button
-                  key={letter}
-                  disabled={!available}
-                  onClick={() => {
-                    const el = document.getElementById(`alpha-group-${letter}`);
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
-                  className={`flex-none font-serif text-base md:text-lg leading-none transition-all duration-200 ${
-                    available
-                      ? "text-primary/70 hover:text-primary hover:scale-110 cursor-pointer"
-                      : "text-muted-foreground/15 cursor-default"
-                  }`}
+          {/* Alphabet jump bar — floating pill style, only active letters */}
+          {(() => {
+            const activeLetters = alphaGroups.map(([l]) => l);
+            return (
+              <div
+                className="sticky top-[6.5rem] z-30 flex justify-center mb-6"
+              >
+                <div
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto md:overflow-x-visible"
+                  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                 >
-                  {letter}
-                </button>
-              );
-            })}
-          </div>
+                  {activeLetters.map((letter) => (
+                    <button
+                      key={letter}
+                      onClick={() => {
+                        const el = document.getElementById(`alpha-group-${letter}`);
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      className="flex-none font-serif text-xs md:text-sm leading-none px-2 py-1 rounded-full transition-all duration-200 text-foreground/60 hover:text-primary hover:bg-primary/10 cursor-pointer"
+                    >
+                      {letter}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
           <div className="w-full h-px bg-border/30 mb-6" />
           <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
             We collaborate with the world's most distinguished furniture houses, textile ateliers, and artisan workshops 
