@@ -1568,6 +1568,33 @@ const FeaturedDesigners = () => {
   const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Helper: check if a curator pick matches the active subcategory/category filter
+  const pickMatchesFilter = useMemo(() => {
+    if (!selectedSubcategory && !selectedCategory) return () => true;
+    const SUB_TAGS: Record<string, string[]> = {
+      "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+      "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+      "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+      "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+      "Wall Lights": ["Wall Light", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant"],
+      "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+      "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+      "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+      "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+      "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+      "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+    };
+    return (pick: any) => {
+      if (selectedSubcategory) {
+        const mapped = SUB_TAGS[selectedSubcategory];
+        if (mapped) return pick.tags?.some((tag: string) => mapped.some((mt: string) => tag.toLowerCase() === mt.toLowerCase()));
+        return pick.tags?.includes(selectedSubcategory);
+      }
+      if (selectedCategory) return pick.tags?.includes(selectedCategory);
+      return true;
+    };
+  }, [selectedSubcategory, selectedCategory]);
   const minSwipeDistance = 50;
 
   // Listen for category filter from navigation
@@ -2096,19 +2123,35 @@ const FeaturedDesigners = () => {
                               <button
                                 key={idx}
                                 onClick={() => {
-                                  // Filter curator picks by active subcategory/category
-                                  let filteredPicks = designer.curatorPicks || [];
+                                  // Show all picks, start on first matching one
+                                  setCuratorPicksDesigner(designer);
+                                  const allPicks = designer.curatorPicks || [];
                                   if (selectedSubcategory) {
-                                    filteredPicks = filteredPicks.filter((pick: any) => pick.tags?.includes(selectedSubcategory));
+                                    const SUB_TAGS: Record<string, string[]> = {
+                                      "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+                                      "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+                                      "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+                                      "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+                                      "Wall Lights": ["Wall Light", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant"],
+                                      "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+                                      "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+                                      "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+                                      "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+                                      "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+                                      "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+                                    };
+                                    const mapped = SUB_TAGS[selectedSubcategory];
+                                    const firstMatch = allPicks.findIndex((pick: any) => {
+                                      if (mapped) return pick.tags?.some((tag: string) => mapped.some(mt => tag.toLowerCase() === mt.toLowerCase()));
+                                      return pick.tags?.includes(selectedSubcategory);
+                                    });
+                                    setCuratorPickIndex(firstMatch >= 0 ? firstMatch : 0);
                                   } else if (selectedCategory) {
-                                    filteredPicks = filteredPicks.filter((pick: any) => pick.tags?.includes(selectedCategory));
-                                  }
-                                  if (filteredPicks.length > 0) {
-                                    setCuratorPicksDesigner({ ...designer, curatorPicks: filteredPicks } as any);
+                                    const firstMatch = allPicks.findIndex((pick: any) => pick.tags?.includes(selectedCategory));
+                                    setCuratorPickIndex(firstMatch >= 0 ? firstMatch : 0);
                                   } else {
-                                    setCuratorPicksDesigner(designer);
+                                    setCuratorPickIndex(0);
                                   }
-                                  setCuratorPickIndex(0);
                                 }}
                                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-gradient-to-r from-accent/90 to-primary/80 hover:from-accent hover:to-primary text-white rounded-md transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer border border-accent/30"
                               >
@@ -2217,10 +2260,13 @@ const FeaturedDesigners = () => {
                           <img 
                             src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                             alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                            className={`object-contain select-none transition-all duration-300 ${isZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[55vh]'}`}
+                            className={`object-contain select-none transition-all duration-300 ${isZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[55vh]'} ${
+                              !pickMatchesFilter(curatorPicksDesigner.curatorPicks[curatorPickIndex]) ? 'blur-[6px] opacity-40' : ''
+                            }`}
                             draggable={false}
                           />
                         )}
+
                         {/* Maximize/Minimize icon — clickable, top-right */}
                         <button
                           onClick={() => setIsZoomed(!isZoomed)}
@@ -2292,7 +2338,7 @@ const FeaturedDesigners = () => {
                                   : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'
                               }`}
                             >
-                              <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                              <img src={pick.image} alt={pick.title} className={`w-full h-full object-cover ${!pickMatchesFilter(pick) ? 'blur-[3px] opacity-40' : ''}`} loading="lazy" decoding="async" />
                             </button>
                           ))}
                         </div>
