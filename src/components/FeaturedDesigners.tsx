@@ -2313,7 +2313,7 @@ const FeaturedDesigners = () => {
                         {/* Maximize/Minimize icon — clickable, top-right */}
                         <button
                           onClick={() => setIsZoomed(!isZoomed)}
-                          className="absolute top-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                          className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
                           aria-label={isZoomed ? "Minimize image" : "Maximize image"}
                         >
                           {isZoomed

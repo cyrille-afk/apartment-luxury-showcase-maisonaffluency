@@ -807,7 +807,7 @@ const Collectibles = () => {
                         e.stopPropagation();
                         setIsZoomed(!isZoomed);
                       }}
-                      className={`absolute top-2 right-2 z-10 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
+                      className={`absolute bottom-2 right-2 z-10 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
                       aria-label={isZoomed ? "Zoom out" : "Zoom in"}
                     >
                       {isZoomed ? (
