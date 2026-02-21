@@ -68,6 +68,7 @@ const navItems = [...leftNavItems, ...rightNavItems];
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("#home");
+  const [categoriesExpanded, setCategoriesExpanded] = useState(false);
 
   useEffect(() => {
     // All page section IDs in order
@@ -172,29 +173,37 @@ const Navigation = () => {
                   </button>
                 ))}
 
-                {/* Categories in mobile menu */}
+                {/* Categories dropdown in mobile menu */}
                 <div 
                   className="animate-fade-in opacity-0"
                   style={{ animationDelay: `${leftNavItems.length * 120}ms`, animationFillMode: 'forwards' }}
                 >
-                  <p className="font-serif text-xl text-foreground mb-3 border-b border-border/30 pb-2">Categories</p>
-                  <div className="flex flex-col gap-2 pl-2">
-                    <button
-                      onClick={() => { setIsOpen(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: null })); handleNavClick('#gallery'); }}
-                      className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      All Categories
-                    </button>
-                    {["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"].map(cat => (
+                  <button
+                    onClick={() => setCategoriesExpanded(!categoriesExpanded)}
+                    className="font-serif text-2xl text-left transition-all duration-300 py-3 relative group border-b border-border/30 w-full flex items-center justify-between text-foreground hover:text-primary"
+                  >
+                    All Categories
+                    <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${categoriesExpanded ? "rotate-180" : ""}`} />
+                  </button>
+                  {categoriesExpanded && (
+                    <div className="flex flex-col gap-2 pl-4 pt-3 pb-2 bg-background border border-border/30 rounded-b-lg shadow-sm">
                       <button
-                        key={cat}
-                        onClick={() => { setIsOpen(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: cat })); handleNavClick('#gallery'); }}
-                        className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors"
+                        onClick={() => { setIsOpen(false); setCategoriesExpanded(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: null })); handleNavClick('#gallery'); }}
+                        className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors py-1"
                       >
-                        {cat}
+                        All
                       </button>
-                    ))}
-                  </div>
+                      {["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"].map(cat => (
+                        <button
+                          key={cat}
+                          onClick={() => { setIsOpen(false); setCategoriesExpanded(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: cat })); handleNavClick('#gallery'); }}
+                          className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors py-1"
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
                 <div 
