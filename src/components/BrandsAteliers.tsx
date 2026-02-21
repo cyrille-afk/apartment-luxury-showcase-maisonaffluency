@@ -463,7 +463,7 @@ const partnerBrands = [
     description: "Slovenian designer known for poetic, feminine furniture and lighting that combines nostalgic elegance with contemporary sensibility.",
     featured: "Stardust Loveseat",
     instagram: "https://instagram.com/nikazupancstudio",
-    galleryIndex: 6, // A Sophisticated Boudoir
+    galleryIndex: 7, // A Serene Decor (Personal Sanctuary)
   },
   {
     id: "okha",
