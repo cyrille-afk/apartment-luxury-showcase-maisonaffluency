@@ -458,7 +458,7 @@ const Gallery = () => {
                       </div>
                       {index === 2 && (
                         <p className="text-[10px] text-muted-foreground/50 font-body tracking-wider text-right -mt-4 md:-mt-5 mb-4 md:mb-5 flex items-center gap-1 justify-end">
-                          Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-muted-foreground transition-colors"><Instagram className="w-3 h-3" style={{ stroke: "url(#ig-gradient-gallery)" }} />Thanawat Chu</a>
+                          Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-muted-foreground transition-colors"><Instagram className="w-3 h-3 text-[#ee2a7b]" />Thanawat Chu</a>
                         </p>
                       )}
                     </motion.div>
