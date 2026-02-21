@@ -388,7 +388,7 @@ const Gallery = () => {
                       </p>
                       {index === 2 && (
                         <p className="absolute top-2 right-2 text-[8px] text-white/40 font-body tracking-wider flex items-center gap-1">
-                          Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 hover:text-white/60 transition-colors" onClick={e => e.stopPropagation()}><svg width="0" height="0" className="absolute"><defs><linearGradient id={`ig-gradient-card-${originalSectionIndex}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f9ce34" /><stop offset="50%" stopColor="#ee2a7b" /><stop offset="100%" stopColor="#6228d7" /></linearGradient></defs></svg><Instagram className="w-2.5 h-2.5" style={{ stroke: `url(#ig-gradient-card-${originalSectionIndex})` }} />Thanawat Chu</a>
+                          Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 hover:text-white/60 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-3 h-3 text-[#ee2a7b]" />Thanawat Chu</a>
                         </p>
                       )}
                     </motion.div>
