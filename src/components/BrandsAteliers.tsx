@@ -693,6 +693,7 @@ const partnerBrands = [
     origin: "France",
     description: "French artisan designer and cabinetmaker whose style is a delicate balance between form, color, and detail. Trained with the Compagnons du Devoir, his work captivates the imagination, eliciting tactile and visual emotion.",
     featured: "Boo Buffet",
+    instagram: "https://www.instagram.com/simoncabrol/?hl=en",
   },
 ];
 
