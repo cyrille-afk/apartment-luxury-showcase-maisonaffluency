@@ -1723,7 +1723,7 @@ const FeaturedDesigners = () => {
   }, []);
 
   // Fixed category order
-  const CATEGORY_ORDER = ["Lighting", "Seating", "Tables", "Storage", "Rugs", "Décor"];
+  const CATEGORY_ORDER = ["Seating", "Tables", "Storage", "Lighting", "Rugs", "Décor"];
 
   // Collect categories and subcategories from curators' picks
   const categoryMap = useMemo(() => {
