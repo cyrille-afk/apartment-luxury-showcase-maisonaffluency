@@ -1711,6 +1711,17 @@ const FeaturedDesigners = () => {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const minSwipeDistance = 50;
 
+  // Listen for category filter from navigation
+  useEffect(() => {
+    const handleDesignerCategory = (e: CustomEvent) => {
+      const { category, subcategory } = e.detail || {};
+      setSelectedCategory(category || null);
+      setSelectedSubcategory(subcategory || null);
+    };
+    window.addEventListener('setDesignerCategory', handleDesignerCategory as EventListener);
+    return () => window.removeEventListener('setDesignerCategory', handleDesignerCategory as EventListener);
+  }, []);
+
   // Fixed category order
   const CATEGORY_ORDER = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"];
 

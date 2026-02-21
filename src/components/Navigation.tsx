@@ -63,12 +63,24 @@ const contactOptions = [
   },
 ];
 
+const CATEGORY_ORDER = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"];
+
+const SUBCATEGORY_MAP: Record<string, string[]> = {
+  "Lighting": ["Chandelier", "Floor Lamp", "Lantern", "Pendant", "Sconce", "Table Lamp", "Wall Light"],
+  "Seating": ["Bench", "Chair", "Sofa", "Stool"],
+  "Storage": ["Cabinet", "Chest of Drawers", "Console", "Credenza", "Sideboard"],
+  "Tables": ["Coffee Table", "Console Table", "Desk", "Dining Table", "Side Table"],
+  "Rugs": ["Textile"],
+  "Decorative Object": ["Mirror", "Sculpture", "Tableware", "Vase", "Vessel"],
+};
+
 const navItems = [...leftNavItems, ...rightNavItems];
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("#home");
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     // All page section IDs in order
@@ -186,21 +198,50 @@ const Navigation = () => {
                     <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${categoriesExpanded ? "rotate-180" : ""}`} />
                   </button>
                   {categoriesExpanded && (
-                    <div className="flex flex-col gap-2 pl-4 pt-3 pb-2 bg-background border border-border/30 rounded-b-lg shadow-sm">
-                    <button
-                      onClick={() => { setIsOpen(false); setCategoriesExpanded(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: null })); handleNavClick('#designers'); }}
-                      className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors py-1"
-                    >
-                      All
-                    </button>
-                    {["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"].map(cat => (
+                    <div className="flex flex-col gap-1 pl-4 pt-3 pb-2 bg-background border border-border/30 rounded-b-lg shadow-sm">
                       <button
-                        key={cat}
-                        onClick={() => { setIsOpen(false); setCategoriesExpanded(false); window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: cat })); handleNavClick('#designers'); }}
-                          className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors py-1"
-                        >
-                          {cat}
-                        </button>
+                        onClick={() => { setIsOpen(false); setCategoriesExpanded(false); setExpandedCategory(null); window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } })); handleNavClick('#designers'); }}
+                        className="text-left font-body text-base text-muted-foreground hover:text-primary transition-colors py-1"
+                      >
+                        All
+                      </button>
+                      {CATEGORY_ORDER.map(cat => (
+                        <div key={cat}>
+                          <button
+                            onClick={() => {
+                              if (expandedCategory === cat) {
+                                setExpandedCategory(null);
+                              } else {
+                                setExpandedCategory(cat);
+                              }
+                            }}
+                            className={`text-left font-body text-base transition-colors py-1.5 w-full flex items-center justify-between ${expandedCategory === cat ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}
+                          >
+                            {cat}
+                            {SUBCATEGORY_MAP[cat]?.length > 0 && (
+                              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${expandedCategory === cat ? "rotate-180" : ""}`} />
+                            )}
+                          </button>
+                          {expandedCategory === cat && SUBCATEGORY_MAP[cat]?.length > 0 && (
+                            <div className="ml-4 mb-2 space-y-0.5 border-l border-border/40 pl-3">
+                              <button
+                                onClick={() => { setIsOpen(false); setCategoriesExpanded(false); setExpandedCategory(null); window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } })); handleNavClick('#designers'); }}
+                                className="block text-[11px] uppercase tracking-[0.15em] font-body text-muted-foreground/60 hover:text-primary transition-all duration-300 py-1"
+                              >
+                                All {cat}
+                              </button>
+                              {SUBCATEGORY_MAP[cat].map(sub => (
+                                <button
+                                  key={sub}
+                                  onClick={() => { setIsOpen(false); setCategoriesExpanded(false); setExpandedCategory(null); window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } })); handleNavClick('#designers'); }}
+                                  className="block text-[11px] uppercase tracking-[0.15em] font-body text-muted-foreground/60 hover:text-primary transition-all duration-300 py-1"
+                                >
+                                  {sub}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}
@@ -318,27 +359,40 @@ const Navigation = () => {
                 <ChevronDown className="h-3 w-3" />
                 <span className="absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="bg-background border border-border shadow-lg z-50 min-w-[180px]">
+              <DropdownMenuContent align="center" className="bg-background border border-border shadow-lg z-50 min-w-[220px] max-h-[70vh] overflow-y-auto">
                 <DropdownMenuItem
                   onClick={() => {
-                    window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: null }));
+                    window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
                     handleNavClick('#designers');
                   }}
                   className="px-4 py-2 cursor-pointer hover:bg-muted transition-colors font-body text-[10px] uppercase tracking-[0.2em]"
                 >
                   All Categories
                 </DropdownMenuItem>
-                {["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"].map(cat => (
-                  <DropdownMenuItem
-                    key={cat}
-                    onClick={() => {
-                      window.dispatchEvent(new CustomEvent('setGalleryCategory', { detail: cat }));
-                      handleNavClick('#designers');
-                    }}
-                    className="px-4 py-2 cursor-pointer hover:bg-muted transition-colors font-body text-[10px] uppercase tracking-[0.2em]"
-                  >
-                    {cat}
-                  </DropdownMenuItem>
+                {CATEGORY_ORDER.map(cat => (
+                  <div key={cat}>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
+                        handleNavClick('#designers');
+                      }}
+                      className="px-4 py-2 cursor-pointer hover:bg-muted transition-colors font-body text-[10px] uppercase tracking-[0.2em] font-medium"
+                    >
+                      {cat}
+                    </DropdownMenuItem>
+                    {SUBCATEGORY_MAP[cat]?.map(sub => (
+                      <DropdownMenuItem
+                        key={sub}
+                        onClick={() => {
+                          window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
+                          handleNavClick('#designers');
+                        }}
+                        className="pl-8 pr-4 py-1.5 cursor-pointer hover:bg-muted transition-colors font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground"
+                      >
+                        {sub}
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
