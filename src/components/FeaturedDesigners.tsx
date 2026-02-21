@@ -1423,7 +1423,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     image: pierreBonnefulleImg,
     biography: "Pierre Bonnefille is a French artist, painter, designer and 'Maître d'Art' — a title awarded by the French Ministry of Culture to masters of exceptional craft. A graduate of École Boulle and École Nationale Supérieure des Arts Décoratifs, he creates his own materials from mineral powder, limestone, lava, marble, earth, natural pigments and metallic powders. His Bronze Paintings are monumental works where material and color become inseparable. His collaboration with Olivier Gagnère on the Café Marly at the Musée du Louvre first brought him widespread international attention.",
     notableWorks: "Bronze Painting 204 (Maison Affluency), Café Marly at the Louvre, Mineral Painting Series",
-    notableWorksLink: { text: "Bronze Painting 204", galleryIndex: 8 },
     philosophy: "The material, colors and light are inseparable in my work. I create my own textures from the earth itself.",
     curatorPicks: [
       {
