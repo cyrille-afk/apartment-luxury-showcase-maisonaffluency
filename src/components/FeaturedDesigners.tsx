@@ -1464,9 +1464,8 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     biography:
       "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
     notableWorks:
-      "Orsay Centre Table, Niko 420 Custom Sofa. \nLimited and numbered edition (12 copies).",
+      "Niko 420 Custom Sofa. \nLimited and numbered edition (12 copies).",
     notableWorksLinks: [
-      { text: "Orsay Centre Table", galleryIndex: 1 },
       { text: "Niko 420 Custom Sofa", galleryIndex: 0 },
     ],
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
