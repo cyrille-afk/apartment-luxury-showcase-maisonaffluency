@@ -28,7 +28,7 @@ import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
 import yvesMacheretImg from "@/assets/designers/yves-macheret.jpg";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
 import leoAertsAlineaImg from "@/assets/designers/leo-aerts-alinea.jpg";
-import ericSchmittImg from "@/assets/designers/eric-schmitt.jpg";
+
 import pierreBonnefulleImg from "@/assets/designers/pierre-bonnefille.jpg";
 import ccTapisImg from "@/assets/designers/cc-tapis.jpg";
 import haymannEditionsImg from "@/assets/designers/haymann-editions.jpg";
@@ -131,13 +131,6 @@ import leoSentouPickLD from "@/assets/curators-picks/leo-sentou-ld-armchair.png"
 
 // Additional curator picks images
 import ericSchmittChairie from "@/assets/curators-picks/eric-schmitt-chairie.jpg";
-import ericSchmittDrageeConsole from "@/assets/curators-picks/eric-schmitt-dragee-console.jpg";
-import ericSchmittSaturneTable from "@/assets/curators-picks/eric-schmitt-saturne-table.jpg";
-import ericSchmittFrameTable from "@/assets/curators-picks/eric-schmitt-frame-table.jpg";
-import ericSchmittAnneauLamp from "@/assets/curators-picks/eric-schmitt-anneau-lamp.jpg";
-import ericSchmittDentelleConsole from "@/assets/curators-picks/eric-schmitt-dentelle-console.jpg";
-import ericSchmittFloatingTable from "@/assets/curators-picks/eric-schmitt-floating-table.jpg";
-import ericSchmittRocwoodTable from "@/assets/curators-picks/eric-schmitt-rocwood-table.jpg";
 import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
 import ccTapisGiudecca from "@/assets/curators-picks/cc-tapis-giudecca.jpg";
 import haymannMarieLamp from "@/assets/curators-picks/haymann-marie-lamp.jpg";
@@ -886,79 +879,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/entrelacs_lightings" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "eric-schmitt-studio",
-    name: "Éric Schmitt Studio",
-    specialty: "Sculptural Bronze & Marble Design",
-    image: ericSchmittImg,
-    biography: "French designer Éric Schmitt believes that 'a piece of furniture needs to exude silence so it can be loved for a long time.' Rather than explaining his work, he prefers to let his objects speak for themselves. His sculptural forms—from the graceful arch of a marble cabinet to the enduring silhouette of a Jarre table—echo the Romanesque churches and medieval architecture of his native Burgundy region. Represented by Carpenters Workshop Gallery, his pieces blur the line between collectible design and fine art.",
-    notableWorks: "Chairie (dining chair featured at Maison Affluency), Jarre Table, Marble Cabinet Series, Table Soleil",
-    notableWorksLink: { text: "Chairie dining chair", galleryIndex: 2 },
-    philosophy: "A piece of furniture needs to exude silence so it can be loved for a long time.",
-    curatorPicks: [
-      {
-        image: ericSchmittDrageeConsole,
-        title: "Dragée Console",
-        category: "Tables",
-        tags: ["Tables", "Console", "8 copies and 4 artist's proofs"],
-        materials: "Bronze and lacquered polyester resin or pink marble tops",
-        dimensions: "H 85 × L 120 cm"
-      },
-      {
-        image: ericSchmittSaturneTable,
-        title: "Saturne Coffee Table",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table", "24 copies and 4 artist's proofs"],
-        materials: "Two shades of patinated bronze or patinated and nickel plated bronze",
-        dimensions: "H 45 × Ø 90 cm"
-      },
-      {
-        image: ericSchmittFrameTable,
-        title: "Frame Table Low Side Table",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Black patinated and polished bronze",
-        dimensions: "L 50 × W 29 × H 40 cm"
-      },
-      {
-        image: ericSchmittAnneauLamp,
-        title: "Anneau Pendant Lamp",
-        category: "Lighting",
-        tags: ["Lighting", "Ceiling Lights"],
-        materials: "Alabaster, bronze & brass",
-        dimensions: "Ø 70 / 80 / 90 / 100 cm"
-      },
-      {
-        image: ericSchmittDentelleConsole,
-        title: "Dentelle Console",
-        category: "Tables",
-        tags: ["Tables", "Console", "4 copies and 4 artist's proofs"],
-        materials: "Silver plated bronze and steel",
-        dimensions: "L 90 × W 40 × H 96 cm"
-      },
-      {
-        image: ericSchmittFloatingTable,
-        title: "Floating Table One Foot",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Wood top and legs, blown glass bases",
-        dimensions: "Ø 130 × H 75 cm"
-      },
-      {
-        image: ericSchmittRocwoodTable,
-        title: "Rocwood Dining Table",
-        category: "Tables",
-        tags: ["Tables", "Dining Table", "24 copies and 4 artist's proofs"],
-        materials: "Patinated bronze base, black tinted walnut top",
-        dimensions: "L 330 × W 120 × H 75 cm",
-        description: "Made to measure on request"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/studio_eric_schmitt_/" },
       { type: "Curators' Picks" },
     ],
   },
