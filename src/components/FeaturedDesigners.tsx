@@ -128,6 +128,7 @@ import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonne
 import pierreBonnefilleBronzePainting208 from "@/assets/curators-picks/pierre-bonnefille-bronze-painting-208.png";
 import pierreBonnefilleMetamorphosisLamps from "@/assets/curators-picks/pierre-bonnefille-metamorphosis-lamps.png";
 import pierreBonnefilleMetamorphosisPolygone from "@/assets/curators-picks/pierre-bonnefille-metamorphosis-polygone.png";
+import pierreBonnefilleTabouretsStone from "@/assets/curators-picks/pierre-bonnefille-tabourets-stone.png";
 import ccTapisGiudecca from "@/assets/curators-picks/cc-tapis-giudecca.jpg";
 import haymannMarieLamp from "@/assets/curators-picks/haymann-marie-lamp.jpg";
 import theoremeGarnierLinker from "@/assets/curators-picks/theoreme-garnier-linker.jpg";
@@ -1597,6 +1598,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [
       { image: pierreBonnefilleMetamorphosisLamps, title: "Metamorphosis Lamps A&B", category: "Lighting", subcategory: "Table Lamps", tags: ["Lighting", "Table Lamps"], materials: "Table lamp in mixed media on wood. Patinated brass with burnished bronze or burnished copper finish — Bespoke Dimensions and Colours upon request", dimensions: "W 16 × D 30 × H 59 cm / Lampshade Ø 30 × H 25 cm", photoCredit: "Luca Bonnefille" },
       { image: pierreBonnefilleMetamorphosisPolygone, title: "Metamorphosis Polygone 1", category: "Tables", subcategory: "Dining Tables", tags: ["Tables", "Dining Tables"], materials: "Mixed media on wood. Burnished carbon base. Also available in copper. Bespoke Dimensions and Colours upon request", dimensions: "W 240 × D 100 × H 72 cm", edition: "Edition of 8 + 2 artist's proofs", photoCredit: "Luca Bonnefille" },
+      { image: pierreBonnefilleTabouretsStone, title: "3 Tabourets Stone", category: "Seating", subcategory: "Stools", tags: ["Seating", "Stool"], materials: "Stool in mixed material, mixture of natural pigments, mineral and metallic powders applied on a wooden structure — Bespoke Dimensions and Colours upon request", dimensions: "W 39 × D 29 × H 41 cm", photoCredit: "Luca Bonnefille" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/pierre_bonnefille/" },
