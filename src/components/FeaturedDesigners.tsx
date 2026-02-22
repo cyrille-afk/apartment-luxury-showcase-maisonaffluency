@@ -84,6 +84,7 @@ import apparatusPick1 from "@/assets/curators-picks/apparatus-1.jpg";
 import apparatusPick2 from "@/assets/curators-picks/apparatus-2.jpg";
 import apparatusPick3 from "@/assets/curators-picks/apparatus-3.jpg";
 import apparatusPick4 from "@/assets/curators-picks/apparatus-4.jpg";
+import apparatusPick5 from "@/assets/curators-picks/apparatus-5.png";
 import pendhapaPick1 from "@/assets/curators-picks/pendhapa-1.jpg";
 import pendhapaPick2 from "@/assets/curators-picks/pendhapa-2.jpg";
 import pendhapaPick4 from "@/assets/curators-picks/pendhapa-4.jpg";
@@ -386,6 +387,15 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         tags: ["Lighting", "Pendant"],
         materials: "Mold-blown glass cylinders • Brass dome and armature",
         dimensions: "Ø32.5\""
+      },
+      { 
+        image: apparatusPick5, 
+        title: "Segment",
+        subtitle: "Console Table",
+        category: "Furniture",
+        tags: ["Furniture", "Console"],
+        materials: "Hand-Cast Resin Legs • Lacquer or Sand-Blasted Ash Table Surface",
+        dimensions: "W 147 × D 45 × H 84 cm"
       },
     ],
     links: [
