@@ -24,7 +24,7 @@ import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank-new.jpg";
 import emanuelleLevetStenneImg from "@/assets/designers/emanuelle-levet-stenne.png";
 import milanPekarImg from "@/assets/designers/milan-pekar.png";
 import atelierPendhapaImg from "@/assets/designers/atelier-pendhapa.png";
-import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
+
 import yvesMacheretImg from "@/assets/designers/yves-macheret.jpg";
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
 import leoAertsAlineaImg from "@/assets/designers/leo-aerts-alinea.jpg";
@@ -102,13 +102,6 @@ import emmanuelLevetStennePick4 from "@/assets/curators-picks/emmanuel-levet-ste
 import emmanuelLevetStennePick5 from "@/assets/curators-picks/emmanuel-levet-stenne-5.jpg";
 import emmanuelLevetStennePick6 from "@/assets/curators-picks/emmanuel-levet-stenne-6.png";
 import emmanuelLevetStennePick7 from "@/assets/curators-picks/emmanuel-levet-stenne-7.png";
-import emmanuelBabledPick1 from "@/assets/curators-picks/emmanuel-babled-1.jpg";
-import emmanuelBabledPick2 from "@/assets/curators-picks/emmanuel-babled-2.jpg";
-import emmanuelBabledPick3 from "@/assets/curators-picks/emmanuel-babled-3.jpg";
-import emmanuelBabledPick4 from "@/assets/curators-picks/emmanuel-babled-4.jpg";
-import emmanuelBabledPick5 from "@/assets/curators-picks/emmanuel-babled-5.jpg";
-import emmanuelBabledPick6 from "@/assets/curators-picks/emmanuel-babled-6.jpg";
-import emmanuelBabledPick7 from "@/assets/curators-picks/emmanuel-babled-7.jpg";
 import hamreiPick1 from "@/assets/curators-picks/hamrei-1.jpg";
 import hamreiPick2 from "@/assets/curators-picks/hamrei-2.jpg";
 import hamreiPick3 from "@/assets/curators-picks/hamrei-3.jpg";
@@ -723,86 +716,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/emanuellelevetstenne" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "emmanuel-babled",
-    name: "Emmanuel Babled",
-    specialty: "Sculptural Glass & Marble Design",
-    image: emmanuelBabledImg,
-    biography:
-      "Emmanuel Babled is a French-Italian designer renowned for his limited edition sculptural objects in glass and marble. His Osmosi Series represents the pinnacle of material exploration and artistic vision, blending organic forms with exceptional craftsmanship. Each piece is a unique work of art that pushes the boundaries of material possibilities.",
-    notableWorks: "Osmosi Series Sculptured Book Cover, Glass Sculptures, Marble Objects",
-    notableWorksLink: { text: "Osmosi Series", galleryIndex: 2 },
-    philosophy: "I explore the boundaries between art and design, creating objects that challenge perception and celebrate material beauty.",
-    curatorPicks: [
-      {
-        image: emmanuelBabledPick1,
-        title: "Osmosi",
-        subtitle: "Console",
-        category: "Tables",
-        tags: ["Tables", "Console"],
-        materials: "Carrara marble, Murano blown glass",
-        dimensions: "H80 × L160 × D35 cm"
-      },
-      {
-        image: emmanuelBabledPick2,
-        title: "Coral",
-        subtitle: "Coffee Table",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table"],
-        materials: "Bianco Carrara marble, plexiglass",
-        dimensions: "L150 × W100 × H28 cm"
-      },
-      {
-        image: emmanuelBabledPick3,
-        title: "Pyros Marini",
-        subtitle: "Vase",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Vase"],
-        materials: "Murano blown glass (Venini)",
-        dimensions: "H45 × Ø30 cm"
-      },
-      {
-        image: emmanuelBabledPick4,
-        title: "Quark Bronze",
-        subtitle: "Coffee Table",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table"],
-        materials: "Bronze",
-        dimensions: "H30 × L122.5 × W83 cm"
-      },
-      {
-        image: emmanuelBabledPick5,
-        title: "Siliceaarenaria",
-        subtitle: "Vessels",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Vessel"],
-        materials: "Murano blown glass (Venini)",
-        dimensions: "Ø25 × H22 cm (each)"
-      },
-      {
-        image: emmanuelBabledPick6,
-        title: "Etna Cabinet",
-        subtitle: "Stripes",
-        category: "Storage",
-        tags: ["Storage", "Cabinet"],
-        materials: "Murano glass doors • Lava stone legs",
-        dimensions: "H85 × L120 × D45 cm"
-      },
-      {
-        image: emmanuelBabledPick7,
-        title: "Osmosi",
-        subtitle: "Side Table",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Carrara marble • Murano blown glass",
-        dimensions: "H55 × Ø60 cm"
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/emmanuelbabled" },
       { type: "Curators' Picks" },
     ],
   },
