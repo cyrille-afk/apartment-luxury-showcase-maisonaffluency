@@ -845,10 +845,6 @@ const Collectibles = () => {
                         {designer.biography}
                       </p>
                       <div className="space-y-2">
-                        <p className="text-sm font-body">
-                          <span className="text-foreground font-medium">Notable Works:</span>{" "}
-                          <span className="text-muted-foreground">{designer.notableWorks}</span>
-                        </p>
                         <p className="text-sm font-body italic text-primary/80">
                           "{designer.philosophy}"
                         </p>
