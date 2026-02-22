@@ -130,6 +130,7 @@ import pierreBonnefilleMetamorphosisLamps from "@/assets/curators-picks/pierre-b
 import pierreBonnefilleMetamorphosisPolygone from "@/assets/curators-picks/pierre-bonnefille-metamorphosis-polygone.png";
 import pierreBonnefilleTabouretsStone from "@/assets/curators-picks/pierre-bonnefille-tabourets-stone.png";
 import pierreBonnefilleStoneD from "@/assets/curators-picks/pierre-bonnefille-stone-d-coffee-table.png";
+import pierreBonnefilleEnfiladeBloc from "@/assets/curators-picks/pierre-bonnefille-enfilade-bloc.png";
 import ccTapisGiudecca from "@/assets/curators-picks/cc-tapis-giudecca.jpg";
 import haymannMarieLamp from "@/assets/curators-picks/haymann-marie-lamp.jpg";
 import theoremeGarnierLinker from "@/assets/curators-picks/theoreme-garnier-linker.jpg";
@@ -1601,6 +1602,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       { image: pierreBonnefilleMetamorphosisPolygone, title: "Metamorphosis Polygone 1", category: "Tables", subcategory: "Dining Tables", tags: ["Tables", "Dining Tables"], materials: "Mixed media on wood. Burnished carbon base. Also available in copper.\nBespoke Dimensions and Colours upon request", dimensions: "W 240 × D 100 × H 72 cm", edition: "Edition of 8 + 2 artist's proofs", photoCredit: "Luca Bonnefille" },
       { image: pierreBonnefilleTabouretsStone, title: "3 Tabourets Stone", category: "Seating", subcategory: "Stools", tags: ["Seating", "Stool"], materials: "Stool in mixed material, mixture of natural pigments, mineral and metallic powders applied on a wooden structure\nBespoke Dimensions and Colours upon request", dimensions: "W 39 × D 29 × H 41 cm", photoCredit: "Luca Bonnefille" },
       { image: pierreBonnefilleStoneD, title: "Stone D (Medium) Limonite D'Eau Coffee Table", category: "Tables", subcategory: "Coffee Tables", tags: ["Tables", "Coffee Tables"], materials: "Tabletop in mixed material, mixture of natural pigments, mineral and metallic powders applied on a wooden structure\nBespoke Dimensions and Colours upon request", dimensions: "W 130 × D 118 × H 41 cm\n(Also available in W 105 × D 96 × H 41 cm and W 176 × D 160 × H 41 cm)", edition: "Edition of 8 + 2 artist's proofs", photoCredit: "Luca Bonnefille" },
+      { image: pierreBonnefilleEnfiladeBloc, title: "Enfilade Bloc - Partition Bronze", category: "Storage", subcategory: "Sideboards", tags: ["Storage", "Sideboards"], materials: "Mixed media on wood, patinated brass\nBespoke Dimensions and Colours upon request", dimensions: "W 236 × D 43 × H 83 cm", photoCredit: "Luca Bonnefille" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/pierre_bonnefille/" },
