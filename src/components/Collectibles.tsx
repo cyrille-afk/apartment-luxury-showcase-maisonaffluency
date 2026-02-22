@@ -54,7 +54,36 @@ import ericSchmittAnneauLamp from "@/assets/curators-picks/eric-schmitt-anneau-l
 import ericSchmittDentelleConsole from "@/assets/curators-picks/eric-schmitt-dentelle-console.jpg";
 import ericSchmittFloatingTable from "@/assets/curators-picks/eric-schmitt-floating-table.jpg";
 import ericSchmittRocwoodTable from "@/assets/curators-picks/eric-schmitt-rocwood-table.jpg";
-const collectibleDesigners = [
+import felixAgostiniImg from "@/assets/designers/felix-agostini.jpg";
+import felixAgostiniTaureau from "@/assets/curators-picks/felix-agostini-taureau-lamp.png";
+import felixAgostiniSocle from "@/assets/curators-picks/felix-agostini-socle-lamp.png";
+import felixAgostiniEtrier from "@/assets/curators-picks/felix-agostini-etrier.png";
+import felixAgostiniArcheoptryx from "@/assets/curators-picks/felix-agostini-archeoptryx.png";
+import felixAgostiniConsoleCheval from "@/assets/curators-picks/felix-agostini-console-cheval.png";
+import felixAgostiniConsoleInsitu from "@/assets/curators-picks/felix-agostini-console-insitu.png";
+const collectibleDesigners: Array<{
+  id?: string;
+  name: string;
+  founder?: string;
+  specialty: string;
+  image: string;
+  biography: string;
+  notableWorks: string;
+  notableWorksLink?: { text: string; galleryIndex: number };
+  philosophy: string;
+  curatorPicks: Array<{
+    image: string;
+    title: string;
+    category: string;
+    subcategory?: string;
+    materials: string;
+    dimensions: string;
+    edition?: string;
+    tags?: string[];
+    description?: string;
+  }>;
+  links: Array<{ type: string; url?: string }>;
+}> = [
   {
     id: "atelier-demichelis",
     name: "Atelier Demichelis",
@@ -120,6 +149,26 @@ const collectibleDesigners = [
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/studio_eric_schmitt_/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "felix-agostini",
+    name: "Félix Agostini",
+    specialty: "Sculptural Bronze Lighting & Furniture",
+    image: felixAgostiniImg,
+    biography: "Félix Agostini (1910–1980) was a French sculptor and designer whose singular bronze creations are among the most coveted in 20th-century decorative arts. Trained as a sculptor, Agostini brought a raw, almost primal expressiveness to functional objects—lamps, consoles, and wall sconces that feel as much like ancient totems as contemporary furnishings. His hand-worked bronze surfaces, with their textured patinas and zoomorphic silhouettes, have become icons of sculptural design.",
+    notableWorks: "Taureau Floor Lamp, Console Cheval, Archeoptryx Double Skin, Etrier",
+    philosophy: "Bronze is a living material—each mark of the hand becomes a permanent conversation between the sculptor and the light.",
+    curatorPicks: [
+      { image: felixAgostiniTaureau, title: "Taureau Floor Lamp", category: "Lighting", subcategory: "Floor Lamps", materials: "Bronze base, Silk lamp shade", dimensions: "W 23 × D 20 × H 131 cm", edition: "" },
+      { image: felixAgostiniSocle, title: "Socle Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze base, Silk lamp shade", dimensions: "W 15.5 × D 11 × H 57 cm", edition: "" },
+      { image: felixAgostiniEtrier, title: "Etrier", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze", dimensions: "W 15 × D 15 × H 71 cm", edition: "" },
+      { image: felixAgostiniArcheoptryx, title: "Archeoptryx Double Skin", category: "Lighting", subcategory: "Wall Lights", materials: "Bronze & Parchemin", dimensions: "W 135.3 × D 24.6 × H 30 cm", edition: "" },
+      { image: felixAgostiniConsoleCheval, title: "Console Cheval", category: "Tables", subcategory: "Console", materials: "Bronze, Cast Glass Top", dimensions: "W 150 × D 40.5 × H 91 cm", edition: "" },
+      { image: felixAgostiniConsoleInsitu, title: "Console Cheval — In Situ", category: "Tables", subcategory: "Console", materials: "Bronze, Cast Glass Top", dimensions: "W 150 × D 40.5 × H 91 cm", edition: "" },
+    ],
+    links: [
       { type: "Curators' Picks" },
     ],
   },
