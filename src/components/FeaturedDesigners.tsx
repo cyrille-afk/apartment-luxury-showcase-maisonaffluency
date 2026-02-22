@@ -381,6 +381,15 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         dimensions: "H16\" × Ø6.5\""
       },
       { 
+        image: apparatusPick6, 
+        title: "Pars",
+        subtitle: "Cocktail Table",
+        category: "Furniture",
+        tags: ["Furniture", "Table"],
+        materials: "Brass Armature • Stone • Hand-Cut Leather",
+        dimensions: "Ø 31 × H 61 cm"
+      },
+      { 
         image: apparatusPick3, 
         title: "Signal Y",
         subtitle: "Table Lamp",
@@ -397,15 +406,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         tags: ["Lighting", "Pendant"],
         materials: "Mold-blown glass cylinders • Brass dome and armature",
         dimensions: "Ø32.5\""
-      },
-      { 
-        image: apparatusPick6, 
-        title: "Pars",
-        subtitle: "Cocktail Table",
-        category: "Furniture",
-        tags: ["Furniture", "Table"],
-        materials: "Brass Armature • Stone • Hand-Cut Leather",
-        dimensions: "Ø 31 × H 61 cm"
       },
     ],
     links: [
