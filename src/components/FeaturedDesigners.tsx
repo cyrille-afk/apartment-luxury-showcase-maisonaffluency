@@ -600,7 +600,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         subtitle: "Ottomans S & M & Bench",
         category: "Furniture",
         tags: ["Seating", "Ottoman"],
-        materials: "Curved and grooved three-layer laminated glass structure • Cushion upholstered here in Oskar Paglia fabric from Rubelli",
+        materials: "Curved and grooved three-layer laminated glass structure • Upholstered here in Curly Ivory fabric from Casal (Ottoman S), in Divin fabric from Lelièvre Paris and in Louison fabric from Maison Pierre Frey (Ottoman M)",
         dimensions: "S: W 54 × 45 × 42 cm · M: W 72 × 45 × 42 cm · Bench: W 120 × 45 × 42 cm",
         description: "Bespoke fabrics upon request"
       },
