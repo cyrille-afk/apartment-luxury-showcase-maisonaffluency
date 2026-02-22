@@ -1440,7 +1440,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorks: "Lombard Street Sofa (Yabu Pushelberg), Mainkai Lamp (Sebastian Herkner), Rua Tucumã Tables",
     philosophy: "We believe in furniture made with integrity — pieces conceived by great designers and realized by the best craftspeople in the world.",
     curatorPicks: [
-      { image: manOfPartsSideChair, title: "Frenchmen Street Side Chair", subtitle: "by Sebastian Herkner", category: "Seating", materials: "Solid Oak Wood, Fully upholstered in fabric or leather", dimensions: "W 53 × D 59 × H 80 cm — SH 49 cm" },
       { image: manOfPartsCoffeeTable, title: "Praia da Granja Coffee Table", subtitle: "by Sebastian Herkner", category: "Tables", materials: "A mixed textured stone top with a solid walnut or oak base", dimensions: "W 125 × D 40 × H 34 cm" },
       { image: manOfPartsLoungeChair, title: "Frenchmen Street Lounge Chair", subtitle: "by Sebastian Herkner", category: "Seating", materials: "Solid oak frame, Fully upholstered in fabric or leather", dimensions: "W 82 × D 77 × H 73 cm — SH 40 cm" },
       { image: manOfPartsFloorLamp, title: "Cinnamon Gardens Floor Lamp", subtitle: "by Yabu Pushelberg", category: "Lighting", materials: "Solid Ash Wood, Esprit Nuvola — 100% Linen Shade", dimensions: "D 55 × H 156 cm" },
