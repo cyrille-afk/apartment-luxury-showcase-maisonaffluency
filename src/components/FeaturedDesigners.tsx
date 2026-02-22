@@ -903,10 +903,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         image: ericSchmittDrageeConsole,
         title: "Dragée Console",
         category: "Tables",
-        tags: ["Tables", "Console"],
+        tags: ["Tables", "Console", "8 copies and 4 artist's proofs"],
         materials: "Bronze and lacquered polyester resin or pink marble tops",
-        dimensions: "H 85 × L 120 cm",
-        description: "8 copies and 4 artist's proofs"
+        dimensions: "H 85 × L 120 cm"
       },
       {
         image: ericSchmittSaturneTable,
