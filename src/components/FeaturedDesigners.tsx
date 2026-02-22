@@ -176,6 +176,8 @@ import jmfCroisillonLamp from "@/assets/curators-picks/jmf-croisillon-lamp.jpg";
 import jmfSoleilTable1 from "@/assets/curators-picks/jmf-soleil-table-1.jpg";
 import jmfSoleilTable2 from "@/assets/curators-picks/jmf-soleil-table-2.jpg";
 import jmfElephantArmchair from "@/assets/curators-picks/jmf-elephant-armchair.jpg";
+import jmfRoundTable1 from "@/assets/curators-picks/jmf-round-table-1.jpg";
+import jmfRoundTable2 from "@/assets/curators-picks/jmf-round-table-2.jpg";
 import ecartPierreChareau from "@/assets/curators-picks/ecart-pierre-chareau.jpg";
 import kikoLopezMirrorImg from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import maartenVrolijkSakura from "@/assets/curators-picks/maarten-vrolijk-sakura.jpg";
@@ -1010,6 +1012,24 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         materials: "Smooth Solid Oak Frame • Fabric",
         dimensions: "L 87 × D 100 × H 73 cm",
         description: "Various Oak and Walnut finishes available on request"
+      },
+      {
+        image: jmfRoundTable1,
+        title: "Round Table",
+        subtitle: "1935",
+        category: "Furniture",
+        tags: ["Furniture", "Dining Table"],
+        materials: "Sandblasted Oak Marquetry • Deep Sandblasted Oak",
+        dimensions: "Ø 150 × H 75 cm"
+      },
+      {
+        image: jmfRoundTable2,
+        title: "Round Table",
+        subtitle: "1935 — Close-Up",
+        category: "Furniture",
+        tags: ["Furniture", "Dining Table"],
+        materials: "Sandblasted Oak Marquetry • Deep Sandblasted Oak",
+        dimensions: "Ø 150 × H 75 cm"
       },
     ],
     links: [
