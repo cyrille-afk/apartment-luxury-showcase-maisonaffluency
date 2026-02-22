@@ -180,6 +180,7 @@ import jmfRoundTable1 from "@/assets/curators-picks/jmf-round-table-1.jpg";
 import jmfRoundTable2 from "@/assets/curators-picks/jmf-round-table-2.jpg";
 import jmfPresidentDesk1 from "@/assets/curators-picks/jmf-president-desk-1.jpg";
 import jmfPresidentDesk2 from "@/assets/curators-picks/jmf-president-desk-2.jpg";
+import jmfUpholsteredBackSofa from "@/assets/curators-picks/jmf-upholstered-back-sofa.jpg";
 import ecartPierreChareau from "@/assets/curators-picks/ecart-pierre-chareau.jpg";
 import kikoLopezMirrorImg from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import maartenVrolijkSakura from "@/assets/curators-picks/maarten-vrolijk-sakura.jpg";
@@ -1050,6 +1051,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         tags: ["Furniture", "Desk"],
         materials: "Varnished Oak • Patinated Brass",
         dimensions: "L 272 × P 85 × H 75 cm"
+      },
+      {
+        image: jmfUpholsteredBackSofa,
+        title: "Upholstered Back 3-Seater Sofa",
+        subtitle: "1932",
+        category: "Furniture",
+        tags: ["Furniture", "Sofa"],
+        materials: "Varnished Solid Oak • Leather",
+        dimensions: "L 230 × P 89 × H 81 cm",
+        description: "Available in 2-seater: L 160 × P 89 × H 81 cm"
       },
     ],
     links: [
