@@ -150,6 +150,13 @@ import maartenVrolijkBloomingTerra from "@/assets/curators-picks/maarten-vrolijk
 import marcantonioDetail from "@/assets/curators-picks/marcantonio-cotissi-detail.jpg";
 
 import binaBAitelObject from "@/assets/curators-picks/bina-baitel-object.jpg";
+import binaBaitelPick1 from "@/assets/curators-picks/bina-baitel-1.png";
+import binaBaitelPick2 from "@/assets/curators-picks/bina-baitel-2.png";
+import binaBaitelPick3 from "@/assets/curators-picks/bina-baitel-3.png";
+import binaBaitelPick4 from "@/assets/curators-picks/bina-baitel-4.png";
+import binaBaitelPick5 from "@/assets/curators-picks/bina-baitel-5.png";
+import binaBaitelPick6 from "@/assets/curators-picks/bina-baitel-6.png";
+import binaBaitelPick7 from "@/assets/curators-picks/bina-baitel-7.png";
 import kerstensConsole from "@/assets/curators-picks/kerstens-console.jpg";
 import kertensPick1 from "@/assets/curators-picks/kerstens-1.jpg";
 import kertensPick2 from "@/assets/curators-picks/kerstens-2.jpg";
@@ -544,7 +551,78 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     biography: "Bina Baitel Studio creates interior and industrial design projects as well as unique creations in collaboration with museums and galleries. The Paris-based studio conducts a global creative approach ranging from artistic direction to technical studies, with a constant focus on timeless projects and a search for innovation. Bina Baitel's work has been exhibited at the Grand Palais, Milan Design Week, and leading design galleries worldwide.",
     notableWorks: "Sublime Collection (Mobilier National), Design Objects for Galleries and Museums",
     philosophy: "Design is always about finding the right balance between tradition and innovation, between the handmade and the industrial.",
-    curatorPicks: [],
+    curatorPicks: [
+      {
+        image: binaBaitelPick1,
+        title: "Tremblay",
+        subtitle: "Console",
+        category: "Furniture",
+        tags: ["Furniture", "Console"],
+        materials: "Arabescato Corchia Honed marble and handmade transparent wavy glass",
+        dimensions: "L 144 × W 46 × H 76 cm",
+        description: "Bespoke materials and dimensions upon request"
+      },
+      {
+        image: binaBaitelPick2,
+        title: "Premonitions",
+        subtitle: "Bench",
+        category: "Furniture",
+        tags: ["Seating", "Bench"],
+        materials: "Brushed brass structure • Cushions upholstered here in Terrazzo Acqua fabric from Rubelli",
+        dimensions: "W 150 × D 53 × H 47 cm",
+        description: "Bespoke fabrics upon request"
+      },
+      {
+        image: binaBaitelPick3,
+        title: "Sela",
+        subtitle: "Sofa",
+        category: "Furniture",
+        tags: ["Seating", "Sofa"],
+        materials: "Sofa upholstered here in Atom fabric by Raf Simons from Kvadrat",
+        dimensions: "L 210 × W 115 × H 72 cm",
+        description: "Bespoke fabrics upon request"
+      },
+      {
+        image: binaBaitelPick4,
+        title: "ZigZag",
+        subtitle: "Bench",
+        category: "Furniture",
+        tags: ["Seating", "Bench"],
+        materials: "Bench upholstered here in Atom fabric by Raf Simons from Kvadrat",
+        dimensions: "W 160 × D 77 × H 40 cm",
+        description: "Bespoke fabrics upon request"
+      },
+      {
+        image: binaBaitelPick5,
+        title: "Sublime",
+        subtitle: "Ottomans S & M & Bench",
+        category: "Furniture",
+        tags: ["Seating", "Ottoman"],
+        materials: "Curved and grooved three-layer laminated glass structure • Cushion upholstered here in Oskar Paglia fabric from Rubelli",
+        dimensions: "S: W 54 × 45 × 42 cm · M: W 72 × 45 × 42 cm · Bench: W 120 × 45 × 42 cm",
+        description: "Bespoke fabrics upon request"
+      },
+      {
+        image: binaBaitelPick6,
+        title: "ZigZag",
+        subtitle: "Side Table",
+        category: "Furniture",
+        tags: ["Furniture", "Table"],
+        materials: "Verde Guatemala marble",
+        dimensions: "L 45 × W 43 × H 45 cm",
+        description: "Bespoke materials and dimensions upon request"
+      },
+      {
+        image: binaBaitelPick7,
+        title: "NAIA",
+        subtitle: "Sofa",
+        category: "Furniture",
+        tags: ["Seating", "Sofa"],
+        materials: "Sofa upholstered here in Caroube Lichen fabric from Métaphores",
+        dimensions: "W 300 × D 106 × H 76 cm",
+        description: "Bespoke fabrics upon request"
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/binabaitel/" },
       { type: "Curators' Picks" },
