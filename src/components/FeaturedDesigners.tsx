@@ -168,6 +168,7 @@ import manOfPartsRuaLeblon from "@/assets/curators-picks/man-of-parts-rua-leblon
 import manOfPartsBondStreetStool from "@/assets/curators-picks/man-of-parts-bond-street-stool.png";
 import manOfPartsSandyCoveSofa from "@/assets/curators-picks/man-of-parts-sandy-cove-sofa.png";
 import manOfPartsCoffeeTable from "@/assets/curators-picks/man-of-parts-coffee-table.png";
+import manOfPartsCocktailTable from "@/assets/curators-picks/man-of-parts-cocktail-table.png";
 import felixAgostiniCaryatide from "@/assets/curators-picks/felix-agostini-caryatide.jpg";
 import kiraToshiroLamp from "@/assets/curators-picks/kira-toshiro-lamp.jpg";
 
@@ -1446,6 +1447,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       { image: manOfPartsRuaLeblon, title: "Rua Leblon", subtitle: "by Yabu Pushelberg", category: "Seating", materials: "Upholstered in fabric or leather with return swivel. Powder coated black steel with walnut or anthracite base", dimensions: "W 90 × D 92 × H 76 cm — SH 44 cm" },
       { image: manOfPartsBondStreetStool, title: "Bond Street Stool", subtitle: "by Yabu Pushelberg", category: "Seating", materials: "Full upholstery in fabric or leather with a Powdercoat Bronze swivel base", dimensions: "W 62.5 × D 46 × H 63.5 cm — SH 49.3 cm" },
       { image: manOfPartsSandyCoveSofa, title: "Sandy Cove Sofa", subtitle: "by Sebastian Herkner", category: "Seating", materials: "Full upholstered in fabric or leather", dimensions: "W 190 × D 108 × H 70 cm — SH 40 cm" },
+      { image: manOfPartsCocktailTable, title: "Madison Avenue Cocktail Table", subtitle: "by Yabu Pushelberg", category: "Tables", materials: "Marble top with aged brass base", dimensions: "Ø 40.5 × H 47 cm" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/manofparts/" },
