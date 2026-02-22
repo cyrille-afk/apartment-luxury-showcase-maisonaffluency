@@ -36,6 +36,7 @@ import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
 import pierreBonnefilleImg from "@/assets/designers/pierre-bonnefille-collectibles.jpg";
 import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
+import pierreBonnefilleBronzePainting208 from "@/assets/curators-picks/pierre-bonnefille-bronze-painting-208.png";
 import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.png";
 import herveMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
 import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
@@ -264,7 +265,9 @@ const collectibleDesigners: Array<{
     notableWorks: "Bronze Painting 204 (Maison Affluency), Café Marly at the Louvre, Mineral Painting Series",
     notableWorksLink: { text: "Bronze Painting 204", galleryIndex: 8 },
     philosophy: "The material, colors and light are inseparable in my work. I create my own textures from the earth itself.",
-    curatorPicks: [],
+    curatorPicks: [
+      { image: pierreBonnefilleBronzePainting208, title: "Bronze Painting 208, 2024", category: "Wall Art", tags: ["Wall Art", "Art"], materials: "Mixed media on metallic mesh", dimensions: "H 225 x W 515 cm" },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/pierre_bonnefille/" },
       { type: "Curators' Picks" },
