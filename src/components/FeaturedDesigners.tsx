@@ -126,6 +126,7 @@ import leoSentouPickLD from "@/assets/curators-picks/leo-sentou-ld-armchair.png"
 import ericSchmittChairie from "@/assets/curators-picks/eric-schmitt-chairie.jpg";
 import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
 import pierreBonnefilleBronzePainting208 from "@/assets/curators-picks/pierre-bonnefille-bronze-painting-208.png";
+import pierreBonnefilleMetamorphosisLamps from "@/assets/curators-picks/pierre-bonnefille-metamorphosis-lamps.png";
 import ccTapisGiudecca from "@/assets/curators-picks/cc-tapis-giudecca.jpg";
 import haymannMarieLamp from "@/assets/curators-picks/haymann-marie-lamp.jpg";
 import theoremeGarnierLinker from "@/assets/curators-picks/theoreme-garnier-linker.jpg";
@@ -231,7 +232,7 @@ import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler
 import rowinNoneIILamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 
 type DesignerLink = { type: string; url?: string };
-type CuratorPick = { image: string; title: string; subtitle?: string; category?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string };
+type CuratorPick = { image: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; links?: DesignerLink[] })[] = [
@@ -1593,6 +1594,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorksLink: { text: "Bronze Painting 204, 2023", galleryIndex: 2 },
     philosophy: "The material, colors and light are inseparable in my work. I create my own textures from the earth itself.",
     curatorPicks: [
+      { image: pierreBonnefilleMetamorphosisLamps, title: "Metamorphosis Lamps A&B", category: "Lighting", subcategory: "Table Lamps", tags: ["Lighting", "Table Lamps"], materials: "Table lamp in mixed media on wood. Patinated brass with burnished bronze or burnished copper finish — Bespoke Dimensions and Colours upon request", dimensions: "W 16 × D 30 × H 59 cm / Lampshade Ø 30 × H 25 cm", photoCredit: "Luca Bonnefille" },
       { image: pierreBonnefilleBronzePainting208, title: "Bronze Painting 208, 2024", category: "Wall Art", tags: ["Wall Art", "Art"], materials: "Mixed media on metallic mesh", dimensions: "H 225 x W 515 cm" },
       {
         image: pierreBonnefilleBronzePainting,
@@ -2545,6 +2547,11 @@ const FeaturedDesigners = () => {
                           {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.description && (
                             <p className="text-xs md:text-sm text-white/50 font-body leading-relaxed max-w-lg mt-2 mx-auto text-center">
                               {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).description}
+                            </p>
+                          )}
+                          {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.photoCredit && (
+                            <p className="text-[10px] text-white/30 font-body tracking-wider mt-1">
+                              Photo: {curatorPicksDesigner.curatorPicks[curatorPickIndex].photoCredit}
                             </p>
                           )}
                          </div>
