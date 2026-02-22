@@ -161,6 +161,9 @@ import kertensPick5 from "@/assets/curators-picks/kerstens-5.jpg";
 import kertensPick6 from "@/assets/curators-picks/kerstens-6.jpg";
 import kertensPick7 from "@/assets/curators-picks/kerstens-7.jpg";
 import manOfPartsSofa from "@/assets/curators-picks/man-of-parts-sofa.jpg";
+import manOfPartsSideChair from "@/assets/curators-picks/man-of-parts-side-chair.png";
+import manOfPartsLoungeChair from "@/assets/curators-picks/man-of-parts-lounge-chair.png";
+import manOfPartsFloorLamp from "@/assets/curators-picks/man-of-parts-floor-lamp.png";
 import felixAgostiniCaryatide from "@/assets/curators-picks/felix-agostini-caryatide.jpg";
 import kiraToshiroLamp from "@/assets/curators-picks/kira-toshiro-lamp.jpg";
 
@@ -1432,7 +1435,11 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     biography: "Man of Parts is a Hamburg-based design brand founded by Stephan Weishaupt, co-founder of the design magazine Wallpaper*. The brand commissions furniture and objects from leading international designers — including Yabu Pushelberg, Sebastian Herkner, and Osvaldo Tenório — producing pieces of exceptional quality that bridge the gallery and the home. Each collection reflects a distinct design vision united by the pursuit of craft excellence.",
     notableWorks: "Lombard Street Sofa (Yabu Pushelberg), Mainkai Lamp (Sebastian Herkner), Rua Tucumã Tables",
     philosophy: "We believe in furniture made with integrity — pieces conceived by great designers and realized by the best craftspeople in the world.",
-    curatorPicks: [],
+    curatorPicks: [
+      { image: manOfPartsSideChair, title: "Frenchmen Street Side Chair", subtitle: "by Sebastian Herkner", category: "Seating", materials: "Solid Oak Wood, Fully upholstered in fabric or leather", dimensions: "W 53 × D 59 × H 80 cm — SH 49 cm" },
+      { image: manOfPartsLoungeChair, title: "Frenchmen Street Lounge Chair", subtitle: "by Sebastian Herkner", category: "Seating", materials: "Solid oak frame, Fully upholstered in fabric or leather", dimensions: "W 82 × D 77 × H 73 cm — SH 40 cm" },
+      { image: manOfPartsFloorLamp, title: "Cinnamon Gardens Floor Lamp", subtitle: "by Yabu Pushelberg", category: "Lighting", materials: "Solid Ash Wood, Esprit Nuvola — 100% Linen Shade" },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/manofparts/" },
       { type: "Curators' Picks" },
