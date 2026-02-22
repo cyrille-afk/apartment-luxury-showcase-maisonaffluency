@@ -1438,7 +1438,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     curatorPicks: [
       { image: manOfPartsSideChair, title: "Frenchmen Street Side Chair", subtitle: "by Sebastian Herkner", category: "Seating", materials: "Solid Oak Wood, Fully upholstered in fabric or leather", dimensions: "W 53 × D 59 × H 80 cm — SH 49 cm" },
       { image: manOfPartsLoungeChair, title: "Frenchmen Street Lounge Chair", subtitle: "by Sebastian Herkner", category: "Seating", materials: "Solid oak frame, Fully upholstered in fabric or leather", dimensions: "W 82 × D 77 × H 73 cm — SH 40 cm" },
-      { image: manOfPartsFloorLamp, title: "Cinnamon Gardens Floor Lamp", subtitle: "by Yabu Pushelberg", category: "Lighting", materials: "Solid Ash Wood, Esprit Nuvola — 100% Linen Shade" },
+      { image: manOfPartsFloorLamp, title: "Cinnamon Gardens Floor Lamp", subtitle: "by Yabu Pushelberg", category: "Lighting", materials: "Solid Ash Wood, Esprit Nuvola — 100% Linen Shade", dimensions: "D 55 × H 156 cm" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/manofparts/" },
