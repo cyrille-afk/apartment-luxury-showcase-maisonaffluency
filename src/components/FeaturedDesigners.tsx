@@ -1797,9 +1797,9 @@ const FeaturedDesigners = () => {
     return (pick: any) => {
       if (selectedSubcategory) {
         const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
-        return tags.some(tag => pick.subcategory === tag || pick.category === tag);
+        return tags.some(tag => pick.subcategory === tag || pick.category === tag || (pick.tags && pick.tags.some((t: string) => t.toLowerCase() === tag.toLowerCase())));
       }
-      return pick.category === selectedCategory;
+      return pick.category === selectedCategory || (pick.tags && pick.tags.includes(selectedCategory));
     };
   }, [selectedSubcategory, selectedCategory]);
   const minSwipeDistance = 50;
@@ -1905,11 +1905,13 @@ const FeaturedDesigners = () => {
           if (selectedSubcategory) {
             const mappedTags = SUBCATEGORY_TO_TAGS[selectedSubcategory];
             if (mappedTags) {
-              return pick.tags?.some((tag: string) => mappedTags.some(mt => tag.toLowerCase() === mt.toLowerCase()));
+              const matchesTags = pick.tags?.some((tag: string) => mappedTags.some(mt => tag.toLowerCase() === mt.toLowerCase()));
+              const matchesCategory = mappedTags.some(mt => pick.category?.toLowerCase() === mt.toLowerCase());
+              return matchesTags || matchesCategory;
             }
-            return pick.tags?.includes(selectedSubcategory);
+            return pick.tags?.includes(selectedSubcategory) || pick.category === selectedSubcategory;
           }
-          if (selectedCategory) return pick.tags?.includes(selectedCategory);
+          if (selectedCategory) return pick.tags?.includes(selectedCategory) || pick.category === selectedCategory;
           return true;
         })
       );
