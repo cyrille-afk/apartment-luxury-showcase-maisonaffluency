@@ -1228,6 +1228,7 @@ const BrandsAteliers = () => {
                     <PopoverContent align="start" className="w-[260px] p-4 max-h-[400px] overflow-y-auto">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="font-serif text-sm text-foreground flex items-center gap-2"><SlidersHorizontal className="h-3.5 w-3.5" /> Filter</h4>
+                        <div className="flex items-center gap-2">
                         {selectedCategory && (
                           <button
                             onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
@@ -1236,6 +1237,10 @@ const BrandsAteliers = () => {
                             Clear
                           </button>
                         )}
+                        <button onClick={() => setFilterOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Close filter">
+                          <X className="h-4 w-4" />
+                        </button>
+                        </div>
                       </div>
                       <div className="space-y-1">
                         {categories.map((category) => (
