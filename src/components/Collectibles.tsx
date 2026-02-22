@@ -664,7 +664,7 @@ const Collectibles = () => {
               );
             })()}
             <p className="text-base md:text-lg text-muted-foreground font-body">
-              Unique Pieces
+              Limited Editions & Unique Pieces
             </p>
           </motion.div>
 
