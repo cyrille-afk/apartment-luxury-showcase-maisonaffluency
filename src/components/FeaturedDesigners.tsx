@@ -696,12 +696,11 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       {
         image: emmanuelLevetStennePick4,
         title: "Dress Up",
-        subtitle: "Dining Table / Wood",
+        subtitle: "Rectangular Dining Table (Wood)",
         category: "Tables",
         tags: ["Tables", "Dining Table"],
-        materials: "Oak or walnut top and base",
-        dimensions: "L280 × W120 × H74 cm",
-        description: "Upholstered here in Curly Ivory fabric from Casal (Ottoman S), in Divin fabric from Lelièvre Paris and in Louison fabric from Maison Pierre Frey (Ottoman M)"
+        materials: "Oak or Walnut top and base",
+        dimensions: "L 280 × l 120 × H 74 cm"
       },
       {
         image: emmanuelLevetStennePick6,
