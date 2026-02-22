@@ -1005,10 +1005,36 @@ const BrandsAteliers = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+
+  const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
+    window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'brands' } }));
+  }, []);
+
+  const setSelectedCategory = useCallback((cat: string | null) => {
+    setSelectedCategoryRaw(cat);
+    setSelectedSubcategoryRaw(null);
+    broadcastFilter(cat, null);
+  }, [broadcastFilter]);
+
+  const setSelectedSubcategory = useCallback((sub: string | null) => {
+    setSelectedSubcategoryRaw(sub);
+    broadcastFilter(selectedCategory, sub);
+  }, [selectedCategory, broadcastFilter]);
+
+  useEffect(() => {
+    const handleCategorySync = (e: CustomEvent) => {
+      const { category, subcategory, source } = e.detail || {};
+      if (source === 'brands') return;
+      setSelectedCategoryRaw(category || null);
+      setSelectedSubcategoryRaw(subcategory || null);
+    };
+    window.addEventListener('syncCategoryFilter', handleCategorySync as EventListener);
+    return () => window.removeEventListener('syncCategoryFilter', handleCategorySync as EventListener);
+  }, []);
 
   // Fixed category order matching the artisans section
   const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
@@ -1231,7 +1257,7 @@ const BrandsAteliers = () => {
                         <div className="flex items-center gap-2">
                         {selectedCategory && (
                           <button
-                            onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
+                            onClick={() => { setSelectedCategory(null); }}
                             className="text-xs text-muted-foreground hover:text-primary transition-colors"
                           >
                             Clear
@@ -1251,10 +1277,8 @@ const BrandsAteliers = () => {
                                 onCheckedChange={() => {
                                   if (selectedCategory === category) {
                                     setSelectedCategory(null);
-                                    setSelectedSubcategory(null);
                                   } else {
                                     setSelectedCategory(category);
-                                    setSelectedSubcategory(null);
                                   }
                                 }}
                               />

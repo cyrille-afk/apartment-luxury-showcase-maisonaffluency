@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { Instagram, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -237,10 +237,36 @@ const Collectibles = () => {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+
+  const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
+    window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'collectibles' } }));
+  }, []);
+
+  const setSelectedCategory = useCallback((cat: string | null) => {
+    setSelectedCategoryRaw(cat);
+    setSelectedSubcategoryRaw(null);
+    broadcastFilter(cat, null);
+  }, [broadcastFilter]);
+
+  const setSelectedSubcategory = useCallback((sub: string | null) => {
+    setSelectedSubcategoryRaw(sub);
+    broadcastFilter(selectedCategory, sub);
+  }, [selectedCategory, broadcastFilter]);
+
+  useEffect(() => {
+    const handleCategorySync = (e: CustomEvent) => {
+      const { category, subcategory, source } = e.detail || {};
+      if (source === 'collectibles') return;
+      setSelectedCategoryRaw(category || null);
+      setSelectedSubcategoryRaw(subcategory || null);
+    };
+    window.addEventListener('syncCategoryFilter', handleCategorySync as EventListener);
+    return () => window.removeEventListener('syncCategoryFilter', handleCategorySync as EventListener);
+  }, []);
   const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
 
@@ -483,7 +509,7 @@ const Collectibles = () => {
                           <div className="flex items-center gap-2">
                           {selectedCategory && (
                             <button
-                              onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
+                              onClick={() => { setSelectedCategory(null); }}
                               className="text-xs text-muted-foreground hover:text-primary transition-colors"
                             >
                               Clear
@@ -503,10 +529,8 @@ const Collectibles = () => {
                                   onCheckedChange={() => {
                                     if (selectedCategory === category) {
                                       setSelectedCategory(null);
-                                      setSelectedSubcategory(null);
                                     } else {
                                       setSelectedCategory(category);
-                                      setSelectedSubcategory(null);
                                     }
                                   }}
                                 />
