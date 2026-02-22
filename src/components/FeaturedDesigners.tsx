@@ -1440,7 +1440,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
   },
   {
     id: "man-of-parts",
-    name: "Man of Parts - Sebastian Herkner, Yabu Pushelberg, Christophe Delcourt, Philippe Malouin, Simone Coste, Workshop APD",
+    name: "Man of Parts",
     specialty: "Curated Contemporary Furniture Collections",
     image: manOfPartsImg,
     biography: "Man of Parts is a Hamburg-based design brand founded by Stephan Weishaupt, co-founder of the design magazine Wallpaper*. The brand commissions furniture and objects from leading international designers — including Yabu Pushelberg, Sebastian Herkner, and Osvaldo Tenório — producing pieces of exceptional quality that bridge the gallery and the home. Each collection reflects a distinct design vision united by the pursuit of craft excellence.",
