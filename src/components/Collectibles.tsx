@@ -61,7 +61,29 @@ import felixAgostiniEtrier from "@/assets/curators-picks/felix-agostini-etrier.p
 import felixAgostiniArcheoptryx from "@/assets/curators-picks/felix-agostini-archeoptryx.png";
 import felixAgostiniConsoleCheval from "@/assets/curators-picks/felix-agostini-console-cheval.png";
 import felixAgostiniConsoleInsitu from "@/assets/curators-picks/felix-agostini-console-insitu.png";
-const collectibleDesigners = [
+const collectibleDesigners: Array<{
+  id?: string;
+  name: string;
+  founder?: string;
+  specialty: string;
+  image: string;
+  biography: string;
+  notableWorks: string;
+  notableWorksLink?: { text: string; galleryIndex: number };
+  philosophy: string;
+  curatorPicks: Array<{
+    image: string;
+    title: string;
+    category: string;
+    subcategory?: string;
+    materials: string;
+    dimensions: string;
+    edition?: string;
+    tags?: string[];
+    description?: string;
+  }>;
+  links: Array<{ type: string; url?: string }>;
+}> = [
   {
     id: "atelier-demichelis",
     name: "Atelier Demichelis",
