@@ -20,7 +20,7 @@ import oliviaCognetImg from "@/assets/designers/olivia-cognet.jpg";
 import jeremyMaxwellWintrebertImg from "@/assets/designers/jeremy-maxwell-wintrebert.jpg";
 import alexanderLamontImg from "@/assets/designers/alexander-lamont.jpg";
 import leoSentouImg from "@/assets/designers/leo-sentou.jpg";
-import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank.jpg";
+import jeanMichelFrankImg from "@/assets/designers/jean-michel-frank-new.jpg";
 import emanuelleLevetStenneImg from "@/assets/designers/emanuelle-levet-stenne.png";
 import milanPekarImg from "@/assets/designers/milan-pekar.png";
 import atelierPendhapaImg from "@/assets/designers/atelier-pendhapa.png";
