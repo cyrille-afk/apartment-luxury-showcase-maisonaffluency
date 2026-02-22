@@ -387,7 +387,8 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         category: "Furniture",
         tags: ["Furniture", "Table"],
         materials: "Brass Armature • Stone • Hand-Cut Leather",
-        dimensions: "Ø 31 × H 61 cm"
+        dimensions: "Ø 31 × H 61 cm",
+        description: "Also available in Noir Saint-Laurent Marble Top, Ebene Leather and Oil-Rubbed Bronze"
       },
       { 
         image: apparatusPick3, 
