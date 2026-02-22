@@ -911,10 +911,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         image: ericSchmittSaturneTable,
         title: "Saturne Coffee Table",
         category: "Tables",
-        tags: ["Tables", "Coffee Table"],
+        tags: ["Tables", "Coffee Table", "24 copies and 4 artist's proofs"],
         materials: "Two shades of patinated bronze or patinated and nickel plated bronze",
-        dimensions: "H 45 × Ø 90 cm",
-        description: "24 copies and 4 artist's proofs"
+        dimensions: "H 45 × Ø 90 cm"
       },
       {
         image: ericSchmittFrameTable,
@@ -936,10 +935,9 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         image: ericSchmittDentelleConsole,
         title: "Dentelle Console",
         category: "Tables",
-        tags: ["Tables", "Console"],
+        tags: ["Tables", "Console", "4 copies and 4 artist's proofs"],
         materials: "Silver plated bronze and steel",
-        dimensions: "L 90 × W 40 × H 96 cm",
-        description: "4 copies and 4 artist's proofs"
+        dimensions: "L 90 × W 40 × H 96 cm"
       },
       {
         image: ericSchmittFloatingTable,
@@ -953,10 +951,10 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         image: ericSchmittRocwoodTable,
         title: "Rocwood Dining Table",
         category: "Tables",
-        tags: ["Tables", "Dining Table"],
+        tags: ["Tables", "Dining Table", "24 copies and 4 artist's proofs"],
         materials: "Patinated bronze base, black tinted walnut top",
         dimensions: "L 330 × W 120 × H 75 cm",
-        description: "Made to measure on request • 24 copies and 4 artist's proofs"
+        description: "Made to measure on request"
       },
     ],
     links: [
