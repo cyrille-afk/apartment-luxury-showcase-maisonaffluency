@@ -1595,17 +1595,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     philosophy: "The material, colors and light are inseparable in my work. I create my own textures from the earth itself.",
     curatorPicks: [
       { image: pierreBonnefilleMetamorphosisLamps, title: "Metamorphosis Lamps A&B", category: "Lighting", subcategory: "Table Lamps", tags: ["Lighting", "Table Lamps"], materials: "Table lamp in mixed media on wood. Patinated brass with burnished bronze or burnished copper finish — Bespoke Dimensions and Colours upon request", dimensions: "W 16 × D 30 × H 59 cm / Lampshade Ø 30 × H 25 cm", photoCredit: "Luca Bonnefille" },
-      { image: pierreBonnefilleBronzePainting208, title: "Bronze Painting 208, 2024", category: "Wall Art", tags: ["Wall Art", "Art"], materials: "Mixed media on metallic mesh", dimensions: "H 225 x W 515 cm" },
-      {
-        image: pierreBonnefilleBronzePainting,
-        title: "Bronze Painting",
-        subtitle: "Mineral pigments on canvas",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Art"],
-        materials: "Mineral powder, limestone, lava, metallic pigments on canvas",
-        dimensions: "Various — bespoke commissions available",
-        description: "Pierre Bonnefille's Bronze Paintings are unique works where he creates his own materials from mineral powder, limestone, lava, earth, natural and metallic pigments. The result is a surface of extraordinary depth and luminosity — simultaneously painting, relief and material exploration."
-      },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/pierre_bonnefille/" },
