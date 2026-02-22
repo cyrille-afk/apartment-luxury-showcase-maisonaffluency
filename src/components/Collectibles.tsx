@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState, useMemo, useEffect, useCallback } from "react";
+import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { Instagram, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -717,9 +717,15 @@ const Collectibles = () => {
                 }} 
                 className="w-full space-y-4"
               >
-                {filteredDesigners.map((designer, index) => (
+                {filteredDesigners.map((designer, index) => {
+                  const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+                  const currentLetter = normalize(designer.name)[0];
+                  const prevLetter = index > 0 ? normalize(filteredDesigners[index - 1].name)[0] : null;
+                  const isFirstOfLetter = currentLetter !== prevLetter;
+                  return (
+                <Fragment key={designer.id}>
+                  {isFirstOfLetter && <div id={`collectible-alpha-${currentLetter}`} className="scroll-mt-24" />}
                 <AccordionItem
-                  key={designer.id}
                   value={designer.id}
                   id={`collectible-${designer.id}`}
                   data-collectible={designer.id}
@@ -863,7 +869,9 @@ const Collectibles = () => {
                     </div>
                   </AccordionContent>
               </AccordionItem>
-              ))}
+                </Fragment>
+                  );
+                })}
             </Accordion>
             )}
           </motion.div>
