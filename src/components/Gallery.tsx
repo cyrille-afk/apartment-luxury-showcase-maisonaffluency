@@ -397,9 +397,6 @@ const Gallery = () => {
                       <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm p-1.5 rounded-full animate-pulse-fade">
                         <Maximize2 className="w-3.5 h-3.5 text-white" />
                       </div>
-                      <p className="absolute bottom-3 left-3 right-3 text-white text-xs font-body leading-snug line-clamp-2">
-                        {item.title}
-                      </p>
                       {index === 2 && (
                         <p className="absolute top-2 right-2 text-[8px] text-white/40 font-body tracking-wider flex items-center gap-1">
                           Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 hover:text-white/60 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-3 h-3 text-[#ee2a7b]" />Thanawat Chu</a>
