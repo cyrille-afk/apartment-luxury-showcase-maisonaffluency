@@ -129,6 +129,10 @@ import ccTapisGiudecca from "@/assets/curators-picks/cc-tapis-giudecca.jpg";
 import haymannMarieLamp from "@/assets/curators-picks/haymann-marie-lamp.jpg";
 import theoremeGarnierLinker from "@/assets/curators-picks/theoreme-garnier-linker.jpg";
 import garnierLinkerCenterpiece from "@/assets/curators-picks/garnier-linker-centerpiece.jpg";
+import garnierLinkerEratoPendant from "@/assets/curators-picks/garnier-linker-erato-pendant.png";
+import garnierLinkerBoraSconce from "@/assets/curators-picks/garnier-linker-bora-sconce.png";
+import garnierLinkerCallistoPendant from "@/assets/curators-picks/garnier-linker-callisto-pendant.png";
+import garnierLinkerOrionPendant from "@/assets/curators-picks/garnier-linker-orion-pendant.png";
 import robicaraSiraCredenza from "@/assets/curators-picks/robicara-sira-credenza-new.jpg";
 import robicaraArmchair from "@/assets/curators-picks/robicara-armchair.jpg";
 import robicaraHighbackChair from "@/assets/curators-picks/robicara-highback-chair.jpg";
@@ -954,16 +958,10 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorksLink: { text: "Crystal Centerpiece - Théorème Editions", galleryIndex: 1 },
     philosophy: "Crystal is the most unforgiving of materials — it demands complete mastery and rewards it with unmatched luminosity.",
     curatorPicks: [
-      {
-        image: garnierLinkerCenterpiece,
-        category: "Decorative Object",
-        title: "Lost-Wax Crystal Centerpiece",
-        subtitle: "For Théorème Éditions",
-        materials: "Lost-wax cast crystal",
-        dimensions: "Diameter 30 cm",
-        tags: ["Decorative Object"],
-        description: "This extraordinary centerpiece was created by Garnier & Linker for Théorème Éditions using the ancient lost-wax casting technique applied to crystal — a remarkable technical feat that results in a piece of unsurpassed clarity and precision. Each piece is unique, bearing the subtle marks of the hand that shaped it.",
-      },
+      { image: garnierLinkerEratoPendant, title: "Erato Pendant Large", category: "Lighting", tags: ["Lighting", "Pendants"], materials: "White alabaster or white alabaster with brown veins. Patinas: light bronze, dark bronze, blackened bronze or black matt", dimensions: "Without pendant stem (to order): Ø 16 x H 35 cm. Also available in Ø 12 x H 24 cm and Ø 12 x H 33 cm" },
+      { image: garnierLinkerBoraSconce, title: "Bora Sconce Uplight", category: "Lighting", tags: ["Lighting", "Sconces"], materials: "Sconce in lost-wax cast glass, patinated brass structure. Each piece is numbered and signed", dimensions: "W 12 x D 17 x H 24 cm" },
+      { image: garnierLinkerCallistoPendant, title: "Callisto Pendant x 4", category: "Lighting", tags: ["Lighting", "Pendants"], materials: "Pendant in alabaster, patinated brass structure. Each piece is numbered and signed", dimensions: "Without suspension stem (to order): Ø 16 x H 52 cm" },
+      { image: garnierLinkerOrionPendant, title: "Orion Pendant", category: "Lighting", tags: ["Lighting", "Pendants"], materials: "Pendant in alabaster and patinated brass. Each piece is numbered and signed", dimensions: "Ø 11 x L 200 cm. Also exists in length 150 cm" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/garnieretlinker/" },
