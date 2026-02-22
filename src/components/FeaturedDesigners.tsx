@@ -1475,7 +1475,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       { image: manOfPartsFloorLamp, title: "Cinnamon Gardens Floor Lamp", subtitle: "by Yabu Pushelberg", category: "Lighting", materials: "Solid Ash Wood, Esprit Nuvola — 100% Linen Shade", dimensions: "D 55 × H 156 cm" },
       { image: manOfPartsRuaLeblon, title: "Rua Leblon", subtitle: "by Yabu Pushelberg", category: "Armchair", materials: "Upholstered in fabric or leather with return swivel. Powder coated black steel with walnut or anthracite base", dimensions: "W 90 × D 92 × H 76 cm — SH 44 cm" },
       { image: manOfPartsBondStreetStool, title: "Bond Street Stool", subtitle: "by Yabu Pushelberg", category: "Seating", materials: "Full upholstery in fabric or leather with a Powdercoat Bronze swivel base", dimensions: "W 62.5 × D 46 × H 63.5 cm — SH 49.3 cm" },
-      { image: manOfPartsSandyCoveSofa, title: "Sandy Cove Sofa", subtitle: "by Sebastian Herkner", category: "Seating", materials: "Full upholstered in fabric or leather", dimensions: "W 190 × D 108 × H 70 cm — SH 40 cm" },
+      { image: manOfPartsSandyCoveSofa, title: "Sandy Cove Sofa", subtitle: "by Sebastian Herkner", category: "Sofa", materials: "Full upholstered in fabric or leather", dimensions: "W 190 × D 108 × H 70 cm — SH 40 cm" },
       { image: manOfPartsCocktailTable, title: "Madison Avenue Cocktail Table", subtitle: "by Yabu Pushelberg", category: "Tables", materials: "Marble top with aged brass base", dimensions: "Ø 40.5 × H 47 cm" },
     ],
     links: [
