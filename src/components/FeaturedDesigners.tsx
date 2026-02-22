@@ -969,7 +969,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
   },
   {
     id: "jean-michel-frank",
-    name: "Jean-Michel Frank",
+    name: "Jean-Michel Frank - ECART Re-Edition",
     specialty: "Minimalist Luxury & Art Deco Pioneer",
     image: jeanMichelFrankImg,
     imagePosition: "center 80%",
