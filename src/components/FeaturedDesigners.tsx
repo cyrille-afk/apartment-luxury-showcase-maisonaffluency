@@ -172,6 +172,7 @@ import oliviaCognetVallauris from "@/assets/curators-picks/olivia-cognet-vallaur
 import milanPekarCrystalline from "@/assets/curators-picks/milan-pekar-crystalline.jpg";
 import nathalieZieglerChandelier from "@/assets/curators-picks/nathalie-ziegler-chandelier.jpg";
 import jmfStool1934 from "@/assets/curators-picks/jmf-stool-1934.jpg";
+import jmfCroisillonLamp from "@/assets/curators-picks/jmf-croisillon-lamp.jpg";
 import ecartPierreChareau from "@/assets/curators-picks/ecart-pierre-chareau.jpg";
 import kikoLopezMirrorImg from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import maartenVrolijkSakura from "@/assets/curators-picks/maarten-vrolijk-sakura.jpg";
@@ -967,7 +968,18 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     notableWorks: "Table Soleil 1930, Stool 1934 (with Adolphe Chanaux), Parchment-covered furniture, Shagreen desks",
     notableWorksLink: { text: "Stool 1934", galleryIndex: 1 },
     philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
-    curatorPicks: [],
+    curatorPicks: [
+      {
+        image: jmfCroisillonLamp,
+        title: "Croisillon Lamp",
+        subtitle: "1928",
+        category: "Lighting",
+        tags: ["Lighting", "Table Lamp"],
+        materials: "Varnished Solid Oak Base • Patinated Brass • Cotton Lamp Shade",
+        dimensions: "Ø 34 × H 51 cm",
+        description: "Also available with a solid Walnut, Golden Brass or Black Patinated Brass base"
+      },
+    ],
     links: [
       { type: "Curators' Picks" },
     ],
