@@ -993,7 +993,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       {
         image: jmfSoleilTable2,
         title: "Soleil Coffee Table",
-        subtitle: "1930 — Detail",
+        subtitle: "1930 — Close-Up",
         category: "Furniture",
         tags: ["Furniture", "Coffee Table"],
         materials: "Straw Marquetry",
