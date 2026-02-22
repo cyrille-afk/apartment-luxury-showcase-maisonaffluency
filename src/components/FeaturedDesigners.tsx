@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState, useMemo, useEffect } from "react";
+import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { Instagram, Search, X, ChevronDown, ExternalLink, Star, Maximize2, Minimize2, SlidersHorizontal } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
@@ -1552,8 +1552,25 @@ const FeaturedDesigners = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
+  const categorySourceRef = useRef<string | null>(null);
+
+  const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
+    window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'designers' } }));
+  }, []);
+
+  const setSelectedCategory = useCallback((cat: string | null) => {
+    setSelectedCategoryRaw(cat);
+    setSelectedSubcategoryRaw(null);
+    broadcastFilter(cat, null);
+  }, [broadcastFilter]);
+
+  const setSelectedSubcategory = useCallback((sub: string | null) => {
+    setSelectedSubcategoryRaw(sub);
+    broadcastFilter(selectedCategory, sub);
+  }, [selectedCategory, broadcastFilter]);
+
   const [showSearch, setShowSearch] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
@@ -1578,28 +1595,38 @@ const FeaturedDesigners = () => {
       "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
       "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
       "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+      "Centre Tables": ["Centre Table"],
     };
     return (pick: any) => {
       if (selectedSubcategory) {
-        const mapped = SUB_TAGS[selectedSubcategory];
-        if (mapped) return pick.tags?.some((tag: string) => mapped.some((mt: string) => tag.toLowerCase() === mt.toLowerCase()));
-        return pick.tags?.includes(selectedSubcategory);
+        const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
+        return tags.some(tag => pick.subcategory === tag || pick.category === tag);
       }
-      if (selectedCategory) return pick.tags?.includes(selectedCategory);
-      return true;
+      return pick.category === selectedCategory;
     };
   }, [selectedSubcategory, selectedCategory]);
   const minSwipeDistance = 50;
 
-  // Listen for category filter from navigation
   useEffect(() => {
+    const handleCategorySync = (e: CustomEvent) => {
+      const { category, subcategory, source } = e.detail || {};
+      if (source === 'designers') return;
+      setSelectedCategoryRaw(category || null);
+      setSelectedSubcategoryRaw(subcategory || null);
+    };
     const handleDesignerCategory = (e: CustomEvent) => {
       const { category, subcategory } = e.detail || {};
-      setSelectedCategory(category || null);
-      setSelectedSubcategory(subcategory || null);
+      setSelectedCategoryRaw(category || null);
+      setSelectedSubcategoryRaw(subcategory || null);
+      // Also broadcast to other sections
+      window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: category || null, subcategory: subcategory || null, source: 'designers' } }));
     };
+    window.addEventListener('syncCategoryFilter', handleCategorySync as EventListener);
     window.addEventListener('setDesignerCategory', handleDesignerCategory as EventListener);
-    return () => window.removeEventListener('setDesignerCategory', handleDesignerCategory as EventListener);
+    return () => {
+      window.removeEventListener('syncCategoryFilter', handleCategorySync as EventListener);
+      window.removeEventListener('setDesignerCategory', handleDesignerCategory as EventListener);
+    };
   }, []);
 
   // Fixed category order
@@ -1809,7 +1836,7 @@ const FeaturedDesigners = () => {
                   <div className="flex items-center gap-2">
                   {selectedCategory && (
                     <button
-                      onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); }}
+                      onClick={() => { setSelectedCategory(null); }}
                       className="text-xs text-muted-foreground hover:text-primary transition-colors"
                     >
                       Clear
@@ -1829,10 +1856,8 @@ const FeaturedDesigners = () => {
                           onCheckedChange={() => {
                             if (selectedCategory === category) {
                               setSelectedCategory(null);
-                              setSelectedSubcategory(null);
                             } else {
                               setSelectedCategory(category);
-                              setSelectedSubcategory(null);
                             }
                           }}
                         />
