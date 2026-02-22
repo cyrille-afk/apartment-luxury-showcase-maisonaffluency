@@ -183,6 +183,10 @@ import herveVdsMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
 import oliviaCognetVallauris from "@/assets/curators-picks/olivia-cognet-vallauris.jpg";
 import milanPekarCrystalline from "@/assets/curators-picks/milan-pekar-crystalline.jpg";
+import milanPekarCrystallineVase from "@/assets/curators-picks/milan-pekar-crystalline-vase.jpg";
+import milanPekarCrystallineV2 from "@/assets/curators-picks/milan-pekar-crystalline-v2.jpg";
+import milanPekarCrystallineSmall from "@/assets/curators-picks/milan-pekar-crystalline-small.jpg";
+import milanPekarCrystallineXL from "@/assets/curators-picks/milan-pekar-crystalline-xl.jpg";
 import nathalieZieglerChandelier from "@/assets/curators-picks/nathalie-ziegler-chandelier.jpg";
 import jmfStool1934 from "@/assets/curators-picks/jmf-stool-1934.jpg";
 import jmfCroisillonLamp from "@/assets/curators-picks/jmf-croisillon-lamp.jpg";
@@ -1467,16 +1471,10 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     
     philosophy: "Glass is frozen light—my work seeks to capture that ephemeral quality in permanent form.",
     curatorPicks: [
-      {
-        image: milanPekarCrystalline,
-        title: "Crystalline",
-        subtitle: "Sculptural Vase",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Vessel"],
-        materials: "Hand-blown crystalline glass — Bohemian technique",
-        dimensions: "H35 × Ø18 cm (approx.)",
-        description: "Milan Pekař's Crystalline vases are the result of an extraordinarily demanding glassblowing process that produces spontaneous crystal formations on the surface of the glass. No two pieces are alike — each is a unique collaboration between the artist's hand and the alchemy of fire and mineral."
-      },
+      { image: milanPekarCrystallineVase, title: "Crystalline Vase", category: "Decorative Object", tags: ["Decorative Object", "Vessel"], materials: "Hand-blown crystalline glass — Bohemian technique", dimensions: "Ø 16 × H 36 cm", description: "Milan Pekař's Crystalline vases are the result of an extraordinarily demanding glassblowing process that produces spontaneous crystal formations on the surface of the glass. No two pieces are alike — each is a unique collaboration between the artist's hand and the alchemy of fire and mineral." },
+      { image: milanPekarCrystallineV2, title: "Crystalline Volume 2 Vase", category: "Decorative Object", tags: ["Decorative Object", "Vessel"], materials: "Hand-blown crystalline glass — Bohemian technique", dimensions: "Ø 15 × H 24 cm" },
+      { image: milanPekarCrystallineSmall, title: "Crystalline Small Vase", category: "Decorative Object", tags: ["Decorative Object", "Vessel"], materials: "Hand-blown crystalline glass — Bohemian technique", dimensions: "Ø 10 × H 15 cm" },
+      { image: milanPekarCrystallineXL, title: "Crystalline XL Vase", category: "Decorative Object", tags: ["Decorative Object", "Vessel"], materials: "Hand-blown crystalline glass — Bohemian technique", dimensions: "Ø 22 × H 36 cm" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/milanpekar_glass" },
