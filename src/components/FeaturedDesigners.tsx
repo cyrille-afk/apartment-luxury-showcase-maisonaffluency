@@ -362,6 +362,15 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         dimensions: "H18\" × Ø10\""
       },
       { 
+        image: apparatusPick5, 
+        title: "Segment",
+        subtitle: "Console Table",
+        category: "Furniture",
+        tags: ["Furniture", "Console"],
+        materials: "Hand-Cast Resin Legs • Lacquer or Sand-Blasted Ash Table Surface",
+        dimensions: "W 147 × D 45 × H 84 cm"
+      },
+      { 
         image: apparatusPick2, 
         title: "Lariat",
         subtitle: "Pendant",
@@ -387,15 +396,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         tags: ["Lighting", "Pendant"],
         materials: "Mold-blown glass cylinders • Brass dome and armature",
         dimensions: "Ø32.5\""
-      },
-      { 
-        image: apparatusPick5, 
-        title: "Segment",
-        subtitle: "Console Table",
-        category: "Furniture",
-        tags: ["Furniture", "Console"],
-        materials: "Hand-Cast Resin Legs • Lacquer or Sand-Blasted Ash Table Surface",
-        dimensions: "W 147 × D 45 × H 84 cm"
       },
     ],
     links: [
