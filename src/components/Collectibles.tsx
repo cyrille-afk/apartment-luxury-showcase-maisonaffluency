@@ -54,6 +54,13 @@ import ericSchmittAnneauLamp from "@/assets/curators-picks/eric-schmitt-anneau-l
 import ericSchmittDentelleConsole from "@/assets/curators-picks/eric-schmitt-dentelle-console.jpg";
 import ericSchmittFloatingTable from "@/assets/curators-picks/eric-schmitt-floating-table.jpg";
 import ericSchmittRocwoodTable from "@/assets/curators-picks/eric-schmitt-rocwood-table.jpg";
+import felixAgostiniImg from "@/assets/designers/felix-agostini.jpg";
+import felixAgostiniTaureau from "@/assets/curators-picks/felix-agostini-taureau-lamp.png";
+import felixAgostiniSocle from "@/assets/curators-picks/felix-agostini-socle-lamp.png";
+import felixAgostiniEtrier from "@/assets/curators-picks/felix-agostini-etrier.png";
+import felixAgostiniArcheoptryx from "@/assets/curators-picks/felix-agostini-archeoptryx.png";
+import felixAgostiniConsoleCheval from "@/assets/curators-picks/felix-agostini-console-cheval.png";
+import felixAgostiniConsoleInsitu from "@/assets/curators-picks/felix-agostini-console-insitu.png";
 const collectibleDesigners = [
   {
     id: "atelier-demichelis",
