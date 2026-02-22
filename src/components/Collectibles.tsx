@@ -294,7 +294,7 @@ const collectibleDesigners: Array<{
   {
     id: "thierry-lemaire",
     name: "Thierry Lemaire",
-    specialty: "Sculptural Furniture & Limited Editions",
+    specialty: "Sculptural Furniture & Unique Pieces",
     image: thierryLemaireImg,
     biography:
       "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Centre Table exemplifies his signature style of elegant forms with unexpected details.",
@@ -664,7 +664,7 @@ const Collectibles = () => {
               );
             })()}
             <p className="text-base md:text-lg text-muted-foreground font-body">
-              Limited Editions & Unique Pieces
+              Unique Pieces
             </p>
           </motion.div>
 
@@ -855,7 +855,7 @@ const Collectibles = () => {
                           >
                             <Star size={16} className="fill-current" />
                             <span className="font-medium">
-                              {designer.curatorPicks.every(pick => pick.edition === "Unique Piece") ? "Unique Piece" : "Limited Editions"}
+                              {designer.curatorPicks.every(pick => pick.edition === "Unique Piece") ? "Unique Piece" : "Unique Pieces"}
                             </span>
                           </button>
                         </div>
@@ -879,7 +879,7 @@ const Collectibles = () => {
         >
           <VisuallyHidden>
             <DialogTitle>
-              {curatorPicksDesigner?.name} - {curatorPicksDesigner?.curatorPicks?.every(pick => pick.edition === "Unique Piece") ? "Unique Piece" : "Limited Editions"}
+              {curatorPicksDesigner?.name} - {curatorPicksDesigner?.curatorPicks?.every(pick => pick.edition === "Unique Piece") ? "Unique Piece" : "Unique Pieces"}
             </DialogTitle>
           </VisuallyHidden>
           
