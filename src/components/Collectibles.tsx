@@ -234,6 +234,15 @@ const Collectibles = () => {
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
+
+  // Preload all curator pick images when lightbox opens
+  useEffect(() => {
+    if (!curatorPicksDesigner?.curatorPicks?.length) return;
+    curatorPicksDesigner.curatorPicks.forEach(pick => {
+      const img = new Image();
+      img.src = pick.image;
+    });
+  }, [curatorPicksDesigner]);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -837,6 +846,7 @@ const Collectibles = () => {
                   )}
                   <div className="relative inline-block">
                     <img 
+                      key={curatorPickIndex}
                       src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                       alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
                       className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}

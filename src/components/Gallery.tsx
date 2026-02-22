@@ -201,6 +201,18 @@ const Gallery = () => {
     return galleryExperiences.flatMap(section => section.items);
   }, []);
 
+  // Preload adjacent gallery images for smooth transitions
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const toPreload = [currentImageIndex - 1, currentImageIndex, currentImageIndex + 1].filter(
+      i => i >= 0 && i < allItems.length
+    );
+    toPreload.forEach(i => {
+      const img = new Image();
+      img.src = allItems[i].image;
+    });
+  }, [currentImageIndex, lightboxOpen, allItems]);
+
   const [externalSourceId, setExternalSourceId] = useState<string | null>(null);
 
   // Check for gallery index from sessionStorage (set by BrandsAteliers)
@@ -491,7 +503,7 @@ const Gallery = () => {
 
             {/* Image container */}
             <div className="flex flex-col items-center justify-center max-w-[90vw] max-h-[85vh] px-16">
-              <img src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="max-w-full max-h-[70vh] object-contain" loading="eager" decoding="async" />
+              <img key={currentImageIndex} src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="max-w-full max-h-[70vh] object-contain transition-opacity duration-200" loading="eager" decoding="async" />
               <div className="mt-4 text-center">
                 <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
                   {allItems[currentImageIndex]?.title}
