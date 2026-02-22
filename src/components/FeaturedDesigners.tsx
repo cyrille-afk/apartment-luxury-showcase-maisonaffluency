@@ -1570,7 +1570,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       { image: oliviaCognetRedTravertine, title: "Custom Bas Relief", category: "Wall Art", tags: ["Wall Art", "Sculpture"], materials: "Red Travertine", dimensions: "285 × 175 cm" },
       { image: oliviaCognetVallaurisLamps, title: "Vallauris Floor Lamp", category: "Lighting", tags: ["Lighting", "Floor Lamps"], materials: "Ceramic base", dimensions: "H 60–75 cm Ø 70–80 cm · Shade: Ø 40 × 100 cm" },
       { image: oliviaCognetCeramicRelief, title: "Custom Bas Relief", category: "Wall Art", tags: ["Wall Art", "Sculpture"], materials: "Ceramic", dimensions: "140 × 80 cm" },
-      { image: oliviaCognetLeSudVessels, title: "Mediterranean Glazed Vessels", subtitle: "Le Sud Serie", category: "Objects", tags: ["Objects", "Vessels", "Le Sud Serie"], materials: "Glazed Ceramic", dimensions: "Medium: 30–40 cm · Large: 50 cm" },
+      { image: oliviaCognetLeSudVessels, title: "Mediterranean Glazed Vessels", category: "Objects", tags: ["Objects", "Vessels", "Le Sud Serie"], materials: "Glazed Ceramic", dimensions: "Medium: 30–40 cm · Large: 50 cm" },
       { image: oliviaCognetCurveXxl, title: "Curve XXL Chandelier", category: "Lighting", tags: ["Lighting", "Chandeliers"], materials: "Ceramic", dimensions: "W 120 × D 75 × H 40 cm" },
       { image: oliviaCognetTotemSeries, title: "Totem Series", category: "Sculpture", tags: ["Sculpture", "Objects"], materials: "Ceramic, Steel base", dimensions: "Small: 170 cm · Medium: 190 cm · Large: 220 cm" },
       { image: oliviaCognetRetrofutureTable, title: "Retrofuture Coffee Table", category: "Tables", tags: ["Tables", "Coffee Tables"], materials: "Ceramic", dimensions: "L 130 × W 60 × H 45 cm" },
