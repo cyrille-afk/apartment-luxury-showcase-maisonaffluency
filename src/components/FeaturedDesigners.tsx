@@ -1046,22 +1046,13 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         dimensions: "Ø 150 × H 75 cm"
       },
       {
-        image: jmfPresidentDesk1,
-        title: "President Desk",
-        subtitle: "1930",
-        category: "Furniture",
-        tags: ["Furniture", "Desk"],
-        materials: "Varnished Oak • Patinated Brass",
-        dimensions: "L 160 × P 85 × H 75 cm"
-      },
-      {
         image: jmfPresidentDesk2,
         title: "President Desk",
         subtitle: "1930 — Fully Opened",
         category: "Furniture",
         tags: ["Furniture", "Desk"],
         materials: "Varnished Oak • Patinated Brass",
-        dimensions: "L 272 × P 85 × H 75 cm"
+        dimensions: "L 272 × P 85 × H 75 cm (L 160 once closed)"
       },
       {
         image: jmfXStoolRound,
