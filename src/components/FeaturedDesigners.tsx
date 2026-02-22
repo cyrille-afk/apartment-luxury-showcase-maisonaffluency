@@ -134,6 +134,7 @@ import garnierLinkerBoraSconce from "@/assets/curators-picks/garnier-linker-bora
 import garnierLinkerCallistoPendant from "@/assets/curators-picks/garnier-linker-callisto-pendant.png";
 import garnierLinkerCalliopeChandelier from "@/assets/curators-picks/garnier-linker-calliope-chandelier.png";
 import garnierLinkerOrionPendant from "@/assets/curators-picks/garnier-linker-orion-pendant.png";
+import garnierLinkerLipariPendant from "@/assets/curators-picks/garnier-linker-lipari-pendant.png";
 import robicaraSiraCredenza from "@/assets/curators-picks/robicara-sira-credenza-new.jpg";
 import robicaraArmchair from "@/assets/curators-picks/robicara-armchair.jpg";
 import robicaraHighbackChair from "@/assets/curators-picks/robicara-highback-chair.jpg";
@@ -964,6 +965,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       { image: garnierLinkerCallistoPendant, title: "Callisto Pendant x 4", category: "Lighting", tags: ["Lighting", "Pendants"], materials: "Pendant in alabaster, patinated brass structure. Each piece is numbered and signed", dimensions: "Without suspension stem (to order): Ø 16 x H 52 cm" },
       { image: garnierLinkerOrionPendant, title: "Orion Pendant", category: "Lighting", tags: ["Lighting", "Pendants"], materials: "Pendant in alabaster and patinated brass. Each piece is numbered and signed", dimensions: "Ø 11 x L 200 cm. Also exists in length 150 cm" },
       { image: garnierLinkerCalliopeChandelier, title: "Calliope Medium Chandelier", category: "Lighting", tags: ["Lighting", "Chandeliers"], materials: "Chandelier in alabaster, patinated brass structure. Each piece is numbered and signed", dimensions: "Without suspension stem (to order): Ø 56 x H 28 cm. Also available in Ø 67 x H 36 cm" },
+      { image: garnierLinkerLipariPendant, title: "Lipari Pendant", category: "Lighting", tags: ["Lighting", "Pendants"], materials: "Volcanic Stone, Grey Travertine or Navona Travertine, Patinated Brass Details. Stainless steel cables or patinated brass tubes. Each piece is numbered and signed", dimensions: "Ø 8 x length on request up to 250 cm, adjustable height" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/garnieretlinker/" },
