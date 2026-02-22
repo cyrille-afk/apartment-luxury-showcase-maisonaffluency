@@ -1473,11 +1473,11 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     
     philosophy: "Glass is frozen light—my work seeks to capture that ephemeral quality in permanent form.",
     curatorPicks: [
+      { image: milanPekarCrystallineSeries, title: "Crystalline Volume Series", category: "Decorative Object", tags: ["Decorative Object", "Collection"], materials: "Hand-blown crystalline glass — Bohemian technique" },
       { image: milanPekarCrystallineVase, title: "Crystalline Vase", category: "Decorative Object", tags: ["Decorative Object", "Vessel"], materials: "Hand-blown crystalline glass — Bohemian technique", dimensions: "Ø 16 × H 36 cm", description: "Milan Pekař's Crystalline vases are the result of an extraordinarily demanding glassblowing process that produces spontaneous crystal formations on the surface of the glass. No two pieces are alike — each is a unique collaboration between the artist's hand and the alchemy of fire and mineral." },
       { image: milanPekarCrystallineV2, title: "Crystalline Volume 2 Vase", category: "Decorative Object", tags: ["Decorative Object", "Vessel"], materials: "Hand-blown crystalline glass — Bohemian technique", dimensions: "Ø 15 × H 24 cm" },
       { image: milanPekarCrystallineSmall, title: "Crystalline Small Vase", category: "Decorative Object", tags: ["Decorative Object", "Vessel"], materials: "Hand-blown crystalline glass — Bohemian technique", dimensions: "Ø 10 × H 15 cm" },
       { image: milanPekarCrystallineXL, title: "Crystalline XL Vase", category: "Decorative Object", tags: ["Decorative Object", "Vessel"], materials: "Hand-blown crystalline glass — Bohemian technique", dimensions: "Ø 22 × H 36 cm" },
-      { image: milanPekarCrystallineSeries, title: "Crystalline Volume Series", category: "Decorative Object", tags: ["Decorative Object", "Collection"], materials: "Hand-blown crystalline glass — Bohemian technique" },
       { image: milanPekarMetallicVase, title: "Volume Metallic Vase", category: "Decorative Object", tags: ["Decorative Object", "Vessel"], materials: "Metallic glaze with triangle spinel crystal — based on ancient Chinese Tenmoku glaze from the 12th century", description: "This metallic glaze with triangle crystal is based on the ancient Chinese glaze Tenmoku from the 12th century. The most interesting aspect of this process is the crystallisation of metal oxides in triangle shapes (spinel crystal), a most unusual formation in ceramic glazes." },
     ],
     links: [
