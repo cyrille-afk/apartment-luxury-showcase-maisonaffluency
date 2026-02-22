@@ -38,6 +38,14 @@ import pierreBonnefilleImg from "@/assets/designers/pierre-bonnefille-collectibl
 import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
 import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.png";
 import herveMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
+import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
+import emmanuelBabledPick1 from "@/assets/curators-picks/emmanuel-babled-1.jpg";
+import emmanuelBabledPick2 from "@/assets/curators-picks/emmanuel-babled-2.jpg";
+import emmanuelBabledPick3 from "@/assets/curators-picks/emmanuel-babled-3.jpg";
+import emmanuelBabledPick4 from "@/assets/curators-picks/emmanuel-babled-4.jpg";
+import emmanuelBabledPick5 from "@/assets/curators-picks/emmanuel-babled-5.jpg";
+import emmanuelBabledPick6 from "@/assets/curators-picks/emmanuel-babled-6.jpg";
+import emmanuelBabledPick7 from "@/assets/curators-picks/emmanuel-babled-7.jpg";
 import ericSchmittImg from "@/assets/designers/eric-schmitt.jpg";
 import ericSchmittDrageeConsole from "@/assets/curators-picks/eric-schmitt-dragee-console.jpg";
 import ericSchmittSaturneTable from "@/assets/curators-picks/eric-schmitt-saturne-table.jpg";
@@ -250,6 +258,29 @@ const collectibleDesigners = [
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/studio_eric_schmitt_/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "emmanuel-babled",
+    name: "Emmanuel Babled",
+    specialty: "Sculptural Glass & Marble Design",
+    image: emmanuelBabledImg,
+    biography: "Emmanuel Babled is a French-Italian designer renowned for his limited edition sculptural objects in glass and marble. His Osmosi Series represents the pinnacle of material exploration and artistic vision, blending organic forms with exceptional craftsmanship. Each piece is a unique work of art that pushes the boundaries of material possibilities.",
+    notableWorks: "Osmosi Series Sculptured Book Cover, Glass Sculptures, Marble Objects",
+    notableWorksLink: { text: "Osmosi Series", galleryIndex: 2 },
+    philosophy: "I explore the boundaries between art and design, creating objects that challenge perception and celebrate material beauty.",
+    curatorPicks: [
+      { image: emmanuelBabledPick1, title: "Osmosi — Console", category: "Tables", subcategory: "Console", materials: "Carrara marble, Murano blown glass", dimensions: "H80 × L160 × D35 cm", edition: "" },
+      { image: emmanuelBabledPick2, title: "Coral — Coffee Table", category: "Tables", subcategory: "Coffee Table", materials: "Bianco Carrara marble, plexiglass", dimensions: "L150 × W100 × H28 cm", edition: "" },
+      { image: emmanuelBabledPick3, title: "Pyros Marini — Vase", category: "Decorative Object", subcategory: "Vase", materials: "Murano blown glass (Venini)", dimensions: "H45 × Ø30 cm", edition: "" },
+      { image: emmanuelBabledPick4, title: "Quark Bronze — Coffee Table", category: "Tables", subcategory: "Coffee Table", materials: "Bronze", dimensions: "H30 × L122.5 × W83 cm", edition: "" },
+      { image: emmanuelBabledPick5, title: "Siliceaarenaria — Vessels", category: "Decorative Object", subcategory: "Vessel", materials: "Murano blown glass (Venini)", dimensions: "Ø25 × H22 cm (each)", edition: "" },
+      { image: emmanuelBabledPick6, title: "Etna Cabinet — Stripes", category: "Storage", subcategory: "Cabinet", materials: "Murano glass doors • Lava stone legs", dimensions: "H85 × L120 × D45 cm", edition: "" },
+      { image: emmanuelBabledPick7, title: "Osmosi — Side Table", category: "Tables", subcategory: "Side Table", materials: "Carrara marble • Murano blown glass", dimensions: "H55 × Ø60 cm", edition: "" },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/emmanuelbabled" },
       { type: "Curators' Picks" },
     ],
   },
