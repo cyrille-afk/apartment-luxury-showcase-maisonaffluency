@@ -1441,12 +1441,12 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     philosophy: "We believe in furniture made with integrity — pieces conceived by great designers and realized by the best craftspeople in the world.",
     curatorPicks: [
       { image: manOfPartsSideChair, title: "Frenchmen Street Side Chair", subtitle: "by Sebastian Herkner", category: "Seating", materials: "Solid Oak Wood, Fully upholstered in fabric or leather", dimensions: "W 53 × D 59 × H 80 cm — SH 49 cm" },
+      { image: manOfPartsCoffeeTable, title: "Praia da Granja Coffee Table", subtitle: "by Sebastian Herkner", category: "Tables", materials: "A mixed textured stone top with a solid walnut or oak base", dimensions: "W 125 × D 40 × H 34 cm" },
       { image: manOfPartsLoungeChair, title: "Frenchmen Street Lounge Chair", subtitle: "by Sebastian Herkner", category: "Seating", materials: "Solid oak frame, Fully upholstered in fabric or leather", dimensions: "W 82 × D 77 × H 73 cm — SH 40 cm" },
       { image: manOfPartsFloorLamp, title: "Cinnamon Gardens Floor Lamp", subtitle: "by Yabu Pushelberg", category: "Lighting", materials: "Solid Ash Wood, Esprit Nuvola — 100% Linen Shade", dimensions: "D 55 × H 156 cm" },
       { image: manOfPartsRuaLeblon, title: "Rua Leblon", subtitle: "by Yabu Pushelberg", category: "Seating", materials: "Upholstered in fabric or leather with return swivel. Powder coated black steel with walnut or anthracite base", dimensions: "W 90 × D 92 × H 76 cm — SH 44 cm" },
       { image: manOfPartsBondStreetStool, title: "Bond Street Stool", subtitle: "by Yabu Pushelberg", category: "Seating", materials: "Full upholstery in fabric or leather with a Powdercoat Bronze swivel base", dimensions: "W 62.5 × D 46 × H 63.5 cm — SH 49.3 cm" },
       { image: manOfPartsSandyCoveSofa, title: "Sandy Cove Sofa", subtitle: "by Sebastian Herkner", category: "Seating", materials: "Full upholstered in fabric or leather", dimensions: "W 190 × D 108 × H 70 cm — SH 40 cm" },
-      { image: manOfPartsCoffeeTable, title: "Praia da Granja Coffee Table", subtitle: "by Sebastian Herkner", category: "Tables", materials: "A mixed textured stone top with a solid walnut or oak base", dimensions: "W 125 × D 40 × H 34 cm" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/manofparts/" },
