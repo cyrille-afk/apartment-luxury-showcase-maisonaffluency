@@ -173,6 +173,8 @@ import milanPekarCrystalline from "@/assets/curators-picks/milan-pekar-crystalli
 import nathalieZieglerChandelier from "@/assets/curators-picks/nathalie-ziegler-chandelier.jpg";
 import jmfStool1934 from "@/assets/curators-picks/jmf-stool-1934.jpg";
 import jmfCroisillonLamp from "@/assets/curators-picks/jmf-croisillon-lamp.jpg";
+import jmfSoleilTable1 from "@/assets/curators-picks/jmf-soleil-table-1.jpg";
+import jmfSoleilTable2 from "@/assets/curators-picks/jmf-soleil-table-2.jpg";
 import ecartPierreChareau from "@/assets/curators-picks/ecart-pierre-chareau.jpg";
 import kikoLopezMirrorImg from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import maartenVrolijkSakura from "@/assets/curators-picks/maarten-vrolijk-sakura.jpg";
@@ -978,6 +980,24 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         materials: "Varnished Solid Oak Base • Patinated Brass • Cotton Lamp Shade",
         dimensions: "Ø 34 × H 51 cm",
         description: "Also available with a solid Walnut, Golden Brass or Black Patinated Brass base"
+      },
+      {
+        image: jmfSoleilTable1,
+        title: "Soleil Coffee Table",
+        subtitle: "1930",
+        category: "Furniture",
+        tags: ["Furniture", "Coffee Table"],
+        materials: "Straw Marquetry",
+        dimensions: "Ø 85 × H 35 cm"
+      },
+      {
+        image: jmfSoleilTable2,
+        title: "Soleil Coffee Table",
+        subtitle: "1930 — Detail",
+        category: "Furniture",
+        tags: ["Furniture", "Coffee Table"],
+        materials: "Straw Marquetry",
+        dimensions: "Ø 85 × H 35 cm"
       },
     ],
     links: [
