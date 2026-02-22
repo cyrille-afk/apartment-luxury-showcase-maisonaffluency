@@ -89,30 +89,35 @@ const Overview = () => {
                 <div className="font-display text-2xl md:text-3xl text-primary group-hover:text-accent transition-colors duration-300">5</div>
                 <div className="font-body text-xs uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-all duration-300">Atmospheres</div>
               </button>
-              <button
-                onClick={() => {
-                  const designersSection = document.getElementById('designers');
-                  if (designersSection) {
-                    designersSection.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-                className="text-left cursor-pointer group transition-all duration-300 hover:scale-105"
-              >
-                <div className="font-display text-2xl md:text-3xl text-primary group-hover:text-accent transition-colors duration-300">50+</div>
-                <div className="font-body text-xs uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-all duration-300">Designers</div>
-              </button>
-              <button
-                onClick={() => {
-                  const collectiblesSection = document.getElementById('collectibles');
-                  if (collectiblesSection) {
-                    collectiblesSection.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-                className="text-left cursor-pointer group transition-all duration-300 hover:scale-105"
-              >
-                <div className="font-display text-2xl md:text-3xl text-primary group-hover:text-accent transition-colors duration-300">10+</div>
-                <div className="font-body text-xs uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-all duration-300">Collectibles</div>
-              </button>
+              <div className="flex flex-col gap-1">
+                <div className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">In Situ</div>
+                <div className="flex gap-4 md:gap-6">
+                  <button
+                    onClick={() => {
+                      const designersSection = document.getElementById('designers');
+                      if (designersSection) {
+                        designersSection.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="text-left cursor-pointer group transition-all duration-300 hover:scale-105"
+                  >
+                    <div className="font-display text-2xl md:text-3xl text-primary group-hover:text-accent transition-colors duration-300">50+</div>
+                    <div className="font-body text-xs uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-all duration-300">Designers</div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const collectiblesSection = document.getElementById('collectibles');
+                      if (collectiblesSection) {
+                        collectiblesSection.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="text-left cursor-pointer group transition-all duration-300 hover:scale-105"
+                  >
+                    <div className="font-display text-2xl md:text-3xl text-primary group-hover:text-accent transition-colors duration-300">10+</div>
+                    <div className="font-body text-xs uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-all duration-300">Collectibles</div>
+                  </button>
+                </div>
+              </div>
             </motion.div>
           </div>
           
