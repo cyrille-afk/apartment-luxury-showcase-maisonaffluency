@@ -100,6 +100,7 @@ import emmanuelLevetStennePick2 from "@/assets/curators-picks/emmanuel-levet-ste
 import emmanuelLevetStennePick3 from "@/assets/curators-picks/emmanuel-levet-stenne-3.jpg";
 import emmanuelLevetStennePick4 from "@/assets/curators-picks/emmanuel-levet-stenne-4.jpg";
 import emmanuelLevetStennePick5 from "@/assets/curators-picks/emmanuel-levet-stenne-5.jpg";
+import emmanuelLevetStennePick6 from "@/assets/curators-picks/emmanuel-levet-stenne-6.png";
 import emmanuelBabledPick1 from "@/assets/curators-picks/emmanuel-babled-1.jpg";
 import emmanuelBabledPick2 from "@/assets/curators-picks/emmanuel-babled-2.jpg";
 import emmanuelBabledPick3 from "@/assets/curators-picks/emmanuel-babled-3.jpg";
@@ -699,6 +700,15 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         tags: ["Tables", "Dining Table"],
         materials: "Oak or walnut top and base",
         dimensions: "L280 × W120 × H74 cm"
+      },
+      {
+        image: emmanuelLevetStennePick6,
+        title: "Night Cup",
+        subtitle: "Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Table Light"],
+        materials: "Patinated or Polished Brass and Alabaster",
+        dimensions: "L 29 × l 22 × H 33 cm"
       },
     ],
     links: [
