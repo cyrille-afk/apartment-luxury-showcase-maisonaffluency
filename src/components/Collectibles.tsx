@@ -855,7 +855,7 @@ const Collectibles = () => {
                           >
                             <Star size={16} className="fill-current" />
                             <span className="font-medium">
-                              {designer.curatorPicks.every(pick => pick.edition === "Unique Piece") ? "Unique Piece" : "Unique Pieces"}
+                              {designer.specialty.includes("Limited Editions") ? "Limited Editions" : designer.curatorPicks.every(pick => pick.edition === "Unique Piece") ? "Unique Piece" : "Unique Pieces"}
                             </span>
                           </button>
                         </div>
@@ -879,7 +879,7 @@ const Collectibles = () => {
         >
           <VisuallyHidden>
             <DialogTitle>
-              {curatorPicksDesigner?.name} - {curatorPicksDesigner?.curatorPicks?.every(pick => pick.edition === "Unique Piece") ? "Unique Piece" : "Unique Pieces"}
+              {curatorPicksDesigner?.name} - {curatorPicksDesigner?.specialty?.includes("Limited Editions") ? "Limited Editions" : curatorPicksDesigner?.curatorPicks?.every(pick => pick.edition === "Unique Piece") ? "Unique Piece" : "Unique Pieces"}
             </DialogTitle>
           </VisuallyHidden>
           
