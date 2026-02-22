@@ -1684,6 +1684,29 @@ const FeaturedDesigners = () => {
   const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(true);
+
+  // Preload adjacent curator pick images for smooth transitions
+  useEffect(() => {
+    if (!curatorPicksDesigner?.curatorPicks?.length) return;
+    const picks = curatorPicksDesigner.curatorPicks;
+    const toPreload = [curatorPickIndex - 1, curatorPickIndex + 1].filter(
+      i => i >= 0 && i < picks.length
+    );
+    toPreload.forEach(i => {
+      const img = new Image();
+      img.src = picks[i].image;
+    });
+  }, [curatorPickIndex, curatorPicksDesigner]);
+
+  // Also preload all images when lightbox opens
+  useEffect(() => {
+    if (!curatorPicksDesigner?.curatorPicks?.length) return;
+    curatorPicksDesigner.curatorPicks.forEach(pick => {
+      const img = new Image();
+      img.src = pick.image;
+    });
+  }, [curatorPicksDesigner]);
 
   // Helper: check if a curator pick matches the active subcategory/category filter
   const pickMatchesFilter = useMemo(() => {
@@ -2387,12 +2410,14 @@ const FeaturedDesigners = () => {
                       <div className="relative inline-block">
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image && (
                           <img 
+                            key={curatorPickIndex}
                             src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                             alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
                             className={`object-contain select-none transition-all duration-300 ${isZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[55vh]'} ${
                               !pickMatchesFilter(curatorPicksDesigner.curatorPicks[curatorPickIndex]) ? 'blur-[6px] opacity-40' : ''
-                            }`}
+                            } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                             draggable={false}
+                            onLoad={() => setImageLoaded(true)}
                           />
                         )}
 
