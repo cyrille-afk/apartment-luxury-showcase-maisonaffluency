@@ -178,6 +178,8 @@ import jmfSoleilTable2 from "@/assets/curators-picks/jmf-soleil-table-2.jpg";
 import jmfElephantArmchair from "@/assets/curators-picks/jmf-elephant-armchair.jpg";
 import jmfRoundTable1 from "@/assets/curators-picks/jmf-round-table-1.jpg";
 import jmfRoundTable2 from "@/assets/curators-picks/jmf-round-table-2.jpg";
+import jmfPresidentDesk1 from "@/assets/curators-picks/jmf-president-desk-1.jpg";
+import jmfPresidentDesk2 from "@/assets/curators-picks/jmf-president-desk-2.jpg";
 import ecartPierreChareau from "@/assets/curators-picks/ecart-pierre-chareau.jpg";
 import kikoLopezMirrorImg from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import maartenVrolijkSakura from "@/assets/curators-picks/maarten-vrolijk-sakura.jpg";
@@ -1030,6 +1032,24 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         tags: ["Furniture", "Dining Table"],
         materials: "Sandblasted Oak Marquetry • Deep Sandblasted Oak",
         dimensions: "Ø 150 × H 75 cm"
+      },
+      {
+        image: jmfPresidentDesk1,
+        title: "President Desk",
+        subtitle: "1930",
+        category: "Furniture",
+        tags: ["Furniture", "Desk"],
+        materials: "Varnished Oak • Patinated Brass",
+        dimensions: "L 160 × P 85 × H 75 cm"
+      },
+      {
+        image: jmfPresidentDesk2,
+        title: "President Desk",
+        subtitle: "1930 — Fully Opened",
+        category: "Furniture",
+        tags: ["Furniture", "Desk"],
+        materials: "Varnished Oak • Patinated Brass",
+        dimensions: "L 272 × P 85 × H 75 cm"
       },
     ],
     links: [
