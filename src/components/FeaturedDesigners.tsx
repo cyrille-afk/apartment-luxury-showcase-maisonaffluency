@@ -979,6 +979,16 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
     curatorPicks: [
       {
+        image: jmfUpholsteredBackSofa,
+        title: "Upholstered Back 3-Seater Sofa",
+        subtitle: "1932",
+        category: "Furniture",
+        tags: ["Furniture", "Sofa"],
+        materials: "Varnished Solid Oak • Leather",
+        dimensions: "L 230 × P 89 × H 81 cm",
+        description: "Available in 2-seater: L 160 × P 89 × H 81 cm"
+      },
+      {
         image: jmfCroisillonLamp,
         title: "Croisillon Lamp",
         subtitle: "1928",
@@ -1051,16 +1061,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         tags: ["Furniture", "Desk"],
         materials: "Varnished Oak • Patinated Brass",
         dimensions: "L 272 × P 85 × H 75 cm"
-      },
-      {
-        image: jmfUpholsteredBackSofa,
-        title: "Upholstered Back 3-Seater Sofa",
-        subtitle: "1932",
-        category: "Furniture",
-        tags: ["Furniture", "Sofa"],
-        materials: "Varnished Solid Oak • Leather",
-        dimensions: "L 230 × P 89 × H 81 cm",
-        description: "Available in 2-seater: L 160 × P 89 × H 81 cm"
       },
     ],
     links: [
