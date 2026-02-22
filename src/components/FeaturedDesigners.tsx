@@ -2484,7 +2484,14 @@ const FeaturedDesigners = () => {
                           />
                         )}
 
-                        {/* Maximize/Minimize icon — clickable, top-right */}
+                        {/* Photo credit — bottom left on image */}
+                        {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.photoCredit && (
+                          <p className="absolute bottom-2 left-2 z-10 text-[10px] text-white/50 font-body tracking-wider flex items-center gap-1">
+                            Photo: <a href="https://www.instagram.com/lucabonnefille/?hl=en" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-white/80 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-3 h-3" style={{ stroke: "url(#ig-gradient-curator)" }} /><svg width="0" height="0"><defs><linearGradient id="ig-gradient-curator" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f9ce34" /><stop offset="50%" stopColor="#ee2a7b" /><stop offset="100%" stopColor="#6228d7" /></linearGradient></defs></svg>{curatorPicksDesigner.curatorPicks[curatorPickIndex].photoCredit}</a>
+                          </p>
+                        )}
+
+                        {/* Maximize/Minimize icon — clickable, bottom-right */}
                         <button
                           onClick={() => setIsZoomed(!isZoomed)}
                           className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
@@ -2536,11 +2543,6 @@ const FeaturedDesigners = () => {
                           {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.description && (
                             <p className="text-xs md:text-sm text-white/50 font-body leading-relaxed max-w-lg mt-2 mx-auto text-center">
                               {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).description}
-                            </p>
-                          )}
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.photoCredit && (
-                            <p className="text-[10px] text-white/30 font-body tracking-wider mt-1">
-                              Photo: {curatorPicksDesigner.curatorPicks[curatorPickIndex].photoCredit}
                             </p>
                           )}
                          </div>
