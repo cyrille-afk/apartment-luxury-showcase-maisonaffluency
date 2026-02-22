@@ -700,7 +700,8 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
         category: "Tables",
         tags: ["Tables", "Dining Table"],
         materials: "Oak or walnut top and base",
-        dimensions: "L280 × W120 × H74 cm"
+        dimensions: "L280 × W120 × H74 cm",
+        description: "Upholstered here in Curly Ivory fabric from Casal (Ottoman S), in Divin fabric from Lelièvre Paris and in Louison fabric from Maison Pierre Frey (Ottoman M)"
       },
       {
         image: emmanuelLevetStennePick6,
