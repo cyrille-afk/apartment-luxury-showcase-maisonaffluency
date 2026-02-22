@@ -36,6 +36,8 @@ import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
 import pierreBonnefilleImg from "@/assets/designers/pierre-bonnefille-collectibles.jpg";
 import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
+import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.png";
+import herveMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
 
 const collectibleDesigners = [
   {
@@ -61,7 +63,25 @@ const collectibleDesigners = [
     ],
   },
   {
-    id: "kiko-lopez",
+    id: "herve-van-der-straeten",
+    name: "Hervé van der Straeten",
+    specialty: "Bronze Sculpture & Lighting Design",
+    image: herveVanDerStraetenImg,
+    biography:
+      "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
+    notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
+    notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 9 },
+    philosophy:
+      "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
+    curatorPicks: [
+      { image: herveMicmac, title: "Mic Mac Chandelier", category: "Lighting", subcategory: "Chandeliers", materials: "Bronze • Patinated finish", dimensions: "Variable dimensions", edition: "Limited Edition" },
+    ],
+    links: [
+      { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
     name: "Kiko Lopez",
     specialty: "Artisan Mirrors & Reflective Surfaces",
     image: kikoLopezImg,

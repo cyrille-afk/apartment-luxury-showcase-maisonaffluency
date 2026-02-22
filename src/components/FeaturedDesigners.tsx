@@ -958,23 +958,6 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     ],
   },
   {
-    id: "herve-van-der-straeten",
-    name: "Hervé van der Straeten",
-    specialty: "Bronze Sculpture & Lighting Design",
-    image: herveVanDerStraetenImg,
-    biography:
-      "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
-    notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
-    notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 9 },
-    philosophy:
-      "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
-    curatorPicks: [],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
     id: "jean-michel-frank",
     name: "Jean-Michel Frank",
     specialty: "Minimalist Luxury & Art Deco Pioneer",
