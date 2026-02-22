@@ -131,6 +131,7 @@ import pierreBonnefilleMetamorphosisPolygone from "@/assets/curators-picks/pierr
 import pierreBonnefilleTabouretsStone from "@/assets/curators-picks/pierre-bonnefille-tabourets-stone.png";
 import pierreBonnefilleStoneD from "@/assets/curators-picks/pierre-bonnefille-stone-d-coffee-table.png";
 import pierreBonnefilleEnfiladeBloc from "@/assets/curators-picks/pierre-bonnefille-enfilade-bloc.png";
+import pierreBonnefilleBlocSideboardII from "@/assets/curators-picks/pierre-bonnefille-bloc-sideboard-ii.png";
 import ccTapisGiudecca from "@/assets/curators-picks/cc-tapis-giudecca.jpg";
 import haymannMarieLamp from "@/assets/curators-picks/haymann-marie-lamp.jpg";
 import theoremeGarnierLinker from "@/assets/curators-picks/theoreme-garnier-linker.jpg";
@@ -1603,6 +1604,7 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
       { image: pierreBonnefilleTabouretsStone, title: "3 Stone Stools", category: "Seating", subcategory: "Stools", tags: ["Seating", "Stool"], materials: "Stool in mixed material, mixture of natural pigments, mineral and metallic powders applied on a wooden structure\nBespoke Dimensions and Colours upon request", dimensions: "A. 41 × 39 × 29 cm / B. 41 × 41 × 25 cm / C. 41 × 37 × 28 cm", photoCredit: "Luca Bonnefille" },
       { image: pierreBonnefilleStoneD, title: "Stone D (Medium) Limonite D'Eau Coffee Table", category: "Tables", subcategory: "Coffee Tables", tags: ["Tables", "Coffee Tables"], materials: "Tabletop in mixed material, mixture of natural pigments, mineral and metallic powders applied on a wooden structure\nBespoke Dimensions and Colours upon request", dimensions: "W 130 × D 118 × H 41 cm\n(Also available in W 105 × D 96 × H 41 cm and W 176 × D 160 × H 41 cm)", edition: "Edition of 8 + 2 AP", photoCredit: "Luca Bonnefille" },
       { image: pierreBonnefilleEnfiladeBloc, title: "Enfilade Bloc - Partition Bronze", category: "Storage", subcategory: "Sideboards", tags: ["Storage", "Sideboards"], materials: "Mixed media on wood, patinated brass\nBespoke Dimensions and Colours upon request", dimensions: "W 236 × D 43 × H 83 cm", edition: "Edition of 8 + 2 AP", photoCredit: "Luca Bonnefille" },
+      { image: pierreBonnefilleBlocSideboardII, title: "Bloc Sideboard II", category: "Storage", subcategory: "Sideboards", tags: ["Storage", "Sideboards"], materials: "Mixed media on wood, patinated steel\nBespoke Dimensions and Colours upon request", dimensions: "W 200 × D 45 × H 75 cm", edition: "Edition of 20 + 4 AP", photoCredit: "Luca Bonnefille" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/pierre_bonnefille/" },
