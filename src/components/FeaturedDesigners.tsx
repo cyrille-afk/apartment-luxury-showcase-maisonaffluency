@@ -170,6 +170,12 @@ import manOfPartsSandyCoveSofa from "@/assets/curators-picks/man-of-parts-sandy-
 import manOfPartsCoffeeTable from "@/assets/curators-picks/man-of-parts-coffee-table.png";
 import manOfPartsCocktailTable from "@/assets/curators-picks/man-of-parts-cocktail-table.png";
 import felixAgostiniCaryatide from "@/assets/curators-picks/felix-agostini-caryatide.jpg";
+import felixAgostiniTaureauFD from "@/assets/curators-picks/felix-agostini-taureau-lamp.png";
+import felixAgostiniSocleFD from "@/assets/curators-picks/felix-agostini-socle-lamp.png";
+import felixAgostiniEtrierFD from "@/assets/curators-picks/felix-agostini-etrier.png";
+import felixAgostiniArcheoptryxFD from "@/assets/curators-picks/felix-agostini-archeoptryx.png";
+import felixAgostiniConsoleChevalFD from "@/assets/curators-picks/felix-agostini-console-cheval.png";
+import felixAgostiniConsoleInsituFD from "@/assets/curators-picks/felix-agostini-console-insitu.png";
 import kiraToshiroLamp from "@/assets/curators-picks/kira-toshiro-lamp.jpg";
 
 import tristanAuerYsaWallLightH from "@/assets/curators-picks/tristan-auer-ysa-wall-light-h.jpg";
@@ -817,7 +823,14 @@ const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; l
     biography: "Felix Agostini is a mid-twentieth century French designer renowned for his highly refined figural bronze lighting, created under the Charles Paris imprint. Working primarily in the 1950s and 1960s, his Grande Caryatide sconces and candelabra draw on the classical tradition of architectural figural sculpture while expressing a distinctly French post-war elegance. His pieces are now highly sought after by collectors and museums worldwide.",
     notableWorks: "Grande Caryatide Sconce (Charles Paris), Figural Bronze Candelabra, Table Lamps",
     philosophy: "The figure has always been at the heart of decorative art — my work honors that tradition with modern sensibility.",
-    curatorPicks: [],
+    curatorPicks: [
+      { image: felixAgostiniTaureauFD, title: "Taureau Floor Lamp", category: "Lighting", tags: ["Lighting", "Floor Lamps"], materials: "Bronze base, Silk lamp shade", dimensions: "W 23 × D 20 × H 131 cm" },
+      { image: felixAgostiniSocleFD, title: "Socle Table Lamp", category: "Lighting", tags: ["Lighting", "Table Lamps"], materials: "Bronze base, Silk lamp shade", dimensions: "W 15.5 × D 11 × H 57 cm" },
+      { image: felixAgostiniEtrierFD, title: "Etrier", category: "Lighting", tags: ["Lighting", "Table Lamps"], materials: "Bronze", dimensions: "W 15 × D 15 × H 71 cm" },
+      { image: felixAgostiniArcheoptryxFD, title: "Archeoptryx Double Skin", category: "Lighting", tags: ["Lighting", "Wall Lights"], materials: "Bronze & Parchemin", dimensions: "W 135.3 × D 24.6 × H 30 cm" },
+      { image: felixAgostiniConsoleChevalFD, title: "Console Cheval", category: "Tables", tags: ["Tables", "Console"], materials: "Bronze, Cast Glass Top", dimensions: "W 150 × D 40.5 × H 91 cm" },
+      { image: felixAgostiniConsoleInsituFD, title: "Console Cheval — In Situ", category: "Tables", tags: ["Tables", "Console"], materials: "Bronze, Cast Glass Top", dimensions: "W 150 × D 40.5 × H 91 cm" },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/maisoncharlesparis/" },
       { type: "Curators' Picks" },
