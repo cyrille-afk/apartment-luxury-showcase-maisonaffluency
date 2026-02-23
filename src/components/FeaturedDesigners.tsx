@@ -2384,7 +2384,7 @@ const FeaturedDesigners = () => {
                                   <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
                                 </button>
                                 {linkIdx < designer.notableWorksLinks.length - 1 && (
-                                  <span className="text-muted-foreground mx-1">•</span>
+                                  <span className="text-muted-foreground mx-1 hidden md:inline">•</span>
                                 )}
                               </span>
                             ))
