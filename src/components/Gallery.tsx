@@ -555,7 +555,7 @@ const Gallery = () => {
 
       {/* Lightbox Dialog */}
       <Dialog open={lightboxOpen} onOpenChange={(open) => !open && closeLightbox()}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none" onKeyDown={handleKeyDown} aria-describedby={undefined}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 pt-14 md:pt-0 bg-black/95 border-none [&>button]:hidden" onKeyDown={handleKeyDown} aria-describedby={undefined}>
           <VisuallyHidden>
             <DialogTitle>{allItems[currentImageIndex]?.title || 'Gallery Image'}</DialogTitle>
           </VisuallyHidden>
@@ -579,25 +579,25 @@ const Gallery = () => {
 
             {/* Image container */}
             <div className="flex flex-col items-center justify-center w-full md:max-w-[90vw] max-h-[85vh] px-0 md:px-16">
-              <img key={currentImageIndex} src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="w-full md:max-w-full max-h-[75vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
-              <div className="mt-4 text-center">
+              <img key={currentImageIndex} src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="w-full md:max-w-full max-h-[60vh] md:max-h-[75vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
+              {/* Dot indicators - mobile only, directly below image */}
+              <div className="flex md:hidden justify-center gap-1.5 mt-3">
+                {allItems.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentImageIndex(i)}
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentImageIndex ? 'bg-white' : 'bg-white/40'}`}
+                    aria-label={`Go to image ${i + 1}`}
+                  />
+                ))}
+              </div>
+              <div className="mt-3 text-center">
                 <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
                   {allItems[currentImageIndex]?.title}
                 </h3>
                 <p className="text-sm md:text-base text-white/70 font-body max-w-2xl">
                   {allItems[currentImageIndex]?.description}
                 </p>
-                {/* Dot indicators - mobile only */}
-                <div className="flex md:hidden justify-center gap-1.5 mt-4">
-                  {allItems.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setCurrentImageIndex(i)}
-                      className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentImageIndex ? 'bg-white' : 'bg-white/40'}`}
-                      aria-label={`Go to image ${i + 1}`}
-                    />
-                  ))}
-                </div>
                 {/* Counter - desktop only */}
                 <p className="hidden md:block text-xs text-white/50 mt-3 font-body">
                   {currentImageIndex + 1} / {allItems.length}
