@@ -477,11 +477,11 @@ const Gallery = () => {
                 </div>
                 {/* Instagram-style indicator — top right: icon on first photo, counter on others */}
                 {section.items.length > 1 && (
-                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full pointer-events-none shadow-sm">
+                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm p-1.5 rounded-md pointer-events-none">
                     {(activeScrollIndices[originalSectionIndex] || 0) === 0 ? (
-                      <Copy className="w-3.5 h-3.5 text-foreground" />
+                      <Copy className="w-3.5 h-3.5 text-white" />
                     ) : (
-                      <span className="text-foreground text-[10px] font-body font-medium">
+                      <span className="text-white text-[10px] font-body font-medium">
                         {(activeScrollIndices[originalSectionIndex] || 0) + 1}/{section.items.length}
                       </span>
                     )}
