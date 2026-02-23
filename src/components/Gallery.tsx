@@ -361,19 +361,37 @@ const Gallery = () => {
             duration: 0.6,
             delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between">
                   <h3 className="text-xl md:text-3xl lg:text-4xl font-serif text-primary mb-2">
                     {section.experience}
                   </h3>
                   {originalSectionIndex === 0 && (
-                    <button
-                      onClick={() => setGridCols(prev => prev === 3 ? 5 : 3)}
-                      className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-primary/20 hover:border-primary/40 bg-background/80 backdrop-blur-sm transition-all text-primary/60 hover:text-primary mb-2"
-                      aria-label={`Switch to ${gridCols === 3 ? 5 : 3} column grid`}
-                    >
-                      {gridCols === 3 ? <LayoutGrid className="w-4 h-4" /> : <Grid3X3 className="w-4 h-4" />}
-                      <span className="text-xs font-body tracking-wide">{gridCols === 3 ? 5 : 3}</span>
-                    </button>
+                    <div className="hidden md:flex items-center gap-1">
+                      <button
+                        onClick={() => setGridCols(3)}
+                        className={`p-1.5 rounded transition-all ${gridCols === 3 ? 'text-primary' : 'text-primary/30 hover:text-primary/60'}`}
+                        aria-label="3 column grid"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="0.5" y="0.5" width="4.5" height="17" rx="1" fill="currentColor"/>
+                          <rect x="6.75" y="0.5" width="4.5" height="17" rx="1" fill="currentColor"/>
+                          <rect x="13" y="0.5" width="4.5" height="17" rx="1" fill="currentColor"/>
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setGridCols(5)}
+                        className={`p-1.5 rounded transition-all ${gridCols === 5 ? 'text-primary' : 'text-primary/30 hover:text-primary/60'}`}
+                        aria-label="5 column grid"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="0" y="0.5" width="2.4" height="17" rx="0.5" fill="currentColor"/>
+                          <rect x="3.9" y="0.5" width="2.4" height="17" rx="0.5" fill="currentColor"/>
+                          <rect x="7.8" y="0.5" width="2.4" height="17" rx="0.5" fill="currentColor"/>
+                          <rect x="11.7" y="0.5" width="2.4" height="17" rx="0.5" fill="currentColor"/>
+                          <rect x="15.6" y="0.5" width="2.4" height="17" rx="0.5" fill="currentColor"/>
+                        </svg>
+                      </button>
+                    </div>
                   )}
                 </div>
                 <p className="text-sm md:text-base text-muted-foreground font-body italic">
