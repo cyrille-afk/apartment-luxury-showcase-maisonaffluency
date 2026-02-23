@@ -2283,7 +2283,7 @@ const FeaturedDesigners = () => {
                           </div>
                         </div>
                       </DialogTrigger>
-                      <DialogContent className="max-w-3xl" aria-describedby={undefined}>
+                      <DialogContent className="max-w-3xl max-h-[90vh] [&>button]:top-3 [&>button]:right-3 [&>button]:p-2 [&>button]:bg-foreground/10 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:opacity-100 [&>button>svg]:h-5 [&>button>svg]:w-5" aria-describedby={undefined}>
                         <VisuallyHidden>
                           <DialogTitle>{selectedImage?.name || designer.name}</DialogTitle>
                         </VisuallyHidden>
@@ -2291,7 +2291,7 @@ const FeaturedDesigners = () => {
                           <img
                             src={selectedImage?.image || designer.image!}
                             alt={selectedImage?.name || designer.name}
-                            className="w-full h-auto rounded-lg object-contain"
+                            className="w-full h-auto rounded-lg object-contain max-h-[75vh]"
                           />
                           <p className="text-center mt-4 text-lg font-serif text-foreground">
                             {designer.founder || selectedImage?.name || designer.name}
