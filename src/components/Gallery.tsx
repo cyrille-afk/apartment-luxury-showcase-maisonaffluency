@@ -460,6 +460,19 @@ const Gallery = () => {
                         decoding="async"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                      {/* Expand icon - bottom left */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openLightbox(originalSectionIndex, index);
+                        }}
+                        className="absolute bottom-2 left-2 z-10"
+                        aria-label="View full image"
+                      >
+                        <span className="bg-background/90 text-foreground p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center justify-center">
+                          <Maximize2 className="w-3 h-3" />
+                        </span>
+                      </button>
                     </div>
                   ))}
                 </div>
