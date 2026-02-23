@@ -60,6 +60,10 @@ const galleryExperiences = [{
     image: intimateLoungeImage,
     title: "A Relaxed Setting",
     description: "Delcourt Collection's BOB armchair, Kiko Lopez' shadow drawings mirror, Alinea Design Objects' Angelo M side table, Takayokaya's Ojami Cushion, Milan Pekař's Crystalline Vase"
+  }, {
+    image: "/gallery/intimate-4.jpeg",
+    title: "Art Life Corner",
+    description: "A curated reading corner with sculptural seating, artisan ottoman and travertine side table"
   }]
 }, {
   experience: "A Personal Sanctuary",
