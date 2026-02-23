@@ -165,13 +165,13 @@ export const collectibleDesigners: Array<{
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     curatorPicks: [
+      { image: herveEmpileeConsole, title: "Empilée Console", category: "Furniture", subcategory: "Consoles", materials: "Precariously balanced wood lacquered slabs resting on bronze wedges, characteristic of the designer's research into structure", dimensions: "L 200 x l 45 x H 85 cm - 72 kg", edition: "Edition of 20" },
       { image: herveArthurLamp, title: "Arthur Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Patinated bronze Vison Nuancé and Montblanc fabric lampshade", dimensions: "Ø 39 x H 51.5 cm - 8kg" },
       { image: herveBubblingLamp, title: "Bubbling Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze with a golden brown patina, diffuses a soft light which is surreptitiously captured by the crystal spheres adorning its base.\nAlso available in bronze with a black or silver patina – possibility to change lampshade colour", dimensions: "Ø 32 x H 51.5 cm - 4 kg" },
       { image: herveDaphnePendant, title: "Daphne Pendant", category: "Lighting", subcategory: "Pendants", materials: "Golden-brown patinated bronze", dimensions: "Ø 100 x H 140 cm - 57kg", edition: "Edition of 40" },
       { image: herveTourbillonPendant, title: "Tourbillon Pendant", category: "Lighting", subcategory: "Pendants", materials: "Golden-brown patinated bronze", dimensions: "Ø 40 x H 129.3 cm" },
       { image: herveFacettedPendant, title: "Facetted Pendant", category: "Lighting", subcategory: "Pendants", materials: "Golden brown patinated Bronze\nAlso available in large size, with patinated or lacquered bronze", dimensions: "Ø 40cm x H 155 cm - 15kg" },
       { image: herveTumulteMirror, title: "Tumulte Convex Mirror", category: "Decorative Objects", subcategory: "Mirrors", materials: "Constellation of lacquered, bubble-like pebbles in Prussian blue, set in a swirling vortex of bronze", dimensions: "W 127 x H 138 cm - 56kg", edition: "Edition of 3" },
-      { image: herveEmpileeConsole, title: "Empilée Console", category: "Furniture", subcategory: "Consoles", materials: "Precariously balanced wood lacquered slabs resting on bronze wedges, characteristic of the designer's research into structure", dimensions: "L 200 x l 45 x H 85 cm - 72 kg", edition: "Edition of 20" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
