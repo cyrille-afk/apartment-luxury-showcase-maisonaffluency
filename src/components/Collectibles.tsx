@@ -39,6 +39,13 @@ import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonne
 import pierreBonnefilleBronzePainting208 from "@/assets/curators-picks/pierre-bonnefille-bronze-painting-208.png";
 import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.png";
 import herveMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
+import herveArthurLamp from "@/assets/curators-picks/herve-vds-arthur-lamp.png";
+import herveBubblingLamp from "@/assets/curators-picks/herve-vds-bubbling-lamp.png";
+import herveDaphnePendant from "@/assets/curators-picks/herve-vds-daphne-pendant.png";
+import herveTourbillonPendant from "@/assets/curators-picks/herve-vds-tourbillon-pendant.png";
+import herveFacettedPendant from "@/assets/curators-picks/herve-vds-facetted-pendant.png";
+import herveTumulteMirror from "@/assets/curators-picks/herve-vds-tumulte-mirror.png";
+import herveEmpileeConsole from "@/assets/curators-picks/herve-vds-empilee-console.png";
 import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
 import emmanuelBabledPick1 from "@/assets/curators-picks/emmanuel-babled-1.jpg";
 import emmanuelBabledPick2 from "@/assets/curators-picks/emmanuel-babled-2.jpg";
@@ -159,6 +166,13 @@ export const collectibleDesigners: Array<{
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     curatorPicks: [
       { image: herveMicmac, title: "Mic Mac Chandelier", category: "Lighting", subcategory: "Chandeliers", materials: "Bronze • Patinated finish", dimensions: "Variable dimensions", edition: "Limited Edition" },
+      { image: herveArthurLamp, title: "Arthur Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Patinated bronze Vison Nuancé and Montblanc fabric lampshade", dimensions: "Ø 39 x H 51.5 cm - 8kg" },
+      { image: herveBubblingLamp, title: "Bubbling Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze with a golden brown patina, diffuses a soft light which is surreptitiously captured by the crystal spheres adorning its base.\nAlso available in bronze with a black or silver patina – possibility to change lampshade colour", dimensions: "Ø 32 x H 51.5 cm - 4 kg" },
+      { image: herveDaphnePendant, title: "Daphne Pendant", category: "Lighting", subcategory: "Pendants", materials: "Golden-brown patinated bronze", dimensions: "Ø 100 x H 140 cm - 57kg", edition: "Edition of 40" },
+      { image: herveTourbillonPendant, title: "Tourbillon Pendant", category: "Lighting", subcategory: "Pendants", materials: "Golden-brown patinated bronze", dimensions: "Ø 40 x H 129.3 cm" },
+      { image: herveFacettedPendant, title: "Facetted Pendant", category: "Lighting", subcategory: "Pendants", materials: "Golden brown patinated Bronze\nAlso available in large size, with patinated or lacquered bronze", dimensions: "Ø 40cm x H 155 cm - 15kg" },
+      { image: herveTumulteMirror, title: "Tumulte Convex Mirror", category: "Decorative Objects", subcategory: "Mirrors", materials: "Constellation of lacquered, bubble-like pebbles in Prussian blue, set in a swirling vortex of bronze", dimensions: "W 127 x H 138 cm - 56kg", edition: "Edition of 3" },
+      { image: herveEmpileeConsole, title: "Empilée Console", category: "Furniture", subcategory: "Consoles", materials: "Precariously balanced wood lacquered slabs resting on bronze wedges, characteristic of the designer's research into structure", dimensions: "L 200 x l 45 x H 85 cm - 72 kg" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
