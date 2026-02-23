@@ -119,7 +119,7 @@ const partnerBrands = [
     description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
     featured: "Corteza Console Table",
     instagram: "https://instagram.com/alexanderlamont",
-    galleryIndex: 19, // Artisan Materials in The Details Make the Design
+    galleryIndex: 23, // Artisan Materials in The Details Make the Design
   },
   {
     id: "alinea-design-objects",
