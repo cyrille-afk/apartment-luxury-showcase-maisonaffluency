@@ -1365,6 +1365,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     notableWorks: "Angelo M/R Dining Table, Angelo M Side Table Collection, Angelo W Limited Edition, Visible M Horizontal Display Cabinet, Twin Chair",
     notableWorksLinks: [
       { text: "Custom Angelo M 110 Dining Table", galleryIndex: 2 },
+      { text: "Angelo M/SR 55 Side Table", galleryIndex: 7 },
     ],
     philosophy: "Stone is the slowest material on earth. That patience is what I bring to every design.",
     curatorPicks: [
