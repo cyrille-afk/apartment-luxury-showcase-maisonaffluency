@@ -579,8 +579,11 @@ const Gallery = () => {
 
             {/* Image container */}
             <div className="flex flex-col items-center justify-center w-full md:max-w-[90vw] max-h-[85vh] px-0 md:px-16">
-              <img key={currentImageIndex} src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="w-full md:max-w-full max-h-[60vh] md:max-h-[75vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
-              {/* Dot indicators - mobile only, directly below image */}
+              <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center">
+                {allItems[currentImageIndex]?.title}
+              </h3>
+              <img key={currentImageIndex} src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="w-full md:max-w-full max-h-[55vh] md:max-h-[70vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
+              {/* Dot indicators */}
               <div className="flex justify-center gap-1.5 mt-3">
                 {allItems.map((_, i) => (
                   <button
@@ -592,9 +595,6 @@ const Gallery = () => {
                 ))}
               </div>
               <div className="mt-3 text-center">
-                <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
-                  {allItems[currentImageIndex]?.title}
-                </h3>
                 <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
                   {allItems[currentImageIndex]?.description}
                 </p>
