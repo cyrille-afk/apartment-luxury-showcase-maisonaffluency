@@ -583,7 +583,7 @@ const Collectibles = () => {
                           className="pl-9 pr-8 h-9 text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
                         />
                         <button
-                          onClick={() => { setSearchQuery(""); setSearchOpen(false); }}
+                          onClick={() => { setSearchQuery(""); setSearchOpen(false); ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                         >
                           <X className="h-3.5 w-3.5" />
