@@ -267,7 +267,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     notableWorks: "Tectra Coffee Table, Void Dining Chair, Geometer Chair, BNVO Dining Chair, Repose Sofa, OVD Server",
     notableWorksLinks: [
       { text: "Villa Pedestal Nightstand", galleryIndex: 10 },
-      { text: "Villa Pedestal Side Table", galleryIndex: 10 },
     ],
     philosophy: "Good design is fearless. It should command a room without shouting — and reward the hand that touches it.",
     curatorPicks: [
