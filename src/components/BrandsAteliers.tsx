@@ -69,6 +69,7 @@ import leBerreVevaudBg from "@/assets/designers/le-berre-vevaud-bg.png";
 import binaBaitelBg from "@/assets/designers/bina-baitel-bg.png";
 import charlesParisBg from "@/assets/designers/charles-paris-bg.png";
 import victoriaMagniantBg from "@/assets/designers/victoria-magniant-bg.png";
+import pierreYovanovitchBg from "@/assets/designers/pierre-yovanovitch-bg.png";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -828,6 +829,15 @@ const partnerBrands = [
     description: "Limited-edition furniture designer trained at Central Saint Martins, Victoria Magniant develops her practice in Paris in close collaboration with master artisans, creating pieces at the intersection of design, sculpture, and the decorative arts.",
     instagram: "https://www.instagram.com/victoriamagniant/",
   },
+  {
+    id: "pierre-yovanovitch",
+    name: "Pierre Yovanovitch",
+    category: "Seating",
+    subcategory: "Furniture",
+    origin: "France",
+    description: "French architect and designer renowned for his bold, sculptural furniture that merges modernist rigor with a warm, tactile sensibility, produced in collaboration with the finest European ateliers.",
+    instagram: "https://www.instagram.com/pierreyovanovitch/",
+  },
 ];
 
 // Background image map
@@ -895,6 +905,7 @@ const brandBgMap: Record<string, string> = {
   "Le Berre Vevaud": leBerreVevaudBg,
   "Charles Paris": charlesParisBg,
   "Victoria Magniant": victoriaMagniantBg,
+  "Pierre Yovanovitch": pierreYovanovitchBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
