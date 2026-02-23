@@ -2331,7 +2331,18 @@ const FeaturedDesigners = () => {
                           </a>
                         )}
                         <h3 className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 group-hover:text-primary">
-                          {(designer as any).displayName || designer.name}
+                          <span className="hidden md:inline">{(designer as any).displayName || designer.name}</span>
+                          <span className="md:hidden">
+                            {((designer as any).displayName || designer.name).includes(' - ') ? (
+                              <>
+                                {((designer as any).displayName || designer.name).split(' - ')[0]}
+                                <br />
+                                <span className="text-lg">{((designer as any).displayName || designer.name).split(' - ').slice(1).join(' - ')}</span>
+                              </>
+                            ) : (
+                              (designer as any).displayName || designer.name
+                            )}
+                          </span>
                         </h3>
                       </div>
                       <p className="text-sm md:text-base text-primary font-body italic transition-opacity duration-300 group-hover:opacity-80">
