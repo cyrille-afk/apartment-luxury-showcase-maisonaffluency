@@ -86,8 +86,8 @@ const CuratingTeam = () => {
                   </div>
                 </div>
               </DialogTrigger>
-              <DialogContent className="max-w-md p-0 overflow-hidden bg-background border-primary/20">
-                <div className="flex flex-col items-center p-6">
+              <DialogContent className="max-w-md p-0 overflow-hidden bg-background border-primary/20 [&>button]:absolute [&>button]:top-3 [&>button]:left-3 [&>button]:right-auto [&>button]:z-50 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:w-9 [&>button]:h-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:shadow-md [&>button]:border [&>button]:border-primary/20 [&>button]:text-foreground">
+                <div className="flex flex-col items-center p-6 pt-14">
                   {member.image ? (
                     <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden mb-6 border-2 border-primary/20">
                       <img
