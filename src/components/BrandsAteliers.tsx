@@ -10,7 +10,7 @@ import atelierDemichelisBg from "@/assets/designers/atelier-demichelis-bg.jpg";
 import emmanuelBabledBg from "@/assets/designers/emmanuel-babled-bg.jpg";
 import brunoDeMaistreBg from "@/assets/designers/bruno-de-maistre-bg.jpg";
 import celsoDeLemosBg from "@/assets/designers/celso-de-lemos-bg.jpg";
-import baleriItaliaBg from "@/assets/designers/baleri-italia-bg.jpg";
+
 import delaEspadaBg from "@/assets/designers/de-la-espada-bg.jpg";
 import damienLangloisMeurinneBg from "@/assets/designers/damien-langlois-meurinne-bg.jpg";
 import berntPetersenBg from "@/assets/designers/bernt-petersen-bg.jpg";
@@ -175,17 +175,6 @@ const partnerBrands = [
     featured: "Lantern Table Lamp",
     instagram: "https://instagram.com/apparatusstudio",
     galleryIndex: 13, // Compact Elegance in A Small Room with Massive Personality
-  },
-  {
-    id: "baleri",
-    name: "Baleri Italia",
-    category: "Storage",
-    subcategory: "Bookcases & Credenzas",
-    origin: "Italy",
-    description: "Italian furniture company known for innovative designs and collaborations with leading architects and designers since 1984.",
-    featured: "Plato Bookcase",
-    instagram: "https://instagram.com/baleriitalia",
-    galleryIndex: 8, // A Design Treasure Trove
   },
   {
     id: "bieke-casteleyn",
@@ -825,7 +814,7 @@ const brandBgMap: Record<string, string> = {
   "Babled Studio": emmanuelBabledBg,
   "Bruno de Maistre": brunoDeMaistreBg,
   "Celso de Lemos": celsoDeLemosBg,
-  "Baleri Italia": baleriItaliaBg,
+  
   "Garnier & Linker": garnierLinkerBg,
   "Haymann Editions": haymannEditionsBg,
   "Made in Kira": kiraBg,
@@ -1002,9 +991,8 @@ function AlphaStrip({
                   aria-hidden="true"
                   className="absolute inset-0 w-full h-full pointer-events-none select-none"
                   style={{
-                    objectFit: brand.name === "Baleri Italia" ? "contain" : "cover",
-                    objectPosition: brand.name === "Baleri Italia" ? "center 20%" : brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : brand.name === "Robicara" ? "center 45%" : brand.name === "Okha" ? "center 30%" : brand.name === "Sé Collections" ? "center center" : brand.name === "Andrée Putman" ? "center 60%" : "center top",
-                    padding: brand.name === "Baleri Italia" ? "10%" : "0",
+                    objectFit: "cover",
+                    objectPosition: brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : brand.name === "Robicara" ? "center 45%" : brand.name === "Okha" ? "center 30%" : brand.name === "Sé Collections" ? "center center" : brand.name === "Andrée Putman" ? "center 60%" : "center top",
                   }}
                 />
               )}
