@@ -371,7 +371,7 @@ const Gallery = () => {
                       className="hidden md:flex items-center p-1.5 rounded transition-all text-primary hover:text-primary/80"
                       aria-label={`Switch to ${gridCols === 3 ? 5 : 3} column grid`}
                     >
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-current">
+                      <svg width="28" height="28" viewBox="0 0 20 20" fill="none" className="text-current">
                         {gridCols === 3 ? (
                           <>
                             <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8" />
