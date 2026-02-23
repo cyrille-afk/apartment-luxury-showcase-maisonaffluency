@@ -43,6 +43,10 @@ const galleryExperiences = [{
     image: diningImage,
     title: "With Panoramic Cityscape Views",
     description: "Alinea Design Objects' Angelo M table, Eric Schmitt Studio's Chairie and Cazes&Conquet's Augusta dining chairs, Emanuelle Levet Stenne's Alabaster Pendant Light, Emmanuel Babled's Limited Edition Sculptured Book Cover from his emblematic Osmosi Series"
+  }, {
+    image: "/gallery/sociable-4.jpeg",
+    title: "A Sculptural Reading Corner",
+    description: "Olivia Cognet's Valauris Lamp, Thierry Lemaire's Orsay Centre Table, Iksel's Decorative Wallcover"
   }]
 }, {
   experience: "An Intimate Setting",

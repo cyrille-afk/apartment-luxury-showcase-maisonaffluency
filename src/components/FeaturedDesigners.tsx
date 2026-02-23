@@ -266,7 +266,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography: "Adam Courts is the founder and creative director of Okha, a Johannesburg-based design studio at the vanguard of contemporary collectible furniture. Drawing on the rich material culture and craft traditions of southern Africa, Courts creates pieces of sculptural authority and refined restraint. His work — spanning seating, cabinetry, tables and lighting — is distinguished by its precision joinery, architect's rigour and a deep sensitivity to texture and form. Okha is represented in landmark private collections and leading design galleries internationally.",
     notableWorks: "Tectra Coffee Table, Void Dining Chair, Geometer Chair, BNVO Dining Chair, Repose Sofa, OVD Server",
     notableWorksLinks: [
-      { text: "Villa Pedestal Nightstand", galleryIndex: 10 },
+      { text: "Villa Pedestal Nightstand", galleryIndex: 11 },
     ],
     philosophy: "Good design is fearless. It should command a room without shouting — and reward the hand that touches it.",
     curatorPicks: [
@@ -354,7 +354,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Alexander Lamont is a British designer based in Bangkok whose eponymous brand has become synonymous with exceptional craftsmanship and the innovative use of traditional materials. Working with bronze, shagreen, straw marquetry, lacquer and gold leaf, his pieces marry East and West influences with a distinct sculptural presence. Winner of multiple UNESCO Awards for Excellence in Craftsmanship, his work graces prestigious interiors worldwide.",
     notableWorks: "Hammered Bowls (UNESCO Award), Brancusi Spiral Table, River Ledge Credenza, Agata Cabinet, Lune Mirrors",
-    notableWorksLink: { text: "Corteza Console Table | Natural Distress", galleryIndex: 19 },
+    notableWorksLink: { text: "Corteza Console Table | Natural Distress", galleryIndex: 20 },
     philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
     curatorPicks: [
       { 
@@ -409,9 +409,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       "Apparatus Studio is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
     notableWorks: "Lantern Table Lamp, Metronome Reading Floor Lamp, Sculptural Lighting Series",
     notableWorksLinks: [
-      { text: "Lantern Table Lamp", galleryIndex: 12 },
+      { text: "Lantern Table Lamp", galleryIndex: 13 },
       { text: "Median 3 Surface Alabaster Lights", galleryIndex: 0 },
-      { text: "Metronome Reading Floor Lamp", galleryIndex: 7 }
+      { text: "Metronome Reading Floor Lamp", galleryIndex: 8 }
     ],
     philosophy:
       "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
@@ -553,7 +553,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Atelier Pendhapa is an Indonesian design atelier specializing in bespoke furniture that celebrates the rich tradition of Indonesian woodworking and craftsmanship. Their Deepah custom table exemplifies their philosophy of creating pieces that honor traditional techniques while embracing contemporary design sensibilities. Each piece is handcrafted by master artisans using sustainably sourced materials.",
     notableWorks: "Deepah Custom Table, Bespoke Dining Collection",
-    notableWorksLink: { text: "Deepah Custom Table", galleryIndex: 3 },
+    notableWorksLink: { text: "Deepah Custom Table", galleryIndex: 4 },
     philosophy: "We create furniture that bridges the gap between ancient Indonesian craft traditions and contemporary global design.",
     curatorPicks: [
       { 
@@ -679,7 +679,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
     ],
     notableWorksLinks: [
-      { text: "Sublime Ottoman M in Métaphores Fabric", galleryIndex: 6 },
+      { text: "Sublime Ottoman M in Métaphores Fabric", galleryIndex: 7 },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/binabaitel/" },
@@ -694,7 +694,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Bruno de Maistre is a French designer known for his poetic approach to furniture design. His Lyrical Desk demonstrates his ability to create pieces that are both functional and emotionally resonant, with flowing lines and thoughtful proportions that inspire creativity and contemplation.",
     notableWorks: "Lyric Desk, Contemporary Furniture Series",
-    notableWorksLink: { text: "Lyric Desk", galleryIndex: 6 },
+    notableWorksLink: { text: "Lyric Desk", galleryIndex: 7 },
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     curatorPicks: [],
     links: [
@@ -790,7 +790,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Founded by the Macheret family in central France, Entrelacs is an artisan foundry where bronze and alabaster—materials inherited from the origins of our world—are crafted into timeless, pared-down expressions. Yves Macheret, who has been running the foundry with his brother Paul since 2015, trained alongside his father to master all techniques of bronze work: modelling, mould-making, casting, chasing, and patination. His vision to create minimal lighting designs at accessible prices has naturally steered him towards a timeless aesthetic that fully expresses the beauty and simplicity of these noble materials.",
     notableWorks: "Bronze & Alabaster Lighting Collection, Martell Wall Lamp",
-    notableWorksLink: { text: "Martell Wall Lamp", galleryIndex: 12 },
+    notableWorksLink: { text: "Martell Wall Lamp", galleryIndex: 13 },
     philosophy: "Revealing the beauty and simplicity of bronze, making exceptional craftsmanship accessible while honoring a heritage passed down from father to son.",
     curatorPicks: [
       { 
@@ -962,7 +962,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: forestGiaconiaImg,
     biography: "Forest & Giaconia is a French design duo known for their refined approach to contemporary furniture and lighting. Their work combines natural materials — notably walnut wood — with innovative technical elements such as PMMA, resulting in pieces of sculptural clarity and tactile warmth. The IHI Floor Lamp exemplifies their ability to create objects that are simultaneously minimal and deeply considered.",
     notableWorks: "IHI Floor Lamp (walnut & PMMA), Contemporary Furniture Collection",
-    notableWorksLink: { text: "BOB Armchair - Delcourt Collection", galleryIndex: 5 },
+    notableWorksLink: { text: "BOB Armchair - Delcourt Collection", galleryIndex: 6 },
     philosophy: "We design objects that inhabit space with quiet presence — functional forms that reward close attention.",
     curatorPicks: [
       {
@@ -1034,7 +1034,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Hamrei brings a playful yet sophisticated approach to contemporary design. Their Pépé Chair showcases their signature style of combining comfort with unexpected visual delight. Each piece demonstrates a mastery of form and craftsmanship while maintaining a sense of joy and personality.",
     notableWorks: "Pépé Chair, Whimsical Furniture Collection",
-    notableWorksLink: { text: "Pépé Chair", galleryIndex: 3 },
+    notableWorksLink: { text: "Pépé Chair", galleryIndex: 4 },
     philosophy:
       "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
     curatorPicks: [
@@ -1197,7 +1197,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Born in Paris and raised in Western Africa, Jeremy Maxwell Wintrebert is a glass artist of French and North American heritage who established JMW Studio in 2015 beneath the historic Viaduc des Arts in Paris. After apprenticing with masters including Dale Chihuly in Seattle and Davide Salvadore in Venice, he developed his signature freehand glassblowing technique. Winner of the 2019 Prix Bettencourt pour l'Intelligence de la Main, his work graces the collections of the Victoria & Albert Museum, Palais de Tokyo, and MusVerre.",
     notableWorks: "Cloud Bulle Pendants, Autumn Light Pendants, Space Nugget Side Table, Sonde Chandelier, Dark Matter Installation",
-    notableWorksLink: { text: "Cloud Bulle Pendants", galleryIndex: 3 },
+    notableWorksLink: { text: "Cloud Bulle Pendants", galleryIndex: 4 },
     philosophy: "Freehand glassblowing is an emotional conversation between hands, head, heart, and material. You start with a small seed and help it grow—it is a humble process.",
     curatorPicks: [
       {
@@ -1512,7 +1512,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: kiraImg,
     biography: "Kira is primarily the expression, in a character object, of an identity and a history, that of a child of Japan in search of a fair balance. In the subtlety of a line and the intensity of a color, Roman Akira Frankel praises the shadow through a collection of lacquered lamps.\n\nFounded in 2022 in Paris, Kira oscillates between tradition and modernity, lightness and depth, design and sculpture, to create objects filled with meaning and significance. Drawing on Japan's aesthetic vocabulary, the collection invites contemplation.",
     notableWorks: "Toshiro Lamp (Maison Affluency), Hand-thrown Ceramic Collection",
-    notableWorksLink: { text: "Toshiro Lamp", galleryIndex: 6 },
+    notableWorksLink: { text: "Toshiro Lamp", galleryIndex: 7 },
     philosophy: "Each piece is a unique conversation between the hand, the clay and the fire — no two are ever alike.",
     curatorPicks: [],
     links: [
@@ -1552,8 +1552,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       "Milan Pekař is a Czech glass artist renowned for his mastery of crystalline glass techniques. His Crystalline Vase collection showcases his exceptional skill in creating pieces that capture and refract light in mesmerizing ways. Working in the tradition of Bohemian glassmaking while pushing contemporary boundaries, his work transforms functional vessels into sculptural art.",
     notableWorks: "Crystalline Vase Collection, Crystalline Volume Series, Sculptural Glass Vessels",
     notableWorksLinks: [
-      { text: "Crystalline Vase — Volume 5", galleryIndex: 14 },
-      { text: "Crystalline Vase — Volume 3", galleryIndex: 4 },
+      { text: "Crystalline Vase — Volume 5", galleryIndex: 15 },
+      { text: "Crystalline Vase — Volume 3", galleryIndex: 5 },
     ],
     
     philosophy: "Glass is frozen light—my work seeks to capture that ephemeral quality in permanent form.",
@@ -1577,7 +1577,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: nathalieZieglerImg,
     biography: "Nathalie Ziegler is a French glass artist who creates bespoke chandeliers and glass sculptures that blur the line between functional lighting and fine art. Drawing on traditional Murano and Saint-Just glassmaking techniques, she manipulates light through hand-blown glass to create dramatic, ethereal forms that transform spaces. Her chandeliers and vessels are entirely unique — each a one-of-a-kind commission conceived in close collaboration with her clients.",
     notableWorks: "Saint Just Custom Glass Chandelier (Maison Affluency), Gold Leaves+Glass Snake Vase, Sculptural Glass Lighting",
-    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 6 },
+    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 7 },
     philosophy: "Glass holds light the way memory holds experience — transforming it into something luminous and lasting.",
     curatorPicks: [
       {
@@ -1613,7 +1613,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: noeDuchaufourImg,
     biography: "Noé Duchaufour-Lawrance is a French designer based in Paris known for his organic, biomorphic approach to furniture and objects. His work explores the intersection of natural forms and industrial materials, creating pieces of rare tactile and visual poetry. He has collaborated with Saint-Louis crystal, Bernhardt Design, and leading European manufacturers. His Amber Folio Portable Lamp for Cristallerie Saint-Louis — featured at Maison Affluency — showcases his mastery of translucent materials and organic form.",
     notableWorks: "Amber Folio Portable Lamp for Saint-Louis (Maison Affluency), Refine Console, Steinway Collaboration",
-    notableWorksLink: { text: "Amber Folio Lamp for Cristallerie Saint-Louis", galleryIndex: 20 },
+    notableWorksLink: { text: "Amber Folio Lamp for Cristallerie Saint-Louis", galleryIndex: 21 },
     philosophy: "Nature has already designed everything. My role is to find those forms and translate them into objects that resonate with the human hand and eye.",
     curatorPicks: [
       {
@@ -1706,7 +1706,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: redaAmalouImg,
     biography: "Reda Amalou is a French architect and designer who founded the architectural agency AW2 over 25 years ago with the ambition of transcending the boundaries between architecture and design. A true creator of experiences, his work spans luxury hospitality architecture (Six Senses, Coucoo Cabanes) to collectible furniture editions. His DOT side table — a perfect geometric sphere in lacquered wood — has become one of the most recognized pieces in contemporary French design.",
     notableWorks: "DOT Side Table (Maison Affluency), Eggshell Collection, AW2 Hospitality Projects",
-    notableWorksLink: { text: "DOT Side Table", galleryIndex: 12 },
+    notableWorksLink: { text: "DOT Side Table", galleryIndex: 13 },
     philosophy: "Architecture and design are the same discipline — both are about creating places that stimulate the mind and mobilize the senses.",
     curatorPicks: [],
     links: [
@@ -1740,7 +1740,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: tristanAuerImg,
     biography: "Tristan Auer is a Paris-based interior architect and designer who trained at ESAG Paris before collaborating with Christian Liaigre and Philippe Starck on landmark international projects. In 2002 he founded his own agency, going on to design the lobbies of leading luxury hotels across Europe. His Veronese furniture collection — produced by the prestigious French manufacturer of the same name — distils his signature aesthetic: architectural rigour, noble materials, and a quietly bold luxury.",
     notableWorks: "Veronese Furniture Collection, Hotel Wilson — Paris, Les Ambassadeurs — Paris",
-    notableWorksLink: { text: "YSA Wall Lamp for Véronèse", galleryIndex: 17 },
+    notableWorksLink: { text: "YSA Wall Lamp for Véronèse", galleryIndex: 18 },
     philosophy: "Luxury is not about excess. It's about the perfect choice of material, proportion and light — doing more with less.",
     curatorPicks: [
       {
