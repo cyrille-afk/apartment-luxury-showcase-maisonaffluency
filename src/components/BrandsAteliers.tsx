@@ -828,7 +828,7 @@ const partnerBrands = [
     subcategory: "Limited Editions",
     origin: "France",
     description: "Limited-edition furniture designer trained at Central Saint Martins, Victoria Magniant develops her practice in Paris in close collaboration with master artisans, creating pieces at the intersection of design, sculpture, and the decorative arts.",
-    instagram: "https://www.instagram.com/victoriamagniant/",
+    instagram: "https://www.instagram.com/victoria_magniant/",
   },
   {
     id: "pierre-yovanovitch",
