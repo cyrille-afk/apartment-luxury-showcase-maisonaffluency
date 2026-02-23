@@ -366,30 +366,22 @@ const Gallery = () => {
                     {section.experience}
                   </h3>
                   {originalSectionIndex === 0 && (
-                    <div className="hidden md:flex items-center gap-1">
+                    <div className="hidden md:flex items-center gap-1.5">
                       <button
                         onClick={() => setGridCols(3)}
-                        className={`p-1.5 rounded transition-all ${gridCols === 3 ? 'text-primary' : 'text-primary/30 hover:text-primary/60'}`}
+                        className={`flex items-center gap-1 p-1.5 rounded transition-all ${gridCols === 3 ? 'text-primary' : 'text-primary/30 hover:text-primary/60'}`}
                         aria-label="3 column grid"
                       >
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect x="0.5" y="0.5" width="4.5" height="17" rx="1" fill="currentColor"/>
-                          <rect x="6.75" y="0.5" width="4.5" height="17" rx="1" fill="currentColor"/>
-                          <rect x="13" y="0.5" width="4.5" height="17" rx="1" fill="currentColor"/>
-                        </svg>
+                        <Grid3X3 className="w-4 h-4" />
+                        <span className="text-[10px] font-body">3</span>
                       </button>
                       <button
                         onClick={() => setGridCols(5)}
-                        className={`p-1.5 rounded transition-all ${gridCols === 5 ? 'text-primary' : 'text-primary/30 hover:text-primary/60'}`}
+                        className={`flex items-center gap-1 p-1.5 rounded transition-all ${gridCols === 5 ? 'text-primary' : 'text-primary/30 hover:text-primary/60'}`}
                         aria-label="5 column grid"
                       >
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect x="0" y="0.5" width="2.4" height="17" rx="0.5" fill="currentColor"/>
-                          <rect x="3.9" y="0.5" width="2.4" height="17" rx="0.5" fill="currentColor"/>
-                          <rect x="7.8" y="0.5" width="2.4" height="17" rx="0.5" fill="currentColor"/>
-                          <rect x="11.7" y="0.5" width="2.4" height="17" rx="0.5" fill="currentColor"/>
-                          <rect x="15.6" y="0.5" width="2.4" height="17" rx="0.5" fill="currentColor"/>
-                        </svg>
+                        <Grid3X3 className="w-4 h-4" />
+                        <span className="text-[10px] font-body">5</span>
                       </button>
                     </div>
                   )}
