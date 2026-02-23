@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
-import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Star } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Star, Maximize2, Minimize2 } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import alexanderLamontBg from "@/assets/designers/alexander-lamont-bg.png";
 import leoAertsBg from "@/assets/designers/leo-aerts-alinea-bg.jpg";
 import apparatusBg from "@/assets/designers/apparatus-studio-bg.jpg";
@@ -925,11 +928,13 @@ function AlphaStrip({
   brands,
   isInView,
   scrollToGallery,
+  onOpenPicks,
 }: {
   letter: string;
   brands: ConsolidatedBrand[];
   isInView: boolean;
   scrollToGallery: (idx: number, name: string) => void;
+  onOpenPicks: (brandName: string) => void;
 }) {
   const stripRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -1068,39 +1073,21 @@ function AlphaStrip({
                 </div>
                 )}
 
-                {/* Curators' Picks link */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const designerId = brandToDesignerMap[brand.name];
-                    if (designerId) {
-                      const el = document.getElementById(`designer-${designerId}`);
-                      if (el) {
-                        el.scrollIntoView({ behavior: "smooth", block: "center" });
-                        setTimeout(() => {
-                          const trigger = el.querySelector("[data-state]");
-                          if (trigger && trigger.getAttribute("data-state") === "closed") {
-                            (trigger as HTMLElement).click();
-                          }
-                        }, 600);
-                      }
-                    } else {
-                      // Scroll to the Curators' Picks section
-                      const section = document.getElementById("curators-picks");
-                      if (section) {
-                        section.scrollIntoView({ behavior: "smooth", block: "start" });
-                      }
-                    }
-                  }}
-                  className={`flex items-center gap-1.5 text-[10px] md:text-xs uppercase tracking-wider font-body mt-2 group/picks touch-manipulation transition-colors duration-300 ${hasBg ? "text-white/70 hover:text-white" : "text-muted-foreground hover:text-primary"}`}
-                >
-                  <Star className="h-3 w-3 flex-shrink-0" />
-                  <span className={`underline underline-offset-2 ${hasBg ? "decoration-white/30 group-hover/picks:decoration-white" : "decoration-primary/30 group-hover/picks:decoration-primary"}`}>
-                    Curators' Picks
-                  </span>
-                </button>
 
               </div>
+
+
+              {/* Curators' Picks — bottom left, gold */}
+              <button
+                onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
+                className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-[10px] md:text-xs uppercase tracking-wider font-body group/picks touch-manipulation transition-all duration-300"
+                style={{ color: "#C5A572" }}
+              >
+                <Star className="h-3 w-3 flex-shrink-0 fill-current" />
+                <span className="group-hover/picks:underline underline-offset-2">
+                  Curators' Picks
+                </span>
+              </button>
 
               {/* Expand/collapse indicator */}
               <div className={`absolute bottom-3 right-3 z-10 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
@@ -1159,6 +1146,25 @@ const BrandsAteliers = () => {
     setSelectedSubcategoryRaw(sub);
     broadcastFilter(selectedCategory, sub);
   }, [selectedCategory, broadcastFilter]);
+  // Curators' Picks lightbox state
+  const [picksDesignerName, setPicksDesignerName] = useState<string | null>(null);
+  const [picksIndex, setPicksIndex] = useState(0);
+  const [picksZoomed, setPicksZoomed] = useState(false);
+  const [picksTouchStart, setPicksTouchStart] = useState<number | null>(null);
+  const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
+
+  const picksDesigner = useMemo(() => {
+    if (!picksDesignerName) return null;
+    const designerId = brandToDesignerMap[picksDesignerName];
+    if (!designerId) return null;
+    return featuredDesigners.find(d => d.id === designerId) || null;
+  }, [picksDesignerName]);
+
+  const openPicks = useCallback((brandName: string) => {
+    setPicksDesignerName(brandName);
+    setPicksIndex(0);
+    setPicksZoomed(false);
+  }, []);
 
   useEffect(() => {
     const handleCategorySync = (e: CustomEvent) => {
@@ -1474,10 +1480,162 @@ const BrandsAteliers = () => {
                 brands={brands}
                 isInView={isInView}
                 scrollToGallery={scrollToGallery}
+                onOpenPicks={openPicks}
               />
             </div>
           ))}
         </div>
+
+        {/* Curators' Picks Lightbox */}
+        <Dialog
+          open={!!picksDesignerName}
+          onOpenChange={(open) => {
+            if (!open) {
+              setPicksDesignerName(null);
+              setPicksIndex(0);
+              setPicksZoomed(false);
+            }
+          }}
+        >
+          <DialogContent
+            className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none"
+            aria-describedby={undefined}
+            onKeyDown={(e) => {
+              if (!picksDesigner?.curatorPicks?.length) return;
+              if (e.key === "ArrowLeft") setPicksIndex(prev => prev === 0 ? picksDesigner.curatorPicks.length - 1 : prev - 1);
+              if (e.key === "ArrowRight") setPicksIndex(prev => prev === picksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+            }}
+          >
+            <VisuallyHidden>
+              <DialogTitle>Curators' Picks - {picksDesignerName}</DialogTitle>
+            </VisuallyHidden>
+            {picksDesigner ? (
+              picksDesigner.curatorPicks && picksDesigner.curatorPicks.length > 0 ? (
+                <div
+                  className="relative w-full h-full flex items-center justify-center"
+                  onTouchStart={(e) => { setPicksTouchEnd(null); setPicksTouchStart(e.targetTouches[0].clientX); }}
+                  onTouchMove={(e) => { setPicksTouchEnd(e.targetTouches[0].clientX); }}
+                  onTouchEnd={() => {
+                    if (!picksTouchStart || !picksDesigner.curatorPicks?.length) return;
+                    if (picksTouchEnd !== null) {
+                      const distance = picksTouchStart - picksTouchEnd;
+                      if (distance > 50) setPicksIndex(prev => prev === picksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+                      else if (distance < -50) setPicksIndex(prev => prev === 0 ? picksDesigner.curatorPicks.length - 1 : prev - 1);
+                    }
+                  }}
+                >
+                  <button
+                    onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
+                    className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors"
+                    aria-label="Close lightbox"
+                  >
+                    <X className="h-6 w-6 text-white" />
+                  </button>
+
+                  <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${picksZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
+                    <div className="relative">
+                      {!picksZoomed && ((picksDesigner.curatorPicks[picksIndex] as any)?.tags?.length > 0 || picksDesigner.curatorPicks[picksIndex]?.edition) && (
+                        <div className="text-center mb-2 flex flex-wrap gap-1.5 justify-center">
+                          {((picksDesigner.curatorPicks[picksIndex] as any)?.tags || [(picksDesigner.curatorPicks[picksIndex] as any)?.category]).map((tag: string, i: number) => (
+                            <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">{tag}</span>
+                          ))}
+                          {picksDesigner.curatorPicks[picksIndex]?.edition && (
+                            <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">{picksDesigner.curatorPicks[picksIndex].edition}</span>
+                          )}
+                        </div>
+                      )}
+                      <div className="relative inline-block">
+                        {picksDesigner.curatorPicks[picksIndex]?.image && (
+                          <img
+                            key={picksIndex}
+                            src={picksDesigner.curatorPicks[picksIndex]?.image}
+                            alt={picksDesigner.curatorPicks[picksIndex]?.title}
+                            className={`object-contain select-none transition-all duration-300 ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[55vh]'}`}
+                            draggable={false}
+                          />
+                        )}
+                        {picksDesigner.curatorPicks[picksIndex]?.photoCredit && (
+                          <p className="absolute bottom-2 left-2 z-10 text-[10px] text-white/50 font-body tracking-wider flex items-center gap-1">
+                            Photo: <a href="https://www.instagram.com/lucabonnefille/?hl=en" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-white/80 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-3 h-3" />{picksDesigner.curatorPicks[picksIndex].photoCredit}</a>
+                          </p>
+                        )}
+                        <button
+                          onClick={() => setPicksZoomed(!picksZoomed)}
+                          className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                          aria-label={picksZoomed ? "Minimize image" : "Maximize image"}
+                        >
+                          {picksZoomed ? <Minimize2 className="w-3.5 h-3.5 text-white" /> : <Maximize2 className="w-3.5 h-3.5 text-white" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {picksDesigner.curatorPicks.length > 1 && !picksZoomed && (
+                      <div className="flex items-center gap-2 mt-3">
+                        {picksDesigner.curatorPicks.map((_: CuratorPick, idx: number) => (
+                          <button key={idx} aria-label={`Go to image ${idx + 1}`} onClick={() => { setPicksIndex(idx); setPicksZoomed(false); }}
+                            className={`rounded-full transition-all duration-300 ${picksIndex === idx ? 'w-4 h-2 bg-white' : 'w-2 h-2 bg-white/30 hover:bg-white/60'}`} />
+                        ))}
+                      </div>
+                    )}
+
+                    <div className={`mt-3 text-center transition-all duration-300 ${picksZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
+                      <h3 className="text-sm md:text-base font-serif text-white mb-1">
+                        {picksDesigner.curatorPicks[picksIndex]?.title}
+                        {(picksDesigner.curatorPicks[picksIndex] as any)?.subtitle && (
+                          <span className="font-serif"> {(picksDesigner.curatorPicks[picksIndex] as any).subtitle}</span>
+                        )}
+                      </h3>
+                      {picksDesigner.curatorPicks[picksIndex]?.materials && (
+                        <p className="text-white/60 font-body text-xs md:text-sm mb-1 whitespace-pre-line">{picksDesigner.curatorPicks[picksIndex].materials}</p>
+                      )}
+                      {picksDesigner.curatorPicks[picksIndex]?.dimensions && (
+                        <div className="mt-2 max-w-xl space-y-1 mx-auto text-center">
+                          <p className="text-xs md:text-sm text-white/40 font-body italic whitespace-pre-line">{picksDesigner.curatorPicks[picksIndex].dimensions}</p>
+                          {(picksDesigner.curatorPicks[picksIndex] as any)?.description && (
+                            <p className="text-xs md:text-sm text-white/50 font-body leading-relaxed max-w-lg mt-2 mx-auto text-center">{(picksDesigner.curatorPicks[picksIndex] as any).description}</p>
+                          )}
+                        </div>
+                      )}
+
+                      {picksDesigner.curatorPicks.length > 1 && (
+                        <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
+                          {picksDesigner.curatorPicks.map((pick: CuratorPick, idx: number) => (
+                            <button key={idx} onClick={() => { setPicksIndex(idx); setPicksZoomed(false); }} aria-label={`View ${pick.title}`}
+                              className={`flex-none relative w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden transition-all duration-300 ${picksIndex === idx ? 'ring-2 ring-white scale-110 opacity-100' : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'}`}>
+                              <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      <p className="mt-6 text-xs text-white font-body italic">
+                        For further details, please contact{" "}
+                        <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/80 transition-colors">concierge@myaffluency.com</a>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center w-full h-full">
+                  <div className="text-center p-8">
+                    <Star className="h-16 w-16 text-white/30 mx-auto mb-4" />
+                    <h3 className="text-2xl font-serif text-white mb-2">Curators' Picks</h3>
+                    <p className="text-white/70 font-body mb-2">{picksDesigner.name}</p>
+                    <p className="text-sm text-white/50 font-body italic">Curated selections coming soon</p>
+                  </div>
+                </div>
+              )
+            ) : (
+              <div className="flex items-center justify-center w-full h-full">
+                <div className="text-center p-8">
+                  <Star className="h-16 w-16 text-white/30 mx-auto mb-4" />
+                  <h3 className="text-2xl font-serif text-white mb-2">Curators' Picks</h3>
+                  <p className="text-sm text-white/50 font-body italic">Coming soon</p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );
