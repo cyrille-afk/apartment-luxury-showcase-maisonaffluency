@@ -60,6 +60,7 @@ import biekeCasteleynBg from "@/assets/designers/bieke-casteleyn-bg.jpg";
 import galerieMcdeBg from "@/assets/designers/galerie-mcde-bg.png";
 import gillesBoissierBg from "@/assets/designers/gilles-boissier-bg.png";
 import jacobHashimotoBg from "@/assets/designers/jacob-hashimoto-bg.png";
+import paulCocksedgeBg from "@/assets/designers/paul-cocksedge-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -874,6 +875,7 @@ const brandBgMap: Record<string, string> = {
   "Galerie MCDE": galerieMcdeBg,
   "Gilles & Boissier": gillesBoissierBg,
   "Jacob Hashimoto Studio": jacobHashimotoBg,
+  "Paul Cocksedge Studio": paulCocksedgeBg,
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
