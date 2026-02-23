@@ -818,6 +818,15 @@ const partnerBrands = [
     description: "Parisian gallery dedicated to the re-edition and preservation of Pierre Chareau's visionary furniture and lighting designs, maintaining the legacy of one of the 20th century's most influential French designers.",
     instagram: "https://www.instagram.com/galeriemcde/",
   },
+  {
+    id: "victoria-magniant",
+    name: "Victoria Magniant",
+    category: "Tables",
+    subcategory: "Limited Editions",
+    origin: "France",
+    description: "Limited-edition furniture designer trained at Central Saint Martins, Victoria Magniant develops her practice in Paris in close collaboration with master artisans, creating pieces at the intersection of design, sculpture, and the decorative arts.",
+    instagram: "https://www.instagram.com/victoriamagniant/",
+  },
 ];
 
 // Background image map
