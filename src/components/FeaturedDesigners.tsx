@@ -1844,13 +1844,14 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       {
         image: seCollectionsDarkPendant,
-        title: "Dark Glass Pendant",
+        title: "Gae Pendant by Ini Archibong",
         subtitle: "for Sé Collections",
         category: "Lighting",
         tags: ["Lighting", "Ceiling Lights"],
         materials: "Hand-carved smoked crystal glass • Polished brass chain",
         dimensions: "",
-        description: "A dramatic teardrop pendant in hand-carved smoked crystal with organic surface patterns, suspended from a polished brass chain — a bold counterpart in the Sé Collections lighting family."
+        description: "A dramatic teardrop pendant in hand-carved smoked crystal with organic surface patterns, suspended from a polished brass chain — a bold counterpart in the Sé Collections lighting family.",
+        edition: "Edition of 5"
       },
       {
         image: seCollectionsMarbleTable,
