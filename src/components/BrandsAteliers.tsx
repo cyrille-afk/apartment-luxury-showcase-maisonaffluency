@@ -1083,7 +1083,7 @@ function AlphaStrip({
                {/* Curators' Picks — bottom left, white */}
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
-                className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-[10px] md:text-xs tracking-wider font-body group/picks touch-manipulation transition-all duration-300 text-white"
+                className="absolute bottom-10 md:bottom-3 left-3 z-10 flex items-center gap-1.5 text-[10px] md:text-xs tracking-wider font-body group/picks touch-manipulation transition-all duration-300 text-white"
               >
                 <Star className="h-3 w-3 flex-shrink-0 fill-current" />
                 <span className="group-hover/picks:underline underline-offset-2">
@@ -1092,7 +1092,7 @@ function AlphaStrip({
               </button>
 
               {/* Expand/collapse indicator */}
-              <div className={`absolute bottom-3 right-3 z-10 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
+              <div className={`absolute bottom-3 left-3 md:left-auto md:right-3 right-auto z-10 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
                 <div className={`rounded-full p-1.5 backdrop-blur-sm ${hasBg ? "bg-white/20 text-white" : "bg-foreground/10 text-foreground"}`}>
                   <ChevronDown className="h-4 w-4" />
                 </div>
