@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
+import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
-import { Search, X, Instagram, ExternalLink, SlidersHorizontal } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown } from "lucide-react";
 import alexanderLamontBg from "@/assets/designers/alexander-lamont-bg.png";
 import leoAertsBg from "@/assets/designers/leo-aerts-alinea-bg.jpg";
 import apparatusBg from "@/assets/designers/apparatus-studio-bg.jpg";
@@ -893,6 +893,7 @@ function AlphaStrip({
 }) {
   const stripRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   const handleScroll = useCallback(() => {
     const el = stripRef.current;
@@ -939,7 +940,8 @@ function AlphaStrip({
             <div
               key={brand.name}
               id={`brand-${brand.name.replace(/\s+/g, "-").toLowerCase()}`}
-              className="group flex-none w-[80vw] md:w-[340px] h-[280px] md:h-[300px] snap-start border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden p-5 md:p-6"
+              onClick={() => setExpandedCard(expandedCard === brand.name ? null : brand.name)}
+              className={`group flex-none w-[80vw] md:w-[340px] snap-start border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden p-5 md:p-6 ${expandedCard === brand.name ? "min-h-[280px] md:min-h-[300px]" : "h-[280px] md:h-[300px]"}`}
             >
               {/* Lazy-loaded background image */}
               {bg && (
@@ -996,19 +998,19 @@ function AlphaStrip({
                   </div>
                 </div>
 
-                <p className={`text-xs md:text-sm font-body leading-relaxed mb-3 line-clamp-3 transition-colors duration-300 ${hasBg ? "text-white/90" : "text-muted-foreground"}`}>
+                <p className={`text-xs md:text-sm font-body leading-relaxed mb-3 transition-colors duration-300 ${expandedCard === brand.name ? "" : "line-clamp-3"} ${hasBg ? "text-white/90" : "text-muted-foreground"}`}>
                   {brand.description}
                 </p>
 
-                {brand.featuredItems.some(item => item.featured) && (
-                <div className="space-y-1">
+                {expandedCard === brand.name && brand.featuredItems.some(item => item.featured) && (
+                <div className="space-y-1 mb-3">
                   <span className={`text-[10px] md:text-xs uppercase tracking-wider block transition-colors duration-300 ${hasBg ? "text-white/70" : "text-muted-foreground"}`}>Featured</span>
                   <ul className="space-y-0.5">
                     {brand.featuredItems.map((item, itemIndex) => (
                       <li key={itemIndex}>
                         {item.featured && item.galleryIndex !== undefined ? (
                           <button
-                            onClick={() => scrollToGallery(item.galleryIndex!, brand.name)}
+                            onClick={(e) => { e.stopPropagation(); scrollToGallery(item.galleryIndex!, brand.name); }}
                             className={`text-xs md:text-sm font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation text-left ${hasBg ? "text-white" : "text-foreground"}`}
                           >
                             <span className={`underline underline-offset-2 ${hasBg ? "decoration-white/40 group-hover/link:decoration-white" : "decoration-primary/40 group-hover/link:decoration-primary"}`}>
@@ -1026,6 +1028,11 @@ function AlphaStrip({
                   </ul>
                 </div>
                 )}
+
+                {/* Expand/collapse indicator */}
+                <div className={`absolute bottom-3 right-3 z-10 transition-transform duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
+                  <ChevronDown className={`h-4 w-4 ${hasBg ? "text-white/60" : "text-muted-foreground/50"}`} />
+                </div>
               </div>
             </div>
           );
