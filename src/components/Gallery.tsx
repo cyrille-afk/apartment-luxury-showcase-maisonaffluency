@@ -566,7 +566,7 @@ const Gallery = () => {
             </button>
 
             {/* Pill indicator - top right */}
-            <div className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none md:hidden">
+            <div className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none">
               <span className="text-white text-[10px] font-body font-medium leading-none">
                 {currentImageIndex + 1}/{allItems.length}
               </span>
@@ -581,7 +581,7 @@ const Gallery = () => {
             <div className="flex flex-col items-center justify-center w-full md:max-w-[90vw] max-h-[85vh] px-0 md:px-16">
               <img key={currentImageIndex} src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="w-full md:max-w-full max-h-[60vh] md:max-h-[75vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
               {/* Dot indicators - mobile only, directly below image */}
-              <div className="flex md:hidden justify-center gap-1.5 mt-3">
+              <div className="flex justify-center gap-1.5 mt-3">
                 {allItems.map((_, i) => (
                   <button
                     key={i}
@@ -597,10 +597,6 @@ const Gallery = () => {
                 </h3>
                 <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
                   {allItems[currentImageIndex]?.description}
-                </p>
-                {/* Counter - desktop only */}
-                <p className="hidden md:block text-xs text-white/50 mt-3 font-body">
-                  {currentImageIndex + 1} / {allItems.length}
                 </p>
               </div>
             </div>
