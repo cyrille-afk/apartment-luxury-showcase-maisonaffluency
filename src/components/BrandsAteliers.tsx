@@ -119,7 +119,7 @@ const partnerBrands = [
     description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
     featured: "Corteza Console Table",
     instagram: "https://instagram.com/alexanderlamont",
-    galleryIndex: 18, // Artisan Materials in The Details Make the Design
+    galleryIndex: 19, // Artisan Materials in The Details Make the Design
   },
   {
     id: "alinea-design-objects",
@@ -185,7 +185,7 @@ const partnerBrands = [
     description: "New York-based design studio creating refined lighting and furniture that bridges art and function through meticulous craftsmanship and material exploration.",
     featured: "Lantern Table Lamp",
     instagram: "https://instagram.com/apparatusstudio",
-    galleryIndex: 15, // Compact Elegance in A Small Room with Massive Personality
+    galleryIndex: 16, // Compact Elegance in A Small Room with Massive Personality
   },
   {
     id: "bieke-casteleyn",
@@ -256,7 +256,7 @@ const partnerBrands = [
     description: "London-based house founded in 2014, producing classic 20th century Scandinavian furniture for the modern home — celebrating the golden era of Scandinavian Modern design from 1930 to 1970.",
     featured: "Bernt Petersen 4-Drawer Executive Desk, c1960s",
     instagram: "https://www.instagram.com/dagmarlondon/",
-    galleryIndex: 17, // A Workspace of Distinction - Home Office with a View
+    galleryIndex: 18, // A Workspace of Distinction - Home Office with a View
   },
   {
     id: "de-la-espada",
@@ -309,7 +309,7 @@ const partnerBrands = [
     description: "French atelier renowned for bespoke upholstery and furniture, combining traditional savoir-faire with contemporary design to create exceptional seating pieces.",
     featured: "Kheops Bronze & Alabaster Wall Light",
     instagram: "https://www.instagram.com/entrelacs_lightings/",
-    galleryIndex: 17, // A Workspace of Distinction - Home Office with a View
+    galleryIndex: 18, // A Workspace of Distinction - Home Office with a View
   },
   {
     id: "damien-langlois-meurinne",
@@ -321,7 +321,7 @@ const partnerBrands = [
     description: "French designer creating bold, sculptural furniture and lighting that combines artistic vision with masterful craftsmanship and luxurious materials.",
     featured: "Ooh La La Console for Sé Collections",
     instagram: "https://instagram.com/damienlangloismeurinne_studio",
-    galleryIndex: 13, // Design Icons and Collectibles
+    galleryIndex: 14, // Design Icons and Collectibles
   },
   {
     id: "ecart-paris",
@@ -388,7 +388,7 @@ const partnerBrands = [
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
     featured: "Carved Marble Marie Lamp by Toni Grilo",
     instagram: "https://instagram.com/haymanneditions",
-    galleryIndex: 13, // Design Icons and Collectibles
+    galleryIndex: 14, // Design Icons and Collectibles
   },
   {
     id: "herve-van-der-straeten",
@@ -456,7 +456,7 @@ const partnerBrands = [
     description: "French glass artist renowned for his extraordinary hand-silvered mirrors and sculptural glass works, each piece a unique testament to ancient techniques reimagined.",
     featured: "Silver Glass Hammer Mirror",
     instagram: "https://instagram.com/kikolumieres",
-    galleryIndex: 13, // Design Icons and Collectibles
+    galleryIndex: 14, // Design Icons and Collectibles
   },
   {
     id: "leo-sentou",
@@ -552,7 +552,7 @@ const partnerBrands = [
     description: "French luxury brand creating sculptural marble candles and decorative objects that blend artisanal craftsmanship with contemporary design sensibility.",
     featured: "Lyra Marble Candle",
     instagram: "https://instagram.com/ooummparis",
-    galleryIndex: 13, // Design Icons and Collectibles
+    galleryIndex: 14, // Design Icons and Collectibles
   },
   {
     id: "olivia-cognet",
@@ -617,7 +617,7 @@ const partnerBrands = [
     description: "French architect and designer creating collectible furniture editions that transcend the boundaries between architecture and design, with pieces of geometric precision and sculptural elegance.",
     featured: "DOT Side Table",
     instagram: "https://instagram.com/redaamalou",
-    galleryIndex: 14,
+    galleryIndex: 15,
   },
   {
     id: "robicara",
@@ -685,7 +685,7 @@ const partnerBrands = [
     description: "Founded in 1586, Cristallerie Saint-Louis is France's oldest crystal manufacturer. A crown jewel of Hermès, the maison creates exceptional lighting and decorative objects that blend centuries of savoir-faire with contemporary design.",
     featured: "Amber Folio Portable Lamp by Noé Duchaufour Lawrance",
     instagram: "https://instagram.com/saintlouiscrystal",
-    galleryIndex: 19, // Light & Texture in The Details Make the Design
+    galleryIndex: 20, // Light & Texture in The Details Make the Design
   },
   {
     id: "kerstens",
