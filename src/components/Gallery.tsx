@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2, Instagram } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, Instagram, Grid3X3, LayoutGrid } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import bedroomImage from "@/assets/master-suite.jpg";
@@ -161,6 +161,7 @@ const Gallery = () => {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [gridCols, setGridCols] = useState<3 | 5>(3);
 
   // Listen for category changes from Navigation
   useEffect(() => {
@@ -360,9 +361,21 @@ const Gallery = () => {
             duration: 0.6,
             delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
-                <h3 className="text-xl md:text-3xl lg:text-4xl font-serif text-primary mb-2">
-                  {section.experience}
-                </h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl md:text-3xl lg:text-4xl font-serif text-primary mb-2">
+                    {section.experience}
+                  </h3>
+                  {originalSectionIndex === 0 && (
+                    <button
+                      onClick={() => setGridCols(prev => prev === 3 ? 5 : 3)}
+                      className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-primary/20 hover:border-primary/40 bg-background/80 backdrop-blur-sm transition-all text-primary/60 hover:text-primary mb-2"
+                      aria-label={`Switch to ${gridCols === 3 ? 5 : 3} column grid`}
+                    >
+                      {gridCols === 3 ? <LayoutGrid className="w-4 h-4" /> : <Grid3X3 className="w-4 h-4" />}
+                      <span className="text-xs font-body tracking-wide">{gridCols === 3 ? 5 : 3}</span>
+                    </button>
+                  )}
+                </div>
                 <p className="text-sm md:text-base text-muted-foreground font-body italic">
                   {section.subtitle}
                 </p>
@@ -434,7 +447,7 @@ const Gallery = () => {
                 ))}
               </div>
 
-              <div className="hidden md:grid md:gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <div className={`hidden md:grid md:gap-8 md:grid-cols-2 ${gridCols === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-3'} transition-all duration-300`}>
                 {section.items.map((item, index) => {
                   const itemKey = `${originalSectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
