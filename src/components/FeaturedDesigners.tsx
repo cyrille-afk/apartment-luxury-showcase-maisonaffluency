@@ -265,6 +265,10 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: adamCourtsOkhaImg,
     biography: "Adam Courts is the founder and creative director of Okha, a Johannesburg-based design studio at the vanguard of contemporary collectible furniture. Drawing on the rich material culture and craft traditions of southern Africa, Courts creates pieces of sculptural authority and refined restraint. His work — spanning seating, cabinetry, tables and lighting — is distinguished by its precision joinery, architect's rigour and a deep sensitivity to texture and form. Okha is represented in landmark private collections and leading design galleries internationally.",
     notableWorks: "Tectra Coffee Table, Void Dining Chair, Geometer Chair, BNVO Dining Chair, Repose Sofa, OVD Server",
+    notableWorksLinks: [
+      { text: "Villa Pedestal Nightstand", galleryIndex: 10 },
+      { text: "Villa Pedestal Side Table", galleryIndex: 10 },
+    ],
     philosophy: "Good design is fearless. It should command a room without shouting — and reward the hand that touches it.",
     curatorPicks: [
       {
