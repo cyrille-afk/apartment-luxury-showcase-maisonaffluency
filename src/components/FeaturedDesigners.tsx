@@ -1806,62 +1806,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { type: "Curators' Picks" },
     ],
   },
-  {
-    id: "se-collections",
-    name: "Sé Collections",
-    specialty: "Sculptural Furniture & Decorative Objects",
-    origin: "Portugal",
-    description: "Portuguese atelier producing bold sculptural furniture and lighting in collaboration with leading international designers, distinguished by extraordinary material craftsmanship in glass, marble, and metal.",
-    curatorPicks: [
-      {
-        image: seCollectionsGreenPendant,
-        title: "Gae Pendant by Ini Archibong",
-        subtitle: "",
-        category: "Lighting",
-        tags: ["Lighting", "Ceiling Lights"],
-        materials: "Hand-carved crystal glass • Polished brass chain",
-        dimensions: "",
-        description: "A teardrop pendant in hand-carved emerald crystal suspended from a polished brass pebble chain — luminous Murano-inspired craftsmanship reimagined for Sé Collections.",
-        edition: "Edition of 5"
-      },
-      {
-        image: seCollectionsGlassDisc,
-        title: "Gae Pendant by Ini Archibong - Detail",
-        subtitle: "",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Sculptural Objects"],
-        materials: "Hand-carved crystal glass",
-        dimensions: "",
-        description: "A mesmerising hand-carved crystal disc for Sé Collections, its radial facets catching and refracting light in deep emerald tones — a sculptural centrepiece of extraordinary glass craftsmanship.",
-        edition: "Edition of 5"
-      },
-      {
-        image: seCollectionsDarkPendant,
-        title: "Gae Pendant by Ini Archibong",
-        subtitle: "",
-        category: "Lighting",
-        tags: ["Lighting", "Ceiling Lights"],
-        materials: "Hand-carved smoked crystal glass • Polished brass chain",
-        dimensions: "",
-        description: "A dramatic teardrop pendant in hand-carved smoked crystal with organic surface patterns, suspended from a polished brass chain — a bold counterpart in the Sé Collections lighting family.",
-        edition: "Edition of 5"
-      },
-      {
-        image: seCollectionsMarbleTable,
-        title: "Valley of Contentment Low Table by Ini Archibong",
-        subtitle: "",
-        category: "Tables",
-        tags: ["Tables", "Low Tables"],
-        materials: "Verde Lapponia Marble",
-        dimensions: "W 154 × D 75 × H 40 cm",
-        description: "A monumental low table in hand-sculpted Verde Lapponia marble for Sé Collections, its raw, textured surface and organic legs evoking geological formations — a statement of primal material beauty.",
-        edition: "Edition of 8"
-      },
-    ],
-    links: [
-      { type: "Curators' Picks" },
-    ],
-  },
 ];
 
 const FeaturedDesigners = () => {
