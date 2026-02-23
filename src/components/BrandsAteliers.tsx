@@ -1069,15 +1069,14 @@ function AlphaStrip({
                 )}
 
                 {/* Curators' Picks link */}
-                {brandToDesignerMap[brand.name] && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const designerId = brandToDesignerMap[brand.name];
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const designerId = brandToDesignerMap[brand.name];
+                    if (designerId) {
                       const el = document.getElementById(`designer-${designerId}`);
                       if (el) {
                         el.scrollIntoView({ behavior: "smooth", block: "center" });
-                        // Trigger accordion open via click
                         setTimeout(() => {
                           const trigger = el.querySelector("[data-state]");
                           if (trigger && trigger.getAttribute("data-state") === "closed") {
@@ -1085,15 +1084,21 @@ function AlphaStrip({
                           }
                         }, 600);
                       }
-                    }}
-                    className={`flex items-center gap-1.5 text-[10px] md:text-xs uppercase tracking-wider font-body mt-2 group/picks touch-manipulation transition-colors duration-300 ${hasBg ? "text-white/70 hover:text-white" : "text-muted-foreground hover:text-primary"}`}
-                  >
-                    <Star className="h-3 w-3 flex-shrink-0" />
-                    <span className={`underline underline-offset-2 ${hasBg ? "decoration-white/30 group-hover/picks:decoration-white" : "decoration-primary/30 group-hover/picks:decoration-primary"}`}>
-                      Curators' Picks
-                    </span>
-                  </button>
-                )}
+                    } else {
+                      // Scroll to the Curators' Picks section
+                      const section = document.getElementById("curators-picks");
+                      if (section) {
+                        section.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }
+                  }}
+                  className={`flex items-center gap-1.5 text-[10px] md:text-xs uppercase tracking-wider font-body mt-2 group/picks touch-manipulation transition-colors duration-300 ${hasBg ? "text-white/70 hover:text-white" : "text-muted-foreground hover:text-primary"}`}
+                >
+                  <Star className="h-3 w-3 flex-shrink-0" />
+                  <span className={`underline underline-offset-2 ${hasBg ? "decoration-white/30 group-hover/picks:decoration-white" : "decoration-primary/30 group-hover/picks:decoration-primary"}`}>
+                    Curators' Picks
+                  </span>
+                </button>
 
               </div>
 
