@@ -1595,7 +1595,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "noe-duchaufour-lawrance",
-    name: "Noé Duchaufour Lawrance",
+    name: "Noé Duchaufour Lawrance - NDL Editions",
     specialty: "Organic Furniture & Crystal Design",
     image: noeDuchaufourImg,
     biography: "Noé Duchaufour-Lawrance is a French designer based in Paris known for his organic, biomorphic approach to furniture and objects. His work explores the intersection of natural forms and industrial materials, creating pieces of rare tactile and visual poetry. He has collaborated with Saint-Louis crystal, Bernhardt Design, and leading European manufacturers. His Amber Folio Portable Lamp for Cristallerie Saint-Louis — featured at Maison Affluency — showcases his mastery of translucent materials and organic form.",
