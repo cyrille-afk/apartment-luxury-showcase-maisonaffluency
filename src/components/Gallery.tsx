@@ -169,7 +169,7 @@ const Gallery = () => {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [gridCols, setGridCols] = useState<3 | 5>(3);
+  const [gridCols, setGridCols] = useState<3 | 4>(3);
 
   // Listen for category changes from Navigation
   useEffect(() => {
@@ -375,9 +375,9 @@ const Gallery = () => {
                   </h3>
                   {originalSectionIndex === 0 && (
                     <button
-                      onClick={() => setGridCols(gridCols === 3 ? 5 : 3)}
+                      onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
                       className="hidden md:flex items-center p-1.5 rounded transition-all text-primary hover:text-primary/80"
-                      aria-label={`Switch to ${gridCols === 3 ? 5 : 3} column grid`}
+                      aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
                     >
                       <svg width="28" height="28" viewBox="0 0 20 20" fill="none" className="text-current">
                         {gridCols === 3 ? (
@@ -394,21 +394,18 @@ const Gallery = () => {
                           </>
                         ) : (
                           <>
-                            <rect x="0.5" y="0.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.8" />
-                            <rect x="4.5" y="0.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.8" />
-                            <rect x="8.5" y="0.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.8" />
-                            <rect x="12.5" y="0.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.8" />
-                            <rect x="16.5" y="0.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.8" />
-                            <rect x="0.5" y="4.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
-                            <rect x="4.5" y="4.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
-                            <rect x="8.5" y="4.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
-                            <rect x="12.5" y="4.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
-                            <rect x="16.5" y="4.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
-                            <rect x="0.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.2" />
-                            <rect x="4.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.2" />
-                            <rect x="8.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.2" />
-                            <rect x="12.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.2" />
-                            <rect x="16.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.2" />
+                            <rect x="0.5" y="0.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.8" />
+                            <rect x="5.5" y="0.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.8" />
+                            <rect x="10.5" y="0.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.8" />
+                            <rect x="15.5" y="0.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.8" />
+                            <rect x="0.5" y="5.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.4" />
+                            <rect x="5.5" y="5.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.4" />
+                            <rect x="10.5" y="5.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.4" />
+                            <rect x="15.5" y="5.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.4" />
+                            <rect x="0.5" y="10.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.2" />
+                            <rect x="5.5" y="10.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.2" />
+                            <rect x="10.5" y="10.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.2" />
+                            <rect x="15.5" y="10.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.2" />
                           </>
                         )}
                       </svg>
@@ -476,8 +473,8 @@ const Gallery = () => {
                 ))}
               </div>
 
-              <div className={`hidden md:grid md:gap-8 md:grid-cols-2 ${gridCols === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-3'} transition-all duration-300`}>
-                {section.items.map((item, index) => {
+              <div className={`hidden md:grid md:gap-8 md:grid-cols-2 ${gridCols === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} transition-all duration-300`}>
+                {(gridCols === 3 ? section.items.slice(0, 3) : section.items).map((item, index) => {
                   const itemKey = `${originalSectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
 
