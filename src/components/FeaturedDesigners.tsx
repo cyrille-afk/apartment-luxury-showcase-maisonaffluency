@@ -1356,6 +1356,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: leoAertsAlineaImg,
     biography: "Léo Aerts is a Belgian designer and the founder of Alinea Design Objects, a studio renowned for its mastery of natural stone and its ability to transform one of the earth's oldest materials into contemporary design objects of exceptional refinement. Each piece is conceived as a sculptural statement: monolithic yet precise, elemental yet deeply considered. Working closely with Belgian and Italian quarries, Aerts selects his stones for their geological character, ensuring that every table, shelf and object carries the unique signature of its material. His Angelo series has earned international recognition for its fusion of natural stone with solid American walnut.",
     notableWorks: "Angelo M/R Dining Table, Angelo M Side Table Collection, Angelo W Limited Edition, Visible M Horizontal Display Cabinet, Twin Chair",
+    notableWorksLinks: [
+      { text: "Custom Angelo M 110 Dining Table", galleryIndex: 2 },
+    ],
     philosophy: "Stone is the slowest material on earth. That patience is what I bring to every design.",
     curatorPicks: [
       {
