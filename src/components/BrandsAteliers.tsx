@@ -885,7 +885,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Babled Studio": "emmanuel-babled",
   "Bruno de Maistre": "bruno-de-maistre",
   "Ecart Paris": "jean-michel-frank",
-  "Eric Schmitt Studio": "eric-schmitt",
+  "Eric Schmitt Studio": "eric-schmitt-studio",
   "Garnier & Linker": "garnier-linker",
   "Hamrei": "hamrei",
   "Hervé van der Straeten": "herve-van-der-straeten",
