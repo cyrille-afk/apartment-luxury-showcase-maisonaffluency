@@ -900,7 +900,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Pierre Bonnefille": "pierre-bonnefille",
   "Robicara": "robicara",
   "Thierry Lemaire": "thierry-lemaire",
-  "Théorème Editions": "garnier-linker",
+  "Théorème Editions": "theoreme-editions",
   "Cristallerie Saint-Louis": "noe-duchaufour-lawrance",
   "Delcourt Collection": "forest-giaconia",
   "Entrelacs Création": "entrelacs-creation",
