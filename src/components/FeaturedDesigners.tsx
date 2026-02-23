@@ -246,12 +246,6 @@ import marcantonioVessel from "@/assets/curators-picks/marcantonio-cotissi-vesse
 import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode.jpg";
 import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
 import rowinNoneIILamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
-import delaEspadaElliotChair from "@/assets/curators-picks/de-la-espada-1.png";
-import delaEspadaVegaBChair from "@/assets/curators-picks/de-la-espada-2.png";
-import delaEspadaAzoresSofa from "@/assets/curators-picks/de-la-espada-3.png";
-import delaEspadaOrionTable from "@/assets/curators-picks/de-la-espada-4.png";
-import delaEspadaElliottTable from "@/assets/curators-picks/de-la-espada-5.png";
-import delaEspadaTaiDanConsole from "@/assets/curators-picks/de-la-espada-6.png";
 
 type DesignerLink = { type: string; url?: string };
 export type CuratorPick = { image: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string };
@@ -1807,72 +1801,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/tristanauer/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "de-la-espada",
-    name: "De La Espada",
-    specialty: "Contemporary Furniture",
-    image: delaEspadaElliotChair,
-    biography:
-      "De La Espada is an Anglo-Portuguese furniture studio creating refined contemporary pieces rooted in the craft traditions of Portugal, combining natural materials with precise joinery and enduring form.",
-    notableWorks: "Elliot Chair, Vega B Chair, Azores Sofa, Orion Table, Elliott Table, Tai Dan Console",
-    philosophy: "We believe in furniture that is honestly made, using time-honoured techniques and the finest natural materials.",
-    curatorPicks: [
-      {
-        image: delaEspadaElliotChair,
-        title: "Elliot Dining Chair",
-        category: "Seating",
-        tags: ["Seating", "Dining Chairs"],
-        materials: "Solid wood frame, upholstered seat",
-        dimensions: "Bespoke Dimensions and Colours upon request",
-      },
-      {
-        image: delaEspadaVegaBChair,
-        title: "Vega B Chair",
-        subtitle: "by Anthony Guerrée",
-        category: "Seating",
-        tags: ["Seating", "Chairs"],
-        materials: "Solid wood frame, upholstered seat and back",
-        dimensions: "Bespoke Dimensions and Colours upon request",
-      },
-      {
-        image: delaEspadaAzoresSofa,
-        title: "Azores Sofa",
-        subtitle: "by Luca Nichetto",
-        category: "Seating",
-        tags: ["Seating", "Sofas"],
-        materials: "Solid wood frame, upholstered cushions",
-        dimensions: "Bespoke Dimensions and Colours upon request",
-      },
-      {
-        image: delaEspadaOrionTable,
-        title: "Orion Dining Table",
-        category: "Tables",
-        tags: ["Tables", "Dining Tables"],
-        materials: "Solid wood",
-        dimensions: "Bespoke Dimensions and Colours upon request",
-      },
-      {
-        image: delaEspadaElliottTable,
-        title: "Elliott Rectangular Dining Table",
-        category: "Tables",
-        tags: ["Tables", "Dining Tables"],
-        materials: "Solid wood",
-        dimensions: "Bespoke Dimensions and Colours upon request",
-      },
-      {
-        image: delaEspadaTaiDanConsole,
-        title: "Tai Dan 2 Console Cabinet",
-        category: "Storage",
-        tags: ["Storage", "Console"],
-        materials: "Solid wood, integrated storage",
-        dimensions: "Bespoke Dimensions and Colours upon request",
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/delaespada/" },
       { type: "Curators' Picks" },
     ],
   },
