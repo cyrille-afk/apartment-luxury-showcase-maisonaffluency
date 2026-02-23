@@ -1285,32 +1285,15 @@ const BrandsAteliers = () => {
   // Fixed category order matching the artisans section
   const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
 
-  // Build category → subcategory map from brand data
-  const categoryMap = useMemo(() => {
-    const map: Record<string, Set<string>> = {};
-    
-    partnerBrands.forEach(brand => {
-      const primaryCat = brand.category;
-      if (!map[primaryCat]) map[primaryCat] = new Set();
-      const subcat = (brand as any).subcategory || (brand as any).seatType || (brand as any).tableType;
-      if (subcat && subcat !== primaryCat) {
-        map[primaryCat].add(subcat);
-      }
-    });
-    
-    const result: Record<string, string[]> = {};
-    CATEGORY_ORDER.forEach(cat => {
-      if (map[cat]) {
-        result[cat] = Array.from(map[cat]).sort();
-      }
-    });
-    Object.keys(map).forEach(cat => {
-      if (!result[cat]) {
-        result[cat] = Array.from(map[cat]).sort();
-      }
-    });
-    return result;
-  }, []);
+  // Use the same fixed subcategory names as the All Categories navigation
+  const categoryMap = useMemo<Record<string, string[]>>(() => ({
+    "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
+    "Tables": ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables"],
+    "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
+    "Storage": ["Bookcases", "Cabinets"],
+    "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
+    "Décor": ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
+  }), []);
 
   const categories = useMemo(() => {
     const ordered = CATEGORY_ORDER.filter(cat => categoryMap[cat]);
