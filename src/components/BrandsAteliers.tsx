@@ -1080,10 +1080,10 @@ function AlphaStrip({
               </div>
 
 
-               {/* Curators' Picks — bottom left, white */}
+               {/* Curators' Picks — bottom center */}
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
-                className="absolute bottom-10 md:bottom-3 left-3 z-10 flex items-center gap-1.5 text-[10px] md:text-xs tracking-wider font-body group/picks touch-manipulation transition-all duration-300 text-white"
+                className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 text-[10px] md:text-xs tracking-wider font-body group/picks touch-manipulation transition-all duration-300 text-white whitespace-nowrap"
               >
                 <Star className="h-3 w-3 flex-shrink-0 fill-current" />
                 <span className="group-hover/picks:underline underline-offset-2">
