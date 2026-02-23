@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2, Instagram } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, Instagram, Copy } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import bedroomImage from "@/assets/master-suite.jpg";
@@ -439,60 +439,30 @@ const Gallery = () => {
                 </p>
               </motion.div>
 
-              {/* Mobile: horizontal scroll strip */}
-              <div
-                ref={el => { scrollStripRefs.current[originalSectionIndex] = el; }}
-                onScroll={() => handleStripScroll(originalSectionIndex)}
-                className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 md:hidden scrollbar-hide -mx-4 px-4"
-              >
-                {section.items.map((item, index) => {
-                  const itemKey = `${originalSectionIndex}-${index}`;
-                  return (
-                    <motion.div
-                      key={`${item.title}-${index}-mobile`}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={isInView ? { opacity: 1, x: 0 } : {}}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      className="relative flex-none w-[72vw] snap-start overflow-hidden rounded-sm aspect-[3/4] cursor-pointer"
-                      onClick={() => openLightbox(originalSectionIndex, index)}
-                    >
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05]"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                      {/* Eye icon — pulsing to signal tap-to-expand */}
-                      <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm p-1.5 rounded-full animate-pulse-fade">
-                        <Maximize2 className="w-3.5 h-3.5 text-white" />
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-
-
-              {/* Dot indicators — mobile only */}
-              <div className="flex justify-center gap-2 mt-2 md:hidden">
-                {section.items.map((_, dotIndex) => (
-                  <button
-                    key={dotIndex}
-                    aria-label={`Go to photo ${dotIndex + 1}`}
-                    onClick={() => {
-                      const strip = scrollStripRefs.current[originalSectionIndex];
-                      if (!strip) return;
-                      const cardWidth = strip.scrollWidth / section.items.length;
-                      strip.scrollTo({ left: cardWidth * dotIndex, behavior: 'smooth' });
-                    }}
-                    className={`rounded-full transition-all duration-300 ${
-                      activeScrollIndices[originalSectionIndex] === dotIndex
-                        ? 'w-4 h-2 bg-primary'
-                        : 'w-2 h-2 bg-primary/30'
-                    }`}
+              {/* Mobile: single cover image with carousel icon */}
+              <div className="md:hidden">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5 }}
+                  className="relative overflow-hidden rounded-sm aspect-[3/4] cursor-pointer"
+                  onClick={() => openLightbox(originalSectionIndex, 0)}
+                >
+                  <img
+                    src={section.items[0].image}
+                    alt={section.items[0].title}
+                    className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05]"
+                    loading="lazy"
+                    decoding="async"
                   />
-                ))}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                  {/* Multi-photo carousel icon — upper right like Instagram */}
+                  {section.items.length > 1 && (
+                    <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm p-1.5 rounded-full">
+                      <Copy className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                </motion.div>
               </div>
 
               <div className={`hidden md:grid md:gap-8 md:grid-cols-2 ${gridCols === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} transition-all duration-300`}>
