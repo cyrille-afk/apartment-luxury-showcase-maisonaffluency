@@ -1045,12 +1045,12 @@ function AlphaStrip({
                   </div>
                 </div>
 
-                <p className={`text-xs md:text-sm font-body leading-relaxed mb-3 transition-colors duration-300 ${expandedCard === brand.name ? "" : "line-clamp-3"} ${hasBg ? "text-white/90" : "text-muted-foreground"}`}>
+                <p className={`text-xs md:text-sm font-body leading-relaxed mb-3 transition-colors duration-300 pl-8 md:pl-0 ${expandedCard === brand.name ? "" : "line-clamp-3"} ${hasBg ? "text-white/90" : "text-muted-foreground"}`}>
                   {brand.description}
                 </p>
 
                 {brand.featuredItems.some(item => item.featured) && (
-                <div className="space-y-1 mb-3">
+                <div className="space-y-1 mb-3 pl-8 md:pl-0">
                   <span className={`text-[10px] md:text-xs uppercase tracking-wider block transition-colors duration-300 ${hasBg ? "text-white/70" : "text-muted-foreground"}`}>Gallery Featured</span>
                   <ul className="space-y-0.5">
                     {brand.featuredItems.map((item, itemIndex) => (
