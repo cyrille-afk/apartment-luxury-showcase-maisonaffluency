@@ -529,7 +529,7 @@ const partnerBrands = [
     description: "South African design studio creating sophisticated furniture that bridges African craft traditions with contemporary global aesthetics.",
     featured: "Adam Court's Villa Pedestal Nightstand",
     instagram: "https://instagram.com/__okha",
-    galleryIndex: 12, // Unique by Design
+    galleryIndex: 15, // Unique by Design
   },
   {
     id: "okha-side-table",
@@ -541,7 +541,7 @@ const partnerBrands = [
     description: "South African design studio creating sophisticated furniture that bridges African craft traditions with contemporary global aesthetics.",
     featured: "Villa Pedestal Side Table",
     instagram: "https://instagram.com/__okha",
-    galleryIndex: 12, // Unique by Design - picture 2 of A Calming and Dreamy Environment
+    galleryIndex: 15, // Unique by Design - picture 4 of A Calming and Dreamy Environment
   },
   {
     id: "ooumm",
