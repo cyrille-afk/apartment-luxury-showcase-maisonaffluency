@@ -1155,13 +1155,18 @@ const BrandsAteliers = () => {
   const [picksTouchStart, setPicksTouchStart] = useState<number | null>(null);
   const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
 
+  // Brands that should use FeaturedDesigners data instead of Collectibles
+  const preferFeatured = new Set(["Pierre Bonnefille"]);
+
   const picksDesigner = useMemo(() => {
     if (!picksDesignerName) return null;
     const designerId = brandToDesignerMap[picksDesignerName];
     if (!designerId) return null;
-    // Prioritize collectible designers (limited editions) over featured designers
-    const collectibleMatch = collectibleDesigners.find(d => d.id === designerId || d.name === picksDesignerName);
-    if (collectibleMatch) return collectibleMatch as any;
+    // Check collectible designers first, unless brand prefers featured
+    if (!preferFeatured.has(picksDesignerName)) {
+      const collectibleMatch = collectibleDesigners.find(d => d.id === designerId || d.name === picksDesignerName);
+      if (collectibleMatch) return collectibleMatch as any;
+    }
     return featuredDesigners.find(d => d.id === designerId) || null;
   }, [picksDesignerName]);
 
