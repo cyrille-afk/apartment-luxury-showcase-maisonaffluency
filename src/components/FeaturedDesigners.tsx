@@ -57,6 +57,9 @@ import leoAertsOutdoorChair from "@/assets/curators-picks/leo-aerts-outdoor-chai
 import leoAertsTwinChairOutdoor from "@/assets/curators-picks/leo-aerts-twin-chair-outdoor.jpg";
 import leoAertsAngeloMMacassar from "@/assets/curators-picks/leo-aerts-angelo-m-macassar.jpg";
 import forestGiaconiaIhiLamp from "@/assets/curators-picks/forest-giaconia-ihi-floor-lamp.jpg";
+import forestGiaconiaConsole from "@/assets/forrest-giaconia-console.png";
+import forestGiaconiaTable from "@/assets/forrest-giaconia-table.png";
+import forestGiaconiaCoffee from "@/assets/forrest-giaconia-coffee.png";
 import forestGiaconiaImg from "@/assets/designers/forest-giaconia.jpg";
 import adamCourtsOkhaImg from "@/assets/designers/adam-courts-okha.jpg";
 import adamCourtsVoidTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
@@ -953,14 +956,37 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     philosophy: "We design objects that inhabit space with quiet presence — functional forms that reward close attention.",
     curatorPicks: [
       {
-        image: forestGiaconiaIhiLamp,
-        title: "IHI - Delcourt Collection",
-        subtitle: "Floor Lamp",
-        category: "Lighting",
-        tags: ["Lighting", "Floor Lamp"],
-        materials: "Walnut wood • PMMA",
-        dimensions: "40 × 40 × H187 cm",
-        description: "The IHI Floor Lamp by Forest & Giaconia pairs the natural warmth of solid walnut with a PMMA diffuser to create a striking yet understated floor lamp. Its precise geometry and material contrast make it a standout piece in any interior."
+        image: forestGiaconiaConsole,
+        title: "Marble Console.01",
+        subtitle: "for Archimobilier",
+        category: "Consoles",
+        tags: ["Consoles", "Marble"],
+        materials: "Other finish on request",
+        dimensions: "L 140 × 75 cm",
+        edition: "Edition of 10",
+        description: "The Marble Console.01 by Forest & Giaconia for Archimobilier is a sculptural statement piece featuring bold geometric forms in polished marble."
+      },
+      {
+        image: forestGiaconiaTable,
+        title: "Table.03",
+        subtitle: "for Archimobilier",
+        category: "Tables",
+        tags: ["Tables", "Dining Tables"],
+        materials: "Carrara Marble",
+        dimensions: "L 260 × 75 cm",
+        edition: "Edition of 6+2 AP",
+        description: "Table.03 by Forest & Giaconia for Archimobilier is an impressive dining table carved from Carrara Marble with a sculptural pedestal base."
+      },
+      {
+        image: forestGiaconiaCoffee,
+        title: "Coffee.03",
+        subtitle: "for Archimobilier",
+        category: "Tables",
+        tags: ["Tables", "Coffee Tables"],
+        materials: "Wood & Lacquer",
+        dimensions: "L 110 × 42 cm",
+        edition: "Edition of 10",
+        description: "Coffee.03 by Forest & Giaconia for Archimobilier is a geometric coffee table combining wood and lacquer in a modular, grid-inspired design."
       },
     ],
     links: [
