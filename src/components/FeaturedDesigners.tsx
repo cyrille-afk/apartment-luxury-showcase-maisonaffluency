@@ -879,6 +879,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   {
     id: "robicara",
     name: "Francesco Caracciolo di Marano - Robicara",
+    mobileNameLines: ["Francesco Caracciolo", "di Marano - Robicara"],
     specialty: "Italian-crafted Luxury Furniture",
     image: robicaraImg,
     biography: "Robicara was founded by Sam Robin, an interior architect, and Francesco Caracciolo, an Italian furniture designer — a transatlantic creative partnership uniting her flair for bespoke residential interiors with his deep expertise in Italian luxury furniture manufacturing. The brand combines the finest Italian craftsmanship with a modern aesthetic sensibility, producing pieces that express sophisticated restraint through exceptional materials and precision construction.",
@@ -2333,7 +2334,13 @@ const FeaturedDesigners = () => {
                         <h3 className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 group-hover:text-primary">
                           <span className="hidden md:inline">{(designer as any).displayName || designer.name}</span>
                           <span className="md:hidden">
-                            {((designer as any).displayName || designer.name).includes(' - ') ? (
+                            {(designer as any).mobileNameLines ? (
+                              <>
+                                {(designer as any).mobileNameLines[0]}
+                                <br />
+                                <span className="text-lg">{(designer as any).mobileNameLines[1]}</span>
+                              </>
+                            ) : ((designer as any).displayName || designer.name).includes(' - ') ? (
                               <>
                                 {((designer as any).displayName || designer.name).split(' - ')[0]}
                                 <br />
