@@ -1037,11 +1037,12 @@ function AlphaStrip({
                 </div>
                 )}
 
-                {/* Expand/collapse indicator */}
-                <div className={`absolute -bottom-1 right-3 z-10 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
-                  <div className={`rounded-full p-1.5 backdrop-blur-sm ${hasBg ? "bg-white/20 text-white" : "bg-foreground/10 text-foreground"}`}>
-                    <ChevronDown className="h-4 w-4" />
-                  </div>
+              </div>
+
+              {/* Expand/collapse indicator */}
+              <div className={`absolute bottom-3 right-3 z-10 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
+                <div className={`rounded-full p-1.5 backdrop-blur-sm ${hasBg ? "bg-white/20 text-white" : "bg-foreground/10 text-foreground"}`}>
+                  <ChevronDown className="h-4 w-4" />
                 </div>
               </div>
             </div>
