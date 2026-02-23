@@ -463,12 +463,16 @@ const Gallery = () => {
                     </div>
                   ))}
                 </div>
-                {/* Instagram-style counter — top right */}
+                {/* Instagram-style indicator — top right: icon on first photo, counter on others */}
                 {section.items.length > 1 && (
-                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full pointer-events-none">
-                    <span className="text-white text-xs font-body font-medium">
-                      {(activeScrollIndices[originalSectionIndex] || 0) + 1}/{section.items.length}
-                    </span>
+                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2.5 py-1.5 rounded-full pointer-events-none">
+                    {(activeScrollIndices[originalSectionIndex] || 0) === 0 ? (
+                      <Copy className="w-4 h-4 text-white" />
+                    ) : (
+                      <span className="text-white text-xs font-body font-medium">
+                        {(activeScrollIndices[originalSectionIndex] || 0) + 1}/{section.items.length}
+                      </span>
+                    )}
                   </div>
                 )}
                 {/* Dot indicators */}
