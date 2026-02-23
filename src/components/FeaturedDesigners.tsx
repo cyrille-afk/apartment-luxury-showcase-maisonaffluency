@@ -1823,7 +1823,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       {
         image: seCollectionsGreenPendant,
         title: "Gae Pendant by Ini Archibong",
-        subtitle: "for Sé Collections",
+        subtitle: "",
         category: "Lighting",
         tags: ["Lighting", "Ceiling Lights"],
         materials: "Hand-carved crystal glass • Polished brass chain",
@@ -1834,7 +1834,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       {
         image: seCollectionsGlassDisc,
         title: "Gae Pendant by Ini Archibong - Detail",
-        subtitle: "for Sé Collections",
+        subtitle: "",
         category: "Decorative Object",
         tags: ["Decorative Object", "Sculptural Objects"],
         materials: "Hand-carved crystal glass",
