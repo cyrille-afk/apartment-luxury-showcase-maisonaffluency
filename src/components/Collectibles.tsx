@@ -165,7 +165,6 @@ export const collectibleDesigners: Array<{
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     curatorPicks: [
-      { image: herveMicmac, title: "Mic Mac Chandelier", category: "Lighting", subcategory: "Chandeliers", materials: "Bronze • Patinated finish", dimensions: "Variable dimensions", edition: "Limited Edition" },
       { image: herveArthurLamp, title: "Arthur Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Patinated bronze Vison Nuancé and Montblanc fabric lampshade", dimensions: "Ø 39 x H 51.5 cm - 8kg" },
       { image: herveBubblingLamp, title: "Bubbling Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze with a golden brown patina, diffuses a soft light which is surreptitiously captured by the crystal spheres adorning its base.\nAlso available in bronze with a black or silver patina – possibility to change lampshade colour", dimensions: "Ø 32 x H 51.5 cm - 4 kg" },
       { image: herveDaphnePendant, title: "Daphne Pendant", category: "Lighting", subcategory: "Pendants", materials: "Golden-brown patinated bronze", dimensions: "Ø 100 x H 140 cm - 57kg", edition: "Edition of 40" },
