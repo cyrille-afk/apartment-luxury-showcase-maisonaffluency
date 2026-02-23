@@ -185,7 +185,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Kiko Lopez is a French master mirror artisan renowned for creating extraordinary reflective surfaces that blur the line between functional object and sculptural art. Using traditional techniques combined with innovative approaches to glass and metal, his mirrors transform spaces with their unique textural qualities and light-capturing properties. His Silver Glass Hammer Mirror and Shadow Drawings Mirror exemplify his distinctive style of treating mirrors as artistic statements.",
     notableWorks: "Silver Glass Hammer Mirror, Shadow Drawings Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
-    notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 13 },
+    notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 14 },
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
     curatorPicks: [
       { image: kikoLopezMirror, title: "Shadow Drawings Mirror", category: "Decorative Object", subcategory: "Mirrors", materials: "Antiqued glass • Bronze patina frame", dimensions: "H100 × W70 cm", edition: "Unique Piece" },
@@ -203,7 +203,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Maarten Vrolijk is a Dutch designer known for his sculptural approach to furniture design. His work explores the intersection of art and functionality, creating pieces that challenge conventional forms while remaining inherently practical. Each creation reflects his deep understanding of materials and his commitment to pushing the boundaries of contemporary design.",
     notableWorks: "Sakura TRP 22001, Sculptural Glass Vessels, Unique Art Pieces",
-    notableWorksLink: { text: "Sakura TRP 22001", galleryIndex: 17 },
+    notableWorksLink: { text: "Sakura TRP 22001", galleryIndex: 18 },
     philosophy: "Furniture should be a conversation between form and function—each piece tells a story of material and intention.",
     curatorPicks: [
       { image: maartenVrolijkVessel, title: "Sakura TRP 22001", category: "Decorative Object", subcategory: "Vessels", materials: "Handblown & sculpted glass, unique piece with certificate", dimensions: "H 52 cm × W 40 cm × D 41 cm", edition: "Unique Piece" },
@@ -221,7 +221,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Marcantonio Brandolini D'Adda is an Italian glass artist whose work represents the finest traditions of Murano glassmaking combined with contemporary artistic vision. His vessels are celebrated for their organic forms and exceptional craftsmanship.",
     notableWorks: "Cotissi Vessel, Murano Glass Sculptures",
-    notableWorksLink: { text: "Cotissi Vessel", galleryIndex: 17 },
+    notableWorksLink: { text: "Cotissi Vessel", galleryIndex: 18 },
     philosophy: "Glass is a living material that captures light and transforms space into poetry.",
     curatorPicks: [
       { image: marcantonioCotissiVessel, title: "Cotissi Vessel", category: "Decorative Object", subcategory: "Vessels", materials: "Hand-blown Murano glass", dimensions: "H35 × Ø20 cm", edition: "Unique Piece" },
@@ -294,7 +294,7 @@ export const collectibleDesigners: Array<{
     biography:
       "RoWin' Atelier is a French ceramics studio renowned for creating exceptional handcrafted pieces that blend traditional techniques with contemporary design. Each creation showcases meticulous attention to detail and a deep understanding of material properties.",
     notableWorks: "None II Table Lamp",
-    notableWorksLink: { text: "None II Table Lamp", galleryIndex: 18 },
+    notableWorksLink: { text: "None II Table Lamp", galleryIndex: 19 },
     philosophy: "Every piece of clay holds the potential for extraordinary beauty when shaped by skilled hands.",
     curatorPicks: [
       { image: rowinNoneIiLamp, title: "None II Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Cippolino Verde Marble, Silver-Plated brass", dimensions: "39 cm × 22.5 cm × H 58 cm", edition: "Unique Piece" },
