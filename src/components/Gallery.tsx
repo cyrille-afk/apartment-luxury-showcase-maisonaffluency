@@ -595,7 +595,7 @@ const Gallery = () => {
                 <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
                   {allItems[currentImageIndex]?.title}
                 </h3>
-                <p className="text-sm md:text-base text-white/70 font-body max-w-2xl">
+                <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
                   {allItems[currentImageIndex]?.description}
                 </p>
                 {/* Counter - desktop only */}
