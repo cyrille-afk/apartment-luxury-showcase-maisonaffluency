@@ -172,7 +172,7 @@ export const collectibleDesigners: Array<{
       { image: herveTourbillonPendant, title: "Tourbillon Pendant", category: "Lighting", subcategory: "Pendants", materials: "Golden-brown patinated bronze", dimensions: "Ø 40 x H 129.3 cm" },
       { image: herveFacettedPendant, title: "Facetted Pendant", category: "Lighting", subcategory: "Pendants", materials: "Golden brown patinated Bronze\nAlso available in large size, with patinated or lacquered bronze", dimensions: "Ø 40cm x H 155 cm - 15kg" },
       { image: herveTumulteMirror, title: "Tumulte Convex Mirror", category: "Decorative Objects", subcategory: "Mirrors", materials: "Constellation of lacquered, bubble-like pebbles in Prussian blue, set in a swirling vortex of bronze", dimensions: "W 127 x H 138 cm - 56kg", edition: "Edition of 3" },
-      { image: herveEmpileeConsole, title: "Empilée Console", category: "Furniture", subcategory: "Consoles", materials: "Precariously balanced wood lacquered slabs resting on bronze wedges, characteristic of the designer's research into structure", dimensions: "L 200 x l 45 x H 85 cm - 72 kg" },
+      { image: herveEmpileeConsole, title: "Empilée Console", category: "Furniture", subcategory: "Consoles", materials: "Precariously balanced wood lacquered slabs resting on bronze wedges, characteristic of the designer's research into structure", dimensions: "L 200 x l 45 x H 85 cm - 72 kg", edition: "Edition of 20" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
