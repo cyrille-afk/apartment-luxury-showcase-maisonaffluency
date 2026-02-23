@@ -34,7 +34,7 @@ const galleryExperiences = [{
   items: [{
     image: bespokeSofaImage,
     title: "An Inviting Lounge Area",
-    description: "Thierry Lemaire's Niko 420 custom sofa, Atelier Février's Ricky custom rug, Poltrona Frau's Albero bookcase, Jindrich Halabala's lounge chair, Apparatus Studio's Median 3 Surface Alabaster lights, Alexander Lamont's Reef Vessels, Maarten Vrolijk's Sakura TRP 22001 Vessel"
+    description: "Sofa: Thierry Lemaire's Niko 420 custom, Rug: Atelier Février's Ricky custom rug, Coffee table: Thierry Lemaire's Orsay Coffee table (edition of 12), Ceiling light: Apparatus Studio's Median 3 Surface Alabaster lights, Bookcase: Poltrona Frau's Albero bookcase, Vessel behind the sofa: Maarten Vrolijk's Sakura TRP 22001 Vessel (unique piece), Bronze Vessels: Alexander Lamont's Reef Vessels, Lounge Chair: Jindrich Halabala's Vintage Lounge Chair c.1970"
   }, {
     image: livingRoomImage,
     title: "A Sophisticated Living Room",
