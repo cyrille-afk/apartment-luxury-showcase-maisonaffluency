@@ -532,6 +532,18 @@ const partnerBrands = [
     galleryIndex: 10, // Unique by Design
   },
   {
+    id: "okha-side-table",
+    name: "Okha",
+    category: "Tables",
+    subcategory: "Tables",
+    tableType: "Side Tables",
+    origin: "South Africa",
+    description: "South African design studio creating sophisticated furniture that bridges African craft traditions with contemporary global aesthetics.",
+    featured: "Villa Pedestal Side Table",
+    instagram: "https://instagram.com/__okha",
+    galleryIndex: 10, // Unique by Design - picture 2 of A Calming and Dreamy Environment
+  },
+  {
     id: "ooumm",
     name: "oOumm",
     category: "Decorative Object",
