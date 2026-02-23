@@ -439,30 +439,60 @@ const Gallery = () => {
                 </p>
               </motion.div>
 
-              {/* Mobile: single cover image with carousel icon */}
-              <div className="md:hidden">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5 }}
-                  className="relative overflow-hidden rounded-sm aspect-[3/4] cursor-pointer"
-                  onClick={() => openLightbox(originalSectionIndex, 0)}
+              {/* Mobile: swipeable carousel like Instagram */}
+              <div className="md:hidden relative">
+                <div
+                  ref={el => { scrollStripRefs.current[originalSectionIndex] = el; }}
+                  onScroll={() => handleStripScroll(originalSectionIndex)}
+                  className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
                 >
-                  <img
-                    src={section.items[0].image}
-                    alt={section.items[0].title}
-                    className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05]"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                  {/* Multi-photo carousel icon — upper right like Instagram */}
-                  {section.items.length > 1 && (
-                    <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm p-1.5 rounded-full">
-                      <Copy className="w-4 h-4 text-white" />
+                  {section.items.map((item, index) => (
+                    <div
+                      key={`${item.title}-${index}-mobile`}
+                      className="relative flex-none w-full snap-center aspect-[3/4] cursor-pointer"
+                      onClick={() => openLightbox(originalSectionIndex, index)}
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05]"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                     </div>
-                  )}
-                </motion.div>
+                  ))}
+                </div>
+                {/* Instagram-style counter — top right */}
+                {section.items.length > 1 && (
+                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full pointer-events-none">
+                    <span className="text-white text-xs font-body font-medium">
+                      {(activeScrollIndices[originalSectionIndex] || 0) + 1}/{section.items.length}
+                    </span>
+                  </div>
+                )}
+                {/* Dot indicators */}
+                {section.items.length > 1 && (
+                  <div className="flex justify-center gap-1.5 mt-3">
+                    {section.items.map((_, dotIndex) => (
+                      <button
+                        key={dotIndex}
+                        aria-label={`Go to photo ${dotIndex + 1}`}
+                        onClick={() => {
+                          const strip = scrollStripRefs.current[originalSectionIndex];
+                          if (!strip) return;
+                          const cardWidth = strip.scrollWidth / section.items.length;
+                          strip.scrollTo({ left: cardWidth * dotIndex, behavior: 'smooth' });
+                        }}
+                        className={`rounded-full transition-all duration-300 ${
+                          (activeScrollIndices[originalSectionIndex] || 0) === dotIndex
+                            ? 'w-1.5 h-1.5 bg-primary'
+                            : 'w-1.5 h-1.5 bg-primary/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className={`hidden md:grid md:gap-8 md:grid-cols-2 ${gridCols === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} transition-all duration-300`}>
