@@ -1822,23 +1822,25 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     curatorPicks: [
       {
         image: seCollectionsGreenPendant,
-        title: "Green Glass Pendant",
+        title: "Gae Pendant by Ini Archibong",
         subtitle: "for Sé Collections",
         category: "Lighting",
         tags: ["Lighting", "Ceiling Lights"],
         materials: "Hand-carved crystal glass • Polished brass chain",
         dimensions: "",
-        description: "A teardrop pendant in hand-carved emerald crystal suspended from a polished brass pebble chain — luminous Murano-inspired craftsmanship reimagined for Sé Collections."
+        description: "A teardrop pendant in hand-carved emerald crystal suspended from a polished brass pebble chain — luminous Murano-inspired craftsmanship reimagined for Sé Collections.",
+        edition: "Edition of 5"
       },
       {
         image: seCollectionsGlassDisc,
-        title: "Sculpted Glass Disc",
+        title: "Gae Pendant by Ini Archibong - Detail",
         subtitle: "for Sé Collections",
         category: "Decorative Object",
         tags: ["Decorative Object", "Sculptural Objects"],
         materials: "Hand-carved crystal glass",
         dimensions: "",
-        description: "A mesmerising hand-carved crystal disc for Sé Collections, its radial facets catching and refracting light in deep emerald tones — a sculptural centrepiece of extraordinary glass craftsmanship."
+        description: "A mesmerising hand-carved crystal disc for Sé Collections, its radial facets catching and refracting light in deep emerald tones — a sculptural centrepiece of extraordinary glass craftsmanship.",
+        edition: "Edition of 5"
       },
       {
         image: seCollectionsDarkPendant,
