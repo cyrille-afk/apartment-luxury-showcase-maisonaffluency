@@ -71,6 +71,7 @@ import charlesParisBg from "@/assets/designers/charles-paris-bg.png";
 import victoriaMagniantBg from "@/assets/designers/victoria-magniant-bg.png";
 import pierreYovanovitchBg from "@/assets/designers/pierre-yovanovitch-bg.png";
 import brunoMoinardBg from "@/assets/designers/bruno-moinard-bg.png";
+import noeDuchaufourBg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -848,6 +849,15 @@ const partnerBrands = [
     description: "French architect and designer Bruno Moinard creates refined furniture editions that embody timeless Parisian elegance, blending noble materials with masterful craftsmanship and understated sophistication.",
     instagram: "https://www.instagram.com/brunomoinard/",
   },
+  {
+    id: "ndl-editions",
+    name: "NDL Editions",
+    category: "Furniture",
+    subcategory: "Furniture",
+    origin: "France",
+    description: "NDL Editions is the eponymous furniture line by Noé Duchaufour-Lawrance, translating his organic, biomorphic design language into a curated collection of limited-edition furniture pieces crafted with exceptional materials and artisanal savoir-faire.",
+    instagram: "https://www.instagram.com/noeduchaufourlawrance/",
+  },
 ];
 
 // Background image map
@@ -917,6 +927,7 @@ const brandBgMap: Record<string, string> = {
   "Victoria Magniant": victoriaMagniantBg,
   "Pierre Yovanovitch": pierreYovanovitchBg,
   "Bruno Moinard Editions": brunoMoinardBg,
+  "NDL Editions": noeDuchaufourBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
@@ -947,6 +958,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Thierry Lemaire": "thierry-lemaire",
   "Théorème Editions": "theoreme-editions",
   "Cristallerie Saint-Louis": "noe-duchaufour-lawrance",
+  "NDL Editions": "noe-duchaufour-lawrance",
   "Delcourt Collection": "forest-giaconia",
   "Entrelacs Création": "entrelacs-creation",
   "Charles Paris": "felix-agostini",
