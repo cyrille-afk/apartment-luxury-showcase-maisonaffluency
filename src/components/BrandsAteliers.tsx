@@ -414,6 +414,15 @@ const partnerBrands = [
     galleryIndex: 4, // A Dreamy Tuscan Landscape (Intimate Setting)
   },
   {
+    id: "hom-le-xuan",
+    name: "Hom Le Xuan",
+    category: "Decorative Object",
+    subcategory: "Decorative Objects",
+    origin: "France",
+    description: "Franco-Vietnamese designer creating refined furniture and decorative objects that blend Eastern craftsmanship with Western contemporary design sensibility.",
+    instagram: "https://www.instagram.com/hom_lexuan/?hl=en",
+  },
+  {
     id: "jindrich-halabala",
     name: "Jindrich Halabala",
     category: "Seating",
