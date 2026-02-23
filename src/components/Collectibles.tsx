@@ -682,13 +682,6 @@ const Collectibles = () => {
           </motion.div>
 
           <div className="flex items-center justify-between mb-4">
-            {(searchQuery || selectedCategory) ? (
-              <p className="text-left text-[10px] text-muted-foreground/50 font-body tracking-wider">
-                {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
-                {selectedSubcategory && <span> · {selectedSubcategory}</span>}
-                {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
-              </p>
-            ) : <div />}
             <button
               onClick={toggleAllDesigners}
               className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1"
@@ -696,6 +689,13 @@ const Collectibles = () => {
               <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
               <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
             </button>
+            {(searchQuery || selectedCategory) ? (
+              <p className="text-left text-[10px] text-muted-foreground/50 font-body tracking-wider">
+                {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
+                {selectedSubcategory && <span> · {selectedSubcategory}</span>}
+                {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
+              </p>
+            ) : <div />}
           </div>
 
           <motion.div
