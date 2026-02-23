@@ -1006,7 +1006,7 @@ function AlphaStrip({
                   {brand.description}
                 </p>
 
-                {expandedCard === brand.name && brand.featuredItems.some(item => item.featured) && (
+                {brand.featuredItems.some(item => item.featured) && (
                 <div className="space-y-1 mb-3">
                   <span className={`text-[10px] md:text-xs uppercase tracking-wider block transition-colors duration-300 ${hasBg ? "text-white/70" : "text-muted-foreground"}`}>Featured</span>
                   <ul className="space-y-0.5">
@@ -1034,8 +1034,10 @@ function AlphaStrip({
                 )}
 
                 {/* Expand/collapse indicator */}
-                <div className={`absolute bottom-3 right-3 z-10 transition-transform duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
-                  <ChevronDown className={`h-4 w-4 ${hasBg ? "text-white/60" : "text-muted-foreground/50"}`} />
+                <div className={`absolute bottom-3 right-3 z-10 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
+                  <div className={`rounded-full p-1.5 backdrop-blur-sm ${hasBg ? "bg-white/20 text-white" : "bg-foreground/10 text-foreground"}`}>
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
                 </div>
               </div>
             </div>
