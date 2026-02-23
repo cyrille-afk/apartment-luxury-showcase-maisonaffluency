@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
-import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Star } from "lucide-react";
 import alexanderLamontBg from "@/assets/designers/alexander-lamont-bg.png";
 import leoAertsBg from "@/assets/designers/leo-aerts-alinea-bg.jpg";
 import apparatusBg from "@/assets/designers/apparatus-studio-bg.jpg";
@@ -878,6 +878,47 @@ const brandBgMap: Record<string, string> = {
   "Paul Cocksedge Studio": paulCocksedgeBg,
 };
 
+// Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
+const brandToDesignerMap: Record<string, string> = {
+  "Alexander Lamont": "alexander-lamont",
+  "Alinea Design Objects": "leo-aerts-alinea",
+  "Apparatus Studio": "apparatus-studio",
+  "Atelier Février": "atelier-fevrier",
+  "Atelier Pendhapa": "atelier-pendhapa",
+  "Babled Studio": "emmanuel-babled",
+  "Bruno de Maistre": "bruno-de-maistre",
+  "Ecart Paris": "jean-michel-frank",
+  "Eric Schmitt Studio": "eric-schmitt",
+  "Garnier & Linker": "garnier-linker",
+  "Hamrei": "hamrei",
+  "Hervé van der Straeten": "herve-van-der-straeten",
+  "Kerstens": "kerstens",
+  "Kiko Lopez": "kiko-lopez",
+  "Leo Sentou": "leo-sentou",
+  "Made in Kira": "kira",
+  "Man of Parts": "man-of-parts",
+  "Nathalie Ziegler": "nathalie-ziegler",
+  "Okha": "adam-courts-okha",
+  "Olivia Cognet": "olivia-cognet",
+  "Pierre Bonnefille": "pierre-bonnefille",
+  "Robicara": "robicara",
+  "Thierry Lemaire": "thierry-lemaire",
+  "Théorème Editions": "garnier-linker",
+  "Cristallerie Saint-Louis": "noe-duchaufour-lawrance",
+  "Delcourt Collection": "forest-giaconia",
+  "Entrelacs Création": "entrelacs-creation",
+  "Charles Paris": "felix-agostini",
+  "Sé Collections": "tristan-auer",
+  "Reda Amalou": "reda-amalou",
+  "Bina Baitel": "bina-baitel",
+  "Emanuelle Levet Stenne": "emanuelle-levet-stenne",
+  "Milan Pekař": "milan-pekar",
+  "Matthieu Gicquel": "matthieu-gicquel",
+  "CC-Tapis": "cc-tapis",
+  "Haymann Editions": "haymann-editions",
+  "Atelier DeMichelis": "atelier-demichelis",
+};
+
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
 type ConsolidatedBrand = {
   name: string;
@@ -1035,6 +1076,33 @@ function AlphaStrip({
                     ))}
                   </ul>
                 </div>
+                )}
+
+                {/* Curators' Picks link */}
+                {brandToDesignerMap[brand.name] && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const designerId = brandToDesignerMap[brand.name];
+                      const el = document.getElementById(`designer-${designerId}`);
+                      if (el) {
+                        el.scrollIntoView({ behavior: "smooth", block: "center" });
+                        // Trigger accordion open via click
+                        setTimeout(() => {
+                          const trigger = el.querySelector("[data-state]");
+                          if (trigger && trigger.getAttribute("data-state") === "closed") {
+                            (trigger as HTMLElement).click();
+                          }
+                        }, 600);
+                      }
+                    }}
+                    className={`flex items-center gap-1.5 text-[10px] md:text-xs uppercase tracking-wider font-body mt-2 group/picks touch-manipulation transition-colors duration-300 ${hasBg ? "text-white/70 hover:text-white" : "text-muted-foreground hover:text-primary"}`}
+                  >
+                    <Star className="h-3 w-3 flex-shrink-0" />
+                    <span className={`underline underline-offset-2 ${hasBg ? "decoration-white/30 group-hover/picks:decoration-white" : "decoration-primary/30 group-hover/picks:decoration-primary"}`}>
+                      Curators' Picks
+                    </span>
+                  </button>
                 )}
 
               </div>
