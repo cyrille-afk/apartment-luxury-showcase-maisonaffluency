@@ -1607,6 +1607,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     philosophy: "Nature has already designed everything. My role is to find those forms and translate them into objects that resonate with the human hand and eye.",
     curatorPicks: [
       {
+        image: noeMineralFlowerCoffee,
+        title: "Mineral Flower Coffee Table",
+        subtitle: "",
+        category: "Tables",
+        tags: ["Tables", "Coffee Tables"],
+        materials: "Marble",
+        dimensions: "W 121 × D 114 × H 46,5 cm – 180 kg",
+        description: "The Mineral Flower Coffee Table by Noé Duchaufour-Lawrance is a monumental marble coffee table composed of sweeping, overlapping stone petals. Its sculptural silhouette transforms raw marble into a fluid, flower-inspired centrepiece of extraordinary presence."
+      },
+      {
         image: noeDuchaufourMadonnaTables,
         title: "Madonna Del Monte Coffee and Side Round Tables",
         subtitle: "",
@@ -1625,16 +1635,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Marble",
         dimensions: "W 47,8 × D 61,5 × H 53 cm – 50 kg",
         description: "The Mineral Flower Side Table II by Noé Duchaufour-Lawrance is a sculptural marble side table whose interlocking petal-like forms evoke natural stone erosion. Each piece is carved from a single block, celebrating the raw beauty of marble through organic, biomorphic geometry."
-      },
-      {
-        image: noeMineralFlowerCoffee,
-        title: "Mineral Flower Coffee Table",
-        subtitle: "",
-        category: "Tables",
-        tags: ["Tables", "Coffee Tables"],
-        materials: "Marble",
-        dimensions: "W 121 × D 114 × H 46,5 cm – 180 kg",
-        description: "The Mineral Flower Coffee Table by Noé Duchaufour-Lawrance is a monumental marble coffee table composed of sweeping, overlapping stone petals. Its sculptural silhouette transforms raw marble into a fluid, flower-inspired centrepiece of extraordinary presence."
       },
     ],
     links: [
