@@ -99,6 +99,10 @@ const galleryExperiences = [{
     title: "A Masterful Suite",
     description: "CC-Tapis Giudecca custom rug, Celso de Lemos' Silk Bed Cover, Hervé van der Straeten's Bronze MicMac Chandelier, Iksel's Brunelleschi Perspective Wallcover"
   }, {
+    image: bedroomThirdImage,
+    title: "Design Icons and Collectibles",
+    description: "Damien Langlois-Meurinne's Ooh La La Console, Haymann Editions' Carved Marble Marie Lamp, Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
+  }, {
     image: "/gallery/calming-2.jpg",
     title: "A Venetian Dream",
     description: "Hervé van der Straeten's Bronze MicMac Chandelier, Iksel's Brunelleschi Perspective Wallcover, Stéphane CG Abstract Diasec, Celso de Lemos' Silk Bed Cover, CC-Tapis Giudecca Custom Rug"
@@ -106,10 +110,6 @@ const galleryExperiences = [{
     image: bedroomAltImage,
     title: "Unique by Design",
     description: "Okha's Adam Court's Villa Pedestal Nightstand, Atelier DeMichelis' Limited Edition Bud Table Lamp, Pinton 1867 Custom Rug, Peter Reed's Riyad Double Faced Throw and Cushion"
-  }, {
-    image: bedroomThirdImage,
-    title: "Design Icons and Collectibles",
-    description: "Damien Langlois-Meurinne's Ooh La La Console, Haymann Editions' Carved Marble Marie Lamp, Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
   }]
 }, {
   experience: "A Small Room with Massive Personality",
