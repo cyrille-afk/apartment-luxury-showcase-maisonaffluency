@@ -66,6 +66,7 @@ import gillesBoissierBg from "@/assets/designers/gilles-boissier-bg.png";
 import jacobHashimotoBg from "@/assets/designers/jacob-hashimoto-bg.png";
 import paulCocksedgeBg from "@/assets/designers/paul-cocksedge-bg.jpg";
 import leBerreVevaudBg from "@/assets/designers/le-berre-vevaud-bg.png";
+import charlesParisBg from "@/assets/designers/charles-paris-bg.png";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -871,6 +872,7 @@ const brandBgMap: Record<string, string> = {
   "Jacob Hashimoto Studio": jacobHashimotoBg,
   "Paul Cocksedge Studio": paulCocksedgeBg,
   "Le Berre Vevaud": leBerreVevaudBg,
+  "Charles Paris": charlesParisBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
