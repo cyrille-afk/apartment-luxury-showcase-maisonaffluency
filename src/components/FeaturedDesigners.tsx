@@ -2261,8 +2261,7 @@ const FeaturedDesigners = () => {
                             alt={designer.name}
                             className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
                             style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined}
-                            loading="lazy"
-                            decoding="async"
+                            loading="eager"
                           />
                           <div className="absolute inset-0 rounded-full bg-primary/0 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center">
                             <svg
@@ -2682,7 +2681,7 @@ const FeaturedDesigners = () => {
                                   : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'
                               }`}
                             >
-                              <img src={pick.image} alt={pick.title} className={`w-full h-full object-cover ${!pickMatchesFilter(pick) ? 'blur-[3px] opacity-40' : ''}`} loading="lazy" decoding="async" />
+                              <img src={pick.image} alt={pick.title} className={`w-full h-full object-cover ${!pickMatchesFilter(pick) ? 'blur-[3px] opacity-40' : ''}`} loading="eager" />
                             </button>
                           ))}
                         </div>

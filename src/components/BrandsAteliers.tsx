@@ -1091,8 +1091,7 @@ function AlphaStrip({
                 <img
                   src={bg}
                   alt=""
-                  loading="lazy"
-                  decoding="async"
+                  loading="eager"
                   aria-hidden="true"
                   className="absolute inset-0 w-full h-full pointer-events-none select-none"
                   style={{
@@ -1690,7 +1689,7 @@ const BrandsAteliers = () => {
                           {picksDesigner.curatorPicks.map((pick: CuratorPick, idx: number) => (
                             <button key={idx} onClick={() => { setPicksIndex(idx); setPicksZoomed(false); }} aria-label={`View ${pick.title}`}
                               className={`flex-none relative w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden transition-all duration-300 ${picksIndex === idx ? 'ring-2 ring-white scale-110 opacity-100' : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'}`}>
-                              <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                              <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="eager" />
                             </button>
                           ))}
                         </div>
