@@ -574,7 +574,18 @@ const partnerBrands = [
     description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
     featured: "Riyad Double Faced Throw and Cushion",
     instagram: "https://instagram.com/peterreed1861",
-    galleryIndex: 12, // Unique by Design
+    galleryIndex: 14, // A Venetian Dream
+  },
+  {
+    id: "peter-reed",
+    name: "Peter Reed 1861",
+    category: "Decorative Object",
+    subcategory: "Linens",
+    origin: "United Kingdom",
+    description: "British heritage brand creating the world's finest bed linens since 1861, using exclusive long-staple Egyptian cotton and meticulous craftsmanship.",
+    featured: "Riyad Double Faced Throw and Cushion",
+    instagram: "https://instagram.com/peterreed1861",
+    galleryIndex: 15, // Unique by Design
   },
   {
     id: "pierre-bonnefille",
