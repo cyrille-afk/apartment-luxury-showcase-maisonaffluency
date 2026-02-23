@@ -46,7 +46,7 @@ const galleryExperiences = [{
   }, {
     image: "/gallery/sociable-4.jpeg",
     title: "A Sculptural Reading Corner",
-    description: "Olivia Cognet's Blue glazed Vallauris floor lamp, Thierry Lemaire's Orsay Centre Table, Iksel's Decorative Wallcover"
+    description: "Olivia Cognet's Blue glazed Vallauris floor lamp, Jean-Michel Frank's Soleil Coffee Table 1930, Iksel's Decorative Wallcover"
   }]
 }, {
   experience: "An Intimate Setting",
