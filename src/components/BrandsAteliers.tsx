@@ -561,7 +561,7 @@ const partnerBrands = [
     subcategory: "Floor Lamps",
     origin: "France",
     description: "French artist and designer creating sculptural ceramic lighting and furniture that celebrates organic forms and handcrafted textures.",
-    featured: "Valauris Lamp",
+    featured: "Blue glazed Vallauris floor lamp",
     instagram: "https://www.instagram.com/olivia_cognet",
     galleryIndex: 1, // A Sophisticated Living Room
   },
