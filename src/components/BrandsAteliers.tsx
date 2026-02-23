@@ -76,6 +76,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import redaAmalouBg from "@/assets/designers/reda-amalou-bg.png";
+import homLeXuanBg from "@/assets/designers/hom-le-xuan-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -973,6 +974,7 @@ const brandBgMap: Record<string, string> = {
   "Pierre Yovanovitch": pierreYovanovitchBg,
   "Bruno Moinard Editions": brunoMoinardBg,
   "NDL Editions": noeDuchaufourBg,
+  "Hom Le Xuan": homLeXuanBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
