@@ -468,7 +468,7 @@ const Gallery = () => {
                         className="absolute bottom-2 left-2 z-10"
                         aria-label="View full image"
                       >
-                        <span className="bg-background/90 text-foreground p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center justify-center">
+                        <span className="bg-black/60 text-white p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center justify-center">
                           <Maximize2 className="w-3 h-3" />
                         </span>
                       </button>
@@ -477,7 +477,7 @@ const Gallery = () => {
                 </div>
                 {/* Instagram-style indicator — top right: icon on first photo, counter on others */}
                 {section.items.length > 1 && (
-                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm p-1.5 rounded-md pointer-events-none">
+                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1.5 rounded-full pointer-events-none">
                     {(activeScrollIndices[originalSectionIndex] || 0) === 0 ? (
                       <Copy className="w-3.5 h-3.5 text-white" />
                     ) : (
