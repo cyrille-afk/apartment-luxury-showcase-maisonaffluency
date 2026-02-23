@@ -678,6 +678,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "Bespoke fabrics upon request"
       },
     ],
+    notableWorksLinks: [
+      { text: "Sublime Ottoman M in Métaphores Fabric", galleryIndex: 6 },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/binabaitel/" },
       { type: "Curators' Picks" },
