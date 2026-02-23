@@ -1619,7 +1619,14 @@ const BrandsAteliers = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center w-full h-full">
+                <div className="relative flex items-center justify-center w-full h-full">
+                  <button
+                    onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
+                    className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors"
+                    aria-label="Close lightbox"
+                  >
+                    <X className="h-6 w-6 text-white" />
+                  </button>
                   <div className="text-center p-8">
                     <Star className="h-16 w-16 text-white/30 mx-auto mb-4" />
                     <h3 className="text-2xl font-serif text-white mb-2">Curators' Picks</h3>
@@ -1629,7 +1636,14 @@ const BrandsAteliers = () => {
                 </div>
               )
             ) : (
-              <div className="flex items-center justify-center w-full h-full">
+              <div className="relative flex items-center justify-center w-full h-full">
+                <button
+                  onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
+                  className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors"
+                  aria-label="Close lightbox"
+                >
+                  <X className="h-6 w-6 text-white" />
+                </button>
                 <div className="text-center p-8">
                   <Star className="h-16 w-16 text-white/30 mx-auto mb-4" />
                   <h3 className="text-2xl font-serif text-white mb-2">Curators' Picks</h3>
