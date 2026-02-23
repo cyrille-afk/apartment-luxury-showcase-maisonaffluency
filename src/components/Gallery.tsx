@@ -171,6 +171,16 @@ const Gallery = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
 
+  // Preload all gallery images (including hidden 4th items) so toggle is instant
+  useEffect(() => {
+    galleryExperiences.forEach(section => {
+      section.items.forEach(item => {
+        const img = new Image();
+        img.src = item.image;
+      });
+    });
+  }, []);
+
   // Listen for category changes from Navigation
   useEffect(() => {
     const handleCategoryChange = (e: CustomEvent<string | null>) => {
