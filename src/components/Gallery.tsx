@@ -447,7 +447,7 @@ const Gallery = () => {
                       <img
                         src={item.image}
                         alt={item.title}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05]"
                         loading="lazy"
                         decoding="async"
                       />
@@ -500,7 +500,7 @@ const Gallery = () => {
                       <div
                         className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm"
                       >
-                        <img src={item.image} alt={item.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" />
+                        <img src={item.image} alt={item.title} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         {/* Expand icon - opens lightbox directly */}
                         <button
@@ -544,7 +544,7 @@ const Gallery = () => {
 
             {/* Image container */}
             <div className="flex flex-col items-center justify-center max-w-[90vw] max-h-[85vh] px-16">
-              <img key={currentImageIndex} src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="max-w-full max-h-[70vh] object-contain transition-opacity duration-200" loading="eager" decoding="async" />
+              <img key={currentImageIndex} src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="max-w-full max-h-[70vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
               <div className="mt-4 text-center">
                 <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
                   {allItems[currentImageIndex]?.title}
