@@ -37,6 +37,7 @@ import garnierLinkerImg from "@/assets/designers/garnier-linker.jpg";
 import robicaraImg from "@/assets/designers/robicara-v2.jpg";
 import redaAmalouImg from "@/assets/designers/reda-amalou.jpg";
 import noeDuchaufourImg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
+import noeDuchaufourMadonnaTables from "@/assets/curators-picks/noe-duchaufour-madonna-tables.png";
 import binaBAitelImg from "@/assets/designers/bina-baitel.png";
 import tristanAuerImg from "@/assets/designers/tristan-auer.jpg";
 
@@ -1602,7 +1603,18 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     notableWorks: "Amber Folio Portable Lamp for Saint-Louis (Maison Affluency), Refine Console, Steinway Collaboration",
     notableWorksLink: { text: "Amber Folio Lamp for Cristallerie Saint-Louis", galleryIndex: 20 },
     philosophy: "Nature has already designed everything. My role is to find those forms and translate them into objects that resonate with the human hand and eye.",
-    curatorPicks: [],
+    curatorPicks: [
+      {
+        image: noeDuchaufourMadonnaTables,
+        title: "Madonna Del Monte Coffee and Side Round Tables",
+        subtitle: "",
+        category: "Tables",
+        tags: ["Tables", "Coffee Tables", "Side Tables"],
+        materials: "Glass & Aluminium",
+        dimensions: "Side Table: W 50 × D 50 × H 60 cm – 33 kg\nTable M: W 70 × D 70 × H 33 cm – 45 kg\nTable L: W 90 × D 90 × H 35 cm – 66 kg",
+        description: "The Madonna Del Monte collection by Noé Duchaufour-Lawrance features a series of round tables in glass and aluminium, available in three sizes. Their sculpted glass tops evoke organic water ripple forms, combining biomorphic design with industrial precision."
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/noeduchaufourlawrance/" },
       { type: "Curators' Picks" },
