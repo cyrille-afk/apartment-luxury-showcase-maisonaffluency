@@ -39,7 +39,19 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.6,
               delay: 0.2
-            }} className="mb-2 tracking-[0.3em] text-foreground text-sm md:text-xl lg:text-2xl font-serif font-bold">Gallery Overview</motion.p>
+            }} className="mb-2 tracking-[0.3em] text-foreground text-sm md:text-xl lg:text-2xl font-serif font-bold">
+                <button
+                  onClick={() => {
+                    const gallerySection = document.getElementById("gallery");
+                    if (gallerySection) {
+                      gallerySection.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  className="hover:text-foreground/70 transition-colors duration-300 cursor-pointer"
+                >
+                  Gallery Overview
+                </button>
+              </motion.p>
               
               <motion.h2 initial={{
               opacity: 0,
@@ -50,7 +62,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.8,
               delay: 0.3
-            }} className="font-display text-base md:text-xl lg:text-2xl leading-tight text-foreground">An{" "}
+            }} className="font-display text-base md:text-xl lg:text-2xl leading-tight text-foreground">A{" "}
                 <button
                   onClick={() => {
                     const gallerySection = document.getElementById("gallery");
@@ -60,7 +72,7 @@ const Overview = () => {
                   }}
                   className="inline text-foreground hover:text-foreground/70 underline decoration-foreground/30 hover:decoration-foreground/50 transition-all duration-300 cursor-pointer"
                 >
-                  exclusive 2,400 sq ft showroom
+                  2,400 sq ft showroom
                 </button>
                 {" "}where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors
               </motion.h2>
