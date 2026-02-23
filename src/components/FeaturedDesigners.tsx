@@ -1821,16 +1821,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     description: "Portuguese atelier producing bold sculptural furniture and lighting in collaboration with leading international designers, distinguished by extraordinary material craftsmanship in glass, marble, and metal.",
     curatorPicks: [
       {
-        image: seCollectionsGlassDisc,
-        title: "Sculpted Glass Disc",
-        subtitle: "for Sé Collections",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Sculptural Objects"],
-        materials: "Hand-carved crystal glass",
-        dimensions: "",
-        description: "A mesmerising hand-carved crystal disc for Sé Collections, its radial facets catching and refracting light in deep emerald tones — a sculptural centrepiece of extraordinary glass craftsmanship."
-      },
-      {
         image: seCollectionsGreenPendant,
         title: "Green Glass Pendant",
         subtitle: "for Sé Collections",
@@ -1839,6 +1829,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Hand-carved crystal glass • Polished brass chain",
         dimensions: "",
         description: "A teardrop pendant in hand-carved emerald crystal suspended from a polished brass pebble chain — luminous Murano-inspired craftsmanship reimagined for Sé Collections."
+      },
+      {
+        image: seCollectionsGlassDisc,
+        title: "Sculpted Glass Disc",
+        subtitle: "for Sé Collections",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Sculptural Objects"],
+        materials: "Hand-carved crystal glass",
+        dimensions: "",
+        description: "A mesmerising hand-carved crystal disc for Sé Collections, its radial facets catching and refracting light in deep emerald tones — a sculptural centrepiece of extraordinary glass craftsmanship."
       },
       {
         image: seCollectionsDarkPendant,
