@@ -55,7 +55,7 @@ import ericSchmittAnneauLamp from "@/assets/curators-picks/eric-schmitt-anneau-l
 import ericSchmittDentelleConsole from "@/assets/curators-picks/eric-schmitt-dentelle-console.jpg";
 import ericSchmittFloatingTable from "@/assets/curators-picks/eric-schmitt-floating-table.jpg";
 import ericSchmittRocwoodTable from "@/assets/curators-picks/eric-schmitt-rocwood-table.jpg";
-const collectibleDesigners: Array<{
+export const collectibleDesigners: Array<{
   id?: string;
   name: string;
   founder?: string;

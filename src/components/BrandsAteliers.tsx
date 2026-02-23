@@ -5,6 +5,7 @@ import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Sta
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
+import { collectibleDesigners } from "@/components/Collectibles";
 import alexanderLamontBg from "@/assets/designers/alexander-lamont-bg.png";
 import leoAertsBg from "@/assets/designers/leo-aerts-alinea-bg.jpg";
 import apparatusBg from "@/assets/designers/apparatus-studio-bg.jpg";
@@ -1156,6 +1157,9 @@ const BrandsAteliers = () => {
     if (!picksDesignerName) return null;
     const designerId = brandToDesignerMap[picksDesignerName];
     if (!designerId) return null;
+    // Prioritize collectible designers (limited editions) over featured designers
+    const collectibleMatch = collectibleDesigners.find(d => d.id === designerId || d.name === picksDesignerName);
+    if (collectibleMatch) return collectibleMatch as any;
     return featuredDesigners.find(d => d.id === designerId) || null;
   }, [picksDesignerName]);
 
