@@ -68,6 +68,7 @@ import paulCocksedgeBg from "@/assets/designers/paul-cocksedge-bg.jpg";
 import leBerreVevaudBg from "@/assets/designers/le-berre-vevaud-bg.png";
 import binaBaitelBg from "@/assets/designers/bina-baitel-bg.png";
 import charlesParisBg from "@/assets/designers/charles-paris-bg.png";
+import victoriaMagniantBg from "@/assets/designers/victoria-magniant-bg.png";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -893,6 +894,7 @@ const brandBgMap: Record<string, string> = {
   "Paul Cocksedge Studio": paulCocksedgeBg,
   "Le Berre Vevaud": leBerreVevaudBg,
   "Charles Paris": charlesParisBg,
+  "Victoria Magniant": victoriaMagniantBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
