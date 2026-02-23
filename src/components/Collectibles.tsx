@@ -677,7 +677,7 @@ const Collectibles = () => {
               );
             })()}
             <p className="text-base md:text-lg text-muted-foreground font-body">
-              Limited Editions & Unique Pieces
+              Curators' Picks
             </p>
           </motion.div>
 
@@ -870,7 +870,7 @@ const Collectibles = () => {
                           >
                             <Star size={16} className="fill-current" />
                             <span className="font-medium">
-                              {["maarten-vrolijk", "marcantonio-brandolini-dadda", "rowin-atelier", "pierre-bonnefille", "nathalie-ziegler"].includes(designer.id) ? (designer.curatorPicks.length === 1 ? "Unique Piece" : "Unique Pieces") : "Limited Editions"}
+                              Curators' Picks
                             </span>
                           </button>
                         </div>
@@ -896,7 +896,7 @@ const Collectibles = () => {
         >
           <VisuallyHidden>
             <DialogTitle>
-              {curatorPicksDesigner?.name} - {["maarten-vrolijk", "marcantonio-brandolini-dadda", "rowin-atelier", "pierre-bonnefille", "nathalie-ziegler"].includes(curatorPicksDesigner?.id || "") ? "Unique Pieces" : "Limited Editions"}
+              {curatorPicksDesigner?.name} - Curators' Picks
             </DialogTitle>
           </VisuallyHidden>
           
