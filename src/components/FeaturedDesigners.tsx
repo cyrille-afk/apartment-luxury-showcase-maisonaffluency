@@ -1733,46 +1733,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "L27 × P9 × H27 cm",
         description: "The Eclipse Wall Light for Pouenat by Tristan Auer is a sculptural study in circular geometry — a brushed copper disc framing a deep painted steel recess. Its minimal, planetary form generates a warm, grazing light that animates the wall surface with shadow and material depth."
       },
-      {
-        image: seCollectionsGlassDisc,
-        title: "Sculpted Glass Disc",
-        subtitle: "for Sé Collections",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Sculptural Objects"],
-        materials: "Hand-carved crystal glass",
-        dimensions: "",
-        description: "A mesmerising hand-carved crystal disc for Sé Collections, its radial facets catching and refracting light in deep emerald tones — a sculptural centrepiece of extraordinary glass craftsmanship."
-      },
-      {
-        image: seCollectionsGreenPendant,
-        title: "Green Glass Pendant",
-        subtitle: "for Sé Collections",
-        category: "Lighting",
-        tags: ["Lighting", "Ceiling Lights"],
-        materials: "Hand-carved crystal glass • Polished brass chain",
-        dimensions: "",
-        description: "A teardrop pendant in hand-carved emerald crystal suspended from a polished brass pebble chain — luminous Murano-inspired craftsmanship reimagined for Sé Collections."
-      },
-      {
-        image: seCollectionsDarkPendant,
-        title: "Dark Glass Pendant",
-        subtitle: "for Sé Collections",
-        category: "Lighting",
-        tags: ["Lighting", "Ceiling Lights"],
-        materials: "Hand-carved smoked crystal glass • Polished brass chain",
-        dimensions: "",
-        description: "A dramatic teardrop pendant in hand-carved smoked crystal with organic surface patterns, suspended from a polished brass chain — a bold counterpart in the Sé Collections lighting family."
-      },
-      {
-        image: seCollectionsMarbleTable,
-        title: "Sculptural Marble Table",
-        subtitle: "for Sé Collections",
-        category: "Tables",
-        tags: ["Tables", "Dining Tables"],
-        materials: "Hand-sculpted green marble",
-        dimensions: "",
-        description: "A monumental dining table in hand-sculpted green marble for Sé Collections, its raw, textured surface and organic legs evoking geological formations — a statement of primal material beauty."
-      },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/tristanauer/" },
