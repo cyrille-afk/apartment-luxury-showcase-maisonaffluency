@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2, Instagram, Grid3X3, LayoutGrid } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, Instagram } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import bedroomImage from "@/assets/master-suite.jpg";
@@ -366,24 +366,45 @@ const Gallery = () => {
                     {section.experience}
                   </h3>
                   {originalSectionIndex === 0 && (
-                    <div className="hidden md:flex items-center gap-1.5">
-                      <button
-                        onClick={() => setGridCols(3)}
-                        className={`flex items-center gap-1 p-1.5 rounded transition-all ${gridCols === 3 ? 'text-primary' : 'text-primary/30 hover:text-primary/60'}`}
-                        aria-label="3 column grid"
-                      >
-                        <Grid3X3 className="w-4 h-4" />
-                        <span className="text-[10px] font-body">3</span>
-                      </button>
-                      <button
-                        onClick={() => setGridCols(5)}
-                        className={`flex items-center gap-1 p-1.5 rounded transition-all ${gridCols === 5 ? 'text-primary' : 'text-primary/30 hover:text-primary/60'}`}
-                        aria-label="5 column grid"
-                      >
-                        <Grid3X3 className="w-4 h-4" />
-                        <span className="text-[10px] font-body">5</span>
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setGridCols(gridCols === 3 ? 5 : 3)}
+                      className="hidden md:flex items-center p-1.5 rounded transition-all text-primary hover:text-primary/80"
+                      aria-label={`Switch to ${gridCols === 3 ? 5 : 3} column grid`}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-current">
+                        {gridCols === 3 ? (
+                          <>
+                            <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8" />
+                            <rect x="7.5" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8" />
+                            <rect x="14" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8" />
+                            <rect x="1" y="7.5" width="5" height="5" rx="1" fill="currentColor" opacity="0.4" />
+                            <rect x="7.5" y="7.5" width="5" height="5" rx="1" fill="currentColor" opacity="0.4" />
+                            <rect x="14" y="7.5" width="5" height="5" rx="1" fill="currentColor" opacity="0.4" />
+                            <rect x="1" y="14" width="5" height="5" rx="1" fill="currentColor" opacity="0.2" />
+                            <rect x="7.5" y="14" width="5" height="5" rx="1" fill="currentColor" opacity="0.2" />
+                            <rect x="14" y="14" width="5" height="5" rx="1" fill="currentColor" opacity="0.2" />
+                          </>
+                        ) : (
+                          <>
+                            <rect x="0.5" y="0.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.8" />
+                            <rect x="4.5" y="0.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.8" />
+                            <rect x="8.5" y="0.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.8" />
+                            <rect x="12.5" y="0.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.8" />
+                            <rect x="16.5" y="0.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.8" />
+                            <rect x="0.5" y="4.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
+                            <rect x="4.5" y="4.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
+                            <rect x="8.5" y="4.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
+                            <rect x="12.5" y="4.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
+                            <rect x="16.5" y="4.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.4" />
+                            <rect x="0.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.2" />
+                            <rect x="4.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.2" />
+                            <rect x="8.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.2" />
+                            <rect x="12.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.2" />
+                            <rect x="16.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.2" />
+                          </>
+                        )}
+                      </svg>
+                    </button>
                   )}
                 </div>
                 <p className="text-sm md:text-base text-muted-foreground font-body italic">
