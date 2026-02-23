@@ -959,6 +959,7 @@ const brandToDesignerMap: Record<string, string> = {
   "CC-Tapis": "cc-tapis",
   "Haymann Editions": "haymann-editions",
   "Atelier DeMichelis": "atelier-demichelis",
+  "De La Espada": "de-la-espada",
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
