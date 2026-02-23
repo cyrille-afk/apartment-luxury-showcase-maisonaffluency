@@ -1813,6 +1813,58 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { type: "Curators' Picks" },
     ],
   },
+  {
+    id: "se-collections",
+    name: "Sé Collections",
+    specialty: "Sculptural Furniture & Decorative Objects",
+    origin: "Portugal",
+    description: "Portuguese atelier producing bold sculptural furniture and lighting in collaboration with leading international designers, distinguished by extraordinary material craftsmanship in glass, marble, and metal.",
+    curatorPicks: [
+      {
+        image: seCollectionsGlassDisc,
+        title: "Sculpted Glass Disc",
+        subtitle: "for Sé Collections",
+        category: "Decorative Object",
+        tags: ["Decorative Object", "Sculptural Objects"],
+        materials: "Hand-carved crystal glass",
+        dimensions: "",
+        description: "A mesmerising hand-carved crystal disc for Sé Collections, its radial facets catching and refracting light in deep emerald tones — a sculptural centrepiece of extraordinary glass craftsmanship."
+      },
+      {
+        image: seCollectionsGreenPendant,
+        title: "Green Glass Pendant",
+        subtitle: "for Sé Collections",
+        category: "Lighting",
+        tags: ["Lighting", "Ceiling Lights"],
+        materials: "Hand-carved crystal glass • Polished brass chain",
+        dimensions: "",
+        description: "A teardrop pendant in hand-carved emerald crystal suspended from a polished brass pebble chain — luminous Murano-inspired craftsmanship reimagined for Sé Collections."
+      },
+      {
+        image: seCollectionsDarkPendant,
+        title: "Dark Glass Pendant",
+        subtitle: "for Sé Collections",
+        category: "Lighting",
+        tags: ["Lighting", "Ceiling Lights"],
+        materials: "Hand-carved smoked crystal glass • Polished brass chain",
+        dimensions: "",
+        description: "A dramatic teardrop pendant in hand-carved smoked crystal with organic surface patterns, suspended from a polished brass chain — a bold counterpart in the Sé Collections lighting family."
+      },
+      {
+        image: seCollectionsMarbleTable,
+        title: "Sculptural Marble Table",
+        subtitle: "for Sé Collections",
+        category: "Tables",
+        tags: ["Tables", "Dining Tables"],
+        materials: "Hand-sculpted green marble",
+        dimensions: "",
+        description: "A monumental dining table in hand-sculpted green marble for Sé Collections, its raw, textured surface and organic legs evoking geological formations — a statement of primal material beauty."
+      },
+    ],
+    links: [
+      { type: "Curators' Picks" },
+    ],
+  },
 ];
 
 const FeaturedDesigners = () => {

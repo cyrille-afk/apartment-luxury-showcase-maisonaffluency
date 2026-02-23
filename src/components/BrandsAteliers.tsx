@@ -950,7 +950,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Delcourt Collection": "forest-giaconia",
   "Entrelacs Création": "entrelacs-creation",
   "Charles Paris": "felix-agostini",
-  "Sé Collections": "tristan-auer",
+  "Sé Collections": "se-collections",
   "Reda Amalou": "reda-amalou",
   "Bina Baitel": "bina-baitel",
   "Emanuelle Levet Stenne": "emanuelle-levet-stenne",
