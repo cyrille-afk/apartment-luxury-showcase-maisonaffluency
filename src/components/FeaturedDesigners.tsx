@@ -666,7 +666,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "bruno-de-maistre",
-    name: "Bruno de Maistre",
+    name: "Bruno de Maistre - Atelier BdM",
     specialty: "Contemporary Furniture Design",
     image: brunoDeMaistreImg,
     biography:

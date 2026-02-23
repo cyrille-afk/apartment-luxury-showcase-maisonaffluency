@@ -193,7 +193,7 @@ const partnerBrands = [
   },
   {
     id: "bruno-de-maistre",
-    name: "Bruno de Maistre",
+    name: "Bruno de Maistre - Atelier BdM",
     category: "Tables",
     subcategory: "Desks",
     origin: "France",
@@ -818,7 +818,7 @@ const brandBgMap: Record<string, string> = {
   "Atelier DeMichelis": atelierDemichelisBg,
   "Atelier Février": atelierFevrierBg,
   "Babled Studio": emmanuelBabledBg,
-  "Bruno de Maistre": brunoDeMaistreBg,
+  "Bruno de Maistre - Atelier BdM": brunoDeMaistreBg,
   "Celso de Lemos": celsoDeLemosBg,
   
   "Garnier & Linker": garnierLinkerBg,
@@ -883,7 +883,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Atelier Février": "atelier-fevrier",
   "Atelier Pendhapa": "atelier-pendhapa",
   "Babled Studio": "emmanuel-babled",
-  "Bruno de Maistre": "bruno-de-maistre",
+  "Bruno de Maistre - Atelier BdM": "bruno-de-maistre",
   "Ecart Paris": "jean-michel-frank",
   "Eric Schmitt Studio": "eric-schmitt-studio",
   "Garnier & Linker": "garnier-linker",
