@@ -75,7 +75,7 @@ import noeDuchaufourBg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-
+import redaAmalouBg from "@/assets/designers/reda-amalou.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -608,6 +608,18 @@ const partnerBrands = [
     galleryIndex: 0, // An Inviting Lounge Area
   },
   {
+    id: "reda-amalou-design",
+    name: "Reda Amalou Design",
+    category: "Tables",
+    subcategory: "Tables",
+    tableType: "Side Tables",
+    origin: "France",
+    description: "French architect and designer creating collectible furniture editions that transcend the boundaries between architecture and design, with pieces of geometric precision and sculptural elegance.",
+    featured: "DOT Side Table",
+    instagram: "https://instagram.com/redaamalou",
+    galleryIndex: 12,
+  },
+  {
     id: "robicara",
     name: "Robicara",
     category: "Storage",
@@ -908,6 +920,7 @@ const brandBgMap: Record<string, string> = {
   "Thierry Lemaire": thierryLemaireBg,
   "Serge Mouille": sergeMouilleBg,
   "Robicara": robicaraBg,
+  "Reda Amalou Design": redaAmalouBg,
   "Peter Reed 1861": peterReedBg,
   "Pierre Bonnefille": pierreBonnefilleBg,
   "Pinton 1867": pinton1867Bg,
@@ -967,6 +980,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Olivia Cognet": "olivia-cognet",
   "Pierre Bonnefille": "pierre-bonnefille",
   "Robicara": "robicara",
+  "Reda Amalou Design": "reda-amalou",
   "Thierry Lemaire": "thierry-lemaire",
   "Théorème Editions": "theoreme-editions",
   "Cristallerie Saint-Louis": "noe-duchaufour-lawrance",
