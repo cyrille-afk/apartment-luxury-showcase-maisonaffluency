@@ -1845,7 +1845,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       {
         image: seCollectionsDarkPendant,
         title: "Gae Pendant by Ini Archibong",
-        subtitle: "for Sé Collections",
+        subtitle: "",
         category: "Lighting",
         tags: ["Lighting", "Ceiling Lights"],
         materials: "Hand-carved smoked crystal glass • Polished brass chain",
@@ -1856,7 +1856,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       {
         image: seCollectionsMarbleTable,
         title: "Valley of Contentment Low Table by Ini Archibong",
-        subtitle: "for Sé Collections",
+        subtitle: "",
         category: "Tables",
         tags: ["Tables", "Low Tables"],
         materials: "Verde Lapponia Marble",
