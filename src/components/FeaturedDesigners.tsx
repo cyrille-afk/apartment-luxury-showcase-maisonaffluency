@@ -409,7 +409,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       "Apparatus Studio is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
     notableWorks: "Lantern Table Lamp, Metronome Reading Floor Lamp, Sculptural Lighting Series",
     notableWorksLinks: [
-      { text: "Lantern Table Lamp", galleryIndex: 15 },
+      { text: "Lantern Table Lamp", galleryIndex: 13 },
       { text: "Median 3 Surface Alabaster Lights", galleryIndex: 0 },
       { text: "Metronome Reading Floor Lamp", galleryIndex: 10 }
     ],
@@ -790,7 +790,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Founded by the Macheret family in central France, Entrelacs is an artisan foundry where bronze and alabaster—materials inherited from the origins of our world—are crafted into timeless, pared-down expressions. Yves Macheret, who has been running the foundry with his brother Paul since 2015, trained alongside his father to master all techniques of bronze work: modelling, mould-making, casting, chasing, and patination. His vision to create minimal lighting designs at accessible prices has naturally steered him towards a timeless aesthetic that fully expresses the beauty and simplicity of these noble materials.",
     notableWorks: "Bronze & Alabaster Lighting Collection, Martell Wall Lamp",
-    notableWorksLink: { text: "Martell Wall Lamp", galleryIndex: 15 },
+    notableWorksLink: { text: "Martell Wall Lamp", galleryIndex: 13 },
     philosophy: "Revealing the beauty and simplicity of bronze, making exceptional craftsmanship accessible while honoring a heritage passed down from father to son.",
     curatorPicks: [
       { 
@@ -1707,7 +1707,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: redaAmalouImg,
     biography: "Reda Amalou is a French architect and designer who founded the architectural agency AW2 over 25 years ago with the ambition of transcending the boundaries between architecture and design. A true creator of experiences, his work spans luxury hospitality architecture (Six Senses, Coucoo Cabanes) to collectible furniture editions. His DOT side table — a perfect geometric sphere in lacquered wood — has become one of the most recognized pieces in contemporary French design.",
     notableWorks: "DOT Side Table (Maison Affluency), Eggshell Collection, AW2 Hospitality Projects",
-    notableWorksLink: { text: "DOT Side Table", galleryIndex: 15 },
+    notableWorksLink: { text: "DOT Side Table", galleryIndex: 13 },
     philosophy: "Architecture and design are the same discipline — both are about creating places that stimulate the mind and mobilize the senses.",
     curatorPicks: [],
     links: [

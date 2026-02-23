@@ -321,7 +321,7 @@ const partnerBrands = [
     description: "French designer creating bold, sculptural furniture and lighting that combines artistic vision with masterful craftsmanship and luxurious materials.",
     featured: "Ooh La La Console for Sé Collections",
     instagram: "https://instagram.com/damienlangloismeurinne_studio",
-    galleryIndex: 14, // Design Icons and Collectibles
+    galleryIndex: 15, // Design Icons and Collectibles
   },
   {
     id: "ecart-paris",
@@ -388,7 +388,7 @@ const partnerBrands = [
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
     featured: "Carved Marble Marie Lamp by Toni Grilo",
     instagram: "https://instagram.com/haymanneditions",
-    galleryIndex: 14, // Design Icons and Collectibles
+    galleryIndex: 15, // Design Icons and Collectibles
   },
   {
     id: "herve-van-der-straeten",
@@ -456,7 +456,7 @@ const partnerBrands = [
     description: "French glass artist renowned for his extraordinary hand-silvered mirrors and sculptural glass works, each piece a unique testament to ancient techniques reimagined.",
     featured: "Silver Glass Hammer Mirror",
     instagram: "https://instagram.com/kikolumieres",
-    galleryIndex: 14, // Design Icons and Collectibles
+    galleryIndex: 15, // Design Icons and Collectibles
   },
   {
     id: "leo-sentou",
@@ -552,7 +552,7 @@ const partnerBrands = [
     description: "French luxury brand creating sculptural marble candles and decorative objects that blend artisanal craftsmanship with contemporary design sensibility.",
     featured: "Lyra Marble Candle",
     instagram: "https://instagram.com/ooummparis",
-    galleryIndex: 14, // Design Icons and Collectibles
+    galleryIndex: 15, // Design Icons and Collectibles
   },
   {
     id: "olivia-cognet",
@@ -617,7 +617,7 @@ const partnerBrands = [
     description: "French architect and designer creating collectible furniture editions that transcend the boundaries between architecture and design, with pieces of geometric precision and sculptural elegance.",
     featured: "DOT Side Table",
     instagram: "https://instagram.com/redaamalou",
-    galleryIndex: 15,
+    galleryIndex: 13,
   },
   {
     id: "robicara",
