@@ -445,21 +445,11 @@ const Gallery = () => {
                       <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm p-1.5 rounded-full animate-pulse-fade">
                         <Maximize2 className="w-3.5 h-3.5 text-white" />
                       </div>
-                      {index === 2 && (
-                        <p className="absolute top-2 right-2 text-[8px] text-white/40 font-body tracking-wider flex items-center gap-1">
-                          Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 hover:text-white/60 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-3 h-3 text-[#ee2a7b]" />Thanawat Chu</a>
-                        </p>
-                      )}
                     </motion.div>
                   );
                 })}
               </div>
 
-              {/* Photo credit — mobile only */}
-              <p className="text-[9px] text-muted-foreground/40 font-body tracking-wider mt-3 md:hidden flex items-center gap-1">
-                Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 hover:text-muted-foreground/70 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-2.5 h-2.5" style={{ stroke: "url(#ig-gradient-gallery)" }} />Thanawat Chu</a>
-                <svg width="0" height="0"><defs><linearGradient id="ig-gradient-gallery" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f9ce34" /><stop offset="50%" stopColor="#ee2a7b" /><stop offset="100%" stopColor="#6228d7" /></linearGradient></defs></svg>
-              </p>
 
               {/* Dot indicators — mobile only */}
               <div className="flex justify-center gap-2 mt-2 md:hidden">
@@ -515,11 +505,6 @@ const Gallery = () => {
                           </span>
                         </button>
                       </div>
-                      {index === 2 && (
-                        <p className="text-[10px] text-muted-foreground/50 font-body tracking-wider text-right -mt-4 md:-mt-5 mb-4 md:mb-5 flex items-center gap-1 justify-end">
-                          Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-muted-foreground transition-colors"><Instagram className="w-3 h-3 text-[#ee2a7b]" />Thanawat Chu</a>
-                        </p>
-                      )}
                     </motion.div>
                   );
                 })}
