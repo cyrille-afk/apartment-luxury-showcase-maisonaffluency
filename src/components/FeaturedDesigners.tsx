@@ -38,6 +38,8 @@ import robicaraImg from "@/assets/designers/robicara-v2.jpg";
 import redaAmalouImg from "@/assets/designers/reda-amalou.jpg";
 import noeDuchaufourImg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
 import noeDuchaufourMadonnaTables from "@/assets/curators-picks/noe-duchaufour-madonna-tables.png";
+import noeMineralFlowerSide from "@/assets/curators-picks/noe-mineral-flower-side-table.png";
+import noeMineralFlowerCoffee from "@/assets/curators-picks/noe-mineral-flower-coffee-table.png";
 import binaBAitelImg from "@/assets/designers/bina-baitel.png";
 import tristanAuerImg from "@/assets/designers/tristan-auer.jpg";
 
@@ -1613,6 +1615,26 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Glass & Aluminium",
         dimensions: "Side Table: W 50 × D 50 × H 60 cm – 33 kg\nTable M: W 70 × D 70 × H 33 cm – 45 kg\nTable L: W 90 × D 90 × H 35 cm – 66 kg",
         description: "The Madonna Del Monte collection by Noé Duchaufour-Lawrance features a series of round tables in glass and aluminium, available in three sizes. Their sculpted glass tops evoke organic water ripple forms, combining biomorphic design with industrial precision."
+      },
+      {
+        image: noeMineralFlowerSide,
+        title: "Mineral Flower Side Table II",
+        subtitle: "",
+        category: "Tables",
+        tags: ["Tables", "Side Tables"],
+        materials: "Marble",
+        dimensions: "W 47,8 × D 61,5 × H 53 cm – 50 kg",
+        description: "The Mineral Flower Side Table II by Noé Duchaufour-Lawrance is a sculptural marble side table whose interlocking petal-like forms evoke natural stone erosion. Each piece is carved from a single block, celebrating the raw beauty of marble through organic, biomorphic geometry."
+      },
+      {
+        image: noeMineralFlowerCoffee,
+        title: "Mineral Flower Coffee Table",
+        subtitle: "",
+        category: "Tables",
+        tags: ["Tables", "Coffee Tables"],
+        materials: "Marble",
+        dimensions: "W 121 × D 114 × H 46,5 cm – 180 kg",
+        description: "The Mineral Flower Coffee Table by Noé Duchaufour-Lawrance is a monumental marble coffee table composed of sweeping, overlapping stone petals. Its sculptural silhouette transforms raw marble into a fluid, flower-inspired centrepiece of extraordinary presence."
       },
     ],
     links: [
