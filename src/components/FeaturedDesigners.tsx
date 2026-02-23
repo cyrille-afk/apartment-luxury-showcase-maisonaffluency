@@ -266,7 +266,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography: "Adam Courts is the founder and creative director of Okha, a Johannesburg-based design studio at the vanguard of contemporary collectible furniture. Drawing on the rich material culture and craft traditions of southern Africa, Courts creates pieces of sculptural authority and refined restraint. His work — spanning seating, cabinetry, tables and lighting — is distinguished by its precision joinery, architect's rigour and a deep sensitivity to texture and form. Okha is represented in landmark private collections and leading design galleries internationally.",
     notableWorks: "Tectra Coffee Table, Void Dining Chair, Geometer Chair, BNVO Dining Chair, Repose Sofa, OVD Server",
     notableWorksLinks: [
-      { text: "Villa Pedestal Nightstand", galleryIndex: 11 },
+      { text: "Villa Pedestal Nightstand", galleryIndex: 12 },
     ],
     philosophy: "Good design is fearless. It should command a room without shouting — and reward the hand that touches it.",
     curatorPicks: [
@@ -354,7 +354,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Alexander Lamont is a British designer based in Bangkok whose eponymous brand has become synonymous with exceptional craftsmanship and the innovative use of traditional materials. Working with bronze, shagreen, straw marquetry, lacquer and gold leaf, his pieces marry East and West influences with a distinct sculptural presence. Winner of multiple UNESCO Awards for Excellence in Craftsmanship, his work graces prestigious interiors worldwide.",
     notableWorks: "Hammered Bowls (UNESCO Award), Brancusi Spiral Table, River Ledge Credenza, Agata Cabinet, Lune Mirrors",
-    notableWorksLink: { text: "Corteza Console Table | Natural Distress", galleryIndex: 20 },
+    notableWorksLink: { text: "Corteza Console Table | Natural Distress", galleryIndex: 21 },
     philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
     curatorPicks: [
       { 
@@ -409,9 +409,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       "Apparatus Studio is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
     notableWorks: "Lantern Table Lamp, Metronome Reading Floor Lamp, Sculptural Lighting Series",
     notableWorksLinks: [
-      { text: "Lantern Table Lamp", galleryIndex: 13 },
+      { text: "Lantern Table Lamp", galleryIndex: 14 },
       { text: "Median 3 Surface Alabaster Lights", galleryIndex: 0 },
-      { text: "Metronome Reading Floor Lamp", galleryIndex: 8 }
+      { text: "Metronome Reading Floor Lamp", galleryIndex: 10 }
     ],
     philosophy:
       "We create objects that exist at the intersection of art, design, and architecture—pieces that define and enhance the spaces they inhabit.",
@@ -790,7 +790,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Founded by the Macheret family in central France, Entrelacs is an artisan foundry where bronze and alabaster—materials inherited from the origins of our world—are crafted into timeless, pared-down expressions. Yves Macheret, who has been running the foundry with his brother Paul since 2015, trained alongside his father to master all techniques of bronze work: modelling, mould-making, casting, chasing, and patination. His vision to create minimal lighting designs at accessible prices has naturally steered him towards a timeless aesthetic that fully expresses the beauty and simplicity of these noble materials.",
     notableWorks: "Bronze & Alabaster Lighting Collection, Martell Wall Lamp",
-    notableWorksLink: { text: "Martell Wall Lamp", galleryIndex: 13 },
+    notableWorksLink: { text: "Martell Wall Lamp", galleryIndex: 14 },
     philosophy: "Revealing the beauty and simplicity of bronze, making exceptional craftsmanship accessible while honoring a heritage passed down from father to son.",
     curatorPicks: [
       { 
@@ -1553,7 +1553,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       "Milan Pekař is a Czech glass artist renowned for his mastery of crystalline glass techniques. His Crystalline Vase collection showcases his exceptional skill in creating pieces that capture and refract light in mesmerizing ways. Working in the tradition of Bohemian glassmaking while pushing contemporary boundaries, his work transforms functional vessels into sculptural art.",
     notableWorks: "Crystalline Vase Collection, Crystalline Volume Series, Sculptural Glass Vessels",
     notableWorksLinks: [
-      { text: "Crystalline Vase — Volume 5", galleryIndex: 15 },
+      { text: "Crystalline Vase — Volume 5", galleryIndex: 16 },
       { text: "Crystalline Vase — Volume 3", galleryIndex: 5 },
     ],
     
@@ -1614,7 +1614,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: noeDuchaufourImg,
     biography: "Noé Duchaufour-Lawrance is a French designer based in Paris known for his organic, biomorphic approach to furniture and objects. His work explores the intersection of natural forms and industrial materials, creating pieces of rare tactile and visual poetry. He has collaborated with Saint-Louis crystal, Bernhardt Design, and leading European manufacturers. His Amber Folio Portable Lamp for Cristallerie Saint-Louis — featured at Maison Affluency — showcases his mastery of translucent materials and organic form.",
     notableWorks: "Amber Folio Portable Lamp for Saint-Louis (Maison Affluency), Refine Console, Steinway Collaboration",
-    notableWorksLink: { text: "Amber Folio Lamp for Cristallerie Saint-Louis", galleryIndex: 21 },
+    notableWorksLink: { text: "Amber Folio Lamp for Cristallerie Saint-Louis", galleryIndex: 22 },
     philosophy: "Nature has already designed everything. My role is to find those forms and translate them into objects that resonate with the human hand and eye.",
     curatorPicks: [
       {
@@ -1707,7 +1707,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: redaAmalouImg,
     biography: "Reda Amalou is a French architect and designer who founded the architectural agency AW2 over 25 years ago with the ambition of transcending the boundaries between architecture and design. A true creator of experiences, his work spans luxury hospitality architecture (Six Senses, Coucoo Cabanes) to collectible furniture editions. His DOT side table — a perfect geometric sphere in lacquered wood — has become one of the most recognized pieces in contemporary French design.",
     notableWorks: "DOT Side Table (Maison Affluency), Eggshell Collection, AW2 Hospitality Projects",
-    notableWorksLink: { text: "DOT Side Table", galleryIndex: 13 },
+    notableWorksLink: { text: "DOT Side Table", galleryIndex: 14 },
     philosophy: "Architecture and design are the same discipline — both are about creating places that stimulate the mind and mobilize the senses.",
     curatorPicks: [],
     links: [
