@@ -21,7 +21,7 @@ const sections = [
   { id: "curating-team", label: "Team", icon: Users },
   { id: "designers", label: "Designers", icon: Palette },
   { id: "collectibles", label: "Collectibles", icon: Gem },
-  { id: "brands", label: "Brands", icon: Building2 },
+  { id: "brands", label: "Ateliers", icon: Building2 },
   { id: "details", label: "Trade", icon: FileText },
   { id: "contact", label: "Contact", icon: Mail },
 ];

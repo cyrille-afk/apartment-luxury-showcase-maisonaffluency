@@ -1327,7 +1327,7 @@ const BrandsAteliers = () => {
           </div>
           <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
-              Brands & Ateliers
+              Ateliers
             </h2>
           </div>
           {/* A-Z alphabet jump bar + Search + Filter */}
