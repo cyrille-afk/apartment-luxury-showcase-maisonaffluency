@@ -561,12 +561,19 @@ const Gallery = () => {
           </VisuallyHidden>
           <div className="relative w-full h-full flex items-center justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
             {/* Close button */}
-            <button onClick={closeLightbox} className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Close lightbox">
+            <button onClick={closeLightbox} className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-2 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
               <X className="h-6 w-6 text-white" />
             </button>
 
-            {/* Previous button */}
-            <button onClick={goToPrevious} className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Previous image">
+            {/* Pill indicator - top right */}
+            <div className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none md:hidden">
+              <span className="text-white text-[10px] font-body font-medium leading-none">
+                {currentImageIndex + 1}/{allItems.length}
+              </span>
+            </div>
+
+            {/* Previous button - desktop only */}
+            <button onClick={goToPrevious} className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Previous image">
               <ChevronLeft className="h-8 w-8 text-white" />
             </button>
 
@@ -580,14 +587,26 @@ const Gallery = () => {
                 <p className="text-sm md:text-base text-white/70 font-body max-w-2xl">
                   {allItems[currentImageIndex]?.description}
                 </p>
-                <p className="text-xs text-white/50 mt-3 font-body">
+                {/* Dot indicators - mobile only */}
+                <div className="flex md:hidden justify-center gap-1.5 mt-4">
+                  {allItems.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentImageIndex(i)}
+                      className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentImageIndex ? 'bg-white' : 'bg-white/40'}`}
+                      aria-label={`Go to image ${i + 1}`}
+                    />
+                  ))}
+                </div>
+                {/* Counter - desktop only */}
+                <p className="hidden md:block text-xs text-white/50 mt-3 font-body">
                   {currentImageIndex + 1} / {allItems.length}
                 </p>
               </div>
             </div>
 
-            {/* Next button */}
-            <button onClick={goToNext} className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Next image">
+            {/* Next button - desktop only */}
+            <button onClick={goToNext} className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Next image">
               <ChevronRight className="h-8 w-8 text-white" />
             </button>
           </div>
