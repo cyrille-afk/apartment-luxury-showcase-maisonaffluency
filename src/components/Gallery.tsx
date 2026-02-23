@@ -392,7 +392,7 @@ const Gallery = () => {
             delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl md:text-3xl lg:text-4xl font-serif text-primary mb-2">
+                  <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-primary mb-2">
                     {section.experience}
                   </h3>
                   {originalSectionIndex === 0 && (
