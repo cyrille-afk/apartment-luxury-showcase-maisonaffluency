@@ -993,6 +993,14 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       "Design should bring joy and surprise to daily life while maintaining the highest standards of craftsmanship.",
     curatorPicks: [
       {
+        image: hamreiPick4,
+        title: "MIRRA Side Table",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Textured blackened brass, solid Murano glass top (Ocean Blue)",
+        dimensions: "Ø36 × H48 cm (glass Ø32 cm)"
+      },
+      {
         image: hamreiPick1,
         title: "PEDRO Coffee Table",
         subtitle: "Limited Edition Aqua",
@@ -1016,14 +1024,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Tables", "Side Table"],
         materials: "Solid cast bronze, hand-textured and finished",
         dimensions: "Small: Ø28 × H48 cm / Tall: Ø37 × H60 cm"
-      },
-      {
-        image: hamreiPick4,
-        title: "MIRRA Side Table",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Textured blackened brass, solid Murano glass top (Ocean Blue)",
-        dimensions: "Ø36 × H48 cm (glass Ø32 cm)"
       },
       {
         image: hamreiPick5,
