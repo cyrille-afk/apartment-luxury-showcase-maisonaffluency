@@ -1855,13 +1855,14 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       {
         image: seCollectionsMarbleTable,
-        title: "Sculptural Marble Table",
+        title: "Valley of Contentment Low Table by Ini Archibong",
         subtitle: "for Sé Collections",
         category: "Tables",
-        tags: ["Tables", "Dining Tables"],
-        materials: "Hand-sculpted green marble",
-        dimensions: "",
-        description: "A monumental dining table in hand-sculpted green marble for Sé Collections, its raw, textured surface and organic legs evoking geological formations — a statement of primal material beauty."
+        tags: ["Tables", "Low Tables"],
+        materials: "Verde Lapponia Marble",
+        dimensions: "W 154 × D 75 × H 40 cm",
+        description: "A monumental low table in hand-sculpted Verde Lapponia marble for Sé Collections, its raw, textured surface and organic legs evoking geological formations — a statement of primal material beauty.",
+        edition: "Edition of 8"
       },
     ],
     links: [
