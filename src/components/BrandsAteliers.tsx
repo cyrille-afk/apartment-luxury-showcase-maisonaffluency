@@ -66,7 +66,7 @@ import gillesBoissierBg from "@/assets/designers/gilles-boissier-bg.png";
 import jacobHashimotoBg from "@/assets/designers/jacob-hashimoto-bg.png";
 import paulCocksedgeBg from "@/assets/designers/paul-cocksedge-bg.jpg";
 import leBerreVevaudBg from "@/assets/designers/le-berre-vevaud-bg.png";
-import binaBaitelBg from "@/assets/designers/bina-baitel.png";
+import binaBaitelBg from "@/assets/designers/bina-baitel-bg.png";
 import charlesParisBg from "@/assets/designers/charles-paris-bg.png";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
