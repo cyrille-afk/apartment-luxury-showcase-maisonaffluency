@@ -837,7 +837,7 @@ const partnerBrands = [
     subcategory: "Furniture",
     origin: "France",
     description: "French architect and designer renowned for his bold, sculptural furniture that merges modernist rigor with a warm, tactile sensibility, produced in collaboration with the finest European ateliers.",
-    instagram: "https://www.instagram.com/pierreyovanovitch/",
+    instagram: "https://www.instagram.com/pierre.yovanovitch.mobilier/",
   },
   {
     id: "bruno-moinard-editions",
