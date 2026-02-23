@@ -66,6 +66,7 @@ import gillesBoissierBg from "@/assets/designers/gilles-boissier-bg.png";
 import jacobHashimotoBg from "@/assets/designers/jacob-hashimoto-bg.png";
 import paulCocksedgeBg from "@/assets/designers/paul-cocksedge-bg.jpg";
 import leBerreVevaudBg from "@/assets/designers/le-berre-vevaud-bg.png";
+import binaBaitelBg from "@/assets/designers/bina-baitel.png";
 import charlesParisBg from "@/assets/designers/charles-paris-bg.png";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -201,6 +202,15 @@ const partnerBrands = [
     featured: "Lyric Desk",
     instagram: "https://instagram.com/bruno_de_maistre_bdm",
     galleryIndex: 6, // A Sophisticated Boudoir
+  },
+  {
+    id: "bina-baitel",
+    name: "Bina Baitel Studio",
+    category: "Decorative Objects",
+    subcategory: "Sculptural Objects",
+    origin: "France",
+    description: "Paris-based design studio creating interior and industrial design projects as well as unique creations in collaboration with museums and galleries, with a constant focus on timeless projects and a search for innovation.",
+    instagram: "https://instagram.com/binabaitel",
   },
   {
     id: "cazes-conquet",
@@ -819,6 +829,7 @@ const brandBgMap: Record<string, string> = {
   "Atelier Février": atelierFevrierBg,
   "Babled Studio": emmanuelBabledBg,
   "Bruno de Maistre - Atelier BdM": brunoDeMaistreBg,
+  "Bina Baitel Studio": binaBaitelBg,
   "Celso de Lemos": celsoDeLemosBg,
   
   "Garnier & Linker": garnierLinkerBg,
@@ -884,6 +895,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Atelier Pendhapa": "atelier-pendhapa",
   "Babled Studio": "emmanuel-babled",
   "Bruno de Maistre - Atelier BdM": "bruno-de-maistre",
+  "Bina Baitel Studio": "bina-baitel",
   "Ecart Paris": "jean-michel-frank",
   "Eric Schmitt Studio": "eric-schmitt-studio",
   "Garnier & Linker": "garnier-linker",
