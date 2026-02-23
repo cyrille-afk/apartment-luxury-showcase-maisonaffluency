@@ -2244,7 +2244,7 @@ const FeaturedDesigners = () => {
                 data-designer={designer.id}
                 className="border border-border/40 rounded-lg px-4 md:px-6 bg-card/30 hover:bg-card/50 transition-colors duration-300 scroll-mt-16"
               >
-                <AccordionTrigger className="hover:no-underline py-4 md:py-6 group active:scale-[0.99] touch-manipulation [&>svg]:hidden">
+                <AccordionTrigger className="hover:no-underline py-4 md:py-6 group active:scale-[0.99] touch-manipulation [&>svg]:hidden md:[&>svg]:block">
                   <div className="flex flex-col w-full gap-3">
                     <div className="flex items-center gap-4 md:gap-6 text-left w-full">
                     {designer.image ? (
@@ -2397,7 +2397,7 @@ const FeaturedDesigners = () => {
                       )}
                     </div>
                     </div>
-                    <div className="flex justify-start pl-0 md:pl-0">
+                    <div className="flex justify-start md:hidden">
                       <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
                     </div>
                   </div>
