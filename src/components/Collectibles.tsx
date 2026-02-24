@@ -203,7 +203,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Maarten Vrolijk is a Dutch designer known for his sculptural approach to furniture design. His work explores the intersection of art and functionality, creating pieces that challenge conventional forms while remaining inherently practical. Each creation reflects his deep understanding of materials and his commitment to pushing the boundaries of contemporary design.",
     notableWorks: "Sakura TRP 22001, Sculptural Glass Vessels, Unique Art Pieces",
-    notableWorksLink: { text: "Sakura TRP 22001", galleryIndex: 18 },
+    notableWorksLink: { text: "Sakura TRP 22001 | An Inviting Lounge Area", galleryIndex: 0 },
     philosophy: "Furniture should be a conversation between form and function—each piece tells a story of material and intention.",
     curatorPicks: [
       { image: maartenVrolijkVessel, title: "Sakura TRP 22001", category: "Decorative Object", subcategory: "Vessels", materials: "Handblown & sculpted glass, unique piece with certificate", dimensions: "H 52 cm × W 40 cm × D 41 cm", edition: "Unique Piece" },
