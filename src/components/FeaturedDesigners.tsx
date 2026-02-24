@@ -1743,6 +1743,13 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "80 x 60 x H40 cm",
       },
       {
+        image: redaAmalouMuse,
+        title: "MUSE Rug",
+        subtitle: "for Toulemonde Bochart",
+        materials: "Hand-tufted, vegetable silk and wool",
+        dimensions: "250 x 350 cm",
+      },
+      {
         image: redaAmalouOoma,
         title: "OOMA Dining Table",
         subtitle: "",
@@ -1755,13 +1762,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "",
         materials: "Base in American walnut or black stained oak. Hand-lacquered top, glossy or matte finish. 19 colours available. Drawer, leather interior",
         dimensions: "120 / 140 / 160 x 61 x H72 cm",
-      },
-      {
-        image: redaAmalouMuse,
-        title: "MUSE Rug",
-        subtitle: "for Toulemonde Bochart",
-        materials: "Hand-tufted, vegetable silk and wool",
-        dimensions: "250 x 350 cm",
       },
     ],
     links: [
