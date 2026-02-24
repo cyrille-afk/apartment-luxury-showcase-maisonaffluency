@@ -94,6 +94,7 @@ import lostProfileStudioBg from "@/assets/designers/lost-profile-studio-bg.jpg";
 import okurayamaStudioBg from "@/assets/designers/okurayama-studio-bg.jpg";
 import overgaardDyrmanBg from "@/assets/designers/overgaard-dyrman-bg.jpg";
 import stephaneParmentierBg from "@/assets/designers/stephane-parmentier-bg.jpg";
+import privatiselectionemBg from "@/assets/designers/privatiselectionem-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1070,6 +1071,15 @@ const partnerBrands = [
     description: "Stéphane Parmentier is a Paris-based designer and artistic director creating refined furniture and objects that blend luxurious materials — leather, bronze, marble, and rare stones — with bold, architectural silhouettes rooted in a sophisticated modernist vocabulary.",
     instagram: "https://www.instagram.com/stephaneparmentier/?hl=en",
   },
+  {
+    id: "privatiselectionem",
+    name: "Privatiselectionem",
+    category: "Furniture",
+    subcategory: "Tables & Objects",
+    origin: "Belgium",
+    description: "Privatiselectionem is a Belgian design studio creating sculptural furniture and objects defined by organic, free-form silhouettes — their work in bronze, stone, and rare materials transforms functional pieces into bold, collectible art statements.",
+    instagram: "https://www.instagram.com/privatiselectionem/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1158,6 +1168,7 @@ const brandBgMap: Record<string, string> = {
   "Okurayama Studio": okurayamaStudioBg,
   "Overgaard & Dyrman": overgaardDyrmanBg,
   "Stéphane Parmentier": stephaneParmentierBg,
+  "Privatiselectionem": privatiselectionemBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
