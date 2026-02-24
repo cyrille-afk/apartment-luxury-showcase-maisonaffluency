@@ -66,8 +66,8 @@ const galleryExperiences = [{
     description: "Armchair: Forest & Giaconia's BOB Armchair for Delcourt Collection, Side Table: Alinea Design Objects' Angelo M Side Table, Mirror: Kiko Lopez' Shadow Drawings (Unique Piece), Cushion: Takayokaya's Ojami Cushion, Vessel: Milan Pekař's Crystalline Green Vessel Volume 5"
   }, {
     image: "/gallery/intimate-4.jpeg",
-    title: "Art Life Corner",
-    description: "A curated reading corner with sculptural seating, artisan ottoman and travertine side table"
+    title: "A Colourful Nook",
+    description: "Armchair: Forest & Giaconia's BOB Armchair for Delcourt Collection, Side Table: Alinea Design Objects' Angelo M Side Table, Mirror: Kiko Lopez' Shadow Drawings (Unique Piece), Cushion: Takayokaya's Ojami Cushion, Ottoman: Bina Baitel's Sublime Ottoman M in Métaphores Fabric, Vessel: Milan Pekař's Crystalline Green Vessel Volume 5"
   }]
 }, {
   experience: "A Personal Sanctuary",
