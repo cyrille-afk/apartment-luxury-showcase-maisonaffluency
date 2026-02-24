@@ -86,6 +86,7 @@ import stephaneCgBg from "@/assets/designers/stephane-cg-bg.jpg";
 import andreaClaireBg from "@/assets/designers/andrea-claire-studio-bg.jpg";
 import michelAmarBg from "@/assets/designers/michel-amar-studio-bg.jpg";
 import arredoluceBg from "@/assets/designers/arredoluce-bg.jpg";
+import articoloStudiosBg from "@/assets/designers/articolo-studios-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -990,6 +991,15 @@ const partnerBrands = [
     description: "Founded by Angelo Lelii in 1943 in Monza, Arredoluce is an iconic Italian lighting manufacturer celebrated for its mid-century modern masterpieces — combining sculptural brass forms with opaline glass to create timeless fixtures that defined an era of Italian design excellence.",
     instagram: "https://www.instagram.com/angelolelii/?hl=en",
   },
+  {
+    id: "articolo-studios",
+    name: "Articolo Studios",
+    category: "Lighting",
+    subcategory: "Lighting",
+    origin: "Australia",
+    description: "Articolo Studios is a Melbourne-based lighting design house crafting refined, architectural luminaires — known for their minimalist silhouettes, premium materials like hand-blown glass and solid brass, and a quiet sophistication that elevates contemporary interiors.",
+    instagram: "https://www.instagram.com/articolostudios/",
+  },
 ];
 
 // Background image map
@@ -1070,6 +1080,7 @@ const brandBgMap: Record<string, string> = {
   "Andrea Claire Studio": andreaClaireBg,
   "Michel Amar Studio": michelAmarBg,
   "Arredoluce": arredoluceBg,
+  "Articolo Studios": articoloStudiosBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
