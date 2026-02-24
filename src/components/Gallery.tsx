@@ -63,7 +63,7 @@ const galleryExperiences = [{
   }, {
     image: intimateLoungeImage,
     title: "A Relaxed Setting",
-    description: "Delcourt Collection's BOB armchair, Kiko Lopez' shadow drawings mirror, Alinea Design Objects' Angelo M side table, Takayokaya's Ojami Cushion, Milan Pekař's Crystalline Vase"
+    description: "Armchair: Forest & Giaconia's BOB Armchair for Delcourt Collection, Side Table: Alinea Design Objects' Angelo M Side Table, Mirror: Kiko Lopez' Shadow Drawings (Unique Piece), Cushion: Takayokaya's Ojami Cushion, Vessel: Milan Pekař's Crystalline Green Vessel Volume 5"
   }, {
     image: "/gallery/intimate-4.jpeg",
     title: "Art Life Corner",
