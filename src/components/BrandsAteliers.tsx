@@ -135,6 +135,18 @@ const partnerBrands = [
     galleryIndex: 2, // With Panoramic Cityscape Views
   },
   {
+    id: "alinea-design-objects-side",
+    name: "Alinea Design Objects",
+    category: "Tables",
+    subcategory: "Tables",
+    tableType: "Side Tables",
+    origin: "Belgium",
+    description: "Belgian design house curating and producing exceptional furniture pieces that blend sculptural form with functional elegance.",
+    featured: "Angelo M/SR 55 Side Table",
+    instagram: "https://instagram.com/alinea_design_objects",
+    galleryIndex: 6, // A Relaxed Setting
+  },
+  {
     id: "atelier-demichelis",
     name: "Atelier DeMichelis",
     category: "Lighting",
