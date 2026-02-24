@@ -92,6 +92,7 @@ import bryanOSullivanBg from "@/assets/designers/bryan-osullivan-bg.jpg";
 import christopherBootsBg from "@/assets/designers/christopher-boots-bg.jpg";
 import lostProfileStudioBg from "@/assets/designers/lost-profile-studio-bg.jpg";
 import okurayamaStudioBg from "@/assets/designers/okurayama-studio-bg.jpg";
+import overgaardDyrmanBg from "@/assets/designers/overgaard-dyrman-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1050,6 +1051,15 @@ const partnerBrands = [
     description: "Okurayama Studio is a Japanese design practice creating monumental stone sculptures and furniture that draw from the primal power of natural landscapes — their raw, elemental works evoke ancient standing stones and celebrate the beauty of unrefined materiality.",
     instagram: "https://www.instagram.com/okurayamastudio.design/?hl=en",
   },
+  {
+    id: "overgaard-dyrman",
+    name: "Overgaard & Dyrman",
+    category: "Furniture",
+    subcategory: "Seating & Tables",
+    origin: "Denmark",
+    description: "Overgaard & Dyrman is a Danish design studio crafting precision-engineered furniture that merges traditional metalwork and leather craftsmanship with modernist sensibility — their iconic Circle Dining Chair exemplifies their mastery of sculptural form and material refinement.",
+    instagram: "https://www.instagram.com/overgaard_dyrman/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1136,6 +1146,7 @@ const brandBgMap: Record<string, string> = {
   "Christopher Boots": christopherBootsBg,
   "Lost Profile Studio": lostProfileStudioBg,
   "Okurayama Studio": okurayamaStudioBg,
+  "Overgaard & Dyrman": overgaardDyrmanBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
