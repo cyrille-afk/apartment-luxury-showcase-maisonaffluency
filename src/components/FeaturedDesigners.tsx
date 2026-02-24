@@ -2350,7 +2350,7 @@ const FeaturedDesigners = () => {
                           </div>
                         </div>
                       </DialogTrigger>
-                      <DialogContent className="max-w-3xl max-h-[90vh] [&>button]:top-3 [&>button]:right-3 [&>button]:p-2 [&>button]:bg-foreground/10 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:opacity-100 [&>button>svg]:h-5 [&>button>svg]:w-5" aria-describedby={undefined}>
+                      <DialogContent className="max-w-3xl max-h-[90vh] [&>button]:top-3 [&>button]:left-3 [&>button]:right-auto md:[&>button]:left-auto md:[&>button]:right-3 [&>button]:p-2 [&>button]:bg-foreground/10 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:opacity-100 [&>button>svg]:h-5 [&>button>svg]:w-5" aria-describedby={undefined}>
                         <VisuallyHidden>
                           <DialogTitle>{selectedImage?.name || designer.name}</DialogTitle>
                         </VisuallyHidden>
@@ -2636,7 +2636,7 @@ const FeaturedDesigners = () => {
                       setCuratorPickIndex(0);
                       setIsZoomed(false);
                     }}
-                    className="absolute top-4 right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                    className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                     aria-label="Close lightbox"
                   >
                     <X className="h-6 w-6 text-white" />
