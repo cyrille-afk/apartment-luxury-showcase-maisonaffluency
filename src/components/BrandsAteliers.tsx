@@ -89,17 +89,6 @@ import homLeXuanBg from "@/assets/designers/hom-le-xuan-bg.jpg";
 
 const partnerBrands = [
   {
-    id: "alexander-lamont-reef",
-    name: "Alexander Lamont",
-    category: "Decorative Object",
-    subcategory: "Decorative Objects",
-    origin: "Thailand",
-    description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
-    featured: "Reef Vessels",
-    instagram: "https://instagram.com/alexanderlamont",
-    galleryIndex: 0, // An Inviting Lounge Area
-  },
-  {
     id: "alexander-lamont-mantle",
     name: "Alexander Lamont",
     category: "Decorative Object",
