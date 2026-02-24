@@ -152,7 +152,7 @@ const galleryExperiences = [{
   items: [{
     image: detailsSectionImage,
     title: "Curated Vignette",
-    description: "Alexandre Lamont's Corteza Console Table, Thierry Lemaire's Kedis Lamp, Milan Pekař's small Crystalline Vase, Marcantonio Brandolini D'Adda's Vase 'Unknown N.83', Jaime Hayon's Time Piece Ceramic for Sé Collections, Jindrich Halabala's Lounge Chair in Dedar's UKIYO MONOGATARI 003, Gianfranco Frattini's Albero Bookcase for Poltrona Frau, Maarten Vrolijk's Sakura TRP 22001 Vessel"
+    description: "Console: Alexandre Lamont's Corteza Console, Table Lamp: Thierry Lemaire's Kedis Lamp, Small Vase: Milan Pekař's small Crystalline Vase, Blue Vessel: Marcantonio Brandolini D'Adda's Vase 'Unknown N.83', Side Table: Jaime Hayon's Time Piece Ceramic for Sé Collections, Lounge Chair: Jindrich Halabala's Lounge Chair in Dedar's UKIYO MONOGATARI 003, Bookcase: Gianfranco Frattini's Albero Bookcase for Poltrona Frau, Vessel: Maarten Vrolijk's Sakura TRP 22001 Vessel"
   }, {
     image: detailsConsoleImage,
     title: "Artisan Materials",
