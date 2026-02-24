@@ -79,6 +79,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import redaAmalouBg from "@/assets/designers/reda-amalou-bg.png";
 import homLeXuanBg from "@/assets/designers/hom-le-xuan-bg.jpg";
 import frederiqueRobWhittleBg from "@/assets/designers/frederique-rob-whittle-bg.jpg";
+import martinMasseBg from "@/assets/designers/martin-masse-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -915,6 +916,15 @@ const partnerBrands = [
     description: "Franco-British artistic duo specialising in monumental sculptural plasterwork, creating breathtaking bas-relief murals that transform architectural surfaces into immersive narrative landscapes inspired by nature and mythology.",
     instagram: "https://www.instagram.com/frederiqueetrobwhittle/?hl=en",
   },
+  {
+    id: "martin-masse",
+    name: "Martin Massé",
+    category: "Decorative Object",
+    subcategory: "Decorative Objects",
+    origin: "France",
+    description: "French sculptor and designer working with stone and mineral aggregates to create monumental organic forms, transforming raw geological materials into refined collectible pieces that celebrate the beauty of natural textures.",
+    instagram: "https://www.instagram.com/martin_masse_/",
+  },
 ];
 
 // Background image map
@@ -988,6 +998,7 @@ const brandBgMap: Record<string, string> = {
   "NDL Editions": ndlEditionsBg,
   "Hom Le Xuan": homLeXuanBg,
   "Frédérique and Rob Whittle": frederiqueRobWhittleBg,
+  "Martin Massé": martinMasseBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
