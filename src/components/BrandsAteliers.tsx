@@ -745,7 +745,7 @@ const partnerBrands = [
     description: "London-based luxury furniture house collaborating with visionary designers including Nika Zupanc, Jaime Hayon and Damien Langlois-Meurinne to create bold, sculptural pieces that push the boundaries of contemporary design.",
     featured: "Stardust Loveseat by Nika Zupanc",
     instagram: "https://www.instagram.com/se_collections/",
-    galleryIndex: 9, // A Serene Decor in A Personal Sanctuary
+    galleryIndex: 10, // A Serene Decor in A Personal Sanctuary
   },
   {
     id: "se-collections-ooh-la-la",
