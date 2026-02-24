@@ -95,6 +95,7 @@ import okurayamaStudioBg from "@/assets/designers/okurayama-studio-bg.jpg";
 import overgaardDyrmanBg from "@/assets/designers/overgaard-dyrman-bg.jpg";
 import stephaneParmentierBg from "@/assets/designers/stephane-parmentier-bg.jpg";
 import privatiselectionemBg from "@/assets/designers/privatiselectionem-bg.jpg";
+import achilleSalvagniBg from "@/assets/designers/achille-salvagni-bg.png";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1178,6 +1179,7 @@ const brandBgMap: Record<string, string> = {
   "Overgaard & Dyrman": overgaardDyrmanBg,
   "Stéphane Parmentier": stephaneParmentierBg,
   "Privatiselectionem": privatiselectionemBg,
+  "Achille Salvagni Atelier": achilleSalvagniBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
