@@ -87,6 +87,7 @@ import andreaClaireBg from "@/assets/designers/andrea-claire-studio-bg.jpg";
 import michelAmarBg from "@/assets/designers/michel-amar-studio-bg.jpg";
 import arredoluceBg from "@/assets/designers/arredoluce-bg.jpg";
 import articoloStudiosBg from "@/assets/designers/articolo-studios-bg.jpg";
+import basedUponBg from "@/assets/designers/based-upon-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1000,6 +1001,15 @@ const partnerBrands = [
     description: "Articolo Studios is a Melbourne-based lighting design house crafting refined, architectural luminaires — known for their minimalist silhouettes, premium materials like hand-blown glass and solid brass, and a quiet sophistication that elevates contemporary interiors.",
     instagram: "https://www.instagram.com/articolostudios/",
   },
+  {
+    id: "based-upon",
+    name: "Based Upon",
+    category: "Sculptural Furniture",
+    subcategory: "Tables & Sculpture",
+    origin: "United Kingdom",
+    description: "Based Upon is a London-based studio creating sculptural furniture and art objects that fuse organic forms with precious materials — their fluid bronze and marble pieces blur the boundary between functional design and fine art.",
+    instagram: "https://www.instagram.com/basedupon",
+  },
 ];
 
 // Background image map
@@ -1081,6 +1091,7 @@ const brandBgMap: Record<string, string> = {
   "Michel Amar Studio": michelAmarBg,
   "Arredoluce": arredoluceBg,
   "Articolo Studios": articoloStudiosBg,
+  "Based Upon": basedUponBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
