@@ -88,7 +88,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.4
-          }} className="flex gap-4 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
+          }} className="flex items-start gap-4 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
               <button 
                 onClick={() => {
                   const target = document.getElementById("sociable-environment");
