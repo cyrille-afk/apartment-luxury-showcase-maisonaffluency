@@ -88,6 +88,7 @@ import michelAmarBg from "@/assets/designers/michel-amar-studio-bg.jpg";
 import arredoluceBg from "@/assets/designers/arredoluce-bg.jpg";
 import articoloStudiosBg from "@/assets/designers/articolo-studios-bg.jpg";
 import basedUponBg from "@/assets/designers/based-upon-bg.jpg";
+import bryanOSullivanBg from "@/assets/designers/bryan-osullivan-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1010,6 +1011,15 @@ const partnerBrands = [
     description: "Based Upon is a London-based studio creating sculptural furniture and art objects that fuse organic forms with precious materials — their fluid bronze and marble pieces blur the boundary between functional design and fine art.",
     instagram: "https://www.instagram.com/basedupon",
   },
+  {
+    id: "bryan-osullivan-studio",
+    name: "Bryan O'Sullivan Studio",
+    category: "Interior Design",
+    subcategory: "Architecture & Interiors",
+    origin: "Ireland / United Kingdom",
+    description: "Bryan O'Sullivan Studio is a London and Dublin-based interior design practice known for richly layered, maximalist interiors that marry bold colour, sumptuous textures, and collectible design with a refined sense of warmth and theatricality.",
+    instagram: "https://www.instagram.com/bryanosullivancollection/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1092,6 +1102,7 @@ const brandBgMap: Record<string, string> = {
   "Arredoluce": arredoluceBg,
   "Articolo Studios": articoloStudiosBg,
   "Based Upon": basedUponBg,
+  "Bryan O'Sullivan Studio": bryanOSullivanBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
