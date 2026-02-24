@@ -85,6 +85,7 @@ import paulinPaulinPaulinBg from "@/assets/designers/paulin-paulin-paulin-bg.jpg
 import stephaneCgBg from "@/assets/designers/stephane-cg-bg.jpg";
 import andreaClaireBg from "@/assets/designers/andrea-claire-studio-bg.jpg";
 import michelAmarBg from "@/assets/designers/michel-amar-studio-bg.jpg";
+import arredoluceBg from "@/assets/designers/arredoluce-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -980,6 +981,15 @@ const partnerBrands = [
     description: "Michel Amar Studio is a Paris-based interior architecture practice renowned for its bold, sculptural approach to luxury residential and hospitality interiors — blending contemporary minimalism with dramatic material contrasts and bespoke craftsmanship.",
     instagram: "https://www.instagram.com/michel_amar/?hl=en",
   },
+  {
+    id: "arredoluce",
+    name: "Arredoluce",
+    category: "Lighting",
+    subcategory: "Lighting",
+    origin: "Italy",
+    description: "Founded by Angelo Lelii in 1943 in Monza, Arredoluce is an iconic Italian lighting manufacturer celebrated for its mid-century modern masterpieces — combining sculptural brass forms with opaline glass to create timeless fixtures that defined an era of Italian design excellence.",
+    instagram: "https://www.instagram.com/angelolelii/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1059,6 +1069,7 @@ const brandBgMap: Record<string, string> = {
   "Stéphane CG": stephaneCgBg,
   "Andrea Claire Studio": andreaClaireBg,
   "Michel Amar Studio": michelAmarBg,
+  "Arredoluce": arredoluceBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
