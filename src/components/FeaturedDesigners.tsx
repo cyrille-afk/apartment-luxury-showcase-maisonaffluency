@@ -253,6 +253,13 @@ import marcantonioVessel from "@/assets/curators-picks/marcantonio-cotissi-vesse
 import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode.jpg";
 import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
 import rowinNoneIILamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
+import stephaneCgOrsayAbstract from "@/assets/curators-picks/stephane-cg-orsay-abstract.jpg";
+import stephaneCgLouvre from "@/assets/curators-picks/stephane-cg-louvre.jpg";
+import stephaneCgWingedVictory from "@/assets/curators-picks/stephane-cg-winged-victory.jpg";
+import stephaneCgHomageToMiro from "@/assets/curators-picks/stephane-cg-homage-to-miro.jpg";
+import stephaneCgEyeOfTiger from "@/assets/curators-picks/stephane-cg-eye-of-tiger.jpg";
+import stephaneCgSkyFreeze from "@/assets/curators-picks/stephane-cg-sky-freeze.jpg";
+import stephaneCgHallwayToHeaven from "@/assets/curators-picks/stephane-cg-hallway-to-heaven.jpg";
 
 type DesignerLink = { type: string; url?: string };
 export type CuratorPick = { image?: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string };
@@ -1861,6 +1868,72 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/tristanauer/" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "stephane-cg",
+    name: "Stéphane CG",
+    specialty: "Abstract Photography & Diasec",
+    image: "",
+    origin: "France",
+    category: "Art",
+    subcategory: "Photography",
+    bio: "Stéphane CG is a French abstract photographer whose multi-exposure Diasec works transform iconic landmarks and natural landscapes into mesmerising, painterly compositions that blur the line between photography and fine art.",
+    notableWorks: ["Orsay Abstract", "Louvre: Passion and Artistry", "Winged Victory of Samotrace"],
+    curatorPicks: [
+      {
+        image: stephaneCgOrsayAbstract,
+        title: "Orsay Abstract",
+        category: "Photography",
+        tags: ["Photography", "Diasec"],
+        description: "A multi-exposure abstract interpretation of the Musée d'Orsay's grand nave — layered glass vault, golden galleries and ghostly visitors merge into a luminous, painterly composition."
+      },
+      {
+        image: stephaneCgLouvre,
+        title: "Louvre: Passion and Artistry",
+        category: "Photography",
+        tags: ["Photography", "Diasec"],
+        description: "Deep crimson galleries of the Louvre dissolve through multiple exposures into a richly atmospheric vision where Old Master paintings, gilded frames and spectral visitors converge."
+      },
+      {
+        image: stephaneCgWingedVictory,
+        title: "Winged Victory of Samotrace",
+        category: "Photography",
+        tags: ["Photography", "Diasec"],
+        description: "The Nike of Samothrace ascends her marble staircase in an ethereal multi-exposure composition — draped wings, vaulted ceilings and ascending visitors fuse into a monumental tribute to classical beauty."
+      },
+      {
+        image: stephaneCgHomageToMiro,
+        title: "Homage to Miro_2",
+        category: "Photography",
+        tags: ["Photography", "Abstract"],
+        description: "A vibrant abstract homage channelling Miró's bold palette — warm ochres, deep reds and luminous textures interweave in an intimate, painterly composition."
+      },
+      {
+        image: stephaneCgEyeOfTiger,
+        title: "Eye of the Tiger",
+        category: "Photography",
+        tags: ["Photography", "Abstract"],
+        description: "An electric blue abstract capturing concentric organic forms — layered spheres and soft gradations evoke a hypnotic, oceanic depth."
+      },
+      {
+        image: stephaneCgSkyFreeze,
+        title: "Sky Freeze (Vancouver)",
+        category: "Photography",
+        tags: ["Photography", "Abstract"],
+        description: "An explosive radial blur of forest canopy and sky — deep blue-green branches burst outward in a dynamic, kinetic composition captured in Vancouver."
+      },
+      {
+        image: stephaneCgHallwayToHeaven,
+        title: "Hallway to Heaven (Jaipur)",
+        category: "Photography",
+        tags: ["Photography", "Diasec"],
+        description: "Warm terracotta walls of a Jaipur passage dissolve through layered exposures — sunlight floods the archway as ghostly figures navigate the ancient corridor."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/stephcgart/?hl=en" },
       { type: "Curators' Picks" },
     ],
   },
