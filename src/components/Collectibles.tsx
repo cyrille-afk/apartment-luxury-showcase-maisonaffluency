@@ -523,7 +523,7 @@ const Collectibles = () => {
           >
             <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
-                Collectibles
+                Collectible Design
               </h2>
             </div>
             <p className="font-body text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed mb-4">
