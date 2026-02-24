@@ -1080,6 +1080,15 @@ const partnerBrands = [
     description: "Privatiselectionem is a Belgian design studio creating sculptural furniture and objects defined by organic, free-form silhouettes — their work in bronze, stone, and rare materials transforms functional pieces into bold, collectible art statements.",
     instagram: "https://www.instagram.com/privatiselectionem/?hl=en",
   },
+  {
+    id: "achille-salvagni-atelier",
+    name: "Achille Salvagni Atelier",
+    category: "Lighting",
+    subcategory: "Decorative Objects",
+    origin: "Italy",
+    description: "Achille Salvagni Atelier is a Rome-based design studio led by architect and designer Achille Salvagni, creating sculptural furniture, lighting and objects of extraordinary craftsmanship. His work draws from classical Roman forms and Baroque drama, reinterpreted through a contemporary lens with precious materials — bronze, onyx, rock crystal — resulting in pieces that are collected by the world's most discerning interiors.",
+    instagram: "https://www.instagram.com/atelierachillesalvagni/",
+  },
 ];
 
 // Background image map
