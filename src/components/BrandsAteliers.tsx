@@ -82,6 +82,7 @@ import frederiqueRobWhittleBg from "@/assets/designers/frederique-rob-whittle-bg
 import martinMasseBg from "@/assets/designers/martin-masse-bg.jpg";
 import mernoeBg from "@/assets/designers/mernoe-bg.jpg";
 import paulinPaulinPaulinBg from "@/assets/designers/paulin-paulin-paulin-bg.jpg";
+import stephaneCgBg from "@/assets/designers/stephane-cg-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -948,6 +949,15 @@ const partnerBrands = [
     description: "Custodians of Pierre Paulin's legendary design legacy, producing authorised re-editions and limited series of his iconic sculptural seating — celebrating one of the 20th century's most visionary French furniture designers.",
     instagram: "https://www.instagram.com/paulinpaulinpaulin/?hl=en",
   },
+  {
+    id: "stephane-cg",
+    name: "Stéphane CG",
+    category: "Art",
+    subcategory: "Photography",
+    origin: "France",
+    description: "French abstract photographer whose multi-exposure Diasec works transform iconic landmarks and natural landscapes into mesmerising, painterly compositions — blurring the line between photography and fine art.",
+    instagram: "https://www.instagram.com/stephcgart/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1024,6 +1034,7 @@ const brandBgMap: Record<string, string> = {
   "Martin Massé": martinMasseBg,
   "Mernøe": mernoeBg,
   "Paulin Paulin Paulin": paulinPaulinPaulinBg,
+  "Stéphane CG": stephaneCgBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
@@ -1069,6 +1080,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Haymann Editions": "haymann-editions",
   "Atelier DeMichelis": "atelier-demichelis",
   "De La Espada": "de-la-espada",
+  "Stéphane CG": "stephane-cg",
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
