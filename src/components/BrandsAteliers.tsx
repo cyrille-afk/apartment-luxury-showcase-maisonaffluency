@@ -322,7 +322,7 @@ const partnerBrands = [
     description: "French atelier renowned for bespoke upholstery and furniture, combining traditional savoir-faire with contemporary design to create exceptional seating pieces.",
     featured: "Kheops Bronze & Alabaster Wall Light",
     instagram: "https://www.instagram.com/entrelacs_lightings/",
-    galleryIndex: 18, // A Workspace of Distinction - Home Office with a View
+    galleryIndex: 19, // A Workspace of Distinction - Home Office with a View
   },
   {
     id: "damien-langlois-meurinne",
