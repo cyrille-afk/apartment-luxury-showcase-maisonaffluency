@@ -111,7 +111,7 @@ const Overview = () => {
                 className="text-left cursor-pointer group transition-all duration-300 hover:scale-105"
               >
                 <div className="font-display text-2xl md:text-3xl text-primary group-hover:text-accent transition-colors duration-300">50+</div>
-                <div className="font-body text-xs uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-all duration-300 leading-tight"><span className="hidden md:inline">Designers,<br />Collectible Design Pieces,<br />In Situ</span><span className="md:hidden">Designers works and<br />collectible design pieces in situ</span></div>
+                <div className="font-body text-xs uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-all duration-300 leading-tight"><span className="hidden md:inline">Designers' works,<br />Collectible Design Pieces,<br />In Situ</span><span className="md:hidden">Designers works and<br />collectible design pieces in situ</span></div>
               </button>
             </motion.div>
           </div>
