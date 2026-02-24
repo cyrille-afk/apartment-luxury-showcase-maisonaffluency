@@ -39,7 +39,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.6,
               delay: 0.2
-            }} className="mb-2 tracking-[0.3em] text-foreground text-sm md:text-xl lg:text-2xl font-serif font-bold">
+            }} className="mb-2 tracking-[0.3em] text-foreground text-xl md:text-2xl lg:text-2xl font-serif font-bold">
                 <button
                   onClick={() => {
                     const gallerySection = document.getElementById("gallery");
