@@ -122,7 +122,7 @@ const galleryExperiences = [{
   }, {
     image: smallRoomPersonalityImage,
     title: "Compact Elegance",
-    description: "Apparatus Studio Lantern Table, Reda Amalou Eggshell DOT side table, Pierre Frey Kagura and Kasimir Fabrics, Pierre Frey Natte Wallcovering, Peter Reed's Riyad Double Faced Throw"
+    description: "Headboard: Pierre Frey's Kagura Fabric, Apparatus Studio Lantern Table, Reda Amalou Eggshell DOT side table, Pierre Frey Kagura and Kasimir Fabrics, Pierre Frey Natte Wallcovering, Peter Reed's Riyad Double Faced Throw"
   }, {
     image: smallRoomVaseImage,
     title: "Yellow Crystalline",
