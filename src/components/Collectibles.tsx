@@ -137,7 +137,7 @@ export const collectibleDesigners: Array<{
     image: ericSchmittImg,
     biography: "French designer Éric Schmitt believes that 'a piece of furniture needs to exude silence so it can be loved for a long time.' Rather than explaining his work, he prefers to let his objects speak for themselves. His sculptural forms—from the graceful arch of a marble cabinet to the enduring silhouette of a Jarre table—echo the Romanesque churches and medieval architecture of his native Burgundy region. Represented by Carpenters Workshop Gallery, his pieces blur the line between collectible design and fine art.",
     notableWorks: "Chairie (dining chair featured at Maison Affluency), Jarre Table, Marble Cabinet Series, Table Soleil",
-    notableWorksLink: { text: "Chairie dining chair", galleryIndex: 2 },
+    notableWorksLink: { text: "Chairie Dining Chair | Panoramic Cityscape Views", galleryIndex: 2 },
     philosophy: "A piece of furniture needs to exude silence so it can be loved for a long time.",
     curatorPicks: [
       { image: ericSchmittDrageeConsole, title: "Dragée Console", category: "Tables", subcategory: "Console", materials: "Bronze and lacquered polyester resin or pink marble tops", dimensions: "H 85 × L 120 cm", edition: "8 copies and 4 artist's proofs" },
