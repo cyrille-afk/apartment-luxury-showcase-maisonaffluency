@@ -248,7 +248,7 @@ import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler
 import rowinNoneIILamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 
 type DesignerLink = { type: string; url?: string };
-export type CuratorPick = { image: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string };
+export type CuratorPick = { image?: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; links?: DesignerLink[] })[] = [
@@ -1706,7 +1706,50 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     notableWorks: "DOT Side Table (Maison Affluency), Eggshell Collection, AW2 Hospitality Projects",
     notableWorksLink: { text: "DOT Side Table", galleryIndex: 17 },
     philosophy: "Architecture and design are the same discipline — both are about creating places that stimulate the mind and mobilize the senses.",
-    curatorPicks: [],
+    curatorPicks: [
+      {
+        title: "Lady Bug Side Table",
+        subtitle: "",
+        materials: "Base with hammered bronze finish, Wooden top covered with gauze and varnished",
+        dimensions: "Ø40 x H45 cm",
+      },
+      {
+        title: "EGG Coffee Table",
+        subtitle: "",
+        materials: "Solid wood. Available finishes: American walnut, natural oak or stained oak",
+        dimensions: "80 x 60 x H40 cm",
+      },
+      {
+        title: "OOMA Dining Table",
+        subtitle: "",
+        materials: "Double top in wood and marble. Wooden base. Wood finish: American walnut, stained oak, or natural oak. Marble finish: Carrara White, Emperador, Nero Marquina, or Sahara",
+        dimensions: "160 x 160 x 75 cm and 180 x 180 x 75 cm",
+      },
+      {
+        title: "TARA Desk",
+        subtitle: "",
+        materials: "Base in American walnut or black stained oak. Hand-lacquered top, glossy or matte finish. 19 colours available. Drawer, leather interior",
+        dimensions: "120 / 140 / 160 x 61 x H72 cm",
+      },
+      {
+        title: "ICE Pendant Light",
+        subtitle: "for Véronèse",
+        materials: "Murano glass, Aluminium structure col.Bronze",
+        dimensions: "9 x 80 / 120 / 160 / 200 x H24 cm",
+      },
+      {
+        title: "STEELTOP Bookcase",
+        subtitle: "",
+        materials: "Black Steel and American walnut",
+        dimensions: "110 / 150 x 40 x H210 cm",
+      },
+      {
+        title: "MUSE Rug",
+        subtitle: "for Toulemonde Bochart",
+        materials: "Hand-tufted, vegetable silk and wool",
+        dimensions: "250 x 350 cm",
+      },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/redaamalou/" },
       { type: "Curators' Picks" },
