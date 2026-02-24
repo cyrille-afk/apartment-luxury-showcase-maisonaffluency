@@ -113,6 +113,7 @@ import hamreiPick2 from "@/assets/curators-picks/hamrei-2.jpg";
 import hamreiPick3 from "@/assets/curators-picks/hamrei-3.jpg";
 import hamreiPick4 from "@/assets/curators-picks/hamrei-4.jpg";
 import hamreiPick5 from "@/assets/curators-picks/hamrei-5.jpg";
+import hamreiPick6 from "@/assets/curators-picks/hamrei-6.jpg";
 import jmwPick1 from "@/assets/curators-picks/jmw-1.webp";
 import jmwPick2 from "@/assets/curators-picks/jmw-2.png";
 import jmwPick3 from "@/assets/curators-picks/jmw-3.png";
@@ -1089,6 +1090,13 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Tables", "Dining Table"],
         materials: "Hand-chiseled stone top, textured earthenware ceramic base",
         dimensions: "Ø120 × H75 cm (customisable)"
+      },
+      {
+        image: hamreiPick6,
+        title: "TRIO Dining Table & Pépé Chair Composition",
+        category: "Tables & Seating",
+        tags: ["Tables", "Dining Table", "Chairs"],
+        materials: "Hand-chiseled stone top, textured earthenware ceramic base, brass chair frame with woven upholstery",
       },
     ],
     links: [
