@@ -816,26 +816,32 @@ const Collectibles = () => {
                         </div>
                         <p className="text-sm md:text-base text-primary font-body">{designer.specialty}</p>
                         {designer.notableWorksLink && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const gallerySection = document.getElementById('gallery');
-                              if (gallerySection) {
-                                gallerySection.scrollIntoView({ behavior: 'smooth' });
-                                setTimeout(() => {
-                                  window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
-                                    detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` } 
-                                  }));
-                                }, 500);
-                              }
-                            }}
-                            className="inline-flex items-center gap-1 mt-2 text-xs md:text-sm font-body text-primary hover:text-primary/70 transition-all duration-300 group/link touch-manipulation"
-                          >
-                            <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary/60">
-                              {designer.notableWorksLink.text}
-                            </span>
-                            <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-80 transition-opacity flex-shrink-0" />
-                          </button>
+                          <>
+                            <span className="text-primary/40 text-xs tracking-[0.3em] mt-1">• • •</span>
+                            <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                              <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const gallerySection = document.getElementById('gallery');
+                                  if (gallerySection) {
+                                    gallerySection.scrollIntoView({ behavior: 'smooth' });
+                                    setTimeout(() => {
+                                      window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                        detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` } 
+                                      }));
+                                    }, 500);
+                                  }
+                                }}
+                                className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                              >
+                                <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
+                                  {designer.notableWorksLink.text}
+                                </span>
+                                <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
+                              </button>
+                            </div>
+                          </>
                         )}
                       </div>
                     </div>
