@@ -594,7 +594,7 @@ const partnerBrands = [
     description: "French artist renowned for his bronze paintings and sculptural works, creating pieces that blur the boundaries between painting and sculpture through masterful material exploration.",
     featured: "Bronze Painting 204",
     instagram: "https://instagram.com/pierrebonnefille",
-    galleryIndex: 10, // A Design Treasure Trove
+    galleryIndex: 11, // A Design Treasure Trove
   },
   {
     id: "pinton-1867",
