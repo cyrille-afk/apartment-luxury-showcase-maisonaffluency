@@ -123,6 +123,17 @@ const partnerBrands = [
     galleryIndex: 23, // Artisan Materials in The Details Make the Design
   },
   {
+    id: "alexander-lamont-hammered",
+    name: "Alexander Lamont",
+    category: "Decorative Object",
+    subcategory: "Decorative Objects",
+    origin: "Thailand",
+    description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
+    featured: "Textured Bronze Globes Hammered Bowls",
+    instagram: "https://instagram.com/alexanderlamont",
+    galleryIndex: 3, // A Sunlight Reading Corner in A Sociable Environment
+  },
+  {
     id: "alinea-design-objects",
     name: "Alinea Design Objects",
     category: "Tables",

@@ -348,7 +348,10 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Alexander Lamont is a British designer based in Bangkok whose eponymous brand has become synonymous with exceptional craftsmanship and the innovative use of traditional materials. Working with bronze, shagreen, straw marquetry, lacquer and gold leaf, his pieces marry East and West influences with a distinct sculptural presence. Winner of multiple UNESCO Awards for Excellence in Craftsmanship, his work graces prestigious interiors worldwide.",
     notableWorks: "Hammered Bowls (UNESCO Award), Brancusi Spiral Table, River Ledge Credenza, Agata Cabinet, Lune Mirrors",
-    notableWorksLink: { text: "Corteza Console Table | Artisan Materials", galleryIndex: 23 },
+    notableWorksLinks: [
+      { text: "Corteza Console Table | Artisan Materials", galleryIndex: 23 },
+      { text: "Hammered Bowls | A Sunlight Reading Corner", galleryIndex: 3 },
+    ],
     philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
     curatorPicks: [
       { 
