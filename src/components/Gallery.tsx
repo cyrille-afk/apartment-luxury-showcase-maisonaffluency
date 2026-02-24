@@ -125,8 +125,8 @@ const galleryExperiences = [{
     description: "Apparatus Studio Lantern Table, Reda Amalou Eggshell DOT side table, Pierre Frey Kagura and Kasimir Fabrics, Pierre Frey Natte Wallcovering, Peter Reed's Riyad Double Faced Throw"
   }, {
     image: smallRoomVaseImage,
-    title: "A Sunlit Corner",
-    description: "Milan Pekař's Crystalline Vase, Peter Reed's Riyad Double Faced Throw"
+    title: "Yellow Crystalline",
+    description: "Vessel: Milan Pekař's Yellow Crystalline Vessel Volume 5, Bed Throw: Peter Reed 1861's Riyad Double Faced Throw"
   }]
 }, {
   experience: "Home Office with a View",
