@@ -44,7 +44,7 @@ const galleryExperiences = [{
   }, {
     image: diningImage,
     title: "Panoramic Cityscape Views",
-    description: "Dining Table: Alinea Design Objects' Custom Angelo M Table, Dining Chairs: 2 x Eric Schmitt Studio's Chairie and 1 x Cazes&Conquet's Augusta Dining Chairs, Alabaster Pendant: Emanuelle Levet Stenne's Pendant Light, Sculptured Book Cover: Emmanuel Babled's Limited Edition of 8 + 4 AP from the Osmosi Series, Sofa: Thierry Lemaire's Niko 420 custom, Bookcase: Poltrona Frau's Albero Bookcase, Vessel behind the sofa: Maarten Vrolijk's Sakura TRP 22001 Vessel (unique piece)"
+    description: "Dining Table: Alinea Design Objects' Custom Angelo M Table, Dining Chairs: 2 x Eric Schmitt Studio's Chairie and 1 x Cazes&Conquet's Augusta Dining Chairs, Alabaster Pendant: Emanuelle Levet Stenne's Pendant Light, Sculptured Book Cover: Emmanuel Babled's Limited Edition of 8 + 4 AP from the Osmosi Series, Sofa: Thierry Lemaire's Niko 420 custom, Bookcase: Gianfranco Frattini's Albero Bookcase for Poltrona Frau, Vessel behind the sofa: Maarten Vrolijk's Sakura TRP 22001 Vessel (unique piece)"
   }, {
     image: "/gallery/sociable-4.jpeg",
     title: "A Sun Lit Reading Corner",
