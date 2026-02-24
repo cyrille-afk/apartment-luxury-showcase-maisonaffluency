@@ -104,8 +104,8 @@ const galleryExperiences = [{
     description: "Console: Damien Langlois-Meurinne's Ooh La La Console for Sé Collections, Table Lamp: Toni Grilo's Marble Marie Lamp for Hayman Editions, Mirror: Kiko Lopez' Silver Glass Hammer Mirror (Unique Piece), Bench: Gallery S.Bensimon's MB02 Bench, Candle: Dan Yeffet's Lyra Marble Candle for oOumm"
   }, {
     image: "/gallery/calming-2.jpg",
-    title: "A Venetian Dream",
-    description: "Hervé van der Straeten's Bronze MicMac Chandelier, Iksel's Brunelleschi Perspective Wallcover, Stéphane CG Abstract Diasec, Celso de Lemos' Silk Bed Cover, CC-Tapis Giudecca Custom Rug"
+    title: "A Venitian Cocoon",
+    description: "Rug: CC-Tapis Giudecca Rug (Custom), Bed Throw: Peter Reed 1861's Riyad Double Faced Throw and Cushions, Chandelier: Hervé van der Straeten's Bronze MicMac Chandelier, Nightstand: Adam Courts' Villa Pedestal for Okha, Table Lamps: Atelier DeMichelis' Bronze Bud Table Lamps (Edition of 20), Console: Damien Langlois-Meurinne's Ooh La La Console for Sé Collections, Table Lamp: Toni Grilo's Marble Marie Lamp for Hayman Editions, Mirror: Kiko Lopez' Silver Glass Hammer Mirror (Unique Piece), Bench: Gallery S.Bensimon's MB02 Bench, Candle: Dan Yeffet's Lyra Marble Candle for oOumm"
   }, {
     image: bedroomAltImage,
     title: "Unique by Design",
