@@ -88,7 +88,7 @@ const galleryExperiences = [{
   }, {
     image: artMasterBronzeImage,
     title: "A Design Treasure Trove",
-    description: "Pierre Bonnefille's Bronze Painting 204, Alexander Lamont's Straw Marquetry Mantle Box, Baleri Italia's Marble Carved and Solid Wood Plato bookcase"
+    description: "Top Left Box: Alexander Lamont's Straw Marquetry Mantle Box, Painting: Pierre Bonnefille's Bronze Painting 204, Bookcase: Baleri Italia's Marble Carved and Solid Wood Plato Bookcase"
   }]
 }, {
   experience: "A Calming and Dreamy Environment",
