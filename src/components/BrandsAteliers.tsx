@@ -269,7 +269,7 @@ const partnerBrands = [
     description: "London-based house founded in 2014, producing classic 20th century Scandinavian furniture for the modern home — celebrating the golden era of Scandinavian Modern design from 1930 to 1970.",
     featured: "Bernt Petersen 4-Drawer Executive Desk, c1960s",
     instagram: "https://www.instagram.com/dagmarlondon/",
-    galleryIndex: 18, // A Workspace of Distinction - Home Office with a View
+    galleryIndex: 19, // A Workspace of Distinction - Home Office with a View
   },
   {
     id: "de-la-espada",
