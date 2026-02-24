@@ -10,7 +10,7 @@ import ComingSoon from "./pages/ComingSoon";
 const queryClient = new QueryClient();
 
 // Set to false to disable maintenance mode and show the real site
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
