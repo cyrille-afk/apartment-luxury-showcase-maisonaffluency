@@ -23,6 +23,7 @@ import detailsSectionImage from "@/assets/details-section.jpg";
 import detailsConsoleImage from "@/assets/details-console.jpg";
 import detailsLampImage from "@/assets/details-lamp.jpg";
 import detailsConsole4Image from "@/assets/gallery/details-console-4.jpg";
+import smallRoomChairImage from "@/assets/small-room-chair.jpeg";
 import homeOfficeDeskImage from "@/assets/home-office-desk.jpg";
 import homeOfficeDesk2Image from "@/assets/home-office-desk-2.jpg";
 import homeOffice3Image from "@/assets/home-office-3.jpg";
@@ -129,6 +130,10 @@ const galleryExperiences = [{
     image: smallRoomVaseImage,
     title: "Yellow Crystalline",
     description: "Vessel: Milan Pekař's Yellow Crystalline Vessel Volume 5, Bed Throw: Peter Reed 1861's Riyad Double Faced Throw"
+  }, {
+    image: smallRoomChairImage,
+    title: "Golden Hour",
+    description: "Chair in situ, Side Table, Abstract Painting"
   }]
 }, {
   experience: "Home Office with a View",
