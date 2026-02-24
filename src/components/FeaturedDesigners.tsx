@@ -691,7 +691,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Bruno de Maistre is a French designer known for his poetic approach to furniture design. His Lyrical Desk demonstrates his ability to create pieces that are both functional and emotionally resonant, with flowing lines and thoughtful proportions that inspire creativity and contemplation.",
     notableWorks: "Lyric Desk, Contemporary Furniture Series",
-    notableWorksLink: { text: "Lyric Desk", galleryIndex: 7 },
+    notableWorksLink: { text: "Lyric Desk", galleryIndex: 8 },
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     curatorPicks: [],
     links: [
