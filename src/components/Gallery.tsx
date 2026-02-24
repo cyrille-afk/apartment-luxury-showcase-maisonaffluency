@@ -133,7 +133,7 @@ const galleryExperiences = [{
   }, {
     image: smallRoomChairImage,
     title: "Golden Hour",
-    description: "Chair in situ, Side Table, Abstract Painting"
+    description: "Bar/Counter Stool: Yabu Pushelberg's Park Place Stool for Man of Parts, Side Table: Jaime Hayon's Time Piece Ceramic for Sé Collections"
   }]
 }, {
   experience: "Home Office with a View",
