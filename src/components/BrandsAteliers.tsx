@@ -89,6 +89,7 @@ import arredoluceBg from "@/assets/designers/arredoluce-bg.jpg";
 import articoloStudiosBg from "@/assets/designers/articolo-studios-bg.jpg";
 import basedUponBg from "@/assets/designers/based-upon-bg.jpg";
 import bryanOSullivanBg from "@/assets/designers/bryan-osullivan-bg.jpg";
+import christopherBootsBg from "@/assets/designers/christopher-boots-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1020,6 +1021,15 @@ const partnerBrands = [
     description: "Bryan O'Sullivan Studio is a London and Dublin-based interior design practice known for richly layered, maximalist interiors that marry bold colour, sumptuous textures, and collectible design with a refined sense of warmth and theatricality.",
     instagram: "https://www.instagram.com/bryanosullivancollection/?hl=en",
   },
+  {
+    id: "christopher-boots",
+    name: "Christopher Boots",
+    category: "Lighting",
+    subcategory: "Lighting",
+    origin: "Australia",
+    description: "Christopher Boots is a Melbourne-based lighting designer celebrated for his sculptural chandeliers and pendants that fuse raw natural materials — crystal, marble, and alabaster — with hand-forged metalwork, creating dramatic luminaires that bridge the organic and the architectural.",
+    instagram: "https://www.instagram.com/christopherboots/",
+  },
 ];
 
 // Background image map
@@ -1103,6 +1113,7 @@ const brandBgMap: Record<string, string> = {
   "Articolo Studios": articoloStudiosBg,
   "Based Upon": basedUponBg,
   "Bryan O'Sullivan Studio": bryanOSullivanBg,
+  "Christopher Boots": christopherBootsBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
