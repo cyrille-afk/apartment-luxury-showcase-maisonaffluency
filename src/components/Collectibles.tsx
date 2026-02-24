@@ -294,7 +294,7 @@ export const collectibleDesigners: Array<{
     biography:
       "RoWin' Atelier is a French ceramics studio renowned for creating exceptional handcrafted pieces that blend traditional techniques with contemporary design. Each creation showcases meticulous attention to detail and a deep understanding of material properties.",
     notableWorks: "None II Table Lamp",
-    notableWorksLink: { text: "None II Table Lamp", galleryIndex: 19 },
+    notableWorksLink: { text: "None II Table Lamp | Refined Details", galleryIndex: 20 },
     philosophy: "Every piece of clay holds the potential for extraordinary beauty when shaped by skilled hands.",
     curatorPicks: [
       { image: rowinNoneIiLamp, title: "None II Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Cippolino Verde Marble, Silver-Plated brass", dimensions: "39 cm × 22.5 cm × H 58 cm", edition: "Unique Piece" },
