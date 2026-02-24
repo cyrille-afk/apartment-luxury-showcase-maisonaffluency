@@ -228,7 +228,7 @@ const Navigation = () => {
                   className="animate-fade-in opacity-0 border-t border-border/30 pt-4"
                   style={{ animationDelay: `${leftNavItems.length * 120}ms`, animationFillMode: 'forwards' }}
                 >
-                  <p className="font-body text-[11px] uppercase tracking-[0.25em] text-foreground/40 mb-3">All Categories</p>
+                  <p className="font-body text-[11px] uppercase tracking-[0.25em] text-foreground/40 mb-3 text-center">All Categories</p>
                   <div className="flex flex-col gap-0">
                     {CATEGORY_ORDER.map(cat => (
                       <div key={cat} className="mb-3">
