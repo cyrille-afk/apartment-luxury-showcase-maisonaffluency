@@ -478,7 +478,7 @@ const partnerBrands = [
     description: "French glass artist renowned for his extraordinary hand-silvered mirrors and sculptural glass works, each piece a unique testament to ancient techniques reimagined.",
     featured: "Silver Glass Hammer Mirror",
     instagram: "https://instagram.com/kikolumieres",
-    galleryIndex: 15, // Design Tableau
+    galleryIndex: 13, // Design Tableau
   },
   {
     id: "leo-sentou",
