@@ -22,6 +22,7 @@ import smallRoomBedroomImage from "@/assets/small-room-bedroom.jpg";
 import detailsSectionImage from "@/assets/details-section.jpg";
 import detailsConsoleImage from "@/assets/details-console.jpg";
 import detailsLampImage from "@/assets/details-lamp.jpg";
+import detailsConsole4Image from "@/assets/gallery/details-console-4.jpg";
 import homeOfficeDeskImage from "@/assets/home-office-desk.jpg";
 import homeOfficeDesk2Image from "@/assets/home-office-desk-2.jpg";
 import homeOffice3Image from "@/assets/home-office-3.jpg";
@@ -162,7 +163,7 @@ const galleryExperiences = [{
     title: "Light & Texture",
     description: "Noe Duchaufour Lawrance's Amber Folio Portable Lamp for Cristallerie Saint-Louis"
   }, {
-    image: "/gallery/details-4.jpg",
+    image: detailsConsole4Image,
     title: "Desk & Vase Detail",
     description: "Bruno de Maistre's Lyric Desk detail, Nathalie Ziegler's Gold Leaves+Glass Snake Vase, Hamrei's Pépé Chair in Pierre Frey fabric"
   }]
