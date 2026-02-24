@@ -90,6 +90,7 @@ import articoloStudiosBg from "@/assets/designers/articolo-studios-bg.jpg";
 import basedUponBg from "@/assets/designers/based-upon-bg.jpg";
 import bryanOSullivanBg from "@/assets/designers/bryan-osullivan-bg.jpg";
 import christopherBootsBg from "@/assets/designers/christopher-boots-bg.jpg";
+import lostProfileStudioBg from "@/assets/designers/lost-profile-studio-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1030,6 +1031,15 @@ const partnerBrands = [
     description: "Christopher Boots is a Melbourne-based lighting designer celebrated for his sculptural chandeliers and pendants that fuse raw natural materials — crystal, marble, and alabaster — with hand-forged metalwork, creating dramatic luminaires that bridge the organic and the architectural.",
     instagram: "https://www.instagram.com/christopherboots/",
   },
+  {
+    id: "lost-profile-studio",
+    name: "Lost Profile Studio",
+    category: "Lighting",
+    subcategory: "Lighting & Sculpture",
+    origin: "United Kingdom",
+    description: "Lost Profile Studio creates sculptural lighting and objects that explore the interplay of light, form, and materiality — combining hand-worked alabaster, bronze, and glass into striking pieces that feel both ancient and thoroughly contemporary.",
+    instagram: "https://www.instagram.com/lost_profile_studio/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1114,6 +1124,7 @@ const brandBgMap: Record<string, string> = {
   "Based Upon": basedUponBg,
   "Bryan O'Sullivan Studio": bryanOSullivanBg,
   "Christopher Boots": christopherBootsBg,
+  "Lost Profile Studio": lostProfileStudioBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
