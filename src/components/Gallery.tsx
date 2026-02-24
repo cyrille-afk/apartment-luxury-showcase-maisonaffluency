@@ -117,8 +117,8 @@ const galleryExperiences = [{
   categories: ["Lighting", "Tables", "Decorative Object"] as string[],
   items: [{
     image: smallRoomBedroomImage,
-    title: "Artistic Statement",
-    description: "Felix Millory Martell Wall Lamp for Entrelacs, Apparatus Studio Lantern Table Lamp, Reda Amalou Eggshell DOT side table, Pierre Frey Kagura Headboard Fabric, Pierre Frey Natte Wallcovering, Peter Reed's Riyad Double Faced Throw"
+    title: "An Artistic Statement",
+    description: "Wall Light: Felix Millory Martell Wall Lamp for Entrelacs, Table Lamp: Apparatus Studio Lantern, Side Table: Reda Amalou's Eggshell DOT Side Table, Armchair: Pierre Frey's Kagura Headboard Fabric, Wallcovering: Pierre Frey's Natte, Bed Throw: Peter Reed 1861's Riyad Double Faced Throw"
   }, {
     image: smallRoomPersonalityImage,
     title: "Compact Elegance",
