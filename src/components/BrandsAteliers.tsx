@@ -560,9 +560,9 @@ const partnerBrands = [
     subcategory: "Decorative Objects",
     origin: "France",
     description: "French luxury brand creating sculptural marble candles and decorative objects that blend artisanal craftsmanship with contemporary design sensibility.",
-    featured: "Lyra Marble Candle",
+    featured: "Dan Yeffet's Lyra Marble Candle",
     instagram: "https://instagram.com/ooummparis",
-    galleryIndex: 15, // Design Tableau
+    galleryIndex: 13, // Design Tableau
   },
   {
     id: "olivia-cognet",
