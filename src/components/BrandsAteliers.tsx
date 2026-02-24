@@ -81,6 +81,7 @@ import homLeXuanBg from "@/assets/designers/hom-le-xuan-bg.jpg";
 import frederiqueRobWhittleBg from "@/assets/designers/frederique-rob-whittle-bg.jpg";
 import martinMasseBg from "@/assets/designers/martin-masse-bg.jpg";
 import mernoeBg from "@/assets/designers/mernoe-bg.jpg";
+import paulinPaulinPaulinBg from "@/assets/designers/paulin-paulin-paulin-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -937,6 +938,16 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/mernoelighting/?hl=en",
     galleryIndex: 19, // A Workspace of Distinction
   },
+  {
+    id: "paulin-paulin-paulin",
+    name: "Paulin Paulin Paulin",
+    category: "Seating",
+    subcategory: "Sofas & Loveseats",
+    seatType: "Sofas & Loveseats",
+    origin: "France",
+    description: "Custodians of Pierre Paulin's legendary design legacy, producing authorised re-editions and limited series of his iconic sculptural seating — celebrating one of the 20th century's most visionary French furniture designers.",
+    instagram: "https://www.instagram.com/paulinpaulinpaulin/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1012,6 +1023,7 @@ const brandBgMap: Record<string, string> = {
   "Frédérique and Rob Whittle": frederiqueRobWhittleBg,
   "Martin Massé": martinMasseBg,
   "Mernøe": mernoeBg,
+  "Paulin Paulin Paulin": paulinPaulinPaulinBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
