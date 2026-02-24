@@ -288,7 +288,7 @@ export const collectibleDesigners: Array<{
   },
   {
     id: "rowin-atelier",
-    name: "RoWin' Atelier",
+    name: "Rochette Frederic & Winkler Hervé - RoWin' Atelier",
     specialty: "Artisan Ceramics & Sculptural Objects",
     image: rowinAtelierImg,
     biography:
