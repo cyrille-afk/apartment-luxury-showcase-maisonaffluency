@@ -99,6 +99,7 @@ import achilleSalvagniBg from "@/assets/designers/achille-salvagni-bg.png";
 import valerieRostaingBg from "@/assets/designers/valerie-rostaing-bg.png";
 import mmairoBg from "@/assets/ateliers/mmairo.png";
 import lobjetBg from "@/assets/ateliers/lobjet.png";
+import osannaViscontiBg from "@/assets/ateliers/osanna-visconti.png";
 import laChanceParisBg from "@/assets/ateliers/la-chance-paris.png";
 
 // Gallery image index mapping (based on flattened gallery items order)
@@ -1086,6 +1087,15 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/okurayamastudio.design/?hl=en",
   },
   {
+    id: "osanna-visconti",
+    name: "Osanna Visconti",
+    category: "Furniture",
+    subcategory: "Sculptural Furniture",
+    origin: "Italy",
+    description: "Osanna Visconti is an Italian sculptor and designer whose work in bronze transforms organic forms — branches, bamboo, coral — into extraordinary functional pieces. Her hand-cast consoles, screens, and tables blur the boundary between sculpture and furniture, each piece a celebration of nature's geometry rendered in precious metal.",
+    instagram: "https://www.instagram.com/osannavisconti/?hl=en",
+  },
+  {
     id: "overgaard-dyrman",
     name: "Overgaard & Dyrman",
     category: "Furniture",
@@ -1225,6 +1235,7 @@ const brandBgMap: Record<string, string> = {
   "MMairo": mmairoBg,
   "L'Objet": lobjetBg,
   "La Chance Paris": laChanceParisBg,
+  "Osanna Visconti": osannaViscontiBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
