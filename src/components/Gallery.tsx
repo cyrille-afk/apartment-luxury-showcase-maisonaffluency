@@ -561,11 +561,11 @@ const Gallery = () => {
 
       {/* Lightbox Dialog */}
       <Dialog open={lightboxOpen} onOpenChange={(open) => !open && closeLightbox()}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 pt-14 md:pt-0 bg-black/95 border-none [&>button]:hidden" onKeyDown={handleKeyDown} aria-describedby={undefined}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 pt-14 md:pt-0 bg-black/95 border-none [&>button]:hidden overflow-y-auto" onKeyDown={handleKeyDown} aria-describedby={undefined}>
           <VisuallyHidden>
             <DialogTitle>{allItems[currentImageIndex]?.title || 'Gallery Image'}</DialogTitle>
           </VisuallyHidden>
-          <div className="relative w-full h-full flex items-center justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+          <div className="relative w-full h-full flex items-start md:items-center justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
             {/* Close button */}
             <button onClick={closeLightbox} className="absolute top-4 left-4 z-50 p-2 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
               <X className="h-6 w-6 text-white" />
@@ -584,11 +584,11 @@ const Gallery = () => {
             </button>
 
             {/* Image container */}
-            <div className="flex flex-col items-center justify-center w-full md:max-w-[90vw] max-h-[85vh] px-4 md:px-16">
+            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 md:justify-center md:max-h-[85vh]">
               <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center">
                 {allItems[currentImageIndex]?.title}
               </h3>
-              <img key={currentImageIndex} src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="w-full md:max-w-full max-h-[55vh] md:max-h-[70vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
+              <img key={currentImageIndex} src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[70vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
               {/* Dot indicators */}
               <div className="flex justify-center gap-1.5 mt-3">
                 {allItems.map((_, i) => (
