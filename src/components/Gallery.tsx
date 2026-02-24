@@ -26,6 +26,7 @@ import detailsConsole4Image from "@/assets/gallery/details-console-4.jpg";
 import homeOfficeDeskImage from "@/assets/home-office-desk.jpg";
 import homeOfficeDesk2Image from "@/assets/home-office-desk-2.jpg";
 import homeOffice3Image from "@/assets/home-office-3.jpg";
+import officeBooksCornerImage from "@/assets/gallery/office-books-corner.jpg";
 const galleryCategories = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"] as const;
 
 const galleryExperiences = [{
@@ -145,6 +146,10 @@ const galleryExperiences = [{
     image: homeOffice3Image,
     title: "Light & Focus",
     description: "Executive Desk: Bernt Petersen 4-Drawer Desk, Office Chair: Vitra Eames' Soft Pad EA 219 Chair by Charles & Ray Eames, Wall Light: Tristan Auer's YSA Wall Light for Véronèse, Desk Display Wall Lamp: Kheops Wall Lamp by Kelly Boukobza for Entrelacs"
+  }, {
+    image: officeBooksCornerImage,
+    title: "Design & Fine Art Books Corner",
+    description: "Executive Desk: Bernt Petersen 4-Drawer Desk details, Table Lamp: RoWin' Atelier's None II Table Lamp (Unique Piece)"
   }]
 }, {
   experience: "The Details Make the Design",
