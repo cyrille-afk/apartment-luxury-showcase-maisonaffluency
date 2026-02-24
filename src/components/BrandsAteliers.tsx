@@ -485,7 +485,7 @@ const partnerBrands = [
     description: "Masters of decorative wallcoverings, creating hand-painted panoramic murals and scenic wallpapers inspired by historical archives and artistic traditions.",
     featured: "White Blossom Wallcover",
     instagram: "https://instagram.com/iksel_decorative_arts",
-    galleryIndex: 9, // A Serene Decor
+    galleryIndex: 10, // A Serene Decor
   },
   {
     id: "kiko-lopez",
