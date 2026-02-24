@@ -1090,6 +1090,15 @@ const partnerBrands = [
     description: "Achille Salvagni Atelier is a Rome-based design studio led by architect and designer Achille Salvagni, creating sculptural furniture, lighting and objects of extraordinary craftsmanship. His work draws from classical Roman forms and Baroque drama, reinterpreted through a contemporary lens with precious materials — bronze, onyx, rock crystal — resulting in pieces that are collected by the world's most discerning interiors.",
     instagram: "https://www.instagram.com/atelierachillesalvagni/",
   },
+  {
+    id: "valerie-rostaing",
+    name: "Valérie Rostaing",
+    category: "Decorative Object",
+    subcategory: "Decorative Objects",
+    origin: "France",
+    description: "Valérie Rostaing is a Paris-based designer known for her sculptural furniture and objects that balance poetic sensibility with material experimentation. Her work — spanning ceramics, bronze, and mixed media — inhabits a space between functional design and fine art, creating pieces of quiet intensity and timeless elegance.",
+    instagram: "https://www.instagram.com/valerie_rostaing/",
+  },
 ];
 
 // Background image map
