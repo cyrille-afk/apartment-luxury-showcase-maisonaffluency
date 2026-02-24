@@ -490,7 +490,7 @@ const partnerBrands = [
     description: "French furniture designer creating refined contemporary pieces that balance sculptural presence with functional elegance and exceptional craftsmanship.",
     featured: "AB Armchair",
     instagram: "https://www.instagram.com/leosentou",
-    galleryIndex: 1, // A Sophisticated Living Room
+    galleryIndex: 3, // A Sun Lit Reading Corner
   },
   {
     id: "made-in-kira",
