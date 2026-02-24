@@ -84,7 +84,7 @@ const galleryExperiences = [{
   }, {
     image: bedroomSecondImage,
     title: "A Serene Decor",
-    description: "Iksel's White Blossom Wallcover, Apparatus Studio's Metronome Reading Suede Floor Lamp, Nika Zupanc's Stardust Loveseat for Sé Collections"
+    description: "Sofa/Loveseat: Nika Zupanc's Stardust Loveseat for Sé Collections, Floor Lamp: Apparatus' Metronome Reading Floor Lamp"
   }, {
     image: artMasterBronzeImage,
     title: "A Design Treasure Trove",
