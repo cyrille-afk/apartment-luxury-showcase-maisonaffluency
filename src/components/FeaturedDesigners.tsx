@@ -157,6 +157,13 @@ import robicaraSiraNightstand from "@/assets/curators-picks/robicara-sira-nights
 import robicaraMarbleTable from "@/assets/curators-picks/robicara-marble-table.jpg";
 import robicaraMartiniTable from "@/assets/curators-picks/robicara-martini-table.jpg";
 import redaAmalouDotTable from "@/assets/curators-picks/reda-amalou-dot-table.jpg";
+import redaAmalouLadybug from "@/assets/curators-picks/reda-amalou-ladybug.png";
+import redaAmalouEgg from "@/assets/curators-picks/reda-amalou-egg.png";
+import redaAmalouOoma from "@/assets/curators-picks/reda-amalou-ooma.png";
+import redaAmalouTara from "@/assets/curators-picks/reda-amalou-tara.png";
+import redaAmalouIce from "@/assets/curators-picks/reda-amalou-ice.png";
+import redaAmalouSteeltop from "@/assets/curators-picks/reda-amalou-steeltop.png";
+import redaAmalouMuse from "@/assets/curators-picks/reda-amalou-muse.png";
 import noeFolioLamp from "@/assets/curators-picks/noe-folio-lamp.jpg";
 import rowinNoneIILampDetail from "@/assets/curators-picks/rowin-none-ii-lamp-detail.jpg";
 import matthieuGicquelGoldGeode from "@/assets/curators-picks/matthieu-gicquel-gold-geode.jpg";
@@ -1708,42 +1715,49 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     philosophy: "Architecture and design are the same discipline — both are about creating places that stimulate the mind and mobilize the senses.",
     curatorPicks: [
       {
+        image: redaAmalouLadybug,
         title: "Lady Bug Side Table",
         subtitle: "",
         materials: "Base with hammered bronze finish, Wooden top covered with gauze and varnished",
         dimensions: "Ø40 x H45 cm",
       },
       {
+        image: redaAmalouEgg,
         title: "EGG Coffee Table",
         subtitle: "",
         materials: "Solid wood. Available finishes: American walnut, natural oak or stained oak",
         dimensions: "80 x 60 x H40 cm",
       },
       {
+        image: redaAmalouOoma,
         title: "OOMA Dining Table",
         subtitle: "",
         materials: "Double top in wood and marble. Wooden base. Wood finish: American walnut, stained oak, or natural oak. Marble finish: Carrara White, Emperador, Nero Marquina, or Sahara",
         dimensions: "160 x 160 x 75 cm and 180 x 180 x 75 cm",
       },
       {
+        image: redaAmalouTara,
         title: "TARA Desk",
         subtitle: "",
         materials: "Base in American walnut or black stained oak. Hand-lacquered top, glossy or matte finish. 19 colours available. Drawer, leather interior",
         dimensions: "120 / 140 / 160 x 61 x H72 cm",
       },
       {
+        image: redaAmalouIce,
         title: "ICE Pendant Light",
         subtitle: "for Véronèse",
         materials: "Murano glass, Aluminium structure col.Bronze",
         dimensions: "9 x 80 / 120 / 160 / 200 x H24 cm",
       },
       {
+        image: redaAmalouSteeltop,
         title: "STEELTOP Bookcase",
         subtitle: "",
         materials: "Black Steel and American walnut",
         dimensions: "110 / 150 x 40 x H210 cm",
       },
       {
+        image: redaAmalouMuse,
         title: "MUSE Rug",
         subtitle: "for Toulemonde Bochart",
         materials: "Hand-tufted, vegetable silk and wool",
