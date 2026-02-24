@@ -100,8 +100,8 @@ const galleryExperiences = [{
     description: "Rug: CC-Tapis Giudecca Rug (Custom), Bed Throw: Celso de Lemos' Silk Bed Throw, Chandelier: Hervé van der Straeten's Bronze MicMac Chandelier, Nightstand: Adam Courts' Villa Pedestal for Okha, Table Lamps: Atelier DeMichelis' Bronze Bud Table Lamps (Edition of 20), Vessel: Milan Pekař's Crystalline Blue Vessel Volume 5, Nightstand Rug: Pinton 1867 'After the Rain' Custom Rug, Iksel's Brunelleschi Perspective Wallcover"
   }, {
     image: bedroomThirdImage,
-    title: "Design Icons and Collectibles",
-    description: "Damien Langlois-Meurinne's Ooh La La Console, Haymann Editions' Carved Marble Marie Lamp, Kiko Lopez' Silver Glass Hammer Mirror, oOumm Lyra Marble Candle"
+    title: "Design Tableau",
+    description: "Console: Damien Langlois-Meurinne's Ooh La La Console for Sé Collections, Table Lamp: Toni Grilo's Marble Marie Lamp for Hayman Editions, Mirror: Kiko Lopez' Silver Glass Hammer Mirror (Unique Piece), Bench: Gallery S.Bensimon's MB02 Bench, Candle: Dan Yeffet's Lyra Marble Candle for oOumm"
   }, {
     image: "/gallery/calming-2.jpg",
     title: "A Venetian Dream",

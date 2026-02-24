@@ -82,7 +82,7 @@ import homLeXuanBg from "@/assets/designers/hom-le-xuan-bg.jpg";
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
 // 3: A Dreamy Tuscan Landscape, 4: A Highly Customised Table, 5: A Relaxed Setting
 // 6: A Sophisticated Boudoir, 7: A Serene Decor, 8: A Design Treasure Trove
-// 9: A Masterful Suite, 10: Unique by Design, 11: Design Icons and Collectibles
+// 9: A Masterful Suite, 10: Unique by Design, 11: Design Tableau
 // 12: Artistic Statement, 13: Compact Elegance, 14: A Sunlit Corner
 // 15: A Workspace of Distinction, 16: Refined Details, 17: Light & Focus
 // 18: Curated Vignette, 19: Artisan Materials, 20: Light & Texture
@@ -333,7 +333,7 @@ const partnerBrands = [
     description: "French designer creating bold, sculptural furniture and lighting that combines artistic vision with masterful craftsmanship and luxurious materials.",
     featured: "Ooh La La Console for Sé Collections",
     instagram: "https://instagram.com/damienlangloismeurinne_studio",
-    galleryIndex: 15, // Design Icons and Collectibles
+    galleryIndex: 15, // Design Tableau
   },
   {
     id: "ecart-paris",
@@ -400,7 +400,7 @@ const partnerBrands = [
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
     featured: "Carved Marble Marie Lamp by Toni Grilo",
     instagram: "https://instagram.com/haymanneditions",
-    galleryIndex: 15, // Design Icons and Collectibles
+    galleryIndex: 15, // Design Tableau
   },
   {
     id: "herve-van-der-straeten",
@@ -477,7 +477,7 @@ const partnerBrands = [
     description: "French glass artist renowned for his extraordinary hand-silvered mirrors and sculptural glass works, each piece a unique testament to ancient techniques reimagined.",
     featured: "Silver Glass Hammer Mirror",
     instagram: "https://instagram.com/kikolumieres",
-    galleryIndex: 15, // Design Icons and Collectibles
+    galleryIndex: 15, // Design Tableau
   },
   {
     id: "leo-sentou",
@@ -573,7 +573,7 @@ const partnerBrands = [
     description: "French luxury brand creating sculptural marble candles and decorative objects that blend artisanal craftsmanship with contemporary design sensibility.",
     featured: "Lyra Marble Candle",
     instagram: "https://instagram.com/ooummparis",
-    galleryIndex: 15, // Design Icons and Collectibles
+    galleryIndex: 15, // Design Tableau
   },
   {
     id: "olivia-cognet",
