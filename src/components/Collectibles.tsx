@@ -94,7 +94,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Atelier Demichelis is a contemporary design studio specializing in limited edition lighting fixtures. Each piece is meticulously handcrafted, combining traditional techniques with innovative design. Their Bud Table Lamp represents their commitment to creating functional art objects with exceptional attention to detail.",
     notableWorks: "Limited Edition Bud Table Lamp, Artisan Lighting Collection",
-    notableWorksLink: { text: "Bud Table Lamp", galleryIndex: 12 },
+    notableWorksLink: { text: "Bud Table Lamp | Unique By Design Vignette", galleryIndex: 15 },
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
     curatorPicks: [
       { image: demichelisPick1, title: "Babel Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze • Brass • Ash wood • White fabric shade", dimensions: "Ø45 × H60.9 cm", edition: "Numbered edition of 20" },
