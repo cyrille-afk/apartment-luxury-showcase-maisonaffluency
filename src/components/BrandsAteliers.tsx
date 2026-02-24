@@ -501,7 +501,7 @@ const partnerBrands = [
     description: "Japanese lighting atelier creating delicate paper and natural material lamps that embody the principles of wabi-sabi and mindful design.",
     featured: "Toshiro Lamp",
     instagram: "https://instagram.com/madeinkira",
-    galleryIndex: 7, // A Sophisticated Boudoir
+    galleryIndex: 8, // A Sophisticated Boudoir
   },
   {
     id: "nathalie-ziegler",
