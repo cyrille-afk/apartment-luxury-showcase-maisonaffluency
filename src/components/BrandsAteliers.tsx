@@ -408,7 +408,7 @@ const partnerBrands = [
     description: "French glass artist renowned for his exceptional tableware and decorative objects that blend traditional craftsmanship with contemporary design, featuring textured glass adorned with precious gold leaf details.",
     featured: "Texture Glass with Gold Leaf rim Géode",
     instagram: "https://instagram.com/matthieugicquel",
-    galleryIndex: 1, // A Sophisticated Living Room
+    galleryIndex: 26, // Craftsmanship At Every Corner
   },
   {
     id: "haymann-editions",
