@@ -1613,6 +1613,10 @@ const BrandsAteliers = () => {
               Ateliers
             </h2>
           </div>
+          <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
+            We collaborate with the world's most distinguished furniture houses, textile ateliers, and artisan workshops 
+            to bring exceptional pieces to discerning collectors and design professionals.
+          </p>
           {/* A-Z alphabet jump bar + Search + Filter */}
           {(() => {
             const activeLettersArr = alphaGroups.map(([l]) => l);
@@ -1750,10 +1754,6 @@ const BrandsAteliers = () => {
               </div>
             );
           })()}
-          <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
-            We collaborate with the world's most distinguished furniture houses, textile ateliers, and artisan workshops 
-            to bring exceptional pieces to discerning collectors and design professionals.
-          </p>
         </motion.div>
 
         {(searchQuery || selectedCategory) && (
