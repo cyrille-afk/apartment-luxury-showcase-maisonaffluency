@@ -98,6 +98,7 @@ import privatiselectionemBg from "@/assets/designers/privatiselectionem-bg.jpg";
 import achilleSalvagniBg from "@/assets/designers/achille-salvagni-bg.png";
 import valerieRostaingBg from "@/assets/designers/valerie-rostaing-bg.png";
 import mmairoBg from "@/assets/ateliers/mmairo.png";
+import lobjetBg from "@/assets/ateliers/lobjet.png";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -890,6 +891,15 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/leberrevevaud/",
   },
   {
+    id: "lobjet",
+    name: "L'Objet",
+    category: "Decorative Object",
+    subcategory: "Decorative Objects",
+    origin: "United States",
+    description: "L'Objet is a luxury design house founded by Elad Yifrach, creating exquisite tableware, home décor, and fragrances that blend artisanal craftsmanship with bold sculptural vision. Each piece — from porcelain to 24k gold-plated objets — is conceived as a work of art, elevating everyday rituals into extraordinary experiences.",
+    instagram: "https://www.instagram.com/lobjet",
+  },
+  {
     id: "galerie-mcde",
     name: "Galerie MCDE",
     category: "Decorative Object",
@@ -1203,6 +1213,7 @@ const brandBgMap: Record<string, string> = {
   "Achille Salvagni Atelier": achilleSalvagniBg,
   "Valérie Rostaing": valerieRostaingBg,
   "MMairo": mmairoBg,
+  "L'Objet": lobjetBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
