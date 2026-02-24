@@ -613,7 +613,7 @@ const partnerBrands = [
     subcategory: "Bookcases & Credenzas",
     origin: "Italy",
     description: "Iconic Italian furniture house renowned for exceptional leather craftsmanship since 1912. Their timeless designs grace prestigious residences and institutions worldwide.",
-    featured: "Albero Bookcase",
+    featured: "Gianfranco Frattini's Albero Bookcase",
     instagram: "https://instagram.com/poltronafrauofficial",
     galleryIndex: 0, // An Inviting Lounge Area
   },
