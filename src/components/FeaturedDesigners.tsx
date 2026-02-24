@@ -1722,11 +1722,11 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "Ø40 x H45 cm",
       },
       {
-        image: redaAmalouEgg,
-        title: "EGG Coffee Table",
-        subtitle: "",
-        materials: "Solid wood. Available finishes: American walnut, natural oak or stained oak",
-        dimensions: "80 x 60 x H40 cm",
+        image: redaAmalouIce,
+        title: "ICE Pendant Light",
+        subtitle: "for Véronèse",
+        materials: "Murano glass, Aluminium structure col.Bronze",
+        dimensions: "9 x 80 / 120 / 160 / 200 x H24 cm",
       },
       {
         image: redaAmalouSteeltop,
@@ -1734,6 +1734,13 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "",
         materials: "Black Steel and American walnut",
         dimensions: "110 / 150 x 40 x H210 cm",
+      },
+      {
+        image: redaAmalouEgg,
+        title: "EGG Coffee Table",
+        subtitle: "",
+        materials: "Solid wood. Available finishes: American walnut, natural oak or stained oak",
+        dimensions: "80 x 60 x H40 cm",
       },
       {
         image: redaAmalouOoma,
@@ -1748,13 +1755,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "",
         materials: "Base in American walnut or black stained oak. Hand-lacquered top, glossy or matte finish. 19 colours available. Drawer, leather interior",
         dimensions: "120 / 140 / 160 x 61 x H72 cm",
-      },
-      {
-        image: redaAmalouIce,
-        title: "ICE Pendant Light",
-        subtitle: "for Véronèse",
-        materials: "Murano glass, Aluminium structure col.Bronze",
-        dimensions: "9 x 80 / 120 / 160 / 200 x H24 cm",
       },
       {
         image: redaAmalouMuse,
