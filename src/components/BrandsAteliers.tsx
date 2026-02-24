@@ -84,6 +84,7 @@ import mernoeBg from "@/assets/designers/mernoe-bg.jpg";
 import paulinPaulinPaulinBg from "@/assets/designers/paulin-paulin-paulin-bg.jpg";
 import stephaneCgBg from "@/assets/designers/stephane-cg-bg.jpg";
 import andreaClaireBg from "@/assets/designers/andrea-claire-studio-bg.jpg";
+import michelAmarBg from "@/assets/designers/michel-amar-studio-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -970,6 +971,15 @@ const partnerBrands = [
     description: "Andrea Claire Studio creates hand-sculpted ceramic vessels, objects and lighting that celebrate organic form and tactile materiality — each unique piece embodies a refined, wabi-sabi sensibility rooted in craft and contemporary design.",
     instagram: "https://www.instagram.com/andreaclairestudio/?hl=en",
   },
+  {
+    id: "michel-amar-studio",
+    name: "Michel Amar Studio",
+    category: "Interior Design",
+    subcategory: "Architecture & Interiors",
+    origin: "France",
+    description: "Michel Amar Studio is a Paris-based interior architecture practice renowned for its bold, sculptural approach to luxury residential and hospitality interiors — blending contemporary minimalism with dramatic material contrasts and bespoke craftsmanship.",
+    instagram: "https://www.instagram.com/michel_amar/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1048,6 +1058,7 @@ const brandBgMap: Record<string, string> = {
   "Paulin Paulin Paulin": paulinPaulinPaulinBg,
   "Stéphane CG": stephaneCgBg,
   "Andrea Claire Studio": andreaClaireBg,
+  "Michel Amar Studio": michelAmarBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
