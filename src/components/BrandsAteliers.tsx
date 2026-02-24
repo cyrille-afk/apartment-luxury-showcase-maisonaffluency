@@ -566,7 +566,7 @@ const partnerBrands = [
   },
   {
     id: "okha",
-    name: "Okha",
+    name: "Okha Design Studio",
     category: "Tables",
     subcategory: "Tables",
     tableType: "Side Tables",
@@ -1148,7 +1148,7 @@ const brandBgMap: Record<string, string> = {
   "Garnier & Linker": garnierLinkerBg,
   "Haymann Editions": haymannEditionsBg,
   "Made in Kira": kiraBg,
-  "Okha": okhaBg,
+  "Okha Design Studio": okhaBg,
   "De La Espada": delaEspadaBg,
   "Damien Langlois Meurinne Studio": damienLangloisMeurinneBg,
   "Dagmar London": berntPetersenBg,
@@ -1248,7 +1248,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Made in Kira": "kira",
   "Man of Parts": "man-of-parts",
   "Nathalie Ziegler": "nathalie-ziegler",
-  "Okha": "adam-courts-okha",
+  "Okha Design Studio": "adam-courts-okha",
   "Olivia Cognet": "olivia-cognet",
   "Pierre Bonnefille": "pierre-bonnefille",
   "Robicara": "robicara",
@@ -1359,7 +1359,7 @@ function AlphaStrip({
                   className="absolute inset-0 w-full h-full pointer-events-none select-none"
                   style={{
                     objectFit: "cover",
-                    objectPosition: brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : brand.name === "Robicara" ? "center 45%" : brand.name === "Okha" ? "center 30%" : brand.name === "Sé Collections" ? "center center" : brand.name === "Andrée Putman" ? "center 60%" : "center top",
+                    objectPosition: brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : brand.name === "Robicara" ? "center 45%" : brand.name === "Okha Design Studio" ? "center 30%" : brand.name === "Sé Collections" ? "center center" : brand.name === "Andrée Putman" ? "center 60%" : "center top",
                   }}
                 />
               )}
