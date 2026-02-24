@@ -1729,6 +1729,13 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "80 x 60 x H40 cm",
       },
       {
+        image: redaAmalouSteeltop,
+        title: "STEELTOP Bookcase",
+        subtitle: "",
+        materials: "Black Steel and American walnut",
+        dimensions: "110 / 150 x 40 x H210 cm",
+      },
+      {
         image: redaAmalouOoma,
         title: "OOMA Dining Table",
         subtitle: "",
@@ -1748,13 +1755,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "for Véronèse",
         materials: "Murano glass, Aluminium structure col.Bronze",
         dimensions: "9 x 80 / 120 / 160 / 200 x H24 cm",
-      },
-      {
-        image: redaAmalouSteeltop,
-        title: "STEELTOP Bookcase",
-        subtitle: "",
-        materials: "Black Steel and American walnut",
-        dimensions: "110 / 150 x 40 x H210 cm",
       },
       {
         image: redaAmalouMuse,
