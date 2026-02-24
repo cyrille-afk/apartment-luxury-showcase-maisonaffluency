@@ -72,6 +72,7 @@ import victoriaMagniantBg from "@/assets/designers/victoria-magniant-bg.png";
 import pierreYovanovitchBg from "@/assets/designers/pierre-yovanovitch-bg.png";
 import brunoMoinardBg from "@/assets/designers/bruno-moinard-bg.png";
 import noeDuchaufourBg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
+import ndlEditionsBg from "@/assets/designers/ndl-editions-bg.jpg";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -974,7 +975,7 @@ const brandBgMap: Record<string, string> = {
   "Victoria Magniant": victoriaMagniantBg,
   "Pierre Yovanovitch": pierreYovanovitchBg,
   "Bruno Moinard Editions": brunoMoinardBg,
-  "NDL Editions": noeDuchaufourBg,
+  "NDL Editions": ndlEditionsBg,
   "Hom Le Xuan": homLeXuanBg,
 };
 
