@@ -93,6 +93,7 @@ import christopherBootsBg from "@/assets/designers/christopher-boots-bg.jpg";
 import lostProfileStudioBg from "@/assets/designers/lost-profile-studio-bg.jpg";
 import okurayamaStudioBg from "@/assets/designers/okurayama-studio-bg.jpg";
 import overgaardDyrmanBg from "@/assets/designers/overgaard-dyrman-bg.jpg";
+import stephaneParmentierBg from "@/assets/designers/stephane-parmentier-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1060,6 +1061,15 @@ const partnerBrands = [
     description: "Overgaard & Dyrman is a Danish design studio crafting precision-engineered furniture that merges traditional metalwork and leather craftsmanship with modernist sensibility — their iconic Circle Dining Chair exemplifies their mastery of sculptural form and material refinement.",
     instagram: "https://www.instagram.com/overgaard_dyrman/?hl=en",
   },
+  {
+    id: "stephane-parmentier",
+    name: "Stéphane Parmentier",
+    category: "Furniture",
+    subcategory: "Tables & Seating",
+    origin: "France",
+    description: "Stéphane Parmentier is a Paris-based designer and artistic director creating refined furniture and objects that blend luxurious materials — leather, bronze, marble, and rare stones — with bold, architectural silhouettes rooted in a sophisticated modernist vocabulary.",
+    instagram: "https://www.instagram.com/stephaneparmentier/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1147,6 +1157,7 @@ const brandBgMap: Record<string, string> = {
   "Lost Profile Studio": lostProfileStudioBg,
   "Okurayama Studio": okurayamaStudioBg,
   "Overgaard & Dyrman": overgaardDyrmanBg,
+  "Stéphane Parmentier": stephaneParmentierBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
