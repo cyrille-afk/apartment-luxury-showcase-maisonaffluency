@@ -1540,6 +1540,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: manOfPartsImg,
     biography: "Man of Parts is a Hamburg-based design brand founded by Stephan Weishaupt, co-founder of the design magazine Wallpaper*. The brand commissions furniture and objects from leading international designers — including Yabu Pushelberg, Sebastian Herkner, and Osvaldo Tenório — producing pieces of exceptional quality that bridge the gallery and the home. Each collection reflects a distinct design vision united by the pursuit of craft excellence.",
     notableWorks: "Lombard Street Sofa (Yabu Pushelberg), Mainkai Lamp (Sebastian Herkner), Rua Tucumã Tables",
+    notableWorksLinks: [
+      { text: "Yabu Pushelberg's Park Place Bar/Counter Stool | Golden Hour", galleryIndex: 19 },
+    ],
     philosophy: "We believe in furniture made with integrity — pieces conceived by great designers and realized by the best craftspeople in the world.",
     curatorPicks: [
       { image: manOfPartsCoffeeTable, title: "Praia da Granja Coffee Table", subtitle: "by Sebastian Herkner", category: "Tables", materials: "A mixed textured stone top with a solid walnut or oak base", dimensions: "W 125 × D 40 × H 34 cm" },
