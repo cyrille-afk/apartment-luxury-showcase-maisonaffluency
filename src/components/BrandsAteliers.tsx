@@ -957,7 +957,9 @@ const partnerBrands = [
     subcategory: "Photography",
     origin: "France",
     description: "French abstract photographer whose multi-exposure Diasec works transform iconic landmarks and natural landscapes into mesmerising, painterly compositions — blurring the line between photography and fine art.",
+    featured: "Orsay Abstract Diasec",
     instagram: "https://www.instagram.com/stephcgart/?hl=en",
+    galleryIndex: 1, // A Sophisticated Living Room
   },
   {
     id: "andrea-claire-studio",
