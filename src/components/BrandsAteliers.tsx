@@ -401,7 +401,7 @@ const partnerBrands = [
     description: "British design studio creating sculptural lighting and objects in carved marble and natural materials, each piece a unique work of art.",
     featured: "Carved Marble Marie Lamp by Toni Grilo",
     instagram: "https://instagram.com/haymanneditions",
-    galleryIndex: 15, // Design Tableau
+    galleryIndex: 13, // Design Tableau
   },
   {
     id: "herve-van-der-straeten",
