@@ -958,6 +958,15 @@ const partnerBrands = [
     description: "French abstract photographer whose multi-exposure Diasec works transform iconic landmarks and natural landscapes into mesmerising, painterly compositions — blurring the line between photography and fine art.",
     instagram: "https://www.instagram.com/stephcgart/?hl=en",
   },
+  {
+    id: "andrea-claire-studio",
+    name: "Andrea Claire Studio",
+    category: "Decorative Object",
+    subcategory: "Decorative Objects",
+    origin: "United States",
+    description: "Andrea Claire Studio creates hand-sculpted ceramic vessels, objects and lighting that celebrate organic form and tactile materiality — each unique piece embodies a refined, wabi-sabi sensibility rooted in craft and contemporary design.",
+    instagram: "https://www.instagram.com/andreaclairestudio/?hl=en",
+  },
 ];
 
 // Background image map
