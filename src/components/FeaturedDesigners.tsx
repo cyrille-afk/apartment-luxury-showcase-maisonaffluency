@@ -2404,7 +2404,7 @@ const FeaturedDesigners = () => {
                             alt={designer.name}
                             className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
                             style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined}
-                            loading="eager"
+                            loading="lazy"
                           />
                           <div className="absolute inset-0 rounded-full bg-primary/0 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center">
                             <svg
@@ -2829,7 +2829,7 @@ const FeaturedDesigners = () => {
                               }`}
                             >
                               {pick.image ? (
-                                <img src={pick.image} alt={pick.title} className={`w-full h-full object-cover ${!pickMatchesFilter(pick) ? 'blur-[3px] opacity-40' : ''}`} loading="eager" />
+                                <img src={pick.image} alt={pick.title} className={`w-full h-full object-cover ${!pickMatchesFilter(pick) ? 'blur-[3px] opacity-40' : ''}`} loading="lazy" />
                               ) : (
                                 <div className="w-full h-full bg-white/10 flex items-center justify-center">
                                   <span className="text-white/40 text-[6px] text-center leading-tight px-0.5">{pick.title}</span>
