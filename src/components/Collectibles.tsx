@@ -161,7 +161,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
     notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
-    notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 11 },
+    notableWorksLink: { text: "Mic Mac Chandelier | A Masterful Suite", galleryIndex: 12 },
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     curatorPicks: [
