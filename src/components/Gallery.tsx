@@ -584,7 +584,7 @@ const Gallery = () => {
             </button>
 
             {/* Image container */}
-            <div className="flex flex-col items-center justify-center w-full md:max-w-[90vw] max-h-[85vh] px-0 md:px-16">
+            <div className="flex flex-col items-center justify-center w-full md:max-w-[90vw] max-h-[85vh] px-4 md:px-16">
               <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center">
                 {allItems[currentImageIndex]?.title}
               </h3>
