@@ -45,7 +45,7 @@ const galleryExperiences = [{
     description: "Dining Table: Alinea Design Objects' Custom Angelo M Table, Dining Chairs: 2 x Eric Schmitt Studio's Chairie and 1 x Cazes&Conquet's Augusta Dining Chairs, Alabaster Pendant: Emanuelle Levet Stenne's Pendant Light, Sculptured Book Cover: Emmanuel Babled's Limited Edition of 8 + 4 AP from the Osmosi Series, Sofa: Thierry Lemaire's Niko 420 custom, Bookcase: Poltrona Frau's Albero Bookcase, Vessel behind the sofa: Maarten Vrolijk's Sakura TRP 22001 Vessel (unique piece)"
   }, {
     image: "/gallery/sociable-4.jpeg",
-    title: "A Sunlight Reading Corner",
+    title: "A Sun Lit Reading Corner",
     description: "Floor Lamp: Olivia Cognet's Blue glazed Vallauris Floor Lamp, Armchair: Leo Sentou's AB Chair, Coffee Table: Jean-Michel Frank's Soleil Table (Straw) 1930, Iksel's Japanese Cranes Wallcover, Haas Brothers' Monster Gold-Tone Incense Burner for L'Objet, Textured Bronze Globes: Alexander Lamont's Hammered Bowls"
   }]
 }, {

@@ -131,7 +131,7 @@ const partnerBrands = [
     description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
     featured: "Textured Bronze Globes Hammered Bowls",
     instagram: "https://instagram.com/alexanderlamont",
-    galleryIndex: 3, // A Sunlight Reading Corner in A Sociable Environment
+    galleryIndex: 3, // A Sun Lit Reading Corner in A Sociable Environment
   },
   {
     id: "alinea-design-objects",
