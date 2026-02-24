@@ -905,7 +905,7 @@ const partnerBrands = [
     name: "L'Objet",
     category: "Decorative Object",
     subcategory: "Decorative Objects",
-    origin: "United States",
+    origin: "France",
     description: "L'Objet is a luxury design house founded by Elad Yifrach, creating exquisite tableware, home décor, and fragrances that blend artisanal craftsmanship with bold sculptural vision. Each piece — from porcelain to 24k gold-plated objets — is conceived as a work of art, elevating everyday rituals into extraordinary experiences.",
     instagram: "https://www.instagram.com/lobjet",
   },
