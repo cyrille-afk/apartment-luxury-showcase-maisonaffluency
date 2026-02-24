@@ -667,9 +667,6 @@ const Collectibles = () => {
                 </div>
               );
             })()}
-            <p className="text-base md:text-lg text-muted-foreground font-body">
-              Curators' Picks
-            </p>
           </motion.div>
 
           <div className="flex items-center justify-between mb-4">
