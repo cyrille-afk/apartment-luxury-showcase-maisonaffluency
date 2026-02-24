@@ -771,6 +771,18 @@ const partnerBrands = [
     galleryIndex: 9, // A Serene Decor in A Personal Sanctuary
   },
   {
+    id: "se-collections-ooh-la-la",
+    name: "Sé Collections",
+    category: "Seating",
+    subcategory: "Sofas & Loveseats",
+    seatType: "Sofas & Loveseats",
+    origin: "United Kingdom",
+    description: "London-based luxury furniture house collaborating with visionary designers including Nika Zupanc, Jaime Hayon and Damien Langlois-Meurinne to create bold, sculptural pieces that push the boundaries of contemporary design.",
+    featured: "Ooh La La Console by Damien Langlois-Meurinne",
+    instagram: "https://www.instagram.com/se_collections/",
+    galleryIndex: 13, // Design Tableau
+  },
+  {
     id: "valeria-nascimento",
     name: "Valeria Nascimento",
     category: "Decorative Object",
