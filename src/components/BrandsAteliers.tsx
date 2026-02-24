@@ -530,7 +530,7 @@ const partnerBrands = [
     description: "French glass artist creating bespoke chandeliers and sculptural glass pieces, each work a unique expression of light and organic form.",
     featured: "Custom Glass Chandelier",
     instagram: "https://instagram.com/nathaliezieglerpasqua",
-    galleryIndex: 7, // A Sophisticated Boudoir
+    galleryIndex: 8, // A Sophisticated Boudoir
   },
   {
     id: "maison-wecraft",
