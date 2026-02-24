@@ -445,7 +445,7 @@ const partnerBrands = [
     description: "Legendary Czech furniture designer whose iconic mid-century lounge chairs represent the pinnacle of functionalist design, prized by collectors worldwide.",
     featured: "Lounge Chair",
     instagram: "",
-    galleryIndex: 0, // An Inviting Lounge Area
+    galleryIndex: 23, // Curated Vignette
   },
   {
     id: "iksel-brunelleschi",
