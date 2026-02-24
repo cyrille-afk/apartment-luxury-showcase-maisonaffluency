@@ -135,7 +135,7 @@ const galleryExperiences = [{
   items: [{
     image: homeOfficeDeskImage,
     title: "A Workspace of Distinction",
-    description: "Bernt Petersen 4-Drawer Executive Desk, Entrelacs Création's Kheops Bronze & Alabaster Wall Light, Mernøe N1 Pendant, Vitra Eames Soft Pad EA 219 Office Chair by Charles & Ray Eames"
+    description: "Executive Desk: Bernt Petersen 4-Drawer Desk, Wall Lamp at Right of Desk: Kheops Wall Lamp by Kelly Boukobza for Entrelacs, Table Lamp at Left: RoWin' Atelier's None II Table Lamp, Pendant Light: Mernøe N1 Pendant, Office Chair: Vitra Eames Soft Pad EA 219 by Charles & Ray Eames"
   }, {
     image: homeOfficeDesk2Image,
     title: "Refined Details",
