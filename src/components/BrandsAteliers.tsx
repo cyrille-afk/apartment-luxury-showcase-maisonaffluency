@@ -96,6 +96,7 @@ import overgaardDyrmanBg from "@/assets/designers/overgaard-dyrman-bg.jpg";
 import stephaneParmentierBg from "@/assets/designers/stephane-parmentier-bg.jpg";
 import privatiselectionemBg from "@/assets/designers/privatiselectionem-bg.jpg";
 import achilleSalvagniBg from "@/assets/designers/achille-salvagni-bg.png";
+import valerieRostaingBg from "@/assets/designers/valerie-rostaing-bg.png";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1098,6 +1099,7 @@ const partnerBrands = [
     origin: "France",
     description: "Valérie Rostaing is a Paris-based designer known for her sculptural furniture and objects that balance poetic sensibility with material experimentation. Her work — spanning ceramics, bronze, and mixed media — inhabits a space between functional design and fine art, creating pieces of quiet intensity and timeless elegance.",
     instagram: "https://www.instagram.com/valerie_rostaing/",
+    photoCredit: "Olivier Marceny",
   },
 ];
 
@@ -1189,6 +1191,7 @@ const brandBgMap: Record<string, string> = {
   "Stéphane Parmentier": stephaneParmentierBg,
   "Privatiselectionem": privatiselectionemBg,
   "Achille Salvagni Atelier": achilleSalvagniBg,
+  "Valérie Rostaing": valerieRostaingBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
@@ -1245,6 +1248,7 @@ type ConsolidatedBrand = {
   instagram: string;
   categories: string[];
   featuredItems: Array<{ featured?: string; galleryIndex?: number; category: string }>;
+  photoCredit?: string;
 };
 
 function AlphaStrip({
@@ -1327,6 +1331,11 @@ function AlphaStrip({
                 />
               )}
               <div className={`absolute inset-0 transition-all duration-300 ${hasBg ? "bg-black/35 group-hover:bg-black/25" : "bg-card/50 group-hover:bg-card/80"}`} />
+              {brand.photoCredit && (
+                <p className="absolute bottom-2 right-2 z-10 text-[9px] text-white/40 font-body tracking-wider">
+                  Photo: {brand.photoCredit}
+                </p>
+              )}
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2">
@@ -1568,6 +1577,7 @@ const BrandsAteliers = () => {
           instagram: brand.instagram,
           categories: [],
           featuredItems: [],
+          photoCredit: (brand as any).photoCredit,
         };
       }
       if (!brandMap[brand.name].categories.includes(brand.category)) {
