@@ -1704,7 +1704,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: redaAmalouImg,
     biography: "Reda Amalou is a French architect and designer who founded the architectural agency AW2 over 25 years ago with the ambition of transcending the boundaries between architecture and design. A true creator of experiences, his work spans luxury hospitality architecture (Six Senses, Coucoo Cabanes) to collectible furniture editions. His DOT side table — a perfect geometric sphere in lacquered wood — has become one of the most recognized pieces in contemporary French design.",
     notableWorks: "DOT Side Table (Maison Affluency), Eggshell Collection, AW2 Hospitality Projects",
-    notableWorksLink: { text: "DOT Side Table", galleryIndex: 13 },
+    notableWorksLink: { text: "DOT Side Table", galleryIndex: 17 },
     philosophy: "Architecture and design are the same discipline — both are about creating places that stimulate the mind and mobilize the senses.",
     curatorPicks: [],
     links: [

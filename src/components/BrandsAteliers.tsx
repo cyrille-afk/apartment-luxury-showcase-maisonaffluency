@@ -649,7 +649,7 @@ const partnerBrands = [
     description: "French architect and designer creating collectible furniture editions that transcend the boundaries between architecture and design, with pieces of geometric precision and sculptural elegance.",
     featured: "DOT Side Table",
     instagram: "https://instagram.com/redaamalou",
-    galleryIndex: 13,
+    galleryIndex: 17,
   },
   {
     id: "robicara",
