@@ -350,7 +350,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     notableWorks: "Hammered Bowls (UNESCO Award), Brancusi Spiral Table, River Ledge Credenza, Agata Cabinet, Lune Mirrors",
     notableWorksLinks: [
       { text: "Corteza Console Table | Artisan Materials", galleryIndex: 23 },
-      { text: "Hammered Bowls | A Sunlight Reading Corner", galleryIndex: 3 },
+      { text: "Hammered Bowls | A Sun Lit Reading Corner", galleryIndex: 3 },
     ],
     philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
     curatorPicks: [
@@ -1658,7 +1658,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Olivia Cognet is a French ceramic artist that draws her inspiration from the South of France where she grew up and and was nourished by the brilliant masters from the school of Vallauris, from Picasso to Roger Capron. Her Vallauris floor lamp in a custom blue glazed ceramic, is a testimony of her constant search for the balance between art & design. ",
     notableWorks: "Bas Relief sculptures, Vallauris floor lamp",
-    notableWorksLink: { text: "Blue Glazed Vallauris Floor Lamp", galleryIndex: 1 },
+    notableWorksLink: { text: "Blue Glazed Vallauris Floor Lamp", galleryIndex: 3 },
     philosophy: "Blending modern brutalism with a graphic feminine sensibility.",
     curatorPicks: [
       { image: oliviaCognetRedTravertine, title: "Custom Bas Relief", category: "Wall Art", tags: ["Wall Art", "Sculpture"], materials: "Red Travertine", dimensions: "285 × 175 cm" },
