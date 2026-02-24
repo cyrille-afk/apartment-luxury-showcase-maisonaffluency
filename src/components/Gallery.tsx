@@ -41,8 +41,8 @@ const galleryExperiences = [{
     description: "Coffee Table: Thierry Lemaire Orsay Coffee Table (edition of 12), Garnier & Linker's Lost-Wax Crystal Cast Centerpiece for Théorème Editions, Shagreen Credenza: Robicara's Sira Credenza, Atop the Credenza: Matthieu Gicquel's Texture Glass with Gold Leaf rim Géode, Jean-Michel Frank & Adolphe Chanaux' Stool 1934, Olivia Cognet's Blue glazed Vallauris Floor Lamp, Leo Sentou's AB Armchair, Jean-Michel Frank's Soleil Coffee Table 1930, Iksel's Japanese Cranes Wallcover"
   }, {
     image: diningImage,
-    title: "With Panoramic Cityscape Views",
-    description: "Alinea Design Objects' Angelo M table, Eric Schmitt Studio's Chairie and Cazes&Conquet's Augusta dining chairs, Emanuelle Levet Stenne's Alabaster Pendant Light, Emmanuel Babled's Limited Edition Sculptured Book Cover from his emblematic Osmosi Series"
+    title: "Panoramic Cityscape Views",
+    description: "Dining Table: Alinea Design Objects' Custom Angelo M Table, Dining Chairs: 2 x Eric Schmitt Studio's Chairie and 1 x Cazes&Conquet's Augusta Dining Chairs, Alabaster Pendant: Emanuelle Levet Stenne's Pendant Light, Sculptured Book Cover: Emmanuel Babled's Limited Edition of 8 + 4 AP from the Osmosi Series, Sofa: Thierry Lemaire's Niko 420 custom, Bookcase: Poltrona Frau's Albero Bookcase, Vessel behind the sofa: Maarten Vrolijk's Sakura TRP 22001 Vessel (unique piece)"
   }, {
     image: "/gallery/sociable-4.jpeg",
     title: "A Sculptural Reading Corner",
