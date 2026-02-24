@@ -99,6 +99,7 @@ import achilleSalvagniBg from "@/assets/designers/achille-salvagni-bg.png";
 import valerieRostaingBg from "@/assets/designers/valerie-rostaing-bg.png";
 import mmairoBg from "@/assets/ateliers/mmairo.png";
 import lobjetBg from "@/assets/ateliers/lobjet.png";
+import laChanceParisBg from "@/assets/ateliers/la-chance-paris.png";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -882,6 +883,15 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/jacobhashimotostudio/",
   },
   {
+    id: "la-chance-paris",
+    name: "La Chance Paris",
+    category: "Furniture",
+    subcategory: "Tables",
+    origin: "France",
+    description: "La Chance is a Parisian design house creating bold, collectible furniture and objects that bridge the gap between art and design. Founded on a spirit of creative daring, the house collaborates with international designers to produce distinctive pieces — from sculptural tables to statement seating — that bring personality and colour to contemporary interiors.",
+    instagram: "https://www.instagram.com/lachance_paris/?hl=en",
+  },
+  {
     id: "le-berre-vevaud",
     name: "Le Berre Vevaud",
     category: "Decorative Object",
@@ -1214,6 +1224,7 @@ const brandBgMap: Record<string, string> = {
   "Valérie Rostaing": valerieRostaingBg,
   "MMairo": mmairoBg,
   "L'Objet": lobjetBg,
+  "La Chance Paris": laChanceParisBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
