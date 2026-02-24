@@ -139,7 +139,7 @@ const galleryExperiences = [{
   }, {
     image: homeOfficeDesk2Image,
     title: "Refined Details",
-    description: "Bernt Petersen 4-Drawer Executive Desk, RoWin' Atelier's None II Table Lamp"
+    description: "Executive Desk: Bernt Petersen 4-Drawer Desk, Table Lamp: RoWin' Atelier's None II Table Lamp (Unique Piece)"
   }, {
     image: homeOffice3Image,
     title: "Light & Focus",
