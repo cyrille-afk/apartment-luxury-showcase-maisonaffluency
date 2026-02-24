@@ -1610,7 +1610,7 @@ const BrandsAteliers = () => {
           </div>
           <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
-              Ateliers
+              Ateliers & Partners
             </h2>
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
