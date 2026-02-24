@@ -55,7 +55,7 @@ const galleryExperiences = [{
   items: [{
     image: intimateDiningImage,
     title: "A Dreamy Tuscan Landscape",
-    description: "Dining Table: Atelier Pendhapa's Deepah Custom Table, Dining Chairs: Hamrei's Pépé Custom Chairs, Pendant Lights: Jeremy Maxwell Wintrebert's Murano Cloud Bulle Pendants, Blue Vessel: Milan Pekař's Crystalline Vase Volume 3, Pierre Frey's Tuscan Journey Wallcover"
+    description: "Dining Table: Atelier Pendhapa's Deepah Custom Table, Dining Chairs: Hamrei's Pépé Custom Chairs in FJ Hamikian Fabric, Pendant Lights: Jeremy Maxwell Wintrebert's Murano Cloud Bulle Pendants, Blue Vessel: Milan Pekař's Crystalline Vase Volume 3, Pierre Frey's Tuscan Journey Wallcover"
   }, {
     image: intimateTableImage,
     title: "A Highly Customised Dining Room",
