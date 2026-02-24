@@ -171,9 +171,9 @@ const Navigation = () => {
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         {/* Mobile: single row */}
         <div className="flex h-24 items-center justify-center md:hidden relative">
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center ml-6">
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-[1.4rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+              <span className="font-brand text-[1.6rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                 MAISON AFFLUENCY
               </span>
             </button>
