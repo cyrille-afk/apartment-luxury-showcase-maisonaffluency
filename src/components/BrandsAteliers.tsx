@@ -301,7 +301,7 @@ const partnerBrands = [
     description: "Portuguese textile house crafting exquisite bed linens and home textiles using the finest natural fibers and artisanal techniques.",
     featured: "Silk Bed Cover",
     instagram: "https://instagram.com/celso.de.lemos",
-    galleryIndex: 11, // A Masterful Suite
+    galleryIndex: 12, // A Masterful Suite
   },
   {
     id: "entrelacs-creation",
