@@ -78,6 +78,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import redaAmalouBg from "@/assets/designers/reda-amalou-bg.png";
 import homLeXuanBg from "@/assets/designers/hom-le-xuan-bg.jpg";
+import frederiqueRobWhittleBg from "@/assets/designers/frederique-rob-whittle-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -905,6 +906,15 @@ const partnerBrands = [
     description: "NDL Editions is the eponymous furniture line by Noé Duchaufour-Lawrance, translating his organic, biomorphic design language into a curated collection of limited-edition furniture pieces crafted with exceptional materials and artisanal savoir-faire.",
     instagram: "https://www.instagram.com/noeduchaufourlawrance/",
   },
+  {
+    id: "frederique-rob-whittle",
+    name: "Frédérique and Rob Whittle",
+    category: "Decorative Object",
+    subcategory: "Decorative Objects",
+    origin: "France",
+    description: "Franco-British artistic duo specialising in monumental sculptural plasterwork, creating breathtaking bas-relief murals that transform architectural surfaces into immersive narrative landscapes inspired by nature and mythology.",
+    instagram: "https://www.instagram.com/frederiqueetrobwhittle/?hl=en",
+  },
 ];
 
 // Background image map
@@ -977,6 +987,7 @@ const brandBgMap: Record<string, string> = {
   "Bruno Moinard Editions": brunoMoinardBg,
   "NDL Editions": ndlEditionsBg,
   "Hom Le Xuan": homLeXuanBg,
+  "Frédérique and Rob Whittle": frederiqueRobWhittleBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
