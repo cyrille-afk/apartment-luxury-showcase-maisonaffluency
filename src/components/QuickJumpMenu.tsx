@@ -76,7 +76,7 @@ const QuickJumpMenu = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed right-4 bottom-20 md:right-6 md:bottom-24 z-50"
+          className="fixed right-4 bottom-16 md:right-6 md:bottom-24 z-50"
         >
           <AnimatePresence>
         {isOpen && (
