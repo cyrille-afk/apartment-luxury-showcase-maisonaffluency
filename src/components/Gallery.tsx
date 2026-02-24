@@ -462,7 +462,7 @@ const Gallery = () => {
                         src={item.image}
                         alt={item.title}
                         className={`h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage ? "object-[center_35%]" : ""}`}
-                        loading="eager"
+                        loading="lazy"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                       {/* Expand icon - bottom left */}
@@ -534,7 +534,7 @@ const Gallery = () => {
                       <div
                         className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm"
                       >
-                        <img src={item.image} alt={item.title} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="eager" />
+                        <img src={item.image} alt={item.title} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         {/* Expand icon - opens lightbox directly */}
                         <button
