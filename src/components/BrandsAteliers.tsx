@@ -80,6 +80,7 @@ import redaAmalouBg from "@/assets/designers/reda-amalou-bg.png";
 import homLeXuanBg from "@/assets/designers/hom-le-xuan-bg.jpg";
 import frederiqueRobWhittleBg from "@/assets/designers/frederique-rob-whittle-bg.jpg";
 import martinMasseBg from "@/assets/designers/martin-masse-bg.jpg";
+import mernoeBg from "@/assets/designers/mernoe-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -925,6 +926,17 @@ const partnerBrands = [
     description: "French sculptor and designer working with stone and mineral aggregates to create monumental organic forms, transforming raw geological materials into refined collectible pieces that celebrate the beauty of natural textures.",
     instagram: "https://www.instagram.com/martin_masse_/",
   },
+  {
+    id: "mernoe",
+    name: "Mernøe",
+    category: "Lighting",
+    subcategory: "Pendant Lights",
+    origin: "Denmark",
+    description: "Danish lighting atelier crafting refined pendant and table lamps in warm natural materials — wood, brass and copper — that embody Scandinavian simplicity with exceptional artisanal quality.",
+    featured: "N1 Pendant",
+    instagram: "https://www.instagram.com/mernoelighting/?hl=en",
+    galleryIndex: 19, // A Workspace of Distinction
+  },
 ];
 
 // Background image map
@@ -999,6 +1011,7 @@ const brandBgMap: Record<string, string> = {
   "Hom Le Xuan": homLeXuanBg,
   "Frédérique and Rob Whittle": frederiqueRobWhittleBg,
   "Martin Massé": martinMasseBg,
+  "Mernøe": mernoeBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
