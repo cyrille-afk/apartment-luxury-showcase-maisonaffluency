@@ -280,7 +280,7 @@ const Navigation = () => {
                       key={item.href} 
                       onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
-                      className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground/70 hover:text-primary font-semibold"
+                      className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                     >
                       {item.label}
                       <ChevronRight className="h-4 w-4" />
@@ -294,7 +294,7 @@ const Navigation = () => {
                 >
                   <button
                     onClick={() => setContactExpanded(!contactExpanded)}
-                    className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground/70 hover:text-primary font-semibold"
+                    className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                   >
                     Contact Us
                     <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${contactExpanded ? "rotate-90" : ""}`} />
