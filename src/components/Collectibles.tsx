@@ -257,7 +257,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Nathalie Ziegler is a French glass artist known for her custom chandeliers and glass sculptures that blur the line between functional lighting and fine art. Her Saint Just Custom Glass Chandelier showcases her ability to manipulate glass into dramatic, ethereal forms that transform spaces with light and color.",
     notableWorks: "Saint Just Custom Glass Chandelier, Gold Leaves+Glass Snake Vase, Sculptural Glass Series",
-    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 7 },
+    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 8 },
     philosophy:
       "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
     curatorPicks: [
