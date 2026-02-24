@@ -2188,6 +2188,10 @@ const FeaturedDesigners = () => {
               Designers & Makers
             </h2>
           </div>
+          <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
+            Discover the visionary designers and artisans whose exceptional work defines Maison Affluency. Each brings
+            their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
+          </p>
           {/* A-Z alphabet jump bar + Search + Filter */}
           <div className="flex flex-col gap-3 mb-3">
             <div
@@ -2320,10 +2324,6 @@ const FeaturedDesigners = () => {
             </Popover>
             </div>
           </div>
-          <p className="text-base md:text-lg text-muted-foreground font-body max-w-3xl">
-            Discover the visionary designers and artisans whose exceptional work defines Maison Affluency. Each brings
-            their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
-          </p>
         </motion.div>
 
         {(searchQuery || selectedCategory) && (
