@@ -97,6 +97,7 @@ import stephaneParmentierBg from "@/assets/designers/stephane-parmentier-bg.jpg"
 import privatiselectionemBg from "@/assets/designers/privatiselectionem-bg.jpg";
 import achilleSalvagniBg from "@/assets/designers/achille-salvagni-bg.png";
 import valerieRostaingBg from "@/assets/designers/valerie-rostaing-bg.png";
+import mmairoBg from "@/assets/ateliers/mmairo.png";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -738,6 +739,15 @@ const partnerBrands = [
     instagram: "https://instagram.com/manofparts",
   },
   {
+    id: "mmairo",
+    name: "MMairo",
+    category: "Furniture",
+    subcategory: "Tables",
+    origin: "Italy",
+    description: "MMairo is an Italian design studio specializing in sculptural furniture and objects crafted from rare natural stones — onyx, alabaster, and marble. Each piece celebrates the inherent beauty and translucency of the material, merging traditional stone-working mastery with bold contemporary forms to create functional works of art.",
+    instagram: "https://www.instagram.com/mmairo_design/?hl=en",
+  },
+  {
     id: "serge-mouille",
     name: "Serge Mouille",
     category: "Lighting",
@@ -1192,6 +1202,7 @@ const brandBgMap: Record<string, string> = {
   "Privatiselectionem": privatiselectionemBg,
   "Achille Salvagni Atelier": achilleSalvagniBg,
   "Valérie Rostaing": valerieRostaingBg,
+  "MMairo": mmairoBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
