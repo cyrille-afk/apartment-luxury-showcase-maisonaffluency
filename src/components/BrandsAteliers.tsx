@@ -249,7 +249,7 @@ const partnerBrands = [
     description: "Italian rug manufacturer known for contemporary designs and traditional Nepalese hand-knotting techniques. Their Giudecca custom rugs blend artistry with exceptional craftsmanship.",
     featured: "Giudecca Custom Rug",
     instagram: "https://instagram.com/cc_tapis",
-    galleryIndex: 11, // A Masterful Suite
+    galleryIndex: 12, // A Masterful Suite
   },
   {
     id: "collection-particuliere",
