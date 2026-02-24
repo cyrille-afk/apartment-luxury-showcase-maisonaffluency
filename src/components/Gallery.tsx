@@ -38,7 +38,7 @@ const galleryExperiences = [{
   }, {
     image: livingRoomImage,
     title: "A Sophisticated Living Room",
-    description: "Thierry Lemaire Orsay Centre Table, Robicara's Sira Credenza, Jean-Michel Frank & Adolphe Chanaux' Stool 1934, Olivia Cognet's Blue glazed Vallauris floor lamp, Leo Sentou's AB armchair, Garnier & Linker lost-wax cast crystal centerpiece for Théorème Editions, Matthieu Gicquel's Texture Glass with Gold Leaf rim Géode"
+    description: "Coffee Table: Thierry Lemaire Orsay Coffee Table (edition of 12), Garnier & Linker's Lost-Wax Crystal Cast Centerpiece for Théorème Editions, Shagreen Credenza: Robicara's Sira Credenza, Atop the Credenza: Matthieu Gicquel's Texture Glass with Gold Leaf rim Géode, Jean-Michel Frank & Adolphe Chanaux' Stool 1934, Olivia Cognet's Blue glazed Vallauris Floor Lamp, Leo Sentou's AB Armchair, Jean-Michel Frank's Soleil Coffee Table 1930, Iksel's Japanese Cranes Wallcover"
   }, {
     image: diningImage,
     title: "With Panoramic Cityscape Views",
