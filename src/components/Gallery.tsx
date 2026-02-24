@@ -369,7 +369,7 @@ const Gallery = () => {
           duration: 0.8
         }} className="mb-12 md:mb-16 text-left">
             <div className="mb-2 md:mb-3">
-              <p className="tracking-[0.15em] md:tracking-[0.3em] text-foreground text-sm md:text-xl lg:text-2xl font-serif font-bold">
+              <p className="tracking-[0.15em] md:tracking-[0.3em] text-foreground text-xl md:text-2xl lg:text-2xl font-serif font-bold">
                 A Uniquely Curated Venue
               </p>
             </div>
