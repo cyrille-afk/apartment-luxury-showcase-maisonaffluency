@@ -573,7 +573,7 @@ const partnerBrands = [
     description: "French artist and designer creating sculptural ceramic lighting and furniture that celebrates organic forms and handcrafted textures.",
     featured: "Blue glazed Vallauris floor lamp",
     instagram: "https://www.instagram.com/olivia_cognet",
-    galleryIndex: 1, // A Sophisticated Living Room
+    galleryIndex: 3, // A Sun Lit Reading Corner
   },
   {
     id: "peter-reed",
