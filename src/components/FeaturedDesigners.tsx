@@ -1903,8 +1903,10 @@ const FeaturedDesigners = () => {
   useEffect(() => {
     if (!curatorPicksDesigner?.curatorPicks?.length) return;
     curatorPicksDesigner.curatorPicks.forEach(pick => {
-      const img = new Image();
-      img.src = pick.image;
+      if (pick.image) {
+        const img = new Image();
+        img.src = pick.image;
+      }
     });
   }, [curatorPicksDesigner]);
 
@@ -2636,7 +2638,7 @@ const FeaturedDesigners = () => {
                         </div>
                       )}
                       <div className="relative inline-block">
-                        {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image && (
+                        {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image ? (
                           <img 
                             key={curatorPickIndex}
                             src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
@@ -2647,6 +2649,10 @@ const FeaturedDesigners = () => {
                             draggable={false}
                             onLoad={() => setImageLoaded(true)}
                           />
+                        ) : (
+                          <div className="flex items-center justify-center max-w-full max-h-[55vh] w-64 h-64 bg-white/5 border border-white/10 rounded-lg">
+                            <span className="text-white/40 font-serif text-lg text-center px-4">{curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}</span>
+                          </div>
                         )}
 
                         {/* Photo credit — bottom left on image */}
@@ -2727,7 +2733,13 @@ const FeaturedDesigners = () => {
                                   : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'
                               }`}
                             >
-                              <img src={pick.image} alt={pick.title} className={`w-full h-full object-cover ${!pickMatchesFilter(pick) ? 'blur-[3px] opacity-40' : ''}`} loading="eager" />
+                              {pick.image ? (
+                                <img src={pick.image} alt={pick.title} className={`w-full h-full object-cover ${!pickMatchesFilter(pick) ? 'blur-[3px] opacity-40' : ''}`} loading="eager" />
+                              ) : (
+                                <div className="w-full h-full bg-white/10 flex items-center justify-center">
+                                  <span className="text-white/40 text-[6px] text-center leading-tight px-0.5">{pick.title}</span>
+                                </div>
+                              )}
                             </button>
                           ))}
                         </div>
