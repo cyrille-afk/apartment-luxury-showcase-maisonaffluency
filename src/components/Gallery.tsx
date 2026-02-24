@@ -80,7 +80,7 @@ const galleryExperiences = [{
   }, {
     image: "/gallery/sanctuary-2.jpg",
     title: "Artisan Craftsmanship",
-    description: "Bruno de Maistre's Lyric Desk detail, Nathalie Ziegler's Gold Leaves+Glass Snake Vase, Hamrei's Pépé Chair in Pierre Frey fabric"
+    description: "Desk Close-Up: BdM's Lyric Desk, Chair: Hamrei's Pépé Chair, Vessel: Nathalie Ziegler's Gold Leaves+Glass Snake Vessel (Unique Piece)"
   }, {
     image: bedroomSecondImage,
     title: "A Serene Decor",
