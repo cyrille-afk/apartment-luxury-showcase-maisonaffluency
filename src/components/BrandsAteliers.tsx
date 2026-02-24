@@ -1296,7 +1296,7 @@ function AlphaStrip({
               {bg && (
                 <img
                   src={bg}
-                  alt=""
+                  alt={`${brand.name} background`}
                   loading="eager"
                   aria-hidden="true"
                   className="absolute inset-0 w-full h-full pointer-events-none select-none"
