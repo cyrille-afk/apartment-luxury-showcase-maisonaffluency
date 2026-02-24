@@ -185,7 +185,8 @@ const Gallery = () => {
     margin: "-100px"
   });
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+  const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [hasTapped, setHasTapped] = useState(false);
@@ -238,22 +239,40 @@ const Gallery = () => {
   // Minimum swipe distance required (in px)
   const minSwipeDistance = 50;
 
-  // Flatten all gallery items for lightbox navigation
+  // Flatten all gallery items for external link compatibility
   const allItems = useMemo(() => {
     return galleryExperiences.flatMap(section => section.items);
+  }, []);
+
+  // Get current section's items for scoped lightbox navigation
+  const currentSectionItems = useMemo(() => {
+    return galleryExperiences[currentSectionIndex]?.items || [];
+  }, [currentSectionIndex]);
+
+  // Helper: convert flat index to section + item index
+  const flatIndexToSectionItem = useCallback((flatIndex: number) => {
+    let remaining = flatIndex;
+    for (let s = 0; s < galleryExperiences.length; s++) {
+      if (remaining < galleryExperiences[s].items.length) {
+        return { sectionIndex: s, itemIndex: remaining };
+      }
+      remaining -= galleryExperiences[s].items.length;
+    }
+    return { sectionIndex: 0, itemIndex: 0 };
   }, []);
 
   // Preload adjacent gallery images for smooth transitions
   useEffect(() => {
     if (!lightboxOpen) return;
-    const toPreload = [currentImageIndex - 1, currentImageIndex, currentImageIndex + 1].filter(
-      i => i >= 0 && i < allItems.length
+    const items = currentSectionItems;
+    const toPreload = [currentItemIndex - 1, currentItemIndex, currentItemIndex + 1].filter(
+      i => i >= 0 && i < items.length
     );
     toPreload.forEach(i => {
       const img = new Image();
-      img.src = allItems[i].image;
+      img.src = items[i].image;
     });
-  }, [currentImageIndex, lightboxOpen, allItems]);
+  }, [currentItemIndex, lightboxOpen, currentSectionItems]);
 
   const [externalSourceId, setExternalSourceId] = useState<string | null>(null);
 
@@ -265,9 +284,11 @@ const Gallery = () => {
       if (storedIndex !== null) {
         const index = parseInt(storedIndex, 10);
         if (!isNaN(index) && index >= 0 && index < allItems.length) {
-          setCurrentImageIndex(index);
+          const { sectionIndex, itemIndex } = flatIndexToSectionItem(index);
+          setCurrentSectionIndex(sectionIndex);
+          setCurrentItemIndex(itemIndex);
           setExternalSourceId(sourceId);
-          setSourceItemKey(null); // Clear internal source
+          setSourceItemKey(null);
           setLightboxOpen(true);
         }
         sessionStorage.removeItem('openGalleryIndex');
@@ -291,9 +312,11 @@ const Gallery = () => {
     }>) => {
       const index = e.detail.index;
       if (index >= 0 && index < allItems.length) {
-        setCurrentImageIndex(index);
+        const { sectionIndex, itemIndex } = flatIndexToSectionItem(index);
+        setCurrentSectionIndex(sectionIndex);
+        setCurrentItemIndex(itemIndex);
         setExternalSourceId(e.detail.sourceId || null);
-        setSourceItemKey(null); // Clear internal source
+        setSourceItemKey(null);
         setLightboxOpen(true);
       }
     };
@@ -301,13 +324,8 @@ const Gallery = () => {
     return () => window.removeEventListener('openGalleryLightbox', handleOpenLightbox as EventListener);
   }, [allItems.length]);
   const openLightbox = (sectionIndex: number, itemIndex: number) => {
-    // Calculate the flat index
-    let flatIndex = 0;
-    for (let i = 0; i < sectionIndex; i++) {
-      flatIndex += galleryExperiences[i].items.length;
-    }
-    flatIndex += itemIndex;
-    setCurrentImageIndex(flatIndex);
+    setCurrentSectionIndex(sectionIndex);
+    setCurrentItemIndex(itemIndex);
     setSourceItemKey(`${sectionIndex}-${itemIndex}`);
     setLightboxOpen(true);
   };
@@ -333,10 +351,10 @@ const Gallery = () => {
     }
   };
   const goToPrevious = () => {
-    setCurrentImageIndex(prev => prev === 0 ? allItems.length - 1 : prev - 1);
+    setCurrentItemIndex(prev => prev === 0 ? currentSectionItems.length - 1 : prev - 1);
   };
   const goToNext = () => {
-    setCurrentImageIndex(prev => prev === allItems.length - 1 ? 0 : prev + 1);
+    setCurrentItemIndex(prev => prev === currentSectionItems.length - 1 ? 0 : prev + 1);
   };
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") goToPrevious();
@@ -568,7 +586,7 @@ const Gallery = () => {
       <Dialog open={lightboxOpen} onOpenChange={(open) => !open && closeLightbox()}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 pt-14 md:pt-0 bg-black/95 border-none [&>button]:hidden overflow-y-auto" onKeyDown={handleKeyDown} aria-describedby={undefined}>
           <VisuallyHidden>
-            <DialogTitle>{allItems[currentImageIndex]?.title || 'Gallery Image'}</DialogTitle>
+            <DialogTitle>{currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}</DialogTitle>
           </VisuallyHidden>
           <div className="relative w-full h-full flex items-start md:items-center justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
             {/* Close button */}
@@ -579,7 +597,7 @@ const Gallery = () => {
             {/* Pill indicator - top right */}
             <div className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none">
               <span className="text-white text-[10px] font-body font-medium leading-none">
-                {currentImageIndex + 1}/{allItems.length}
+                {currentItemIndex + 1}/{currentSectionItems.length}
               </span>
             </div>
 
@@ -591,23 +609,23 @@ const Gallery = () => {
             {/* Image container */}
             <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 md:justify-center md:max-h-[85vh]">
               <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center">
-                {allItems[currentImageIndex]?.title}
+                {currentSectionItems[currentItemIndex]?.title}
               </h3>
-              <img key={currentImageIndex} src={allItems[currentImageIndex]?.image} alt={allItems[currentImageIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[70vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
+              <img key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[70vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
               {/* Dot indicators */}
               <div className="flex justify-center gap-1.5 mt-3">
-                {allItems.map((_, i) => (
+                {currentSectionItems.map((_, i) => (
                   <button
                     key={i}
-                    onClick={() => setCurrentImageIndex(i)}
-                    className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentImageIndex ? 'bg-white' : 'bg-white/40'}`}
+                    onClick={() => setCurrentItemIndex(i)}
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
                     aria-label={`Go to image ${i + 1}`}
                   />
                 ))}
               </div>
               <div className="mt-3 text-center">
                 <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
-                  {allItems[currentImageIndex]?.description}
+                  {currentSectionItems[currentItemIndex]?.description}
                 </p>
               </div>
             </div>
