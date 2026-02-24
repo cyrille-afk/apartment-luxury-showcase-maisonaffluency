@@ -1654,7 +1654,7 @@ const BrandsAteliers = () => {
                         </div>
                       )}
                       <div className="relative inline-block">
-                        {picksDesigner.curatorPicks[picksIndex]?.image && (
+                        {picksDesigner.curatorPicks[picksIndex]?.image ? (
                           <img
                             key={picksIndex}
                             src={picksDesigner.curatorPicks[picksIndex]?.image}
@@ -1662,6 +1662,10 @@ const BrandsAteliers = () => {
                             className={`object-contain select-none transition-all duration-300 ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[55vh]'}`}
                             draggable={false}
                           />
+                        ) : (
+                          <div className="flex items-center justify-center max-w-full max-h-[55vh] w-64 h-64 bg-white/5 border border-white/10 rounded-lg">
+                            <span className="text-white/40 font-serif text-lg text-center px-4">{picksDesigner.curatorPicks[picksIndex]?.title}</span>
+                          </div>
                         )}
                         {picksDesigner.curatorPicks[picksIndex]?.photoCredit && (
                           <p className="absolute bottom-2 left-2 z-10 text-[10px] text-white/50 font-body tracking-wider flex items-center gap-1">
@@ -1711,7 +1715,13 @@ const BrandsAteliers = () => {
                           {picksDesigner.curatorPicks.map((pick: CuratorPick, idx: number) => (
                             <button key={idx} onClick={() => { setPicksIndex(idx); setPicksZoomed(false); }} aria-label={`View ${pick.title}`}
                               className={`flex-none relative w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden transition-all duration-300 ${picksIndex === idx ? 'ring-2 ring-white scale-110 opacity-100' : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'}`}>
-                              <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="eager" />
+                              {pick.image ? (
+                                <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="eager" />
+                              ) : (
+                                <div className="w-full h-full bg-white/10 flex items-center justify-center">
+                                  <span className="text-white/40 text-[6px] text-center leading-tight px-0.5">{pick.title}</span>
+                                </div>
+                              )}
                             </button>
                           ))}
                         </div>
