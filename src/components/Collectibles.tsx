@@ -526,7 +526,7 @@ const Collectibles = () => {
                 Collectible Design
               </h2>
             </div>
-            <p className="font-body text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed mb-4">
+            <p className="font-body text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed mb-4 text-justify">
               Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance.
             </p>
             {/* A-Z alphabet jump bar + Search + Filter */}
