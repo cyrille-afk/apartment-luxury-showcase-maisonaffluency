@@ -91,6 +91,7 @@ import basedUponBg from "@/assets/designers/based-upon-bg.jpg";
 import bryanOSullivanBg from "@/assets/designers/bryan-osullivan-bg.jpg";
 import christopherBootsBg from "@/assets/designers/christopher-boots-bg.jpg";
 import lostProfileStudioBg from "@/assets/designers/lost-profile-studio-bg.jpg";
+import okurayamaStudioBg from "@/assets/designers/okurayama-studio-bg.jpg";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1040,6 +1041,15 @@ const partnerBrands = [
     description: "Lost Profile Studio creates sculptural lighting and objects that explore the interplay of light, form, and materiality — combining hand-worked alabaster, bronze, and glass into striking pieces that feel both ancient and thoroughly contemporary.",
     instagram: "https://www.instagram.com/lost_profile_studio/?hl=en",
   },
+  {
+    id: "okurayama-studio",
+    name: "Okurayama Studio",
+    category: "Sculptural Furniture",
+    subcategory: "Sculpture & Furniture",
+    origin: "Japan",
+    description: "Okurayama Studio is a Japanese design practice creating monumental stone sculptures and furniture that draw from the primal power of natural landscapes — their raw, elemental works evoke ancient standing stones and celebrate the beauty of unrefined materiality.",
+    instagram: "https://www.instagram.com/okurayamastudio.design/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1125,6 +1135,7 @@ const brandBgMap: Record<string, string> = {
   "Bryan O'Sullivan Studio": bryanOSullivanBg,
   "Christopher Boots": christopherBootsBg,
   "Lost Profile Studio": lostProfileStudioBg,
+  "Okurayama Studio": okurayamaStudioBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
