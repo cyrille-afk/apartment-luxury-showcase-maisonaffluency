@@ -1563,6 +1563,7 @@ function AlphaStrip({
               </div>
 
 
+
                {/* Curators' Picks — bottom center */}
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
@@ -1675,6 +1676,7 @@ const BrandsAteliers = () => {
   const [picksDesignerName, setPicksDesignerName] = useState<string | null>(null);
   const [picksIndex, setPicksIndex] = useState(0);
   const [picksZoomed, setPicksZoomed] = useState(false);
+  const [picksImageLoaded, setPicksImageLoaded] = useState(false);
   const [picksTouchStart, setPicksTouchStart] = useState<number | null>(null);
   const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
 
@@ -1699,7 +1701,13 @@ const BrandsAteliers = () => {
     setPicksDesignerName(brandName);
     setPicksIndex(0);
     setPicksZoomed(false);
+    setPicksImageLoaded(false);
   }, []);
+
+  // Reset image loaded state when switching picks
+  useEffect(() => {
+    setPicksImageLoaded(false);
+  }, [picksIndex]);
 
   useEffect(() => {
     const handleCategorySync = (e: CustomEvent) => {
@@ -2060,13 +2068,24 @@ const BrandsAteliers = () => {
                       )}
                       <div className="relative inline-block">
                         {picksDesigner.curatorPicks[picksIndex]?.image ? (
-                          <img
-                            key={picksIndex}
-                            src={picksDesigner.curatorPicks[picksIndex]?.image}
-                            alt={picksDesigner.curatorPicks[picksIndex]?.title}
-                            className={`object-contain select-none transition-all duration-300 ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[45vh] md:max-h-[55vh]'}`}
-                            draggable={false}
-                          />
+                          <>
+                            {!picksImageLoaded && (
+                              <div className={`flex items-center justify-center ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[45vh] md:max-h-[55vh]'} w-64 h-64 animate-pulse`}>
+                                <div className="w-full h-full bg-white/5 rounded-lg flex items-center justify-center">
+                                  <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+                                </div>
+                              </div>
+                            )}
+                            <img
+                              key={picksIndex}
+                              src={picksDesigner.curatorPicks[picksIndex]?.image}
+                              alt={picksDesigner.curatorPicks[picksIndex]?.title}
+                              className={`object-contain select-none transition-all duration-300 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[45vh] md:max-h-[55vh]'}`}
+                              draggable={false}
+                              decoding="async"
+                              onLoad={() => setPicksImageLoaded(true)}
+                            />
+                          </>
                         ) : (
                           <div className="flex items-center justify-center max-w-full max-h-[55vh] w-64 h-64 bg-white/5 border border-white/10 rounded-lg">
                             <span className="text-white/40 font-serif text-lg text-center px-4">{picksDesigner.curatorPicks[picksIndex]?.title}</span>
@@ -2121,7 +2140,7 @@ const BrandsAteliers = () => {
                             <button key={idx} onClick={() => { setPicksIndex(idx); setPicksZoomed(false); }} aria-label={`View ${pick.title}`}
                               className={`flex-none relative w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden transition-all duration-300 ${picksIndex === idx ? 'ring-2 ring-white scale-110 opacity-100' : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'}`}>
                               {pick.image ? (
-                                <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="lazy" />
+                                <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                               ) : (
                                 <div className="w-full h-full bg-white/10 flex items-center justify-center">
                                   <span className="text-white/40 text-[6px] text-center leading-tight px-0.5">{pick.title}</span>
