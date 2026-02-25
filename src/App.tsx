@@ -6,11 +6,17 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ComingSoon from "./pages/ComingSoon";
+import usePageTracking from "./hooks/usePageTracking";
 
 const queryClient = new QueryClient();
 
 // Set to false to disable maintenance mode and show the real site
 const MAINTENANCE_MODE = false;
+
+const PageTracker = () => {
+  usePageTracking();
+  return null;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -18,6 +24,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <PageTracker />
         {MAINTENANCE_MODE ? (
           <Routes>
             <Route path="*" element={<ComingSoon />} />
