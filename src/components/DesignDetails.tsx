@@ -81,6 +81,15 @@ const DesignDetails = () => {
 
       if (error) throw error;
 
+      // Track Trade Program submission in Google Analytics
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'generate_lead', {
+          event_category: 'Trade Program',
+          event_label: 'Trade Program Application',
+          value: 1,
+        });
+      }
+
       toast({
         title: "Application Submitted",
         description: "Thank you for your interest. We'll be in touch shortly.",
