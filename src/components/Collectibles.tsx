@@ -239,7 +239,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Matthieu Gicquel is a French glass artist renowned for his exceptional tableware and decorative objects that blend traditional craftsmanship with contemporary design. His signature pieces feature textured glass adorned with precious gold leaf details, creating functional art that elevates everyday dining into a refined experience.",
     notableWorks: "Texture Glass with Gold Leaf rim Géode, Artisan Tableware Collection",
-    notableWorksLink: { text: "Texture Glass with Gold Leaf rim Géode | Craftsmanship At Every Corner", galleryIndex: 26 },
+    notableWorksLink: { text: "Texture Glass with Gold Leaf rim Géode | Craftsmanship At Every Corner", galleryIndex: 27 },
     philosophy: "Each piece of glass tells a story of light, texture, and the timeless beauty of artisan craftsmanship.",
     curatorPicks: [
       { image: matthieuGicquelGeode, title: "Géode Nbr 4: Texture Glass with Gold Leaf Rim", category: "Decorative Object", subcategory: "Tableware", materials: "Textured glass • 24k gold leaf rim", dimensions: "Ø32 cm", edition: "Unique Piece" },
