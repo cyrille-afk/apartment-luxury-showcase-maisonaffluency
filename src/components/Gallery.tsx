@@ -516,9 +516,13 @@ const Gallery = () => {
                     )}
                   </div>
                 )}
+                {/* Photo title below carousel */}
+                <h4 className="font-serif text-foreground text-base mt-3 px-1">
+                  {section.items[activeScrollIndices[originalSectionIndex] || 0]?.title}
+                </h4>
                 {/* Dot indicators */}
                 {section.items.length > 1 && (
-                  <div className="flex justify-center gap-1.5 mt-3">
+                  <div className="flex justify-center gap-1.5 mt-2">
                     {section.items.map((_, dotIndex) => (
                       <button
                         key={dotIndex}
@@ -555,7 +559,8 @@ const Gallery = () => {
                       className="group cursor-pointer"
                     >
                       <div
-                        className="relative mb-4 md:mb-6 aspect-[4/5] overflow-hidden rounded-sm"
+                        className="relative mb-2 aspect-[4/5] overflow-hidden rounded-sm"
+                        onClick={() => openLightbox(originalSectionIndex, index)}
                       >
                         <img src={item.image} alt={item.title} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -572,6 +577,14 @@ const Gallery = () => {
                             <Maximize2 className={`w-3 h-3 ${gridCols === 4 ? 'md:w-3 md:h-3' : 'md:w-4 md:h-4'}`} />
                           </span>
                         </button>
+                      </div>
+                      <div className="mb-4 md:mb-6">
+                        <h4 className={`font-serif text-foreground group-hover:text-primary transition-colors duration-300 ${gridCols === 4 ? 'text-sm' : 'text-base'}`}>
+                          {item.title}
+                        </h4>
+                        <p className={`text-muted-foreground font-body mt-0.5 line-clamp-2 ${gridCols === 4 ? 'text-[10px]' : 'text-xs'}`}>
+                          {item.description.split(',').slice(0, 2).join(',')}…
+                        </p>
                       </div>
                     </motion.div>
                   );
