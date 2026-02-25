@@ -30,7 +30,7 @@ const Hero = () => {
           className="h-full w-full object-cover object-[50%_40%] md:h-[130%] md:object-[50%_30%] will-change-transform"
           style={{ opacity, imageRendering: "auto", WebkitBackfaceVisibility: "hidden" }}
           loading="eager"
-          decoding="async"
+          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </motion.div>

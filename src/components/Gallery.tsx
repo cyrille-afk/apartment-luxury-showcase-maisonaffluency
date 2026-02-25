@@ -195,14 +195,14 @@ const Gallery = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
 
-  // Preload all gallery images (including hidden 4th items) so toggle is instant
+  // Preload first section's gallery images only (visible on initial load)
   useEffect(() => {
-    galleryExperiences.forEach(section => {
-      section.items.forEach(item => {
+    if (galleryExperiences.length > 0) {
+      galleryExperiences[0].items.slice(0, 3).forEach(item => {
         const img = new Image();
         img.src = item.image;
       });
-    });
+    }
   }, []);
 
   // Listen for category changes from Navigation
@@ -485,7 +485,7 @@ const Gallery = () => {
                         src={item.image}
                         alt={item.title}
                         className={`h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage ? "object-[center_35%]" : ""}`}
-                        loading="eager"
+                        loading="lazy"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                       {/* Expand icon - bottom left */}
