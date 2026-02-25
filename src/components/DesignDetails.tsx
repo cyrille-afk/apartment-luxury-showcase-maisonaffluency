@@ -124,9 +124,9 @@ const DesignDetails = () => {
             delay: 0.2
           }}>
             <div className="mb-3 flex flex-col items-center gap-3">
-              <p className="font-body text-lg sm:text-2xl uppercase tracking-[0.3em] text-primary font-semibold">
-                TRADE PROGRAM
-              </p>
+              <h2 className="font-display text-xl sm:text-2xl text-primary">
+                Trade Program
+              </h2>
               <button 
                 onClick={() => setIsOpen(true)}
                 className="bg-muted text-foreground px-4 py-2 font-body text-xs uppercase tracking-wider hover:bg-muted-foreground/20 transition-colors sm:px-5 sm:py-2 sm:text-xs"
