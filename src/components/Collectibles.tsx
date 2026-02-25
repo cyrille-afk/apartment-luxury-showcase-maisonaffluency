@@ -345,10 +345,10 @@ const Collectibles = () => {
       if (designer) {
         const designerId = designer.id ?? designer.name;
         setOpenDesigners(prev => prev.includes(designerId) ? prev : [...prev, designerId]);
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           const el = document.getElementById(`collectible-${designerId}`);
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 400);
+        });
       }
     };
     window.addEventListener("deeplink-open-profile", handler);
