@@ -123,18 +123,16 @@ const DesignDetails = () => {
             duration: 0.8,
             delay: 0.2
           }}>
-            <div className="mb-3">
-              <h2 className="font-display text-xl sm:text-2xl text-foreground text-center">
+            <div className="mb-3 flex flex-col items-center gap-2">
+              <h2 className="font-display text-xl sm:text-2xl text-foreground">
                 Trade Program
               </h2>
-              <div className="flex justify-end mt-2">
-                <button 
-                  onClick={() => setIsOpen(true)}
-                  className="bg-muted text-foreground px-4 py-2 font-body text-xs uppercase tracking-wider hover:bg-muted-foreground/20 transition-colors sm:px-5 sm:py-2 sm:text-xs"
-                >
-                  Join Now
-                </button>
-              </div>
+              <button 
+                onClick={() => setIsOpen(true)}
+                className="bg-muted text-foreground px-4 py-2 font-body text-xs uppercase tracking-wider hover:bg-muted-foreground/20 transition-colors sm:px-5 sm:py-2 sm:text-xs"
+              >
+                Join Now
+              </button>
             </div>
             <div className="mb-10">
               <h3 className="font-display text-xl text-foreground md:text-2xl text-center sm:text-left sm:pl-8 underline underline-offset-4 decoration-1">Our Guiding Principles</h3>
