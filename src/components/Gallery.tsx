@@ -380,7 +380,7 @@ const Gallery = () => {
     }
   };
   return <>
-      <section id="gallery" ref={ref} className="pt-4 pb-16 px-4 md:pt-6 md:pb-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
+      <section id="gallery" ref={ref} className="pt-2 pb-16 px-4 md:pt-4 md:pb-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{
           opacity: 0,
@@ -390,7 +390,7 @@ const Gallery = () => {
           y: 0
         } : {}} transition={{
           duration: 0.8
-        }} className="mb-12 md:mb-16 text-left">
+        }} className="mb-6 md:mb-10 text-left">
             <div className="mb-2 md:mb-3">
               <p className="text-foreground text-xl md:text-2xl lg:text-2xl font-serif font-bold">
                 A Uniquely Curated Venue
