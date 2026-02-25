@@ -107,6 +107,7 @@ import osannaViscontiBg from "@/assets/ateliers/osanna-visconti.png";
 import laChanceParisBg from "@/assets/ateliers/la-chance-paris.png";
 import tacchiniBg from "@/assets/ateliers/tacchini-bg.png";
 import refractoryStudioBg from "@/assets/ateliers/refractory-studio-bg.png";
+import martaSalaEditionsBg from "@/assets/ateliers/marta-sala-editions-bg.png";
 
 // Stéphane CG Curators' Picks images
 import stephaneCgOrsay from "@/assets/curators-picks/stephane-cg-orsay-abstract.jpg";
@@ -1248,6 +1249,15 @@ const partnerBrands = [
     description: "Refractory Studio is a design practice creating handcrafted lighting pieces that celebrate the raw beauty of hammered metals and artisanal glass. Their sculptural pendants and fixtures combine ancient metalworking techniques with contemporary form, producing luminaires of striking presence and material honesty.",
     instagram: "https://www.instagram.com/refractory.studio/",
   },
+  {
+    id: "marta-sala-editions",
+    name: "Marta Sala Éditions",
+    category: "Furniture",
+    subcategory: "Seating & Tables",
+    origin: "Italy",
+    description: "Marta Sala Éditions is a Milan-based publishing house of collectible furniture founded by Marta Sala Noseda, championing the intersection of art, architecture and design. Each limited-edition piece is conceived with leading architects and designers, crafted by master Italian artisans using noble materials — from hand-patinated metals to richly upholstered volumes — resulting in furnishings of sculptural presence and enduring elegance.",
+    instagram: "https://www.instagram.com/martasalaeditions/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1346,6 +1356,7 @@ const brandBgMap: Record<string, string> = {
   "Pierre Augustin Rose": pierreAugustinRoseBg,
   "Tacchini": tacchiniBg,
   "Refractory Studio": refractoryStudioBg,
+  "Marta Sala Éditions": martaSalaEditionsBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
