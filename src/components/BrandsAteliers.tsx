@@ -104,6 +104,7 @@ import mmairoBg from "@/assets/ateliers/mmairo.png";
 import lobjetBg from "@/assets/ateliers/lobjet.png";
 import osannaViscontiBg from "@/assets/ateliers/osanna-visconti.png";
 import laChanceParisBg from "@/assets/ateliers/la-chance-paris.png";
+import tacchiniBg from "@/assets/ateliers/tacchini-bg.png";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1153,6 +1154,15 @@ const partnerBrands = [
     description: "Pierre Augustin Rose is a French design studio creating sculptural furniture defined by organic silhouettes, generous curves and a masterful interplay of natural materials — wood, stone and linen — resulting in pieces that feel both monumental and intimately refined.",
     instagram: "https://www.instagram.com/pierre_augustin_rose/",
   },
+  {
+    id: "tacchini",
+    name: "Tacchini",
+    category: "Furniture",
+    subcategory: "Seating & Sofas",
+    origin: "Italy",
+    description: "Tacchini Italia is a Milan-based furniture house renowned for its sculptural upholstered seating that balances Italian craft tradition with contemporary design vision. Collaborating with leading international designers, Tacchini creates iconic sofas, armchairs and lounge pieces defined by generous volumes, refined tailoring and an enduring sense of comfort.",
+    instagram: "https://www.instagram.com/tacchini_italia/?hl=en",
+  },
 ];
 
 // Background image map
@@ -1249,6 +1259,7 @@ const brandBgMap: Record<string, string> = {
   "La Chance Paris": laChanceParisBg,
   "Osanna Visconti": osannaViscontiBg,
   "Pierre Augustin Rose": pierreAugustinRoseBg,
+  "Tacchini": tacchiniBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
