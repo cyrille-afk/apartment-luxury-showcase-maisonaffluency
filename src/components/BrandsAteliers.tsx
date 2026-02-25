@@ -2050,7 +2050,7 @@ const BrandsAteliers = () => {
                     <X className="h-6 w-6 text-white" />
                   </button>
 
-                  <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${picksZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
+                  <div className={`flex flex-col items-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${picksZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[90vh] pb-4'}`}>
                     <div className="relative">
                       {!picksZoomed && ((picksDesigner.curatorPicks[picksIndex] as any)?.tags?.length > 0 || picksDesigner.curatorPicks[picksIndex]?.edition) && (
                         <div className="text-center mb-2 flex flex-wrap gap-1.5 justify-center">
@@ -2068,7 +2068,7 @@ const BrandsAteliers = () => {
                             key={picksIndex}
                             src={picksDesigner.curatorPicks[picksIndex]?.image}
                             alt={picksDesigner.curatorPicks[picksIndex]?.title}
-                            className={`object-contain select-none transition-all duration-300 ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[55vh]'}`}
+                            className={`object-contain select-none transition-all duration-300 ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[45vh] md:max-h-[55vh]'}`}
                             draggable={false}
                           />
                         ) : (
