@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail } from "lucide-react";
+import { trackCTA } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -41,6 +42,7 @@ const contactOptions = [
     label: "Book an Appointment", 
     icon: Calendar,
     action: () => {
+      trackCTA.bookAppointment("Navigation");
       const contactSection = document.getElementById('contact');
       if (contactSection) {
         contactSection.scrollIntoView({ behavior: 'smooth' });
@@ -51,6 +53,7 @@ const contactOptions = [
     label: "WhatsApp", 
     icon: MessageCircle,
     action: () => {
+      trackCTA.whatsapp("Navigation");
       window.open('https://wa.me/6591393850', '_blank');
     }
   },
@@ -58,6 +61,7 @@ const contactOptions = [
     label: "concierge@myaffluency.com", 
     icon: Mail,
     action: () => {
+      trackCTA.email("Navigation");
       window.location.href = 'mailto:concierge@myaffluency.com';
     }
   },

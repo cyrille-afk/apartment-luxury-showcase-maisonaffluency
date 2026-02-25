@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { trackCTA } from "@/lib/analytics";
 
 const ContactInquiry = () => {
   const ref = useRef(null);
@@ -206,6 +207,7 @@ const ContactInquiry = () => {
           <a
             href="mailto:concierge@myaffluency.com"
             className="mt-2 inline-block font-body text-lg text-primary hover:text-primary/80"
+            onClick={() => trackCTA.email("Contact Section")}
           >
             concierge@myaffluency.com
           </a>
