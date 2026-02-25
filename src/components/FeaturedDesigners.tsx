@@ -2403,9 +2403,11 @@ const FeaturedDesigners = () => {
                             href={designer.links.find(l => l.type === "Instagram")?.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-0.5 transition-transform duration-300 hover:scale-110"
+                            className="p-0.5 transition-transform duration-300 hover:scale-110 relative z-10"
                             aria-label="Instagram"
-                            onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Featured Designers", designer.name); }}
+                            onClick={(e) => { e.stopPropagation(); e.preventDefault(); trackCTA.instagram("Featured Designers", designer.name); window.open(designer.links!.find(l => l.type === "Instagram")!.url!, '_blank', 'noopener,noreferrer'); }}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onTouchEnd={(e) => { e.stopPropagation(); }}
                           >
                             <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-name)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <defs>
