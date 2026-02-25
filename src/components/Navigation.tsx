@@ -20,15 +20,19 @@ import logoIcon from "@/assets/affluency-logo-icon.jpeg";
 
 const leftNavItems = [{
   label: "Gallery",
+  mobileLabel: "Gallery",
   href: "#overview"
 }, {
-  label: "Designers & Makers",
+  label: "Designers",
+  mobileLabel: "Designers & Makers",
   href: "#designers"
 }, {
   label: "Collectible Design",
+  mobileLabel: "Collectible Design",
   href: "#collectibles"
 }, {
-  label: "Ateliers & Partners",
+  label: "Ateliers",
+  mobileLabel: "Ateliers & Partners",
   href: "#brands"
 }];
 
@@ -222,7 +226,7 @@ const Navigation = () => {
                     className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
                     style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
                   >
-                    {item.label}
+                    {item.mobileLabel}
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 ))}
