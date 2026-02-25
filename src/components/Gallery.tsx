@@ -595,10 +595,6 @@ const Gallery = () => {
             <DialogTitle>{currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}</DialogTitle>
           </VisuallyHidden>
           <div className="relative w-full h-full flex items-start md:items-center justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-            {/* Close button */}
-            <button onClick={closeLightbox} className="absolute bottom-4 right-4 md:top-auto md:bottom-4 z-50 p-2 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
-              <X className="h-6 w-6 text-white" />
-            </button>
 
             {/* Pill indicator - top right */}
             <div className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none">
@@ -617,7 +613,13 @@ const Gallery = () => {
               <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
                 {currentSectionItems[currentItemIndex]?.title}
               </h3>
-              <img key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200 shrink-0" loading="eager" decoding="async" />
+              <div className="relative inline-block shrink-0">
+                <img key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
+                {/* Close button - bottom right of image */}
+                <button onClick={closeLightbox} className="absolute bottom-2 right-2 z-50 p-2 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
+                  <X className="h-6 w-6 text-white" />
+                </button>
+              </div>
               {/* Dot indicators */}
               <div className="flex justify-center gap-1.5 mt-3 shrink-0">
                 {currentSectionItems.map((_, i) => (
