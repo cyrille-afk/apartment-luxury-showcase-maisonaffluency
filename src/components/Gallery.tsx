@@ -4,6 +4,7 @@ import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, X, Maximize2, Instagram, Copy } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import bedroomImage from "@/assets/master-suite.jpg";
 import diningImage from "@/assets/dining-room.jpg";
 import boudoirImage from "@/assets/boudoir.jpg";
@@ -425,42 +426,37 @@ const Gallery = () => {
                     {section.experience}
                   </h3>
                   {originalSectionIndex === 0 && (
-                    <button
-                      onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
-                      className="hidden md:flex items-center p-1.5 rounded transition-all text-primary hover:text-primary/80"
-                      aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
-                    >
-                      <svg width="28" height="28" viewBox="0 0 20 20" fill="none" className="text-current">
-                        {gridCols === 3 ? (
-                          <>
-                            <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8" />
-                            <rect x="7.5" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8" />
-                            <rect x="14" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8" />
-                            <rect x="1" y="7.5" width="5" height="5" rx="1" fill="currentColor" opacity="0.4" />
-                            <rect x="7.5" y="7.5" width="5" height="5" rx="1" fill="currentColor" opacity="0.4" />
-                            <rect x="14" y="7.5" width="5" height="5" rx="1" fill="currentColor" opacity="0.4" />
-                            <rect x="1" y="14" width="5" height="5" rx="1" fill="currentColor" opacity="0.2" />
-                            <rect x="7.5" y="14" width="5" height="5" rx="1" fill="currentColor" opacity="0.2" />
-                            <rect x="14" y="14" width="5" height="5" rx="1" fill="currentColor" opacity="0.2" />
-                          </>
-                        ) : (
-                          <>
-                            <rect x="0.5" y="0.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.8" />
-                            <rect x="5.5" y="0.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.8" />
-                            <rect x="10.5" y="0.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.8" />
-                            <rect x="15.5" y="0.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.8" />
-                            <rect x="0.5" y="5.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.4" />
-                            <rect x="5.5" y="5.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.4" />
-                            <rect x="10.5" y="5.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.4" />
-                            <rect x="15.5" y="5.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.4" />
-                            <rect x="0.5" y="10.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.2" />
-                            <rect x="5.5" y="10.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.2" />
-                            <rect x="10.5" y="10.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.2" />
-                            <rect x="15.5" y="10.5" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.2" />
-                          </>
-                        )}
-                      </svg>
-                    </button>
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
+                            className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
+                            aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
+                          >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                              {gridCols === 3 ? (
+                                <>
+                                  <rect x="4" y="3" width="4" height="18" rx="1" fill="black" />
+                                  <rect x="10" y="3" width="4" height="18" rx="1" fill="black" />
+                                  <rect x="16" y="3" width="4" height="18" rx="1" fill="black" />
+                                </>
+                              ) : (
+                                <>
+                                  <rect x="2" y="3" width="4" height="18" rx="1" fill="black" />
+                                  <rect x="7.5" y="3" width="4" height="18" rx="1" fill="black" />
+                                  <rect x="13" y="3" width="4" height="18" rx="1" fill="black" />
+                                  <rect x="18.5" y="3" width="4" height="18" rx="0.5" fill="black" />
+                                </>
+                              )}
+                            </svg>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="text-xs">
+                          {gridCols === 3 ? "Display 4" : "Display 3"}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </div>
                 <p className="text-sm md:text-base text-muted-foreground font-body italic">
