@@ -49,6 +49,15 @@ const ContactInquiry = () => {
 
       if (error) throw error;
 
+      // Track successful submission in Google Analytics
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'generate_lead', {
+          event_category: 'Contact',
+          event_label: 'Contact Inquiry Form',
+          value: 1,
+        });
+      }
+
       toast({
         title: "Inquiry Sent",
         description: "Thank you for your inquiry. We will be in touch shortly."
