@@ -590,7 +590,7 @@ const Gallery = () => {
 
       {/* Lightbox Dialog */}
       <Dialog open={lightboxOpen} onOpenChange={(open) => !open && closeLightbox()}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 pt-14 md:pt-0 bg-black/95 border-none [&>button]:hidden overflow-y-auto" onKeyDown={handleKeyDown} aria-describedby={undefined}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 pt-14 md:pt-0 bg-black/95 border-none [&>button]:hidden overflow-hidden" onKeyDown={handleKeyDown} aria-describedby={undefined}>
           <VisuallyHidden>
             <DialogTitle>{currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}</DialogTitle>
           </VisuallyHidden>
@@ -612,14 +612,14 @@ const Gallery = () => {
               <ChevronLeft className="h-8 w-8 text-white" />
             </button>
 
-            {/* Image container */}
-            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 md:justify-center md:max-h-[85vh]">
-              <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center">
+            {/* Scrollable image + legend container */}
+            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 overflow-y-auto max-h-[calc(95vh-3.5rem)] md:max-h-[90vh] scrollbar-hide">
+              <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
                 {currentSectionItems[currentItemIndex]?.title}
               </h3>
-              <img key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[70vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
+              <img key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200 shrink-0" loading="eager" decoding="async" />
               {/* Dot indicators */}
-              <div className="flex justify-center gap-1.5 mt-3">
+              <div className="flex justify-center gap-1.5 mt-3 shrink-0">
                 {currentSectionItems.map((_, i) => (
                   <button
                     key={i}
@@ -629,7 +629,7 @@ const Gallery = () => {
                   />
                 ))}
               </div>
-              <div className="mt-3 text-center">
+              <div className="mt-3 text-center shrink-0 pb-6">
                 <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
                   {currentSectionItems[currentItemIndex]?.description}
                 </p>
