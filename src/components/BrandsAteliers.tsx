@@ -1505,7 +1505,7 @@ function AlphaStrip({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const siteUrl = "https://apartment-luxury-showcase-maisonaffluency.lovable.app";
+                      const siteUrl = "https://maisonaffluency.com";
                       const featuredText = brand.featuredItems.find(i => i.featured)?.featured;
                       const message = featuredText
                         ? `Check out ${brand.name} – ${featuredText} at Maison Affluency: ${siteUrl}`
