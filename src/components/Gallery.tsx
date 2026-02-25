@@ -171,7 +171,7 @@ const galleryExperiences = [{
   }, {
     image: detailsLampImage,
     title: "Light & Texture",
-    description: "Noe Duchaufour Lawrance's Amber Folio Portable Lamp for Cristallerie Saint-Louis"
+    description: "Noe Duchaufour Lawrance's Amber Folia Portable Lamp for Cristallerie Saint-Louis"
   }, {
     image: detailsConsole4Image,
     title: "Craftsmanship At Every Corner",
