@@ -25,10 +25,12 @@ const leftNavItems = [{
 }, {
   label: "Designers",
   mobileLabel: "Designers & Makers",
+  mobileSubtitle: "In Situ",
   href: "#designers"
 }, {
   label: "Collectible Design",
   mobileLabel: "Collectible Design",
+  mobileSubtitle: "In Situ",
   href: "#collectibles"
 }, {
   label: "Ateliers",
@@ -226,7 +228,12 @@ const Navigation = () => {
                     className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
                     style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
                   >
-                    {item.mobileLabel}
+                    <span className="flex flex-col">
+                      <span>{item.mobileLabel}</span>
+                      {item.mobileSubtitle && (
+                        <span className="text-[10px] tracking-[0.2em] text-muted-foreground font-normal normal-case">{item.mobileSubtitle}</span>
+                      )}
+                    </span>
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 ))}
