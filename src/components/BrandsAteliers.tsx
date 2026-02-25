@@ -2082,9 +2082,18 @@ const BrandsAteliers = () => {
                               alt={picksDesigner.curatorPicks[picksIndex]?.title}
                               className={`object-contain select-none transition-all duration-300 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[45vh] md:max-h-[55vh]'}`}
                               draggable={false}
-                              decoding="async"
+                              decoding="sync"
+                              loading="eager"
+                              fetchPriority="high"
                               onLoad={() => setPicksImageLoaded(true)}
                             />
+                            {/* Preload adjacent images */}
+                            {picksDesigner.curatorPicks.length > 1 && [
+                              picksDesigner.curatorPicks[(picksIndex + 1) % picksDesigner.curatorPicks.length]?.image,
+                              picksDesigner.curatorPicks[(picksIndex - 1 + picksDesigner.curatorPicks.length) % picksDesigner.curatorPicks.length]?.image,
+                            ].filter(Boolean).map((src, i) => (
+                              <img key={`preload-${i}`} src={src!} alt="" className="hidden" loading="eager" />
+                            ))}
                           </>
                         ) : (
                           <div className="flex items-center justify-center max-w-full max-h-[55vh] w-64 h-64 bg-white/5 border border-white/10 rounded-lg">
