@@ -590,7 +590,7 @@ const Gallery = () => {
           </VisuallyHidden>
           <div className="relative w-full h-full flex items-start md:items-center justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
             {/* Close button */}
-            <button onClick={closeLightbox} className="absolute top-4 left-4 z-50 p-2 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
+            <button onClick={closeLightbox} className="absolute top-4 left-4 md:top-auto md:left-auto md:bottom-4 md:right-4 z-50 p-2 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
               <X className="h-6 w-6 text-white" />
             </button>
 
