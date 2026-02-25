@@ -875,7 +875,7 @@ const Collectibles = () => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const siteUrl = "https://apartment-luxury-showcase-maisonaffluency.lovable.app";
+                                    const siteUrl = "https://maisonaffluency.com";
                                     const message = `Check out ${designer.name} – ${designer.specialty} at Maison Affluency: ${siteUrl}`;
                                     const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
                                     trackCTA.whatsapp(`Collectibles_Share_${designer.name}`);
