@@ -123,19 +123,19 @@ const DesignDetails = () => {
             duration: 0.8,
             delay: 0.2
           }}>
-            <div className="mb-3 flex flex-col items-center gap-2">
-              <h2 className="font-display text-xl sm:text-2xl text-foreground">
+            <div className="mb-3 flex flex-col items-center sm:items-center gap-2">
+              <h2 className="font-display text-xl sm:text-2xl text-foreground self-start pl-8 sm:self-center sm:pl-0">
                 Trade Program
               </h2>
+            </div>
+            <div className="mb-10 flex items-center justify-between pl-8 pr-8">
+              <h3 className="font-display text-xl text-foreground md:text-2xl text-left underline underline-offset-4 decoration-1">Our Guiding Principles</h3>
               <button 
                 onClick={() => setIsOpen(true)}
-                className="bg-muted text-foreground px-4 py-2 font-body text-xs uppercase tracking-wider hover:bg-muted-foreground/20 transition-colors sm:px-5 sm:py-2 sm:text-xs"
+                className="bg-muted text-foreground px-4 py-2 font-body text-xs uppercase tracking-wider hover:bg-muted-foreground/20 transition-colors sm:px-5 sm:py-2 sm:text-xs whitespace-nowrap ml-4"
               >
                 Join Now
               </button>
-            </div>
-            <div className="mb-10">
-              <h3 className="font-display text-xl text-foreground md:text-2xl text-left pl-8 underline underline-offset-4 decoration-1">Our Guiding Principles</h3>
             </div>
             
             <Accordion type="single" collapsible className="space-y-4">
