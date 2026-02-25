@@ -73,6 +73,7 @@ import pierreYovanovitchBg from "@/assets/designers/pierre-yovanovitch-bg.png";
 import brunoMoinardBg from "@/assets/designers/bruno-moinard-bg.png";
 import noeDuchaufourBg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
 import ndlEditionsBg from "@/assets/designers/ndl-editions-bg.jpg";
+import pierreAugustinRoseBg from "@/assets/designers/pierre-augustin-rose-bg.png";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -1141,6 +1142,15 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/valerie_rostaing/",
     photoCredit: "Olivier Marceny",
   },
+  {
+    id: "pierre-augustin-rose",
+    name: "Pierre Augustin Rose",
+    category: "Furniture",
+    subcategory: "Tables",
+    origin: "France",
+    description: "Pierre Augustin Rose is a French design studio creating sculptural furniture defined by organic silhouettes, generous curves and a masterful interplay of natural materials — wood, stone and linen — resulting in pieces that feel both monumental and intimately refined.",
+    instagram: "https://www.instagram.com/pierre_augustin_rose/",
+  },
 ];
 
 // Background image map
@@ -1236,6 +1246,7 @@ const brandBgMap: Record<string, string> = {
   "L'Objet": lobjetBg,
   "La Chance Paris": laChanceParisBg,
   "Osanna Visconti": osannaViscontiBg,
+  "Pierre Augustin Rose": pierreAugustinRoseBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
