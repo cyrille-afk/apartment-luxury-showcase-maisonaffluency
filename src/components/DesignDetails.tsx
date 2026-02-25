@@ -124,7 +124,7 @@ const DesignDetails = () => {
             delay: 0.2
           }}>
             <div className="mb-3 flex flex-col items-center gap-3">
-              <h2 className="font-display text-xl sm:text-2xl text-primary">
+              <h2 className="font-display text-xl sm:text-2xl text-foreground">
                 Trade Program
               </h2>
               <button 
@@ -135,7 +135,7 @@ const DesignDetails = () => {
               </button>
             </div>
             <div className="mb-10">
-              <h3 className="font-display text-lg text-foreground md:text-xl text-left">Our Guiding Principles</h3>
+              <h3 className="font-display text-xl text-foreground md:text-2xl text-left">Our Guiding Principles</h3>
             </div>
             
             <Accordion type="single" collapsible className="space-y-4">
