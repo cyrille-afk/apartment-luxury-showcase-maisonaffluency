@@ -3,6 +3,7 @@ import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { Instagram, Search, X, ChevronDown, ExternalLink, Star, Maximize2, Minimize2, SlidersHorizontal } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
+import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -1913,6 +1914,25 @@ const FeaturedDesigners = () => {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [imageLoaded, setImageLoaded] = useState(true);
 
+  // Deep-link handler: expand designer from URL hash
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail.section !== "designer") return;
+      const designer = featuredDesigners.find(d => d.id === detail.id);
+      if (designer) {
+        setOpenDesigners(prev => prev.includes(designer.id) ? prev : [...prev, designer.id]);
+        // Scroll to the specific designer after accordion opens
+        setTimeout(() => {
+          const el = document.getElementById(`designer-${designer.id}`);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 400);
+      }
+    };
+    window.addEventListener("deeplink-open-profile", handler);
+    return () => window.removeEventListener("deeplink-open-profile", handler);
+  }, []);
+
   // Preload adjacent curator pick images for smooth transitions
   useEffect(() => {
     if (!curatorPicksDesigner?.curatorPicks?.length) return;
@@ -2577,11 +2597,8 @@ const FeaturedDesigners = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  const siteUrl = "https://maisonaffluency.com";
-                                  const message = `Check out ${designer.name} – ${designer.specialty} at Maison Affluency: ${siteUrl}`;
-                                  const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                                  shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
                                   trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
-                                  window.open(waUrl, '_blank');
                                 }}
                                 className="p-1.5 rounded-full bg-foreground/5 hover:bg-foreground/15 transition-all duration-300 hover:scale-110 cursor-pointer"
                                 aria-label={`Share ${designer.name} on WhatsApp`}

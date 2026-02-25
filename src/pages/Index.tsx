@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import FeaturedDesigners from "@/components/FeaturedDesigners";
@@ -13,8 +14,48 @@ import ScrollProgress from "@/components/ScrollProgress";
 import CuratingTeam from "@/components/CuratingTeam";
 import QuickJumpMenu from "@/components/QuickJumpMenu";
 
+/**
+ * Parse deep-link hash: #designer/<id>, #collectible/<id>, #atelier/<slug>
+ * Returns { section, id } or null.
+ */
+function parseDeepLink(hash: string) {
+  const match = hash.match(/^#(designer|collectible|atelier)\/(.+)$/);
+  if (!match) return null;
+  return { section: match[1] as "designer" | "collectible" | "atelier", id: decodeURIComponent(match[2]) };
+}
 
 const Index = () => {
+  useEffect(() => {
+    const link = parseDeepLink(window.location.hash);
+    if (!link) return;
+
+    // Map section type to DOM section id
+    const sectionMap: Record<string, string> = {
+      designer: "designers",
+      collectible: "collectibles",
+      atelier: "brands",
+    };
+    const sectionId = sectionMap[link.section];
+
+    // Small delay to let components mount
+    const timer = setTimeout(() => {
+      // Scroll to section
+      const sectionEl = document.getElementById(sectionId);
+      if (sectionEl) {
+        sectionEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // Dispatch custom event so the component can expand the profile
+      window.dispatchEvent(
+        new CustomEvent("deeplink-open-profile", {
+          detail: { section: link.section, id: link.id },
+        })
+      );
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <>
       <ScrollProgress />
