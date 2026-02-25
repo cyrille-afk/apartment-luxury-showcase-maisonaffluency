@@ -1657,14 +1657,15 @@ const BrandsAteliers = () => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail.section !== "atelier") return;
-      setTimeout(() => {
+      // Use requestAnimationFrame for fastest possible response
+      requestAnimationFrame(() => {
         const card = document.getElementById(`brand-${detail.id}`);
         if (card) {
           card.scrollIntoView({ behavior: "smooth", block: "center" });
           card.classList.add('ring-2', 'ring-primary');
           setTimeout(() => card.classList.remove('ring-2', 'ring-primary'), 3000);
         }
-      }, 400);
+      });
     };
     window.addEventListener("deeplink-open-profile", handler);
     return () => window.removeEventListener("deeplink-open-profile", handler);

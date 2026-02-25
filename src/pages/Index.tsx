@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import FeaturedDesigners from "@/components/FeaturedDesigners";
@@ -24,12 +24,16 @@ function parseDeepLink(hash: string) {
   return { section: match[1] as "designer" | "collectible" | "atelier", id: decodeURIComponent(match[2]) };
 }
 
+/** Global flag so components can skip entrance animations on deep-link */
+export const isDeepLink = () => !!parseDeepLink(window.location.hash);
+
 const Index = () => {
+  const [deepLinkReady, setDeepLinkReady] = useState(false);
+
   useEffect(() => {
     const link = parseDeepLink(window.location.hash);
     if (!link) return;
 
-    // Map section type to DOM section id
     const sectionMap: Record<string, string> = {
       designer: "designers",
       collectible: "collectibles",
@@ -37,23 +41,26 @@ const Index = () => {
     };
     const sectionId = sectionMap[link.section];
 
-    // Small delay to let components mount
-    const timer = setTimeout(() => {
-      // Scroll to section
+    // Use requestAnimationFrame to act as soon as DOM is painted
+    const raf = requestAnimationFrame(() => {
+      // Instant scroll (no smooth) for fast landing
       const sectionEl = document.getElementById(sectionId);
       if (sectionEl) {
-        sectionEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        sectionEl.scrollIntoView({ behavior: "instant", block: "start" });
       }
 
-      // Dispatch custom event so the component can expand the profile
-      window.dispatchEvent(
-        new CustomEvent("deeplink-open-profile", {
-          detail: { section: link.section, id: link.id },
-        })
-      );
-    }, 800);
+      // Short delay for components to hydrate, then dispatch
+      setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent("deeplink-open-profile", {
+            detail: { section: link.section, id: link.id },
+          })
+        );
+        setDeepLinkReady(true);
+      }, 200);
+    });
 
-    return () => clearTimeout(timer);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   return (

@@ -1923,10 +1923,10 @@ const FeaturedDesigners = () => {
       if (designer) {
         setOpenDesigners(prev => prev.includes(designer.id) ? prev : [...prev, designer.id]);
         // Scroll to the specific designer after accordion opens
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           const el = document.getElementById(`designer-${designer.id}`);
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 400);
+        });
       }
     };
     window.addEventListener("deeplink-open-profile", handler);
