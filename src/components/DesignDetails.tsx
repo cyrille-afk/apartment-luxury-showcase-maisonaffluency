@@ -123,25 +123,19 @@ const DesignDetails = () => {
             duration: 0.8,
             delay: 0.2
           }}>
-            <div className="mb-3 flex items-center justify-between gap-4">
+            <div className="mb-2 flex items-center justify-between gap-4">
               <p className="font-body text-sm uppercase tracking-[0.3em] text-primary">
                 TRADE PROGRAM
               </p>
               <button 
                 onClick={() => setIsOpen(true)}
-                className="bg-foreground text-background px-4 py-2 font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors sm:hidden"
+                className="bg-foreground text-background px-4 py-2 font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors sm:px-6 sm:py-3 sm:text-sm"
               >
                 Join Now
               </button>
             </div>
-            <div className="mb-12 flex items-center justify-between">
-              <h2 className="font-display text-4xl text-foreground md:text-5xl">Our Guiding Principles</h2>
-              <button 
-                onClick={() => setIsOpen(true)}
-                className="hidden sm:block bg-foreground text-background px-6 py-3 font-body text-sm uppercase tracking-wider hover:bg-foreground/90 transition-colors"
-              >
-                Join Now
-              </button>
+            <div className="mb-10">
+              <h3 className="font-display text-2xl text-foreground md:text-3xl">Our Guiding Principles</h3>
             </div>
             
             <Accordion type="single" collapsible className="space-y-4">
