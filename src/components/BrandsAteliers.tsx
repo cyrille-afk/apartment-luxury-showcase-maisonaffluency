@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Star, Maximize2, Minimize2 } from "lucide-react";
+import { trackCTA } from "@/lib/analytics";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
@@ -1400,7 +1401,7 @@ function AlphaStrip({
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-1 -m-1 touch-manipulation flex-shrink-0 mt-0.5 group/insta"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
                       >
                         <svg className="h-6 w-6 md:h-7 md:w-7 transition-transform duration-300 group-hover/insta:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-strip)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <defs>
