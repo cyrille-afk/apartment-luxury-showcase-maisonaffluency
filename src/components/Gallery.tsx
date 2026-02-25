@@ -615,8 +615,8 @@ const Gallery = () => {
               </h3>
               <div className="relative inline-block shrink-0">
                 <img key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
-                {/* Close button - bottom right of image */}
-                <button onClick={closeLightbox} className="absolute bottom-2 right-2 z-50 p-2 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
+                {/* Close button - bottom left on mobile, bottom right on desktop */}
+                <button onClick={closeLightbox} className="absolute bottom-2 left-2 md:left-auto md:right-2 z-50 p-2 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
                   <X className="h-6 w-6 text-white" />
                 </button>
               </div>
