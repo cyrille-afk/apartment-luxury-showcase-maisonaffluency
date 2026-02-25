@@ -3,6 +3,7 @@ import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { Instagram, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
+import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
@@ -334,6 +335,25 @@ const Collectibles = () => {
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
+
+  // Deep-link handler: expand designer from URL hash
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail.section !== "collectible") return;
+      const designer = collectibleDesigners.find(d => d.id === detail.id || d.name === detail.id);
+      if (designer) {
+        const designerId = designer.id ?? designer.name;
+        setOpenDesigners(prev => prev.includes(designerId) ? prev : [...prev, designerId]);
+        setTimeout(() => {
+          const el = document.getElementById(`collectible-${designerId}`);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 400);
+      }
+    };
+    window.addEventListener("deeplink-open-profile", handler);
+    return () => window.removeEventListener("deeplink-open-profile", handler);
+  }, []);
 
   // Preload all curator pick images when lightbox opens
   useEffect(() => {
@@ -875,11 +895,8 @@ const Collectibles = () => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const siteUrl = "https://maisonaffluency.com";
-                                    const message = `Check out ${designer.name} – ${designer.specialty} at Maison Affluency: ${siteUrl}`;
-                                    const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                                    shareProfileOnWhatsApp("collectible", designer.id ?? designer.name, designer.name, designer.specialty);
                                     trackCTA.whatsapp(`Collectibles_Share_${designer.name}`);
-                                    window.open(waUrl, '_blank');
                                   }}
                                   className="p-1.5 rounded-full bg-foreground/5 hover:bg-foreground/15 transition-all duration-300 hover:scale-110 cursor-pointer"
                                   aria-label={`Share ${designer.name} on WhatsApp`}

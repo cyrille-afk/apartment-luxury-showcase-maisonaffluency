@@ -3,6 +3,7 @@ import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Star, Maximize2, Minimize2, Share2 } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
+import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -1579,14 +1580,9 @@ function AlphaStrip({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const siteUrl = "https://maisonaffluency.com";
                       const featuredText = brand.featuredItems.find(i => i.featured)?.featured;
-                      const message = featuredText
-                        ? `Check out ${brand.name} – ${featuredText} at Maison Affluency: ${siteUrl}`
-                        : `Check out ${brand.name} at Maison Affluency: ${siteUrl}`;
-                      const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                      shareProfileOnWhatsApp("atelier", brand.name.replace(/\s+/g, "-").toLowerCase(), brand.name, featuredText);
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
-                      window.open(waUrl, '_blank');
                     }}
                     className={`absolute bottom-3 right-12 md:right-12 z-10 rounded-full p-1.5 backdrop-blur-sm transition-all duration-300 ${hasBg ? "bg-white/20 text-white hover:bg-white/40" : "bg-foreground/10 text-foreground hover:bg-foreground/20"}`}
                     aria-label={`Share ${brand.name} on WhatsApp`}
@@ -1656,6 +1652,24 @@ const BrandsAteliers = () => {
     setSelectedSubcategoryRaw(sub);
     broadcastFilter(selectedCategory, sub);
   }, [selectedCategory, broadcastFilter]);
+  // Deep-link handler: scroll to brand card from URL hash
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail.section !== "atelier") return;
+      setTimeout(() => {
+        const card = document.getElementById(`brand-${detail.id}`);
+        if (card) {
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+          card.classList.add('ring-2', 'ring-primary');
+          setTimeout(() => card.classList.remove('ring-2', 'ring-primary'), 3000);
+        }
+      }, 400);
+    };
+    window.addEventListener("deeplink-open-profile", handler);
+    return () => window.removeEventListener("deeplink-open-profile", handler);
+  }, []);
+
   // Curators' Picks lightbox state
   const [picksDesignerName, setPicksDesignerName] = useState<string | null>(null);
   const [picksIndex, setPicksIndex] = useState(0);
