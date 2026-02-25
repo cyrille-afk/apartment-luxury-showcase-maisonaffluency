@@ -1568,7 +1568,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       "Milan Pekař is a Czech glass artist renowned for his mastery of crystalline glass techniques. His Crystalline Vase collection showcases his exceptional skill in creating pieces that capture and refract light in mesmerizing ways. Working in the tradition of Bohemian glassmaking while pushing contemporary boundaries, his work transforms functional vessels into sculptural art.",
     notableWorks: "Crystalline Vase Collection, Crystalline Volume Series, Sculptural Glass Vessels",
     notableWorksLinks: [
-      { text: "Crystalline Vase — Volume 5", galleryIndex: 17 },
+      { text: "Crystalline Vase — Volume 5 | Yellow Crystalline", galleryIndex: 18 },
       { text: "Crystalline Vase — Volume 3", galleryIndex: 5 },
     ],
     
