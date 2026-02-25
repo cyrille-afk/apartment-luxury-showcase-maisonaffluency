@@ -107,6 +107,80 @@ import laChanceParisBg from "@/assets/ateliers/la-chance-paris.png";
 import tacchiniBg from "@/assets/ateliers/tacchini-bg.png";
 import refractoryStudioBg from "@/assets/ateliers/refractory-studio-bg.png";
 
+// Stéphane CG Curators' Picks images
+import stephaneCgOrsay from "@/assets/curators-picks/stephane-cg-orsay-abstract.jpg";
+import stephaneCgLouvre from "@/assets/curators-picks/stephane-cg-louvre.jpg";
+import stephaneCgWingedVictory from "@/assets/curators-picks/stephane-cg-winged-victory.jpg";
+import stephaneCgMiro from "@/assets/curators-picks/stephane-cg-homage-to-miro.jpg";
+import stephaneCgEyeTiger from "@/assets/curators-picks/stephane-cg-eye-of-tiger.jpg";
+import stephaneCgSkyFreeze from "@/assets/curators-picks/stephane-cg-sky-freeze.jpg";
+import stephaneCgHallway from "@/assets/curators-picks/stephane-cg-hallway-to-heaven.jpg";
+
+// Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
+const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
+  "stephane-cg": {
+    name: "Stéphane CG",
+    curatorPicks: [
+      {
+        image: stephaneCgOrsay,
+        title: "Orsay Abstract",
+        subtitle: "Diasec on Aluminium",
+        tags: ["Photography", "Abstract"],
+        materials: "Multi-exposure photograph\nDiasec mount on aluminium",
+        dimensions: "Various sizes available\nBespoke Dimensions upon request",
+      },
+      {
+        image: stephaneCgLouvre,
+        title: "Louvre: Passion and Artistry",
+        subtitle: "Diasec on Aluminium",
+        tags: ["Photography", "Abstract"],
+        materials: "Multi-exposure photograph\nDiasec mount on aluminium",
+        dimensions: "Various sizes available\nBespoke Dimensions upon request",
+      },
+      {
+        image: stephaneCgWingedVictory,
+        title: "Winged Victory of Samotrace",
+        subtitle: "Diasec on Aluminium",
+        tags: ["Photography", "Abstract"],
+        materials: "Multi-exposure photograph\nDiasec mount on aluminium",
+        dimensions: "Various sizes available\nBespoke Dimensions upon request",
+      },
+      {
+        image: stephaneCgMiro,
+        title: "Homage to Miro",
+        subtitle: "Diasec on Aluminium",
+        tags: ["Photography", "Abstract"],
+        materials: "Multi-exposure photograph\nDiasec mount on aluminium",
+        dimensions: "Various sizes available\nBespoke Dimensions upon request",
+      },
+      {
+        image: stephaneCgEyeTiger,
+        title: "Eye of the Tiger",
+        subtitle: "Diasec on Aluminium",
+        tags: ["Photography", "Wildlife"],
+        materials: "Multi-exposure photograph\nDiasec mount on aluminium",
+        dimensions: "Various sizes available\nBespoke Dimensions upon request",
+      },
+      {
+        image: stephaneCgSkyFreeze,
+        title: "Sky Freeze (Vancouver)",
+        subtitle: "Diasec on Aluminium",
+        tags: ["Photography", "Landscape"],
+        materials: "Multi-exposure photograph\nDiasec mount on aluminium",
+        dimensions: "Various sizes available\nBespoke Dimensions upon request",
+      },
+      {
+        image: stephaneCgHallway,
+        title: "Hallway to Heaven (Jaipur)",
+        subtitle: "Diasec on Aluminium",
+        tags: ["Photography", "Architecture"],
+        materials: "Multi-exposure photograph\nDiasec mount on aluminium",
+        dimensions: "Various sizes available\nBespoke Dimensions upon request",
+      },
+    ],
+  },
+};
+
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
 // 3: A Dreamy Tuscan Landscape, 4: A Highly Customised Table, 5: A Relaxed Setting
@@ -1596,6 +1670,8 @@ const BrandsAteliers = () => {
     if (!picksDesignerName) return null;
     const designerId = brandToDesignerMap[picksDesignerName];
     if (!designerId) return null;
+    // Check atelier-only picks first
+    if (atelierOnlyPicks[designerId]) return atelierOnlyPicks[designerId] as any;
     // Check collectible designers first, unless brand prefers featured
     if (!preferFeatured.has(picksDesignerName)) {
       const collectibleMatch = collectibleDesigners.find(d => d.id === designerId || d.name === picksDesignerName);
