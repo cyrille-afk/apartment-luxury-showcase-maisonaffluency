@@ -123,7 +123,7 @@ const DesignDetails = () => {
             duration: 0.8,
             delay: 0.2
           }}>
-            <div className="mb-3 flex flex-row items-center justify-center gap-4">
+            <div className="mb-3 flex flex-row items-center justify-end gap-4">
               <h2 className="font-display text-xl sm:text-2xl text-foreground">
                 Trade Program
               </h2>
