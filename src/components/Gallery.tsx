@@ -380,7 +380,7 @@ const Gallery = () => {
     }
   };
   return <>
-      <section id="gallery" ref={ref} className="pt-8 pb-16 px-4 md:pt-12 md:pb-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
+      <section id="gallery" ref={ref} className="pt-4 pb-16 px-4 md:pt-6 md:pb-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{
           opacity: 0,
