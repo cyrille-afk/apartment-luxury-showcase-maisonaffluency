@@ -105,6 +105,7 @@ import lobjetBg from "@/assets/ateliers/lobjet.png";
 import osannaViscontiBg from "@/assets/ateliers/osanna-visconti.png";
 import laChanceParisBg from "@/assets/ateliers/la-chance-paris.png";
 import tacchiniBg from "@/assets/ateliers/tacchini-bg.png";
+import refractoryStudioBg from "@/assets/ateliers/refractory-studio-bg.png";
 
 // Gallery image index mapping (based on flattened gallery items order)
 // 0: An Inviting Lounge Area, 1: A Sophisticated Living Room, 2: With Panoramic Cityscape Views
@@ -1163,6 +1164,15 @@ const partnerBrands = [
     description: "Tacchini Italia is a Milan-based furniture house renowned for its sculptural upholstered seating that balances Italian craft tradition with contemporary design vision. Collaborating with leading international designers, Tacchini creates iconic sofas, armchairs and lounge pieces defined by generous volumes, refined tailoring and an enduring sense of comfort.",
     instagram: "https://www.instagram.com/tacchini_italia/?hl=en",
   },
+  {
+    id: "refractory-studio",
+    name: "Refractory Studio",
+    category: "Lighting",
+    subcategory: "Pendant Lighting",
+    origin: "International",
+    description: "Refractory Studio is a design practice creating handcrafted lighting pieces that celebrate the raw beauty of hammered metals and artisanal glass. Their sculptural pendants and fixtures combine ancient metalworking techniques with contemporary form, producing luminaires of striking presence and material honesty.",
+    instagram: "https://www.instagram.com/refractory.studio/",
+  },
 ];
 
 // Background image map
@@ -1260,6 +1270,7 @@ const brandBgMap: Record<string, string> = {
   "Osanna Visconti": osannaViscontiBg,
   "Pierre Augustin Rose": pierreAugustinRoseBg,
   "Tacchini": tacchiniBg,
+  "Refractory Studio": refractoryStudioBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
