@@ -135,7 +135,7 @@ const DesignDetails = () => {
               </button>
             </div>
             <div className="mb-10">
-              <h3 className="font-display text-lg text-foreground md:text-xl text-center">Our Guiding Principles</h3>
+              <h3 className="font-display text-lg text-foreground md:text-xl text-left">Our Guiding Principles</h3>
             </div>
             
             <Accordion type="single" collapsible className="space-y-4">
