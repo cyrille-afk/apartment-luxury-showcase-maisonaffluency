@@ -1826,18 +1826,13 @@ const BrandsAteliers = () => {
           transition={{ duration: 0.8 }}
           className="mb-12 md:mb-16 text-left"
         >
-          <div className="flex items-center gap-3 mb-2 md:mb-3">
-            <p className="uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary text-sm md:text-xl lg:text-2xl font-serif">
-              OUR PARTNERS
-            </p>
-            <span className="text-xs md:text-sm text-muted-foreground/50 font-body tracking-widest border border-border/30 rounded-full px-2.5 py-0.5">
-              {totalBrands}
-            </span>
-          </div>
           <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
               Ateliers & Partners
             </h2>
+            <span className="text-sm md:text-base text-foreground font-body mb-1 md:mb-1.5">
+              {totalBrands}
+            </span>
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
             We collaborate with the world's most distinguished furniture houses, textile ateliers, and artisan workshops 
