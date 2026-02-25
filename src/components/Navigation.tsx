@@ -22,13 +22,13 @@ const leftNavItems = [{
   label: "Gallery",
   href: "#overview"
 }, {
-  label: "Designers",
+  label: "Designers & Makers",
   href: "#designers"
 }, {
   label: "Collectible Design",
   href: "#collectibles"
 }, {
-  label: "Ateliers",
+  label: "Ateliers & Partners",
   href: "#brands"
 }];
 
