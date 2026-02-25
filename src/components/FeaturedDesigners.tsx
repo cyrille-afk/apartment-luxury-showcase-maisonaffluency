@@ -1446,7 +1446,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/alinea.design.objects/" },
+      { type: "Instagram", url: "https://www.instagram.com/alinea_design_objects/?hl=en" },
       { type: "Curators' Picks" },
     ],
   },
