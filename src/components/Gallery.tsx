@@ -559,10 +559,10 @@ const Gallery = () => {
                       className="group cursor-pointer"
                     >
                       <div
-                        className="relative mb-2 aspect-[3/4] overflow-hidden rounded-sm"
+                        className="relative mb-2 overflow-hidden rounded-sm"
                         onClick={() => openLightbox(originalSectionIndex, index)}
                       >
-                        <img src={item.image} alt={item.title} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                        <img src={item.image} alt={item.title} className="w-full object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         {/* Expand icon - opens lightbox directly */}
                         <button
