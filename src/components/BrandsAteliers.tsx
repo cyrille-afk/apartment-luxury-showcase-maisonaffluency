@@ -118,6 +118,12 @@ import stephaneCgEyeTiger from "@/assets/curators-picks/stephane-cg-eye-of-tiger
 import stephaneCgSkyFreeze from "@/assets/curators-picks/stephane-cg-sky-freeze.jpg";
 import stephaneCgHallway from "@/assets/curators-picks/stephane-cg-hallway-to-heaven.jpg";
 
+// Marta Sala Éditions Curators' Picks images
+import martaSalaVelazquez from "@/assets/curators-picks/marta-sala-velazquez-t13.png";
+import martaSalaRanieri from "@/assets/curators-picks/marta-sala-ranieri-t5.png";
+import martaSalaAchille from "@/assets/curators-picks/marta-sala-achille-lta1.png";
+import martaSalaInge from "@/assets/curators-picks/marta-sala-inge-d3.png";
+
 // Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
 const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
   "stephane-cg": {
@@ -178,6 +184,43 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         tags: ["Photography", "Architecture"],
         materials: "Multi-exposure photograph\nDiasec mount on aluminium",
         dimensions: "Various sizes available\nBespoke Dimensions upon request",
+      },
+    ],
+  },
+  "marta-sala-editions": {
+    name: "Marta Sala Éditions",
+    curatorPicks: [
+      {
+        image: martaSalaVelazquez,
+        title: "Velazquez",
+        subtitle: "T13 Side Table",
+        tags: ["Furniture", "Side Table"],
+        materials: "Canaletto Walnut or Ash Solid Wood",
+        dimensions: "W 59,50 x H 40 / 63 cm",
+      },
+      {
+        image: martaSalaRanieri,
+        title: "Ranieri",
+        subtitle: "T5 Side Table",
+        tags: ["Furniture", "Side Table"],
+        materials: "Lightened Calacatta 5mm thick gold marble top, stain-resistant treatment\nBrass or Iron Frame",
+        dimensions: "Ø 80 x H 60/90/110 cm",
+      },
+      {
+        image: martaSalaAchille,
+        title: "Achille",
+        subtitle: "LTA1 Table Lamp",
+        tags: ["Lighting", "Table Lamp"],
+        materials: "Metal plate, laser-cut and hand-curved Frame\nPolished Calacatta gold marble, bevelled edge Base, stain-resistant treatment\nSilk with PVC lid\nE27 bulb holder",
+        dimensions: "Ø 30 x 64 cm\nSilk Shade — H 30 cm",
+      },
+      {
+        image: martaSalaInge,
+        title: "Inge",
+        subtitle: "D3 Sofa",
+        tags: ["Furniture", "Sofa"],
+        materials: "Solid and multilayer wood, elastic belts Frame\nUpholstery in different densities polyurethane foam\nLacquered back solid wood base\nCompartmentalized feathers with removable cover cushions",
+        dimensions: "Bespoke Dimensions upon request",
       },
     ],
   },
@@ -1403,6 +1446,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Atelier DeMichelis": "atelier-demichelis",
   "De La Espada": "de-la-espada",
   "Stéphane CG": "stephane-cg",
+  "Marta Sala Éditions": "marta-sala-editions",
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
