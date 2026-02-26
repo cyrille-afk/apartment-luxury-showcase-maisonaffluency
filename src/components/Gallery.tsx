@@ -30,7 +30,7 @@ const smallRoomChairImage = cloudinaryUrl("small-room-chair_aobzyb", { width: 16
 const homeOfficeDeskImage = cloudinaryUrl("home-office-desk_g0ywv2", { width: 1600, quality: "auto:good", crop: "fill" });
 const homeOfficeDesk2Image = cloudinaryUrl("home-office-desk-2_gb1nlb", { width: 1600, quality: "auto:good", crop: "fill" });
 const homeOffice3Image = cloudinaryUrl("home-office-3_t39msw", { width: 1600, quality: "auto:good", crop: "fill" });
-import officeBooksCornerImage from "@/assets/gallery/office-books-corner.jpg";
+const officeBooksCornerImage = cloudinaryUrl("AffluencySG_143_1_f9iihg", { width: 1600, quality: "auto:good", crop: "fill" });
 const galleryCategories = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"] as const;
 
 const galleryExperiences = [{
