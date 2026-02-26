@@ -118,14 +118,14 @@ import stephaneCgEyeTiger from "@/assets/curators-picks/stephane-cg-eye-of-tiger
 import stephaneCgSkyFreeze from "@/assets/curators-picks/stephane-cg-sky-freeze.jpg";
 import stephaneCgHallway from "@/assets/curators-picks/stephane-cg-hallway-to-heaven.jpg";
 
-// Marta Sala Éditions Curators' Picks images
-import martaSalaVelazquez from "@/assets/curators-picks/marta-sala-velazquez-t13.png";
-import martaSalaRanieri from "@/assets/curators-picks/marta-sala-ranieri-t5.png";
-import martaSalaAchille from "@/assets/curators-picks/marta-sala-achille-lta1.png";
-import martaSalaInge from "@/assets/curators-picks/marta-sala-inge-d3.png";
-import martaSalaElisabeth from "@/assets/curators-picks/marta-sala-elisabeth-d1.png";
-import martaSalaMurena from "@/assets/curators-picks/marta-sala-murena-s2.png";
-import martaSalaLaviana from "@/assets/curators-picks/marta-sala-laviana-p3.png";
+// Marta Sala Éditions Curators' Picks images (Cloudinary)
+const martaSalaLaviana = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.09.48_AM_saz2sv", { width: 1600, quality: "auto:good", crop: "fill" });
+const martaSalaVelazquez = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.09.20_AM_cm62ud", { width: 1600, quality: "auto:good", crop: "fill" });
+const martaSalaRanieri = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.04.52_AM_fm0uws", { width: 1600, quality: "auto:good", crop: "fill" });
+const martaSalaInge = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.00.51_AM_ypryzi", { width: 1600, quality: "auto:good", crop: "fill" });
+const martaSalaAchille = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.56.20_AM_aq4khq", { width: 1600, quality: "auto:good", crop: "fill" });
+const martaSalaElisabeth = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.51.46_AM_vnvbwi", { width: 1600, quality: "auto:good", crop: "fill" });
+const martaSalaMurena = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.48.51_AM_e0yej8", { width: 1600, quality: "auto:good", crop: "fill" });
 
 // Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
 const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
