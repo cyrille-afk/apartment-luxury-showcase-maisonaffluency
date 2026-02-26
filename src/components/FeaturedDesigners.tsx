@@ -17,7 +17,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 
 // Designer profile images — served via Cloudinary CDN
 const dImg = (name: string) =>
-  cloudinaryUrl(`maison affluency/designers/${name}.png`, { width: 800, quality: "auto", crop: "fill" });
+  cloudinaryUrl(`maison affluency/designers/${name}`, { width: 800, quality: "auto", crop: "fill" });
 
 const thierryLemaireImg = dImg("thierry-lemaire");
 const herveVanDerStraetenImg = dImg("herve-van-der-straeten");
