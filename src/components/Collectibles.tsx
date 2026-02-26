@@ -62,9 +62,9 @@ const ericSchmittDrageeConsole = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.45.4
 const ericSchmittSaturneTable = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.48.46_PM_hczjbw", { width: 1600, quality: "auto:good", crop: "fill" });
 const ericSchmittFrameTable = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.51.08_PM_kwaasy", { width: 1600, quality: "auto:good", crop: "fill" });
 const ericSchmittAnneauLamp = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.56.09_PM_ocju7w", { width: 1600, quality: "auto:good", crop: "fill" });
-import ericSchmittDentelleConsole from "@/assets/curators-picks/eric-schmitt-dentelle-console.jpg";
-import ericSchmittFloatingTable from "@/assets/curators-picks/eric-schmitt-floating-table.jpg";
-import ericSchmittRocwoodTable from "@/assets/curators-picks/eric-schmitt-rocwood-table.jpg";
+const ericSchmittDentelleConsole = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.59.30_PM_jxhhdg", { width: 1600, quality: "auto:good", crop: "fill" });
+const ericSchmittFloatingTable = cloudinaryUrl("Screen_Shot_2026-02-22_at_4.00.57_PM_tkv0sz", { width: 1600, quality: "auto:good", crop: "fill" });
+const ericSchmittRocwoodTable = cloudinaryUrl("Screen_Shot_2026-02-22_at_4.02.38_PM_ttd1me", { width: 1600, quality: "auto:good", crop: "fill" });
 export const collectibleDesigners: Array<{
   id?: string;
   name: string;
