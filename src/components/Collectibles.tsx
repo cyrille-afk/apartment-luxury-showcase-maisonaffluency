@@ -546,11 +546,11 @@ const Collectibles = () => {
           >
             <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
-                Collectible Design
+                Collectible Design <span className="italic">In Situ</span>
               </h2>
             </div>
             <p className="font-body text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed mb-4 text-justify">
-              Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance. Presented in situ at our showroom.
+              Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance.
             </p>
             {/* A-Z alphabet jump bar + Search + Filter */}
             {(() => {
