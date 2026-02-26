@@ -70,9 +70,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-        }} className="mb-4 md:mb-6 text-xl leading-tight text-cream md:text-4xl font-serif lg:text-2xl">We showcase the best talents of interior design and craftsmanship ​
-​<br />
-​
+}} className="mb-4 md:mb-6 text-xl leading-tight text-cream md:text-4xl font-serif lg:text-2xl">Discover world masters in furniture and collectible design
           </motion.h1>
           
           <motion.p initial={{
