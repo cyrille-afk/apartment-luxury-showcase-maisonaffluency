@@ -116,7 +116,7 @@ const stephaneCgWingedVictory = cloudinaryUrl("PHOTO-2023-09-14-13-51-00_cjed3b"
 const stephaneCgMiro = cloudinaryUrl("PHOTO-2023-09-14-13-51-14_qvzgzq", { width: 1600, quality: "auto:good", crop: "fill" });
 import stephaneCgEyeTiger from "@/assets/curators-picks/stephane-cg-eye-of-tiger.jpg";
 const stephaneCgSkyFreeze = cloudinaryUrl("Screen_Shot_2026-02-24_at_9.41.12_PM_lqqibv", { width: 1600, quality: "auto:good", crop: "fill" });
-import stephaneCgHallway from "@/assets/curators-picks/stephane-cg-hallway-to-heaven.jpg";
+const stephaneCgHallway = cloudinaryUrl("Screen_Shot_2026-02-24_at_9.42.54_PM_v5mquk", { width: 1600, quality: "auto:good", crop: "fill" });
 
 // Marta Sala Éditions Curators' Picks images (Cloudinary)
 const martaSalaLaviana = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.09.48_AM_saz2sv", { width: 1600, quality: "auto:good", crop: "fill" });
