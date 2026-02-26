@@ -80,7 +80,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.8
-        }} className="max-w-2xl text-sm leading-relaxed text-cream/80 text-left md:text-justify font-serif md:text-lg lg:text-xl font-medium mb-6">From Couture Furniture and Collectible Designs to the World's<br />most distinguished Furniture Houses and Artisan Workshops</motion.p>
+        }} className="max-w-2xl text-sm leading-relaxed text-cream/80 text-center font-serif md:text-lg lg:text-xl font-medium mb-6">From Couture Furniture and Collectible Designs to the World's<br />most distinguished Furniture Houses and Artisan Workshops</motion.p>
           
           
         </motion.div>
