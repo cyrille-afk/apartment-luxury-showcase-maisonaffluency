@@ -3,6 +3,7 @@ import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { Instagram, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
+import { cloudinaryUrl } from "@/lib/cloudinary";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -14,12 +15,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
-// Designer images
-import atelierDemichelisImg from "@/assets/designers/atelier-demichelis.jpg";
-import kikoLopezImg from "@/assets/designers/kiko-lopez.jpg";
-import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
-import maartenVrolijkImg from "@/assets/designers/maarten-vrolijk.png";
-import matthieuGicquelImg from "@/assets/designers/matthieu-gicquel.jpg";
+// Designer profile images — served via Cloudinary CDN
+const dImg = (name: string) =>
+  cloudinaryUrl(`maison affluency/designers/${name}`, { width: 800, quality: "auto", crop: "fill" });
+
+const atelierDemichelisImg = dImg("atelier-demichelis");
+const kikoLopezImg = dImg("kiko-lopez");
+const nathalieZieglerImg = dImg("nathalie-ziegler");
+const maartenVrolijkImg = dImg("maarten-vrolijk");
+const matthieuGicquelImg = dImg("matthieu-gicquel");
 
 // Curators' Picks images
 import demichelisPick1 from "@/assets/curators-picks/demichelis-1.jpg";
@@ -30,16 +34,16 @@ import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode
 import maartenVrolijkVessel from "@/assets/curators-picks/maarten-vrolijk-sakura.jpg";
 import kikoLopezMirror from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
-import rowinAtelierImg from "@/assets/designers/rowin-atelier.jpg";
+const rowinAtelierImg = dImg("rowin-atelier");
 import rowinNoneIiLamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
-import marcantonioBrandoliniImg from "@/assets/designers/marcantonio-brandolini-dadda.jpg";
+const marcantonioBrandoliniImg = dImg("marcantonio-brandolini-dadda");
 import marcantonioCotissiVessel from "@/assets/curators-picks/marcantonio-cotissi-vessel.jpg";
-import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
+const thierryLemaireImg = dImg("thierry-lemaire");
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
-import pierreBonnefilleImg from "@/assets/designers/pierre-bonnefille-collectibles.jpg";
+const pierreBonnefilleImg = dImg("pierre-bonnefille-collectibles");
 import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
 import pierreBonnefilleBronzePainting208 from "@/assets/curators-picks/pierre-bonnefille-bronze-painting-208.png";
-import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.png";
+const herveVanDerStraetenImg = dImg("herve-van-der-straeten");
 import herveMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
 import herveArthurLamp from "@/assets/curators-picks/herve-vds-arthur-lamp.png";
 import herveBubblingLamp from "@/assets/curators-picks/herve-vds-bubbling-lamp.png";
@@ -48,7 +52,7 @@ import herveTourbillonPendant from "@/assets/curators-picks/herve-vds-tourbillon
 import herveFacettedPendant from "@/assets/curators-picks/herve-vds-facetted-pendant.png";
 import herveTumulteMirror from "@/assets/curators-picks/herve-vds-tumulte-mirror.png";
 import herveEmpileeConsole from "@/assets/curators-picks/herve-vds-empilee-console.png";
-import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
+const emmanuelBabledImg = dImg("emmanuel-babled");
 import emmanuelBabledPick1 from "@/assets/curators-picks/emmanuel-babled-1.jpg";
 import emmanuelBabledPick2 from "@/assets/curators-picks/emmanuel-babled-2.jpg";
 import emmanuelBabledPick3 from "@/assets/curators-picks/emmanuel-babled-3.jpg";
@@ -56,7 +60,7 @@ import emmanuelBabledPick4 from "@/assets/curators-picks/emmanuel-babled-4.jpg";
 import emmanuelBabledPick5 from "@/assets/curators-picks/emmanuel-babled-5.jpg";
 import emmanuelBabledPick6 from "@/assets/curators-picks/emmanuel-babled-6.jpg";
 import emmanuelBabledPick7 from "@/assets/curators-picks/emmanuel-babled-7.jpg";
-import ericSchmittImg from "@/assets/designers/eric-schmitt.jpg";
+const ericSchmittImg = dImg("eric-schmitt");
 import ericSchmittDrageeConsole from "@/assets/curators-picks/eric-schmitt-dragee-console.jpg";
 import ericSchmittSaturneTable from "@/assets/curators-picks/eric-schmitt-saturne-table.jpg";
 import ericSchmittFrameTable from "@/assets/curators-picks/eric-schmitt-frame-table.jpg";
