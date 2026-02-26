@@ -78,7 +78,7 @@ const victoriaMagniantBg = cloudinaryUrl("victoria-magniant-bg_mykadv", { width:
 const pierreYovanovitchBg = cloudinaryUrl("pierre-yovanovitch-bg_ctngfd", { width: 1600, quality: "auto:good", crop: "fill" });
 const brunoMoinardBg = cloudinaryUrl("bruno-moinard-bg_c4qu9o", { width: 1600, quality: "auto:good", crop: "fill" });
 import noeDuchaufourBg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
-import ndlEditionsBg from "@/assets/designers/ndl-editions-bg.jpg";
+const ndlEditionsBg = cloudinaryUrl("ndl-editions-bg_mtpvnb", { width: 1600, quality: "auto:good", crop: "fill" });
 const pierreAugustinRoseBg = cloudinaryUrl("pierre-augustin-rose-bg_bgbcws", { width: 1600, quality: "auto:good", crop: "fill" });
 const redaAmalouBg = cloudinaryUrl("reda-amalou-bg_phjirf", { width: 1600, quality: "auto:good", crop: "fill" });
 const homLeXuanBg = cloudinaryUrl("hom-le-xuan-bg_q45eaa", { width: 1600, quality: "auto:good", crop: "fill" });
