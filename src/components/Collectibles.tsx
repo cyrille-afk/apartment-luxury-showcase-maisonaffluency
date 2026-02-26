@@ -20,7 +20,7 @@ const atelierDemichelisImg = cloudinaryUrl("Screen_Shot_2025-12-11_at_11.44.20_P
 const kikoLopezImg = cloudinaryUrl("Screen_Shot_2025-12-12_at_1.08.35_AM_uzbbxd", { width: 800, quality: "auto", crop: "fill" });
 const nathalieZieglerImg = cloudinaryUrl("Screen_Shot_2025-12-11_at_11.41.17_PM_r8vwke", { width: 800, quality: "auto", crop: "fill" });
 const maartenVrolijkImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_7.32.25_AM_wujvd4", { width: 800, quality: "auto", crop: "fill" });
-import matthieuGicquelImg from "@/assets/designers/matthieu-gicquel.jpg";
+const matthieuGicquelImg = cloudinaryUrl("Screen_Shot_2026-02-26_at_4.13.15_PM_emrclr", { width: 800, quality: "auto", crop: "fill" });
 
 // Curators' Picks images
 import demichelisPick1 from "@/assets/curators-picks/demichelis-1.jpg";
