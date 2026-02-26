@@ -110,7 +110,7 @@ const refractoryStudioBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_9.09.20_PM_j
 const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_xqirha", { width: 1600, quality: "auto:good", crop: "fill" });
 
 // Stéphane CG Curators' Picks images
-import stephaneCgOrsay from "@/assets/curators-picks/stephane-cg-orsay-abstract.jpg";
+const stephaneCgOrsay = cloudinaryUrl("PHOTO-2023-09-14-13-51-05_1_iyi99i", { width: 1600, quality: "auto:good", crop: "fill" });
 const stephaneCgLouvre = cloudinaryUrl("PHOTO-2023-09-14-13-51-02_egaxpk", { width: 1600, quality: "auto:good", crop: "fill" });
 const stephaneCgWingedVictory = cloudinaryUrl("PHOTO-2023-09-14-13-51-00_cjed3b", { width: 1600, quality: "auto:good", crop: "fill" });
 import stephaneCgMiro from "@/assets/curators-picks/stephane-cg-homage-to-miro.jpg";
