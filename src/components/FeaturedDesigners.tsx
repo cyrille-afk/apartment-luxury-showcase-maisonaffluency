@@ -185,7 +185,7 @@ const binaBaitelPick1 = cloudinaryUrl("Screen_Shot_2026-02-22_at_2.58.25_PM_ljah
 import binaBaitelPick2 from "@/assets/curators-picks/bina-baitel-2.png";
 const binaBaitelPick3 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.01.30_PM_fkyyx2", { width: 1600, quality: "auto:good", crop: "fill" });
 const binaBaitelPick4 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.04.26_PM_vnrscy", { width: 1600, quality: "auto:good", crop: "fill" });
-import binaBaitelPick5 from "@/assets/curators-picks/bina-baitel-5.png";
+const binaBaitelPick5 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.10.14_PM_hbhaap", { width: 1600, quality: "auto:good", crop: "fill" });
 import binaBaitelPick6 from "@/assets/curators-picks/bina-baitel-6.png";
 import binaBaitelPick7 from "@/assets/curators-picks/bina-baitel-7.png";
 import kerstensConsole from "@/assets/curators-picks/kerstens-console.jpg";
