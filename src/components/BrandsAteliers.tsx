@@ -218,20 +218,20 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         dimensions: "Ø 80 x H 60/90/110 cm",
       },
       {
-        image: martaSalaAchille,
-        title: "Achille",
-        subtitle: "LTA1 Table Lamp",
-        tags: ["Lighting", "Table Lamp"],
-        materials: "Metal plate, laser-cut and hand-curved Frame\nPolished Calacatta gold marble, bevelled edge Base, stain-resistant treatment\nSilk with PVC lid\nE27 bulb holder",
-        dimensions: "Ø 30 x 64 cm\nSilk Shade — H 30 cm",
-      },
-      {
         image: martaSalaInge,
         title: "Inge",
         subtitle: "D3 Sofa",
         tags: ["Furniture", "Sofa"],
         materials: "Solid and multilayer wood, elastic belts Frame\nUpholstery in different densities polyurethane foam\nLacquered back solid wood base\nCompartmentalized feathers with removable cover cushions",
         dimensions: "210 / 270 / 330 / 390 x 69 — H 77 cm\nSH 41 cm",
+      },
+      {
+        image: martaSalaAchille,
+        title: "Achille",
+        subtitle: "LTA1 Table Lamp",
+        tags: ["Lighting", "Table Lamp"],
+        materials: "Metal plate, laser-cut and hand-curved Frame\nPolished Calacatta gold marble, bevelled edge Base, stain-resistant treatment\nSilk with PVC lid\nE27 bulb holder",
+        dimensions: "Ø 30 x 64 cm\nSilk Shade — H 30 cm",
       },
       {
         image: martaSalaElisabeth,
