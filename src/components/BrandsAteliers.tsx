@@ -18,7 +18,7 @@ const leoAertsBg = cloudinaryUrl("leo-aerts-alinea-bg_x89hrq", { width: 1600, qu
 const apparatusBg = cloudinaryUrl("apparatus-studio-bg_wzakjr", { width: 1600, quality: "auto:good", crop: "fill" });
 const atelierFevrierBg = cloudinaryUrl("atelier-fevrier-bg_tmsgw9", { width: 1600, quality: "auto:good", crop: "fill" });
 const atelierDemichelisBg = cloudinaryUrl("atelier-demichelis-bg_w8b8f7", { width: 1600, quality: "auto:good", crop: "fill" });
-import emmanuelBabledBg from "@/assets/designers/emmanuel-babled-bg.jpg";
+const emmanuelBabledBg = cloudinaryUrl("Screen_Shot_2025-12-12_at_2.16.52_PM_ueecf1", { width: 1600, quality: "auto:good", crop: "fill" });
 const brunoDeMaistreBg = cloudinaryUrl("bruno-de-maistre-bg_fiazyy", { width: 1600, quality: "auto:good", crop: "fill" });
 const celsoDeLemosBg = cloudinaryUrl("celso-de-lemos-bg_mokwng", { width: 1600, quality: "auto:good", crop: "fill" });
 const delaEspadaBg = cloudinaryUrl("de-la-espada-bg_tkqcuu", { width: 1600, quality: "auto:good", crop: "fill" });
