@@ -38,8 +38,8 @@ import marcantonioCotissiVessel from "@/assets/curators-picks/marcantonio-cotiss
 const thierryLemaireImg = cloudinaryUrl("thierry-lemaire_heyrtj", { width: 800, quality: "auto", crop: "fill" });
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
 const pierreBonnefilleImg = cloudinaryUrl("pierre-bonnefille", { width: 800, quality: "auto", crop: "fill" });
-import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
-import pierreBonnefilleBronzePainting208 from "@/assets/curators-picks/pierre-bonnefille-bronze-painting-208.png";
+const pierreBonnefilleBronzePainting = cloudinaryUrl("art-master-bronze_hf6bad", { width: 1600, quality: "auto:good", crop: "fill" });
+const pierreBonnefilleBronzePainting208 = cloudinaryUrl("Screen_Shot_2026-02-22_at_6.27.12_PM_haymp0", { width: 1600, quality: "auto:good", crop: "fill" });
 const herveVanDerStraetenImg = cloudinaryUrl("Screen_Shot_2025-12-12_at_12.15.28_AM_nraulk", { width: 800, quality: "auto", crop: "fill" });
 import herveMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
 const herveArthurLamp = cloudinaryUrl("Screen_Shot_2026-02-23_at_10.47.13_AM_cukmu3", { width: 1600, quality: "auto:good", crop: "fill" });
