@@ -25,7 +25,7 @@ import delaEspadaBg from "@/assets/designers/de-la-espada-bg.jpg";
 import damienLangloisMeurinneBg from "@/assets/designers/damien-langlois-meurinne-bg.jpg";
 const berntPetersenBg = cloudinaryUrl("bernt-petersen-bg_t4rnoj", { width: 1600, quality: "auto:good", crop: "fill" });
 import erstensBg from "@/assets/designers/kerstens-bg.jpg";
-import ccTapisBg from "@/assets/designers/cc-tapis-bg.jpg";
+const ccTapisBg = cloudinaryUrl("cc-tapis-bg_gacubc", { width: 1600, quality: "auto:good", crop: "fill" });
 import cristallerieSaintLouisBg from "@/assets/designers/cristallerie-saint-louis-bg.jpg";
 import delcourtBg from "@/assets/designers/delcourt-bg.jpg";
 const ecartParisBg = cloudinaryUrl("ecart-paris-bg_av3tqr", { width: 1600, quality: "auto:good", crop: "fill" });
@@ -34,7 +34,7 @@ const garnierLinkerBg = cloudinaryUrl("garnier-linker-bg", { width: 1600, qualit
 const haymannEditionsBg = cloudinaryUrl("haymann-editions-bg", { width: 1600, quality: "auto:good", crop: "fill" });
 import kiraBg from "@/assets/designers/kira-bg.jpg";
 import okhaBg from "@/assets/designers/okha-bg.jpg";
-import cazesConquetBg from "@/assets/designers/cazes-conquet-bg.jpg";
+const cazesConquetBg = cloudinaryUrl("cazes-conquet-bg_b6lzhk", { width: 1600, quality: "auto:good", crop: "fill" });
 import hamreiBg from "@/assets/designers/hamrei-bg.jpg";
 import ikselBg from "@/assets/designers/iksel-bg.jpg";
 import kikoLopezBg from "@/assets/designers/kiko-lopez-bg.jpg";
