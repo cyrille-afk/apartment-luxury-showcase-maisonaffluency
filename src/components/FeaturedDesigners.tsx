@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { Instagram, Search, X, ChevronDown, ExternalLink, Star, Maximize2, Minimize2, SlidersHorizontal } from "lucide-react";
+import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -2712,7 +2713,7 @@ const FeaturedDesigners = () => {
                       )}
                       <div className="relative inline-block">
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image ? (
-                          <img 
+                          <PinchZoomImage 
                             key={curatorPickIndex}
                             src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                             alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
