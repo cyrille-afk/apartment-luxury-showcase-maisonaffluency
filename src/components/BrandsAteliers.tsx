@@ -1519,6 +1519,23 @@ function AlphaStrip({
     el.scrollTo({ left: cardWidth * idx, behavior: "smooth" });
   }, [brands.length]);
 
+  // Deep-link: expand the matching card in this strip
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail.section !== "atelier") return;
+      const matchedBrand = brands.find(b => b.name.replace(/\s+/g, "-").toLowerCase() === detail.id);
+      if (matchedBrand) {
+        setExpandedCard(matchedBrand.name);
+        // Scroll the strip to show the matched card
+        const idx = brands.indexOf(matchedBrand);
+        if (idx >= 0) scrollTo(idx);
+      }
+    };
+    window.addEventListener("deeplink-open-profile", handler);
+    return () => window.removeEventListener("deeplink-open-profile", handler);
+  }, [brands, scrollTo]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
