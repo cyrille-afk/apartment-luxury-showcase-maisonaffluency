@@ -338,6 +338,7 @@ const Collectibles = () => {
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
+  const imageZoomedRef = useRef(false);
 
   // Deep-link handler: expand designer from URL hash
   useEffect(() => {
@@ -506,15 +507,18 @@ const Collectibles = () => {
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
+    if (imageZoomedRef.current) return;
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
+    if (imageZoomedRef.current) return;
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
   const onTouchEnd = () => {
+    if (imageZoomedRef.current) return;
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
@@ -1043,6 +1047,7 @@ const Collectibles = () => {
                       alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
                       className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
                       draggable={false}
+                      onZoomChange={(z) => { imageZoomedRef.current = z; }}
                     />
                     <button 
                       onClick={(e) => {

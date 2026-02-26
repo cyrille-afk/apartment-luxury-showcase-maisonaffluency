@@ -1918,6 +1918,7 @@ const FeaturedDesigners = () => {
   const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const imageZoomedRef = useRef(false);
   const [imageLoaded, setImageLoaded] = useState(true);
 
   // Deep-link handler: expand designer from URL hash
@@ -2662,15 +2663,17 @@ const FeaturedDesigners = () => {
                 <div 
                   className="relative w-full h-full flex items-center justify-center"
                   onTouchStart={(e) => {
+                    if (imageZoomedRef.current) return;
                     setTouchEnd(null);
                     setTouchStart(e.targetTouches[0].clientX);
                   }}
                   onTouchMove={(e) => {
+                    if (imageZoomedRef.current) return;
                     setTouchEnd(e.targetTouches[0].clientX);
                   }}
                   onTouchEnd={() => {
+                    if (imageZoomedRef.current) return;
                     if (!touchStart || !curatorPicksDesigner.curatorPicks?.length) return;
-                    // Only handle swipe if there was actual movement
                     if (touchEnd !== null) {
                       const distance = touchStart - touchEnd;
                       if (distance > minSwipeDistance) {
@@ -2722,6 +2725,7 @@ const FeaturedDesigners = () => {
                             } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                             draggable={false}
                             onLoad={() => setImageLoaded(true)}
+                            onZoomChange={(z) => { imageZoomedRef.current = z; }}
                           />
                         ) : (
                           <div className="flex items-center justify-center max-w-full max-h-[55vh] w-64 h-64 bg-white/5 border border-white/10 rounded-lg">

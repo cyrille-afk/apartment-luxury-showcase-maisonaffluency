@@ -193,6 +193,7 @@ const Gallery = () => {
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const imageZoomedRef = useRef(false);
   const [hasTapped, setHasTapped] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
@@ -366,13 +367,16 @@ const Gallery = () => {
     if (e.key === "Escape") closeLightbox();
   };
   const onTouchStart = (e: React.TouchEvent) => {
+    if (imageZoomedRef.current) return;
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
   const onTouchMove = (e: React.TouchEvent) => {
+    if (imageZoomedRef.current) return;
     setTouchEnd(e.targetTouches[0].clientX);
   };
   const onTouchEnd = () => {
+    if (imageZoomedRef.current) return;
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
@@ -617,7 +621,7 @@ const Gallery = () => {
                 {currentSectionItems[currentItemIndex]?.title}
               </h3>
               <div className="relative inline-block shrink-0">
-                <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" />
+                <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" onZoomChange={(z) => { imageZoomedRef.current = z; }} />
                 {/* Close button - bottom left on mobile, bottom right on desktop */}
                 <button onClick={closeLightbox} className="absolute bottom-2 left-2 md:left-auto md:right-2 z-50 p-2 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
                   <X className="h-6 w-6 text-white" />

@@ -10,6 +10,7 @@ interface PinchZoomImageProps {
   decoding?: "async" | "sync" | "auto";
   fetchPriority?: "high" | "low" | "auto";
   style?: React.CSSProperties;
+  onZoomChange?: (zoomed: boolean) => void;
 }
 
 const PinchZoomImage = ({
@@ -22,6 +23,7 @@ const PinchZoomImage = ({
   decoding,
   fetchPriority,
   style,
+  onZoomChange,
 }: PinchZoomImageProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -38,11 +40,16 @@ const PinchZoomImage = ({
   const panStart = useRef({ x: 0, y: 0 });
   const translateStart = useRef({ x: 0, y: 0 });
 
+  const updateZoom = useCallback((zoomed: boolean) => {
+    setIsZoomed(zoomed);
+    onZoomChange?.(zoomed);
+  }, [onZoomChange]);
+
   const resetZoom = useCallback(() => {
     setScale(1);
     setTranslate({ x: 0, y: 0 });
-    setIsZoomed(false);
-  }, []);
+    updateZoom(false);
+  }, [updateZoom]);
 
   // Reset when src changes
   useEffect(() => {
@@ -62,13 +69,11 @@ const PinchZoomImage = ({
       initialDistance.current = getDistance(e.touches);
       initialScale.current = scale;
     } else if (e.touches.length === 1 && scale > 1) {
-      // Start panning when zoomed — block parent swipe
       e.stopPropagation();
       isPanning.current = true;
       panStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       translateStart.current = { ...translate };
     } else if (e.touches.length === 1) {
-      // Double-tap detection
       const now = Date.now();
       if (now - lastTap.current < 300) {
         e.preventDefault();
@@ -77,12 +82,12 @@ const PinchZoomImage = ({
           resetZoom();
         } else {
           setScale(2.5);
-          setIsZoomed(true);
+          updateZoom(true);
         }
       }
       lastTap.current = now;
     }
-  }, [scale, translate, resetZoom]);
+  }, [scale, translate, resetZoom, updateZoom]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2) {
@@ -91,7 +96,7 @@ const PinchZoomImage = ({
       const dist = getDistance(e.touches);
       const newScale = Math.min(Math.max(initialScale.current * (dist / initialDistance.current), 1), 5);
       setScale(newScale);
-      setIsZoomed(newScale > 1);
+      updateZoom(newScale > 1);
       if (newScale <= 1) {
         setTranslate({ x: 0, y: 0 });
       }
@@ -105,9 +110,12 @@ const PinchZoomImage = ({
         y: translateStart.current.y + dy,
       });
     }
-  }, [scale]);
+  }, [scale, updateZoom]);
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (isPanning.current || scale > 1) {
+      e.stopPropagation();
+    }
     isPanning.current = false;
     if (scale <= 1.05) {
       resetZoom();
