@@ -1447,7 +1447,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Kerstens": "kerstens",
   "Kiko Lopez": "kiko-lopez",
   "Leo Sentou": "leo-sentou",
-  "Made in Kira": "kira",
+  "Made in Kira": "roman-frankel",
   "Man of Parts": "man-of-parts",
   "Nathalie Ziegler": "nathalie-ziegler",
   "Okha Design Studio": "adam-courts-okha",
