@@ -123,6 +123,9 @@ import martaSalaVelazquez from "@/assets/curators-picks/marta-sala-velazquez-t13
 import martaSalaRanieri from "@/assets/curators-picks/marta-sala-ranieri-t5.png";
 import martaSalaAchille from "@/assets/curators-picks/marta-sala-achille-lta1.png";
 import martaSalaInge from "@/assets/curators-picks/marta-sala-inge-d3.png";
+import martaSalaElisabeth from "@/assets/curators-picks/marta-sala-elisabeth-d1.png";
+import martaSalaMurena from "@/assets/curators-picks/marta-sala-murena-s2.png";
+import martaSalaLaviana from "@/assets/curators-picks/marta-sala-laviana-p3.png";
 
 // Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
 const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
@@ -221,6 +224,30 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         tags: ["Furniture", "Sofa"],
         materials: "Solid and multilayer wood, elastic belts Frame\nUpholstery in different densities polyurethane foam\nLacquered back solid wood base\nCompartmentalized feathers with removable cover cushions",
         dimensions: "210 / 270 / 330 / 390 x 69 — H 77 cm\nSH 41 cm",
+      },
+      {
+        image: martaSalaElisabeth,
+        title: "Elisabeth",
+        subtitle: "D1 Sofa",
+        tags: ["Furniture", "Sofa"],
+        materials: "Solid and Multilayer Wood, Elastic Belts, Upholstery in different densities polyurethane foam Frame\nLacquered Solid Wood Back Base\nExpanded foam with removable cover Cushions",
+        dimensions: "W 160 / 220 / 280 / 340 / 400 x D 110 x H 81 cm\nSH 41 cm",
+      },
+      {
+        image: martaSalaMurena,
+        title: "Murena",
+        subtitle: "S2 Dining Chair",
+        tags: ["Furniture", "Chair"],
+        materials: "Metal laser-cut, curved, grind, hand-assembled before final finishing Frame\nSeat: multilayer wood with foam, resinated layer\nCushion: expanded foam with removable cover",
+        dimensions: "55 x 51 x H 68 cm\nSH 45 cm",
+      },
+      {
+        image: martaSalaLaviana,
+        title: "Laviana Hexagonal",
+        subtitle: "P3 Armchair",
+        tags: ["Furniture", "Armchair"],
+        materials: "Frame: solid and multilayer wood, elastic belts, upholstery in different densities polyurethane foam\nSlide feet or lacquered solid wood base",
+        dimensions: "85 x 85 x H 110 cm\nSH 36 cm",
       },
     ],
   },
