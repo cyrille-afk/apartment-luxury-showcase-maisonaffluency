@@ -40,7 +40,7 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </motion.div>
       
-      <div className="relative z-10 h-full px-4 pb-32 pt-32 md:px-12 md:pb-20 md:pt-20 lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-center">
+      <div className="relative z-10 h-full px-4 pb-32 pt-[60%] md:px-12 md:pb-20 md:pt-20 lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-center">
         <motion.div initial={{
         opacity: 0,
         y: 30
@@ -70,7 +70,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-}} className="mb-4 md:mb-6 text-xl leading-tight text-cream md:text-4xl font-serif lg:text-2xl">Discover world masters in furniture and collectible design
+}} className="mb-4 md:mb-6 text-xl leading-tight text-white md:text-4xl font-serif lg:text-2xl">Discover world masters in furniture and collectible design
           </motion.h1>
           
           <motion.p initial={{
@@ -80,7 +80,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.8
-        }} className="max-w-2xl text-sm leading-relaxed text-cream/80 text-center font-serif md:text-lg lg:text-xl font-medium mb-6">From Couture Furniture and Collectible Designs to the World's<br />most distinguished Furniture Houses and Artisan Workshops</motion.p>
+        }} className="max-w-2xl text-sm leading-relaxed text-white text-left font-serif md:text-lg lg:text-xl font-medium mb-6">From Couture Furniture and Collectible Designs to the World's<br />most distinguished Furniture Houses and Artisan Workshops</motion.p>
           
           
         </motion.div>
