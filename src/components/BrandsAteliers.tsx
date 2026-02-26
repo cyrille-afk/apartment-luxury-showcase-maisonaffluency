@@ -16,7 +16,7 @@ import { collectibleDesigners } from "@/components/Collectibles";
 const alexanderLamontBg = cloudinaryUrl("alexander-lamont-bg_prdpsy", { width: 1600, quality: "auto:good", crop: "fill" });
 import leoAertsBg from "@/assets/designers/leo-aerts-alinea-bg.jpg";
 const apparatusBg = cloudinaryUrl("apparatus-studio-bg_wzakjr", { width: 1600, quality: "auto:good", crop: "fill" });
-import atelierFevrierBg from "@/assets/designers/atelier-fevrier-bg.jpg";
+const atelierFevrierBg = cloudinaryUrl("atelier-fevrier-bg_tmsgw9", { width: 1600, quality: "auto:good", crop: "fill" });
 const atelierDemichelisBg = cloudinaryUrl("atelier-demichelis-bg_w8b8f7", { width: 1600, quality: "auto:good", crop: "fill" });
 import emmanuelBabledBg from "@/assets/designers/emmanuel-babled-bg.jpg";
 import brunoDeMaistreBg from "@/assets/designers/bruno-de-maistre-bg.jpg";
