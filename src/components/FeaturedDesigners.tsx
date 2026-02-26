@@ -181,7 +181,7 @@ import maartenVrolijkBloomingTerra from "@/assets/curators-picks/maarten-vrolijk
 import marcantonioDetail from "@/assets/curators-picks/marcantonio-cotissi-detail.jpg";
 
 import binaBAitelObject from "@/assets/curators-picks/bina-baitel-object.jpg";
-import binaBaitelPick1 from "@/assets/curators-picks/bina-baitel-1.png";
+const binaBaitelPick1 = cloudinaryUrl("Screen_Shot_2026-02-22_at_2.58.25_PM_ljahkg", { width: 1600, quality: "auto:good", crop: "fill" });
 import binaBaitelPick2 from "@/assets/curators-picks/bina-baitel-2.png";
 import binaBaitelPick3 from "@/assets/curators-picks/bina-baitel-3.png";
 import binaBaitelPick4 from "@/assets/curators-picks/bina-baitel-4.png";
