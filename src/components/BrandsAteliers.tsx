@@ -106,7 +106,7 @@ import lobjetBg from "@/assets/ateliers/lobjet.png";
 const osannaViscontiBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.25.23_AM_psgxsu", { width: 1600, quality: "auto:good", crop: "fill" });
 const laChanceParisBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.18.38_AM_nkx1t6", { width: 1600, quality: "auto:good", crop: "fill" });
 import tacchiniBg from "@/assets/ateliers/tacchini-bg.png";
-import refractoryStudioBg from "@/assets/ateliers/refractory-studio-bg.png";
+const refractoryStudioBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_9.09.20_PM_jm34g1", { width: 1600, quality: "auto:good", crop: "fill" });
 const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_xqirha", { width: 1600, quality: "auto:good", crop: "fill" });
 
 // Stéphane CG Curators' Picks images
