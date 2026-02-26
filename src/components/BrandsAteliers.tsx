@@ -107,7 +107,7 @@ import osannaViscontiBg from "@/assets/ateliers/osanna-visconti.png";
 import laChanceParisBg from "@/assets/ateliers/la-chance-paris.png";
 import tacchiniBg from "@/assets/ateliers/tacchini-bg.png";
 import refractoryStudioBg from "@/assets/ateliers/refractory-studio-bg.png";
-import martaSalaEditionsBg from "@/assets/ateliers/marta-sala-editions-bg.png";
+const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_xqirha", { width: 1600, quality: "auto:good", crop: "fill" });
 
 // Stéphane CG Curators' Picks images
 import stephaneCgOrsay from "@/assets/curators-picks/stephane-cg-orsay-abstract.jpg";
