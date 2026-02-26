@@ -74,7 +74,7 @@ import paulCocksedgeBg from "@/assets/designers/paul-cocksedge-bg.jpg";
 const leBerreVevaudBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_9.40.24_AM_nfyg7z", { width: 1600, quality: "auto:good", crop: "fill" });
 const binaBaitelBg = cloudinaryUrl("bina-baitel-bg_u0rbnn", { width: 1600, quality: "auto:good", crop: "fill" });
 const charlesParisBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_10.02.17_AM_tnml24", { width: 1600, quality: "auto:good", crop: "fill" });
-import victoriaMagniantBg from "@/assets/designers/victoria-magniant-bg.png";
+const victoriaMagniantBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_11.50.20_AM_fcvyci", { width: 1600, quality: "auto:good", crop: "fill" });
 import pierreYovanovitchBg from "@/assets/designers/pierre-yovanovitch-bg.png";
 import brunoMoinardBg from "@/assets/designers/bruno-moinard-bg.png";
 import noeDuchaufourBg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
