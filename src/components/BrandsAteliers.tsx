@@ -2209,10 +2209,10 @@ const BrandsAteliers = () => {
                         )}
                         <button
                           onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
-                          className="absolute bottom-2 left-2 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
+                          className="absolute bottom-2 left-1 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
                           aria-label="Close lightbox"
                         >
-                          <X className="h-5 w-5 text-white" />
+                          <X className="h-4 w-4 text-white" />
                         </button>
                         <button
                           onClick={() => setPicksZoomed(!picksZoomed)}
@@ -2280,10 +2280,10 @@ const BrandsAteliers = () => {
                 <div className="relative flex items-center justify-center w-full h-full">
                   <button
                     onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
-                    className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
+                    className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
                     aria-label="Close lightbox"
                   >
-                    <X className="h-6 w-6 text-white" />
+                    <X className="h-4 w-4 text-white" />
                   </button>
                   <div className="text-center p-8">
                     <Star className="h-16 w-16 text-white/30 mx-auto mb-4" />
@@ -2297,10 +2297,10 @@ const BrandsAteliers = () => {
               <div className="relative flex items-center justify-center w-full h-full">
                 <button
                   onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
-                  className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
+                  className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
                   aria-label="Close lightbox"
                 >
-                  <X className="h-6 w-6 text-white" />
+                  <X className="h-4 w-4 text-white" />
                 </button>
                 <div className="text-center p-8">
                   <Star className="h-16 w-16 text-white/30 mx-auto mb-4" />
