@@ -115,7 +115,7 @@ const stephaneCgLouvre = cloudinaryUrl("PHOTO-2023-09-14-13-51-02_egaxpk", { wid
 const stephaneCgWingedVictory = cloudinaryUrl("PHOTO-2023-09-14-13-51-00_cjed3b", { width: 1600, quality: "auto:good", crop: "fill" });
 const stephaneCgMiro = cloudinaryUrl("PHOTO-2023-09-14-13-51-14_qvzgzq", { width: 1600, quality: "auto:good", crop: "fill" });
 import stephaneCgEyeTiger from "@/assets/curators-picks/stephane-cg-eye-of-tiger.jpg";
-import stephaneCgSkyFreeze from "@/assets/curators-picks/stephane-cg-sky-freeze.jpg";
+const stephaneCgSkyFreeze = cloudinaryUrl("Screen_Shot_2026-02-24_at_9.41.12_PM_lqqibv", { width: 1600, quality: "auto:good", crop: "fill" });
 import stephaneCgHallway from "@/assets/curators-picks/stephane-cg-hallway-to-heaven.jpg";
 
 // Marta Sala Éditions Curators' Picks images (Cloudinary)
