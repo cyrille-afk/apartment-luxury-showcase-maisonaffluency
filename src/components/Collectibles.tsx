@@ -18,7 +18,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 // Designer images
 const atelierDemichelisImg = cloudinaryUrl("Screen_Shot_2025-12-11_at_11.44.20_PM_bj90pt", { width: 800, quality: "auto", crop: "fill" });
 const kikoLopezImg = cloudinaryUrl("Screen_Shot_2025-12-12_at_1.08.35_AM_uzbbxd", { width: 800, quality: "auto", crop: "fill" });
-import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
+const nathalieZieglerImg = cloudinaryUrl("Screen_Shot_2025-12-11_at_11.41.17_PM_r8vwke", { width: 800, quality: "auto", crop: "fill" });
 const maartenVrolijkImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_7.32.25_AM_wujvd4", { width: 800, quality: "auto", crop: "fill" });
 import matthieuGicquelImg from "@/assets/designers/matthieu-gicquel.jpg";
 
@@ -31,7 +31,7 @@ import matthieuGicquelGeode from "@/assets/curators-picks/matthieu-gicquel-geode
 import maartenVrolijkVessel from "@/assets/curators-picks/maarten-vrolijk-sakura.jpg";
 import kikoLopezMirror from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
-import rowinAtelierImg from "@/assets/designers/rowin-atelier.jpg";
+const rowinAtelierImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_10.54.13_AM_r7npgu", { width: 800, quality: "auto", crop: "fill" });
 import rowinNoneIiLamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 const marcantonioBrandoliniImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_11.02.28_AM_icg7b9", { width: 800, quality: "auto", crop: "fill" });
 import marcantonioCotissiVessel from "@/assets/curators-picks/marcantonio-cotissi-vessel.jpg";
