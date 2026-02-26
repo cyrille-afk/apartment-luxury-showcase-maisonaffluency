@@ -17,7 +17,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 // Designer profile images — served via Cloudinary CDN
 const dImg = (name: string) =>
-  cloudinaryUrl(`maison affluency/designers/${name}`, { width: 800, quality: "auto", crop: "fill" });
+  cloudinaryUrl(name, { width: 800, quality: "auto", crop: "fill" });
 
 const atelierDemichelisImg = dImg("atelier-demichelis");
 const kikoLopezImg = dImg("kiko-lopez");
