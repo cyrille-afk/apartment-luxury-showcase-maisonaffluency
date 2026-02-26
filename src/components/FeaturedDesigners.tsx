@@ -183,7 +183,7 @@ import marcantonioDetail from "@/assets/curators-picks/marcantonio-cotissi-detai
 import binaBAitelObject from "@/assets/curators-picks/bina-baitel-object.jpg";
 const binaBaitelPick1 = cloudinaryUrl("Screen_Shot_2026-02-22_at_2.58.25_PM_ljahkg", { width: 1600, quality: "auto:good", crop: "fill" });
 import binaBaitelPick2 from "@/assets/curators-picks/bina-baitel-2.png";
-import binaBaitelPick3 from "@/assets/curators-picks/bina-baitel-3.png";
+const binaBaitelPick3 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.01.30_PM_fkyyx2", { width: 1600, quality: "auto:good", crop: "fill" });
 import binaBaitelPick4 from "@/assets/curators-picks/bina-baitel-4.png";
 import binaBaitelPick5 from "@/assets/curators-picks/bina-baitel-5.png";
 import binaBaitelPick6 from "@/assets/curators-picks/bina-baitel-6.png";
