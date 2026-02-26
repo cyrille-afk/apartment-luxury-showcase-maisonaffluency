@@ -3,8 +3,10 @@ import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Search, Linkedin } from "lucide-react";
-import cyrilleDelvalImg from "@/assets/team/cyrille-delval.jpg";
-import elsaLemarignierImg from "@/assets/team/elsa-lemarignier.jpg";
+import { cloudinaryUrl } from "@/lib/cloudinary";
+
+const cyrilleDelvalImg = cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 800, quality: "auto", crop: "fill" });
+const elsaLemarignierImg = cloudinaryUrl("Screen_Shot_2025-12-12_at_12.10.11_AM_nrfrha", { width: 800, quality: "auto", crop: "fill" });
 
 const curatingTeam = [
   {
