@@ -82,37 +82,33 @@ const Hero = () => {
           delay: 0.8
         }} className="max-w-2xl text-sm leading-relaxed text-white text-left font-serif md:text-lg lg:text-xl font-medium mb-6">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses and Artisan&nbsp;Workshops</motion.p>
           
+          <motion.div initial={{
+            opacity: 0
+          }} animate={{
+            opacity: 1
+          }} transition={{
+            duration: 1,
+            delay: 1.2
+          }} className="mt-6 md:mt-8 w-full flex justify-center">
+            <button
+              onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
+              className="flex flex-col items-center gap-2 cursor-pointer group"
+            >
+              <span className="font-body text-xs uppercase tracking-widest text-cream/80 group-hover:text-cream transition-colors">
+                Scroll to Explore
+              </span>
+              <motion.div
+                className="h-12 w-[1px] bg-gradient-to-b from-cream/60 to-transparent"
+                animate={{ y: [0, 6, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </button>
+          </motion.div>
           
         </motion.div>
       </div>
 
       {/* Photo credit */}
-      <p className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10 text-[10px] md:text-xs text-cream/50 font-body tracking-wider flex items-center gap-1">
-        Photo: <a href="https://www.instagram.com/thanawatchu.maison/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-cream/80 transition-colors"><Instagram className="w-3 h-3" style={{ stroke: "url(#ig-gradient-hero)" }} /><svg width="0" height="0"><defs><linearGradient id="ig-gradient-hero" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f9ce34" /><stop offset="50%" stopColor="#ee2a7b" /><stop offset="100%" stopColor="#6228d7" /></linearGradient></defs></svg>Thanawat Chu</a>
-      </p>
-      
-      <motion.div initial={{
-      opacity: 0
-    }} animate={{
-      opacity: 1
-    }} transition={{
-      duration: 1,
-      delay: 1.2
-    }} className="absolute bottom-20 md:bottom-8 left-1/2 z-10 -translate-x-1/2">
-        <button
-          onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
-          className="flex flex-col items-center gap-2 cursor-pointer group"
-        >
-          <span className="font-body text-xs uppercase tracking-widest text-cream/80 group-hover:text-cream transition-colors">
-            Scroll to Explore
-          </span>
-          <motion.div
-            className="h-12 w-[1px] bg-gradient-to-b from-cream/60 to-transparent"
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </button>
-      </motion.div>
     </section>;
 };
 export default Hero;
