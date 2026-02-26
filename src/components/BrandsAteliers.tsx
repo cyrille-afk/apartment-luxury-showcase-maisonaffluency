@@ -111,7 +111,7 @@ const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_
 
 // Stéphane CG Curators' Picks images
 import stephaneCgOrsay from "@/assets/curators-picks/stephane-cg-orsay-abstract.jpg";
-import stephaneCgLouvre from "@/assets/curators-picks/stephane-cg-louvre.jpg";
+const stephaneCgLouvre = cloudinaryUrl("PHOTO-2023-09-14-13-51-02_egaxpk", { width: 1600, quality: "auto:good", crop: "fill" });
 const stephaneCgWingedVictory = cloudinaryUrl("PHOTO-2023-09-14-13-51-00_cjed3b", { width: 1600, quality: "auto:good", crop: "fill" });
 import stephaneCgMiro from "@/assets/curators-picks/stephane-cg-homage-to-miro.jpg";
 import stephaneCgEyeTiger from "@/assets/curators-picks/stephane-cg-eye-of-tiger.jpg";
