@@ -5,15 +5,18 @@ import { ChevronLeft, ChevronRight, X, Maximize2, Instagram, Copy } from "lucide
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cloudinaryUrl } from "@/lib/cloudinary";
 import bedroomImage from "@/assets/master-suite.jpg";
 import diningImage from "@/assets/dining-room.jpg";
-import boudoirImage from "@/assets/boudoir.jpg";
 import livingRoomImage from "@/assets/living-room-hero.jpg";
-import bedroomAltImage from "@/assets/bedroom-alt.jpg";
-import bedroomThirdImage from "@/assets/bedroom-third.jpg";
-import bespokeSofaImage from "@/assets/bespoke-sofa.jpg";
-import artMasterBronzeImage from "@/assets/art-master-bronze.jpg";
 import bedroomSecondImage from "@/assets/bedroom-second.jpg";
+
+const boudoirImage = cloudinaryUrl("boudoir_ll5spn", { width: 1600, quality: "auto:good", crop: "fill" });
+const bedroomAltImage = cloudinaryUrl("bedroom-alt_yk0j0d", { width: 1600, quality: "auto:good", crop: "fill" });
+const bedroomThirdImage = cloudinaryUrl("bedroom-third_ol56sx", { width: 1600, quality: "auto:good", crop: "fill" });
+const bespokeSofaImage = cloudinaryUrl("bespoke-sofa_gxidtx", { width: 1600, quality: "auto:good", crop: "fill" });
+const artMasterBronzeImage = cloudinaryUrl("art-master-bronze_hf6bad", { width: 1600, quality: "auto:good", crop: "fill" });
+const detailsConsoleImage = cloudinaryUrl("details-console_hk6uxt", { width: 1600, quality: "auto:good", crop: "fill" });
 import intimateDiningImage from "@/assets/intimate-dining.jpg";
 import intimateTableImage from "@/assets/intimate-table-detail.jpg";
 import intimateLoungeImage from "@/assets/intimate-lounge.jpg";
@@ -21,7 +24,7 @@ import smallRoomPersonalityImage from "@/assets/small-room-personality.jpg";
 import smallRoomVaseImage from "@/assets/small-room-vase.jpg";
 import smallRoomBedroomImage from "@/assets/small-room-bedroom.jpg";
 import detailsSectionImage from "@/assets/details-section.jpg";
-import detailsConsoleImage from "@/assets/details-console.jpg";
+// detailsConsoleImage now served via Cloudinary (defined above)
 import detailsLampImage from "@/assets/details-lamp.jpg";
 import detailsConsole4Image from "@/assets/gallery/details-console-4.jpg";
 import smallRoomChairImage from "@/assets/small-room-chair.jpeg";
