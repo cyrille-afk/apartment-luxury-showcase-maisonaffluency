@@ -75,7 +75,7 @@ const leBerreVevaudBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_9.40.24_AM_nfyg
 const binaBaitelBg = cloudinaryUrl("bina-baitel-bg_u0rbnn", { width: 1600, quality: "auto:good", crop: "fill" });
 const charlesParisBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_10.02.17_AM_tnml24", { width: 1600, quality: "auto:good", crop: "fill" });
 const victoriaMagniantBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_11.50.20_AM_fcvyci", { width: 1600, quality: "auto:good", crop: "fill" });
-import pierreYovanovitchBg from "@/assets/designers/pierre-yovanovitch-bg.png";
+const pierreYovanovitchBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_11.52.58_AM_scdudy", { width: 1600, quality: "auto:good", crop: "fill" });
 import brunoMoinardBg from "@/assets/designers/bruno-moinard-bg.png";
 import noeDuchaufourBg from "@/assets/designers/noe-duchaufour-lawrance.jpg";
 import ndlEditionsBg from "@/assets/designers/ndl-editions-bg.jpg";
