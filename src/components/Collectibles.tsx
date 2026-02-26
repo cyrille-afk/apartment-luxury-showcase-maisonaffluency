@@ -37,7 +37,7 @@ const marcantonioBrandoliniImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_11.02.
 import marcantonioCotissiVessel from "@/assets/curators-picks/marcantonio-cotissi-vessel.jpg";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
-import pierreBonnefilleImg from "@/assets/designers/pierre-bonnefille-collectibles.jpg";
+const pierreBonnefilleImg = cloudinaryUrl("pierre-bonnefille", { width: 800, quality: "auto", crop: "fill" });
 import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
 import pierreBonnefilleBronzePainting208 from "@/assets/curators-picks/pierre-bonnefille-bronze-painting-208.png";
 const herveVanDerStraetenImg = cloudinaryUrl("Screen_Shot_2025-12-12_at_12.15.28_AM_nraulk", { width: 800, quality: "auto", crop: "fill" });
