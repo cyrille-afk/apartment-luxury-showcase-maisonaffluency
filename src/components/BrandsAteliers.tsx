@@ -100,7 +100,7 @@ import okurayamaStudioBg from "@/assets/designers/okurayama-studio-bg.jpg";
 import overgaardDyrmanBg from "@/assets/designers/overgaard-dyrman-bg.jpg";
 import stephaneParmentierBg from "@/assets/designers/stephane-parmentier-bg.jpg";
 import privatiselectionemBg from "@/assets/designers/privatiselectionem-bg.jpg";
-const achilleSalvagniBg = cloudinaryUrl("maison affluency/ateliers/achille-salvagni-bg", { width: 1600, quality: "auto:good", crop: "fill" });
+const achilleSalvagniBg = cloudinaryUrl("achille-salvagni-atelier-bg", { width: 1600, quality: "auto:good", crop: "fill" });
 import valerieRostaingBg from "@/assets/designers/valerie-rostaing-bg.png";
 import mmairoBg from "@/assets/ateliers/mmairo.png";
 import lobjetBg from "@/assets/ateliers/lobjet.png";
