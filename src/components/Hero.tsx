@@ -40,7 +40,7 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </motion.div>
       
-      <div className="relative z-10 h-full px-4 pb-32 pt-[60%] md:px-12 md:pb-20 md:pt-20 lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-center">
+      <div className="relative z-10 h-full px-4 pb-32 pt-[70%] md:px-12 md:pb-20 md:pt-20 lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-center">
         <motion.div initial={{
         opacity: 0,
         y: 30
