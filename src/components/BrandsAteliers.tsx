@@ -37,7 +37,7 @@ const okhaBg = cloudinaryUrl("okha-bg_zdmkil", { width: 1600, quality: "auto:goo
 const cazesConquetBg = cloudinaryUrl("cazes-conquet-bg_b6lzhk", { width: 1600, quality: "auto:good", crop: "fill" });
 const hamreiBg = cloudinaryUrl("hamrei-bg_jpaq7k", { width: 1600, quality: "auto:good", crop: "fill" });
 const ikselBg = cloudinaryUrl("iksel-bg_ihsm0u", { width: 1600, quality: "auto:good", crop: "fill" });
-import kikoLopezBg from "@/assets/designers/kiko-lopez-bg.jpg";
+const kikoLopezBg = cloudinaryUrl("Screen_Shot_2025-12-12_at_1.08.35_AM_qv22mw", { width: 1600, quality: "auto:good", crop: "fill" });
 const leoSentouBg = cloudinaryUrl("leo-sentou-bg_pf0dkl", { width: 1600, quality: "auto:good", crop: "fill" });
 const manOfPartsBg = cloudinaryUrl("man-of-parts-bg_trrhzi", { width: 1600, quality: "auto:good", crop: "fill" });
 const takayokayaBg = cloudinaryUrl("takayokaya-bg_j0lliw", { width: 1600, quality: "auto:good", crop: "fill" });
