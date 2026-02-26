@@ -1783,6 +1783,7 @@ const BrandsAteliers = () => {
   const [picksImageLoaded, setPicksImageLoaded] = useState(false);
   const [picksTouchStart, setPicksTouchStart] = useState<number | null>(null);
   const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
+  const imageZoomedRef = useRef(false);
 
   // Brands that should use FeaturedDesigners data instead of Collectibles
   const preferFeatured = new Set(["Pierre Bonnefille"]);
@@ -2140,9 +2141,10 @@ const BrandsAteliers = () => {
               picksDesigner.curatorPicks && picksDesigner.curatorPicks.length > 0 ? (
                 <div
                   className="relative w-full h-full flex items-center justify-center"
-                  onTouchStart={(e) => { setPicksTouchEnd(null); setPicksTouchStart(e.targetTouches[0].clientX); }}
-                  onTouchMove={(e) => { setPicksTouchEnd(e.targetTouches[0].clientX); }}
+                  onTouchStart={(e) => { if (imageZoomedRef.current) return; setPicksTouchEnd(null); setPicksTouchStart(e.targetTouches[0].clientX); }}
+                  onTouchMove={(e) => { if (imageZoomedRef.current) return; setPicksTouchEnd(e.targetTouches[0].clientX); }}
                   onTouchEnd={() => {
+                    if (imageZoomedRef.current) return;
                     if (!picksTouchStart || !picksDesigner.curatorPicks?.length) return;
                     if (picksTouchEnd !== null) {
                       const distance = picksTouchStart - picksTouchEnd;
@@ -2185,6 +2187,7 @@ const BrandsAteliers = () => {
                               loading="eager"
                               fetchPriority="high"
                               onLoad={() => setPicksImageLoaded(true)}
+                              onZoomChange={(z) => { imageZoomedRef.current = z; }}
                             />
                             {/* Preload adjacent images */}
                             {picksDesigner.curatorPicks.length > 1 && [
