@@ -7,7 +7,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import bedroomImage from "@/assets/master-suite.jpg";
-import diningImage from "@/assets/dining-room.jpg";
+const diningImage = cloudinaryUrl("dining-room_ey0bu5", { width: 1600, quality: "auto:good", crop: "fill" });
 import livingRoomImage from "@/assets/living-room-hero.jpg";
 import bedroomSecondImage from "@/assets/bedroom-second.jpg";
 
@@ -23,9 +23,9 @@ import intimateLoungeImage from "@/assets/intimate-lounge.jpg";
 import smallRoomPersonalityImage from "@/assets/small-room-personality.jpg";
 import smallRoomVaseImage from "@/assets/small-room-vase.jpg";
 import smallRoomBedroomImage from "@/assets/small-room-bedroom.jpg";
-import detailsSectionImage from "@/assets/details-section.jpg";
+const detailsSectionImage = cloudinaryUrl("details-section_u6rwbu", { width: 1600, quality: "auto:good", crop: "fill" });
 // detailsConsoleImage now served via Cloudinary (defined above)
-import detailsLampImage from "@/assets/details-lamp.jpg";
+const detailsLampImage = cloudinaryUrl("details-lamp_clzcrk", { width: 1600, quality: "auto:good", crop: "fill" });
 import detailsConsole4Image from "@/assets/gallery/details-console-4.jpg";
 import smallRoomChairImage from "@/assets/small-room-chair.jpeg";
 import homeOfficeDeskImage from "@/assets/home-office-desk.jpg";
