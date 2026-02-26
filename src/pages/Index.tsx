@@ -54,14 +54,25 @@ const Index = () => {
         sectionEl.scrollIntoView({ behavior: "instant", block: "start" });
       }
 
-      // Short delay for lazy component to hydrate
-      setTimeout(() => {
+      // Retry dispatching until the lazy component has mounted and can handle it
+      let attempts = 0;
+      const maxAttempts = 20; // up to ~4s
+      const tryDispatch = () => {
+        attempts++;
+        const targetEl = document.getElementById(`designer-${link.id}`) ||
+                         document.getElementById(`collectible-${link.id}`) ||
+                         document.getElementById(`atelier-${link.id}`);
         window.dispatchEvent(
           new CustomEvent("deeplink-open-profile", {
             detail: { section: link.section, id: link.id },
           })
         );
-      }, 500);
+        // If element not yet in DOM and we haven't exhausted retries, try again
+        if (!targetEl && attempts < maxAttempts) {
+          setTimeout(tryDispatch, 200);
+        }
+      };
+      setTimeout(tryDispatch, 500);
     });
 
     return () => cancelAnimationFrame(raf);
