@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cloudinaryUrl } from "@/lib/cloudinary";
-const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 800, quality: "auto", crop: "fill" });
+const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 const leftNavItems = [{
   label: "Gallery",
