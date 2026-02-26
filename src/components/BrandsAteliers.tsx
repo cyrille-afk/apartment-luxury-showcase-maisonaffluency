@@ -113,7 +113,7 @@ const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_
 const stephaneCgOrsay = cloudinaryUrl("PHOTO-2023-09-14-13-51-05_1_iyi99i", { width: 1600, quality: "auto:good", crop: "fill" });
 const stephaneCgLouvre = cloudinaryUrl("PHOTO-2023-09-14-13-51-02_egaxpk", { width: 1600, quality: "auto:good", crop: "fill" });
 const stephaneCgWingedVictory = cloudinaryUrl("PHOTO-2023-09-14-13-51-00_cjed3b", { width: 1600, quality: "auto:good", crop: "fill" });
-import stephaneCgMiro from "@/assets/curators-picks/stephane-cg-homage-to-miro.jpg";
+const stephaneCgMiro = cloudinaryUrl("PHOTO-2023-09-14-13-51-14_qvzgzq", { width: 1600, quality: "auto:good", crop: "fill" });
 import stephaneCgEyeTiger from "@/assets/curators-picks/stephane-cg-eye-of-tiger.jpg";
 import stephaneCgSkyFreeze from "@/assets/curators-picks/stephane-cg-sky-freeze.jpg";
 import stephaneCgHallway from "@/assets/curators-picks/stephane-cg-hallway-to-heaven.jpg";
