@@ -102,7 +102,7 @@ const privatiselectionemBg = cloudinaryUrl("privatiselectionem-bg_qn3lgz", { wid
 const achilleSalvagniBg = cloudinaryUrl("achille-salvagni-atelier-bg", { width: 1600, quality: "auto:good", crop: "fill" });
 const valerieRostaingBg = cloudinaryUrl("valerie-rostaing-bg_y7qe57", { width: 1600, quality: "auto:good", crop: "fill" });
 import mmairoBg from "@/assets/ateliers/mmairo.png";
-import lobjetBg from "@/assets/ateliers/lobjet.png";
+const lobjetBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.14.39_AM_jodm2a", { width: 1600, quality: "auto:good", crop: "fill" });
 const osannaViscontiBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.25.23_AM_psgxsu", { width: 1600, quality: "auto:good", crop: "fill" });
 const laChanceParisBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.18.38_AM_nkx1t6", { width: 1600, quality: "auto:good", crop: "fill" });
 import tacchiniBg from "@/assets/ateliers/tacchini-bg.png";
