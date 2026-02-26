@@ -4,6 +4,7 @@ import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "rea
 import { Instagram, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
+import { cloudinaryUrl } from "@/lib/cloudinary";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
@@ -15,10 +16,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 // Designer images
-import atelierDemichelisImg from "@/assets/designers/atelier-demichelis.jpg";
-import kikoLopezImg from "@/assets/designers/kiko-lopez.jpg";
+const atelierDemichelisImg = cloudinaryUrl("Screen_Shot_2025-12-11_at_11.44.20_PM_bj90pt", { width: 800, quality: "auto", crop: "fill" });
+const kikoLopezImg = cloudinaryUrl("Screen_Shot_2025-12-12_at_1.08.35_AM_uzbbxd", { width: 800, quality: "auto", crop: "fill" });
 import nathalieZieglerImg from "@/assets/designers/nathalie-ziegler.jpg";
-import maartenVrolijkImg from "@/assets/designers/maarten-vrolijk.png";
+const maartenVrolijkImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_7.32.25_AM_wujvd4", { width: 800, quality: "auto", crop: "fill" });
 import matthieuGicquelImg from "@/assets/designers/matthieu-gicquel.jpg";
 
 // Curators' Picks images
@@ -32,14 +33,14 @@ import kikoLopezMirror from "@/assets/curators-picks/kiko-lopez-mirror.jpg";
 import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler-snake-vessel.jpg";
 import rowinAtelierImg from "@/assets/designers/rowin-atelier.jpg";
 import rowinNoneIiLamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
-import marcantonioBrandoliniImg from "@/assets/designers/marcantonio-brandolini-dadda.jpg";
+const marcantonioBrandoliniImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_11.02.28_AM_icg7b9", { width: 800, quality: "auto", crop: "fill" });
 import marcantonioCotissiVessel from "@/assets/curators-picks/marcantonio-cotissi-vessel.jpg";
 import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
 import pierreBonnefilleImg from "@/assets/designers/pierre-bonnefille-collectibles.jpg";
 import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
 import pierreBonnefilleBronzePainting208 from "@/assets/curators-picks/pierre-bonnefille-bronze-painting-208.png";
-import herveVanDerStraetenImg from "@/assets/designers/herve-van-der-straeten.png";
+const herveVanDerStraetenImg = cloudinaryUrl("Screen_Shot_2025-12-12_at_12.15.28_AM_nraulk", { width: 800, quality: "auto", crop: "fill" });
 import herveMicmac from "@/assets/curators-picks/herve-vds-micmac.jpg";
 import herveArthurLamp from "@/assets/curators-picks/herve-vds-arthur-lamp.png";
 import herveBubblingLamp from "@/assets/curators-picks/herve-vds-bubbling-lamp.png";
@@ -48,7 +49,7 @@ import herveTourbillonPendant from "@/assets/curators-picks/herve-vds-tourbillon
 import herveFacettedPendant from "@/assets/curators-picks/herve-vds-facetted-pendant.png";
 import herveTumulteMirror from "@/assets/curators-picks/herve-vds-tumulte-mirror.png";
 import herveEmpileeConsole from "@/assets/curators-picks/herve-vds-empilee-console.png";
-import emmanuelBabledImg from "@/assets/designers/emmanuel-babled.png";
+const emmanuelBabledImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_7.32.25_AM_wujvd4", { width: 800, quality: "auto", crop: "fill" });
 import emmanuelBabledPick1 from "@/assets/curators-picks/emmanuel-babled-1.jpg";
 import emmanuelBabledPick2 from "@/assets/curators-picks/emmanuel-babled-2.jpg";
 import emmanuelBabledPick3 from "@/assets/curators-picks/emmanuel-babled-3.jpg";
