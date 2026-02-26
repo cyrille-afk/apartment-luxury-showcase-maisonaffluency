@@ -2691,10 +2691,10 @@ const FeaturedDesigners = () => {
                       setCuratorPickIndex(0);
                       setIsZoomed(false);
                     }}
-                    className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                    className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                     aria-label="Close lightbox"
                   >
-                    <X className="h-6 w-6 text-white" />
+                    <X className="h-4 w-4 text-white" />
                   </button>
 
                   {/* Image container */}
