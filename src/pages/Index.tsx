@@ -61,7 +61,7 @@ const Index = () => {
         attempts++;
         const targetEl = document.getElementById(`designer-${link.id}`) ||
                          document.getElementById(`collectible-${link.id}`) ||
-                         document.getElementById(`atelier-${link.id}`);
+                         document.getElementById(`brand-${link.id}`);
         window.dispatchEvent(
           new CustomEvent("deeplink-open-profile", {
             detail: { section: link.section, id: link.id },
