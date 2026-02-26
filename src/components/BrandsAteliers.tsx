@@ -1752,18 +1752,22 @@ const BrandsAteliers = () => {
     setSelectedSubcategoryRaw(sub);
     broadcastFilter(selectedCategory, sub);
   }, [selectedCategory, broadcastFilter]);
-  // Deep-link handler: scroll to brand card from URL hash
+  // Deep-link handler: scroll to brand card and click to expand
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail.section !== "atelier") return;
-      // Use requestAnimationFrame for fastest possible response
       requestAnimationFrame(() => {
         const card = document.getElementById(`brand-${detail.id}`);
         if (card) {
-          card.scrollIntoView({ behavior: "smooth", block: "center" });
-          card.classList.add('ring-2', 'ring-primary');
-          setTimeout(() => card.classList.remove('ring-2', 'ring-primary'), 3000);
+          // Click to expand the card (triggers the AlphaStrip onClick)
+          card.click();
+          // Scroll into view after a brief delay to let expansion render
+          setTimeout(() => {
+            card.scrollIntoView({ behavior: "smooth", block: "center" });
+            card.classList.add('ring-2', 'ring-primary');
+            setTimeout(() => card.classList.remove('ring-2', 'ring-primary'), 3000);
+          }, 100);
         }
       });
     };
