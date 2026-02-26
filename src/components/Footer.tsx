@@ -1,6 +1,7 @@
 import { Instagram } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
-import affluencyLogo from "@/assets/affluency-footer-logo.jpeg";
+import { cloudinaryUrl } from "@/lib/cloudinary";
+const affluencyLogo = cloudinaryUrl("affluency-footer-logo_gvpt4u", { width: 800, quality: "auto", crop: "fill" });
 import {
   Tooltip,
   TooltipContent,
