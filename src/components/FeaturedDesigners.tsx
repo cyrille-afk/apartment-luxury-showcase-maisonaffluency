@@ -17,17 +17,17 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 
 // Designer profile images — served via Cloudinary CDN
 const dImg = (name: string) =>
-  cloudinaryUrl(`maison affluency/designers/${name}`, { width: 800, quality: "auto", crop: "fill" });
+  cloudinaryUrl(name, { width: 800, quality: "auto", crop: "fill" });
 
 const thierryLemaireImg = dImg("thierry-lemaire");
 const herveVanDerStraetenImg = dImg("herve-van-der-straeten");
 const brunoDeMaistreImg = dImg("bruno-de-maistre");
 const hamreiImg = dImg("hamrei");
 const atelierFevrierImg = dImg("atelier-fevrier");
-const apparatusStudioImg = dImg("apparatus-studio");
+const apparatusStudioImg = dImg("gabriel-hendifar-apparatus-studio");
 const oliviaCognetImg = dImg("olivia-cognet");
 const jeremyMaxwellWintrebertImg = dImg("jeremy-maxwell-wintrebert");
-const alexanderLamontImg = dImg("alexander-lamont");
+const alexanderLamontImg = dImg("alexander-lamont_t5j1nw");
 const leoSentouImg = dImg("leo-sentou");
 const jeanMichelFrankImg = dImg("jean-michel-frank-new");
 const emanuelleLevetStenneImg = dImg("emanuelle-levet-stenne");
@@ -57,7 +57,7 @@ const marcantonioImg = dImg("marcantonio-brandolini-dadda");
 const matthieuGicquelImg = dImg("matthieu-gicquel");
 const rowinAtelierImg = dImg("rowin-atelier");
 const forestGiaconiaImg = dImg("forest-giaconia");
-const adamCourtsOkhaImg = dImg("adam-courts-okha");
+const adamCourtsOkhaImg = dImg("adam-courts");
 
 // Curator picks — still local imports (to be migrated next)
 import noeDuchaufourMadonnaTables from "@/assets/curators-picks/noe-duchaufour-madonna-tables.png";
