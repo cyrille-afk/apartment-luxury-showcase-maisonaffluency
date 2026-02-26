@@ -194,6 +194,14 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
     name: "Marta Sala Éditions",
     curatorPicks: [
       {
+        image: martaSalaLaviana,
+        title: "Laviana Hexagonal",
+        subtitle: "P3 Armchair",
+        tags: ["Furniture", "Armchair"],
+        materials: "Frame: solid and multilayer wood, elastic belts, upholstery in different densities polyurethane foam\nSlide feet or lacquered solid wood base",
+        dimensions: "85 x 85 x H 110 cm\nSH 36 cm",
+      },
+      {
         image: martaSalaVelazquez,
         title: "Velazquez",
         subtitle: "T13 Side Table",
@@ -240,14 +248,6 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         tags: ["Furniture", "Chair"],
         materials: "Metal laser-cut, curved, grind, hand-assembled before final finishing Frame\nSeat: multilayer wood with foam, resinated layer\nCushion: expanded foam with removable cover",
         dimensions: "55 x 51 x H 68 cm\nSH 45 cm",
-      },
-      {
-        image: martaSalaLaviana,
-        title: "Laviana Hexagonal",
-        subtitle: "P3 Armchair",
-        tags: ["Furniture", "Armchair"],
-        materials: "Frame: solid and multilayer wood, elastic belts, upholstery in different densities polyurethane foam\nSlide feet or lacquered solid wood base",
-        dimensions: "85 x 85 x H 110 cm\nSH 36 cm",
       },
     ],
   },
