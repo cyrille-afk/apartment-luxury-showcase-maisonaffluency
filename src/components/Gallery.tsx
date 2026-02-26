@@ -6,9 +6,9 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cloudinaryUrl } from "@/lib/cloudinary";
-import bedroomImage from "@/assets/master-suite.jpg";
+const bedroomImage = cloudinaryUrl("master-suite_y6jaix", { width: 1600, quality: "auto:good", crop: "fill" });
 const diningImage = cloudinaryUrl("dining-room_ey0bu5", { width: 1600, quality: "auto:good", crop: "fill" });
-import livingRoomImage from "@/assets/living-room-hero.jpg";
+const livingRoomImage = cloudinaryUrl("living-room-hero_zxfcxl", { width: 1600, quality: "auto:good", crop: "fill" });
 import bedroomSecondImage from "@/assets/bedroom-second.jpg";
 
 const boudoirImage = cloudinaryUrl("boudoir_ll5spn", { width: 1600, quality: "auto:good", crop: "fill" });
@@ -17,20 +17,19 @@ const bedroomThirdImage = cloudinaryUrl("bedroom-third_ol56sx", { width: 1600, q
 const bespokeSofaImage = cloudinaryUrl("bespoke-sofa_gxidtx", { width: 1600, quality: "auto:good", crop: "fill" });
 const artMasterBronzeImage = cloudinaryUrl("art-master-bronze_hf6bad", { width: 1600, quality: "auto:good", crop: "fill" });
 const detailsConsoleImage = cloudinaryUrl("details-console_hk6uxt", { width: 1600, quality: "auto:good", crop: "fill" });
-import intimateDiningImage from "@/assets/intimate-dining.jpg";
-import intimateTableImage from "@/assets/intimate-table-detail.jpg";
-import intimateLoungeImage from "@/assets/intimate-lounge.jpg";
-import smallRoomPersonalityImage from "@/assets/small-room-personality.jpg";
-import smallRoomVaseImage from "@/assets/small-room-vase.jpg";
-import smallRoomBedroomImage from "@/assets/small-room-bedroom.jpg";
+const intimateDiningImage = cloudinaryUrl("intimate-dining_ux4pee", { width: 1600, quality: "auto:good", crop: "fill" });
+const intimateTableImage = cloudinaryUrl("intimate-table-detail_aqxvvm", { width: 1600, quality: "auto:good", crop: "fill" });
+const intimateLoungeImage = cloudinaryUrl("intimate-lounge_tf4sm1", { width: 1600, quality: "auto:good", crop: "fill" });
+const smallRoomPersonalityImage = cloudinaryUrl("small-room-personality_wvxz6y", { width: 1600, quality: "auto:good", crop: "fill" });
+const smallRoomVaseImage = cloudinaryUrl("small-room-vase_s3nz5o", { width: 1600, quality: "auto:good", crop: "fill" });
+const smallRoomBedroomImage = cloudinaryUrl("small-room-bedroom_mp8mdd", { width: 1600, quality: "auto:good", crop: "fill" });
 const detailsSectionImage = cloudinaryUrl("details-section_u6rwbu", { width: 1600, quality: "auto:good", crop: "fill" });
-// detailsConsoleImage now served via Cloudinary (defined above)
 const detailsLampImage = cloudinaryUrl("details-lamp_clzcrk", { width: 1600, quality: "auto:good", crop: "fill" });
 import detailsConsole4Image from "@/assets/gallery/details-console-4.jpg";
-import smallRoomChairImage from "@/assets/small-room-chair.jpeg";
-import homeOfficeDeskImage from "@/assets/home-office-desk.jpg";
-import homeOfficeDesk2Image from "@/assets/home-office-desk-2.jpg";
-import homeOffice3Image from "@/assets/home-office-3.jpg";
+const smallRoomChairImage = cloudinaryUrl("small-room-chair_aobzyb", { width: 1600, quality: "auto:good", crop: "fill" });
+const homeOfficeDeskImage = cloudinaryUrl("home-office-desk_g0ywv2", { width: 1600, quality: "auto:good", crop: "fill" });
+const homeOfficeDesk2Image = cloudinaryUrl("home-office-desk-2_gb1nlb", { width: 1600, quality: "auto:good", crop: "fill" });
+const homeOffice3Image = cloudinaryUrl("home-office-3_t39msw", { width: 1600, quality: "auto:good", crop: "fill" });
 import officeBooksCornerImage from "@/assets/gallery/office-books-corner.jpg";
 const galleryCategories = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"] as const;
 
