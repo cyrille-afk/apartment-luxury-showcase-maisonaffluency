@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { Instagram, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal } from "lucide-react";
+import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -1036,7 +1037,7 @@ const Collectibles = () => {
                     </div>
                   )}
                   <div className="relative inline-block">
-                    <img 
+                    <PinchZoomImage 
                       key={curatorPickIndex}
                       src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                       alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 

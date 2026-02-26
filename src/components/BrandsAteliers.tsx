@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Star, Maximize2, Minimize2, Share2 } from "lucide-react";
+import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
@@ -2174,7 +2175,7 @@ const BrandsAteliers = () => {
                                 </div>
                               </div>
                             )}
-                            <img
+                            <PinchZoomImage
                               key={picksIndex}
                               src={picksDesigner.curatorPicks[picksIndex]?.image}
                               alt={picksDesigner.curatorPicks[picksIndex]?.title}
