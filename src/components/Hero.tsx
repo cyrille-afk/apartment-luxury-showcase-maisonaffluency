@@ -1,7 +1,8 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Instagram } from "lucide-react";
-import heroImage from "@/assets/living-room-hero.jpg";
+import { cloudinaryUrl } from "@/lib/cloudinary";
+const heroImage = cloudinaryUrl("living-room-hero_zxfcxl", { width: 1600, quality: "auto:good", crop: "fill" });
 
 const Hero = () => {
   const ref = useRef<HTMLElement>(null);
