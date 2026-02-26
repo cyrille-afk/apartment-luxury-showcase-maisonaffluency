@@ -114,7 +114,7 @@ const stephaneCgOrsay = cloudinaryUrl("PHOTO-2023-09-14-13-51-05_1_iyi99i", { wi
 const stephaneCgLouvre = cloudinaryUrl("PHOTO-2023-09-14-13-51-02_egaxpk", { width: 1600, quality: "auto:good", crop: "fill" });
 const stephaneCgWingedVictory = cloudinaryUrl("PHOTO-2023-09-14-13-51-00_cjed3b", { width: 1600, quality: "auto:good", crop: "fill" });
 const stephaneCgMiro = cloudinaryUrl("PHOTO-2023-09-14-13-51-14_qvzgzq", { width: 1600, quality: "auto:good", crop: "fill" });
-import stephaneCgEyeTiger from "@/assets/curators-picks/stephane-cg-eye-of-tiger.jpg";
+const stephaneCgEyeTiger = cloudinaryUrl("Screen_Shot_2026-02-26_at_4.25.47_PM_bgjowh", { width: 1600, quality: "auto:good", crop: "fill" });
 const stephaneCgSkyFreeze = cloudinaryUrl("Screen_Shot_2026-02-24_at_9.41.12_PM_lqqibv", { width: 1600, quality: "auto:good", crop: "fill" });
 const stephaneCgHallway = cloudinaryUrl("Screen_Shot_2026-02-24_at_9.42.54_PM_v5mquk", { width: 1600, quality: "auto:good", crop: "fill" });
 
