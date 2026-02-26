@@ -58,10 +58,12 @@ const PinchZoomImage = ({
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       e.preventDefault();
+      e.stopPropagation();
       initialDistance.current = getDistance(e.touches);
       initialScale.current = scale;
     } else if (e.touches.length === 1 && scale > 1) {
-      // Start panning when zoomed
+      // Start panning when zoomed — block parent swipe
+      e.stopPropagation();
       isPanning.current = true;
       panStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       translateStart.current = { ...translate };
@@ -70,6 +72,7 @@ const PinchZoomImage = ({
       const now = Date.now();
       if (now - lastTap.current < 300) {
         e.preventDefault();
+        e.stopPropagation();
         if (scale > 1) {
           resetZoom();
         } else {
@@ -84,6 +87,7 @@ const PinchZoomImage = ({
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       e.preventDefault();
+      e.stopPropagation();
       const dist = getDistance(e.touches);
       const newScale = Math.min(Math.max(initialScale.current * (dist / initialDistance.current), 1), 5);
       setScale(newScale);
@@ -93,6 +97,7 @@ const PinchZoomImage = ({
       }
     } else if (e.touches.length === 1 && isPanning.current && scale > 1) {
       e.preventDefault();
+      e.stopPropagation();
       const dx = e.touches[0].clientX - panStart.current.x;
       const dy = e.touches[0].clientY - panStart.current.y;
       setTranslate({
