@@ -57,7 +57,7 @@ import emmanuelBabledPick4 from "@/assets/curators-picks/emmanuel-babled-4.jpg";
 import emmanuelBabledPick5 from "@/assets/curators-picks/emmanuel-babled-5.jpg";
 import emmanuelBabledPick6 from "@/assets/curators-picks/emmanuel-babled-6.jpg";
 import emmanuelBabledPick7 from "@/assets/curators-picks/emmanuel-babled-7.jpg";
-import ericSchmittImg from "@/assets/designers/eric-schmitt.jpg";
+const ericSchmittImg = cloudinaryUrl("Screen_Shot_2026-02-26_at_4.16.30_PM_ijgqlu", { width: 800, quality: "auto", crop: "fill" });
 import ericSchmittDrageeConsole from "@/assets/curators-picks/eric-schmitt-dragee-console.jpg";
 import ericSchmittSaturneTable from "@/assets/curators-picks/eric-schmitt-saturne-table.jpg";
 import ericSchmittFrameTable from "@/assets/curators-picks/eric-schmitt-frame-table.jpg";
