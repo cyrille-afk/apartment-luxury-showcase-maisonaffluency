@@ -105,7 +105,7 @@ import mmairoBg from "@/assets/ateliers/mmairo.png";
 const lobjetBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.14.39_AM_jodm2a", { width: 1600, quality: "auto:good", crop: "fill" });
 const osannaViscontiBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.25.23_AM_psgxsu", { width: 1600, quality: "auto:good", crop: "fill" });
 const laChanceParisBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.18.38_AM_nkx1t6", { width: 1600, quality: "auto:good", crop: "fill" });
-import tacchiniBg from "@/assets/ateliers/tacchini-bg.png";
+const tacchiniBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_9.06.23_PM_ixc2yu", { width: 1600, quality: "auto:good", crop: "fill" });
 const refractoryStudioBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_9.09.20_PM_jm34g1", { width: 1600, quality: "auto:good", crop: "fill" });
 const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_xqirha", { width: 1600, quality: "auto:good", crop: "fill" });
 
