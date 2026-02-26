@@ -220,7 +220,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         subtitle: "D3 Sofa",
         tags: ["Furniture", "Sofa"],
         materials: "Solid and multilayer wood, elastic belts Frame\nUpholstery in different densities polyurethane foam\nLacquered back solid wood base\nCompartmentalized feathers with removable cover cushions",
-        dimensions: "Bespoke Dimensions upon request",
+        dimensions: "210 / 270 / 330 / 390 x 69 — H 77 cm\nSH 41 cm",
       },
     ],
   },
