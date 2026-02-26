@@ -35,7 +35,7 @@ const rowinAtelierImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_10.54.13_AM_r7n
 import rowinNoneIiLamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 const marcantonioBrandoliniImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_11.02.28_AM_icg7b9", { width: 800, quality: "auto", crop: "fill" });
 import marcantonioCotissiVessel from "@/assets/curators-picks/marcantonio-cotissi-vessel.jpg";
-import thierryLemaireImg from "@/assets/designers/thierry-lemaire.jpg";
+const thierryLemaireImg = cloudinaryUrl("thierry-lemaire_heyrtj", { width: 800, quality: "auto", crop: "fill" });
 import thierryLemaireOrsay from "@/assets/curators-picks/thierry-lemaire-orsay.jpg";
 const pierreBonnefilleImg = cloudinaryUrl("pierre-bonnefille", { width: 800, quality: "auto", crop: "fill" });
 import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
