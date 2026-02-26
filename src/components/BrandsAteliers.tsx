@@ -104,7 +104,7 @@ const valerieRostaingBg = cloudinaryUrl("valerie-rostaing-bg_y7qe57", { width: 1
 import mmairoBg from "@/assets/ateliers/mmairo.png";
 import lobjetBg from "@/assets/ateliers/lobjet.png";
 import osannaViscontiBg from "@/assets/ateliers/osanna-visconti.png";
-import laChanceParisBg from "@/assets/ateliers/la-chance-paris.png";
+const laChanceParisBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.18.38_AM_nkx1t6", { width: 1600, quality: "auto:good", crop: "fill" });
 import tacchiniBg from "@/assets/ateliers/tacchini-bg.png";
 import refractoryStudioBg from "@/assets/ateliers/refractory-studio-bg.png";
 const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_xqirha", { width: 1600, quality: "auto:good", crop: "fill" });
