@@ -69,11 +69,11 @@ import collectionParticuliereBg from "@/assets/designers/collection-particuliere
 const biekeCasteleynBg = cloudinaryUrl("bieke-casteleyn-bg_wuhwso", { width: 1600, quality: "auto:good", crop: "fill" });
 import galerieMcdeBg from "@/assets/designers/galerie-mcde-bg.png";
 const gillesBoissierBg = cloudinaryUrl("gilles-boissier-bg", { width: 1600, quality: "auto:good", crop: "fill" });
-import jacobHashimotoBg from "@/assets/designers/jacob-hashimoto-bg.png";
+const jacobHashimotoBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_9.21.31_AM_ifnvmk", { width: 1600, quality: "auto:good", crop: "fill" });
 import paulCocksedgeBg from "@/assets/designers/paul-cocksedge-bg.jpg";
-import leBerreVevaudBg from "@/assets/designers/le-berre-vevaud-bg.png";
+const leBerreVevaudBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_9.40.24_AM_nfyg7z", { width: 1600, quality: "auto:good", crop: "fill" });
 const binaBaitelBg = cloudinaryUrl("bina-baitel-bg_u0rbnn", { width: 1600, quality: "auto:good", crop: "fill" });
-import charlesParisBg from "@/assets/designers/charles-paris-bg.png";
+const charlesParisBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_10.02.17_AM_tnml24", { width: 1600, quality: "auto:good", crop: "fill" });
 import victoriaMagniantBg from "@/assets/designers/victoria-magniant-bg.png";
 import pierreYovanovitchBg from "@/assets/designers/pierre-yovanovitch-bg.png";
 import brunoMoinardBg from "@/assets/designers/bruno-moinard-bg.png";
