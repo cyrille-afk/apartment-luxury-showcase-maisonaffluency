@@ -96,7 +96,7 @@ const bryanOSullivanBg = cloudinaryUrl("bryan-osullivan-bg_jpk9d9", { width: 160
 const christopherBootsBg = cloudinaryUrl("christopher-boots-bg_h9vynr", { width: 1600, quality: "auto:good", crop: "fill" });
 const lostProfileStudioBg = cloudinaryUrl("lost-profile-studio-bg_rmah5n", { width: 1600, quality: "auto:good", crop: "fill" });
 const okurayamaStudioBg = cloudinaryUrl("okurayama-studio-bg_b1l8zy", { width: 1600, quality: "auto:good", crop: "fill" });
-import overgaardDyrmanBg from "@/assets/designers/overgaard-dyrman-bg.jpg";
+const overgaardDyrmanBg = cloudinaryUrl("Screen_Shot_2026-02-24_at_10.27.57_PM_het6co", { width: 1600, quality: "auto:good", crop: "fill" });
 const stephaneParmentierBg = cloudinaryUrl("stephane-parmentier-bg_al1rkj", { width: 1600, quality: "auto:good", crop: "fill" });
 const privatiselectionemBg = cloudinaryUrl("privatiselectionem-bg_qn3lgz", { width: 1600, quality: "auto:good", crop: "fill" });
 const achilleSalvagniBg = cloudinaryUrl("achille-salvagni-atelier-bg", { width: 1600, quality: "auto:good", crop: "fill" });
