@@ -139,7 +139,7 @@ import leoSentouPickLD from "@/assets/curators-picks/leo-sentou-ld-armchair.png"
 
 // Additional curator picks images
 import ericSchmittChairie from "@/assets/curators-picks/eric-schmitt-chairie.jpg";
-import pierreBonnefilleBronzePainting from "@/assets/curators-picks/pierre-bonnefille-bronze-painting.jpg";
+const pierreBonnefilleBronzePainting = cloudinaryUrl("art-master-bronze_hf6bad", { width: 1600, quality: "auto:good", crop: "fill" });
 import pierreBonnefilleBronzePainting208 from "@/assets/curators-picks/pierre-bonnefille-bronze-painting-208.png";
 const pierreBonnefilleMetamorphosisLamps = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.04.36_PM_wwoocz", { width: 1600, quality: "auto:good", crop: "fill" });
 const pierreBonnefilleMetamorphosisPolygone = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.14.02_PM_pmlpmu", { width: 1600, quality: "auto:good", crop: "fill" });
