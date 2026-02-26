@@ -9,7 +9,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 const bedroomImage = cloudinaryUrl("master-suite_y6jaix", { width: 1600, quality: "auto:good", crop: "fill" });
 const diningImage = cloudinaryUrl("dining-room_ey0bu5", { width: 1600, quality: "auto:good", crop: "fill" });
 const livingRoomImage = cloudinaryUrl("living-room-hero_zxfcxl", { width: 1600, quality: "auto:good", crop: "fill" });
-import bedroomSecondImage from "@/assets/bedroom-second.jpg";
+const bedroomSecondImage = cloudinaryUrl("AffluencySG_058_2_1_tqa2hd", { width: 1600, quality: "auto:good", crop: "fill" });
 
 const boudoirImage = cloudinaryUrl("boudoir_ll5spn", { width: 1600, quality: "auto:good", crop: "fill" });
 const bedroomAltImage = cloudinaryUrl("bedroom-alt_yk0j0d", { width: 1600, quality: "auto:good", crop: "fill" });
