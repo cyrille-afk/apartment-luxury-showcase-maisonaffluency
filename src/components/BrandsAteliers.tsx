@@ -2128,13 +2128,7 @@ const BrandsAteliers = () => {
                     }
                   }}
                 >
-                  <button
-                    onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
-                    className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-2 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
-                    aria-label="Close lightbox"
-                  >
-                    <X className="h-6 w-6 text-white" />
-                  </button>
+                  {/* Close button moved inside image container below */}
 
                   <div className={`flex flex-col items-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${picksZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[90vh] pb-4'}`}>
                     <div className="relative">
@@ -2188,8 +2182,15 @@ const BrandsAteliers = () => {
                           </p>
                         )}
                         <button
+                          onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
+                          className="absolute bottom-2 left-2 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
+                          aria-label="Close lightbox"
+                        >
+                          <X className="h-5 w-5 text-white" />
+                        </button>
+                        <button
                           onClick={() => setPicksZoomed(!picksZoomed)}
-                          className="absolute bottom-2 left-2 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                          className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
                           aria-label={picksZoomed ? "Minimize image" : "Maximize image"}
                         >
                           {picksZoomed ? <Minimize2 className="w-3.5 h-3.5 text-white" /> : <Maximize2 className="w-3.5 h-3.5 text-white" />}
