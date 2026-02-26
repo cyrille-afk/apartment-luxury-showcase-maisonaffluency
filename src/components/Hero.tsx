@@ -94,11 +94,11 @@ const Hero = () => {
               onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
               className="flex flex-col items-center gap-2 cursor-pointer group"
             >
-              <span className="font-body text-xs uppercase tracking-widest text-cream/80 group-hover:text-cream transition-colors">
+              <span className="font-body text-xs uppercase tracking-widest text-white group-hover:text-white/80 transition-colors">
                 Scroll to Explore
               </span>
               <motion.div
-                className="h-12 w-[1px] bg-gradient-to-b from-cream/60 to-transparent"
+                className="h-12 w-[1px] bg-gradient-to-b from-white/60 to-transparent"
                 animate={{ y: [0, 6, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               />
