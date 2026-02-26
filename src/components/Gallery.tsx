@@ -25,7 +25,7 @@ const smallRoomVaseImage = cloudinaryUrl("small-room-vase_s3nz5o", { width: 1600
 const smallRoomBedroomImage = cloudinaryUrl("small-room-bedroom_mp8mdd", { width: 1600, quality: "auto:good", crop: "fill" });
 const detailsSectionImage = cloudinaryUrl("details-section_u6rwbu", { width: 1600, quality: "auto:good", crop: "fill" });
 const detailsLampImage = cloudinaryUrl("details-lamp_clzcrk", { width: 1600, quality: "auto:good", crop: "fill" });
-import detailsConsole4Image from "@/assets/gallery/details-console-4.jpg";
+const detailsConsole4Image = cloudinaryUrl("AffluencySG_204_1_qbbpqb", { width: 1600, quality: "auto:good", crop: "fill" });
 const smallRoomChairImage = cloudinaryUrl("small-room-chair_aobzyb", { width: 1600, quality: "auto:good", crop: "fill" });
 const homeOfficeDeskImage = cloudinaryUrl("home-office-desk_g0ywv2", { width: 1600, quality: "auto:good", crop: "fill" });
 const homeOfficeDesk2Image = cloudinaryUrl("home-office-desk-2_gb1nlb", { width: 1600, quality: "auto:good", crop: "fill" });
