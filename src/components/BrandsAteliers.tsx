@@ -20,7 +20,7 @@ const atelierFevrierBg = cloudinaryUrl("atelier-fevrier-bg_tmsgw9", { width: 160
 const atelierDemichelisBg = cloudinaryUrl("atelier-demichelis-bg_w8b8f7", { width: 1600, quality: "auto:good", crop: "fill" });
 import emmanuelBabledBg from "@/assets/designers/emmanuel-babled-bg.jpg";
 import brunoDeMaistreBg from "@/assets/designers/bruno-de-maistre-bg.jpg";
-import celsoDeLemosBg from "@/assets/designers/celso-de-lemos-bg.jpg";
+const celsoDeLemosBg = cloudinaryUrl("celso-de-lemos-bg_mokwng", { width: 1600, quality: "auto:good", crop: "fill" });
 import delaEspadaBg from "@/assets/designers/de-la-espada-bg.jpg";
 import damienLangloisMeurinneBg from "@/assets/designers/damien-langlois-meurinne-bg.jpg";
 const berntPetersenBg = cloudinaryUrl("bernt-petersen-bg_t4rnoj", { width: 1600, quality: "auto:good", crop: "fill" });
