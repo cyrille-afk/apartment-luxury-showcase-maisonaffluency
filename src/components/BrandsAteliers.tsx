@@ -28,7 +28,7 @@ import erstensBg from "@/assets/designers/kerstens-bg.jpg";
 import ccTapisBg from "@/assets/designers/cc-tapis-bg.jpg";
 import cristallerieSaintLouisBg from "@/assets/designers/cristallerie-saint-louis-bg.jpg";
 import delcourtBg from "@/assets/designers/delcourt-bg.jpg";
-import ecartParisBg from "@/assets/designers/ecart-paris-bg.jpg";
+const ecartParisBg = cloudinaryUrl("ecart-paris-bg_av3tqr", { width: 1600, quality: "auto:good", crop: "fill" });
 import entrelacsBg from "@/assets/designers/entrelacs-bg.jpg";
 const garnierLinkerBg = cloudinaryUrl("garnier-linker-bg", { width: 1600, quality: "auto:good", crop: "fill" });
 const haymannEditionsBg = cloudinaryUrl("haymann-editions-bg", { width: 1600, quality: "auto:good", crop: "fill" });
