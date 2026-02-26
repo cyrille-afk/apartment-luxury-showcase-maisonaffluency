@@ -1,8 +1,9 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Instagram } from "lucide-react";
-import { cloudinaryUrl } from "@/lib/cloudinary";
+import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 const heroImage = cloudinaryUrl("living-room-hero_zxfcxl", { width: 1600, quality: "auto:good", crop: "fill" });
+const heroSrcSet = cloudinarySrcSet("living-room-hero_zxfcxl", [640, 828, 1200, 1600, 2400], { quality: "auto:good", crop: "fill" });
 
 const Hero = () => {
   const ref = useRef<HTMLElement>(null);
@@ -26,12 +27,15 @@ const Hero = () => {
   return <section ref={ref} className="relative h-screen w-full overflow-hidden">
       <motion.div className="absolute inset-0" style={isMobile ? {} : { y }}>
         <motion.img 
-          src={heroImage} 
+          src={heroImage}
+          srcSet={heroSrcSet}
+          sizes="100vw"
           alt="Luxury living room with Asian-inspired murals and designer furniture" 
           className="h-full w-full object-cover object-[50%_40%] md:h-[130%] md:object-[50%_30%] will-change-transform"
           style={{ opacity, imageRendering: "auto", WebkitBackfaceVisibility: "hidden" }}
           loading="eager"
           fetchPriority="high"
+          decoding="sync"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </motion.div>
