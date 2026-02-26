@@ -182,6 +182,7 @@ export const collectibleDesigners: Array<{
     ],
   },
   {
+    id: "kiko-lopez",
     name: "Kiko Lopez",
     specialty: "Artisan Mirrors & Reflective Surfaces",
     image: kikoLopezImg,
@@ -842,7 +843,9 @@ const Collectibles = () => {
                             <span className="text-primary/40 text-xs tracking-[0.3em] mt-1">• • •</span>
                             <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
                               <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
-                              <button
+                              <span
+                                role="link"
+                                tabIndex={0}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   const gallerySection = document.getElementById('gallery');
@@ -855,13 +858,28 @@ const Collectibles = () => {
                                     }, 500);
                                   }
                                 }}
-                                className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const gallerySection = document.getElementById('gallery');
+                                    if (gallerySection) {
+                                      gallerySection.scrollIntoView({ behavior: 'smooth' });
+                                      setTimeout(() => {
+                                        window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                          detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` } 
+                                        }));
+                                      }, 500);
+                                    }
+                                  }
+                                }}
+                                className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 inline-flex items-center gap-1 group/link touch-manipulation cursor-pointer"
                               >
                                 <span className="underline underline-offset-2 decoration-primary/40 group-hover/link:decoration-primary">
                                   {designer.notableWorksLink.text}
                                 </span>
                                 <ExternalLink className="h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
-                              </button>
+                              </span>
                             </div>
                           </>
                         )}
