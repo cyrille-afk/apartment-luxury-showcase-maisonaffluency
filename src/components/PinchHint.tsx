@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const STORAGE_KEY = "pinch-hint-shown";
-
 const PinchHint = () => {
   const [visible, setVisible] = useState(false);
 
@@ -10,10 +8,8 @@ const PinchHint = () => {
     if (typeof window === "undefined") return;
     // Only show on touch devices
     if (!("ontouchstart" in window)) return;
-    if (localStorage.getItem(STORAGE_KEY)) return;
 
     setVisible(true);
-    localStorage.setItem(STORAGE_KEY, "1");
 
     const timer = setTimeout(() => setVisible(false), 2400);
     return () => clearTimeout(timer);

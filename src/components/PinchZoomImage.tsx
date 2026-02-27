@@ -152,7 +152,7 @@ const PinchZoomImage = ({
     <div
       ref={containerRef}
       className="touch-none"
-      style={{ overflow: isZoomed ? "hidden" : undefined }}
+      style={{ touchAction: "none", overflow: isZoomed ? "hidden" : undefined }}
     >
       <img
         src={src}
@@ -160,9 +160,12 @@ const PinchZoomImage = ({
         className={className}
         style={{
           ...style,
+          touchAction: "none",
           transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)`,
           transformOrigin: "center center",
           transition: isPanning.current ? "none" : "transform 0.2s ease-out",
+          userSelect: "none",
+          WebkitUserSelect: "none",
         }}
         onLoad={onLoad}
         draggable={draggable}
