@@ -620,8 +620,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: atelierPendhapaImg,
     biography:
       "Atelier Pendhapa is an Indonesian design atelier specializing in bespoke furniture that celebrates the rich tradition of Indonesian woodworking and craftsmanship. Their Deepah custom table exemplifies their philosophy of creating pieces that honor traditional techniques while embracing contemporary design sensibilities. Each piece is handcrafted by master artisans using sustainably sourced materials.",
-    notableWorks: "Deepah Custom Table, Bespoke Dining Collection",
-    notableWorksLink: { text: "Deepah Custom Table", galleryIndex: 4 },
+    notableWorks: "Astra Dining Table, Bespoke Dining Collection",
+    notableWorksLink: { text: "Astra Dining Table", galleryIndex: 5 },
     philosophy: "We create furniture that bridges the gap between ancient Indonesian craft traditions and contemporary global design.",
     curatorPicks: [
       { 
