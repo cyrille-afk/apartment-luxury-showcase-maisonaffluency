@@ -639,8 +639,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Dining Chair",
         category: "Seating",
         tags: ["Seating", "Chair"],
-        materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery",
-        dimensions: "L49 × W52 × H85 cm"
+        materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery\nL49 × W52 × H85 cm\nProduction lead time: 10-12 weeks",
+        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request."
       },
       { 
         image: pendhapaPick3, 
