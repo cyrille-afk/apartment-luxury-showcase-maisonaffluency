@@ -672,11 +672,11 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { 
         image: pendhapaPick6, 
         title: "Astra",
-        subtitle: "Dining Table",
+        subtitle: "Dining Table - pictured in natural oak with an oxide red lacquer edging and a Laguetta marble tabletop",
         category: "Tables",
         tags: ["Tables", "Dining Table"],
-        materials: "Custom blend",
-        dimensions: "Custom dimensions available"
+        materials: "L250 x W120 x H74 cm\nProduction lead time: 12-14 weeks",
+        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request."
       },
       { 
         image: pendhapaPick7, 
