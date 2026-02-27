@@ -95,13 +95,13 @@ import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
 import yvesMacheretPick4 from "@/assets/curators-picks/yves-macheret-4.jpg";
 import yvesMacheretPickHublo from "@/assets/curators-picks/yves-macheret-hublo.png";
 import yvesMacheretPickConsole1925 from "@/assets/curators-picks/yves-macheret-console-1925.jpg";
-import apparatusPick1 from "@/assets/curators-picks/apparatus-1.jpg";
-import apparatusPick2 from "@/assets/curators-picks/apparatus-2.jpg";
-import apparatusPick3 from "@/assets/curators-picks/apparatus-3.jpg";
-import apparatusPick4 from "@/assets/curators-picks/apparatus-4.jpg";
-import apparatusPick5 from "@/assets/curators-picks/apparatus-5.png";
-import apparatusPick6 from "@/assets/curators-picks/apparatus-6.png";
-import apparatusPick7 from "@/assets/curators-picks/apparatus-7.png";
+const apparatusPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772162190/Screen_Shot_2026-02-27_at_11.14.28_AM_skwebb.png";
+const apparatusPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772162191/Screen_Shot_2026-02-27_at_11.16.07_AM_qjfogh.png";
+const apparatusPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772162190/Screen_Shot_2026-02-27_at_11.14.45_AM_n1pxgg.png";
+const apparatusPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772162191/Screen_Shot_2026-02-27_at_11.15.22_AM_uxqz3z.png";
+const apparatusPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161859/Screen_Shot_2026-02-22_at_1.58.18_PM_cnfmnc.png";
+const apparatusPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161859/Screen_Shot_2026-02-22_at_2.16.45_PM_t3d8xk.png";
+const apparatusPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772106126/Screen_Shot_2026-02-22_at_2.36.04_PM_ivwy5t.png";
 import pendhapaPick1 from "@/assets/curators-picks/pendhapa-1.jpg";
 import pendhapaPick2 from "@/assets/curators-picks/pendhapa-2.jpg";
 import pendhapaPick4 from "@/assets/curators-picks/pendhapa-4.jpg";
@@ -433,7 +433,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "apparatus-studio",
-    name: "Apparatus Studio",
+    name: "Gabriel Hendifar - Apparatus Studio",
     founder: "Gabriel Hendifar",
     specialty: "Contemporary Lighting & Industrial Design",
     image: apparatusStudioImg,
@@ -506,7 +506,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { 
         image: apparatusPick7, 
         title: "Portal",
-        subtitle: "Dining Table",
+        subtitle: "Dining Lamp",
         category: "Furniture",
         tags: ["Furniture", "Table"],
         materials: "Nero Kinatra Marble",
