@@ -4,8 +4,7 @@ import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, X, Maximize2, Instagram, Copy } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { createPortal } from "react-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
@@ -339,6 +338,14 @@ const Gallery = () => {
     setLightboxOpen(true);
   };
 
+  // Lock body scroll when lightbox is open
+  useEffect(() => {
+    if (lightboxOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [lightboxOpen]);
+
   const closeLightbox = () => {
     setLightboxOpen(false);
     // Scroll back to the source item after closing
@@ -601,13 +608,10 @@ const Gallery = () => {
         </div>
       </section>
 
-      {/* Lightbox Dialog */}
-      <Dialog open={lightboxOpen} onOpenChange={(open) => !open && closeLightbox()}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 pt-14 md:pt-0 bg-black/95 border-none [&>button]:hidden overflow-hidden" onKeyDown={handleKeyDown} aria-describedby={undefined}>
-          <VisuallyHidden>
-            <DialogTitle>{currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}</DialogTitle>
-          </VisuallyHidden>
-          <div className="relative w-full h-full flex items-start md:items-center justify-center" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+      {/* Lightbox - custom portal (bypasses Radix Dialog react-remove-scroll touch blocking) */}
+      {lightboxOpen && createPortal(
+        <div className="fixed inset-0 z-50 bg-black/95" onKeyDown={handleKeyDown} tabIndex={-1} ref={(el) => el?.focus()} role="dialog" aria-modal="true" aria-label={currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}>
+          <div className="relative w-full h-full flex items-start md:items-center justify-center pt-14 md:pt-0" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
 
             {/* Pill indicator - top right */}
             <div className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none">
@@ -621,7 +625,7 @@ const Gallery = () => {
               <ChevronLeft className="h-8 w-8 text-white" />
             </button>
 
-            {/* Image container - OUTSIDE scroll container so touch events work */}
+            {/* Image container */}
             <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[calc(95vh-3.5rem)] md:max-h-[90vh]">
               <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
                 {currentSectionItems[currentItemIndex]?.title}
@@ -629,7 +633,7 @@ const Gallery = () => {
               <div className="relative inline-block shrink-0">
                 <PinchHint />
                 <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
-                {/* Close button - bottom left on mobile, bottom right on desktop */}
+                {/* Close button */}
                 <button onClick={closeLightbox} className="absolute bottom-2 left-1 md:left-auto md:right-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
                   <X className="h-4 w-4 text-white" />
                 </button>
@@ -645,7 +649,7 @@ const Gallery = () => {
                   />
                 ))}
               </div>
-              {/* Scrollable description only */}
+              {/* Description */}
               <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
                 <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
                   {currentSectionItems[currentItemIndex]?.description}
@@ -658,8 +662,9 @@ const Gallery = () => {
               <ChevronRight className="h-8 w-8 text-white" />
             </button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>,
+        document.body
+      )}
     </>;
 };
 export default Gallery;
