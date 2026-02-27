@@ -70,7 +70,19 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-STKGNMN9CS');
+
+      // Exclude internal traffic by IP
+      fetch('https://api.ipify.org?format=json')
+        .then(function(r){return r.json()})
+        .then(function(data){
+          var excluded = ['119.234.37.60'];
+          if (excluded.indexOf(data.ip) === -1) {
+            gtag('config', 'G-STKGNMN9CS');
+          }
+        })
+        .catch(function(){
+          gtag('config', 'G-STKGNMN9CS');
+        });
     </script>
 
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
