@@ -125,7 +125,7 @@ const PinchZoomImage = ({
   return (
     <div
       ref={containerRef}
-      className="touch-none"
+      className={isZoomed ? "touch-none" : "touch-manipulation"}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
