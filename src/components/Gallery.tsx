@@ -622,7 +622,7 @@ const Gallery = () => {
             </button>
 
             {/* Scrollable image + legend container */}
-            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 overflow-y-auto max-h-[calc(95vh-3.5rem)] md:max-h-[90vh] scrollbar-hide touch-pan-y">
+            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 overflow-y-auto max-h-[calc(95vh-3.5rem)] md:max-h-[90vh] scrollbar-hide">
               <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
                 {currentSectionItems[currentItemIndex]?.title}
               </h3>
