@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, X, Maximize2, Minimize2, Instagram, Copy } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
@@ -204,6 +205,25 @@ const Gallery = () => {
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
+
+  // Embla carousel for mobile lightbox
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, startIndex: currentItemIndex });
+
+  // Sync embla slide changes → currentItemIndex
+  useEffect(() => {
+    if (!emblaApi || !isMobile) return;
+    const onSelect = () => {
+      setCurrentItemIndex(emblaApi.selectedScrollSnap());
+    };
+    emblaApi.on("select", onSelect);
+    return () => { emblaApi.off("select", onSelect); };
+  }, [emblaApi, isMobile]);
+
+  // When lightbox opens or section changes, re-init embla to correct slide
+  useEffect(() => {
+    if (!emblaApi || !isMobile || !lightboxOpen) return;
+    emblaApi.scrollTo(currentItemIndex, true);
+  }, [emblaApi, isMobile, lightboxOpen, currentSectionIndex]);
 
   // Preload first section's gallery images only (visible on initial load)
   useEffect(() => {
@@ -655,88 +675,129 @@ const Gallery = () => {
           <VisuallyHidden>
             <DialogTitle>{currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}</DialogTitle>
           </VisuallyHidden>
-           <div
-            ref={swipeContainerRef}
-            className="relative w-full h-full flex items-center justify-center"
-            style={{ touchAction: isMobile ? 'pan-y' : undefined }}
-          >
-            {/* Pill indicator - hidden on mobile */}
-            {!isMobile && (
-              <div className={`absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none ${isExpanded ? 'hidden md:flex' : ''}`}>
-                <span className="text-white text-[10px] font-body font-medium leading-none">
-                  {currentItemIndex + 1}/{currentSectionItems.length}
-                </span>
-              </div>
-            )}
+           {isMobile ? (
+             /* ── Mobile: Embla Carousel lightbox ── */
+             <div className="relative w-full h-full flex flex-col">
+               {/* Close button */}
+               <button
+                 onClick={closeLightbox}
+                 className="absolute top-3 left-3 z-50 p-2 bg-black/60 backdrop-blur-sm rounded-full"
+                 aria-label="Close lightbox"
+               >
+                 <X className="h-5 w-5 text-white" />
+               </button>
 
-            {/* Previous button - desktop only */}
-            <button onClick={goToPrevious} className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Previous image">
-              <ChevronLeft className="h-8 w-8 text-white" />
-            </button>
+               {/* Title */}
+               <h3 className="text-xl font-serif text-white mt-14 mb-3 text-center px-4 shrink-0">
+                 {currentSectionItems[currentItemIndex]?.title}
+               </h3>
 
-            {/* Image container */}
-            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[85vh] overflow-y-auto scrollbar-hide">
-              <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
-                {currentSectionItems[currentItemIndex]?.title}
-              </h3>
-              <div className="relative inline-block shrink-0">
-                {isMobile ? (
-                  <img
-                    key={currentItemIndex}
-                    src={currentSectionItems[currentItemIndex]?.image}
-                    alt={currentSectionItems[currentItemIndex]?.title}
-                    className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[45vh]"
-                    loading="eager"
-                    decoding="sync"
-                    fetchPriority="high"
-                    draggable={false}
-                  />
-                ) : (
-                  <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full md:max-w-full max-h-[45vh] md:max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
-                )}
-                {/* Close button */}
-                <button
-                  onClick={closeLightbox}
-                  className={`absolute top-2 left-2 md:left-auto md:right-2 md:top-2 z-50 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors ${isExpanded ? 'md:hidden' : ''}`}
-                  aria-label="Close lightbox"
-                >
-                  <X className="h-5 w-5 md:h-4 md:w-4 text-white" />
-                </button>
-                {/* Maximize icon — hidden on mobile */}
-                {!isMobile && !isExpanded && (
-                  <button
-                    onClick={() => setIsExpanded(true)}
-                    className="absolute bottom-2 left-1 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
-                    aria-label="Maximize image"
-                  >
-                    <Maximize2 className="w-3.5 h-3.5 text-white" />
-                  </button>
-                )}
-              </div>
-              {/* Dot indicators */}
-              <div className="flex justify-center gap-1.5 mt-3 shrink-0">
-                {currentSectionItems.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentItemIndex(i)}
-                    className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
-                    aria-label={`Go to image ${i + 1}`}
-                  />
-                ))}
-              </div>
-              {/* Description */}
-              <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
-                <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
-                  {currentSectionItems[currentItemIndex]?.description}
-                </p>
-              </div>
-            </div>
+               {/* Embla carousel */}
+               <div className="flex-1 min-h-0 overflow-hidden" ref={emblaRef}>
+                 <div className="flex h-full">
+                   {currentSectionItems.map((item, i) => (
+                     <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center px-4">
+                       <img
+                         src={item.image}
+                         alt={item.title}
+                         className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[50vh]"
+                         loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
+                         decoding="async"
+                         draggable={false}
+                       />
+                     </div>
+                   ))}
+                 </div>
+               </div>
 
-            {/* Next button - desktop only */}
-            <button onClick={goToNext} className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Next image">
-              <ChevronRight className="h-8 w-8 text-white" />
-            </button>
-          </div>
+               {/* Dot indicators */}
+               <div className="flex justify-center gap-1.5 mt-3 shrink-0">
+                 {currentSectionItems.map((_, i) => (
+                   <button
+                     key={i}
+                     onClick={() => { setCurrentItemIndex(i); emblaApi?.scrollTo(i); }}
+                     className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
+                     aria-label={`Go to image ${i + 1}`}
+                   />
+                 ))}
+               </div>
+
+               {/* Description */}
+               <div className="mt-3 text-center shrink-0 pb-6 px-4 overflow-y-auto max-h-[20vh] scrollbar-hide">
+                 <p className="text-sm text-white/70 font-body max-w-2xl mx-auto text-justify">
+                   {currentSectionItems[currentItemIndex]?.description}
+                 </p>
+               </div>
+             </div>
+           ) : (
+             /* ── Desktop: existing layout ── */
+             <div
+               ref={swipeContainerRef}
+               className="relative w-full h-full flex items-center justify-center"
+             >
+               {/* Pill indicator */}
+               <div className={`absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none ${isExpanded ? 'hidden md:flex' : ''}`}>
+                 <span className="text-white text-[10px] font-body font-medium leading-none">
+                   {currentItemIndex + 1}/{currentSectionItems.length}
+                 </span>
+               </div>
+
+               {/* Previous button */}
+               <button onClick={goToPrevious} className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Previous image">
+                 <ChevronLeft className="h-8 w-8 text-white" />
+               </button>
+
+               {/* Image container */}
+               <div className="flex flex-col items-center w-full max-w-[90vw] px-16 max-h-[85vh] overflow-y-auto scrollbar-hide">
+                 <h3 className="text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
+                   {currentSectionItems[currentItemIndex]?.title}
+                 </h3>
+                 <div className="relative inline-block shrink-0">
+                   <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
+                   {/* Close button */}
+                   <button
+                     onClick={closeLightbox}
+                     className={`absolute top-2 right-2 z-50 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors ${isExpanded ? 'hidden md:flex' : ''}`}
+                     aria-label="Close lightbox"
+                   >
+                     <X className="h-4 w-4 text-white" />
+                   </button>
+                   {/* Maximize icon */}
+                   {!isExpanded && (
+                     <button
+                       onClick={() => setIsExpanded(true)}
+                       className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                       aria-label="Maximize image"
+                     >
+                       <Maximize2 className="w-3.5 h-3.5 text-white" />
+                     </button>
+                   )}
+                 </div>
+                 {/* Dot indicators */}
+                 <div className="flex justify-center gap-1.5 mt-3 shrink-0">
+                   {currentSectionItems.map((_, i) => (
+                     <button
+                       key={i}
+                       onClick={() => setCurrentItemIndex(i)}
+                       className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
+                       aria-label={`Go to image ${i + 1}`}
+                     />
+                   ))}
+                 </div>
+                 {/* Description */}
+                 <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
+                   <p className="text-base text-white/70 font-body max-w-2xl text-justify">
+                     {currentSectionItems[currentItemIndex]?.description}
+                   </p>
+                 </div>
+               </div>
+
+               {/* Next button */}
+               <button onClick={goToNext} className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Next image">
+                 <ChevronRight className="h-8 w-8 text-white" />
+               </button>
+             </div>
+           )}
         </DialogContent>
       </Dialog>
     </>;
