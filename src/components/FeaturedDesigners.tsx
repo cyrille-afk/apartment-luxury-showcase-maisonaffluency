@@ -497,7 +497,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Outdoor",
         category: "Seating",
         tags: ["Seating", "Chair", "Outdoor"],
-        materials: "Weather-resistant materials • Stone base",
+        materials: "Weather-resistant materials",
         dimensions: "W52 × D55 × H76 cm",
         description: "The Twin Outdoor Chair extends Alinea's material sensibility to the exterior — its robust construction and considered proportions making it as much at home on a terrace as in an interior."
       },
