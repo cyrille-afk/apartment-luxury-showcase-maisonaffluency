@@ -487,8 +487,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Display Cabinet",
         category: "Storage",
         tags: ["Storage", "Cabinet"],
-        materials: "Natural stone • Solid walnut",
-        dimensions: "Custom dimensions available",
+        materials: "Bottom part in natural stone with aluminium frame",
+        dimensions: "VHS/M 120-45/60 glass: 120 × 45 × 45/60 cm\nVHS/M 120-60 glass: 120 × 45 × 60 cm\nVHS/M 150-45/60 glass: 150 × 45 × 45/60 cm",
         description: "The Visible M Horizontal display cabinet is a study in material honesty — its stone surfaces and walnut structure creating a piece that showcases objects as beautifully as it stores them."
       },
       {
