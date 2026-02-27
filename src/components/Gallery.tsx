@@ -87,8 +87,8 @@ const galleryExperiences = [{
     title: "A Sophisticated Boudoir",
     description: "Sofa/Loveseat: Nika Zupanc's Stardust Loveseat for Sé Collections, Desk: BdM's Lyric Desk, Chair: Hamrei's Pépé Chair, Table Lamp: Made in Kira's Toshiro Lamp, Chandelier: Nathalie Ziegler's Custom Saint-Just Glass Chandelier, Vessel: Nathalie Ziegler's Gold Leaves+Glass Snake Vessel (Unique Piece)"
   }, {
-    image: "/gallery/sanctuary-2.jpg",
-    title: "Detailed Craftsmanship",
+    image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg",
+    title: "A Jewelry Box Like Setting",
     description: "Desk Close-Up: BdM's Lyric Desk, Chair: Hamrei's Pépé Chair, Vessel: Nathalie Ziegler's Gold Leaves+Glass Snake Vessel (Unique Piece)"
   }, {
     image: bedroomSecondImage,
