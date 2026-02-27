@@ -89,7 +89,7 @@ const galleryExperiences = [{
   }, {
     image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,e_brightness:-15/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg",
     title: "A Jewelry Box Like Setting",
-    description: "Desk Close-Up: BdM's Lyric Desk, Chair: Hamrei's Pépé Chair, Sofa/Loveseat: Nika Zupanc's Stardust Loveseat for Sé Collections"
+    description: "Desk Close-Up: BdM's Lyric Desk, Chair: Hamrei's Pépé Chair, Lamp: Félix Agostini's Etrier Lamp - Charles Paris, Sofa/Loveseat: Nika Zupanc's Stardust Loveseat for Sé Collections"
   }, {
     image: bedroomSecondImage,
     title: "A Serene Decor",
