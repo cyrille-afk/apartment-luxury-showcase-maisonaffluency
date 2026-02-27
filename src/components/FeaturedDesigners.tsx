@@ -1759,6 +1759,19 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "The Mineral Flower Side Table II by Noé Duchaufour-Lawrance is a sculptural marble side table whose interlocking petal-like forms evoke natural stone erosion. Each piece is carved from a single block, celebrating the raw beauty of marble through organic, biomorphic geometry.",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/NDL_Editions-Mineral_Flower_Side_Table_II.pdf"
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good/v1772192484/Screen_Shot_2026-02-27_at_7.40.07_PM_pyyf8x.png",
+        title: "Whisper Large Sofa",
+        subtitle: "",
+        category: "Seating",
+        tags: ["Seating", "Sofas"],
+        edition: "Edition of 12 + 4 AP",
+        materials: "",
+        dimensions: "H 84 × L 392 × D 100 cm\n120 kg\nProduction lead time: 12 weeks",
+        description: "",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/NDL-Editions_Whisper_Large_Sofa_1.pdf",
+        pdfFilename: "NDL-Editions_Whisper_Large_Sofa_1.pdf"
+      },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/noeduchaufourlawrance/" },
