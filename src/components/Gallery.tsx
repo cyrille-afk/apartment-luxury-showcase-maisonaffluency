@@ -641,9 +641,10 @@ const Gallery = () => {
           <VisuallyHidden>
             <DialogTitle>{currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}</DialogTitle>
           </VisuallyHidden>
-          <div
+           <div
             ref={swipeContainerRef}
             className="relative w-full h-full flex items-center justify-center"
+            style={{ touchAction: isMobile ? 'pan-x' : undefined }}
           >
             {/* Pill indicator - hidden on mobile */}
             {!isMobile && (
