@@ -102,10 +102,13 @@ const apparatusPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600
 const apparatusPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161859/Screen_Shot_2026-02-22_at_1.58.18_PM_cnfmnc.png";
 const apparatusPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161859/Screen_Shot_2026-02-22_at_2.16.45_PM_t3d8xk.png";
 const apparatusPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772106126/Screen_Shot_2026-02-22_at_2.36.04_PM_ivwy5t.png";
-import pendhapaPick1 from "@/assets/curators-picks/pendhapa-1.jpg";
-import pendhapaPick2 from "@/assets/curators-picks/pendhapa-2.jpg";
-import pendhapaPick4 from "@/assets/curators-picks/pendhapa-4.jpg";
-import pendhapaPick5 from "@/assets/curators-picks/pendhapa-5.jpg";
+const pendhapaPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165712/Screen_Shot_2026-02-27_at_12.11.36_PM_qed4qj.png";
+const pendhapaPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165616/Screen_Shot_2026-02-27_at_12.10.47_PM_nkmbmx.png";
+const pendhapaPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165598/Screen_Shot_2026-02-27_at_12.04.23_PM_wlvkcx.png";
+const pendhapaPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165597/Screen_Shot_2026-02-27_at_12.11.56_PM_sw0yoc.png";
+const pendhapaPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165614/Screen_Shot_2026-02-27_at_12.09.33_PM_npn6eb.png";
+const pendhapaPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165978/Screen_Shot_2026-02-27_at_12.19.05_PM_dodant.png";
+const pendhapaPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165720/Screen_Shot_2026-02-27_at_12.13.12_PM_jpr8qh.png";
 const atelierFevrierPick1 = cloudinaryUrl("Screen_Shot_2026-02-16_at_10.00.02_AM_lfndej", { width: 1600, quality: "auto:good", crop: "fill" });
 const atelierFevrierPick2 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.37.27_AM_beyywn.png", { width: 1600, quality: "auto:good", crop: "fill" });
 const atelierFevrierPick3 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.38.45_AM_sqcvog", { width: 1600, quality: "auto:good", crop: "fill" });
@@ -631,7 +634,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "L190 × W180 × H35 cm"
       },
       { 
-        image: pendhapaPick4, 
+        image: pendhapaPick2, 
         title: "Akar",
         subtitle: "Dining Chair",
         category: "Seating",
@@ -640,7 +643,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "L49 × W52 × H85 cm"
       },
       { 
-        image: pendhapaPick5, 
+        image: pendhapaPick3, 
         title: "Gingko",
         subtitle: "Side Table",
         category: "Tables",
@@ -649,13 +652,40 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "L75 × W48 × H50 cm"
       },
       { 
-        image: pendhapaPick2, 
+        image: pendhapaPick4, 
         title: "Anemos",
         subtitle: "Coffee Table",
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
         materials: "Black oak • Black lacquer tabletop",
         dimensions: "L110 × W80 × H35 cm"
+      },
+      { 
+        image: pendhapaPick5, 
+        title: "Deepah",
+        subtitle: "Side Table",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Custom blend",
+        dimensions: "Custom dimensions available"
+      },
+      { 
+        image: pendhapaPick6, 
+        title: "Astra",
+        subtitle: "Dining Table",
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
+        materials: "Custom blend",
+        dimensions: "Custom dimensions available"
+      },
+      { 
+        image: pendhapaPick7, 
+        title: "Akar",
+        subtitle: "Console",
+        category: "Tables",
+        tags: ["Tables", "Console"],
+        materials: "Custom blend",
+        dimensions: "Custom dimensions available"
       },
     ],
     links: [
