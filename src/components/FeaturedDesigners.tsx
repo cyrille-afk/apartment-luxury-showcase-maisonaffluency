@@ -752,7 +752,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
         materials: "Black oak • Black lacquer tabletop\nL110 × W80 × H35 cm\nProduction lead time: 14-16 weeks",
-        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request."
+        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Atelier_Pendhapa-Anemos_Coffee_Table.pdf",
+        pdfFilename: "Atelier_Pendhapa-Anemos_Coffee_Table.pdf"
       },
       { 
         image: pendhapaPick5, 
