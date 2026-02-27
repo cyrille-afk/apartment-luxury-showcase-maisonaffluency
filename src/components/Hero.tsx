@@ -40,7 +40,7 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </motion.div>
       
-      <div className="relative z-10 h-full px-4 pb-32 pt-[85%] md:px-12 md:pb-20 md:pt-20 lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-center">
+      <div className="relative z-10 h-full px-4 pb-32 pt-[85%] md:px-12 md:pb-20 md:pt-[35%] lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-center md:items-center">
         <motion.div initial={{
         opacity: 0,
         y: 30
@@ -50,7 +50,7 @@ const Hero = () => {
       }} transition={{
         duration: 0.8,
         delay: 0.2
-      }} className="max-w-4xl">
+      }} className="max-w-4xl md:text-center">
           <motion.p initial={{
           opacity: 0
         }} animate={{
@@ -80,7 +80,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.8
-        }} className="max-w-2xl text-sm leading-relaxed text-white text-left font-serif md:text-lg lg:text-xl font-medium mb-6">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses and Artisan&nbsp;Workshops</motion.p>
+        }} className="max-w-2xl text-sm leading-relaxed text-white text-left md:text-center md:text-justify font-serif md:text-lg lg:text-xl font-medium mb-6 md:mx-auto">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses and Artisan&nbsp;Workshops</motion.p>
           
           <motion.div initial={{
             opacity: 0
