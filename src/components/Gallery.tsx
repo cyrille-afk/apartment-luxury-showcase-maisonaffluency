@@ -193,8 +193,6 @@ const Gallery = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
   const [imageZoomed, setImageZoomed] = useState(false);
   const [hasTapped, setHasTapped] = useState(false);
@@ -377,36 +375,51 @@ const Gallery = () => {
     if (e.key === "ArrowRight") goToNext();
     if (e.key === "Escape") closeLightbox();
   };
-  // Check if touch is on the pinch-zoom image container (don't hijack those touches)
-  const isTouchOnPinchZoom = (e: React.TouchEvent) => {
-    const target = e.target as HTMLElement;
-    return !!target.closest('.touch-none');
-  };
-  const onTouchStart = (e: React.TouchEvent) => {
-    if (imageZoomedRef.current) return;
-    if (e.touches.length > 1) return;
-    if (isTouchOnPinchZoom(e)) return; // Let PinchZoomImage handle it
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (imageZoomedRef.current) return;
-    if (e.touches.length > 1) return;
-    if (isTouchOnPinchZoom(e)) return;
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-  const onTouchEnd = () => {
-    if (imageZoomedRef.current) return;
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) {
-      goToNext();
-    } else if (isRightSwipe) {
-      goToPrevious();
-    }
-  };
+  // Swipe detection via native listeners to avoid interfering with PinchZoomImage
+  const swipeContainerRef = useRef<HTMLDivElement>(null);
+  const swipeTouchStart = useRef<number | null>(null);
+  const swipeTouchEnd = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const el = swipeContainerRef.current;
+    if (!el) return;
+
+    const handleSwipeStart = (e: TouchEvent) => {
+      if (imageZoomedRef.current) return;
+      if (e.touches.length > 1) return;
+      // Skip if touch is on the pinch-zoom image
+      const target = e.target as HTMLElement;
+      if (target.closest('.touch-none')) return;
+      swipeTouchEnd.current = null;
+      swipeTouchStart.current = e.touches[0].clientX;
+    };
+    const handleSwipeMove = (e: TouchEvent) => {
+      if (imageZoomedRef.current) return;
+      if (e.touches.length > 1) return;
+      const target = e.target as HTMLElement;
+      if (target.closest('.touch-none')) return;
+      swipeTouchEnd.current = e.touches[0].clientX;
+    };
+    const handleSwipeEnd = () => {
+      if (imageZoomedRef.current) return;
+      if (swipeTouchStart.current === null || swipeTouchEnd.current === null) return;
+      const distance = swipeTouchStart.current - swipeTouchEnd.current;
+      if (distance > minSwipeDistance) goToNext();
+      else if (distance < -minSwipeDistance) goToPrevious();
+      swipeTouchStart.current = null;
+      swipeTouchEnd.current = null;
+    };
+
+    el.addEventListener("touchstart", handleSwipeStart, { passive: true });
+    el.addEventListener("touchmove", handleSwipeMove, { passive: true });
+    el.addEventListener("touchend", handleSwipeEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", handleSwipeStart);
+      el.removeEventListener("touchmove", handleSwipeMove);
+      el.removeEventListener("touchend", handleSwipeEnd);
+    };
+  }, [lightboxOpen]);
   return <>
       <section id="gallery" ref={ref} className="pt-2 pb-16 px-4 md:pt-4 md:pb-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
         <div className="mx-auto max-w-7xl">
@@ -618,7 +631,7 @@ const Gallery = () => {
       {/* Lightbox - custom portal (bypasses Radix Dialog react-remove-scroll touch blocking) */}
       {lightboxOpen && createPortal(
         <div className="fixed inset-0 z-50 bg-black/95" onKeyDown={handleKeyDown} tabIndex={-1} ref={(el) => el?.focus()} role="dialog" aria-modal="true" aria-label={currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}>
-          <div className="relative w-full h-full flex items-start md:items-center justify-center pt-14 md:pt-0" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+          <div ref={swipeContainerRef} className="relative w-full h-full flex items-start md:items-center justify-center pt-14 md:pt-0">
 
             {/* Pill indicator - top right */}
             <div className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none">
