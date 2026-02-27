@@ -70,6 +70,7 @@ const leoAertsVitrineCabinet = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.49
 import leoAertsOutdoorChair from "@/assets/curators-picks/leo-aerts-outdoor-chair.jpg";
 const leoAertsTwinChairIndoor = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.00_AM_msurq2", { width: 1600, quality: "auto:good", crop: "fill" });
 const leoAertsAngeloMMacassar = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.06.14_AM_azdcae", { width: 1600, quality: "auto:good", crop: "fill" });
+const leoAertsAngeloMO290 = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.08.42_AM_xr4vun", { width: 1600, quality: "auto:good", crop: "fill" });
 import forestGiaconiaIhiLamp from "@/assets/curators-picks/forest-giaconia-ihi-floor-lamp.jpg";
 import forestGiaconiaConsole from "@/assets/forrest-giaconia-console.png";
 import forestGiaconiaTable from "@/assets/forrest-giaconia-table.png";
@@ -443,7 +444,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     specialty: "Stone Furniture & Design Objects",
     image: leoAertsAlineaImg,
     biography: "Léo Aerts is a Belgian designer and the founder of Alinea Design Objects, a studio renowned for its mastery of natural stone and its ability to transform one of the earth's oldest materials into contemporary design objects of exceptional refinement. Each piece is conceived as a sculptural statement: monolithic yet precise, elemental yet deeply considered. Working closely with Belgian and Italian quarries, Aerts selects his stones for their geological character, ensuring that every table, shelf and object carries the unique signature of its material. His Angelo series has earned international recognition for its fusion of natural stone with solid American walnut.",
-    notableWorks: "Angelo M/R Dining Table, Angelo M Side Table Collection, Angelo W Limited Edition, Visible M Horizontal Display Cabinet, Twin Chair",
+    notableWorks: "Angelo M/R Dining Table, Angelo M/O 290, Angelo M Side Table Collection, Angelo W Limited Edition, Visible M Horizontal Display Cabinet, Twin Chair",
     notableWorksLinks: [
       { text: "Custom Angelo M 110 Dining Table", galleryIndex: 2 },
       { text: "Angelo M/SR 55 Side Table", galleryIndex: 7 },
@@ -459,6 +460,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Natural stone top & base • Solid American walnut",
         dimensions: "Angelo M/R 130: Ø 130 × 75 cm H — Twin Indoor: 52 × 51 × 74 cm H",
         description: "The Angelo M/R 130 dining table is Léo Aerts' most celebrated work — a circular form in natural stone whose monolithic presence is softened by precise joinery and the warmth of solid American walnut. Shown here with the Twin Indoor Leather Seat."
+      },
+      {
+        image: leoAertsAngeloMO290,
+        title: "Angelo M/O 290",
+        subtitle: "Project: Olivier Lempereur, Amandine & Jules",
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
+        materials: "Natural stone top & base • Solid American walnut",
+        dimensions: "L290 cm",
+        description: "The Angelo M/O 290 is a monumental oval dining table commissioned for a project by Olivier Lempereur — its elongated stone surface creating a sculptural centrepiece that anchors the room with quiet authority."
       },
       {
         image: leoAertsAngeloMDining,
