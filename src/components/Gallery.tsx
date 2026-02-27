@@ -660,19 +660,17 @@ const Gallery = () => {
             </button>
 
             {/* Image container */}
-            <div className={`flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 ${isMobile ? 'justify-center h-full' : 'max-h-[85vh] overflow-y-auto scrollbar-hide'}`}>
-              {!isMobile && (
-                <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
-                  {currentSectionItems[currentItemIndex]?.title}
-                </h3>
-              )}
+            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[85vh] overflow-y-auto scrollbar-hide">
+              <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
+                {currentSectionItems[currentItemIndex]?.title}
+              </h3>
               <div className="relative inline-block shrink-0">
                 {isMobile ? (
                   <img
                     key={currentItemIndex}
                     src={currentSectionItems[currentItemIndex]?.image}
                     alt={currentSectionItems[currentItemIndex]?.title}
-                    className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[80vh]"
+                    className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[45vh]"
                     loading="eager"
                     decoding="sync"
                     fetchPriority="high"
@@ -698,27 +696,23 @@ const Gallery = () => {
                   </button>
                 )}
               </div>
-              {/* Dot indicators — hidden on mobile */}
-              {!isMobile && (
-                <div className="flex justify-center gap-1.5 mt-3 shrink-0">
-                  {currentSectionItems.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setCurrentItemIndex(i)}
-                      className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
-                      aria-label={`Go to image ${i + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
-              {/* Description — hidden on mobile */}
-              {!isMobile && (
-                <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
-                  <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
-                    {currentSectionItems[currentItemIndex]?.description}
-                  </p>
-                </div>
-              )}
+              {/* Dot indicators */}
+              <div className="flex justify-center gap-1.5 mt-3 shrink-0">
+                {currentSectionItems.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentItemIndex(i)}
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
+                    aria-label={`Go to image ${i + 1}`}
+                  />
+                ))}
+              </div>
+              {/* Description */}
+              <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
+                <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
+                  {currentSectionItems[currentItemIndex]?.description}
+                </p>
+              </div>
             </div>
 
             {/* Next button - desktop only */}
