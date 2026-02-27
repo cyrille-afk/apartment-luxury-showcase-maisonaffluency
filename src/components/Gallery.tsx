@@ -643,8 +643,8 @@ const Gallery = () => {
             ref={swipeContainerRef}
             className="relative w-full h-full flex items-center justify-center"
           >
-            {/* Pill indicator - top right */}
-            <div className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none">
+            {/* Pill indicator - top right, hidden on mobile when expanded */}
+            <div className={`absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none ${isExpanded ? 'hidden md:flex' : ''}`}>
               <span className="text-white text-[10px] font-body font-medium leading-none">
                 {currentItemIndex + 1}/{currentSectionItems.length}
               </span>
@@ -657,18 +657,16 @@ const Gallery = () => {
 
             {/* Image container */}
             <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[85vh] overflow-y-auto scrollbar-hide">
-              {!isExpanded && (
-                <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
-                  {currentSectionItems[currentItemIndex]?.title}
-                </h3>
-              )}
+              <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
+                {currentSectionItems[currentItemIndex]?.title}
+              </h3>
               <div className="relative inline-block shrink-0">
                 <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full md:max-w-full max-h-[45vh] md:max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
-                {/* Close button — top-left */}
-                <button onClick={closeLightbox} className="absolute top-1 left-1 md:left-auto md:right-2 md:top-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors" aria-label="Close lightbox">
+                {/* Close button — hidden on mobile when expanded */}
+                <button onClick={closeLightbox} className={`absolute top-1 left-1 md:left-auto md:right-2 md:top-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors ${isExpanded ? 'hidden md:flex' : ''}`} aria-label="Close lightbox">
                   <X className="h-4 w-4 text-white" />
                 </button>
-                {/* Maximize icon — bottom-left, hidden when expanded */}
+                {/* Maximize icon — hidden when expanded */}
                 {!isExpanded && (
                   <button
                     onClick={() => setIsExpanded(true)}
@@ -679,8 +677,7 @@ const Gallery = () => {
                   </button>
                 )}
               </div>
-              {/* Dot indicators */}
-              {!isExpanded && (
+              {/* Dot indicators — always visible */}
               <div className="flex justify-center gap-1.5 mt-3 shrink-0">
                 {currentSectionItems.map((_, i) => (
                   <button
@@ -691,9 +688,8 @@ const Gallery = () => {
                   />
                 ))}
               </div>
-              )}
-              {/* Description */}
-              <div className={`mt-3 text-center shrink-0 pb-6 transition-all duration-300 ${isExpanded ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100 overflow-y-auto max-h-[20vh] scrollbar-hide'}`}>
+              {/* Description — always visible */}
+              <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
                 <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
                   {currentSectionItems[currentItemIndex]?.description}
                 </p>
