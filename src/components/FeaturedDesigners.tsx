@@ -64,12 +64,12 @@ const adamCourtsOkhaImg = dImg("adam-courts");
 const noeDuchaufourMadonnaTables = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.06.51_PM_ukeqij", { width: 1600, quality: "auto:good", crop: "fill" });
 const noeMineralFlowerSide = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.40.43_PM_b0tuc9", { width: 1600, quality: "auto:good", crop: "fill" });
 const noeMineralFlowerCoffee = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.42.29_PM_ryudnm", { width: 1600, quality: "auto:good", crop: "fill" });
-import leoAertsAngeloMCollection from "@/assets/curators-picks/leo-aerts-angelo-m-collection.jpg";
-import leoAertsAngeloMDining from "@/assets/curators-picks/leo-aerts-angelo-m-dining.jpg";
-import leoAertsVitrineCabinet from "@/assets/curators-picks/leo-aerts-vitrine-cabinet.jpg";
+const leoAertsAngeloMCollection = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.35.13_AM_jwbivd", { width: 1600, quality: "auto:good", crop: "fill" });
+const leoAertsAngeloMDining = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.09.13_AM_z727ht", { width: 1600, quality: "auto:good", crop: "fill" });
+const leoAertsVitrineCabinet = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.49_AM_bj59um", { width: 1600, quality: "auto:good", crop: "fill" });
 import leoAertsOutdoorChair from "@/assets/curators-picks/leo-aerts-outdoor-chair.jpg";
-import leoAertsTwinChairOutdoor from "@/assets/curators-picks/leo-aerts-twin-chair-outdoor.jpg";
-import leoAertsAngeloMMacassar from "@/assets/curators-picks/leo-aerts-angelo-m-macassar.jpg";
+const leoAertsTwinChairIndoor = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.00_AM_msurq2", { width: 1600, quality: "auto:good", crop: "fill" });
+const leoAertsAngeloMMacassar = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.06.14_AM_azdcae", { width: 1600, quality: "auto:good", crop: "fill" });
 import forestGiaconiaIhiLamp from "@/assets/curators-picks/forest-giaconia-ihi-floor-lamp.jpg";
 import forestGiaconiaConsole from "@/assets/forrest-giaconia-console.png";
 import forestGiaconiaTable from "@/assets/forrest-giaconia-table.png";
@@ -434,6 +434,85 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
+      { type: "Curators' Picks" },
+    ],
+  },
+  {
+    id: "leo-aerts-alinea",
+    name: "Alinéa Design Objects - Léo Aerts",
+    specialty: "Stone Furniture & Design Objects",
+    image: leoAertsAlineaImg,
+    biography: "Léo Aerts is a Belgian designer and the founder of Alinea Design Objects, a studio renowned for its mastery of natural stone and its ability to transform one of the earth's oldest materials into contemporary design objects of exceptional refinement. Each piece is conceived as a sculptural statement: monolithic yet precise, elemental yet deeply considered. Working closely with Belgian and Italian quarries, Aerts selects his stones for their geological character, ensuring that every table, shelf and object carries the unique signature of its material. His Angelo series has earned international recognition for its fusion of natural stone with solid American walnut.",
+    notableWorks: "Angelo M/R Dining Table, Angelo M Side Table Collection, Angelo W Limited Edition, Visible M Horizontal Display Cabinet, Twin Chair",
+    notableWorksLinks: [
+      { text: "Custom Angelo M 110 Dining Table", galleryIndex: 2 },
+      { text: "Angelo M/SR 55 Side Table", galleryIndex: 7 },
+    ],
+    philosophy: "Stone is the slowest material on earth. That patience is what I bring to every design.",
+    curatorPicks: [
+      {
+        image: leoAertsAngeloMCollection,
+        title: "Angelo M/R 130",
+        subtitle: "Dining Table + Twin Indoor Leather Seat",
+        category: "Tables",
+        tags: ["Tables", "Dining Table"],
+        materials: "Natural stone top & base • Solid American walnut",
+        dimensions: "Angelo M/R 130: Ø 130 × 75 cm H — Twin Indoor: 52 × 51 × 74 cm H",
+        description: "The Angelo M/R 130 dining table is Léo Aerts' most celebrated work — a circular form in natural stone whose monolithic presence is softened by precise joinery and the warmth of solid American walnut. Shown here with the Twin Indoor Leather Seat."
+      },
+      {
+        image: leoAertsAngeloMDining,
+        title: "Angelo M Side Table Collection",
+        subtitle: "Three Heights",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Natural stone • Solid American walnut",
+        dimensions: "Angelo M/SR 45: Ø 45 × 62 cm H — Angelo M/SR 55: Ø 55 × 48 cm H — Angelo M/SR 80: Ø 80 × 36 cm H",
+        description: "Available in three complementary heights, the Angelo M Side Table Collection offers a family of stone objects that work independently or together — their geological variation making each a unique specimen."
+      },
+      {
+        image: leoAertsVitrineCabinet,
+        title: "Visible M Horizontal",
+        subtitle: "Display Cabinet",
+        category: "Storage",
+        tags: ["Storage", "Cabinet"],
+        materials: "Natural stone • Solid walnut",
+        dimensions: "Custom dimensions available",
+        description: "The Visible M Horizontal display cabinet is a study in material honesty — its stone surfaces and walnut structure creating a piece that showcases objects as beautifully as it stores them."
+      },
+      {
+        image: leoAertsOutdoorChair,
+        title: "Twin Chair",
+        subtitle: "Outdoor",
+        category: "Seating",
+        tags: ["Seating", "Chair", "Outdoor"],
+        materials: "Weather-resistant materials • Stone base",
+        dimensions: "W52 × D55 × H76 cm",
+        description: "The Twin Outdoor Chair extends Alinea's material sensibility to the exterior — its robust construction and considered proportions making it as much at home on a terrace as in an interior."
+      },
+      {
+        image: leoAertsTwinChairIndoor,
+        title: "Twin Chair",
+        subtitle: "Indoor Detail",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Natural stone base • Upholstered seat",
+        dimensions: "W52 × D55 × H76 cm",
+        description: "A detail view of the Twin Indoor Chair reveals the quality of Alinea's stonework — the precise cuts, the geological variation, the weight of material that grounds every piece."
+      },
+      {
+        image: leoAertsAngeloMMacassar,
+        title: "Angelo W",
+        subtitle: "Limited Edition of 7",
+        category: "Tables",
+        tags: ["Tables", "Coffee Table"],
+        materials: "Macassar ebony veneer • Natural stone",
+        dimensions: "Custom",
+        description: "The Angelo W is a strictly limited edition of seven pieces — its Macassar ebony veneer surface paired with a natural stone base to create a collectible of extraordinary rarity and beauty."
+      },
+    ],
+    links: [
+      { type: "Instagram", url: "https://www.instagram.com/alinea_design_objects/?hl=en" },
       { type: "Curators' Picks" },
     ],
   },
@@ -1456,85 +1535,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/_kerstens/" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
-    id: "leo-aerts-alinea",
-    name: "Léo Aerts - Alinea Design Objects",
-    specialty: "Stone Furniture & Design Objects",
-    image: leoAertsAlineaImg,
-    biography: "Léo Aerts is a Belgian designer and the founder of Alinea Design Objects, a studio renowned for its mastery of natural stone and its ability to transform one of the earth's oldest materials into contemporary design objects of exceptional refinement. Each piece is conceived as a sculptural statement: monolithic yet precise, elemental yet deeply considered. Working closely with Belgian and Italian quarries, Aerts selects his stones for their geological character, ensuring that every table, shelf and object carries the unique signature of its material. His Angelo series has earned international recognition for its fusion of natural stone with solid American walnut.",
-    notableWorks: "Angelo M/R Dining Table, Angelo M Side Table Collection, Angelo W Limited Edition, Visible M Horizontal Display Cabinet, Twin Chair",
-    notableWorksLinks: [
-      { text: "Custom Angelo M 110 Dining Table", galleryIndex: 2 },
-      { text: "Angelo M/SR 55 Side Table", galleryIndex: 7 },
-    ],
-    philosophy: "Stone is the slowest material on earth. That patience is what I bring to every design.",
-    curatorPicks: [
-      {
-        image: leoAertsAngeloMCollection,
-        title: "Angelo M/R 130",
-        subtitle: "Dining Table + Twin Indoor Leather Seat",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Natural stone top & base • Solid American walnut",
-        dimensions: "Angelo M/R 130: Ø 130 × 75 cm H — Twin Indoor: 52 × 51 × 74 cm H",
-        description: "The Angelo M/R 130 dining table is Léo Aerts' most celebrated work — a circular form in natural stone whose monolithic presence is softened by precise joinery and the warmth of solid American walnut. Shown here with the Twin Indoor Leather Seat."
-      },
-      {
-        image: leoAertsAngeloMDining,
-        title: "Angelo M Side Table Collection",
-        subtitle: "Three Heights",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Natural stone • Solid American walnut",
-        dimensions: "Angelo M/SR 45: Ø 45 × 62 cm H — Angelo M/SR 55: Ø 55 × 48 cm H — Angelo M/SR 80: Ø 80 × 36 cm H",
-        description: "Available in three complementary heights, the Angelo M Side Table Collection offers a family of stone objects that work independently or together — their geological variation making each a unique specimen."
-      },
-      {
-        image: leoAertsVitrineCabinet,
-        title: "Visible M Horizontal",
-        subtitle: "Display Cabinet",
-        category: "Storage",
-        tags: ["Storage", "Cabinet"],
-        materials: "Natural stone • Solid walnut",
-        dimensions: "Custom dimensions available",
-        description: "The Visible M Horizontal display cabinet is a study in material honesty — its stone surfaces and walnut structure creating a piece that showcases objects as beautifully as it stores them."
-      },
-      {
-        image: leoAertsOutdoorChair,
-        title: "Twin Chair",
-        subtitle: "Outdoor",
-        category: "Seating",
-        tags: ["Seating", "Chair", "Outdoor"],
-        materials: "Weather-resistant materials • Stone base",
-        dimensions: "W52 × D55 × H76 cm",
-        description: "The Twin Outdoor Chair extends Alinea's material sensibility to the exterior — its robust construction and considered proportions making it as much at home on a terrace as in an interior."
-      },
-      {
-        image: leoAertsTwinChairOutdoor,
-        title: "Twin Chair",
-        subtitle: "Indoor Detail",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "Natural stone base • Upholstered seat",
-        dimensions: "W52 × D55 × H76 cm",
-        description: "A detail view of the Twin Indoor Chair reveals the quality of Alinea's stonework — the precise cuts, the geological variation, the weight of material that grounds every piece."
-      },
-      {
-        image: leoAertsAngeloMMacassar,
-        title: "Angelo W",
-        subtitle: "Limited Edition of 7",
-        category: "Tables",
-        tags: ["Tables", "Coffee Table"],
-        materials: "Macassar ebony veneer • Natural stone",
-        dimensions: "Custom",
-        description: "The Angelo W is a strictly limited edition of seven pieces — its Macassar ebony veneer surface paired with a natural stone base to create a collectible of extraordinary rarity and beauty."
-      },
-    ],
-    links: [
-      { type: "Instagram", url: "https://www.instagram.com/alinea_design_objects/?hl=en" },
       { type: "Curators' Picks" },
     ],
   },
