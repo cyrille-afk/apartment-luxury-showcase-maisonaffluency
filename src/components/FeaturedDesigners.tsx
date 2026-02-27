@@ -681,11 +681,11 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { 
         image: pendhapaPick7, 
         title: "Akar",
-        subtitle: "Console",
+        subtitle: "Desk/Console - pictured in black teak body with Tanya White marble tabletop",
         category: "Tables",
         tags: ["Tables", "Console"],
-        materials: "Custom blend",
-        dimensions: "Custom dimensions available"
+        materials: "L120 x W65 x H80 cm\nProduction lead time: 12-14 weeks",
+        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request."
       },
     ],
     links: [
