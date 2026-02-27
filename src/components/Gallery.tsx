@@ -668,17 +668,16 @@ const Gallery = () => {
                 <button onClick={closeLightbox} className="absolute top-1 left-1 md:left-auto md:right-2 md:top-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors" aria-label="Close lightbox">
                   <X className="h-4 w-4 text-white" />
                 </button>
-                {/* Maximize/Minimize icon — bottom-left */}
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="absolute bottom-2 left-1 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
-                  aria-label={isExpanded ? "Minimize image" : "Maximize image"}
-                >
-                  {isExpanded
-                    ? <Minimize2 className="w-3.5 h-3.5 text-white" />
-                    : <Maximize2 className="w-3.5 h-3.5 text-white" />
-                  }
-                </button>
+                {/* Maximize icon — bottom-left, hidden when expanded */}
+                {!isExpanded && (
+                  <button
+                    onClick={() => setIsExpanded(true)}
+                    className="absolute bottom-2 left-1 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                    aria-label="Maximize image"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5 text-white" />
+                  </button>
+                )}
               </div>
               {/* Dot indicators */}
               {!isExpanded && (
