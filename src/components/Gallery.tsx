@@ -4,6 +4,7 @@ import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, X, Maximize2, Minimize2, Instagram, Copy } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -186,6 +187,7 @@ const galleryExperiences = [{
   }]
 }];
 const Gallery = () => {
+  const isMobile = useIsMobile();
   const ref = useRef(null);
   const isInView = useInView(ref, {
     once: true,
@@ -643,12 +645,14 @@ const Gallery = () => {
             ref={swipeContainerRef}
             className="relative w-full h-full flex items-center justify-center"
           >
-            {/* Pill indicator - top right, hidden on mobile when expanded */}
-            <div className={`absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none ${isExpanded ? 'hidden md:flex' : ''}`}>
-              <span className="text-white text-[10px] font-body font-medium leading-none">
-                {currentItemIndex + 1}/{currentSectionItems.length}
-              </span>
-            </div>
+            {/* Pill indicator - hidden on mobile */}
+            {!isMobile && (
+              <div className={`absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none ${isExpanded ? 'hidden md:flex' : ''}`}>
+                <span className="text-white text-[10px] font-body font-medium leading-none">
+                  {currentItemIndex + 1}/{currentSectionItems.length}
+                </span>
+              </div>
+            )}
 
             {/* Previous button - desktop only */}
             <button onClick={goToPrevious} className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Previous image">
@@ -656,18 +660,35 @@ const Gallery = () => {
             </button>
 
             {/* Image container */}
-            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[85vh] overflow-y-auto scrollbar-hide">
-              <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
-                {currentSectionItems[currentItemIndex]?.title}
-              </h3>
+            <div className={`flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 ${isMobile ? 'justify-center h-full' : 'max-h-[85vh] overflow-y-auto scrollbar-hide'}`}>
+              {!isMobile && (
+                <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
+                  {currentSectionItems[currentItemIndex]?.title}
+                </h3>
+              )}
               <div className="relative inline-block shrink-0">
-                <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full md:max-w-full max-h-[45vh] md:max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
-                {/* Close button — hidden on mobile when expanded */}
-                <button onClick={closeLightbox} className={`absolute top-1 left-1 md:left-auto md:right-2 md:top-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors ${isExpanded ? 'hidden md:flex' : ''}`} aria-label="Close lightbox">
-                  <X className="h-4 w-4 text-white" />
-                </button>
-                {/* Maximize icon — hidden when expanded */}
-                {!isExpanded && (
+                {isMobile ? (
+                  <img
+                    key={currentItemIndex}
+                    src={currentSectionItems[currentItemIndex]?.image}
+                    alt={currentSectionItems[currentItemIndex]?.title}
+                    className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[80vh]"
+                    loading="eager"
+                    decoding="sync"
+                    fetchPriority="high"
+                    draggable={false}
+                  />
+                ) : (
+                  <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full md:max-w-full max-h-[45vh] md:max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
+                )}
+                {/* Close button — hidden on mobile */}
+                {!isMobile && (
+                  <button onClick={closeLightbox} className={`absolute top-1 left-1 md:left-auto md:right-2 md:top-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors ${isExpanded ? 'hidden md:flex' : ''}`} aria-label="Close lightbox">
+                    <X className="h-4 w-4 text-white" />
+                  </button>
+                )}
+                {/* Maximize icon — hidden on mobile */}
+                {!isMobile && !isExpanded && (
                   <button
                     onClick={() => setIsExpanded(true)}
                     className="absolute bottom-2 left-1 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
@@ -677,23 +698,27 @@ const Gallery = () => {
                   </button>
                 )}
               </div>
-              {/* Dot indicators — always visible */}
-              <div className="flex justify-center gap-1.5 mt-3 shrink-0">
-                {currentSectionItems.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentItemIndex(i)}
-                    className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
-                    aria-label={`Go to image ${i + 1}`}
-                  />
-                ))}
-              </div>
-              {/* Description — always visible */}
-              <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
-                <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
-                  {currentSectionItems[currentItemIndex]?.description}
-                </p>
-              </div>
+              {/* Dot indicators — hidden on mobile */}
+              {!isMobile && (
+                <div className="flex justify-center gap-1.5 mt-3 shrink-0">
+                  {currentSectionItems.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentItemIndex(i)}
+                      className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
+                      aria-label={`Go to image ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+              {/* Description — hidden on mobile */}
+              {!isMobile && (
+                <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
+                  <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
+                    {currentSectionItems[currentItemIndex]?.description}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Next button - desktop only */}
