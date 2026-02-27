@@ -88,7 +88,7 @@ const alexanderLamontPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/
 const alexanderLamontPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg";
 const alexanderLamontPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160682/Dais-Lounge-Chair_06_alexander-lamont_1_fuodom.jpg";
 const alexanderLamontPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160703/Corteza-Console-Table-Dark_03_alexander-lamont_r2ubvz.jpg";
-const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161406/Koi-Carp_01_alexander-lamont_1_kxayax.jpg";
+const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161289/Barbican-Cabinet_13_alexander-lamont_2_hyp2sd.jpg";
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
