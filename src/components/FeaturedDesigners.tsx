@@ -663,11 +663,11 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { 
         image: pendhapaPick5, 
         title: "Deepah",
-        subtitle: "Side Table",
+        subtitle: "Side Table - pictured in green onyx",
         category: "Tables",
         tags: ["Tables", "Side Table"],
-        materials: "Custom blend",
-        dimensions: "Custom dimensions available"
+        materials: "Ø40 x H50 cm\nProduction lead time: 8-10 weeks",
+        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request."
       },
       { 
         image: pendhapaPick6, 
