@@ -106,10 +106,13 @@ import pendhapaPick1 from "@/assets/curators-picks/pendhapa-1.jpg";
 import pendhapaPick2 from "@/assets/curators-picks/pendhapa-2.jpg";
 import pendhapaPick4 from "@/assets/curators-picks/pendhapa-4.jpg";
 import pendhapaPick5 from "@/assets/curators-picks/pendhapa-5.jpg";
-import atelierFevrierPick1 from "@/assets/curators-picks/atelier-fevrier-1.png";
-import atelierFevrierPick2 from "@/assets/curators-picks/atelier-fevrier-2.png";
-import atelierFevrierPick3 from "@/assets/curators-picks/atelier-fevrier-3.png";
-import atelierFevrierPick4 from "@/assets/curators-picks/atelier-fevrier-4.png";
+const atelierFevrierPick1 = cloudinaryUrl("Screen_Shot_2026-02-16_at_10.00.02_AM_lfndej", { width: 1600, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick2 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.37.27_AM_beyywn", { width: 1600, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick3 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.38.45_AM_sqcvog", { width: 1600, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick4 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.41.04_AM_sy9grh", { width: 1600, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick5 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.47.18_AM_o3qliv", { width: 1600, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick6 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.46.17_AM_c5irzd", { width: 1600, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick7 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.46.48_AM_saicfe", { width: 1600, quality: "auto:good", crop: "fill" });
 import emmanuelLevetStennePick1 from "@/assets/curators-picks/emmanuel-levet-stenne-1.jpg";
 import emmanuelLevetStennePick2 from "@/assets/curators-picks/emmanuel-levet-stenne-2.jpg";
 import emmanuelLevetStennePick3 from "@/assets/curators-picks/emmanuel-levet-stenne-3.jpg";
@@ -570,6 +573,33 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "15% wool, 85% silk — 125 knots/sq. inch",
         dimensions: "Custom dimensions available",
         description: "Designed by Sebastian Leon of Atelier d'Amis. The Fréquence rug collection is inspired by the enigmatic vibrational phenomenon called \"cymatics\", which correlates sound frequencies with geometric mandalas. The individual rugs are named after the frequencies of the A note – the standard for tuning – in three consecutive octaves."
+      },
+      { 
+        image: atelierFevrierPick5, 
+        title: "Echo",
+        subtitle: "Hand-knotted Rug",
+        category: "Rugs",
+        tags: ["Rugs", "Textile"],
+        materials: "Custom blend",
+        dimensions: "Custom dimensions available",
+      },
+      { 
+        image: atelierFevrierPick6, 
+        title: "Ricky",
+        subtitle: "Hand-knotted Rug",
+        category: "Rugs",
+        tags: ["Rugs", "Textile"],
+        materials: "Custom blend",
+        dimensions: "Custom dimensions available",
+      },
+      { 
+        image: atelierFevrierPick7, 
+        title: "Ribbon",
+        subtitle: "Hand-knotted Rug",
+        category: "Rugs",
+        tags: ["Rugs", "Textile"],
+        materials: "Custom blend",
+        dimensions: "Custom dimensions available",
       },
     ],
     links: [
