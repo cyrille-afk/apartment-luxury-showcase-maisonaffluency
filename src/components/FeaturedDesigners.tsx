@@ -107,7 +107,7 @@ import pendhapaPick2 from "@/assets/curators-picks/pendhapa-2.jpg";
 import pendhapaPick4 from "@/assets/curators-picks/pendhapa-4.jpg";
 import pendhapaPick5 from "@/assets/curators-picks/pendhapa-5.jpg";
 const atelierFevrierPick1 = cloudinaryUrl("Screen_Shot_2026-02-16_at_10.00.02_AM_lfndej", { width: 1600, quality: "auto:good", crop: "fill" });
-const atelierFevrierPick2 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.37.27_AM_beyywn", { width: 1600, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick2 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.37.27_AM_beyywn.png", { width: 1600, quality: "auto:good", crop: "fill" });
 const atelierFevrierPick3 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.38.45_AM_sqcvog", { width: 1600, quality: "auto:good", crop: "fill" });
 const atelierFevrierPick4 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.41.04_AM_sy9grh", { width: 1600, quality: "auto:good", crop: "fill" });
 const atelierFevrierPick5 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.47.18_AM_o3qliv", { width: 1600, quality: "auto:good", crop: "fill" });
