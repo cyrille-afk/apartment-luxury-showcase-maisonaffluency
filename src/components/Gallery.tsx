@@ -247,7 +247,7 @@ const Gallery = () => {
   }, []);
 
   // Minimum swipe distance required (in px)
-  const minSwipeDistance = 50;
+  const minSwipeDistance = 35;
 
   // Flatten all gallery items for external link compatibility
   const allItems = useMemo(() => {
@@ -337,6 +337,8 @@ const Gallery = () => {
     setCurrentSectionIndex(sectionIndex);
     setCurrentItemIndex(itemIndex);
     setSourceItemKey(`${sectionIndex}-${itemIndex}`);
+    imageZoomedRef.current = false;
+    setImageZoomed(false);
     setLightboxOpen(true);
   };
 
@@ -348,9 +350,19 @@ const Gallery = () => {
     }
   }, [lightboxOpen]);
 
+  // Ensure swipe is never blocked by stale zoom state on mobile
+  useEffect(() => {
+    if (lightboxOpen && isMobile) {
+      imageZoomedRef.current = false;
+      setImageZoomed(false);
+    }
+  }, [lightboxOpen, isMobile, currentItemIndex]);
+
   const closeLightbox = () => {
     setLightboxOpen(false);
     setIsExpanded(false);
+    imageZoomedRef.current = false;
+    setImageZoomed(false);
     // Scroll back to the source item after closing
     if (externalSourceId) {
       setTimeout(() => {
@@ -397,10 +409,12 @@ const Gallery = () => {
       if (e.touches.length > 1) return;
       swipeTouchEnd.current = e.touches[0].clientX;
     };
-    const handleSwipeEnd = () => {
+    const handleSwipeEnd = (e: TouchEvent) => {
       if (imageZoomedRef.current) return;
-      if (swipeTouchStart.current === null || swipeTouchEnd.current === null) return;
-      const distance = swipeTouchStart.current - swipeTouchEnd.current;
+      if (swipeTouchStart.current === null) return;
+      const endX = swipeTouchEnd.current ?? e.changedTouches?.[0]?.clientX ?? null;
+      if (endX === null) return;
+      const distance = swipeTouchStart.current - endX;
       if (distance > minSwipeDistance) goToNext();
       else if (distance < -minSwipeDistance) goToPrevious();
       swipeTouchStart.current = null;
@@ -644,7 +658,7 @@ const Gallery = () => {
            <div
             ref={swipeContainerRef}
             className="relative w-full h-full flex items-center justify-center"
-            style={{ touchAction: isMobile ? 'pan-x' : undefined }}
+            style={{ touchAction: isMobile ? 'pan-y' : undefined }}
           >
             {/* Pill indicator - hidden on mobile */}
             {!isMobile && (
