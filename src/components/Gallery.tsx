@@ -630,8 +630,8 @@ const Gallery = () => {
 
       {/* Lightbox - custom portal (bypasses Radix Dialog react-remove-scroll touch blocking) */}
       {lightboxOpen && createPortal(
-        <div className="fixed inset-0 z-50 bg-black/95" onKeyDown={handleKeyDown} tabIndex={-1} ref={(el) => el?.focus()} role="dialog" aria-modal="true" aria-label={currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}>
-          <div ref={swipeContainerRef} className="relative w-full h-full flex items-start md:items-center justify-center pt-14 md:pt-0">
+        <div className="fixed inset-0 z-50 bg-black/95" style={{ touchAction: "none" }} onKeyDown={handleKeyDown} tabIndex={-1} ref={(el) => el?.focus()} role="dialog" aria-modal="true" aria-label={currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}>
+          <div ref={swipeContainerRef} className="relative w-full h-full flex items-start md:items-center justify-center pt-14 md:pt-0" style={{ touchAction: "none" }}>
 
             {/* Pill indicator - top right */}
             <div className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none">
