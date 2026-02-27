@@ -74,15 +74,13 @@ import forestGiaconiaIhiLamp from "@/assets/curators-picks/forest-giaconia-ihi-f
 import forestGiaconiaConsole from "@/assets/forrest-giaconia-console.png";
 import forestGiaconiaTable from "@/assets/forrest-giaconia-table.png";
 import forestGiaconiaCoffee from "@/assets/forrest-giaconia-coffee.png";
-import adamCourtsVoidTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
-import adamCourtsVoidChair from "@/assets/curators-picks/adam-courts-void-chair.jpg";
-import adamCourtsGeometerChair from "@/assets/curators-picks/adam-courts-geometer-chair.jpg";
-import adamCourtsSofaFront from "@/assets/curators-picks/adam-courts-sofa-front.jpg";
-import adamCourtsReposeSofa from "@/assets/curators-picks/adam-courts-repose-sofa.jpg";
-import adamCourtsReverbSofa from "@/assets/curators-picks/adam-courts-reverb-sofa.jpg";
-import adamCourtsSofaAerial from "@/assets/curators-picks/adam-courts-sofa-aerial.jpg";
-import adamCourtsSideboard from "@/assets/curators-picks/adam-courts-sideboard.jpg";
-import adamCourtsGeometerBench from "@/assets/curators-picks/adam-courts-geometer-bench.jpg";
+const adamCourtsVoidTable = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772110305/Screen_Shot_2026-02-18_at_10.39.49_AM_noqdtn.png";
+const adamCourtsVoidChair = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772110437/Screen_Shot_2026-02-18_at_10.41.11_AM_msssmi.png";
+const adamCourtsGeometerChair = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772159510/Screen_Shot_2026-02-18_at_10.41.39_AM_t1lxrt.png";
+const adamCourtsReposeSofa = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772159511/Screen_Shot_2026-02-18_at_10.42.26_AM_oglbl5.png";
+const adamCourtsReverbSofa = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772159581/Screen_Shot_2026-02-18_at_10.42.38_AM_qvcay0.png";
+const adamCourtsSideboard = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772111095/Screen_Shot_2026-02-18_at_10.43.37_AM_ynqngy.png";
+const adamCourtsGeometerBench = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772159511/Screen_Shot_2026-02-18_at_10.44.15_AM_n5y58h.png";
 
 // Curators' Picks images
 import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
