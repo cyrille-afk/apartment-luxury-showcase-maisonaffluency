@@ -60,10 +60,10 @@ const rowinAtelierImg = dImg("rowin-atelier");
 const forestGiaconiaImg = dImg("forest-giaconia_ikcmkg");
 const adamCourtsOkhaImg = dImg("adam-courts");
 
-// Curator picks — still local imports (to be migrated next)
-import noeDuchaufourMadonnaTables from "@/assets/curators-picks/noe-duchaufour-madonna-tables.png";
-import noeMineralFlowerSide from "@/assets/curators-picks/noe-mineral-flower-side-table.png";
-import noeMineralFlowerCoffee from "@/assets/curators-picks/noe-mineral-flower-coffee-table.png";
+// Curator picks — migrated to Cloudinary
+const noeDuchaufourMadonnaTables = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.06.51_PM_ukeqij", { width: 1600, quality: "auto:good", crop: "fill" });
+const noeMineralFlowerSide = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.40.43_PM_b0tuc9", { width: 1600, quality: "auto:good", crop: "fill" });
+const noeMineralFlowerCoffee = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.42.29_PM_ryudnm", { width: 1600, quality: "auto:good", crop: "fill" });
 import leoAertsAngeloMCollection from "@/assets/curators-picks/leo-aerts-angelo-m-collection.jpg";
 import leoAertsAngeloMDining from "@/assets/curators-picks/leo-aerts-angelo-m-dining.jpg";
 import leoAertsVitrineCabinet from "@/assets/curators-picks/leo-aerts-vitrine-cabinet.jpg";
