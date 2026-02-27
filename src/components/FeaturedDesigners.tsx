@@ -83,10 +83,12 @@ const adamCourtsSideboard = "https://res.cloudinary.com/dif1oamtj/image/upload/w
 const adamCourtsGeometerBench = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772159511/Screen_Shot_2026-02-18_at_10.44.15_AM_n5y58h.png";
 
 // Curators' Picks images
-import alexanderLamontPick1 from "@/assets/curators-picks/alexander-lamont-1.jpg";
-import alexanderLamontPick2 from "@/assets/curators-picks/alexander-lamont-2.jpg";
-import alexanderLamontPick3 from "@/assets/curators-picks/alexander-lamont-3.jpg";
-import alexanderLamontPick4 from "@/assets/curators-picks/alexander-lamont-4.jpg";
+const alexanderLamontPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160682/Ondas-Sconce-Clear_07_alexander-lamont_1_t6ygbc.jpg";
+const alexanderLamontPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160682/Galea-Lantern-Rock_Crystal_01_alexander-lamont_1_rhpxsg.jpg";
+const alexanderLamontPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg";
+const alexanderLamontPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160682/Dais-Lounge-Chair_06_alexander-lamont_1_fuodom.jpg";
+const alexanderLamontPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160703/Corteza-Console-Table-Dark_03_alexander-lamont_r2ubvz.jpg";
+const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161406/Koi-Carp_01_alexander-lamont_1_kxayax.jpg";
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
@@ -404,6 +406,24 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Lighting", "Lantern"],
         materials: "Hammered bronze base • Rock crystal & frosted glass shades",
         dimensions: "H28 × W18 × D18 cm"
+      },
+      { 
+        image: alexanderLamontPick5, 
+        title: "Corteza Console Table",
+        subtitle: "Natural Distress",
+        category: "Tables",
+        tags: ["Tables", "Console"],
+        materials: "Natural distressed wood • Bronze detailing",
+        dimensions: "H85 × W140 × D40 cm"
+      },
+      { 
+        image: alexanderLamontPick6, 
+        title: "Barbican Cabinet",
+        subtitle: "Koi Carps — Wall Art",
+        category: "Decorative",
+        tags: ["Decorative", "Wall Art"],
+        materials: "Hand-painted lacquer • Gold leaf accents",
+        dimensions: "H90 × W60 × D12 cm"
       },
     ],
     links: [
