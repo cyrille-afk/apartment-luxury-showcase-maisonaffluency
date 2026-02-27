@@ -1729,6 +1729,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "",
         category: "Tables",
         tags: ["Tables", "Coffee Tables"],
+        edition: "Edition of 12 + 4 AP",
         materials: "Marble",
         dimensions: "W 121 × D 114 × H 46,5 cm – 180 kg",
         description: "The Mineral Flower Coffee Table by Noé Duchaufour-Lawrance is a monumental marble coffee table composed of sweeping, overlapping stone petals. Its sculptural silhouette transforms raw marble into a fluid, flower-inspired centrepiece of extraordinary presence.",
