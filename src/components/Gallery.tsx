@@ -646,7 +646,7 @@ const Gallery = () => {
           </VisuallyHidden>
           <div
             ref={swipeContainerRef}
-            className="relative w-full h-full flex items-start md:items-center justify-center pt-14 md:pt-0"
+            className="relative w-full h-full flex items-center justify-center"
           >
             {/* Pill indicator - top right */}
             <div className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none">
@@ -661,7 +661,7 @@ const Gallery = () => {
             </button>
 
             {/* Image container */}
-            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[calc(95vh-3.5rem)] md:max-h-[90vh]">
+            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[85vh] overflow-y-auto scrollbar-hide">
               {!isExpanded && (
                 <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
                   {currentSectionItems[currentItemIndex]?.title}
