@@ -4,7 +4,8 @@ import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, X, Maximize2, Instagram, Copy } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
-import { createPortal } from "react-dom";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
@@ -370,32 +371,11 @@ const Gallery = () => {
   const goToNext = () => {
     setCurrentItemIndex(prev => prev === currentSectionItems.length - 1 ? 0 : prev + 1);
   };
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowLeft") goToPrevious();
-    if (e.key === "ArrowRight") goToNext();
-    if (e.key === "Escape") closeLightbox();
-  };
   // Swipe detection via native listeners to avoid interfering with PinchZoomImage
   const swipeContainerRef = useRef<HTMLDivElement>(null);
   const swipeTouchStart = useRef<number | null>(null);
   const swipeTouchEnd = useRef<number | null>(null);
 
-  // Block all browser gesture handling on the lightbox (replaces react-remove-scroll from Radix Dialog)
-  const lightboxRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const el = lightboxRef.current;
-    if (!el) return;
-
-    const blockGesture = (e: TouchEvent) => {
-      // Always block multi-touch (pinch) at the lightbox level so browser doesn't zoom
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    };
-    el.addEventListener("touchmove", blockGesture, { passive: false });
-    return () => el.removeEventListener("touchmove", blockGesture);
-  }, [lightboxOpen]);
 
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -645,11 +625,27 @@ const Gallery = () => {
         </div>
       </section>
 
-      {/* Lightbox - custom portal (bypasses Radix Dialog react-remove-scroll touch blocking) */}
-      {lightboxOpen && createPortal(
-        <div ref={(el) => { (lightboxRef as React.MutableRefObject<HTMLDivElement | null>).current = el; el?.focus(); }} className="fixed inset-0 z-50 bg-black/95" style={{ touchAction: "none" }} onKeyDown={handleKeyDown} tabIndex={-1} role="dialog" aria-modal="true" aria-label={currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}>
-          <div ref={swipeContainerRef} className="relative w-full h-full flex items-start md:items-center justify-center pt-14 md:pt-0" style={{ touchAction: "none" }}>
-
+      {/* Lightbox - using Radix Dialog (react-remove-scroll blocks browser gestures, enabling PinchZoomImage) */}
+      <Dialog
+        open={lightboxOpen}
+        onOpenChange={(open) => { if (!open) closeLightbox(); }}
+      >
+        <DialogContent
+          hideClose
+          className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none"
+          aria-describedby={undefined}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft") goToPrevious();
+            if (e.key === "ArrowRight") goToNext();
+          }}
+        >
+          <VisuallyHidden>
+            <DialogTitle>{currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}</DialogTitle>
+          </VisuallyHidden>
+          <div
+            ref={swipeContainerRef}
+            className="relative w-full h-full flex items-start md:items-center justify-center pt-14 md:pt-0"
+          >
             {/* Pill indicator - top right */}
             <div className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none">
               <span className="text-white text-[10px] font-body font-medium leading-none">
@@ -663,13 +659,12 @@ const Gallery = () => {
             </button>
 
             {/* Image container */}
-            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[calc(95vh-3.5rem)] md:max-h-[90vh]" style={{ touchAction: "none" }}>
+            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[calc(95vh-3.5rem)] md:max-h-[90vh]">
               <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
                 {currentSectionItems[currentItemIndex]?.title}
               </h3>
-              <div className="relative inline-block shrink-0" style={{ touchAction: "none" }}>
-                
-                <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
+              <div className="relative inline-block shrink-0">
+                <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
                 {/* Close button */}
                 <button onClick={closeLightbox} className="absolute bottom-2 left-1 md:left-auto md:right-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
                   <X className="h-4 w-4 text-white" />
@@ -699,9 +694,8 @@ const Gallery = () => {
               <ChevronRight className="h-8 w-8 text-white" />
             </button>
           </div>
-        </div>,
-        document.body
-      )}
+        </DialogContent>
+      </Dialog>
     </>;
 };
 export default Gallery;
