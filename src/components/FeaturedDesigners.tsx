@@ -630,8 +630,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Coffee Table",
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
-        materials: "Black teak • Lava stone crème brûlée tabletop",
-        dimensions: "L190 × W180 × H35 cm"
+        materials: "Natural teak • Raku blanc écru tabletop\nL190 × W180 × H35 cm\nProduction lead time: 14-16 weeks",
+        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request."
       },
       { 
         image: pendhapaPick2, 
