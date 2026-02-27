@@ -507,9 +507,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Leather Seat — Ash Bleached",
         category: "Seating",
         tags: ["Seating", "Chair"],
-        materials: "Natural stone base • Upholstered seat",
+        materials: "Upholstered leather seat • Ash bleached frame",
         dimensions: "W52 × D55 × H76 cm",
-        description: "A detail view of the Twin Indoor Chair reveals the quality of Alinea's stonework — the precise cuts, the geological variation, the weight of material that grounds every piece."
+        description: "The Twin Indoor Chair in leather and bleached ash — its considered proportions and refined materiality making it a quietly sculptural presence in any interior."
       },
       {
         image: leoAertsAngeloMMacassar,
