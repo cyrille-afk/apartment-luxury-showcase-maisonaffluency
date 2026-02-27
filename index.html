@@ -75,7 +75,7 @@
       fetch('https://api.ipify.org?format=json')
         .then(function(r){return r.json()})
         .then(function(data){
-          var excluded = ['119.234.37.60'];
+          var excluded = ['119.234.37.60', '115.66.27.101', '2001:4860:7:50d::fb'];
           if (excluded.indexOf(data.ip) === -1) {
             gtag('config', 'G-STKGNMN9CS');
           }
