@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { Instagram, Search, X, ChevronDown, ExternalLink, Star, Maximize2, Minimize2, SlidersHorizontal } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ExternalLink, Star, Maximize2, Minimize2, SlidersHorizontal, Download } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
@@ -271,7 +271,7 @@ import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler
 import rowinNoneIILamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 
 type DesignerLink = { type: string; url?: string };
-export type CuratorPick = { image?: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string };
+export type CuratorPick = { image?: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string; pdfUrl?: string };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; links?: DesignerLink[] })[] = [
@@ -1741,7 +1741,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         edition: "Edition of 18 + 2 AP",
         materials: "Glass & Aluminium",
         dimensions: "Side Table: W 50 × D 50 × H 60 cm – 33 kg\nTable M: W 70 × D 70 × H 33 cm – 45 kg\nTable L: W 90 × D 90 × H 35 cm – 66 kg",
-        description: "The Madonna Del Monte collection by Noé Duchaufour-Lawrance features a series of round tables in glass and aluminium, available in three sizes. Their sculpted glass tops evoke organic water ripple forms, combining biomorphic design with industrial precision."
+        description: "The Madonna Del Monte collection by Noé Duchaufour-Lawrance features a series of round tables in glass and aluminium, available in three sizes. Their sculpted glass tops evoke organic water ripple forms, combining biomorphic design with industrial precision.",
+        pdfUrl: "/pdfs/NDL_Editions-Madonna_Del_Monte-Round_Coffee_Table_L_1.pdf"
       },
       {
         image: noeMineralFlowerSide,
@@ -2903,6 +2904,19 @@ const FeaturedDesigners = () => {
                             </button>
                           ))}
                         </div>
+                      )}
+
+                      {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl && (
+                        <a
+                          href={(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).pdfUrl}
+                          download
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 text-xs font-body uppercase tracking-wider text-white/80 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Download PDF
+                        </a>
                       )}
 
                       <p className="mt-6 text-xs text-white font-body italic">
