@@ -1769,7 +1769,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Seating", "Sofas"],
         edition: "Edition of 12 + 4 AP",
         materials: "",
-        dimensions: "H 84 × L 392 × D 100 cm\n120 kg\nProduction lead time: 12 weeks",
+        dimensions: "H 84 × L 392 × D 100 cm – 120 kg\nProduction lead time: 12 weeks",
         description: "",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/NDL-Editions_Whisper_Large_Sofa_1.pdf",
         pdfFilename: "NDL-Editions_Whisper_Large_Sofa_1.pdf"
