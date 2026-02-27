@@ -580,8 +580,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Hand-knotted Rug",
         category: "Rugs",
         tags: ["Rugs", "Textile"],
-        materials: "Custom blend",
+        materials: "80% wool, 20% silk — 100 knots/sq. inch",
         dimensions: "Custom dimensions available",
+        description: "Created in collaboration with Francois Mascarello of Mascarello Studio."
       },
       { 
         image: atelierFevrierPick6, 
