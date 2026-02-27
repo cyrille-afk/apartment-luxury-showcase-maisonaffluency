@@ -459,7 +459,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Tables", "Dining Table"],
         materials: "Natural stone top & base • Solid American walnut",
         dimensions: "Angelo M/R 130: Ø 130 × 75 cm H — Twin Indoor: 52 × 51 × 74 cm H",
-        description: "The Angelo M/R 130 dining table is Léo Aerts' most celebrated work — a circular form in natural stone whose monolithic presence is softened by precise joinery and the warmth of solid American walnut. Shown here with the Twin Indoor Leather Seat."
+        description: "The Angelo M/R 130 dining table is Léo Aerts' most celebrated work — a circular form in natural stone whose monolithic presence is softened by precise joinery and the warmth of solid American walnut. Award-winning design table: Good Design Award – Chicago, USA (2018), People's Choice, AZ Award – Toronto, Canada (2019), German Design Award – Frankfurt, Germany (2020)."
       },
       {
         image: leoAertsAngeloMO290,
