@@ -600,8 +600,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Hand-knotted Rug",
         category: "Rugs",
         tags: ["Rugs", "Textile"],
-        materials: "Custom blend",
+        materials: "60% wool, 40% silk — 100 knots/sq. inch",
         dimensions: "Custom dimensions available",
+        description: "Inspired by the timeless work of Léon Bakst, the Ribbon rug is the result of a close collaboration between Atelier Février and de Gournay."
       },
     ],
     links: [
