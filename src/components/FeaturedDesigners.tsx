@@ -648,8 +648,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Side Table",
         category: "Tables",
         tags: ["Tables", "Side Table"],
-        materials: "Natural oak • White lacquer tabletop",
-        dimensions: "L75 × W48 × H50 cm"
+        materials: "Natural oak • White lacquer tabletop\nL75 × W48 × H50 cm\nProduction lead time: 12-14 weeks",
+        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request."
       },
       { 
         image: pendhapaPick4, 
