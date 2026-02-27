@@ -960,6 +960,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: felixAgostiniImg,
     biography: "Felix Agostini is a mid-twentieth century French designer renowned for his highly refined figural bronze lighting, created under the Charles Paris imprint. Working primarily in the 1950s and 1960s, his Grande Caryatide sconces and candelabra draw on the classical tradition of architectural figural sculpture while expressing a distinctly French post-war elegance. His pieces are now highly sought after by collectors and museums worldwide.",
     notableWorks: "Grande Caryatide Sconce (Charles Paris), Figural Bronze Candelabra, Table Lamps",
+    notableWorksLink: { text: "Etrier Bronze Table Lamp | A Jewelry Box Like Setting", galleryIndex: 9 },
     philosophy: "The figure has always been at the heart of decorative art — my work honors that tradition with modern sensibility.",
     curatorPicks: [
       { image: felixAgostiniTaureauFD, title: "Taureau Floor Lamp", category: "Lighting", tags: ["Lighting", "Floor Lamps"], materials: "Bronze base, Silk lamp shade", dimensions: "W 23 × D 20 × H 131 cm" },
