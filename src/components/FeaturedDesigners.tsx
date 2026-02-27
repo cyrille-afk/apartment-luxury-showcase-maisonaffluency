@@ -468,7 +468,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Dining Table"],
         materials: "Natural stone top & base • Solid American walnut",
-        dimensions: "L290 cm",
+        dimensions: "L 290 × H 75 cm",
         description: "The Angelo M/O 290 is a monumental oval dining table commissioned for a project by Olivier Lempereur — its elongated stone surface creating a sculptural centrepiece that anchors the room with quiet authority."
       },
       {
