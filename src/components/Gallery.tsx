@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2, Instagram, Copy } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, Minimize2, Instagram, Copy } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -198,6 +198,7 @@ const Gallery = () => {
   const [imageZoomed, setImageZoomed] = useState(false);
   const [hasTapped, setHasTapped] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
@@ -347,6 +348,7 @@ const Gallery = () => {
 
   const closeLightbox = () => {
     setLightboxOpen(false);
+    setIsExpanded(false);
     // Scroll back to the source item after closing
     if (externalSourceId) {
       setTimeout(() => {
@@ -660,17 +662,31 @@ const Gallery = () => {
 
             {/* Image container */}
             <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[calc(95vh-3.5rem)] md:max-h-[90vh]">
-              <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
-                {currentSectionItems[currentItemIndex]?.title}
-              </h3>
+              {!isExpanded && (
+                <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
+                  {currentSectionItems[currentItemIndex]?.title}
+                </h3>
+              )}
               <div className="relative inline-block shrink-0">
-                <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
-                {/* Close button */}
-                <button onClick={closeLightbox} className="absolute bottom-2 left-1 md:left-auto md:right-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm rounded-full transition-colors" aria-label="Close lightbox">
+                <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full md:max-w-full max-h-[45vh] md:max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
+                {/* Close button — top-left */}
+                <button onClick={closeLightbox} className="absolute top-1 left-1 md:left-auto md:right-2 md:top-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors" aria-label="Close lightbox">
                   <X className="h-4 w-4 text-white" />
+                </button>
+                {/* Maximize/Minimize icon — bottom-left */}
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="absolute bottom-2 left-1 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                  aria-label={isExpanded ? "Minimize image" : "Maximize image"}
+                >
+                  {isExpanded
+                    ? <Minimize2 className="w-3.5 h-3.5 text-white" />
+                    : <Maximize2 className="w-3.5 h-3.5 text-white" />
+                  }
                 </button>
               </div>
               {/* Dot indicators */}
+              {!isExpanded && (
               <div className="flex justify-center gap-1.5 mt-3 shrink-0">
                 {currentSectionItems.map((_, i) => (
                   <button
@@ -681,8 +697,9 @@ const Gallery = () => {
                   />
                 ))}
               </div>
+              )}
               {/* Description */}
-              <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
+              <div className={`mt-3 text-center shrink-0 pb-6 transition-all duration-300 ${isExpanded ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100 overflow-y-auto max-h-[20vh] scrollbar-hide'}`}>
                 <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
                   {currentSectionItems[currentItemIndex]?.description}
                 </p>
