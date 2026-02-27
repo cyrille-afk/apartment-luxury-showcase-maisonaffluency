@@ -72,14 +72,17 @@ const PinchZoomImage = ({
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    console.log("[PinchZoom] Attaching native touch listeners to", el.tagName, el.className);
 
     const handleTouchStart = (e: TouchEvent) => {
+      console.log("[PinchZoom] touchstart fires, touches:", e.touches.length, "scale:", scaleRef.current);
       if (e.touches.length === 2) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
         initialDistance.current = getDistance(e.touches);
         initialScale.current = scaleRef.current;
+        console.log("[PinchZoom] pinch start, initialDist:", initialDistance.current);
       } else if (e.touches.length === 1 && scaleRef.current > 1) {
         e.preventDefault();
         e.stopPropagation();
@@ -88,7 +91,9 @@ const PinchZoomImage = ({
         translateStart.current = { ...translateRef.current };
       } else if (e.touches.length === 1) {
         const now = Date.now();
-        if (now - lastTap.current < 300) {
+        const dt = now - lastTap.current;
+        console.log("[PinchZoom] single tap, dt since last:", dt);
+        if (dt < 300) {
           e.preventDefault();
           e.stopPropagation();
           if (scaleRef.current > 1) {
@@ -96,6 +101,7 @@ const PinchZoomImage = ({
           } else {
             setScale(2.5);
             updateZoom(true);
+            console.log("[PinchZoom] double-tap zoom IN");
           }
         }
         lastTap.current = now;
