@@ -478,7 +478,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Side Table"],
         materials: "Natural stone • Solid American walnut",
-        dimensions: "Angelo M/SR 45: Ø 45 × 62 cm H — Angelo M/SR 55: Ø 55 × 48 cm H — Angelo M/SR 80: Ø 80 × 36 cm H",
+        dimensions: "M/SR 45: Ø45 × 62cm H — M/SR 55: Ø55 × 48cm H — M/SR 80: Ø80 × 36cm H",
         description: "Available in three complementary heights, the Angelo M Side Table Collection offers a family of stone objects that work independently or together — their geological variation making each a unique specimen."
       },
       {
