@@ -380,6 +380,23 @@ const Gallery = () => {
   const swipeTouchStart = useRef<number | null>(null);
   const swipeTouchEnd = useRef<number | null>(null);
 
+  // Block all browser gesture handling on the lightbox (replaces react-remove-scroll from Radix Dialog)
+  const lightboxRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const el = lightboxRef.current;
+    if (!el) return;
+
+    const blockGesture = (e: TouchEvent) => {
+      // Always block multi-touch (pinch) at the lightbox level so browser doesn't zoom
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+    el.addEventListener("touchmove", blockGesture, { passive: false });
+    return () => el.removeEventListener("touchmove", blockGesture);
+  }, [lightboxOpen]);
+
   useEffect(() => {
     if (!lightboxOpen) return;
     const el = swipeContainerRef.current;
@@ -630,7 +647,7 @@ const Gallery = () => {
 
       {/* Lightbox - custom portal (bypasses Radix Dialog react-remove-scroll touch blocking) */}
       {lightboxOpen && createPortal(
-        <div className="fixed inset-0 z-50 bg-black/95" style={{ touchAction: "none" }} onKeyDown={handleKeyDown} tabIndex={-1} ref={(el) => el?.focus()} role="dialog" aria-modal="true" aria-label={currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}>
+        <div ref={(el) => { (lightboxRef as React.MutableRefObject<HTMLDivElement | null>).current = el; el?.focus(); }} className="fixed inset-0 z-50 bg-black/95" style={{ touchAction: "none" }} onKeyDown={handleKeyDown} tabIndex={-1} role="dialog" aria-modal="true" aria-label={currentSectionItems[currentItemIndex]?.title || 'Gallery Image'}>
           <div ref={swipeContainerRef} className="relative w-full h-full flex items-start md:items-center justify-center pt-14 md:pt-0" style={{ touchAction: "none" }}>
 
             {/* Pill indicator - top right */}
@@ -646,11 +663,11 @@ const Gallery = () => {
             </button>
 
             {/* Image container */}
-            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[calc(95vh-3.5rem)] md:max-h-[90vh]">
+            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[calc(95vh-3.5rem)] md:max-h-[90vh]" style={{ touchAction: "none" }}>
               <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
                 {currentSectionItems[currentItemIndex]?.title}
               </h3>
-              <div className="relative inline-block shrink-0">
+              <div className="relative inline-block shrink-0" style={{ touchAction: "none" }}>
                 
                 <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
                 {/* Close button */}
