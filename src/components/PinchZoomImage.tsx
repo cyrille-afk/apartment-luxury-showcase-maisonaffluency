@@ -40,6 +40,12 @@ const PinchZoomImage = ({
   const panStart = useRef({ x: 0, y: 0 });
   const translateStart = useRef({ x: 0, y: 0 });
 
+  // Refs for latest values (used in native event listeners)
+  const scaleRef = useRef(scale);
+  scaleRef.current = scale;
+  const translateRef = useRef(translate);
+  translateRef.current = translate;
+
   const updateZoom = useCallback((zoomed: boolean) => {
     setIsZoomed(zoomed);
     onZoomChange?.(zoomed);
@@ -56,79 +62,94 @@ const PinchZoomImage = ({
     resetZoom();
   }, [src, resetZoom]);
 
-  const getDistance = (touches: React.TouchList) => {
+  const getDistance = (touches: TouchList) => {
     const dx = touches[0].clientX - touches[1].clientX;
     const dy = touches[0].clientY - touches[1].clientY;
     return Math.sqrt(dx * dx + dy * dy);
   };
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 2) {
-      e.preventDefault();
-      e.stopPropagation();
-      initialDistance.current = getDistance(e.touches);
-      initialScale.current = scale;
-    } else if (e.touches.length === 1 && scale > 1) {
-      e.stopPropagation();
-      isPanning.current = true;
-      panStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      translateStart.current = { ...translate };
-    } else if (e.touches.length === 1) {
-      const now = Date.now();
-      if (now - lastTap.current < 300) {
+  // Use native (non-passive) event listeners to ensure preventDefault works
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
         e.preventDefault();
         e.stopPropagation();
-        if (scale > 1) {
-          resetZoom();
-        } else {
-          setScale(2.5);
-          updateZoom(true);
+        initialDistance.current = getDistance(e.touches);
+        initialScale.current = scaleRef.current;
+      } else if (e.touches.length === 1 && scaleRef.current > 1) {
+        e.preventDefault();
+        e.stopPropagation();
+        isPanning.current = true;
+        panStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        translateStart.current = { ...translateRef.current };
+      } else if (e.touches.length === 1) {
+        const now = Date.now();
+        if (now - lastTap.current < 300) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (scaleRef.current > 1) {
+            resetZoom();
+          } else {
+            setScale(2.5);
+            updateZoom(true);
+          }
         }
+        lastTap.current = now;
       }
-      lastTap.current = now;
-    }
-  }, [scale, translate, resetZoom, updateZoom]);
+    };
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 2) {
-      e.preventDefault();
-      e.stopPropagation();
-      const dist = getDistance(e.touches);
-      const newScale = Math.min(Math.max(initialScale.current * (dist / initialDistance.current), 1), 5);
-      setScale(newScale);
-      updateZoom(newScale > 1);
-      if (newScale <= 1) {
-        setTranslate({ x: 0, y: 0 });
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dist = getDistance(e.touches);
+        const newScale = Math.min(Math.max(initialScale.current * (dist / initialDistance.current), 1), 5);
+        setScale(newScale);
+        updateZoom(newScale > 1);
+        if (newScale <= 1) {
+          setTranslate({ x: 0, y: 0 });
+        }
+      } else if (e.touches.length === 1 && isPanning.current && scaleRef.current > 1) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dx = e.touches[0].clientX - panStart.current.x;
+        const dy = e.touches[0].clientY - panStart.current.y;
+        setTranslate({
+          x: translateStart.current.x + dx,
+          y: translateStart.current.y + dy,
+        });
       }
-    } else if (e.touches.length === 1 && isPanning.current && scale > 1) {
-      e.preventDefault();
-      e.stopPropagation();
-      const dx = e.touches[0].clientX - panStart.current.x;
-      const dy = e.touches[0].clientY - panStart.current.y;
-      setTranslate({
-        x: translateStart.current.x + dx,
-        y: translateStart.current.y + dy,
-      });
-    }
-  }, [scale, updateZoom]);
+    };
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (isPanning.current || scale > 1) {
-      e.stopPropagation();
-    }
-    isPanning.current = false;
-    if (scale <= 1.05) {
-      resetZoom();
-    }
-  }, [scale, resetZoom]);
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (isPanning.current || scaleRef.current > 1) {
+        e.stopPropagation();
+      }
+      isPanning.current = false;
+      if (scaleRef.current <= 1.05) {
+        resetZoom();
+      }
+    };
+
+    // { passive: false } is critical — allows preventDefault() to work on mobile
+    el.addEventListener("touchstart", handleTouchStart, { passive: false });
+    el.addEventListener("touchmove", handleTouchMove, { passive: false });
+    el.addEventListener("touchend", handleTouchEnd, { passive: false });
+
+    return () => {
+      el.removeEventListener("touchstart", handleTouchStart);
+      el.removeEventListener("touchmove", handleTouchMove);
+      el.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [resetZoom, updateZoom]);
 
   return (
     <div
       ref={containerRef}
       className="touch-none"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
       style={{ overflow: isZoomed ? "hidden" : undefined }}
     >
       <img
