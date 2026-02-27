@@ -2728,6 +2728,7 @@ const FeaturedDesigners = () => {
           <DialogContent 
             className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none" 
             aria-describedby={undefined}
+            hideClose
             onKeyDown={(e) => {
               if (!curatorPicksDesigner?.curatorPicks?.length) return;
               if (e.key === "ArrowLeft") {
