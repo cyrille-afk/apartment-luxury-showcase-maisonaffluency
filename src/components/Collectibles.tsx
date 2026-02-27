@@ -367,6 +367,25 @@ const Collectibles = () => {
       img.src = pick.image;
     });
   }, [curatorPicksDesigner]);
+
+  // History state: push when lightbox opens so browser back button returns to lightbox
+  useEffect(() => {
+    if (!curatorPicksDesigner) return;
+
+    window.history.pushState({ curatorPicksLightbox: true }, '');
+
+    const handlePopState = () => {
+      setCuratorPicksDesigner(null);
+      setCuratorPickIndex(0);
+      setIsZoomed(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [curatorPicksDesigner]);
+
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -477,9 +496,7 @@ const Collectibles = () => {
   };
 
   const closeCuratorPicks = () => {
-    setCuratorPicksDesigner(null);
-    setCuratorPickIndex(0);
-    setIsZoomed(false);
+    window.history.back();
   };
 
   const goToPreviousPick = () => {

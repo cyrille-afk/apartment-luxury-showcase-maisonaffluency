@@ -2091,6 +2091,24 @@ const FeaturedDesigners = () => {
     });
   }, [curatorPicksDesigner]);
 
+  // History state: push when lightbox opens so browser back button returns to lightbox
+  useEffect(() => {
+    if (!curatorPicksDesigner) return;
+
+    window.history.pushState({ curatorPicksLightbox: true }, '');
+
+    const handlePopState = () => {
+      setCuratorPicksDesigner(null);
+      setCuratorPickIndex(0);
+      setIsZoomed(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [curatorPicksDesigner]);
+
   // Helper: check if a curator pick matches the active subcategory/category filter
   const pickMatchesFilter = useMemo(() => {
     if (!selectedSubcategory && !selectedCategory) return () => true;
@@ -2763,9 +2781,8 @@ const FeaturedDesigners = () => {
           open={!!curatorPicksDesigner} 
           onOpenChange={(open) => {
             if (!open) {
-              setCuratorPicksDesigner(null);
-              setCuratorPickIndex(0);
-              setIsZoomed(false);
+              // Use history.back() to pop the state we pushed when opening
+              window.history.back();
             }
           }}
         >
@@ -2834,9 +2851,7 @@ const FeaturedDesigners = () => {
                         {/* Close button — top-left of image */}
                         <button 
                           onClick={() => {
-                            setCuratorPicksDesigner(null);
-                            setCuratorPickIndex(0);
-                            setIsZoomed(false);
+                            window.history.back();
                           }}
                           className="absolute top-1 left-1 md:left-auto md:right-2 md:top-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors" 
                           aria-label="Close lightbox"
