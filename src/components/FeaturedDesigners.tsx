@@ -1743,7 +1743,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Glass & Aluminium",
         dimensions: "Side Table: W 50 × D 50 × H 60 cm – 33 kg\nTable M: W 70 × D 70 × H 33 cm – 45 kg\nTable L: W 90 × D 90 × H 35 cm – 66 kg",
         description: "The Madonna Del Monte collection by Noé Duchaufour-Lawrance features a series of round tables in glass and aluminium, available in three sizes. Their sculpted glass tops evoke organic water ripple forms, combining biomorphic design with industrial precision.",
-        pdfUrl: "/pdfs/NDL_Editions-Madonna_Del_Monte-Round_Coffee_Table_L_1.pdf"
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/NDL_Editions-Madonna_Del_Monte-Round_Coffee_Table_L_1.pdf"
       },
       {
         image: noeMineralFlowerSide,
