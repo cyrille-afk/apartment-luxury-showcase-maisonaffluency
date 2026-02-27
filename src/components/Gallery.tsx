@@ -387,17 +387,12 @@ const Gallery = () => {
     const handleSwipeStart = (e: TouchEvent) => {
       if (imageZoomedRef.current) return;
       if (e.touches.length > 1) return;
-      // Skip if touch is on the pinch-zoom image
-      const target = e.target as HTMLElement;
-      if (target.closest('.touch-none')) return;
       swipeTouchEnd.current = null;
       swipeTouchStart.current = e.touches[0].clientX;
     };
     const handleSwipeMove = (e: TouchEvent) => {
       if (imageZoomedRef.current) return;
       if (e.touches.length > 1) return;
-      const target = e.target as HTMLElement;
-      if (target.closest('.touch-none')) return;
       swipeTouchEnd.current = e.touches[0].clientX;
     };
     const handleSwipeEnd = () => {
