@@ -2765,18 +2765,6 @@ const FeaturedDesigners = () => {
                     }
                   }}
                 >
-                  {/* Close button */}
-                  <button 
-                    onClick={() => {
-                      setCuratorPicksDesigner(null);
-                      setCuratorPickIndex(0);
-                      setIsZoomed(false);
-                    }}
-                    className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
-                    aria-label="Close lightbox"
-                  >
-                    <X className="h-4 w-4 text-white" />
-                  </button>
 
                   {/* Image container */}
                   <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
@@ -2796,6 +2784,18 @@ const FeaturedDesigners = () => {
                         </div>
                       )}
                       <div className="relative inline-block">
+                        {/* Close button — top-left of image */}
+                        <button 
+                          onClick={() => {
+                            setCuratorPicksDesigner(null);
+                            setCuratorPickIndex(0);
+                            setIsZoomed(false);
+                          }}
+                          className="absolute top-1 left-1 md:left-auto md:right-2 md:top-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors" 
+                          aria-label="Close lightbox"
+                        >
+                          <X className="h-4 w-4 text-white" />
+                        </button>
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image ? (
                           <PinchZoomImage 
                             key={curatorPickIndex}
