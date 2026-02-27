@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
-import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Star, Maximize2, Minimize2, Share2 } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Star, Maximize2, Minimize2, Share2, Download } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -2214,9 +2214,37 @@ const BrandsAteliers = () => {
                         >
                           <X className="h-4 w-4 text-white" />
                         </button>
+                        {(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl && (
+                          <button
+                            className="absolute bottom-2 right-2 md:right-10 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                            aria-label="Download PDF"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const pick = picksDesigner.curatorPicks[picksIndex] as any;
+                              const url = pick.pdfUrl as string;
+                              const filename = pick.pdfFilename || `Maison_Affluency-${(pick.title as string).replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
+                              try {
+                                const res = await fetch(url);
+                                const blob = await res.blob();
+                                const blobUrl = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = blobUrl;
+                                a.download = filename;
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
+                                URL.revokeObjectURL(blobUrl);
+                              } catch {
+                                window.open(url, '_blank');
+                              }
+                            }}
+                          >
+                            <Download className="w-3.5 h-3.5 text-white" />
+                          </button>
+                        )}
                         <button
                           onClick={() => setPicksZoomed(!picksZoomed)}
-                          className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                          className={`absolute bottom-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'right-12 md:right-2' : 'right-2'}`}
                           aria-label={picksZoomed ? "Minimize image" : "Maximize image"}
                         >
                           {picksZoomed ? <Minimize2 className="w-3.5 h-3.5 text-white" /> : <Maximize2 className="w-3.5 h-3.5 text-white" />}
