@@ -67,8 +67,8 @@ const noeMineralFlowerCoffee = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.42.29_
 const leoAertsAngeloMCollection = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.35.13_AM_jwbivd", { width: 1600, quality: "auto:good", crop: "fill" });
 const leoAertsAngeloMDining = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.09.13_AM_z727ht", { width: 1600, quality: "auto:good", crop: "fill" });
 const leoAertsVitrineCabinet = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.49_AM_bj59um", { width: 1600, quality: "auto:good", crop: "fill" });
-import leoAertsOutdoorChair from "@/assets/curators-picks/leo-aerts-outdoor-chair.jpg";
-const leoAertsTwinChairIndoor = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.00_AM_msurq2", { width: 1600, quality: "auto:good", crop: "fill" });
+const leoAertsTwinChairOutdoor = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.00_AM_msurq2", { width: 1600, quality: "auto:good", crop: "fill" });
+const leoAertsTwinChairIndoor = cloudinaryUrl("Screen_Shot_2026-02-27_at_8.41.52_PM_wlksfq", { width: 1600, quality: "auto:good", crop: "fill" });
 const leoAertsAngeloMMacassar = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.06.14_AM_azdcae", { width: 1600, quality: "auto:good", crop: "fill" });
 const leoAertsAngeloMO290 = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.08.42_AM_xr4vun", { width: 1600, quality: "auto:good", crop: "fill" });
 import forestGiaconiaIhiLamp from "@/assets/curators-picks/forest-giaconia-ihi-floor-lamp.jpg";
@@ -492,7 +492,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "The Visible M Horizontal display cabinet is a study in material honesty — its stone surfaces and walnut structure creating a piece that showcases objects as beautifully as it stores them."
       },
       {
-        image: leoAertsOutdoorChair,
+        image: leoAertsTwinChairOutdoor,
         title: "Twin Chair",
         subtitle: "Outdoor",
         category: "Seating",
@@ -503,8 +503,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       {
         image: leoAertsTwinChairIndoor,
-        title: "Twin Chair",
-        subtitle: "Indoor Detail",
+        title: "Twin Chair Indoor",
+        subtitle: "Leather Seat — Ash Bleached",
         category: "Seating",
         tags: ["Seating", "Chair"],
         materials: "Natural stone base • Upholstered seat",
