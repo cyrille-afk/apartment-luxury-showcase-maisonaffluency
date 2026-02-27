@@ -76,15 +76,15 @@ const PinchZoomImage = ({
 
     const handleTouchStart = (e: TouchEvent) => {
       console.log("[PinchZoom] touchstart fires, touches:", e.touches.length, "scale:", scaleRef.current);
+      // Always prevent default to stop the browser from claiming the gesture
+      e.preventDefault();
       if (e.touches.length === 2) {
-        e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
         initialDistance.current = getDistance(e.touches);
         initialScale.current = scaleRef.current;
         console.log("[PinchZoom] pinch start, initialDist:", initialDistance.current);
       } else if (e.touches.length === 1 && scaleRef.current > 1) {
-        e.preventDefault();
         e.stopPropagation();
         isPanning.current = true;
         panStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -94,7 +94,6 @@ const PinchZoomImage = ({
         const dt = now - lastTap.current;
         console.log("[PinchZoom] single tap, dt since last:", dt);
         if (dt < 300) {
-          e.preventDefault();
           e.stopPropagation();
           if (scaleRef.current > 1) {
             resetZoom();
