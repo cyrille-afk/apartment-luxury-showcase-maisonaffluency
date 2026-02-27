@@ -2860,7 +2860,7 @@ const FeaturedDesigners = () => {
                         {/* PDF download — bottom-right on image */}
                         {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl && (
                           <button
-                            className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                            className="absolute bottom-2 right-2 md:right-10 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
                             aria-label="Download PDF"
                             onClick={async (e) => {
                               e.stopPropagation();
