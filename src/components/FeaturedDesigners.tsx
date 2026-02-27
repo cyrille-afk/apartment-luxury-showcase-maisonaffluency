@@ -271,7 +271,7 @@ import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler
 import rowinNoneIILamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 
 type DesignerLink = { type: string; url?: string };
-export type CuratorPick = { image?: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string; pdfUrl?: string };
+export type CuratorPick = { image?: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string; pdfUrl?: string; pdfFilename?: string };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; links?: DesignerLink[] })[] = [
@@ -1732,7 +1732,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Marble",
         dimensions: "W 121 × D 114 × H 46,5 cm – 180 kg",
         description: "The Mineral Flower Coffee Table by Noé Duchaufour-Lawrance is a monumental marble coffee table composed of sweeping, overlapping stone petals. Its sculptural silhouette transforms raw marble into a fluid, flower-inspired centrepiece of extraordinary presence.",
-        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/NDL_Editions-Mineral_Flower_Coffee_Table.pdf"
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/NDL_Editions-Mineral_Flower_Coffee_Table.pdf",
+        pdfFilename: "NDL-Edition_Mineral Flower Coffee Table_2019.pdf"
       },
       {
         image: noeDuchaufourMadonnaTables,
@@ -2836,8 +2837,7 @@ const FeaturedDesigners = () => {
                               e.stopPropagation();
                               const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
                               const url = pick.pdfUrl as string;
-                              const title = (pick.title as string).replace(/[^a-zA-Z0-9]+/g, '_');
-                              const filename = `Maison_Affluency-${title}.pdf`;
+                              const filename = pick.pdfFilename || `Maison_Affluency-${(pick.title as string).replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
                               try {
                                 const res = await fetch(url);
                                 const blob = await res.blob();
