@@ -621,8 +621,8 @@ const Gallery = () => {
               <ChevronLeft className="h-8 w-8 text-white" />
             </button>
 
-            {/* Scrollable image + legend container */}
-            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 overflow-y-auto max-h-[calc(95vh-3.5rem)] md:max-h-[90vh] scrollbar-hide">
+            {/* Image container - OUTSIDE scroll container so touch events work */}
+            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 max-h-[calc(95vh-3.5rem)] md:max-h-[90vh]">
               <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
                 {currentSectionItems[currentItemIndex]?.title}
               </h3>
@@ -645,7 +645,8 @@ const Gallery = () => {
                   />
                 ))}
               </div>
-              <div className="mt-3 text-center shrink-0 pb-6">
+              {/* Scrollable description only */}
+              <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
                 <p className="text-sm md:text-base text-white/70 font-body max-w-2xl text-justify">
                   {currentSectionItems[currentItemIndex]?.description}
                 </p>
