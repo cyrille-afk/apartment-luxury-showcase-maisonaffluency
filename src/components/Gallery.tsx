@@ -377,15 +377,22 @@ const Gallery = () => {
     if (e.key === "ArrowRight") goToNext();
     if (e.key === "Escape") closeLightbox();
   };
+  // Check if touch is on the pinch-zoom image container (don't hijack those touches)
+  const isTouchOnPinchZoom = (e: React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+    return !!target.closest('.touch-none');
+  };
   const onTouchStart = (e: React.TouchEvent) => {
     if (imageZoomedRef.current) return;
-    if (e.touches.length > 1) return; // Don't interfere with pinch
+    if (e.touches.length > 1) return;
+    if (isTouchOnPinchZoom(e)) return; // Let PinchZoomImage handle it
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
   const onTouchMove = (e: React.TouchEvent) => {
     if (imageZoomedRef.current) return;
-    if (e.touches.length > 1) return; // Don't interfere with pinch
+    if (e.touches.length > 1) return;
+    if (isTouchOnPinchZoom(e)) return;
     setTouchEnd(e.targetTouches[0].clientX);
   };
   const onTouchEnd = () => {
