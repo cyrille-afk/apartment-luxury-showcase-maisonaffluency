@@ -2823,6 +2823,21 @@ const FeaturedDesigners = () => {
                           </p>
                         )}
 
+                        {/* PDF download — top-right on image */}
+                        {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl && (
+                          <a
+                            href={(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).pdfUrl}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="absolute top-1 right-1 md:top-2 md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                            aria-label="Download PDF"
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <Download className="w-3.5 h-3.5 text-white" />
+                          </a>
+                        )}
+
                         {/* Maximize/Minimize icon — clickable, bottom-right */}
                         <button
                           onClick={() => setIsZoomed(!isZoomed)}
@@ -2906,18 +2921,8 @@ const FeaturedDesigners = () => {
                         </div>
                       )}
 
-                      {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl && (
-                        <a
-                          href={(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).pdfUrl}
-                          download
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 text-xs font-body uppercase tracking-wider text-white/80 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full transition-colors"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Download PDF
-                        </a>
-                      )}
+
+
 
                       <p className="mt-6 text-xs text-white font-body italic">
                         For further details, please contact{" "}
