@@ -1772,6 +1772,19 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/NDL-Editions_Whisper_Large_Sofa_1.pdf",
         pdfFilename: "NDL-Editions_Whisper_Large_Sofa_1.pdf"
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good/v1772193015/Screen_Shot_2026-02-27_at_7.49.36_PM_xtpnov.png",
+        title: "Nazaré Suspension II Pendant Lamp",
+        subtitle: "Bronze",
+        category: "Lighting",
+        tags: ["Lighting", "Pendant Lamps"],
+        edition: "Edition of 12",
+        materials: "Bronze",
+        dimensions: "W 146 × D 146 × H 100 cm\n80 kg\nProduction lead time: 16 weeks",
+        description: "",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/NDL_Editions_Nazare_Lamp_II_1.pdf",
+        pdfFilename: "NDL_Editions_Nazare_Lamp_II_1.pdf"
+      },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/noeduchaufourlawrance/" },
