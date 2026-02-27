@@ -2824,14 +2824,14 @@ const FeaturedDesigners = () => {
                           </p>
                         )}
 
-                        {/* PDF download — top-right on image */}
+                        {/* PDF download — bottom-right on image */}
                         {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl && (
                           <a
                             href={(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).pdfUrl}
                             download
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="absolute top-1 right-1 md:top-2 md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                            className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
                             aria-label="Download PDF"
                             onClick={e => e.stopPropagation()}
                           >
