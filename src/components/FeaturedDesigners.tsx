@@ -1753,7 +1753,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Tables", "Side Tables"],
         materials: "Marble",
         dimensions: "W 47,8 × D 61,5 × H 53 cm – 50 kg",
-        description: "The Mineral Flower Side Table II by Noé Duchaufour-Lawrance is a sculptural marble side table whose interlocking petal-like forms evoke natural stone erosion. Each piece is carved from a single block, celebrating the raw beauty of marble through organic, biomorphic geometry."
+        description: "The Mineral Flower Side Table II by Noé Duchaufour-Lawrance is a sculptural marble side table whose interlocking petal-like forms evoke natural stone erosion. Each piece is carved from a single block, celebrating the raw beauty of marble through organic, biomorphic geometry.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/NDL_Editions-Mineral_Flower_Side_Table_II.pdf"
       },
     ],
     links: [
