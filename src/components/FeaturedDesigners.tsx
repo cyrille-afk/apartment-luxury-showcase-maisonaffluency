@@ -517,7 +517,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Leather Seat — Ash Bleached",
         category: "Seating",
         tags: ["Seating", "Chair"],
-        materials: "Upholstered leather seat • Ash bleached frame",
+        materials: "Upholstered leather seat • Ash bleached frame\n(Also available in ashwood light gray, ashwood mid gray, ashwood dark brown, ashwood black, walnut)",
         dimensions: "W52 × D55 × H76 cm",
         description: "The Twin Indoor Chair in leather and bleached ash — its considered proportions and refined materiality making it a quietly sculptural presence in any interior."
       },
