@@ -77,6 +77,7 @@ const PinchZoomImage = ({
       if (e.touches.length === 2) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         initialDistance.current = getDistance(e.touches);
         initialScale.current = scaleRef.current;
       } else if (e.touches.length === 1 && scaleRef.current > 1) {
@@ -105,6 +106,7 @@ const PinchZoomImage = ({
       if (e.touches.length === 2) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         const dist = getDistance(e.touches);
         const newScale = Math.min(Math.max(initialScale.current * (dist / initialDistance.current), 1), 5);
         setScale(newScale);

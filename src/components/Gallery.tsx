@@ -372,11 +372,13 @@ const Gallery = () => {
   };
   const onTouchStart = (e: React.TouchEvent) => {
     if (imageZoomedRef.current) return;
+    if (e.touches.length > 1) return; // Don't interfere with pinch
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
   const onTouchMove = (e: React.TouchEvent) => {
     if (imageZoomedRef.current) return;
+    if (e.touches.length > 1) return; // Don't interfere with pinch
     setTouchEnd(e.targetTouches[0].clientX);
   };
   const onTouchEnd = () => {
@@ -620,7 +622,7 @@ const Gallery = () => {
             </button>
 
             {/* Scrollable image + legend container */}
-            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 overflow-y-auto max-h-[calc(95vh-3.5rem)] md:max-h-[90vh] scrollbar-hide">
+            <div className="flex flex-col items-center w-full md:max-w-[90vw] px-4 md:px-16 pt-2 md:pt-0 overflow-y-auto max-h-[calc(95vh-3.5rem)] md:max-h-[90vh] scrollbar-hide touch-pan-y">
               <h3 className="text-xl md:text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
                 {currentSectionItems[currentItemIndex]?.title}
               </h3>
