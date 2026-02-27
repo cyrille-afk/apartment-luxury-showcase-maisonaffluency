@@ -1777,7 +1777,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good/v1772193015/Screen_Shot_2026-02-27_at_7.49.36_PM_xtpnov.png",
         title: "Nazaré Suspension II Pendant Lamp",
-        subtitle: "Bronze",
+        subtitle: "",
         category: "Lighting",
         tags: ["Lighting", "Pendant Lamps"],
         edition: "Edition of 12",
