@@ -2829,17 +2829,33 @@ const FeaturedDesigners = () => {
 
                         {/* PDF download — bottom-right on image */}
                         {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl && (
-                          <a
-                            href={(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).pdfUrl}
-                            download
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
                             className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
                             aria-label="Download PDF"
-                            onClick={e => e.stopPropagation()}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
+                              const url = pick.pdfUrl as string;
+                              const title = (pick.title as string).replace(/[^a-zA-Z0-9]+/g, '_');
+                              const filename = `Maison_Affluency-${title}.pdf`;
+                              try {
+                                const res = await fetch(url);
+                                const blob = await res.blob();
+                                const blobUrl = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = blobUrl;
+                                a.download = filename;
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
+                                URL.revokeObjectURL(blobUrl);
+                              } catch {
+                                window.open(url, '_blank');
+                              }
+                            }}
                           >
                             <Download className="w-3.5 h-3.5 text-white" />
-                          </a>
+                          </button>
                         )}
 
                         {/* Maximize/Minimize icon — clickable, bottom-right */}
