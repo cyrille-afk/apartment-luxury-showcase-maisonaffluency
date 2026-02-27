@@ -627,7 +627,7 @@ const Gallery = () => {
                 <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className="w-full md:max-w-full max-h-[45vh] md:max-h-[65vh] object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-200" loading="eager" decoding="async" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
                 {/* Zoom icon - top left on mobile only, hidden when zoomed */}
                 {!imageZoomed && (
-                  <div className="absolute top-2 left-1 z-50 p-1.5 bg-black/60 backdrop-blur-sm rounded-full md:hidden pointer-events-none">
+                  <div className="absolute bottom-2 right-1 z-50 p-1.5 bg-black/60 backdrop-blur-sm rounded-full md:hidden pointer-events-none">
                     <ZoomIn className="h-4 w-4 text-white" />
                   </div>
                 )}
