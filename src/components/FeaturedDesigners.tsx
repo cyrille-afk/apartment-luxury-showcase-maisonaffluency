@@ -502,16 +502,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "The Twin Outdoor Chair extends Alinea's material sensibility to the exterior — its robust construction and considered proportions making it as much at home on a terrace as in an interior."
       },
       {
-        image: leoAertsTwinChairIndoor,
-        title: "Twin Chair Indoor",
-        subtitle: "Leather Seat — Ash Bleached",
-        category: "Seating",
-        tags: ["Seating", "Chair"],
-        materials: "Upholstered leather seat • Ash bleached frame",
-        dimensions: "W52 × D55 × H76 cm",
-        description: "The Twin Indoor Chair in leather and bleached ash — its considered proportions and refined materiality making it a quietly sculptural presence in any interior."
-      },
-      {
         image: leoAertsAngeloMMacassar,
         title: "Angelo W",
         subtitle: "Limited Edition of 7",
@@ -520,6 +510,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Macassar ebony veneer • Natural stone",
         dimensions: "Custom",
         description: "The Angelo W is a strictly limited edition of seven pieces — its Macassar ebony veneer surface paired with a natural stone base to create a collectible of extraordinary rarity and beauty."
+      },
+      {
+        image: leoAertsTwinChairIndoor,
+        title: "Twin Chair Indoor",
+        subtitle: "Leather Seat — Ash Bleached",
+        category: "Seating",
+        tags: ["Seating", "Chair"],
+        materials: "Upholstered leather seat • Ash bleached frame",
+        dimensions: "W52 × D55 × H76 cm",
+        description: "The Twin Indoor Chair in leather and bleached ash — its considered proportions and refined materiality making it a quietly sculptural presence in any interior."
       },
     ],
     links: [
