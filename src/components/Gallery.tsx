@@ -680,12 +680,14 @@ const Gallery = () => {
                 ) : (
                   <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full md:max-w-full max-h-[45vh] md:max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
                 )}
-                {/* Close button — hidden on mobile */}
-                {!isMobile && (
-                  <button onClick={closeLightbox} className={`absolute top-1 left-1 md:left-auto md:right-2 md:top-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors ${isExpanded ? 'hidden md:flex' : ''}`} aria-label="Close lightbox">
-                    <X className="h-4 w-4 text-white" />
-                  </button>
-                )}
+                {/* Close button */}
+                <button
+                  onClick={closeLightbox}
+                  className={`absolute top-2 left-2 md:left-auto md:right-2 md:top-2 z-50 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors ${isExpanded ? 'md:hidden' : ''}`}
+                  aria-label="Close lightbox"
+                >
+                  <X className="h-5 w-5 md:h-4 md:w-4 text-white" />
+                </button>
                 {/* Maximize icon — hidden on mobile */}
                 {!isMobile && !isExpanded && (
                   <button
