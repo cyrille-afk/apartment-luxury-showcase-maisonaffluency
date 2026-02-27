@@ -657,8 +657,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Coffee Table",
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
-        materials: "Black oak • Black lacquer tabletop",
-        dimensions: "L110 × W80 × H35 cm"
+        materials: "Black oak • Black lacquer tabletop\nL110 × W80 × H35 cm\nProduction lead time: 14-16 weeks",
+        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request."
       },
       { 
         image: pendhapaPick5, 
