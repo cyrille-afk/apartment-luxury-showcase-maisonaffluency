@@ -28,10 +28,10 @@ const sections = [
 
 // Map active section to a desktop vertical position (CSS top value)
 const sectionPositionMap: Record<string, string> = {
-  gallery: "30%",       // Align with first row of gallery images
-  "sociable-environment": "30%",
+  gallery: "45%",       // Align with first row of gallery images
+  "sociable-environment": "45%",
 };
-const defaultDesktopTop = "50%";
+const defaultDesktopTop = "65%";
 
 const QuickJumpMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -169,7 +169,7 @@ const QuickJumpMenu = () => {
           onClick={() => setIsOpen(!isOpen)}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
-          className={`relative flex items-center justify-center w-11 h-11 rounded-full shadow-2xl transition-all duration-300 touch-manipulation ${
+          className={`relative flex items-center justify-center w-13 h-13 rounded-full shadow-2xl transition-all duration-300 touch-manipulation ${
             isOpen
               ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-primary/30"
               : "bg-gradient-to-br from-card to-card/90 backdrop-blur-md border border-primary/30 text-primary hover:border-primary/50 hover:shadow-primary/20"
