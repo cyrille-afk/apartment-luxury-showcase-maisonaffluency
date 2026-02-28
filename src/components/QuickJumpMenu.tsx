@@ -106,7 +106,7 @@ const QuickJumpMenu = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-14 right-0 mb-2 bg-card/95 backdrop-blur-md border border-border/40 rounded-xl shadow-lg overflow-hidden min-w-[140px]"
+            className="absolute bottom-12 right-0 mb-2 bg-card/95 backdrop-blur-md border border-border/40 rounded-xl shadow-lg overflow-hidden min-w-[130px]"
           >
             <div className="py-2">
               {sections.map((section) => {
@@ -116,13 +116,13 @@ const QuickJumpMenu = () => {
                   <button
                     key={section.id}
                     onClick={() => scrollToSection(section.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-body transition-colors duration-200 touch-manipulation ${
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-body transition-colors duration-200 touch-manipulation ${
                       isActive
                         ? "bg-primary/10 text-primary"
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                     }`}
                   >
-                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    <Icon className="h-3.5 w-3.5 flex-shrink-0" />
                     <span className="truncate">{section.label}</span>
                     {isActive && (
                       <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
@@ -148,7 +148,7 @@ const QuickJumpMenu = () => {
           onClick={() => setIsOpen(!isOpen)}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
-          className={`relative flex items-center justify-center w-14 h-14 rounded-full shadow-2xl transition-all duration-300 touch-manipulation ${
+          className={`relative flex items-center justify-center w-11 h-11 rounded-full shadow-2xl transition-all duration-300 touch-manipulation ${
             isOpen
               ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-primary/30"
               : "bg-gradient-to-br from-card to-card/90 backdrop-blur-md border border-primary/30 text-primary hover:border-primary/50 hover:shadow-primary/20"
@@ -164,7 +164,7 @@ const QuickJumpMenu = () => {
               exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </motion.div>
           ) : (
             <motion.div
