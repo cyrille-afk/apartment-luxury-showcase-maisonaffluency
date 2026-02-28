@@ -1243,7 +1243,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "garnier-linker",
-    name: "Garnier & Linker",
+    name: "Garnier & Linker - Guillaume Garnier et Florent Linker",
     specialty: "Lost-Wax Crystal & Sculptural Glass Objects",
     image: garnierLinkerImg,
     biography: "Guillaume Garnier and Florent Linker are two French creators based in Paris. Their work is about giving a contemporary design to rare materials and savoir-faire. All pieces are handmade in small series by French master craftsmen. As designers, they draw inspiration from both decorative arts and sculpture to create pure-shaped forms that reveal their materiality. With their background in interior design, they offer objects that are as comfortable in a gallery as in a private home.",
