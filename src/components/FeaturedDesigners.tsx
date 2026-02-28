@@ -1019,7 +1019,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "Founded by the Macheret family in central France, Entrelacs is an artisan foundry where bronze and alabaster—materials inherited from the origins of our world—are crafted into timeless, pared-down expressions. Yves Macheret, who has been running the foundry with his brother Paul since 2015, trained alongside his father to master all techniques of bronze work: modelling, mould-making, casting, chasing, and patination. His vision to create minimal lighting designs at accessible prices has naturally steered him towards a timeless aesthetic that fully expresses the beauty and simplicity of these noble materials.",
     notableWorks: "Bronze & Alabaster Lighting Collection, Martell Wall Lamp",
-    notableWorksLink: { text: "Martell Wall Lamp | An Artistic Statement", galleryIndex: 16 },
+    notableWorksLink: { text: "Martell Wall Lamp", galleryIndex: 16 },
     philosophy: "Revealing the beauty and simplicity of bronze, making exceptional craftsmanship accessible while honoring a heritage passed down from father to son.",
     curatorPicks: [
       { 
@@ -1094,7 +1094,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: felixAgostiniImg,
     biography: "Felix Agostini is a mid-twentieth century French designer renowned for his highly refined figural bronze lighting, created under the Charles Paris imprint. Working primarily in the 1950s and 1960s, his Grande Caryatide sconces and candelabra draw on the classical tradition of architectural figural sculpture while expressing a distinctly French post-war elegance. His pieces are now highly sought after by collectors and museums worldwide.",
     notableWorks: "Grande Caryatide Sconce (Charles Paris), Figural Bronze Candelabra, Table Lamps",
-    notableWorksLink: { text: "Etrier Bronze Table Lamp | A Jewelry Box Like Setting", galleryIndex: 9 },
+    notableWorksLink: { text: "Etrier Bronze Table Lamp", galleryIndex: 9 },
     philosophy: "The figure has always been at the heart of decorative art — my work honors that tradition with modern sensibility.",
     curatorPicks: [
       { image: felixAgostiniTaureauFD, title: "Taureau Floor Lamp", category: "Lighting", tags: ["Lighting", "Floor Lamps"], materials: "Bronze base, Silk lamp shade", dimensions: "W 23 × D 20 × H 131 cm" },
@@ -1608,7 +1608,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography:
       "French designer Leo Sentou is a contemporary classicist whose debut capsule collection pays homage to the elegance and sophistication of eighteenth-century French decorative arts. His pieces are rooted in tradition yet unequivocally modern, reducing classical forms to their essential shapes while elevating them with a refined palette of limed oak, wrought iron, bronze, mohair, linen and lacquer.",
     notableWorks: "Fauteuil L.D (oval bergère), Side Table L.A, Chair G.J, AB Armchair",
-    notableWorksLink: { text: "AB Armchair | A Sun Lit Reading Corner", galleryIndex: 3 },
+    notableWorksLink: { text: "AB Armchair", galleryIndex: 3 },
     philosophy: "Elegance means elimination. An interior ought to tell a story, with a balance between old and new, light and dark.",
     curatorPicks: [
       {
@@ -1694,7 +1694,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     biography: "Man of Parts is a Hamburg-based design brand founded by Stephan Weishaupt, co-founder of the design magazine Wallpaper*. The brand commissions furniture and objects from leading international designers — including Yabu Pushelberg, Sebastian Herkner, and Osvaldo Tenório — producing pieces of exceptional quality that bridge the gallery and the home. Each collection reflects a distinct design vision united by the pursuit of craft excellence.",
     notableWorks: "Lombard Street Sofa (Yabu Pushelberg), Mainkai Lamp (Sebastian Herkner), Rua Tucumã Tables",
     notableWorksLinks: [
-      { text: "Yabu Pushelberg's Park Place Bar/Counter Stool | Golden Hour", galleryIndex: 19 },
+      { text: "Yabu Pushelberg's Park Place Bar/Counter Stool", galleryIndex: 19 },
     ],
     philosophy: "We believe in furniture made with integrity — pieces conceived by great designers and realized by the best craftspeople in the world.",
     curatorPicks: [
@@ -1721,7 +1721,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       "Milan Pekař is a Czech glass artist renowned for his mastery of crystalline glass techniques. His Crystalline Vase collection showcases his exceptional skill in creating pieces that capture and refract light in mesmerizing ways. Working in the tradition of Bohemian glassmaking while pushing contemporary boundaries, his work transforms functional vessels into sculptural art.",
     notableWorks: "Crystalline Vase Collection, Crystalline Volume Series, Sculptural Glass Vessels",
     notableWorksLinks: [
-      { text: "Crystalline Vase — Volume 5 | Yellow Crystalline", galleryIndex: 18 },
+      { text: "Crystalline Vase — Volume 5", galleryIndex: 18 },
       { text: "Crystalline Vase — Volume 3", galleryIndex: 5 },
     ],
     
@@ -1886,7 +1886,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: pierreBonnefulleImg,
     biography: "Pierre Bonnefille is a French artist, painter, designer and 'Maître d'Art' — a title awarded by the French Ministry of Culture to masters of exceptional craft. A graduate of École Boulle and École Nationale Supérieure des Arts Décoratifs, he creates his own materials from mineral powder, limestone, lava, marble, earth, natural pigments and metallic powders. His Bronze Paintings are monumental works where material and color become inseparable. His collaboration with Olivier Gagnère on the Café Marly at the Musée du Louvre first brought him widespread international attention.",
     notableWorks: "Bronze Painting 204, 2023 (130 x 130 cm), Café Marly at the Louvre, Mineral Painting Series",
-    notableWorksLink: { text: "Bronze Painting 204, 2023 | A Design Treasure Trove", galleryIndex: 11 },
+    notableWorksLink: { text: "Bronze Painting 204, 2023", galleryIndex: 11 },
     philosophy: "The material, colors and light are inseparable in my work. I create my own textures from the earth itself.",
     curatorPicks: [
       { image: pierreBonnefilleMetamorphosisLamps, title: "Metamorphosis Lamps A&B", category: "Lighting", subcategory: "Table Lamps", tags: ["Lighting", "Table Lamps"], materials: "Table lamp in mixed media on wood. Patinated brass with burnished bronze or burnished copper finish\nBespoke Dimensions and Colours upon request", dimensions: "W 16 × D 30 × H 59 cm / Lampshade Ø 30 × H 25 cm", photoCredit: "Luca Bonnefille" },
@@ -1993,7 +1993,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: tristanAuerImg,
     biography: "Tristan Auer is a Paris-based interior architect and designer who trained at ESAG Paris before collaborating with Christian Liaigre and Philippe Starck on landmark international projects. In 2002 he founded his own agency, going on to design the lobbies of leading luxury hotels across Europe. His Veronese furniture collection — produced by the prestigious French manufacturer of the same name — distils his signature aesthetic: architectural rigour, noble materials, and a quietly bold luxury.",
     notableWorks: "Veronese Furniture Collection, Hotel Wilson — Paris, Les Ambassadeurs — Paris",
-    notableWorksLink: { text: "YSA Wall Lamp for Véronèse | Light & Focus", galleryIndex: 22 },
+    notableWorksLink: { text: "YSA Wall Lamp for Véronèse", galleryIndex: 22 },
     philosophy: "Luxury is not about excess. It's about the perfect choice of material, proportion and light — doing more with less.",
     curatorPicks: [
       {
