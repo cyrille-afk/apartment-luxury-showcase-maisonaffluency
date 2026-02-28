@@ -1,23 +1,14 @@
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
-const heroImageMobile = cloudinaryUrl("living-room-hero_zxfcxl", { width: 400, quality: "auto:good", crop: "fill" });
-const heroImageDesktop = cloudinaryUrl("living-room-hero_zxfcxl", { width: 1200, quality: "auto:good", crop: "fill" });
+// Use a single fallback src (smallest useful size); srcSet handles responsive selection
+const heroImageFallback = cloudinaryUrl("living-room-hero_zxfcxl", { width: 400, quality: "auto:good", crop: "fill" });
 const heroSrcSet = cloudinarySrcSet("living-room-hero_zxfcxl", [400, 600, 828, 1200, 1600], { quality: "auto:good", crop: "fill" });
 
 const Hero = () => {
   const ref = useRef<HTMLElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-
-  useEffect(() => {
-    const mql = window.matchMedia("(max-width: 767px)");
-    const onChange = () => setIsMobile(mql.matches);
-    onChange();
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -31,7 +22,7 @@ const Hero = () => {
       {/* Static image container for fastest LCP — no motion wrapper delays */}
       <div className="absolute inset-0">
         <img 
-          src={isMobile ? heroImageMobile : heroImageDesktop}
+          src={heroImageFallback}
           srcSet={heroSrcSet}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
           alt="Luxury living room with Asian-inspired murals and designer furniture" 
