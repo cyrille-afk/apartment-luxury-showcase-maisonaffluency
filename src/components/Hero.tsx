@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { Instagram, Gem } from "lucide-react";
+import { Gem } from "lucide-react";
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 const heroImage = cloudinaryUrl("living-room-hero_zxfcxl", { width: 828, quality: "auto:good", crop: "fill" });
 const heroSrcSet = cloudinarySrcSet("living-room-hero_zxfcxl", [480, 828, 1200, 1600, 2400], { quality: "auto:good", crop: "fill" });
@@ -8,6 +8,7 @@ const heroSrcSet = cloudinarySrcSet("living-room-hero_zxfcxl", [480, 828, 1200, 
 const Hero = () => {
   const ref = useRef<HTMLElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -25,7 +26,8 @@ const Hero = () => {
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.3]);
 
   return <section ref={ref} className="relative h-screen w-full overflow-hidden">
-      <motion.div className="absolute inset-0" style={isMobile ? {} : { y }}>
+      {/* Static image container for fastest LCP — no motion wrapper delays */}
+      <div className="absolute inset-0">
         <img 
           src={heroImage}
           srcSet={heroSrcSet}
@@ -36,9 +38,10 @@ const Hero = () => {
           loading="eager"
           fetchPriority="high"
           decoding="sync"
+          onLoad={() => setImageLoaded(true)}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
-      </motion.div>
+      </div>
       
       <div className="relative z-10 h-full px-4 pb-32 pt-[50%] md:px-12 md:pb-20 md:pt-[18%] lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <motion.div initial={{
