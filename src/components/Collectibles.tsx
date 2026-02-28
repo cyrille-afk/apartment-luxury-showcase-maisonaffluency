@@ -1036,10 +1036,10 @@ const Collectibles = () => {
               {/* Close button */}
               <button 
                 onClick={closeCuratorPicks} 
-                className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                className="absolute top-5 left-4 md:top-4 md:left-auto md:right-4 z-50 p-2 md:p-1.5 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                 aria-label="Close lightbox"
               >
-                <X className="h-4 w-4 text-white" />
+                <X className="h-5 w-5 md:h-4 md:w-4 text-white" />
               </button>
 
               {/* Previous button */}
@@ -1087,7 +1087,7 @@ const Collectibles = () => {
                         e.stopPropagation();
                         setIsZoomed(!isZoomed);
                       }}
-                      className={`absolute bottom-2 right-2 z-10 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
+                      className={`absolute bottom-2 left-2 md:left-auto md:right-2 z-10 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
                       aria-label={isZoomed ? "Zoom out" : "Zoom in"}
                     >
                       {isZoomed ? (
