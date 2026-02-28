@@ -128,6 +128,9 @@ const martaSalaAchille = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.56.20_AM_aq4
 const martaSalaElisabeth = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.51.46_AM_vnvbwi", { width: 1200, quality: "auto:good", crop: "fill" });
 const martaSalaMurena = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.48.51_AM_e0yej8", { width: 1200, quality: "auto:good", crop: "fill" });
 
+// Ozone Light Curators' Picks image
+const ozoneClassiqueV = "/images/ozone-classique-v.jpg";
+
 // Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
 const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
   "stephane-cg": {
@@ -249,6 +252,21 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         tags: ["Furniture", "Chair"],
         materials: "Metal laser-cut, curved, grind, hand-assembled before final finishing Frame\nSeat: multilayer wood with foam, resinated layer\nCushion: expanded foam with removable cover",
         dimensions: "55 x 51 x H 68 cm\nSH 45 cm",
+      },
+    ],
+  },
+  "ozone-light": {
+    name: "Ozone Light",
+    curatorPicks: [
+      {
+        image: ozoneClassiqueV,
+        title: "Classique V",
+        subtitle: "Gounot & Jähnke",
+        tags: ["Lighting", "Chandelier"],
+        materials: "Structures in aluminium and brass\nMedal bronze, mirror nickel or gun metal finish\nWhite paper diffusing material\nWarm white 2700K LED lighting, 230W, 11000 Lumens",
+        dimensions: "120 × 120 × H 12 cm – 48 kg\nSilhouette: 175 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Classique_V.pdf",
+        pdfFilename: "Maison_Affluency-Classique_V.pdf",
       },
     ],
   },
@@ -1475,6 +1493,7 @@ const brandToDesignerMap: Record<string, string> = {
   "De La Espada": "de-la-espada",
   "Stéphane CG": "stephane-cg",
   "Marta Sala Éditions": "marta-sala-editions",
+  "Ozone Light": "ozone-light",
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
