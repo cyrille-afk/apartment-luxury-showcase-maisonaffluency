@@ -1064,7 +1064,7 @@ const Collectibles = () => {
                   {!isZoomed && (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition) && (
                     <div className="flex items-center gap-2 mb-2">
                       {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && (
-                        <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
+                        <span className="hidden md:inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
                         </span>
                       )}
