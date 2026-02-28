@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
 
 // Navigation is heavy (Radix Sheet, Tooltip, DropdownMenu) — lazy-load it
@@ -29,8 +29,26 @@ function parseDeepLink(hash: string) {
   return { section: match[1] as "designer" | "collectible" | "atelier", id: decodeURIComponent(match[2]) };
 }
 
+/**
+ * Tracked section IDs for scroll-based hash updates.
+ * Order matters — later sections win when multiple are visible.
+ */
+const TRACKED_SECTIONS = ["home", "overview", "gallery", "curating-team", "designers", "collectibles", "brands", "details", "contact"] as const;
+
+/**
+ * Parse a simple section hash like #brands, #designers (not deep-links).
+ */
+function parseSectionHash(hash: string): string | null {
+  const clean = hash.replace(/^#/, "");
+  return (TRACKED_SECTIONS as readonly string[]).includes(clean) ? clean : null;
+}
+
 /** Global flag so components can skip entrance animations on deep-link */
 export const isDeepLink = () => !!parseDeepLink(window.location.hash);
+
+/** Check if hash points to a section (for fast restore on refresh) */
+const hasSectionHash = () => !!parseSectionHash(window.location.hash);
+const hasAnyHash = () => isDeepLink() || hasSectionHash();
 
 /** Minimal loading placeholder for lazy sections */
 const SectionFallback = () => (
@@ -55,12 +73,13 @@ const Index = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
   const [showScrollProgress, setShowScrollProgress] = useState(false);
-  const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => isDeepLink());
+  const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => hasAnyHash());
+  const mainRef = useRef<HTMLElement>(null);
 
   // Stagger non-LCP content so hero image wins bandwidth on mobile.
-  // Deep-links bypass all delays so content is available instantly.
+  // Deep-links AND section hashes bypass all delays so content is available instantly.
   useEffect(() => {
-    if (isDeepLink()) {
+    if (hasAnyHash()) {
       setShowNavigation(true);
       setShowScrollProgress(true);
       setShowBelowFoldSections(true);
@@ -83,11 +102,9 @@ const Index = () => {
     };
 
     if (heroImg?.complete) {
-      // Image already cached / decoded
       revealAfterHero();
     } else if (heroImg) {
       heroImg.addEventListener('load', revealAfterHero, { once: true });
-      // Safety fallback if image takes too long or errors
       const timeout = setTimeout(revealAfterHero, 4000);
       heroImg.addEventListener('error', revealAfterHero, { once: true });
       return () => {
@@ -96,10 +113,84 @@ const Index = () => {
         heroImg.removeEventListener('error', revealAfterHero);
       };
     } else {
-      // Fallback if img element not found
       revealAfterHero();
     }
   }, []);
+
+  // On mount with a section hash (e.g. #brands), scroll to that section
+  // once the lazy content has mounted.
+  useEffect(() => {
+    const sectionId = parseSectionHash(window.location.hash);
+    if (!sectionId || sectionId === "home") return;
+
+    // Wait for Suspense boundaries to resolve
+    let attempts = 0;
+    const tryScroll = () => {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: "instant", block: "start" });
+      } else if (attempts < 15) {
+        attempts++;
+        setTimeout(tryScroll, 200);
+      }
+    };
+    // Small initial delay to let React mount lazy components
+    setTimeout(tryScroll, 100);
+  }, [showBelowFoldSections]);
+
+  // Track which section is in view and update the URL hash silently.
+  // Uses replaceState to avoid polluting browser history.
+  useEffect(() => {
+    if (!showBelowFoldSections) return;
+
+    // Don't overwrite deep-link hashes (designer/collectible/atelier)
+    if (isDeepLink()) return;
+
+    const sectionEls = TRACKED_SECTIONS
+      .map(id => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+
+    if (sectionEls.length === 0) return;
+
+    let currentHash = window.location.hash.replace(/^#/, "") || "home";
+    // Debounce to avoid excessive replaceState calls
+    let rafId: number | null = null;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Find the topmost visible section
+        let topSection: string | null = null;
+        let topY = Infinity;
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.boundingClientRect.top < topY) {
+            topY = entry.boundingClientRect.top;
+            topSection = entry.target.id;
+          }
+        }
+        if (topSection && topSection !== currentHash) {
+          currentHash = topSection;
+          if (rafId) cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(() => {
+            const newHash = topSection === "home" ? "" : `#${topSection}`;
+            const url = window.location.pathname + window.location.search + newHash;
+            window.history.replaceState(null, "", url);
+          });
+        }
+      },
+      { rootMargin: "-20% 0px -60% 0px", threshold: 0 }
+    );
+
+    // Small delay to ensure sections are in the DOM
+    const timerId = setTimeout(() => {
+      sectionEls.forEach(el => observer.observe(el));
+    }, 500);
+
+    return () => {
+      clearTimeout(timerId);
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [showBelowFoldSections]);
 
   // Keep exit-intent banner completely out of the critical performance window
   useEffect(() => {
