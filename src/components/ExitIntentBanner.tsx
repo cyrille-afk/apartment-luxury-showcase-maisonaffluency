@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
 
-const WHATSAPP_URL = "https://wa.me/6591393850";
+const WHATSAPP_URL = "https://wa.me/6591393850?text=Hi%2C%20I%27d%20like%20to%20learn%20more%20about%20your%20furniture%20collection";
 const INACTIVITY_DELAY = 18000; // 18 seconds
 
 const ExitIntentBanner = () => {
