@@ -1,16 +1,16 @@
 import { useEffect, lazy, Suspense } from "react";
-import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
-import Overview from "@/components/Overview";
-import Gallery from "@/components/Gallery";
-import ScrollProgress from "@/components/ScrollProgress";
-import CuratingTeam from "@/components/CuratingTeam";
-import QuickJumpMenu from "@/components/QuickJumpMenu";
-import DesignDetails from "@/components/DesignDetails";
-import ContactInquiry from "@/components/ContactInquiry";
-import Footer from "@/components/Footer";
+import Navigation from "@/components/Navigation";
 
-// Lazy-load heavy sections (each has 100-250+ image imports)
+// Lazy-load everything below the fold to reduce initial JS
+const Overview = lazy(() => import("@/components/Overview"));
+const Gallery = lazy(() => import("@/components/Gallery"));
+const ScrollProgress = lazy(() => import("@/components/ScrollProgress"));
+const CuratingTeam = lazy(() => import("@/components/CuratingTeam"));
+const QuickJumpMenu = lazy(() => import("@/components/QuickJumpMenu"));
+const DesignDetails = lazy(() => import("@/components/DesignDetails"));
+const ContactInquiry = lazy(() => import("@/components/ContactInquiry"));
+const Footer = lazy(() => import("@/components/Footer"));
 const FeaturedDesigners = lazy(() => import("@/components/FeaturedDesigners"));
 const Collectibles = lazy(() => import("@/components/Collectibles"));
 const BrandsAteliers = lazy(() => import("@/components/BrandsAteliers"));
@@ -80,20 +80,28 @@ const Index = () => {
 
   return (
     <>
-      <ScrollProgress />
+      <Suspense fallback={null}>
+        <ScrollProgress />
+      </Suspense>
       <Navigation />
       <main className="min-h-screen overflow-x-hidden">
         <section id="home">
           <Hero />
         </section>
         <section id="overview" className="scroll-mt-20 md:scroll-mt-24">
-          <Overview />
+          <Suspense fallback={<SectionFallback />}>
+            <Overview />
+          </Suspense>
         </section>
         <section id="gallery" className="scroll-mt-20 md:scroll-mt-24">
-          <Gallery />
+          <Suspense fallback={<SectionFallback />}>
+            <Gallery />
+          </Suspense>
         </section>
         <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24">
-          <CuratingTeam />
+          <Suspense fallback={<SectionFallback />}>
+            <CuratingTeam />
+          </Suspense>
         </section>
         <section id="designers" className="scroll-mt-20 md:scroll-mt-24">
           <Suspense fallback={<SectionFallback />}>
@@ -111,15 +119,23 @@ const Index = () => {
           </Suspense>
         </section>
         <section id="details" className="scroll-mt-20 md:scroll-mt-24">
-          <DesignDetails />
+          <Suspense fallback={<SectionFallback />}>
+            <DesignDetails />
+          </Suspense>
         </section>
         <section id="contact" className="scroll-mt-20 md:scroll-mt-24">
-          <ContactInquiry />
+          <Suspense fallback={<SectionFallback />}>
+            <ContactInquiry />
+          </Suspense>
         </section>
-        <Footer />
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </main>
       
-      <QuickJumpMenu />
+      <Suspense fallback={null}>
+        <QuickJumpMenu />
+      </Suspense>
     </>
   );
 };

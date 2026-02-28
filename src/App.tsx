@@ -1,12 +1,15 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { lazy, Suspense } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import ComingSoon from "./pages/ComingSoon";
 import usePageTracking from "./hooks/usePageTracking";
+
+// Lazy-load pages and non-critical UI to reduce initial bundle
+const Index = lazy(() => import("./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const ComingSoon = lazy(() => import("./pages/ComingSoon"));
+const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
+const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
 
 const queryClient = new QueryClient();
 
@@ -21,19 +24,21 @@ const PageTracker = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
+      <Suspense fallback={null}>
+        <Toaster />
+        <Sonner />
+      </Suspense>
       <BrowserRouter>
         <PageTracker />
         {MAINTENANCE_MODE ? (
           <Routes>
-            <Route path="*" element={<ComingSoon />} />
+            <Route path="*" element={<Suspense fallback={null}><ComingSoon /></Suspense>} />
           </Routes>
         ) : (
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Suspense fallback={null}><Index /></Suspense>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
           </Routes>
         )}
       </BrowserRouter>
