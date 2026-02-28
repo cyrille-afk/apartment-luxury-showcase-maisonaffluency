@@ -31,7 +31,7 @@ const Hero = () => {
           srcSet={heroSrcSet}
           sizes="100vw"
           alt="Luxury living room with Asian-inspired murals and designer furniture" 
-          className="h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%] will-change-transform scale-[0.9] md:scale-100 origin-center"
+          className="h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%] will-change-transform md:scale-100"
           style={{ opacity, imageRendering: "auto", WebkitBackfaceVisibility: "hidden" }}
           loading="eager"
           fetchPriority="high"
