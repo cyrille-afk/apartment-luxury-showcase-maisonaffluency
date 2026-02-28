@@ -59,7 +59,7 @@ const ExitIntentBanner = () => {
   return (
     <AnimatePresence>
       {visible && !dialogOpen && (
-        <div className="fixed bottom-4 right-4 z-[60]">
+        <div className="fixed bottom-[5.5rem] md:bottom-4 right-4 z-[60]">
           <motion.button
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
