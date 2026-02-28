@@ -31,7 +31,7 @@ const sectionPositionMap: Record<string, string> = {
   gallery: "45%",       // Align with first row of gallery images
   "sociable-environment": "45%",
 };
-const defaultDesktopTop = "65%";
+const defaultDesktopTop = "75%";
 
 const QuickJumpMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
