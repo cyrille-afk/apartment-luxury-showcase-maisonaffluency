@@ -1565,7 +1565,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Open Edition + 2 AP"],
         materials: "",
-        dimensions: "W 108 × D 108 × H 28 cm",
+        dimensions: "W 108 × D 108 × H 28 cm – 254 kg",
         description: ""
       },
       {
