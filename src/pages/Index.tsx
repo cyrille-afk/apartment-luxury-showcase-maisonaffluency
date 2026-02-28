@@ -1,8 +1,6 @@
 import { useEffect, lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
-
-// Lazy-load Navigation — not part of LCP, reduces critical JS chain depth
-const Navigation = lazy(() => import("@/components/Navigation"));
+import Navigation from "@/components/Navigation";
 
 // Lazy-load everything below the fold to reduce initial JS
 const Overview = lazy(() => import("@/components/Overview"));
@@ -85,9 +83,7 @@ const Index = () => {
       <Suspense fallback={null}>
         <ScrollProgress />
       </Suspense>
-      <Suspense fallback={null}>
-        <Navigation />
-      </Suspense>
+      <Navigation />
       <main className="min-h-screen overflow-x-hidden">
         <section id="home">
           <Hero />
