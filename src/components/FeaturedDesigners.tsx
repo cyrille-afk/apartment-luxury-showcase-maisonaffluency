@@ -1692,6 +1692,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     name: "Made in Kira - Roman Frankel",
     specialty: "Hand-crafted Ceramic Lamps & Objects",
     image: kiraImg,
+    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Kira_v3ivdj.jpg",
     biography: "Kira is primarily the expression, in a character object, of an identity and a history, that of a child of Japan in search of a fair balance. In the subtlety of a line and the intensity of a color, Roman Akira Frankel praises the shadow through a collection of lacquered lamps.\n\nFounded in 2022 in Paris, Kira oscillates between tradition and modernity, lightness and depth, design and sculpture, to create objects filled with meaning and significance. Drawing on Japan's aesthetic vocabulary, the collection invites contemplation.",
     notableWorks: "Toshiro Lamp (Maison Affluency), Hand-thrown Ceramic Collection",
     notableWorksLink: { text: "Toshiro Lamp", galleryIndex: 8 },
