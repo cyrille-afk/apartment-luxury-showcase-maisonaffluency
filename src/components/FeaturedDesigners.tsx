@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { Instagram, Search, X, ChevronDown, ExternalLink, Star, Maximize2, Minimize2, SlidersHorizontal, Download } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Star, Maximize2, Minimize2, SlidersHorizontal, Download } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
@@ -2742,15 +2742,36 @@ const FeaturedDesigners = () => {
                         </>
                       )}
                     </div>
-                    {(designer as any).logoUrl && (
-                      <div className="hidden md:flex items-center justify-center flex-shrink-0 mr-8 w-24 h-24">
-                        <img
-                          src={(designer as any).logoUrl}
-                          alt={`${(designer as any).displayName || designer.name} logo`}
-                          className="max-w-full max-h-full object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300 aspect-square"
-                        />
-                      </div>
-                    )}
+                    {/* WhatsApp share + Logo */}
+                    <div className="hidden md:flex items-center gap-3 flex-shrink-0 mr-8">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
+                              trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
+                            }}
+                            className="p-1.5 rounded-full bg-foreground/5 hover:bg-foreground/15 transition-all duration-300 hover:scale-110 cursor-pointer"
+                            aria-label={`Share ${designer.name} on WhatsApp`}
+                          >
+                            <svg className="w-5 h-5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                            </svg>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top"><p>Share on WhatsApp</p></TooltipContent>
+                      </Tooltip>
+                      {(designer as any).logoUrl && (
+                        <div className="flex items-center justify-center w-24 h-24">
+                          <img
+                            src={(designer as any).logoUrl}
+                            alt={`${(designer as any).displayName || designer.name} logo`}
+                            className="max-w-full max-h-full object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300 aspect-square"
+                          />
+                        </div>
+                      )}
+                    </div>
                     </div>
                     <div className="flex justify-start md:hidden">
                       <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
@@ -2836,50 +2857,33 @@ const FeaturedDesigners = () => {
                               </span>
                             )
                           ))}
-                          {/* WhatsApp share button */}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
-                                  trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
-                                }}
-                                className="p-1.5 rounded-full bg-foreground/5 hover:bg-foreground/15 transition-all duration-300 hover:scale-110 cursor-pointer"
-                                aria-label={`Share ${designer.name} on WhatsApp`}
-                              >
-                                <svg className="w-5 h-5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                                </svg>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="top"><p>Share on WhatsApp</p></TooltipContent>
-                          </Tooltip>
                         </div>
                       )}
                     </div>
                   </div>
                 </AccordionContent>
-              </AccordionItem>
-            ))}
+                </AccordionItem>
+              ))}
               </div>
             ))}
-          </Accordion>
-        </motion.div>
+            </Accordion>
+          </motion.div>
+        </div>
 
         {/* Curators' Picks Lightbox Dialog */}
-        <Dialog 
-          open={!!curatorPicksDesigner} 
+        <Dialog
+          open={!!curatorPicksDesigner}
           onOpenChange={(open) => {
             if (!open) {
-              // Use history.back() to pop the state we pushed when opening
+              setCuratorPicksDesigner(null);
+              setCuratorPickIndex(0);
+              setIsZoomed(false);
               window.history.back();
             }
           }}
         >
-          <DialogContent 
-            className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none" 
-            aria-describedby={undefined}
+          <DialogContent
+            className="max-w-[100vw] max-h-[100dvh] w-screen h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-center justify-center [&>button]:hidden"
             hideClose
             onKeyDown={(e) => {
               if (!curatorPicksDesigner?.curatorPicks?.length) return;
@@ -2891,9 +2895,9 @@ const FeaturedDesigners = () => {
               }
             }}
           >
-            <VisuallyHidden>
-              <DialogTitle>Curators' Picks - {curatorPicksDesigner?.name}</DialogTitle>
-            </VisuallyHidden>
+            <DialogTitle>
+              <VisuallyHidden>Curators&apos; Picks</VisuallyHidden>
+            </DialogTitle>
             {curatorPicksDesigner && (
               curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 ? (
                 <div 
@@ -2918,10 +2922,10 @@ const FeaturedDesigners = () => {
                         setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
                       }
                     }
+                    setTouchStart(null);
+                    setTouchEnd(null);
                   }}
                 >
-
-                  {/* Image container */}
                   <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
                     <div className="relative">
                       {!isZoomed && ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category || ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags?.length > 0) || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition) && (
@@ -2932,90 +2936,27 @@ const FeaturedDesigners = () => {
                             </span>
                           ))}
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition && (
-                            <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
+                            <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-accent/20 text-accent rounded-full border border-accent/30">
                               {curatorPicksDesigner.curatorPicks[curatorPickIndex].edition}
                             </span>
                           )}
                         </div>
                       )}
-                      <div className="relative inline-block">
-                        {/* Close button — top-left of image */}
-                        <button 
-                          onClick={() => {
-                            window.history.back();
-                          }}
-                          className="absolute top-1 left-1 md:left-auto md:right-2 md:top-2 z-50 p-1.5 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors" 
-                          aria-label="Close lightbox"
-                        >
-                          <X className="h-4 w-4 text-white" />
-                        </button>
-                        {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image ? (
-                          <PinchZoomImage 
-                            key={curatorPickIndex}
-                            src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
-                            alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                            className={`object-contain select-none transition-all duration-300 ${isZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[55vh]'} ${
-                              !pickMatchesFilter(curatorPicksDesigner.curatorPicks[curatorPickIndex]) ? 'blur-[6px] opacity-40' : ''
-                            } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                            draggable={false}
-                            onLoad={() => setImageLoaded(true)}
-                            onZoomChange={(z) => { imageZoomedRef.current = z; }}
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center max-w-full max-h-[55vh] w-64 h-64 bg-white/5 border border-white/10 rounded-lg">
-                            <span className="text-white/40 font-serif text-lg text-center px-4">{curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}</span>
-                          </div>
-                        )}
-
-                        {/* Photo credit — bottom left on image */}
-                        {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.photoCredit && (
-                          <p className="absolute bottom-2 left-2 z-10 text-[10px] text-white/50 font-body tracking-wider flex items-center gap-1">
-                            Photo: <a href="https://www.instagram.com/lucabonnefille/?hl=en" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-white/80 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-3 h-3" style={{ stroke: "url(#ig-gradient-curator)" }} /><svg width="0" height="0"><defs><linearGradient id="ig-gradient-curator" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f9ce34" /><stop offset="50%" stopColor="#ee2a7b" /><stop offset="100%" stopColor="#6228d7" /></linearGradient></defs></svg>{curatorPicksDesigner.curatorPicks[curatorPickIndex].photoCredit}</a>
-                          </p>
-                        )}
-
-                        {/* PDF download — bottom-right on image */}
-                        {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl && (
-                          <button
-                            className="absolute bottom-2 right-2 md:right-10 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
-                            aria-label="Download PDF"
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
-                              const url = pick.pdfUrl as string;
-                              const filename = pick.pdfFilename || `Maison_Affluency-${(pick.title as string).replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
-                              try {
-                                const res = await fetch(url);
-                                const blob = await res.blob();
-                                const blobUrl = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = blobUrl;
-                                a.download = filename;
-                                document.body.appendChild(a);
-                                a.click();
-                                a.remove();
-                                URL.revokeObjectURL(blobUrl);
-                              } catch {
-                                window.open(url, '_blank');
-                              }
-                            }}
-                          >
-                            <Download className="w-3.5 h-3.5 text-white" />
-                          </button>
-                        )}
-
-                        {/* Maximize/Minimize icon — clickable, bottom-right */}
-                        <button
-                          onClick={() => setIsZoomed(!isZoomed)}
-                          className="absolute bottom-2 left-2 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
-                          aria-label={isZoomed ? "Minimize image" : "Maximize image"}
-                        >
-                          {isZoomed
-                            ? <Minimize2 className="w-3.5 h-3.5 text-white" />
-                            : <Maximize2 className="w-3.5 h-3.5 text-white" />
-                          }
-                        </button>
-                      </div>
+                      <img
+                        src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image}
+                        alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title || "Curator's pick"}
+                        className={`rounded-lg shadow-2xl cursor-zoom-in transition-all duration-300 ${isZoomed ? 'max-h-[90vh] max-w-[90vw] object-contain' : 'max-h-[55vh] md:max-h-[60vh] max-w-full object-contain'}`}
+                        decoding="sync"
+                        loading="eager"
+                        fetchPriority="high"
+                        onClick={() => setIsZoomed(!isZoomed)}
+                      />
+                      {/* Photo credit overlay */}
+                      {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.photoCredit && !isZoomed && (
+                        <span className="absolute bottom-2 left-2 text-[9px] text-white/50 font-body tracking-wide">
+                          {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).photoCredit}
+                        </span>
+                      )}
                     </div>
 
                     {/* Scroll dots — directly under the image */}
@@ -3024,101 +2965,130 @@ const FeaturedDesigners = () => {
                         {curatorPicksDesigner.curatorPicks.map((_, idx) => (
                           <button
                             key={idx}
-                            aria-label={`Go to image ${idx + 1}`}
-                            onClick={() => { setCuratorPickIndex(idx); setIsZoomed(false); }}
-                            className={`rounded-full transition-all duration-300 ${
-                              curatorPickIndex === idx
-                                ? 'w-4 h-2 bg-white'
-                                : 'w-2 h-2 bg-white/30 hover:bg-white/60'
-                            }`}
+                            onClick={() => setCuratorPickIndex(idx)}
+                            className={`w-2 h-2 rounded-full transition-all duration-300 ${idx === curatorPickIndex ? 'bg-white scale-125' : 'bg-white/30 hover:bg-white/60'}`}
+                            aria-label={`View pick ${idx + 1}`}
                           />
                         ))}
                       </div>
                     )}
 
-                    <div className={`mt-3 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
-                      <h3 className="text-sm md:text-base font-serif text-white mb-1">
-                        {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
-                        {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.subtitle && (
-                          <span className="font-serif"> {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).subtitle}</span>
+                    {/* Legend */}
+                    {!isZoomed && (
+                      <div className="text-center mt-4 max-w-lg">
+                        <p className="font-brand text-base md:text-lg text-white tracking-wide">
+                          {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
+                          {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.subtitle && (
+                            <span className="text-white/60"> — {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).subtitle}</span>
+                          )}
+                        </p>
+                        {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
+                          <p className="text-xs text-white/50 font-body mt-1 whitespace-pre-line">
+                            {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials}
+                          </p>
                         )}
-                      </h3>
-                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
-                        <p className="text-white/60 font-body text-xs md:text-sm mb-1 whitespace-pre-line">{curatorPicksDesigner.curatorPicks[curatorPickIndex].materials}</p>
-                      )}
-                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions && (
-                        <div className="mt-2 max-w-xl space-y-1 mx-auto text-center">
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions && (
-                            <p className="text-xs md:text-sm text-white/40 font-body italic whitespace-pre-line">
-                              {curatorPicksDesigner.curatorPicks[curatorPickIndex].dimensions}
-                            </p>
-                          )}
-                          {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.description && (
-                            <p className="text-xs md:text-sm text-white/50 font-body leading-relaxed max-w-lg mt-2 mx-auto text-center">
-                              {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).description}
-                            </p>
-                          )}
-                         </div>
-                       )}
+                        {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.dimensions || (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.weight) && (
+                          <p className="text-xs text-white/40 font-body mt-0.5">
+                            {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.dimensions}
+                            {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.dimensions && (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.weight && ' – '}
+                            {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.weight}
+                          </p>
+                        )}
+                        {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.description && (
+                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed">
+                            {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).description}
+                          </p>
+                        )}
 
-                      {/* Thumbnail strip — inline, above contact line */}
-                      {curatorPicksDesigner.curatorPicks.length > 1 && (
-                        <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
-                          {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => { setCuratorPickIndex(idx); setIsZoomed(false); }}
-                              aria-label={`View ${pick.title}`}
-                              className={`flex-none relative w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden transition-all duration-300 ${
-                                curatorPickIndex === idx
-                                  ? 'ring-2 ring-white scale-110 opacity-100'
-                                  : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'
-                              }`}
-                            >
-                              {pick.image ? (
-                                <img src={pick.image} alt={pick.title} className={`w-full h-full object-cover ${!pickMatchesFilter(pick) ? 'blur-[3px] opacity-40' : ''}`} loading="lazy" />
-                              ) : (
-                                <div className="w-full h-full bg-white/10 flex items-center justify-center">
-                                  <span className="text-white/40 text-[6px] text-center leading-tight px-0.5">{pick.title}</span>
-                                </div>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                        {/* Thumbnail strip — inline, above contact line */}
+                        {curatorPicksDesigner.curatorPicks.length > 1 && (
+                          <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
+                            {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => setCuratorPickIndex(idx)}
+                                className={`flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200 ${idx === curatorPickIndex ? 'border-white/80 scale-105' : 'border-transparent opacity-50 hover:opacity-80'}`}
+                              >
+                                <img
+                                  src={pick.image}
+                                  alt={pick.title || `Pick ${idx + 1}`}
+                                  className="w-12 h-12 md:w-14 md:h-14 object-cover"
+                                />
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
-
-
-
-                      <p className="mt-6 text-xs text-white font-body italic">
-                        For further details, please contact{" "}
-                        <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/80 transition-colors">
-                          concierge@myaffluency.com
-                        </a>
-                      </p>
-                    </div>
+                        <p className="text-xs text-white/40 font-body mt-4">
+                          Inquire about this piece —{" "}
+                          <button
+                            onClick={() => {
+                              setCuratorPicksDesigner(null);
+                              const contactSection = document.getElementById('contact');
+                              if (contactSection) {
+                                contactSection.scrollIntoView({ behavior: 'smooth' });
+                              }
+                            }}
+                            className="underline hover:text-white/70 transition-colors cursor-pointer"
+                          >
+                            Contact concierge
+                          </button>
+                        </p>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Close button */}
+                  <button
+                    onClick={() => {
+                      setCuratorPicksDesigner(null);
+                      setCuratorPickIndex(0);
+                      setIsZoomed(false);
+                      window.history.back();
+                    }}
+                    className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors z-10"
+                    aria-label="Close"
+                  >
+                    <X size={24} />
+                  </button>
+
+                  {/* Nav arrows */}
+                  {curatorPicksDesigner.curatorPicks.length > 1 && !isZoomed && (
+                    <>
+                      <button
+                        onClick={() => setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1)}
+                        className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                        aria-label="Previous"
+                      >
+                        <ChevronLeft size={32} />
+                      </button>
+                      <button
+                        onClick={() => setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1)}
+                        className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                        aria-label="Next"
+                      >
+                        <ChevronRight size={32} />
+                      </button>
+                    </>
+                  )}
                 </div>
               ) : (
-                <div className="flex items-center justify-center w-full h-full">
-                  <div className="text-center p-8">
-                    <Star className="h-16 w-16 text-white/30 mx-auto mb-4" />
-                    <h3 className="text-2xl font-serif text-white mb-2">
-                      Curators' Picks
-                    </h3>
-                    <p className="text-white/70 font-body mb-2">
-                      {curatorPicksDesigner.name}
-                    </p>
-                    <p className="text-sm text-white/50 font-body italic">
-                      Curated selections coming soon
-                    </p>
-                  </div>
+                <div className="flex flex-col items-center justify-center text-white/60 gap-4 p-8">
+                  <p className="font-body text-sm">No curated picks available yet for this designer.</p>
+                  <button
+                    onClick={() => {
+                      setCuratorPicksDesigner(null);
+                      window.history.back();
+                    }}
+                    className="text-white/40 hover:text-white transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
                 </div>
               )
             )}
           </DialogContent>
         </Dialog>
-      </div>
     </section>
   );
 };
