@@ -25,7 +25,7 @@ const Hero = () => {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.3]);
 
-  return <section ref={ref} data-hero-mounted className="relative h-screen w-full overflow-hidden">
+  return <section ref={ref} className="relative h-screen w-full overflow-hidden">
       {/* Static image container for fastest LCP — no motion wrapper delays */}
       <div className="absolute inset-0">
         <img 

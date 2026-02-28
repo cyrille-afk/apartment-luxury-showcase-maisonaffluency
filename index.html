@@ -115,32 +115,7 @@
 </head>
 
   <body>
-    <div id="root">
-      <!-- Static hero shell: renders instantly before React hydrates, eliminated by React mount -->
-      <div id="hero-shell" style="position:relative;height:100vh;width:100%;overflow:hidden;background:#111">
-        <img
-          src="https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl"
-          srcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_480,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 480w, https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 828w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 1200w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 1600w"
-          sizes="100vw"
-          alt="Luxury living room with Asian-inspired murals and designer furniture"
-          style="height:100%;width:100%;object-fit:cover;object-position:50% 40%"
-          fetchpriority="high"
-          decoding="sync"
-        />
-        <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.1),transparent,rgba(0,0,0,.2))"></div>
-      </div>
-    </div>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Remove static hero shell once React has mounted
-      var observer = new MutationObserver(function() {
-        var shell = document.getElementById('hero-shell');
-        if (shell && document.querySelector('[data-hero-mounted]')) {
-          shell.remove();
-          observer.disconnect();
-        }
-      });
-      observer.observe(document.getElementById('root'), { childList: true, subtree: true });
-    </script>
   </body>
 </html>
