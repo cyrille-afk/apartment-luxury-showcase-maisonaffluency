@@ -2235,14 +2235,14 @@ const BrandsAteliers = () => {
                         )}
                         <button
                           onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
-                          className="absolute top-2 left-2 z-50 p-1.5 bg-black/60 hover:bg-black/80 rounded-full backdrop-blur-sm transition-colors"
+                          className="absolute top-3 left-2 md:top-2 z-50 p-2 md:p-1.5 bg-black/60 hover:bg-black/80 rounded-full backdrop-blur-sm transition-colors"
                           aria-label="Close lightbox"
                         >
-                          <X className="h-4 w-4 text-white" />
+                          <X className="h-5 w-5 md:h-4 md:w-4 text-white" />
                         </button>
                         {(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl && (
                           <button
-                            className="absolute bottom-2 right-2 md:right-10 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                            className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
                             aria-label="Download PDF"
                             onClick={async (e) => {
                               e.stopPropagation();
@@ -2270,7 +2270,7 @@ const BrandsAteliers = () => {
                         )}
                         <button
                           onClick={() => setPicksZoomed(!picksZoomed)}
-                          className={`absolute bottom-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'right-12 md:right-2' : 'right-2'}`}
+                          className={`absolute bottom-2 left-2 md:left-auto z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'md:right-12' : 'md:right-2'}`}
                           aria-label={picksZoomed ? "Minimize image" : "Maximize image"}
                         >
                           {picksZoomed ? <Minimize2 className="w-3.5 h-3.5 text-white" /> : <Maximize2 className="w-3.5 h-3.5 text-white" />}

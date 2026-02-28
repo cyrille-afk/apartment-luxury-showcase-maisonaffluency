@@ -680,13 +680,13 @@ const Gallery = () => {
            {isMobile ? (
              /* ── Mobile: Embla Carousel lightbox ── */
              <div className="relative w-full h-full flex flex-col">
-               {/* Close button */}
-               <button
-                 onClick={closeLightbox}
-                 className="absolute top-3 left-3 z-50 p-2 bg-black/60 backdrop-blur-sm rounded-full"
-                 aria-label="Close lightbox"
-               >
-                 <X className="h-5 w-5 text-white" />
+                {/* Close button */}
+                <button
+                  onClick={closeLightbox}
+                  className="absolute top-5 left-3 z-50 p-2.5 bg-black/60 backdrop-blur-sm rounded-full"
+                  aria-label="Close lightbox"
+                >
+                  <X className="h-6 w-6 text-white" />
                </button>
 
                {/* Title */}
@@ -757,24 +757,24 @@ const Gallery = () => {
                  </h3>
                  <div className="relative inline-block shrink-0">
                    <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
-                   {/* Close button */}
-                   <button
-                     onClick={closeLightbox}
-                     className={`absolute top-2 right-2 z-50 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors ${isExpanded ? 'hidden md:flex' : ''}`}
-                     aria-label="Close lightbox"
-                   >
-                     <X className="h-4 w-4 text-white" />
-                   </button>
-                   {/* Maximize icon */}
-                   {!isExpanded && (
-                     <button
-                       onClick={() => setIsExpanded(true)}
-                       className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
-                       aria-label="Maximize image"
-                     >
-                       <Maximize2 className="w-3.5 h-3.5 text-white" />
-                     </button>
-                   )}
+                    {/* Close button — desktop only at top-right */}
+                    <button
+                      onClick={closeLightbox}
+                      className={`absolute top-2 right-2 z-50 p-2 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full transition-colors ${isExpanded ? 'hidden md:flex' : ''}`}
+                      aria-label="Close lightbox"
+                    >
+                      <X className="h-4 w-4 text-white" />
+                    </button>
+                    {/* Maximize icon — bottom-left on mobile, bottom-right on desktop */}
+                    {!isExpanded && (
+                      <button
+                        onClick={() => setIsExpanded(true)}
+                        className="absolute bottom-2 left-2 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                        aria-label="Maximize image"
+                      >
+                        <Maximize2 className="w-3.5 h-3.5 text-white" />
+                      </button>
+                    )}
                  </div>
                  {/* Dot indicators */}
                  <div className="flex justify-center gap-1.5 mt-3 shrink-0">
