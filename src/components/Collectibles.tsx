@@ -579,7 +579,7 @@ const Collectibles = () => {
               const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
               const designerLetters = [...new Set(filteredDesigners.map(d => normalize(d.name)[0]))].sort();
               return (
-                <div className="flex flex-col gap-3 mb-5 md:mb-6">
+                <div className="flex flex-col gap-4 mb-5 md:mb-6">
                   <div
                     className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto w-full"
                     style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}
@@ -631,15 +631,15 @@ const Collectibles = () => {
                         className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
                         aria-label="Search"
                       >
-                        <span className="text-xs font-body uppercase tracking-wider">Search</span>
-                        <Search className="h-5 w-5" />
+                        <span className="text-sm font-body uppercase tracking-wider">Search</span>
+                        <Search className="h-5.5 w-5.5" />
                       </button>
                     )}
                     <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                       <PopoverTrigger asChild>
                         <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none flex items-center gap-1.5" aria-label="Filter">
-                          <span className="text-xs font-body uppercase tracking-wider">Filter</span>
-                          <SlidersHorizontal className="h-5 w-5" />
+                          <span className="text-sm font-body uppercase tracking-wider">Filter</span>
+                          <SlidersHorizontal className="h-5.5 w-5.5" />
                           {selectedCategory && (
                             <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
                               1
