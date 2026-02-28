@@ -839,7 +839,7 @@ const Collectibles = () => {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="p-0.5 transition-transform duration-300 hover:scale-110"
-                              aria-label="Instagram"
+                              aria-label={`${designer.name} on Instagram`}
                               onClick={(e) => e.stopPropagation()}
                             >
                               <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-collectibles)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -968,7 +968,7 @@ const Collectibles = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-md transition-all duration-300 border bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 hover:border-primary/40"
-                                aria-label={link.type}
+                                aria-label={`${designer.name} — ${link.type}`}
                               >
                                 <span>{link.type}</span>
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
