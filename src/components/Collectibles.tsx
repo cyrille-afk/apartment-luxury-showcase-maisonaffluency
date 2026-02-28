@@ -935,7 +935,7 @@ const Collectibles = () => {
                             src={(designer as any).logoUrl}
                             alt={`${designer.name} logo`}
                             sizes="96px"
-                            className="max-w-full max-h-full object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300 aspect-square"
+                            className="max-w-full max-h-full object-contain aspect-square"
                           />
                         )}
                       </div>
