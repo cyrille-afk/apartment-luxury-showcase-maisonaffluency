@@ -70,7 +70,18 @@
     <link rel="preload" as="image" imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_400,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 400w, https://res.cloudinary.com/dif1oamtj/image/upload/w_600,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 600w, https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 828w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 1200w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 1600w" imagesizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Playfair+Display:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap" />
+    <!-- Inline critical @font-face so font files load without waiting for Google Fonts CSS -->
+    <style>
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 300; font-display: swap; src: url(https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuOKfAZFhjQ.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZFhjQ.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url(https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuBWfAZFhjQ.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 300; font-display: swap; src: url(https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKd3vXDXbtXK-F2qC0s.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtXK-F2qC0s.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 500; font-display: swap; src: url(https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdPvXDXbtXK-F2qC0s.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 600; font-display: swap; src: url(https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKejunDXbtXK-F2qC0s.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+      @font-face { font-family: 'Cinzel'; font-style: normal; font-weight: 700; font-display: swap; src: url(https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-hbMTUho_aPXzA.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+    </style>
+    <!-- Full Google Fonts CSS loaded async as fallback for extended character sets -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Playfair+Display:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Playfair+Display:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" /></noscript>
 
