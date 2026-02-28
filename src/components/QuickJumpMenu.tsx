@@ -32,28 +32,49 @@ const QuickJumpMenu = () => {
   const [isVisible, setIsVisible] = useState(false);
   
 
+  // Use IntersectionObserver for active section tracking (no forced reflow)
   useEffect(() => {
-    const handleScroll = () => {
-      // Show menu only after scrolling past the hero section (full viewport height)
-      // This keeps it hidden when the main navigation is most prominent
-      setIsVisible(window.scrollY > window.innerHeight);
+    const visibleSections = new Map<string, number>();
 
-      // Determine active section
-      const scrollPosition = window.scrollY + window.innerHeight / 3;
-      
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const section = document.getElementById(sections[i].id);
-        if (section && section.offsetTop <= scrollPosition) {
-          setActiveSection(sections[i].id);
-          break;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            visibleSections.set(entry.target.id, entry.intersectionRatio);
+          } else {
+            visibleSections.delete(entry.target.id);
+          }
+        });
+
+        // Pick the last visible section in page order
+        let current: string | undefined;
+        for (const s of sections) {
+          if (visibleSections.has(s.id)) current = s.id;
         }
-      }
-    };
+        if (current) setActiveSection(current);
+      },
+      { rootMargin: "-20% 0px -50% 0px", threshold: 0 }
+    );
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Separate observer for hero visibility (controls FAB visibility)
+    const heroEl = document.getElementById("home");
+    const heroObserver = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(!entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    sections.forEach((s) => {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    });
+    if (heroEl) heroObserver.observe(heroEl);
+
+    return () => {
+      observer.disconnect();
+      heroObserver.disconnect();
+    };
   }, []);
 
   const scrollToSection = (sectionId: string) => {
