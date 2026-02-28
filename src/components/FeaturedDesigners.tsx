@@ -1341,7 +1341,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     name: "ECART Re-Edition - Jean-Michel Frank",
     specialty: "Minimalist Luxury & Art Deco Pioneer",
     image: jeanMichelFrankImg,
-    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.40.05_AM_tuwtkr.png",
+    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/v1772270649/Screen_Shot_2026-02-28_at_5.23.19_PM_widtwe.png",
     imagePosition: "center 20%",
     biography:
       "Jean-Michel Frank (1895–1941) was a legendary French interior decorator and furniture designer who pioneered the luxurious minimalist aesthetic of the Art Deco era. His work emphasized refined simplicity, using the finest materials—parchment, shagreen, straw marquetry, and bronze—to create pieces of understated elegance. Collaborating with artists like Alberto Giacometti and Christian Bérard, Frank created iconic designs that continue to influence contemporary luxury interiors.",
