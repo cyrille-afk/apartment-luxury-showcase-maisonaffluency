@@ -6,6 +6,6 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
   const el = document.getElementById(id);
   if (!el) return;
   const navHeight = document.querySelector("nav")?.offsetHeight ?? 96;
-  const y = el.getBoundingClientRect().top + window.scrollY - navHeight - 16;
+  const y = el.getBoundingClientRect().top + window.scrollY - navHeight + 2;
   window.scrollTo({ top: Math.max(0, y), behavior });
 }
