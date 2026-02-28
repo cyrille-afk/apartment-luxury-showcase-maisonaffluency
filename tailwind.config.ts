@@ -139,9 +139,11 @@ export default {
         "text-glow-pulse": {
           "0%, 100%": {
             textShadow: "0 0 0 hsl(var(--accent) / 0)",
+            opacity: "0.7",
           },
           "50%": {
-            textShadow: "0 0 14px hsl(var(--accent) / 0.6), 0 0 28px hsl(var(--accent) / 0.3)",
+            textShadow: "0 0 10px hsl(var(--accent) / 0.4)",
+            opacity: "1",
           },
         },
       },
@@ -152,7 +154,7 @@ export default {
         "slide-in": "slide-in 0.5s ease-out",
         "pulse-fade": "pulse-fade 2.5s ease-in-out infinite",
         "pulse-glow": "pulse-glow 10s ease-in-out infinite",
-        "text-glow-pulse": "text-glow-pulse 16s ease-in-out infinite",
+        "text-glow-pulse": "text-glow-pulse 6s ease-in-out infinite",
       },
     },
   },
