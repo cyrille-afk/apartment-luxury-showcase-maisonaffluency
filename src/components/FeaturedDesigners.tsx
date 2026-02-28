@@ -1510,7 +1510,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     specialty: "Architectural Furniture & Objects",
     image: kerstensImg,
     imagePosition: "center 20%",
-    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/kerstens_logo_symbol_black_square_dcjigj.jpg",
+    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/kerstens_logo_symbol_white_square_pbwx6z.jpg",
     biography: "Kerstens is a multidisciplinary design studio founded by Andy Kerstens in Antwerp, Belgium, in 2015. A graduate of the University of Antwerp in interior architecture, Andy Kerstens combines a thorough architectural design language with a passion for craftsmanship and the atmospheric qualities of materials. The studio's work spans furniture, objects and interiors — always defined by aesthetic purity, refined proportion and true artisan quality.",
     notableWorks: "Stone & Steel Console, Architectural Furniture Collection",
     philosophy: "We strive for a refined, timeless and architectural approach, with a desire for craftsmanship and affinity for the atmospheric — creating pieces that improve with age.",
