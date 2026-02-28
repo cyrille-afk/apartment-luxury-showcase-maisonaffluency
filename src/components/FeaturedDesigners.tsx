@@ -279,7 +279,7 @@ export type CuratorPick = { image?: string; title: string; subtitle?: string; ca
 export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; links?: DesignerLink[] })[] = [
   {
     id: "adam-courts-okha",
-    name: "Adam Courts - Okha Design Studio",
+    name: "Okha Design Studio - Adam Courts",
     specialty: "Collectible Furniture & Contemporary African Design",
     image: adamCourtsOkhaImg,
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_9.45.50_AM_ejpdtg.png",
@@ -563,7 +563,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "apparatus-studio",
-    name: "Gabriel Hendifar - Apparatus Studio",
+    name: "Apparatus Studio - Gabriel Hendifar",
     founder: "Gabriel Hendifar",
     specialty: "Contemporary Lighting & Industrial Design",
     image: apparatusStudioImg,
@@ -1017,7 +1017,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "entrelacs-creation",
-    name: "Yves Macheret - Entrelacs Creation",
+    name: "Entrelacs Creation - Yves Macheret",
     specialty: "Bronze Lighting & Artisan Foundry",
     image: yvesMacheretImg,
     biography:
@@ -1093,7 +1093,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "felix-agostini",
-    name: "Felix Agostini - Charles Paris",
+    name: "Charles Paris - Felix Agostini",
     specialty: "Figural Bronze Lighting & Decorative Objects",
     image: felixAgostiniImg,
     biography: "Felix Agostini is a mid-twentieth century French designer renowned for his highly refined figural bronze lighting, created under the Charles Paris imprint. Working primarily in the 1950s and 1960s, his Grande Caryatide sconces and candelabra draw on the classical tradition of architectural figural sculpture while expressing a distinctly French post-war elegance. His pieces are now highly sought after by collectors and museums worldwide.",
@@ -1115,8 +1115,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "robicara",
-    name: "Francesco Caracciolo di Marano - Robicara",
-    mobileNameLines: ["Francesco Caracciolo", "di Marano - Robicara"],
+    name: "Robicara - Francesco Caracciolo di Marano",
+    mobileNameLines: ["Robicara", "Francesco Caracciolo di Marano"],
     specialty: "Italian-crafted Luxury Furniture",
     image: robicaraImg,
     biography: "Robicara was founded by Sam Robin, an interior architect, and Francesco Caracciolo, an Italian furniture designer — a transatlantic creative partnership uniting her flair for bespoke residential interiors with his deep expertise in Italian luxury furniture manufacturing. The brand combines the finest Italian craftsmanship with a modern aesthetic sensibility, producing pieces that express sophisticated restraint through exceptional materials and precision construction.",
@@ -1328,7 +1328,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "jean-michel-frank",
-    name: "Jean-Michel Frank - ECART Re-Edition",
+    name: "ECART Re-Edition - Jean-Michel Frank",
     specialty: "Minimalist Luxury & Art Deco Pioneer",
     image: jeanMichelFrankImg,
     imagePosition: "center 20%",
@@ -1677,7 +1677,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "kira",
-    name: "Roman Frankel - Made in Kira",
+    name: "Made in Kira - Roman Frankel",
     specialty: "Hand-crafted Ceramic Lamps & Objects",
     image: kiraImg,
     biography: "Kira is primarily the expression, in a character object, of an identity and a history, that of a child of Japan in search of a fair balance. In the subtlety of a line and the intensity of a color, Roman Akira Frankel praises the shadow through a collection of lacquered lamps.\n\nFounded in 2022 in Paris, Kira oscillates between tradition and modernity, lightness and depth, design and sculpture, to create objects filled with meaning and significance. Drawing on Japan's aesthetic vocabulary, the collection invites contemplation.",
@@ -1781,7 +1781,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "noe-duchaufour-lawrance",
-    name: "Noé Duchaufour Lawrance - NDL Editions",
+    name: "NDL Editions - Noé Duchaufour Lawrance",
     specialty: "Organic Furniture & Crystal Design",
     image: noeDuchaufourImg,
     biography: "Noé Duchaufour-Lawrance is a French designer based in Paris known for his organic, biomorphic approach to furniture and objects. His work explores the intersection of natural forms and industrial materials, creating pieces of rare tactile and visual poetry. He has collaborated with Saint-Louis crystal, Bernhardt Design, and leading European manufacturers. His Amber Folia Portable Lamp for Cristallerie Saint-Louis — featured at Maison Affluency — showcases his mastery of translucent materials and organic form.",
