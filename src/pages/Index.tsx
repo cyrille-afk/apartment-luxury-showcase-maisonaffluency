@@ -14,6 +14,7 @@ const Footer = lazy(() => import("@/components/Footer"));
 const FeaturedDesigners = lazy(() => import("@/components/FeaturedDesigners"));
 const Collectibles = lazy(() => import("@/components/Collectibles"));
 const BrandsAteliers = lazy(() => import("@/components/BrandsAteliers"));
+const ExitIntentBanner = lazy(() => import("@/components/ExitIntentBanner"));
 
 /**
  * Parse deep-link hash: #designer/<id>, #collectible/<id>, #atelier/<slug>
@@ -135,6 +136,9 @@ const Index = () => {
       
       <Suspense fallback={null}>
         <QuickJumpMenu />
+      </Suspense>
+      <Suspense fallback={null}>
+        <ExitIntentBanner />
       </Suspense>
     </>
   );
