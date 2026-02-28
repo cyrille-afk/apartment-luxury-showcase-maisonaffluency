@@ -120,8 +120,9 @@ const CuratingTeam = () => {
                         rel="noopener noreferrer"
                         className="text-[#0077B5] hover:text-[#005582] transition-colors duration-300"
                         onClick={(e) => e.stopPropagation()}
+                        aria-label={`${member.name} on LinkedIn`}
                       >
-                        <Linkedin className="w-5 h-5" />
+                        <Linkedin className="w-5 h-5" aria-hidden="true" />
                       </a>
                     )}
                   </div>

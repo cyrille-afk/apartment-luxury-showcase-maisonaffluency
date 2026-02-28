@@ -2634,7 +2634,7 @@ const FeaturedDesigners = () => {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-0.5 transition-transform duration-300 hover:scale-110 relative z-10"
-                            aria-label="Instagram"
+                            aria-label={`${designer.name} on Instagram`}
                             onClick={(e) => { e.stopPropagation(); e.preventDefault(); trackCTA.instagram("Featured Designers", designer.name); window.open(designer.links!.find(l => l.type === "Instagram")!.url!, '_blank', 'noopener,noreferrer'); }}
                             onPointerDown={(e) => e.stopPropagation()}
                             onTouchEnd={(e) => { e.stopPropagation(); }}
@@ -2803,7 +2803,7 @@ const FeaturedDesigners = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-md transition-all duration-300 border bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 hover:border-primary/40"
-                                aria-label={link.type}
+                                aria-label={`${designer.name} — ${link.type}`}
                               >
                                 <span>{link.type}</span>
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

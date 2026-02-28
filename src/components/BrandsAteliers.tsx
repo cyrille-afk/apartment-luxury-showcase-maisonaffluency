@@ -1630,6 +1630,7 @@ function AlphaStrip({
                         rel="noopener noreferrer"
                         className="p-1 -m-1 touch-manipulation flex-shrink-0 mt-0.5 group/insta"
                         onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
+                        aria-label={`${brand.name} on Instagram`}
                       >
                         <svg className="h-6 w-6 md:h-7 md:w-7 transition-transform duration-300 group-hover/insta:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-strip)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <defs>
@@ -2234,7 +2235,7 @@ const BrandsAteliers = () => {
                         )}
                         {picksDesigner.curatorPicks[picksIndex]?.photoCredit && (
                           <p className="absolute bottom-2 left-2 z-10 text-[10px] text-white/50 font-body tracking-wider flex items-center gap-1">
-                            Photo: <a href="https://www.instagram.com/lucabonnefille/?hl=en" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-white/80 transition-colors" onClick={e => e.stopPropagation()}><Instagram className="w-3 h-3" />{picksDesigner.curatorPicks[picksIndex].photoCredit}</a>
+                            Photo: <a href="https://www.instagram.com/lucabonnefille/?hl=en" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-white/80 transition-colors" onClick={e => e.stopPropagation()} aria-label={`${picksDesigner.curatorPicks[picksIndex].photoCredit} on Instagram`}><Instagram className="w-3 h-3" aria-hidden="true" />{picksDesigner.curatorPicks[picksIndex].photoCredit}</a>
                           </p>
                         )}
                         <button

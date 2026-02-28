@@ -39,7 +39,7 @@ const Footer = () => {
             <a href="#curating-team" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               About Us
             </a>
-            <a href="https://www.instagram.com/myaffluency/?hl=en" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram" onClick={() => trackCTA.instagram("Footer", "Maison Affluency")}>
+            <a href="https://www.instagram.com/myaffluency/?hl=en" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Maison Affluency on Instagram" onClick={() => trackCTA.instagram("Footer", "Maison Affluency")}>
               <Instagram size={20} />
             </a>
             <a href="#contact" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
