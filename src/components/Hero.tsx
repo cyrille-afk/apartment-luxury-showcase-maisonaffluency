@@ -82,8 +82,8 @@ const Hero = () => {
             delay: 0.8
           }} className="text-[15px] leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses<br /> and Artisan&nbsp;Workshops</motion.p>
           
-          <div className="mt-6 md:mt-10 md:pl-[calc(50%-0.5ch)]" style={{ paddingLeft: undefined }}>
-            <Gem className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white cursor-pointer hover:opacity-80 transition-opacity md:ml-[18.5rem] lg:ml-[22rem]" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })} />
+          <div className="mt-6 md:mt-10">
+            <Gem className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white cursor-pointer hover:opacity-80 transition-opacity md:ml-[5.5rem] lg:ml-[6.5rem]" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })} />
           </div>
           
           <motion.div initial={{
