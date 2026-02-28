@@ -40,7 +40,7 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </motion.div>
       
-      <div className="relative z-10 h-full px-4 pb-32 pt-[70%] md:px-12 md:pb-20 md:pt-[35%] lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-center md:items-end">
+      <div className="relative z-10 h-full px-4 pb-32 pt-[70%] md:px-12 md:pb-20 md:pt-[22%] lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <motion.div initial={{
         opacity: 0,
         y: 30
@@ -70,7 +70,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-}} className="mb-6 md:mb-10 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}>Discover World Masters in Furniture & Collectible Design
+}} className="mb-6 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}>Discover World Masters in Furniture & Collectible Design
           </motion.h1>
           
           <motion.p initial={{
@@ -89,7 +89,7 @@ const Hero = () => {
           }} transition={{
             duration: 1,
             delay: 1.2
-          }} className="mt-6 md:mt-8 w-full flex justify-center">
+          }} className="mt-6 md:mt-8 w-full flex justify-center md:justify-end">
             <button
               onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
               className="flex flex-col items-center gap-2 cursor-pointer group"
