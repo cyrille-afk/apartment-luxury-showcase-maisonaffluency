@@ -66,42 +66,14 @@ const Index = () => {
       return;
     }
 
-    const intentEvents = ["wheel", "touchstart", "keydown", "mousedown", "mousemove"] as const;
-
-    const revealBelowFold = () => {
-      setShowBelowFoldSections(true);
-      window.removeEventListener("scroll", showOnScroll);
-      intentEvents.forEach((eventName) => window.removeEventListener(eventName, showOnIntent));
-    };
-
-    const showOnIntent = () => {
+    // Auto-reveal all content after 1.2s so visitors immediately see there's more to explore
+    const revealTimer = setTimeout(() => {
+      setShowNavigation(true);
       setShowScrollProgress(true);
-      revealBelowFold();
-    };
+      setShowBelowFoldSections(true);
+    }, 1200);
 
-    const showOnScroll = () => {
-      if (window.scrollY > 24) {
-        setShowScrollProgress(true);
-      }
-      if (window.scrollY > 80) {
-        revealBelowFold();
-      }
-    };
-
-    const cleanups = [
-      scheduleWhenIdle(() => setShowNavigation(true), 500),
-      // Fallback: ensure page never gets stuck if there is no initial scrollable area
-      scheduleWhenIdle(() => setShowBelowFoldSections(true), 2500),
-    ];
-
-    intentEvents.forEach((eventName) => window.addEventListener(eventName, showOnIntent, { passive: true }));
-    window.addEventListener("scroll", showOnScroll, { passive: true });
-
-    return () => {
-      cleanups.forEach((cleanup) => cleanup());
-      window.removeEventListener("scroll", showOnScroll);
-      intentEvents.forEach((eventName) => window.removeEventListener(eventName, showOnIntent));
-    };
+    return () => clearTimeout(revealTimer);
   }, []);
 
   // Keep exit-intent banner completely out of the critical performance window
