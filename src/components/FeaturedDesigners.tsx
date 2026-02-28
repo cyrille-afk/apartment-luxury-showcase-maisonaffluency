@@ -2582,6 +2582,7 @@ const FeaturedDesigners = () => {
                           <img
                             src={designer.image}
                             alt={designer.name}
+                            sizes="(max-width: 767px) 96px, 128px"
                             className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
                             style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined}
                             loading="lazy"
@@ -2611,6 +2612,7 @@ const FeaturedDesigners = () => {
                           <img
                             src={selectedImage?.image || designer.image!}
                             alt={selectedImage?.name || designer.name}
+                            sizes="(max-width: 767px) 90vw, 700px"
                             className="w-full h-auto rounded-lg object-contain max-h-[75vh]"
                           />
                           <p className="text-center mt-4 text-lg font-serif text-foreground">
@@ -2770,6 +2772,7 @@ const FeaturedDesigners = () => {
                           <img
                             src={(designer as any).logoUrl}
                             alt={`${(designer as any).displayName || designer.name} logo`}
+                            sizes="96px"
                             className="max-w-full max-h-full object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300 aspect-square"
                           />
                         )}
@@ -2948,6 +2951,7 @@ const FeaturedDesigners = () => {
                       <img
                         src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image}
                         alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title || "Curator's pick"}
+                        sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
                         className={`rounded-lg shadow-2xl cursor-zoom-in transition-all duration-300 ${isZoomed ? 'max-h-[90vh] max-w-[90vw] object-contain' : 'max-h-[55vh] md:max-h-[60vh] max-w-full object-contain'}`}
                         decoding="sync"
                         loading="eager"
@@ -3015,6 +3019,7 @@ const FeaturedDesigners = () => {
                                 <img
                                   src={pick.image}
                                   alt={pick.title || `Pick ${idx + 1}`}
+                                  sizes="(max-width: 767px) 48px, 56px"
                                   className="w-12 h-12 md:w-14 md:h-14 object-cover"
                                 />
                               </button>
