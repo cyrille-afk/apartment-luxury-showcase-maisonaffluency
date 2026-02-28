@@ -73,13 +73,15 @@ const Index = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
   const [showScrollProgress, setShowScrollProgress] = useState(false);
-  const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => hasAnyHash());
+  const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => isDeepLink());
   const mainRef = useRef<HTMLElement>(null);
 
   // Stagger non-LCP content so hero image wins bandwidth on mobile.
-  // Deep-links AND section hashes bypass all delays so content is available instantly.
+  // Only deep-links (designer/collectible/atelier profiles) bypass delays.
+  // Section hashes (#designers, #brands) still wait for hero to load first,
+  // then mount sections and scroll — preserving LCP on mobile.
   useEffect(() => {
-    if (hasAnyHash()) {
+    if (isDeepLink()) {
       setShowNavigation(true);
       setShowScrollProgress(true);
       setShowBelowFoldSections(true);
