@@ -428,11 +428,22 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { 
         image: alexanderLamontPick6, 
         title: "Barbican Cabinet",
-        subtitle: "Koi Carps — Wall Art",
+        subtitle: "",
+        category: "Storage",
+        tags: ["Storage", "Cabinet"],
+        materials: "Hand-painted lacquer • Gold leaf accents",
+        dimensions: "H90 × W60 × D12 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Barbican_Cabinet.pdf",
+        pdfFilename: "Maison_Affluency-Barbican_Cabinet.pdf"
+      },
+      {
+        image: "",
+        title: "Koi Carps",
+        subtitle: "Wall Art",
         category: "Decorative",
         tags: ["Decorative", "Wall Art"],
-        materials: "Hand-painted lacquer • Gold leaf accents",
-        dimensions: "H90 × W60 × D12 cm"
+        materials: "",
+        dimensions: ""
       },
     ],
     links: [
