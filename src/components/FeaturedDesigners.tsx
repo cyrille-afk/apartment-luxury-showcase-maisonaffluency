@@ -2718,7 +2718,7 @@ const FeaturedDesigners = () => {
                         <img
                           src={(designer as any).logoUrl}
                           alt={`${(designer as any).displayName || designer.name} logo`}
-                          className="h-24 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300"
+                          className="w-24 h-24 object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300"
                         />
                       </div>
                     )}
