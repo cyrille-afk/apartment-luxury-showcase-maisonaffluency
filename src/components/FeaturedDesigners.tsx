@@ -2740,11 +2740,11 @@ const FeaturedDesigners = () => {
                       )}
                     </div>
                     {(designer as any).logoUrl && (
-                      <div className="hidden md:flex flex-shrink-0 mr-8">
+                      <div className="hidden md:flex items-center justify-center flex-shrink-0 mr-8 w-24 h-24">
                         <img
                           src={(designer as any).logoUrl}
                           alt={`${(designer as any).displayName || designer.name} logo`}
-                          className="w-24 h-24 object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300"
+                          className="max-w-full max-h-full object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300 aspect-square"
                         />
                       </div>
                     )}
