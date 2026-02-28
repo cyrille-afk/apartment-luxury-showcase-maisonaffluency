@@ -84,7 +84,7 @@ const Hero = () => {
           
           <div className="mt-6 md:mt-10">
             <motion.div
-              animate={{ scale: [1, 1.15, 1], opacity: [0.8, 1, 0.8] }}
+              animate={{ scale: [1, 1.05, 1], opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
               className="cursor-pointer md:ml-[5.5rem] lg:ml-[6.5rem]"
               onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
