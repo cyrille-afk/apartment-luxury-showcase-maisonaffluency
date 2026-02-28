@@ -2240,7 +2240,7 @@ const BrandsAteliers = () => {
                         )}
                         <button
                           onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
-                          className="absolute top-2 right-2 z-50 p-1.5 bg-black/60 hover:bg-black/80 rounded-full backdrop-blur-sm transition-colors"
+                          className="absolute top-2 left-2 z-50 p-1.5 bg-black/60 hover:bg-black/80 rounded-full backdrop-blur-sm transition-colors"
                           aria-label="Close lightbox"
                         >
                           <X className="h-4 w-4 text-white" />
