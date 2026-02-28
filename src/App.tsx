@@ -2,10 +2,9 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import usePageTracking from "./hooks/usePageTracking";
+import Index from "./pages/Index";
 
-// Lazy-load pages and non-critical UI to reduce initial bundle
-const Index = lazy(() => import("./pages/Index"));
+// Lazy-load non-landing pages and non-critical UI
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 
@@ -18,10 +17,10 @@ const queryClient = new QueryClient();
 // Set to false to disable maintenance mode and show the real site
 const MAINTENANCE_MODE = false;
 
-const PageTracker = () => {
-  usePageTracking();
-  return null;
-};
+const PageTracker = lazy(() => import("./hooks/usePageTracking").then(m => {
+  const Tracker = () => { m.default(); return null; };
+  return { default: Tracker };
+}));
 
 const App = () => {
   const [showDeferredUi, setShowDeferredUi] = useState(false);
@@ -41,24 +40,25 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Suspense fallback={null}>
-          {showDeferredUi ? (
-            <>
-              <Toaster />
-              <Sonner />
-            </>
-          ) : null}
-        </Suspense>
+        {showDeferredUi && (
+          <Suspense fallback={null}>
+            <Toaster />
+            <Sonner />
+          </Suspense>
+        )}
         <BrowserRouter>
-          {showDeferredUi ? <PageTracker /> : null}
+          {showDeferredUi && (
+            <Suspense fallback={null}>
+              <PageTracker />
+            </Suspense>
+          )}
           {MAINTENANCE_MODE ? (
             <Routes>
               <Route path="*" element={<Suspense fallback={null}><ComingSoon /></Suspense>} />
             </Routes>
           ) : (
             <Routes>
-              <Route path="/" element={<Suspense fallback={null}><Index /></Suspense>} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="/" element={<Index />} />
               <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
             </Routes>
           )}
@@ -69,4 +69,3 @@ const App = () => {
 };
 
 export default App;
-
