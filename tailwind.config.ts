@@ -136,6 +136,14 @@ export default {
             opacity: "1",
           },
         },
+        "text-glow-pulse": {
+          "0%, 100%": {
+            textShadow: "0 0 0 hsl(var(--primary) / 0)",
+          },
+          "50%": {
+            textShadow: "0 0 10px hsl(var(--primary) / 0.35)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.3s ease-out",
@@ -144,6 +152,7 @@ export default {
         "slide-in": "slide-in 0.5s ease-out",
         "pulse-fade": "pulse-fade 2.5s ease-in-out infinite",
         "pulse-glow": "pulse-glow 10s ease-in-out infinite",
+        "text-glow-pulse": "text-glow-pulse 3s ease-in-out infinite",
       },
     },
   },
