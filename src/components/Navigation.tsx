@@ -189,9 +189,9 @@ const Navigation = () => {
               </span>
             </button>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="h-px w-6 bg-foreground" />
+              <span className="h-px w-6 bg-foreground" aria-hidden="true" />
               <span className="font-body text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Since 2017</span>
-              <span className="h-px w-6 bg-foreground" />
+              <span className="h-px w-6 bg-foreground" aria-hidden="true" />
             </div>
           </div>
 
@@ -359,9 +359,9 @@ const Navigation = () => {
                 </span>
               </button>
               <div className="flex items-center gap-3 mt-1">
-                <span className="h-px w-10 bg-foreground" />
+                <span className="h-px w-10 bg-foreground" aria-hidden="true" />
                 <span className="font-body text-[9px] uppercase tracking-[0.3em] text-foreground font-bold">Since 2017</span>
-                <span className="h-px w-10 bg-foreground" />
+                <span className="h-px w-10 bg-foreground" aria-hidden="true" />
               </div>
             </div>
             <div className="flex justify-end">

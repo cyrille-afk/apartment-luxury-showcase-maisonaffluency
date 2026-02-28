@@ -70,7 +70,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-}} className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}>Discover World Masters in Furniture & Collectible Design
+}} className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity" role="button" tabIndex={0} onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" }); } }}>Discover World Masters in Furniture & Collectible Design
           </motion.h1>
           
           <div className="inline-flex flex-col items-center md:items-end">
@@ -88,9 +88,13 @@ const Hero = () => {
                 animate={{ scale: [1, 1.05, 1], opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 className="cursor-pointer"
+                role="button"
+                tabIndex={0}
+                aria-label="Scroll to gallery"
                 onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" }); } }}
               >
-                <Gem className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] hover:drop-shadow-[0_0_14px_rgba(255,255,255,0.9)] transition-all" />
+                <Gem className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] hover:drop-shadow-[0_0_14px_rgba(255,255,255,0.9)] transition-all" aria-hidden="true" />
               </motion.div>
             </div>
           </div>
