@@ -64,34 +64,39 @@
     }
     </script>
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-STKGNMN9CS"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      // Exclude internal traffic by IP
-      fetch('https://api.ipify.org?format=json')
-        .then(function(r){return r.json()})
-        .then(function(data){
-          var excluded = ['119.234.37.60', '115.66.27.101', '2001:4860:7:50d::fb'];
-          if (excluded.indexOf(data.ip) === -1) {
-            gtag('config', 'G-STKGNMN9CS');
-          }
-        })
-        .catch(function(){
-          gtag('config', 'G-STKGNMN9CS');
-        });
-    </script>
-
+    <!-- Critical resource hints - BEFORE any scripts -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
     <link rel="dns-prefetch" href="https://res.cloudinary.com" />
     <link rel="preload" as="image" imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_480,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 480w, https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 828w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 1200w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 1600w" imagesizes="100vw" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Playfair+Display:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/playfairdisplay/v38/nuFlD-vYSZviVYUb_rj3ij__anPXBYf9lW4e5j5hNKe1_w.woff2" crossorigin />
+
+    <!-- Google Analytics - deferred to not block LCP -->
+    <script>
+      window.addEventListener('load', function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-STKGNMN9CS';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          fetch('https://api.ipify.org?format=json')
+            .then(function(r){return r.json()})
+            .then(function(data){
+              var excluded = ['119.234.37.60', '115.66.27.101', '2001:4860:7:50d::fb'];
+              if (excluded.indexOf(data.ip) === -1) {
+                gtag('config', 'G-STKGNMN9CS');
+              }
+            })
+            .catch(function(){
+              gtag('config', 'G-STKGNMN9CS');
+            });
+        };
+      });
+    </script>
     
   
   <meta property="og:title" content="Maison Affluency | Curated Luxury Design &amp; Collectible Furniture">
