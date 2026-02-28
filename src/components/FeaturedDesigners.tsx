@@ -741,7 +741,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "atelier-pendhapa",
-    name: "Atelier Pendhapa",
+    name: "Atelier Pendhapa - Antonin Hautefort & Ignatio Tenggara",
     specialty: "Bespoke Furniture & Indonesian Craftsmanship",
     image: atelierPendhapaImg,
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.10.52_AM_eabe8v.png",
