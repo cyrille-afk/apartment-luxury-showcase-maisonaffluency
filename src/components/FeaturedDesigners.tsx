@@ -2746,7 +2746,7 @@ const FeaturedDesigners = () => {
                       )}
                     </div>
                     {/* WhatsApp share + Logo */}
-                    <div className={`hidden md:flex items-center flex-shrink-0 ${(designer as any).logoUrl ? 'gap-6 mr-8' : 'mr-4'}`}>
+                    <div className="hidden md:flex items-center gap-6 flex-shrink-0 mr-8">
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
@@ -2765,15 +2765,15 @@ const FeaturedDesigners = () => {
                         </TooltipTrigger>
                         <TooltipContent side="top"><p>Share on WhatsApp</p></TooltipContent>
                       </Tooltip>
-                      {(designer as any).logoUrl && (
-                        <div className="flex items-center justify-center w-24 h-24">
+                      <div className="flex items-center justify-center w-24 h-24">
+                        {(designer as any).logoUrl && (
                           <img
                             src={(designer as any).logoUrl}
                             alt={`${(designer as any).displayName || designer.name} logo`}
                             className="max-w-full max-h-full object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300 aspect-square"
                           />
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                     </div>
                     <div className="flex justify-start md:hidden">
