@@ -2746,7 +2746,7 @@ const FeaturedDesigners = () => {
                       )}
                     </div>
                     {/* WhatsApp share + Logo */}
-                    <div className="hidden md:flex items-center gap-3 flex-shrink-0 mr-8">
+                    <div className="hidden md:flex items-center gap-6 flex-shrink-0 mr-8">
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
