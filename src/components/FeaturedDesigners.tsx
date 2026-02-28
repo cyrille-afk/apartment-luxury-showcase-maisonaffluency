@@ -2513,7 +2513,7 @@ const FeaturedDesigners = () => {
           </p>
         )}
 
-        <div className="flex justify-start md:justify-end mb-4 md:pr-8">
+        <div className="flex justify-end mb-4 md:pr-8">
           <button
             onClick={toggleAllDesigners}
             className="text-sm text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1.5"
@@ -2767,7 +2767,7 @@ const FeaturedDesigners = () => {
                       </div>
                     </div>
                     </div>
-                    <div className="flex justify-start md:hidden">
+                    <div className="flex justify-end md:hidden">
                       <ChevronDown className="h-6 w-6 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
                     </div>
                   </div>
