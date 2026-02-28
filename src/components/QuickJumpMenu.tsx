@@ -26,6 +26,13 @@ const sections = [
   { id: "contact", label: "Contact", icon: Mail },
 ];
 
+// Map active section to a desktop vertical position (CSS top value)
+const sectionPositionMap: Record<string, string> = {
+  gallery: "30%",       // Align with first row of gallery images
+  "sociable-environment": "30%",
+};
+const defaultDesktopTop = "50%";
+
 const QuickJumpMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
@@ -89,6 +96,8 @@ const QuickJumpMenu = () => {
     }
   };
 
+  const desktopTop = sectionPositionMap[activeSection] || defaultDesktopTop;
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -97,8 +106,20 @@ const QuickJumpMenu = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed right-4 bottom-8 md:right-6 md:top-1/2 md:-translate-y-1/2 md:bottom-auto z-50"
+          className="fixed right-4 bottom-8 md:right-6 md:bottom-auto z-50"
+          data-quick-jump
         >
+          {/* Desktop dynamic positioning via inline style */}
+          <style>{`
+            @media (min-width: 768px) {
+              [data-quick-jump] {
+                top: ${desktopTop} !important;
+                bottom: auto !important;
+                transform: translateY(-50%);
+                transition: top 0.4s ease;
+              }
+            }
+          `}</style>
           <AnimatePresence>
         {isOpen && (
           <motion.div
