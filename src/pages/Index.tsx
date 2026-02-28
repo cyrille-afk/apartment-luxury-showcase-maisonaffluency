@@ -66,26 +66,40 @@ const Index = () => {
       return;
     }
 
+    const intentEvents = ["wheel", "touchstart", "keydown"] as const;
+
+    const revealBelowFold = () => {
+      setShowBelowFoldSections(true);
+      window.removeEventListener("scroll", showOnScroll);
+      intentEvents.forEach((eventName) => window.removeEventListener(eventName, showOnIntent));
+    };
+
+    const showOnIntent = () => {
+      revealBelowFold();
+    };
+
     const showOnScroll = () => {
       if (window.scrollY > 24) {
         setShowScrollProgress(true);
       }
       if (window.scrollY > 80) {
-        setShowBelowFoldSections(true);
-      }
-      if (window.scrollY > 80) {
-        window.removeEventListener("scroll", showOnScroll);
+        revealBelowFold();
       }
     };
 
     const cleanups = [
       scheduleWhenIdle(() => setShowNavigation(true), 500),
+      // Fallback: ensure page never gets stuck if there is no initial scrollable area
+      scheduleWhenIdle(() => setShowBelowFoldSections(true), 2500),
     ];
 
+    intentEvents.forEach((eventName) => window.addEventListener(eventName, showOnIntent, { passive: true }));
     window.addEventListener("scroll", showOnScroll, { passive: true });
+
     return () => {
       cleanups.forEach((cleanup) => cleanup());
       window.removeEventListener("scroll", showOnScroll);
+      intentEvents.forEach((eventName) => window.removeEventListener(eventName, showOnIntent));
     };
   }, []);
 
