@@ -929,7 +929,7 @@ const Collectibles = () => {
                         </TooltipTrigger>
                         <TooltipContent side="top"><p>Share on WhatsApp</p></TooltipContent>
                       </Tooltip>
-                      <div className="flex items-center justify-center w-24 h-24">
+                      <div className="flex items-center justify-center w-24 h-24 border border-border/40 rounded-sm">
                         {(designer as any).logoUrl && (
                           <img
                             src={(designer as any).logoUrl}
