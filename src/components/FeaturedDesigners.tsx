@@ -652,7 +652,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "atelier-fevrier",
-    name: "Atelier Fevrier",
+    name: "Atelier Fevrier - Isha Mukhia Pretet & Florian Pretet",
     specialty: "Hand-knotted Rugs & Textile Art",
     image: atelierFevrierImg,
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.13.10_AM_tgc7kd.png",
