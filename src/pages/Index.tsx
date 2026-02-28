@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
 import Navigation from "@/components/Navigation";
 
@@ -14,6 +14,8 @@ const Footer = lazy(() => import("@/components/Footer"));
 const FeaturedDesigners = lazy(() => import("@/components/FeaturedDesigners"));
 const Collectibles = lazy(() => import("@/components/Collectibles"));
 const BrandsAteliers = lazy(() => import("@/components/BrandsAteliers"));
+// ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
+// competing for bandwidth with LCP-critical resources on mobile.
 const ExitIntentBanner = lazy(() => import("@/components/ExitIntentBanner"));
 
 /**
@@ -36,6 +38,14 @@ const SectionFallback = () => (
 );
 
 const Index = () => {
+const [showBanner, setShowBanner] = useState(false);
+
+  // Defer ExitIntentBanner chunk fetch until 5s after mount
+  useEffect(() => {
+    const id = setTimeout(() => setShowBanner(true), 5000);
+    return () => clearTimeout(id);
+  }, []);
+
   useEffect(() => {
     const link = parseDeepLink(window.location.hash);
     if (!link) return;
@@ -137,9 +147,11 @@ const Index = () => {
       <Suspense fallback={null}>
         <QuickJumpMenu />
       </Suspense>
-      <Suspense fallback={null}>
-        <ExitIntentBanner />
-      </Suspense>
+      {showBanner && (
+        <Suspense fallback={null}>
+          <ExitIntentBanner />
+        </Suspense>
+      )}
     </>
   );
 };
