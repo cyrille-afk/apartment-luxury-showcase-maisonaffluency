@@ -28,7 +28,7 @@ const Hero = () => {
           alt="Luxury living room with Asian-inspired murals and designer furniture"
           className="h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%]"
           loading="eager"
-          decoding="async"
+          decoding="sync"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </div>
