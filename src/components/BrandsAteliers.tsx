@@ -1714,7 +1714,7 @@ function AlphaStrip({
                       shareProfileOnWhatsApp("atelier", brand.name.replace(/\s+/g, "-").toLowerCase(), brand.name, featuredText);
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
-                    className={`absolute bottom-3 right-12 md:right-12 z-10 inline-flex items-center gap-2 px-3 py-1.5 text-xs font-body rounded-full backdrop-blur-sm transition-all duration-300 ${hasBg ? "bg-white/20 text-white hover:bg-white/40" : "bg-foreground/10 text-foreground hover:bg-foreground/20"}`}
+                    className={`absolute bottom-3 right-12 md:right-12 z-10 inline-flex items-center gap-2 px-3 py-1.5 text-xs font-body rounded-full backdrop-blur-sm transition-all duration-300 ${hasBg ? "bg-white/30 text-white hover:bg-white/50 border border-white/20" : "bg-white hover:bg-white/80 text-foreground border border-border/40"}`}
                     aria-label={`Share ${brand.name} on WhatsApp`}
                   >
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
