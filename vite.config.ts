@@ -37,7 +37,6 @@ export default defineConfig(({ mode }) => ({
             '@radix-ui/react-dialog',
             '@radix-ui/react-popover',
             '@radix-ui/react-tooltip',
-            '@radix-ui/react-sheet',
           ],
         },
       },
