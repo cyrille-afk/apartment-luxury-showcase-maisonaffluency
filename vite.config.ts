@@ -31,11 +31,13 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-motion': ['framer-motion'],
+          'vendor-query': ['@tanstack/react-query'],
           'vendor-radix': [
             '@radix-ui/react-accordion',
             '@radix-ui/react-dialog',
             '@radix-ui/react-popover',
             '@radix-ui/react-tooltip',
+            '@radix-ui/react-sheet',
           ],
         },
       },
