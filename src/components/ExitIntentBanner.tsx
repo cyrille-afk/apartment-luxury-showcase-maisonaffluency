@@ -51,15 +51,15 @@ const ExitIntentBanner = () => {
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.8, opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed bottom-4 right-4 z-[60] flex items-center gap-2 rounded-full bg-[#25D366] pl-3 pr-2 py-2 shadow-lg cursor-pointer hover:bg-[#20bd5a] transition-colors"
+          className="fixed bottom-4 right-4 z-[60] flex items-center gap-2 rounded-full bg-white pl-3 pr-2 py-2 shadow-lg cursor-pointer hover:bg-white/90 transition-colors border border-border/40"
           onClick={handleClick}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } }}
           role="button"
           tabIndex={0}
           aria-label="Chat with us on WhatsApp"
         >
-          <span className="text-white text-xs font-medium whitespace-nowrap">Chat with us</span>
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center" aria-hidden="true">
+          <span className="text-foreground text-xs font-medium whitespace-nowrap">Chat with us</span>
+          <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center" aria-hidden="true">
             <MessageCircle className="w-4 h-4 text-white" />
           </div>
           <button
