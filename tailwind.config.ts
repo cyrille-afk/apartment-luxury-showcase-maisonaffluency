@@ -139,11 +139,11 @@ export default {
         "text-glow-pulse": {
           "0%, 100%": {
             textShadow: "0 0 0 hsl(var(--accent) / 0)",
-            opacity: "0.7",
+            opacity: "0.75",
           },
           "50%": {
-            textShadow: "0 0 7px hsl(var(--accent) / 0.28)",
-            opacity: "0.92",
+            textShadow: "0 0 5px hsl(var(--accent) / 0.18)",
+            opacity: "0.88",
           },
         },
       },
