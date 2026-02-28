@@ -2980,6 +2980,24 @@ const FeaturedDesigners = () => {
                           {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).photoCredit}
                         </span>
                       )}
+                      {/* Maximize / Minimize button */}
+                      {!isZoomed ? (
+                        <button
+                          onClick={() => setIsZoomed(true)}
+                          className={`absolute bottom-2 ${(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl ? 'right-12' : 'right-2'} p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10`}
+                          aria-label="Expand image"
+                        >
+                          <Maximize2 size={16} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setIsZoomed(false)}
+                          className="absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          aria-label="Minimize image"
+                        >
+                          <Minimize2 size={16} />
+                        </button>
+                      )}
                       {/* PDF download button */}
                       {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl && !isZoomed && (
                         <button
