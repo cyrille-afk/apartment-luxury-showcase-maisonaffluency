@@ -73,7 +73,7 @@ const Hero = () => {
 }} className="mb-6 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}>Discover World Masters in Furniture & Collectible Design
           </motion.h1>
           
-          <div className="inline-flex flex-col items-end">
+          <div className="inline-flex flex-col items-center md:items-end">
             <motion.p initial={{
               opacity: 0
             }} animate={{
