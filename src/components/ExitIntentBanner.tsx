@@ -12,6 +12,16 @@ const WA_ICON_PATH =
 const ExitIntentBanner = () => {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Hide when any Radix Dialog overlay is open (lightboxes)
+  useEffect(() => {
+    const check = () => setDialogOpen(!!document.querySelector('[role="dialog"]'));
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { childList: true, subtree: true });
+    check();
+    return () => observer.disconnect();
+  }, []);
 
   const show = useCallback(() => {
     if (!dismissed) setVisible(true);
@@ -48,7 +58,7 @@ const ExitIntentBanner = () => {
 
   return (
     <AnimatePresence>
-      {visible && (
+      {visible && !dialogOpen && (
         <div className="fixed bottom-4 right-4 z-[60]">
           <motion.button
             initial={{ scale: 0.8, opacity: 0 }}
