@@ -20,7 +20,7 @@ interface CloudinaryImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>,
 const CloudinaryImage = ({
   publicId,
   width = 800,
-  widths = [400, 800, 1200],
+  widths = [300, 400, 600, 800, 1200],
   transforms = {},
   blurUp = true,
   sizes = "100vw",
