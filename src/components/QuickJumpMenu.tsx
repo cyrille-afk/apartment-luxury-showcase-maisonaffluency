@@ -169,7 +169,7 @@ const QuickJumpMenu = () => {
           onClick={() => setIsOpen(!isOpen)}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
-          className={`relative flex items-center justify-center w-13 h-13 rounded-full shadow-2xl transition-all duration-300 touch-manipulation ${
+          className={`relative flex items-center justify-center w-[52px] h-[52px] rounded-full shadow-2xl transition-all duration-300 touch-manipulation ${
             isOpen
               ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-primary/30"
               : "bg-gradient-to-br from-card to-card/90 backdrop-blur-md border border-primary/30 text-primary hover:border-primary/50 hover:shadow-primary/20"
