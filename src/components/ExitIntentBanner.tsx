@@ -77,11 +77,11 @@ const ExitIntentBanner = () => {
             </span>
           </motion.button>
           <button
-            onClick={dismiss}
-            className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center shadow-sm"
+            onClick={(e) => { e.stopPropagation(); dismiss(); }}
+            className="absolute -top-3 -right-3 w-8 h-8 md:w-6 md:h-6 rounded-full bg-card border border-border flex items-center justify-center shadow-md touch-manipulation"
             aria-label="Dismiss WhatsApp chat prompt"
           >
-            <X className="w-3 h-3 text-muted-foreground" />
+            <X className="w-4 h-4 md:w-3 md:h-3 text-muted-foreground" />
           </button>
         </div>
       )}
