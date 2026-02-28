@@ -714,7 +714,15 @@ const Collectibles = () => {
             })()}
           </motion.div>
 
-          <div className="flex items-center justify-between mb-4">
+          {(searchQuery || selectedCategory) && (
+            <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
+              {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
+              {selectedSubcategory && <span> · {selectedSubcategory}</span>}
+              {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
+            </p>
+          )}
+
+          <div className="flex justify-start md:justify-end mb-4 md:pr-8">
             <button
               onClick={toggleAllDesigners}
               className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1"
@@ -722,13 +730,6 @@ const Collectibles = () => {
               <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
               <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
             </button>
-            {(searchQuery || selectedCategory) ? (
-              <p className="text-left text-[10px] text-muted-foreground/50 font-body tracking-wider">
-                {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
-                {selectedSubcategory && <span> · {selectedSubcategory}</span>}
-                {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
-              </p>
-            ) : <div />}
           </div>
 
           <motion.div
@@ -946,7 +947,7 @@ const Collectibles = () => {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2 pb-6">
-                    <div className="space-y-4 text-muted-foreground font-body md:pl-[calc(8rem+1.5rem)] pl-0">
+                    <div className="space-y-4 text-muted-foreground font-body">
                       <p className="text-sm md:text-base leading-relaxed">
                         {designer.biography}
                       </p>
@@ -958,7 +959,7 @@ const Collectibles = () => {
                       </div>
 
                       {designer.links && designer.links.filter(l => l.type !== "Instagram").length > 0 && (
-                        <div className="flex flex-wrap gap-3 mt-4">
+                        <div className="flex flex-wrap gap-3 mt-4 md:pr-8">
                           {designer.links.filter(l => l.type !== "Instagram").map((link, idx) => (
                             link.url ? (
                               <a
@@ -983,7 +984,7 @@ const Collectibles = () => {
                               <button
                                 key={idx}
                                 onClick={() => openCuratorPicks(designer)}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-gradient-to-r from-accent/90 to-primary/80 hover:from-accent hover:to-primary text-white rounded-md transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer border border-accent/30"
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-gradient-to-r from-accent/90 to-primary/80 hover:from-accent hover:to-primary text-white rounded-md transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer border border-accent/30 md:ml-auto"
                               >
                                 <Star size={16} className="fill-current" />
                                 <span className="font-medium">{link.type}</span>
