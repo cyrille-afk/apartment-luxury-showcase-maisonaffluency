@@ -130,6 +130,7 @@ const martaSalaMurena = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.48.51_AM_e0ye
 
 // Ozone Light Curators' Picks image
 const ozoneClassiqueV = "/images/ozone-classique-v.jpg";
+const ozoneBrasiliaPl = "/images/ozone-brasilia-pl.jpg";
 
 // Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
 const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
@@ -267,6 +268,16 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         dimensions: "120 × 120 × H 12 cm – 48 kg\nSilhouette: 175 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Classique_V.pdf",
         pdfFilename: "Maison_Affluency-Classique_V.pdf",
+      },
+      {
+        image: ozoneBrasiliaPl,
+        title: "Brasilia PL",
+        subtitle: "Michel Boyer",
+        tags: ["Lighting", "Chandelier"],
+        materials: "Structures and stem in white lacquered aluminium\nWhite paper diffusing material\nWarm white 2700K LED lighting, 144W, 6600 Lumens",
+        dimensions: "70 × 70 × H 80 cm – 22 kg\nSilhouette: 175 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Brasilia_PL.pdf",
+        pdfFilename: "Maison_Affluency-Brasilia_PL.pdf",
       },
     ],
   },
