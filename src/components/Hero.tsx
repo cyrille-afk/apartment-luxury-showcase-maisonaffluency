@@ -95,29 +95,6 @@ const Hero = () => {
             </div>
           </div>
           
-          <motion.div initial={{
-            opacity: 0
-          }} animate={{
-            opacity: 1
-          }} transition={{
-            duration: 1,
-            delay: 1.2
-          }} className="mt-6 w-full flex justify-center md:hidden">
-            <button
-              onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
-              className="flex flex-col items-center gap-2 cursor-pointer group"
-            >
-              <span className="font-body text-sm md:text-base uppercase tracking-widest text-white group-hover:text-white/80 transition-colors">
-                Scroll to Explore
-              </span>
-              <motion.div
-                className="h-12 w-[1px] bg-gradient-to-b from-white/60 to-transparent"
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </button>
-          </motion.div>
-          
         </motion.div>
       </div>
 
