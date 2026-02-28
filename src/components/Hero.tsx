@@ -70,7 +70,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-}} className="mb-6 md:mb-10 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl">Discover World Masters in Furniture & Collectible Design
+}} className="mb-6 md:mb-10 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}>Discover World Masters in Furniture & Collectible Design
           </motion.h1>
           
           <motion.p initial={{
