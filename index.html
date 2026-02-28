@@ -10,8 +10,6 @@
     <link rel="canonical" href="https://maisonaffluency.com" />
 
     <!-- Open Graph -->
-    
-    
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://maisonaffluency.com" />
     <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,g_auto,q_auto:good,f_jpg/living-room-hero_zxfcxl?v=20260226b">
@@ -88,26 +86,18 @@
     <!-- Google Analytics - deferred to not block LCP -->
     <script>
       window.addEventListener('load', function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-STKGNMN9CS';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          fetch('https://api.ipify.org?format=json')
-            .then(function(r){return r.json()})
-            .then(function(data){
-              var excluded = ['119.234.37.60', '115.66.27.101', '2001:4860:7:50d::fb'];
-              if (excluded.indexOf(data.ip) === -1) {
-                gtag('config', 'G-STKGNMN9CS');
-              }
-            })
-            .catch(function(){
-              gtag('config', 'G-STKGNMN9CS');
-            });
-        };
+        setTimeout(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-STKGNMN9CS';
+          s.async = true;
+          document.head.appendChild(s);
+          s.onload = function() {
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-STKGNMN9CS');
+          };
+        }, 3000);
       });
     </script>
 
