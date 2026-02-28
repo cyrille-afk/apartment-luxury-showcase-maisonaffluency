@@ -385,7 +385,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Storage",
         tags: ["Storage", "Cabinet"],
         materials: "Straw marquetry • Hammered bronze handles • Lacquered interior",
-        dimensions: "H110 × W120 × D45 cm"
+        dimensions: "H110 × W120 × D45 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Casque_Bar_Cabinet_-_Amethyst_Ombre_Havana.pdf",
+        pdfFilename: "Maison_Affluency-Casque_Bar_Cabinet.pdf"
       },
       { 
         image: alexanderLamontPick1, 
