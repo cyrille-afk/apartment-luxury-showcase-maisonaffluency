@@ -975,9 +975,9 @@ const Collectibles = () => {
                               <button
                                 key={idx}
                                 onClick={() => openCuratorPicks(designer)}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-gradient-to-r from-accent/90 to-primary/80 hover:from-accent hover:to-primary text-white rounded-md transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer border border-accent/30 md:ml-auto"
+                                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-body bg-accent/10 hover:bg-accent/20 text-accent-foreground rounded-full transition-all duration-300 cursor-pointer border border-accent/30 md:ml-auto"
                               >
-                                <Star size={16} className="fill-current" />
+                                <Star size={14} className="fill-accent text-accent" />
                                 <span className="font-medium">{link.type}</span>
                               </button>
                             ) : (
