@@ -70,7 +70,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-}} className="mb-4 md:mb-6 text-xl leading-tight text-white md:text-4xl font-serif lg:text-2xl">Discover world masters in furniture and collectible design
+}} className="mb-4 md:mb-6 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl">Discover world masters in furniture and collectible design
           </motion.h1>
           
           <motion.p initial={{
@@ -80,7 +80,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.8
-        }} className="max-w-2xl text-sm leading-relaxed text-white text-left md:text-center md:text-justify font-serif md:text-lg lg:text-xl font-medium mb-6 md:mx-auto">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses and Artisan&nbsp;Workshops</motion.p>
+        }} className="max-w-3xl text-base leading-relaxed text-white text-left md:text-center md:text-justify font-serif md:text-xl lg:text-2xl font-medium mb-6 md:mx-auto">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses and Artisan&nbsp;Workshops</motion.p>
           
           <motion.div initial={{
             opacity: 0
@@ -94,7 +94,7 @@ const Hero = () => {
               onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
               className="flex flex-col items-center gap-2 cursor-pointer group"
             >
-              <span className="font-body text-xs uppercase tracking-widest text-white group-hover:text-white/80 transition-colors">
+              <span className="font-body text-sm md:text-base uppercase tracking-widest text-white group-hover:text-white/80 transition-colors">
                 Scroll to Explore
               </span>
               <motion.div
