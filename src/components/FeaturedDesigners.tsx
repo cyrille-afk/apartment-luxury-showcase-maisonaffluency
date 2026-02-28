@@ -2373,7 +2373,7 @@ const FeaturedDesigners = () => {
             their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture. Presented in situ at our showroom.
           </p>
           {/* A-Z alphabet jump bar + Search + Filter */}
-          <div className="flex flex-col gap-3 mb-3">
+          <div className="flex flex-col gap-3 mb-5 md:mb-6">
             <div
               className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto w-full"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}
