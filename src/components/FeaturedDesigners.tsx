@@ -426,7 +426,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Console"],
         materials: "Natural distressed wood • Bronze detailing",
-        dimensions: "H85 × W140 × D40 cm"
+        dimensions: "H85 × W140 × D40 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Corteza_Console_Table.pdf",
+        pdfFilename: "Maison_Affluency-Corteza_Console_Table.pdf"
       },
       { 
         image: alexanderLamontPick6, 
