@@ -654,6 +654,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     name: "Atelier Fevrier",
     specialty: "Hand-knotted Rugs & Textile Art",
     image: atelierFevrierImg,
+    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.13.10_AM_tgc7kd.png",
     biography:
       "Atelier Fevrier is a textile studio dedicated to the ancient art of hand-knotted rug making. Their Ricky Rug exemplifies their commitment to traditional techniques combined with contemporary design sensibilities. Each rug is a labor of love, taking months to complete with meticulous attention to texture, color, and pattern.",
     notableWorks: "Hand-knotted Ricky Rug, Custom Textile Collection",
