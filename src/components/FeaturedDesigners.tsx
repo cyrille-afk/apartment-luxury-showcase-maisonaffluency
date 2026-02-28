@@ -297,6 +297,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Tables", "Coffee Table"],
         materials: "",
         dimensions: "166.5W × 147.5D × 38H cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/OKHA_CoffeeTable_Tectra2_2.pdf",
         description: ""
       },
       {
@@ -307,6 +308,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Seating", "Chair"],
         materials: "",
         dimensions: "65.5W × 58D × 79H cm · Seat Height: 47 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/OKHA_DiningChair_BNVO_2.pdf",
         description: ""
       },
       {
@@ -317,6 +319,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Seating", "Sofa"],
         materials: "",
         dimensions: "L240 × D95 × H72 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/OKHA_Sofas_ReposeA.pdf",
         description: ""
       },
       {
@@ -327,6 +330,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Seating", "Chair"],
         materials: "",
         dimensions: "47W × 50.5D × 81H cm · Seat Height: 47 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/OKHA_DiningChair_Void_2.pdf",
         description: ""
       },
       {
@@ -337,6 +341,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Seating", "Sofa"],
         materials: "",
         dimensions: "288.5W × 178.5D × 72H cm · Seat Height: 41 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/OKHA_Sofas_Reverb_1.pdf",
         description: ""
       },
       {
@@ -347,6 +352,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Storage", "Sideboard"],
         materials: "",
         dimensions: "140W × 46.6D × 70H cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/OKHA_Server_OVD_2.pdf",
         description: ""
       },
       {
@@ -357,6 +363,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Seating", "Bench"],
         materials: "",
         dimensions: "179.3W × 38D × 41H cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/OKHA_OtherSeating_BenchBed_1.pdf",
         description: ""
       },
     ],
