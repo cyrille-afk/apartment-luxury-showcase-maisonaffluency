@@ -12,22 +12,8 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { CuratorPick } from "@/components/FeaturedDesigners";
-
-// Lazy-load designer data only when user opens Curators' Picks (breaks cross-chunk dependency)
-let _featuredDesigners: any[] | null = null;
-let _collectibleDesigners: any[] | null = null;
-const loadDesignerData = async () => {
-  if (!_featuredDesigners || !_collectibleDesigners) {
-    const [fd, cd] = await Promise.all([
-      import("@/components/FeaturedDesigners"),
-      import("@/components/Collectibles"),
-    ]);
-    _featuredDesigners = fd.featuredDesigners;
-    _collectibleDesigners = cd.collectibleDesigners;
-  }
-  return { featuredDesigners: _featuredDesigners!, collectibleDesigners: _collectibleDesigners! };
-};
+import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
+import { collectibleDesigners } from "@/components/Collectibles";
 const alexanderLamontBg = cloudinaryUrl("alexander-lamont-bg_prdpsy", { width: 1600, quality: "auto:good", crop: "fill" });
 const leoAertsBg = cloudinaryUrl("leo-aerts-alinea-bg_x89hrq", { width: 1600, quality: "auto:good", crop: "fill" });
 const apparatusBg = cloudinaryUrl("apparatus-studio-bg_wzakjr", { width: 1600, quality: "auto:good", crop: "fill" });
@@ -1802,25 +1788,18 @@ const BrandsAteliers = () => {
   // Brands that should use FeaturedDesigners data instead of Collectibles
   const preferFeatured = new Set(["Pierre Bonnefille"]);
 
-  // Lazily resolved designer for Curators' Picks
-  const [picksDesigner, setPicksDesigner] = useState<any>(null);
-  useEffect(() => {
-    if (!picksDesignerName) { setPicksDesigner(null); return; }
+  const picksDesigner = useMemo(() => {
+    if (!picksDesignerName) return null;
     const designerId = brandToDesignerMap[picksDesignerName];
-    if (!designerId) { setPicksDesigner(null); return; }
-    // Check atelier-only picks first (synchronous, always available)
-    if (atelierOnlyPicks[designerId]) { setPicksDesigner(atelierOnlyPicks[designerId] as any); return; }
-    // Lazy-load designer data from the other sections
-    let cancelled = false;
-    loadDesignerData().then(({ featuredDesigners, collectibleDesigners }) => {
-      if (cancelled) return;
-      if (!preferFeatured.has(picksDesignerName)) {
-        const collectibleMatch = collectibleDesigners.find((d: any) => d.id === designerId || d.name === picksDesignerName);
-        if (collectibleMatch) { setPicksDesigner(collectibleMatch); return; }
-      }
-      setPicksDesigner(featuredDesigners.find((d: any) => d.id === designerId) || null);
-    });
-    return () => { cancelled = true; };
+    if (!designerId) return null;
+    // Check atelier-only picks first
+    if (atelierOnlyPicks[designerId]) return atelierOnlyPicks[designerId] as any;
+    // Check collectible designers first, unless brand prefers featured
+    if (!preferFeatured.has(picksDesignerName)) {
+      const collectibleMatch = collectibleDesigners.find(d => d.id === designerId || d.name === picksDesignerName);
+      if (collectibleMatch) return collectibleMatch as any;
+    }
+    return featuredDesigners.find(d => d.id === designerId) || null;
   }, [picksDesignerName]);
 
   const openPicks = useCallback((brandName: string) => {
