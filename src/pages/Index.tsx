@@ -119,25 +119,65 @@ const Index = () => {
     }
   }, []);
 
-  // On mount with a section hash (e.g. #brands), scroll to that section
-  // once the lazy content has mounted.
+  // Persist scroll position to sessionStorage for refresh restoration
   useEffect(() => {
-    const sectionId = parseSectionHash(window.location.hash);
-    if (!sectionId || sectionId === "home") return;
-
-    // Wait for Suspense boundaries to resolve
-    let attempts = 0;
-    const tryScroll = () => {
-      const el = document.getElementById(sectionId);
-      if (el) {
-        el.scrollIntoView({ behavior: "instant", block: "start" });
-      } else if (attempts < 15) {
-        attempts++;
-        setTimeout(tryScroll, 200);
-      }
+    let timer: ReturnType<typeof setTimeout>;
+    const saveScroll = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        sessionStorage.setItem("__scroll_y", String(window.scrollY));
+      }, 150);
     };
-    // Small initial delay to let React mount lazy components
-    setTimeout(tryScroll, 100);
+    window.addEventListener("scroll", saveScroll, { passive: true });
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("scroll", saveScroll);
+    };
+  }, []);
+
+  // On mount: restore exact scroll position OR scroll to section hash
+  useEffect(() => {
+    if (!showBelowFoldSections) return;
+
+    const savedY = sessionStorage.getItem("__scroll_y");
+    const sectionId = parseSectionHash(window.location.hash);
+
+    // If there's a saved scroll position AND the hash matches a section (not a deep-link),
+    // restore the exact pixel position instead of just jumping to the section top.
+    if (savedY && Number(savedY) > 0) {
+      let attempts = 0;
+      const tryRestore = () => {
+        // Wait until the document is tall enough to scroll to the saved position
+        const targetY = Number(savedY);
+        if (document.documentElement.scrollHeight >= targetY + window.innerHeight * 0.5) {
+          window.scrollTo({ top: targetY, behavior: "instant" as ScrollBehavior });
+          sessionStorage.removeItem("__scroll_y");
+        } else if (attempts < 25) {
+          attempts++;
+          setTimeout(tryRestore, 200);
+        } else {
+          // Fallback: scroll to section hash if pixel restore fails
+          if (sectionId && sectionId !== "home") {
+            document.getElementById(sectionId)?.scrollIntoView({ behavior: "instant", block: "start" });
+          }
+          sessionStorage.removeItem("__scroll_y");
+        }
+      };
+      setTimeout(tryRestore, 100);
+    } else if (sectionId && sectionId !== "home") {
+      // No saved position — fall back to section hash scroll
+      let attempts = 0;
+      const tryScroll = () => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          el.scrollIntoView({ behavior: "instant", block: "start" });
+        } else if (attempts < 15) {
+          attempts++;
+          setTimeout(tryScroll, 200);
+        }
+      };
+      setTimeout(tryScroll, 100);
+    }
   }, [showBelowFoldSections]);
 
   // Track which section is in view and update the URL hash silently.
