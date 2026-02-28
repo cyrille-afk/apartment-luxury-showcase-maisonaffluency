@@ -39,19 +39,14 @@ const Hero = () => {
           <p className="mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-cream/90 font-extrabold font-sans text-sm md:text-xl lg:text-2xl hero-fade-in-delayed-1">
           </p>
 
-          <h1
-            className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity hero-fade-in-delayed-2"
-            role="button"
-            tabIndex={0}
-            onClick={scrollToOverview}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                scrollToOverview();
-              }
-            }}
-          >
-            Discover World Masters in Furniture &amp; Collectible Design
+          <h1 className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl hero-fade-in-delayed-2">
+            <button
+              type="button"
+              onClick={scrollToOverview}
+              className="text-left text-inherit font-inherit leading-inherit cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-none p-0 m-0"
+            >
+              Discover World Masters in Furniture &amp; Collectible Design
+            </button>
           </h1>
 
           <div className="inline-flex flex-col items-center md:items-end">
