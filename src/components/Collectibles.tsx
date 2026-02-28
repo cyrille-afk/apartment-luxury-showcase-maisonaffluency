@@ -725,9 +725,9 @@ const Collectibles = () => {
           <div className="flex justify-start md:justify-end mb-4 md:pr-8">
             <button
               onClick={toggleAllDesigners}
-              className="text-xs text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1"
+              className="text-sm text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1.5"
             >
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-4.5 w-4.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
               <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
             </button>
           </div>
@@ -942,7 +942,7 @@ const Collectibles = () => {
                     </div>
                     </div>
                     <div className="flex justify-start md:hidden">
-                      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
+                      <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
                     </div>
                     </div>
                   </AccordionTrigger>
