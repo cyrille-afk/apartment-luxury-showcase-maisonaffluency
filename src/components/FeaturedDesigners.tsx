@@ -2580,6 +2580,8 @@ const FeaturedDesigners = () => {
                             e.stopPropagation();
                             setSelectedImage({ name: designer.name, image: designer.image! });
                           }}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onTouchEnd={(e) => e.stopPropagation()}
                         >
                           <img
                             src={designer.image}

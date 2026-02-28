@@ -790,6 +790,8 @@ const Collectibles = () => {
                               e.stopPropagation();
                               setSelectedImage({ name: designer.name, image: designer.image });
                             }}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onTouchEnd={(e) => e.stopPropagation()}
                           >
                             <img
                               src={designer.image}
@@ -839,9 +841,11 @@ const Collectibles = () => {
                               href={designer.links.find(l => l.type === "Instagram")?.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-0.5 transition-transform duration-300 hover:scale-110"
+                              className="p-0.5 transition-transform duration-300 hover:scale-110 relative z-10"
                               aria-label={`${designer.name} on Instagram`}
                               onClick={(e) => e.stopPropagation()}
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onTouchEnd={(e) => e.stopPropagation()}
                             >
                               <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-collectibles)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <defs>
@@ -870,9 +874,7 @@ const Collectibles = () => {
                             <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
                               <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Gallery Featured:</span>
                               <span
-                                role="link"
-                                tabIndex={0}
-                                aria-label={`View ${designer.notableWorksLink!.text} in gallery`}
+                                tabIndex={-1}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   const gallerySection = document.getElementById('gallery');
@@ -885,19 +887,18 @@ const Collectibles = () => {
                                     }, 500);
                                   }
                                 }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    const gallerySection = document.getElementById('gallery');
-                                    if (gallerySection) {
-                                      gallerySection.scrollIntoView({ behavior: 'smooth' });
-                                      setTimeout(() => {
-                                        window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
-                                          detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` } 
-                                        }));
-                                      }, 500);
-                                    }
+                                onPointerDown={(e) => e.stopPropagation()}
+                                onTouchEnd={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  const gallerySection = document.getElementById('gallery');
+                                  if (gallerySection) {
+                                    gallerySection.scrollIntoView({ behavior: 'smooth' });
+                                    setTimeout(() => {
+                                      window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                        detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` } 
+                                      }));
+                                    }, 500);
                                   }
                                 }}
                                 className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 inline-flex items-center gap-1 group/link touch-manipulation cursor-pointer"
