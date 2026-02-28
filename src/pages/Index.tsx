@@ -66,7 +66,7 @@ const Index = () => {
       return;
     }
 
-    const intentEvents = ["wheel", "touchstart", "keydown"] as const;
+    const intentEvents = ["wheel", "touchstart", "keydown", "mousedown", "mousemove"] as const;
 
     const revealBelowFold = () => {
       setShowBelowFoldSections(true);
@@ -75,6 +75,7 @@ const Index = () => {
     };
 
     const showOnIntent = () => {
+      setShowScrollProgress(true);
       revealBelowFold();
     };
 
