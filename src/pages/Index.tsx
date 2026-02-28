@@ -53,27 +53,22 @@ const scheduleWhenIdle = (callback: () => void, timeout: number) => {
 
 const Index = () => {
   const [showBanner, setShowBanner] = useState(false);
-  const [showNavigation, setShowNavigation] = useState(false);
-  const [showScrollProgress, setShowScrollProgress] = useState(false);
-  const [showBelowFoldSections, setShowBelowFoldSections] = useState(false);
+  // Navigation is above-fold — show immediately for Speed Index
+  const [showNavigation] = useState(true);
+  // ScrollProgress is lightweight — show immediately
+  const [showScrollProgress] = useState(true);
+  // Below-fold sections can defer briefly to let hero image win bandwidth
+  const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => isDeepLink());
 
-  // Defer non-critical UI/chunks so hero image can win bandwidth contention.
   useEffect(() => {
-    if (isDeepLink()) {
-      setShowNavigation(true);
-      setShowScrollProgress(true);
-      setShowBelowFoldSections(true);
-      return;
-    }
+    if (showBelowFoldSections) return; // already showing (deep-link)
 
-    // Auto-reveal all content after 1.2s so visitors immediately see there's more to explore
-    const revealTimer = setTimeout(() => {
-      setShowNavigation(true);
-      setShowScrollProgress(true);
+    // Reveal after a single rAF + microtask so hero paint isn't blocked
+    const raf = requestAnimationFrame(() => {
       setShowBelowFoldSections(true);
-    }, 1200);
+    });
 
-    return () => clearTimeout(revealTimer);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   // Keep exit-intent banner completely out of the critical performance window
@@ -127,17 +122,13 @@ const Index = () => {
 
   return (
     <>
-      {showScrollProgress ? (
-        <Suspense fallback={null}>
-          <ScrollProgress />
-        </Suspense>
-      ) : null}
+      <Suspense fallback={null}>
+        <ScrollProgress />
+      </Suspense>
 
-      {showNavigation ? (
-        <Suspense fallback={null}>
-          <Navigation />
-        </Suspense>
-      ) : null}
+      <Suspense fallback={null}>
+        <Navigation />
+      </Suspense>
 
       <main className="min-h-screen overflow-x-hidden">
         <section id="home">
