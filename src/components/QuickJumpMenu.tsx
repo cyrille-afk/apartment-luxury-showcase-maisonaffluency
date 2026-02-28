@@ -28,8 +28,8 @@ const sections = [
 
 // Map active section to a desktop vertical position (CSS top value)
 const sectionPositionMap: Record<string, string> = {
-  gallery: "45%",       // Align with first row of gallery images
-  "sociable-environment": "45%",
+  gallery: "75%",
+  "sociable-environment": "75%",
 };
 const defaultDesktopTop = "75%";
 
