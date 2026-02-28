@@ -397,7 +397,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Lighting",
         tags: ["Lighting", "Sconce"],
         materials: "Hand-cast bronze with clear glass diffuser",
-        dimensions: "H45 × W12 × D14 cm"
+        dimensions: "H45 × W12 × D14 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Ondas_Sconce.pdf",
+        pdfFilename: "Maison_Affluency-Ondas_Sconce.pdf"
       },
       { 
         image: alexanderLamontPick4, 
