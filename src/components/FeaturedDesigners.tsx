@@ -3122,9 +3122,10 @@ const FeaturedDesigners = () => {
                   )}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center text-white/60 gap-4 p-8">
+                <div className="flex flex-col items-center justify-center text-white/60 gap-3 p-8">
                   <Gem className="h-10 w-10 text-white/30" />
-                  <p className="font-body text-sm">Coming soon</p>
+                  <h3 className="text-xl font-serif text-white">Curators' Picks</h3>
+                  <p className="font-body text-sm italic text-white/50">Coming soon</p>
                   <button
                     onClick={() => {
                       setCuratorPicksDesigner(null);
