@@ -920,7 +920,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "bruno-de-maistre",
-    name: "Bruno de Maistre - Atelier BdM",
+    name: "Atelier BdM - Bruno de Maistre",
     specialty: "Contemporary Furniture Design",
     image: brunoDeMaistreImg,
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.20.04_AM_j1zeee.png",
