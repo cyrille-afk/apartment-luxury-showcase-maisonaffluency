@@ -4,6 +4,7 @@ import React, { useRef, useState, useMemo, useEffect, useCallback } from "react"
 import { Instagram, Search, X, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Gem, Maximize2, Minimize2, SlidersHorizontal, Download } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
+import { scrollToSection } from "@/lib/scrollToSection";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -2700,15 +2701,12 @@ const FeaturedDesigners = () => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const gallerySection = document.getElementById('gallery');
-                                    if (gallerySection) {
-                                      gallerySection.scrollIntoView({ behavior: 'smooth' });
-                                      setTimeout(() => {
-                                        window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
-                                          detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` } 
-                                        }));
-                                      }, 500);
-                                    }
+                                    scrollToSection('gallery');
+                                    setTimeout(() => {
+                                      window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
+                                        detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` } 
+                                      }));
+                                    }, 500);
                                   }}
                                   className="text-xs md:text-sm text-primary/80 font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation"
                                 >
@@ -2727,8 +2725,8 @@ const FeaturedDesigners = () => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 const gallerySection = document.getElementById('gallery');
+                                scrollToSection('gallery');
                                 if (gallerySection) {
-                                  gallerySection.scrollIntoView({ behavior: 'smooth' });
                                   setTimeout(() => {
                                     window.dispatchEvent(new CustomEvent('openGalleryLightbox', { 
                                       detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` } 
@@ -3091,10 +3089,7 @@ const FeaturedDesigners = () => {
                           <button
                             onClick={() => {
                               setCuratorPicksDesigner(null);
-                              const contactSection = document.getElementById('contact');
-                              if (contactSection) {
-                                contactSection.scrollIntoView({ behavior: 'smooth' });
-                              }
+                              scrollToSection('contact');
                             }}
                             className="underline hover:text-white/70 transition-colors cursor-pointer"
                           >

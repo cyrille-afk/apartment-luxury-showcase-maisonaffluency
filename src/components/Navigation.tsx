@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
+import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -50,10 +51,7 @@ const contactOptions = [
     icon: Calendar,
     action: () => {
       trackCTA.bookAppointment("Navigation");
-      const contactSection = document.getElementById('contact');
-      if (contactSection) {
-        contactSection.scrollIntoView({ behavior: 'smooth' });
-      }
+      scrollToSection("contact");
     }
   },
   { 
@@ -166,16 +164,9 @@ const Navigation = () => {
 
   const handleNavClick = (href: string) => {
     setIsOpen(false);
+    const id = href.replace(/^#/, "");
     // Delay scroll to allow Sheet close animation to complete
-    setTimeout(() => {
-      const element = document.querySelector(href);
-      if (element) {
-        element.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-      }
-    }, 350);
+    setTimeout(() => scrollToSection(id), 350);
   };
 
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-background backdrop-blur-sm border-b border-border/50">

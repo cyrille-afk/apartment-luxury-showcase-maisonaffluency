@@ -4,6 +4,7 @@ import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Gem, Maximize2, Minimize2, Share2, Download } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
+import { scrollToSection } from "@/lib/scrollToSection";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
@@ -1948,14 +1949,11 @@ const BrandsAteliers = () => {
   const totalBrands = alphaGroups.reduce((sum, [, brands]) => sum + brands.length, 0);
 
   const scrollToGallery = (galleryIndex: number, brandName: string) => {
-    const gallerySection = document.getElementById('gallery');
-    if (gallerySection) {
-      gallerySection.scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => {
-        sessionStorage.setItem('openGalleryIndex', galleryIndex.toString());
-        sessionStorage.setItem('gallerySourceId', `brand-${brandName.replace(/\s+/g, '-').toLowerCase()}`);
-      }, 600);
-    }
+    scrollToSection('gallery');
+    setTimeout(() => {
+      sessionStorage.setItem('openGalleryIndex', galleryIndex.toString());
+      sessionStorage.setItem('gallerySourceId', `brand-${brandName.replace(/\s+/g, '-').toLowerCase()}`);
+    }, 600);
   };
 
   return (

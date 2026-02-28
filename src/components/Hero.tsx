@@ -1,12 +1,12 @@
 import { useRef, useEffect } from "react";
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
+import { scrollToSection } from "@/lib/scrollToSection";
 
 // Use a single fallback src (smallest useful size); srcSet handles responsive selection
 const heroImageFallback = cloudinaryUrl("living-room-hero_zxfcxl", { width: 400, quality: "auto:good", crop: "fill" });
 const heroSrcSet = cloudinarySrcSet("living-room-hero_zxfcxl", [400, 600, 828, 1200, 1600], { quality: "auto:good", crop: "fill" });
 
-const scrollToOverview = () =>
-  document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" });
+const scrollToOverview = () => scrollToSection("overview");
 
 const Hero = () => {
   const ref = useRef<HTMLElement>(null);

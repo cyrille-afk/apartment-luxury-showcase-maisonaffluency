@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
 
@@ -11,12 +12,7 @@ const Overview = () => {
     margin: "-100px"
   });
 
-  const scrollToTeam = () => {
-    const teamSection = document.getElementById("curating-team");
-    if (teamSection) {
-      teamSection.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const scrollToTeam = () => scrollToSection("curating-team");
 
   return <section id="overview" ref={ref} className="py-10 md:py-20 pb-6 md:pb-10 px-4 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
       <div className="mx-auto max-w-7xl">
@@ -41,12 +37,7 @@ const Overview = () => {
               delay: 0.2
             }} className="mb-2 text-foreground text-xl md:text-2xl lg:text-2xl font-serif font-bold">
                 <button
-                  onClick={() => {
-                    const gallerySection = document.getElementById("gallery");
-                    if (gallerySection) {
-                      gallerySection.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
+                  onClick={() => scrollToSection("gallery")}
                   className="hover:text-foreground/70 transition-colors duration-300 cursor-pointer"
                 >
                   Gallery Overview
@@ -77,25 +68,15 @@ const Overview = () => {
             duration: 0.6,
             delay: 0.4
           }} className="flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
-              <button 
-                onClick={() => {
-                  const target = document.getElementById("sociable-environment");
-                  if (target) {
-                    target.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }
-                }}
+               <button 
+                onClick={() => scrollToSection("sociable-environment")}
                 className="text-left cursor-pointer group transition-all duration-300 hover:scale-105"
               >
                 <div className="font-display text-2xl md:text-3xl text-primary animate-text-glow-pulse group-hover:text-accent group-hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300">5</div>
                 <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300">Atmospheres</div>
               </button>
-              <button
-                onClick={() => {
-                  const designersSection = document.getElementById('designers');
-                  if (designersSection) {
-                    designersSection.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
+               <button
+                onClick={() => scrollToSection("designers")}
                 className="text-left cursor-pointer group transition-all duration-300 hover:scale-105"
               >
                 <div className="font-display text-2xl md:text-3xl text-primary animate-text-glow-pulse group-hover:text-accent group-hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300">50+</div>

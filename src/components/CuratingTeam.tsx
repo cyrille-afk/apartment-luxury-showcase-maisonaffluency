@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
+import { scrollToSection } from "@/lib/scrollToSection";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Search, Linkedin } from "lucide-react";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -152,12 +153,7 @@ const CuratingTeam = () => {
         className="mt-14 text-center"
       >
         <button
-          onClick={() => {
-            const overviewSection = document.getElementById("overview");
-            if (overviewSection) {
-              overviewSection.scrollIntoView({ behavior: "smooth" });
-            }
-          }}
+          onClick={() => scrollToSection("overview")}
           className="flex flex-col items-center gap-2 cursor-pointer group mx-auto"
         >
           <motion.div
