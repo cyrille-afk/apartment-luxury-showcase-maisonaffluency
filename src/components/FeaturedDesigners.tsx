@@ -834,6 +834,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     name: "Bina Baitel",
     specialty: "Product Design & Sculptural Objects",
     image: binaBAitelImg,
+    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.17.48_AM_rkjerk.png",
     biography: "Bina Baitel Studio creates interior and industrial design projects as well as unique creations in collaboration with museums and galleries. The Paris-based studio conducts a global creative approach ranging from artistic direction to technical studies, with a constant focus on timeless projects and a search for innovation. Bina Baitel's work has been exhibited at the Grand Palais, Milan Design Week, and leading design galleries worldwide.",
     notableWorks: "Sublime Collection (Mobilier National), Design Objects for Galleries and Museums",
     philosophy: "Design is always about finding the right balance between tradition and innovation, between the handmade and the industrial.",
@@ -922,6 +923,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     name: "Bruno de Maistre - Atelier BdM",
     specialty: "Contemporary Furniture Design",
     image: brunoDeMaistreImg,
+    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.20.04_AM_j1zeee.png",
     biography:
       "Bruno de Maistre is a French designer known for his poetic approach to furniture design. His Lyrical Desk demonstrates his ability to create pieces that are both functional and emotionally resonant, with flowing lines and thoughtful proportions that inspire creativity and contemplation.",
     notableWorks: "Lyric Desk, Contemporary Furniture Series",
