@@ -90,6 +90,7 @@ const alexanderLamontPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/
 const alexanderLamontPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160682/Dais-Lounge-Chair_06_alexander-lamont_1_fuodom.jpg";
 const alexanderLamontPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160703/Corteza-Console-Table-Dark_03_alexander-lamont_r2ubvz.jpg";
 const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161289/Barbican-Cabinet_13_alexander-lamont_2_hyp2sd.jpg";
+const alexanderLamontPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161406/Koi-Carp_01_alexander-lamont_1_kxayax.jpg";
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
@@ -437,13 +438,15 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "Maison_Affluency-Barbican_Cabinet.pdf"
       },
       {
-        image: "",
+        image: alexanderLamontPick7,
         title: "Koi Carps",
         subtitle: "Wall Art",
         category: "Decorative",
         tags: ["Decorative", "Wall Art"],
-        materials: "",
-        dimensions: ""
+        materials: "Bronze Koi carp appear to swim naturally across surfaces large and small. We can advise on arrangements for the wall and floor.\n5 dimensions:\nFG000139 W 7.5 × L 36 cm – 1.2 kg\nFG000140 W 8.5 × L 40 cm – 1.5 kg\nFG000141 W 11.5 × L 43.5 cm – 2.4 kg\nFG000142 W 12 × L 47.5 cm – 2.5 kg\nFG000145 W 6.5 × L 34 cm – 1 kg",
+        dimensions: "",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Koi_Carps.pdf",
+        pdfFilename: "Maison_Affluency-Koi_Carps_Wall_Art.pdf"
       },
     ],
     links: [
