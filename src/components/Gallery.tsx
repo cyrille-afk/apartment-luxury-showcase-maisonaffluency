@@ -9,9 +9,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { cloudinaryUrl } from "@/lib/cloudinary";
+import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 
-const g = (id: string) => cloudinaryUrl(id, { width: 1600, quality: "auto:good", crop: "fill" });
+const g = (id: string) => cloudinaryUrl(id, { width: 1200, quality: "auto:good", crop: "fill" });
+const gSet = (id: string) => cloudinarySrcSet(id, [400, 600, 800, 1200, 1600], { quality: "auto:good", crop: "fill" });
 
 const bedroomImage = g("master-suite_y6jaix");
 const diningImage = g("dining-room_ey0bu5");
@@ -77,7 +78,7 @@ const galleryExperiences = [{
     title: "A Relaxed Setting",
     description: "Armchair: Forest & Giaconia's BOB Armchair for Delcourt Collection, Side Table: Alinea Design Objects' Angelo M Side Table, Mirror: Kiko Lopez' Shadow Drawings (Unique Piece), Cushion: Takayokaya's Ojami Cushion, Vessel: Milan Pekař's Crystalline Green Vessel Volume 5"
   }, {
-    image: cloudinaryUrl("IMG_2133_wtxd62", { width: 1600, quality: "auto:good", crop: "fill" }),
+    image: cloudinaryUrl("IMG_2133_wtxd62", { width: 1200, quality: "auto:good", crop: "fill" }),
     title: "A Colourful Nook",
     description: "Armchair: Forest & Giaconia's BOB Armchair for Delcourt Collection, Side Table: Alinea Design Objects' Angelo M Side Table, Mirror: Kiko Lopez' Shadow Drawings (Unique Piece), Cushion: Takayokaya's Ojami Cushion, Ottoman: Bina Baitel's Sublime Ottoman M in Métaphores Fabric, Vessel: Milan Pekař's Crystalline Green Vessel Volume 5"
   }]
@@ -550,6 +551,7 @@ const Gallery = () => {
                       <img
                         src={item.image}
                         alt={item.title}
+                        sizes="100vw"
                         className={`h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage ? "object-[center_35%]" : ""}`}
                         loading="lazy"
                       />
@@ -628,7 +630,7 @@ const Gallery = () => {
                         className="relative mb-2 aspect-[4/5] overflow-hidden rounded-sm"
                         onClick={() => openLightbox(originalSectionIndex, index)}
                       >
-                        <img src={item.image} alt={item.title} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                        <img src={item.image} alt={item.title} sizes={gridCols === 4 ? "(max-width: 1024px) 50vw, 25vw" : "(max-width: 1024px) 50vw, 33vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         {/* Expand icon - opens lightbox directly */}
                         <button
@@ -697,14 +699,15 @@ const Gallery = () => {
                  <div className="flex h-full">
                    {currentSectionItems.map((item, i) => (
                      <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center px-4">
-                       <img
-                         src={item.image}
-                         alt={item.title}
-                         className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[50vh]"
-                         loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
-                         decoding="async"
-                         draggable={false}
-                       />
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          sizes="100vw"
+                          className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[50vh]"
+                          loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
+                          decoding="async"
+                          draggable={false}
+                        />
                      </div>
                    ))}
                  </div>

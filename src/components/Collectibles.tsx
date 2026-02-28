@@ -792,6 +792,7 @@ const Collectibles = () => {
                             <img
                               src={designer.image}
                               alt={designer.name}
+                              sizes="(max-width: 767px) 96px, 128px"
                               className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
                               loading="lazy"
                             />
@@ -820,6 +821,7 @@ const Collectibles = () => {
                             <img
                               src={selectedImage?.image || designer.image}
                               alt={selectedImage?.name || designer.name}
+                              sizes="(max-width: 767px) 90vw, 700px"
                               className="w-full h-auto rounded-lg object-contain"
                             />
                             <p className="text-center mt-4 text-lg font-serif text-foreground">
@@ -1114,7 +1116,7 @@ const Collectibles = () => {
                               : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'
                           }`}
                         >
-                          <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="lazy" />
+                          <img src={pick.image} alt={pick.title} sizes="(max-width: 767px) 40px, 48px" className="w-full h-full object-cover" loading="lazy" />
                         </button>
                       ))}
                     </div>
