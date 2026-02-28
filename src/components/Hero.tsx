@@ -50,7 +50,7 @@ const Hero = () => {
       }} transition={{
         duration: 0.8,
         delay: 0.2
-      }} className="max-w-4xl md:text-center">
+      }} className="max-w-4xl md:text-left">
           <motion.p initial={{
           opacity: 0
         }} animate={{
@@ -70,7 +70,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-}} className="mb-4 md:mb-6 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl">Discover world masters in furniture and collectible design
+}} className="mb-4 md:mb-6 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl">Discover World Masters in Furniture & Collectible Design
           </motion.h1>
           
           <motion.p initial={{
@@ -80,7 +80,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.6,
           delay: 0.8
-        }} className="max-w-3xl text-base leading-relaxed text-white text-left md:text-center md:text-justify font-serif md:text-xl lg:text-2xl font-medium mb-6 md:mx-auto">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses and Artisan&nbsp;Workshops</motion.p>
+        }} className="max-w-3xl text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium mb-6">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses and Artisan&nbsp;Workshops</motion.p>
           
           <motion.div initial={{
             opacity: 0
@@ -89,7 +89,7 @@ const Hero = () => {
           }} transition={{
             duration: 1,
             delay: 1.2
-          }} className="mt-6 md:mt-8 w-full flex justify-center">
+          }} className="mt-6 md:mt-8 w-full flex justify-start">
             <button
               onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
               className="flex flex-col items-center gap-2 cursor-pointer group"
