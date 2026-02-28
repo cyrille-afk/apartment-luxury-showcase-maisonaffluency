@@ -1599,7 +1599,12 @@ function AlphaStrip({
             <div
               key={brand.name}
               id={`brand-${brand.name.replace(/\s+/g, "-").toLowerCase()}`}
+              role="button"
+              tabIndex={0}
+              aria-expanded={expandedCard === brand.name}
+              aria-label={`${brand.name} — ${brand.origin}`}
               onClick={() => setExpandedCard(expandedCard === brand.name ? null : brand.name)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedCard(expandedCard === brand.name ? null : brand.name); } }}
               className={`group flex-none w-[80vw] md:w-[340px] snap-start border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden p-5 md:p-6 ${expandedCard === brand.name ? "min-h-[280px] md:min-h-[300px]" : "h-[280px] md:h-[300px]"}`}
             >
               {/* Lazy-loaded background image */}
