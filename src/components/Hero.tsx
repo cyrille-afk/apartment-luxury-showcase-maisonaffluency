@@ -53,7 +53,7 @@ const Hero = () => {
             <p className="text-[15px] leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
               From Couture Furniture and Collectible Designs in Situ,
               <br /> To the World's most distinguished Furniture Houses
-              <br /> and Artisan&nbsp;Workshops
+              <br /> and Design&nbsp;Workshops
             </p>
 
             <div className="mt-8 md:mt-10">
