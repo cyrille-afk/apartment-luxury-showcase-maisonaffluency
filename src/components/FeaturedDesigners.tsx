@@ -61,70 +61,70 @@ const forestGiaconiaImg = dImg("forest-giaconia_ikcmkg");
 const adamCourtsOkhaImg = dImg("adam-courts");
 
 // Curator picks — migrated to Cloudinary
-const noeDuchaufourMadonnaTables = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.06.51_PM_ukeqij", { width: 1600, quality: "auto:good", crop: "fill" });
-const noeMineralFlowerSide = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.40.43_PM_b0tuc9", { width: 1600, quality: "auto:good", crop: "fill" });
-const noeMineralFlowerCoffee = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.42.29_PM_ryudnm", { width: 1600, quality: "auto:good", crop: "fill" });
-const leoAertsAngeloMCollection = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.35.13_AM_jwbivd", { width: 1600, quality: "auto:good", crop: "fill" });
-const leoAertsAngeloMDining = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.09.13_AM_z727ht", { width: 1600, quality: "auto:good", crop: "fill" });
-const leoAertsVitrineCabinet = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.49_AM_bj59um", { width: 1600, quality: "auto:good", crop: "fill" });
-const leoAertsTwinChairOutdoor = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.00_AM_msurq2", { width: 1600, quality: "auto:good", crop: "fill" });
-const leoAertsTwinChairIndoor = cloudinaryUrl("Screen_Shot_2026-02-27_at_8.41.52_PM_wlksfq", { width: 1600, quality: "auto:good", crop: "fill" });
-const leoAertsAngeloMMacassar = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.06.14_AM_azdcae", { width: 1600, quality: "auto:good", crop: "fill" });
-const leoAertsAngeloMO290 = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.08.42_AM_xr4vun", { width: 1600, quality: "auto:good", crop: "fill" });
+const noeDuchaufourMadonnaTables = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.06.51_PM_ukeqij", { width: 1200, quality: "auto:good", crop: "fill" });
+const noeMineralFlowerSide = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.40.43_PM_b0tuc9", { width: 1200, quality: "auto:good", crop: "fill" });
+const noeMineralFlowerCoffee = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.42.29_PM_ryudnm", { width: 1200, quality: "auto:good", crop: "fill" });
+const leoAertsAngeloMCollection = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.35.13_AM_jwbivd", { width: 1200, quality: "auto:good", crop: "fill" });
+const leoAertsAngeloMDining = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.09.13_AM_z727ht", { width: 1200, quality: "auto:good", crop: "fill" });
+const leoAertsVitrineCabinet = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.49_AM_bj59um", { width: 1200, quality: "auto:good", crop: "fill" });
+const leoAertsTwinChairOutdoor = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.00_AM_msurq2", { width: 1200, quality: "auto:good", crop: "fill" });
+const leoAertsTwinChairIndoor = cloudinaryUrl("Screen_Shot_2026-02-27_at_8.41.52_PM_wlksfq", { width: 1200, quality: "auto:good", crop: "fill" });
+const leoAertsAngeloMMacassar = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.06.14_AM_azdcae", { width: 1200, quality: "auto:good", crop: "fill" });
+const leoAertsAngeloMO290 = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.08.42_AM_xr4vun", { width: 1200, quality: "auto:good", crop: "fill" });
 import forestGiaconiaIhiLamp from "@/assets/curators-picks/forest-giaconia-ihi-floor-lamp.jpg";
 import forestGiaconiaConsole from "@/assets/forrest-giaconia-console.png";
 import forestGiaconiaTable from "@/assets/forrest-giaconia-table.png";
 import forestGiaconiaCoffee from "@/assets/forrest-giaconia-coffee.png";
-const adamCourtsVoidTable = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772110305/Screen_Shot_2026-02-18_at_10.39.49_AM_noqdtn.png";
-const adamCourtsVoidChair = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772110437/Screen_Shot_2026-02-18_at_10.41.11_AM_msssmi.png";
-const adamCourtsGeometerChair = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772159510/Screen_Shot_2026-02-18_at_10.41.39_AM_t1lxrt.png";
-const adamCourtsReposeSofa = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772159511/Screen_Shot_2026-02-18_at_10.42.26_AM_oglbl5.png";
-const adamCourtsReverbSofa = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772159581/Screen_Shot_2026-02-18_at_10.42.38_AM_qvcay0.png";
-const adamCourtsSideboard = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772111095/Screen_Shot_2026-02-18_at_10.43.37_AM_ynqngy.png";
-const adamCourtsGeometerBench = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772159511/Screen_Shot_2026-02-18_at_10.44.15_AM_n5y58h.png";
+const adamCourtsVoidTable = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772110305/Screen_Shot_2026-02-18_at_10.39.49_AM_noqdtn.png";
+const adamCourtsVoidChair = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772110437/Screen_Shot_2026-02-18_at_10.41.11_AM_msssmi.png";
+const adamCourtsGeometerChair = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772159510/Screen_Shot_2026-02-18_at_10.41.39_AM_t1lxrt.png";
+const adamCourtsReposeSofa = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772159511/Screen_Shot_2026-02-18_at_10.42.26_AM_oglbl5.png";
+const adamCourtsReverbSofa = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772159581/Screen_Shot_2026-02-18_at_10.42.38_AM_qvcay0.png";
+const adamCourtsSideboard = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772111095/Screen_Shot_2026-02-18_at_10.43.37_AM_ynqngy.png";
+const adamCourtsGeometerBench = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772159511/Screen_Shot_2026-02-18_at_10.44.15_AM_n5y58h.png";
 
 // Curators' Picks images
-const alexanderLamontPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160682/Ondas-Sconce-Clear_07_alexander-lamont_1_t6ygbc.jpg";
-const alexanderLamontPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160682/Galea-Lantern-Rock_Crystal_01_alexander-lamont_1_rhpxsg.jpg";
-const alexanderLamontPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg";
-const alexanderLamontPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160682/Dais-Lounge-Chair_06_alexander-lamont_1_fuodom.jpg";
-const alexanderLamontPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772160703/Corteza-Console-Table-Dark_03_alexander-lamont_r2ubvz.jpg";
-const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161289/Barbican-Cabinet_13_alexander-lamont_2_hyp2sd.jpg";
-const alexanderLamontPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161406/Koi-Carp_01_alexander-lamont_1_kxayax.jpg";
+const alexanderLamontPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160682/Ondas-Sconce-Clear_07_alexander-lamont_1_t6ygbc.jpg";
+const alexanderLamontPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160682/Galea-Lantern-Rock_Crystal_01_alexander-lamont_1_rhpxsg.jpg";
+const alexanderLamontPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg";
+const alexanderLamontPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160682/Dais-Lounge-Chair_06_alexander-lamont_1_fuodom.jpg";
+const alexanderLamontPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160703/Corteza-Console-Table-Dark_03_alexander-lamont_r2ubvz.jpg";
+const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161289/Barbican-Cabinet_13_alexander-lamont_2_hyp2sd.jpg";
+const alexanderLamontPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161406/Koi-Carp_01_alexander-lamont_1_kxayax.jpg";
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
 import yvesMacheretPick4 from "@/assets/curators-picks/yves-macheret-4.jpg";
 import yvesMacheretPickHublo from "@/assets/curators-picks/yves-macheret-hublo.png";
 import yvesMacheretPickConsole1925 from "@/assets/curators-picks/yves-macheret-console-1925.jpg";
-const apparatusPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772162190/Screen_Shot_2026-02-27_at_11.14.28_AM_skwebb.png";
-const apparatusPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772162191/Screen_Shot_2026-02-27_at_11.16.07_AM_qjfogh.png";
-const apparatusPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772162190/Screen_Shot_2026-02-27_at_11.14.45_AM_n1pxgg.png";
-const apparatusPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772162191/Screen_Shot_2026-02-27_at_11.15.22_AM_uxqz3z.png";
-const apparatusPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161859/Screen_Shot_2026-02-22_at_1.58.18_PM_cnfmnc.png";
-const apparatusPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772161859/Screen_Shot_2026-02-22_at_2.16.45_PM_t3d8xk.png";
-const apparatusPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772106126/Screen_Shot_2026-02-22_at_2.36.04_PM_ivwy5t.png";
-const pendhapaPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165712/Screen_Shot_2026-02-27_at_12.11.36_PM_qed4qj.png";
-const pendhapaPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165616/Screen_Shot_2026-02-27_at_12.10.47_PM_nkmbmx.png";
-const pendhapaPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165598/Screen_Shot_2026-02-27_at_12.04.23_PM_wlvkcx.png";
-const pendhapaPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165597/Screen_Shot_2026-02-27_at_12.11.56_PM_sw0yoc.png";
-const pendhapaPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165614/Screen_Shot_2026-02-27_at_12.09.33_PM_npn6eb.png";
-const pendhapaPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165978/Screen_Shot_2026-02-27_at_12.19.05_PM_dodant.png";
-const pendhapaPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,f_auto/v1772165720/Screen_Shot_2026-02-27_at_12.13.12_PM_jpr8qh.png";
-const atelierFevrierPick1 = cloudinaryUrl("Screen_Shot_2026-02-16_at_10.00.02_AM_lfndej", { width: 1600, quality: "auto:good", crop: "fill" });
-const atelierFevrierPick2 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.37.27_AM_jgmxg5.png", { width: 1600, quality: "auto:good", crop: "fill" });
-const atelierFevrierPick3 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.38.45_AM_sqcvog", { width: 1600, quality: "auto:good", crop: "fill" });
-const atelierFevrierPick4 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.41.04_AM_sy9grh", { width: 1600, quality: "auto:good", crop: "fill" });
-const atelierFevrierPick5 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.47.18_AM_o3qliv", { width: 1600, quality: "auto:good", crop: "fill" });
-const atelierFevrierPick6 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.46.17_AM_c5irzd", { width: 1600, quality: "auto:good", crop: "fill" });
-const atelierFevrierPick7 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.46.48_AM_saicfe", { width: 1600, quality: "auto:good", crop: "fill" });
+const apparatusPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772162190/Screen_Shot_2026-02-27_at_11.14.28_AM_skwebb.png";
+const apparatusPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772162191/Screen_Shot_2026-02-27_at_11.16.07_AM_qjfogh.png";
+const apparatusPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772162190/Screen_Shot_2026-02-27_at_11.14.45_AM_n1pxgg.png";
+const apparatusPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772162191/Screen_Shot_2026-02-27_at_11.15.22_AM_uxqz3z.png";
+const apparatusPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161859/Screen_Shot_2026-02-22_at_1.58.18_PM_cnfmnc.png";
+const apparatusPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161859/Screen_Shot_2026-02-22_at_2.16.45_PM_t3d8xk.png";
+const apparatusPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772106126/Screen_Shot_2026-02-22_at_2.36.04_PM_ivwy5t.png";
+const pendhapaPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772165712/Screen_Shot_2026-02-27_at_12.11.36_PM_qed4qj.png";
+const pendhapaPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772165616/Screen_Shot_2026-02-27_at_12.10.47_PM_nkmbmx.png";
+const pendhapaPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772165598/Screen_Shot_2026-02-27_at_12.04.23_PM_wlvkcx.png";
+const pendhapaPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772165597/Screen_Shot_2026-02-27_at_12.11.56_PM_sw0yoc.png";
+const pendhapaPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772165614/Screen_Shot_2026-02-27_at_12.09.33_PM_npn6eb.png";
+const pendhapaPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772165978/Screen_Shot_2026-02-27_at_12.19.05_PM_dodant.png";
+const pendhapaPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772165720/Screen_Shot_2026-02-27_at_12.13.12_PM_jpr8qh.png";
+const atelierFevrierPick1 = cloudinaryUrl("Screen_Shot_2026-02-16_at_10.00.02_AM_lfndej", { width: 1200, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick2 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.37.27_AM_jgmxg5.png", { width: 1200, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick3 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.38.45_AM_sqcvog", { width: 1200, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick4 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.41.04_AM_sy9grh", { width: 1200, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick5 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.47.18_AM_o3qliv", { width: 1200, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick6 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.46.17_AM_c5irzd", { width: 1200, quality: "auto:good", crop: "fill" });
+const atelierFevrierPick7 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.46.48_AM_saicfe", { width: 1200, quality: "auto:good", crop: "fill" });
 import emmanuelLevetStennePick1 from "@/assets/curators-picks/emmanuel-levet-stenne-1.jpg";
 import emmanuelLevetStennePick2 from "@/assets/curators-picks/emmanuel-levet-stenne-2.jpg";
 import emmanuelLevetStennePick3 from "@/assets/curators-picks/emmanuel-levet-stenne-3.jpg";
 import emmanuelLevetStennePick4 from "@/assets/curators-picks/emmanuel-levet-stenne-4.jpg";
 import emmanuelLevetStennePick5 from "@/assets/curators-picks/emmanuel-levet-stenne-5.jpg";
-const emmanuelLevetStennePick6 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.23.51_PM_gyeqne", { width: 1600, quality: "auto:good", crop: "fill" });
-const emmanuelLevetStennePick7 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.29.54_PM_cfncv6", { width: 1600, quality: "auto:good", crop: "fill" });
+const emmanuelLevetStennePick6 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.23.51_PM_gyeqne", { width: 1200, quality: "auto:good", crop: "fill" });
+const emmanuelLevetStennePick7 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.29.54_PM_cfncv6", { width: 1200, quality: "auto:good", crop: "fill" });
 import hamreiPick1 from "@/assets/curators-picks/hamrei-1.jpg";
 import hamreiPick2 from "@/assets/curators-picks/hamrei-2.jpg";
 import hamreiPick3 from "@/assets/curators-picks/hamrei-3.jpg";
@@ -148,15 +148,15 @@ import leoSentouPickLD from "@/assets/curators-picks/leo-sentou-ld-armchair.png"
 
 // Additional curator picks images
 import ericSchmittChairie from "@/assets/curators-picks/eric-schmitt-chairie.jpg";
-const pierreBonnefilleBronzePainting = cloudinaryUrl("art-master-bronze_hf6bad", { width: 1600, quality: "auto:good", crop: "fill" });
-const pierreBonnefilleBronzePainting208 = cloudinaryUrl("Screen_Shot_2026-02-22_at_6.27.12_PM_haymp0", { width: 1600, quality: "auto:good", crop: "fill" });
-const pierreBonnefilleMetamorphosisLamps = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.04.36_PM_wwoocz", { width: 1600, quality: "auto:good", crop: "fill" });
-const pierreBonnefilleMetamorphosisPolygone = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.14.02_PM_pmlpmu", { width: 1600, quality: "auto:good", crop: "fill" });
-const pierreBonnefilleTabouretsStone = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.21.03_PM_kyvd2j", { width: 1600, quality: "auto:good", crop: "fill" });
-const pierreBonnefilleStoneD = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.25.11_PM_gctcgf", { width: 1600, quality: "auto:good", crop: "fill" });
-const pierreBonnefilleEnfiladeBloc = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.33.49_PM_ivior2", { width: 1600, quality: "auto:good", crop: "fill" });
-const pierreBonnefilleBlocSideboardII = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.47.27_PM_zmyb0m", { width: 1600, quality: "auto:good", crop: "fill" });
-const pierreBonnefilleStoneFloorLamp = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.52.01_PM_lnerox", { width: 1600, quality: "auto:good", crop: "fill" });
+const pierreBonnefilleBronzePainting = cloudinaryUrl("art-master-bronze_hf6bad", { width: 1200, quality: "auto:good", crop: "fill" });
+const pierreBonnefilleBronzePainting208 = cloudinaryUrl("Screen_Shot_2026-02-22_at_6.27.12_PM_haymp0", { width: 1200, quality: "auto:good", crop: "fill" });
+const pierreBonnefilleMetamorphosisLamps = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.04.36_PM_wwoocz", { width: 1200, quality: "auto:good", crop: "fill" });
+const pierreBonnefilleMetamorphosisPolygone = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.14.02_PM_pmlpmu", { width: 1200, quality: "auto:good", crop: "fill" });
+const pierreBonnefilleTabouretsStone = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.21.03_PM_kyvd2j", { width: 1200, quality: "auto:good", crop: "fill" });
+const pierreBonnefilleStoneD = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.25.11_PM_gctcgf", { width: 1200, quality: "auto:good", crop: "fill" });
+const pierreBonnefilleEnfiladeBloc = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.33.49_PM_ivior2", { width: 1200, quality: "auto:good", crop: "fill" });
+const pierreBonnefilleBlocSideboardII = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.47.27_PM_zmyb0m", { width: 1200, quality: "auto:good", crop: "fill" });
+const pierreBonnefilleStoneFloorLamp = cloudinaryUrl("Screen_Shot_2026-02-22_at_8.52.01_PM_lnerox", { width: 1200, quality: "auto:good", crop: "fill" });
 import ccTapisGiudecca from "@/assets/curators-picks/cc-tapis-giudecca.jpg";
 import haymannMarieLamp from "@/assets/curators-picks/haymann-marie-lamp.jpg";
 import theoremeGarnierLinker from "@/assets/curators-picks/theoreme-garnier-linker.jpg";
@@ -190,21 +190,21 @@ import maartenVrolijkBloomingTerra from "@/assets/curators-picks/maarten-vrolijk
 import marcantonioDetail from "@/assets/curators-picks/marcantonio-cotissi-detail.jpg";
 
 import binaBAitelObject from "@/assets/curators-picks/bina-baitel-object.jpg";
-const binaBaitelPick1 = cloudinaryUrl("Screen_Shot_2026-02-22_at_2.58.25_PM_ljahkg", { width: 1600, quality: "auto:good", crop: "fill" });
-const binaBaitelPick2 = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.07.08_PM_eyfjvf", { width: 1600, quality: "auto:good", crop: "fill" });
-const binaBaitelPick3 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.01.30_PM_fkyyx2", { width: 1600, quality: "auto:good", crop: "fill" });
-const binaBaitelPick4 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.04.26_PM_vnrscy", { width: 1600, quality: "auto:good", crop: "fill" });
-const binaBaitelPick5 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.10.14_PM_hbhaap", { width: 1600, quality: "auto:good", crop: "fill" });
-const binaBaitelPick6 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.16.37_PM_mydp38", { width: 1600, quality: "auto:good", crop: "fill" });
-const binaBaitelPick7 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.18.36_PM_nngssk", { width: 1600, quality: "auto:good", crop: "fill" });
-const kerstensConsole = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.46.35_AM_mzs6dg", { width: 1600, quality: "auto:good", crop: "fill" });
-const kertensPick1 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.46.35_AM_mzs6dg", { width: 1600, quality: "auto:good", crop: "fill" });
-const kertensPick2 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.50.12_AM_com6lf", { width: 1600, quality: "auto:good", crop: "fill" });
-const kertensPick3 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.51.18_AM_lgqgzk", { width: 1600, quality: "auto:good", crop: "fill" });
-const kertensPick4 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.52.56_AM_cdyd73", { width: 1600, quality: "auto:good", crop: "fill" });
-const kertensPick5 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.53.40_AM_kkfe0w", { width: 1600, quality: "auto:good", crop: "fill" });
-const kertensPick6 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.55.13_AM_qdmapy", { width: 1600, quality: "auto:good", crop: "fill" });
-const kertensPick7 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.56.39_AM_vyjgky", { width: 1600, quality: "auto:good", crop: "fill" });
+const binaBaitelPick1 = cloudinaryUrl("Screen_Shot_2026-02-22_at_2.58.25_PM_ljahkg", { width: 1200, quality: "auto:good", crop: "fill" });
+const binaBaitelPick2 = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.07.08_PM_eyfjvf", { width: 1200, quality: "auto:good", crop: "fill" });
+const binaBaitelPick3 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.01.30_PM_fkyyx2", { width: 1200, quality: "auto:good", crop: "fill" });
+const binaBaitelPick4 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.04.26_PM_vnrscy", { width: 1200, quality: "auto:good", crop: "fill" });
+const binaBaitelPick5 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.10.14_PM_hbhaap", { width: 1200, quality: "auto:good", crop: "fill" });
+const binaBaitelPick6 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.16.37_PM_mydp38", { width: 1200, quality: "auto:good", crop: "fill" });
+const binaBaitelPick7 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.18.36_PM_nngssk", { width: 1200, quality: "auto:good", crop: "fill" });
+const kerstensConsole = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.46.35_AM_mzs6dg", { width: 1200, quality: "auto:good", crop: "fill" });
+const kertensPick1 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.46.35_AM_mzs6dg", { width: 1200, quality: "auto:good", crop: "fill" });
+const kertensPick2 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.50.12_AM_com6lf", { width: 1200, quality: "auto:good", crop: "fill" });
+const kertensPick3 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.51.18_AM_lgqgzk", { width: 1200, quality: "auto:good", crop: "fill" });
+const kertensPick4 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.52.56_AM_cdyd73", { width: 1200, quality: "auto:good", crop: "fill" });
+const kertensPick5 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.53.40_AM_kkfe0w", { width: 1200, quality: "auto:good", crop: "fill" });
+const kertensPick6 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.55.13_AM_qdmapy", { width: 1200, quality: "auto:good", crop: "fill" });
+const kertensPick7 = cloudinaryUrl("Screen_Shot_2026-02-19_at_11.56.39_AM_vyjgky", { width: 1200, quality: "auto:good", crop: "fill" });
 import manOfPartsSofa from "@/assets/curators-picks/man-of-parts-sofa.jpg";
 import manOfPartsSideChair from "@/assets/curators-picks/man-of-parts-side-chair.png";
 import manOfPartsLoungeChair from "@/assets/curators-picks/man-of-parts-lounge-chair.png";
@@ -1845,7 +1845,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/NDL_Editions-Mineral_Flower_Side_Table_II.pdf"
       },
       {
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good/v1772192484/Screen_Shot_2026-02-27_at_7.40.07_PM_pyyf8x.png",
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good/v1772192484/Screen_Shot_2026-02-27_at_7.40.07_PM_pyyf8x.png",
         title: "Whisper Large Sofa",
         subtitle: "",
         category: "Seating",
@@ -1858,7 +1858,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "NDL-Editions_Whisper_Large_Sofa_1.pdf"
       },
       {
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good/v1772193015/Screen_Shot_2026-02-27_at_7.49.36_PM_xtpnov.png",
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good/v1772193015/Screen_Shot_2026-02-27_at_7.49.36_PM_xtpnov.png",
         title: "Nazaré Suspension II Pendant Lamp",
         subtitle: "",
         category: "Lighting",
