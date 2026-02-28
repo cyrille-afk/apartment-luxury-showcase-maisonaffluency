@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { Instagram } from "lucide-react";
+import { Instagram, LogIn } from "lucide-react";
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 const heroImage = cloudinaryUrl("living-room-hero_zxfcxl", { width: 1600, quality: "auto:good", crop: "fill" });
 const heroSrcSet = cloudinarySrcSet("living-room-hero_zxfcxl", [640, 828, 1200, 1600, 2400], { quality: "auto:good", crop: "fill" });
@@ -70,7 +70,7 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-}} className="mb-6 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}>Discover World Masters in Furniture & Collectible Design
+}} className="mb-6 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity inline-flex items-end gap-3 flex-wrap" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}>Discover World Masters in Furniture & Collectible Design <LogIn className="inline-block w-7 h-7 md:w-10 md:h-10 lg:w-12 lg:h-12 mb-1" />
           </motion.h1>
           
           <motion.p initial={{
