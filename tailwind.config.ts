@@ -154,7 +154,7 @@ export default {
         "slide-in": "slide-in 0.5s ease-out",
         "pulse-fade": "pulse-fade 2.5s ease-in-out infinite",
         "pulse-glow": "pulse-glow 10s ease-in-out infinite",
-        "text-glow-pulse": "text-glow-pulse 6s ease-in-out infinite",
+        "text-glow-pulse": "text-glow-pulse 12s ease-in-out infinite",
       },
     },
   },
