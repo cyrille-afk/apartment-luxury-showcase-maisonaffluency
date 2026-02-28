@@ -2015,6 +2015,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     name: "Tristan Auer",
     specialty: "Interior Architecture & Luxury Furniture",
     image: tristanAuerImg,
+    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_1.21.57_PM_z2fdnp.png",
     biography: "Tristan Auer is a Paris-based interior architect and designer who trained at ESAG Paris before collaborating with Christian Liaigre and Philippe Starck on landmark international projects. In 2002 he founded his own agency, going on to design the lobbies of leading luxury hotels across Europe. His Veronese furniture collection — produced by the prestigious French manufacturer of the same name — distils his signature aesthetic: architectural rigour, noble materials, and a quietly bold luxury.",
     notableWorks: "Veronese Furniture Collection, Hotel Wilson — Paris, Les Ambassadeurs — Paris",
     notableWorksLink: { text: "YSA Wall Lamp for Véronèse", galleryIndex: 22 },
