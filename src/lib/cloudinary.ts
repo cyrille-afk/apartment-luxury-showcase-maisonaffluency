@@ -83,7 +83,7 @@ export const presets = {
   /** Gallery / hero images — large */
   hero: (publicId: string) => ({
     src: cloudinaryUrl(publicId, { width: 1200, quality: "auto:good" }),
-    srcSet: cloudinarySrcSet(publicId, [400, 600, 800, 1200, 1600]),
+    srcSet: cloudinarySrcSet(publicId, [400, 600, 800, 1200, 1600, 2400]),
     sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw",
     placeholder: cloudinaryBlurPlaceholder(publicId),
   }),
