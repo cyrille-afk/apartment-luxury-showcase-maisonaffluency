@@ -1064,7 +1064,7 @@ const Collectibles = () => {
               {curatorPicksDesigner.curatorPicks.length > 1 && (
                 <button 
                   onClick={goToPreviousPick}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                  className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                   aria-label="Previous image"
                 >
                   <ChevronLeft className="h-8 w-8 text-white" />
@@ -1167,7 +1167,7 @@ const Collectibles = () => {
               {curatorPicksDesigner.curatorPicks.length > 1 && (
                 <button 
                   onClick={goToNextPick}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                  className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                   aria-label="Next image"
                 >
                   <ChevronRight className="h-8 w-8 text-white" />
