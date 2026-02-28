@@ -89,7 +89,7 @@ const Hero = () => {
           }} transition={{
             duration: 1,
             delay: 1.2
-          }} className="mt-6 md:mt-8 w-full flex justify-start">
+          }} className="mt-6 md:mt-8 w-full flex justify-center">
             <button
               onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
               className="flex flex-col items-center gap-2 cursor-pointer group"
