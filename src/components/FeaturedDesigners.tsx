@@ -1272,6 +1272,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     name: "Hamrei",
     specialty: "Whimsical Furniture & Collectible Design",
     image: hamreiImg,
+    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.49.02_AM_qrbows.png",
     biography:
       "Hamrei brings a playful yet sophisticated approach to contemporary design. Their Pépé Chair showcases their signature style of combining comfort with unexpected visual delight. Each piece demonstrates a mastery of form and craftsmanship while maintaining a sense of joy and personality.",
     notableWorks: "Pépé Chair, Whimsical Furniture Collection",
