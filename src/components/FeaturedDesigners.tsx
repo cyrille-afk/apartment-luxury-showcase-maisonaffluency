@@ -397,7 +397,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Straw marquetry • Hammered bronze handles • Lacquered interior",
         dimensions: "H110 × W120 × D45 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Casque_Bar_Cabinet_-_Amethyst_Ombre_Havana.pdf",
-        pdfFilename: "Maison_Affluency-Casque_Bar_Cabinet.pdf"
+        pdfFilename: "Alexander_Lamont-Casque_Bar_Cabinet.pdf"
       },
       { 
         image: alexanderLamontPick1, 
@@ -408,7 +408,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Hand-cast bronze with clear glass diffuser",
         dimensions: "H45 × W12 × D14 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Ondas_Sconce.pdf",
-        pdfFilename: "Maison_Affluency-Ondas_Sconce.pdf"
+        pdfFilename: "Alexander_Lamont-Ondas_Sconce.pdf"
       },
       { 
         image: alexanderLamontPick4, 
@@ -419,7 +419,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Bouclé upholstery • Shagreen leather • Straw marquetry accents",
         dimensions: "H75 × W80 × D85 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Dais_Lounge_Chair.pdf",
-        pdfFilename: "Maison_Affluency-Dais_Lounge_Chair.pdf"
+        pdfFilename: "Alexander_Lamont-Dais_Lounge_Chair.pdf"
       },
       { 
         image: alexanderLamontPick2, 
@@ -430,7 +430,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Hammered bronze base • Rock crystal & frosted glass shades",
         dimensions: "H28 × W18 × D18 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Galea_Lantern.pdf",
-        pdfFilename: "Maison_Affluency-Galea_Lantern.pdf"
+        pdfFilename: "Alexander_Lamont-Galea_Lantern.pdf"
       },
       { 
         image: alexanderLamontPick5, 
@@ -441,7 +441,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Natural distressed wood • Bronze detailing",
         dimensions: "H85 × W140 × D40 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Corteza_Console_Table.pdf",
-        pdfFilename: "Maison_Affluency-Corteza_Console_Table.pdf"
+        pdfFilename: "Alexander_Lamont-Corteza_Console_Table.pdf"
       },
       { 
         image: alexanderLamontPick6, 
@@ -452,7 +452,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Hand-painted lacquer • Gold leaf accents",
         dimensions: "H90 × W60 × D12 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Barbican_Cabinet.pdf",
-        pdfFilename: "Maison_Affluency-Barbican_Cabinet.pdf"
+        pdfFilename: "Alexander_Lamont-Barbican_Cabinet.pdf"
       },
       {
         image: alexanderLamontPick7,
@@ -463,7 +463,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Bronze Koi carp appear to swim naturally across surfaces large and small. We can advise on arrangements for the wall and floor.",
         dimensions: "FG000139 W 7.5 × L 36 cm – 1.2 kg  ·  FG000140 W 8.5 × L 40 cm – 1.5 kg\nFG000141 W 11.5 × L 43.5 cm – 2.4 kg  ·  FG000142 W 12 × L 47.5 cm – 2.5 kg  ·  FG000145 W 6.5 × L 34 cm – 1 kg",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Koi_Carps.pdf",
-        pdfFilename: "Maison_Affluency-Koi_Carps_Wall_Art.pdf"
+        pdfFilename: "Alexander_Lamont-Koi_Carps_Wall_Art.pdf"
       },
     ],
     links: [
