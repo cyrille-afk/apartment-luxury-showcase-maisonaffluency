@@ -141,7 +141,7 @@ export default {
             textShadow: "0 0 0 rgba(255,255,255,0)",
           },
           "50%": {
-            textShadow: "0 0 10px rgba(255,255,255,0.45)",
+            textShadow: "0 0 16px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.4)",
           },
         },
       },
