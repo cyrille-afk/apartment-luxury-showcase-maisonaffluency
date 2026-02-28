@@ -244,7 +244,7 @@ const Navigation = () => {
                   className="animate-fade-in opacity-0 border-t border-border/30 pt-4"
                   style={{ animationDelay: `${leftNavItems.length * 120}ms`, animationFillMode: 'forwards' }}
                 >
-                  <p className="font-body text-[11px] uppercase tracking-[0.25em] text-foreground/40 mb-3 text-center font-semibold">All Categories</p>
+                  <p className="font-body text-[11px] uppercase tracking-[0.25em] text-muted-foreground mb-3 text-center font-semibold">All Categories</p>
                   <div className="flex flex-col gap-0">
                     {CATEGORY_ORDER.map(cat => (
                       <div key={cat} className="mb-3">
@@ -263,7 +263,7 @@ const Navigation = () => {
                                 window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
                                 handleNavClick('#designers');
                               }}
-                              className="block text-[12px] uppercase tracking-[0.15em] font-body text-foreground/50 hover:text-primary transition-colors py-1.5 font-semibold"
+                              className="block text-[12px] uppercase tracking-[0.15em] font-body text-muted-foreground hover:text-primary transition-colors py-1.5 font-semibold"
                             >
                               All {cat}
                             </button>
@@ -275,7 +275,7 @@ const Navigation = () => {
                                   window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } })); 
                                   handleNavClick('#designers'); 
                                 }}
-                                className="block text-[12px] uppercase tracking-[0.15em] font-body text-foreground/50 hover:text-primary transition-colors py-1.5 font-semibold"
+                                className="block text-[12px] uppercase tracking-[0.15em] font-body text-muted-foreground hover:text-primary transition-colors py-1.5 font-semibold"
                               >
                                 {sub}
                               </button>
@@ -322,7 +322,7 @@ const Navigation = () => {
                           key={option.label}
                           onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); option.action(); }}
                           onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); option.action(); }}
-                          className="flex items-center gap-3 text-left font-body text-[12px] uppercase tracking-[0.15em] text-foreground/50 hover:text-primary transition-colors py-1.5 font-semibold"
+                          className="flex items-center gap-3 text-left font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground hover:text-primary transition-colors py-1.5 font-semibold"
                         >
                           <option.icon className="h-4 w-4 text-primary" />
                           <span>{option.label}</span>

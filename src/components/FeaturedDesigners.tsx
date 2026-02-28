@@ -2382,8 +2382,8 @@ const FeaturedDesigners = () => {
                     }}
                     className={`flex-none font-serif text-sm md:text-sm leading-none px-2 py-1.5 md:px-1.5 md:py-1 rounded-full transition-all duration-200 ${
                       isActive
-                        ? "text-foreground/60 hover:text-primary hover:bg-primary/10 cursor-pointer"
-                        : "text-foreground/20 cursor-default"
+                        ? "text-foreground/70 hover:text-primary hover:bg-primary/10 cursor-pointer"
+                        : "text-foreground/30 cursor-default"
                     }`}
                   >
                     {letter}
@@ -2547,7 +2547,7 @@ const FeaturedDesigners = () => {
             {designerAlphaGroups.map(([letter, designers]) => (
               <div key={letter}>
                 <div id={`designer-alpha-${letter}`} className="scroll-mt-32 pt-4 pb-2">
-                  <span className="font-serif text-lg text-foreground/30">{letter}</span>
+                  <span className="font-serif text-lg text-muted-foreground">{letter}</span>
                 </div>
                 {designers.map((designer, index) => (
               <AccordionItem
