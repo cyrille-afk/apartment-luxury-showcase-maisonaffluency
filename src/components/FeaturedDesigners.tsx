@@ -1536,6 +1536,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Tables", "Side Table", "open edition + 1 CP + 3 AP"],
         materials: "Available in White Onyx, Grand Antique Marble, Muschel Type 'S'",
         dimensions: "42 × 32 × H 44 cm — 75 kg",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Kerstens_Mono_STS-Large.pdf",
         description: ""
       },
       {
@@ -1546,6 +1547,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Tables", "Console", "Open edition + 1 AP"],
         materials: "",
         dimensions: "160 × 42 × H 80 cm — 383 kg",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Kerstens_Mono_CLS-1600.pdf",
         description: ""
       },
       {
@@ -1556,6 +1558,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Tables", "Coffee Table", "open edition + 1 AP"],
         materials: "",
         dimensions: "180 × 82 × H 28 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Kerstens_Rift_CTW-1800.pdf",
         description: ""
       },
       {
@@ -1566,6 +1569,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Tables", "Open Edition + 2 AP"],
         materials: "",
         dimensions: "W 108 × D 108 × H 28 cm – 254 kg",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Kerstens_Rift_CTS-1080.pdf",
         description: ""
       },
       {
@@ -1576,6 +1580,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Storage", "Cabinet", "limited edition of 20 + 1 CP + 1 AP"],
         materials: "",
         dimensions: "255 × 70 × H 100 cm — 810 kg",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Kerstens_Yoma_CLW-2550.pdf",
         description: ""
       },
       {
@@ -1586,6 +1591,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Storage", "Cabinet", "limited edition of 20 + 1 CP + 1 AP"],
         materials: "",
         dimensions: "255 × 70 × H 100 cm — 810 kg",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Kerstens_Yoma_CLW-2550.pdf",
         description: ""
       },
     ],
