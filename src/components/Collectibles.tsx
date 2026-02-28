@@ -98,7 +98,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Atelier Demichelis is a contemporary design studio specializing in limited edition lighting fixtures. Each piece is meticulously handcrafted, combining traditional techniques with innovative design. Their Bud Table Lamp represents their commitment to creating functional art objects with exceptional attention to detail.",
     notableWorks: "Limited Edition Bud Table Lamp, Artisan Lighting Collection",
-    notableWorksLink: { text: "Bud Table Lamp | Unique By Design Vignette", galleryIndex: 15 },
+    notableWorksLink: { text: "Bud Table Lamp", galleryIndex: 15 },
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
     curatorPicks: [
       { image: demichelisPick1, title: "Babel Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze • Brass • Ash wood • White fabric shade", dimensions: "Ø45 × H60.9 cm", edition: "Numbered edition of 20" },
@@ -141,7 +141,7 @@ export const collectibleDesigners: Array<{
     image: ericSchmittImg,
     biography: "French designer Éric Schmitt believes that 'a piece of furniture needs to exude silence so it can be loved for a long time.' Rather than explaining his work, he prefers to let his objects speak for themselves. His sculptural forms—from the graceful arch of a marble cabinet to the enduring silhouette of a Jarre table—echo the Romanesque churches and medieval architecture of his native Burgundy region. Represented by Carpenters Workshop Gallery, his pieces blur the line between collectible design and fine art.",
     notableWorks: "Chairie (dining chair featured at Maison Affluency), Jarre Table, Marble Cabinet Series, Table Soleil",
-    notableWorksLink: { text: "Chairie Dining Chair | Panoramic Cityscape Views", galleryIndex: 2 },
+    notableWorksLink: { text: "Chairie Dining Chair", galleryIndex: 2 },
     philosophy: "A piece of furniture needs to exude silence so it can be loved for a long time.",
     curatorPicks: [
       { image: ericSchmittDrageeConsole, title: "Dragée Console", category: "Tables", subcategory: "Console", materials: "Bronze and lacquered polyester resin or pink marble tops", dimensions: "H 85 × L 120 cm", edition: "8 copies and 4 artist's proofs" },
@@ -165,7 +165,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Hervé van der Straeten is a renowned French designer and sculptor who began his career as a jewelry designer for haute couture houses. His transition to furniture and lighting brought his expertise in bronze work to larger scale. His chandeliers and furniture pieces are characterized by their organic forms and masterful metalwork.",
     notableWorks: "Mic Mac Chandelier, Bronze Console Series, Sculptural Mirrors",
-    notableWorksLink: { text: "Mic Mac Chandelier | A Masterful Suite", galleryIndex: 12 },
+    notableWorksLink: { text: "Mic Mac Chandelier", galleryIndex: 12 },
     philosophy:
       "I work with bronze as a jeweler works with precious metals—creating pieces that capture light and movement.",
     curatorPicks: [
@@ -190,7 +190,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Kiko Lopez is a French master mirror artisan renowned for creating extraordinary reflective surfaces that blur the line between functional object and sculptural art. Using traditional techniques combined with innovative approaches to glass and metal, his mirrors transform spaces with their unique textural qualities and light-capturing properties. His Silver Glass Hammer Mirror and Shadow Drawings Mirror exemplify his distinctive style of treating mirrors as artistic statements.",
     notableWorks: "Silver Glass Hammer Mirror, Shadow Drawings Mirror, Antiqued Mirror Collection, Sculptural Reflective Surfaces",
-    notableWorksLink: { text: "Silver Glass Hammer Mirror | Design Tableau", galleryIndex: 13 },
+    notableWorksLink: { text: "Silver Glass Hammer Mirror", galleryIndex: 13 },
     philosophy: "A mirror is not merely a reflection—it is a portal that transforms light and space into something magical.",
     curatorPicks: [
       { image: kikoLopezMirror, title: "Shadow Drawings Mirror", category: "Decorative Object", subcategory: "Mirrors", materials: "Antiqued glass • Bronze patina frame", dimensions: "H100 × W70 cm", edition: "Unique Piece" },
@@ -208,7 +208,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Maarten Vrolijk is a Dutch designer known for his sculptural approach to furniture design. His work explores the intersection of art and functionality, creating pieces that challenge conventional forms while remaining inherently practical. Each creation reflects his deep understanding of materials and his commitment to pushing the boundaries of contemporary design.",
     notableWorks: "Sakura TRP 22001, Sculptural Glass Vessels, Unique Art Pieces",
-    notableWorksLink: { text: "Sakura TRP 22001 | An Inviting Lounge Area", galleryIndex: 0 },
+    notableWorksLink: { text: "Sakura TRP 22001", galleryIndex: 0 },
     philosophy: "Furniture should be a conversation between form and function—each piece tells a story of material and intention.",
     curatorPicks: [
       { image: maartenVrolijkVessel, title: "Sakura TRP 22001", category: "Decorative Object", subcategory: "Vessels", materials: "Handblown & sculpted glass, unique piece with certificate", dimensions: "H 52 cm × W 40 cm × D 41 cm", edition: "Unique Piece" },
@@ -226,7 +226,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Marcantonio Brandolini D'Adda is an Italian glass artist whose work represents the finest traditions of Murano glassmaking combined with contemporary artistic vision. His vessels are celebrated for their organic forms and exceptional craftsmanship.",
     notableWorks: "Cotissi Vessel, Murano Glass Sculptures",
-    notableWorksLink: { text: "Cotissi Vessel | The Details Make The Design", galleryIndex: 25 },
+    notableWorksLink: { text: "Cotissi Vessel", galleryIndex: 25 },
     philosophy: "Glass is a living material that captures light and transforms space into poetry.",
     curatorPicks: [
       { image: marcantonioCotissiVessel, title: "Cotissi Vessel", category: "Decorative Object", subcategory: "Vessels", materials: "Hand-blown Murano glass", dimensions: "H35 × Ø20 cm", edition: "Unique Piece" },
@@ -244,7 +244,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Matthieu Gicquel is a French glass artist renowned for his exceptional tableware and decorative objects that blend traditional craftsmanship with contemporary design. His signature pieces feature textured glass adorned with precious gold leaf details, creating functional art that elevates everyday dining into a refined experience.",
     notableWorks: "Texture Glass with Gold Leaf rim Géode, Artisan Tableware Collection",
-    notableWorksLink: { text: "Texture Glass with Gold Leaf rim Géode | Craftsmanship At Every Corner", galleryIndex: 27 },
+    notableWorksLink: { text: "Texture Glass with Gold Leaf rim Géode", galleryIndex: 27 },
     philosophy: "Each piece of glass tells a story of light, texture, and the timeless beauty of artisan craftsmanship.",
     curatorPicks: [
       { image: matthieuGicquelGeode, title: "Géode Nbr 4: Texture Glass with Gold Leaf Rim", category: "Decorative Object", subcategory: "Tableware", materials: "Textured glass • 24k gold leaf rim", dimensions: "Ø32 cm", edition: "Unique Piece" },
@@ -281,7 +281,7 @@ export const collectibleDesigners: Array<{
     biography:
       "Pierre Bonnefille is a French artist, painter, designer and 'Maître d'Art' — a title awarded by the French Ministry of Culture to masters of exceptional craft. A graduate of École Boulle and École Nationale Supérieure des Arts Décoratifs, he creates his own materials from mineral powder, limestone, lava, marble, earth, natural pigments and metallic powders. His Bronze Paintings are monumental works where material and color become inseparable.",
     notableWorks: "Bronze Painting 204 (Maison Affluency), Café Marly at the Louvre, Mineral Painting Series",
-    notableWorksLink: { text: "Bronze Painting 204 | A Design Treasure Trove", galleryIndex: 11 },
+    notableWorksLink: { text: "Bronze Painting 204", galleryIndex: 11 },
     philosophy: "The material, colors and light are inseparable in my work. I create my own textures from the earth itself.",
     curatorPicks: [
       { image: pierreBonnefilleBronzePainting208, title: "Bronze Painting 208, 2024", category: "Wall Art", tags: ["Wall Art", "Art"], materials: "Mixed media on metallic mesh", dimensions: "H 225 x W 515 cm" },
@@ -299,7 +299,7 @@ export const collectibleDesigners: Array<{
     biography:
       "RoWin' Atelier is a French ceramics studio renowned for creating exceptional handcrafted pieces that blend traditional techniques with contemporary design. Each creation showcases meticulous attention to detail and a deep understanding of material properties.",
     notableWorks: "None II Table Lamp",
-    notableWorksLink: { text: "None II Table Lamp | Refined Details", galleryIndex: 21 },
+    notableWorksLink: { text: "None II Table Lamp", galleryIndex: 21 },
     philosophy: "Every piece of clay holds the potential for extraordinary beauty when shaped by skilled hands.",
     curatorPicks: [
       { image: rowinNoneIiLamp, title: "None II Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Cippolino Verde Marble, Silver-Plated brass", dimensions: "39 cm × 22.5 cm × H 58 cm", edition: "Unique Piece" },
@@ -317,7 +317,7 @@ export const collectibleDesigners: Array<{
     biography:
       "A French Star Architect, Interior Designer and Designer, Thierry Lemaire is known for his sculptural approach to furniture design. His pieces blend fine craftsmanship with contemporary aesthetics, creating limited edition works that are as much art as they are functional objects. His Orsay Coffee Table exemplifies his signature style of elegant forms with unexpected details.",
     notableWorks: "Orsay Coffee Table. Limited and numbered edition (12 copies).",
-    notableWorksLink: { text: "Orsay Coffee Table | A Sophisticated Living Room", galleryIndex: 1 },
+    notableWorksLink: { text: "Orsay Coffee Table", galleryIndex: 1 },
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
     curatorPicks: [
       { image: thierryLemaireOrsay, title: "Orsay Coffee Table", category: "Tables", subcategory: "Coffee Tables", materials: "Alabastrino Travertine & Ocean Onyx", dimensions: "L 170 × P 100 × H 40 cm", edition: "Edition of 12 signed" },
