@@ -138,10 +138,10 @@ export default {
         },
         "text-glow-pulse": {
           "0%, 100%": {
-            textShadow: "0 0 0 hsl(var(--primary) / 0)",
+            textShadow: "0 0 0 rgba(255,255,255,0)",
           },
           "50%": {
-            textShadow: "0 0 10px hsl(var(--primary) / 0.35)",
+            textShadow: "0 0 10px rgba(255,255,255,0.45)",
           },
         },
       },
