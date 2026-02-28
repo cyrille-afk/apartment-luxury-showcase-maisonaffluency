@@ -2822,7 +2822,7 @@ const FeaturedDesigners = () => {
                                     setCuratorPickIndex(0);
                                   }
                                 }}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-gradient-to-r from-accent/90 to-primary/80 hover:from-accent hover:to-primary text-white rounded-md transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer border border-accent/30"
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-gradient-to-r from-accent/90 to-primary/80 hover:from-accent hover:to-primary text-white rounded-md transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer border border-accent/30 md:ml-auto"
                               >
                                 <Star size={16} className="fill-current" />
                                 <span className="font-medium">{link.type}</span>
