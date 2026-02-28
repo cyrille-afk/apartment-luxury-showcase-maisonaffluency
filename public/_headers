@@ -1,0 +1,25 @@
+# Hashed assets (JS, CSS) – immutable, cache 1 year
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Images & fonts in public folder – cache 30 days
+/*.png
+  Cache-Control: public, max-age=2592000
+/*.jpg
+  Cache-Control: public, max-age=2592000
+/*.svg
+  Cache-Control: public, max-age=2592000
+/*.ico
+  Cache-Control: public, max-age=2592000
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+# Manifest & favicon
+/manifest.json
+  Cache-Control: public, max-age=86400
+
+# HTML – no cache (always fresh)
+/index.html
+  Cache-Control: no-cache
+/*
+  Cache-Control: no-cache
