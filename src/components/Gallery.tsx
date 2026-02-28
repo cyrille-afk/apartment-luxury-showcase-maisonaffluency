@@ -680,10 +680,10 @@ const Gallery = () => {
            {isMobile ? (
              /* ── Mobile: Embla Carousel lightbox ── */
              <div className="relative w-full h-full flex flex-col">
-                {/* Close button */}
+                {/* Close button — bottom-left on mobile */}
                 <button
                   onClick={closeLightbox}
-                  className="absolute top-5 left-3 z-50 p-2.5 bg-black/60 backdrop-blur-sm rounded-full"
+                  className="absolute bottom-4 left-3 z-50 p-2.5 bg-black/60 backdrop-blur-sm rounded-full"
                   aria-label="Close lightbox"
                 >
                   <X className="h-6 w-6 text-white" />
