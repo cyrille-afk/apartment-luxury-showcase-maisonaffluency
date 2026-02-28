@@ -2980,24 +2980,19 @@ const FeaturedDesigners = () => {
                           {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).photoCredit}
                         </span>
                       )}
-                      {/* Maximize / Minimize button */}
-                      {!isZoomed ? (
-                        <button
-                          onClick={() => setIsZoomed(true)}
-                          className={`absolute bottom-2 ${(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl ? 'right-12' : 'right-2'} p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10`}
-                          aria-label="Expand image"
-                        >
-                          <Maximize2 size={16} />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => setIsZoomed(false)}
-                          className="absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
-                          aria-label="Minimize image"
-                        >
-                          <Minimize2 size={16} />
-                        </button>
-                      )}
+                      {/* Close button — top right of image */}
+                      <button
+                        onClick={() => {
+                          setCuratorPicksDesigner(null);
+                          setCuratorPickIndex(0);
+                          setIsZoomed(false);
+                          window.history.back();
+                        }}
+                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                        aria-label="Close"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                       {/* PDF download button */}
                       {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl && !isZoomed && (
                         <button
@@ -3018,10 +3013,28 @@ const FeaturedDesigners = () => {
                               window.open(pick.pdfUrl, '_blank');
                             }
                           }}
-                          className="absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          className="absolute bottom-2 right-12 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Download PDF specification"
                         >
                           <Download size={16} />
+                        </button>
+                      )}
+                      {/* Maximize / Minimize button — rightmost at bottom */}
+                      {!isZoomed ? (
+                        <button
+                          onClick={() => setIsZoomed(true)}
+                          className="absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          aria-label="Expand image"
+                        >
+                          <Maximize2 size={16} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setIsZoomed(false)}
+                          className="absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          aria-label="Minimize image"
+                        >
+                          <Minimize2 size={16} />
                         </button>
                       )}
                     </div>
@@ -3106,19 +3119,6 @@ const FeaturedDesigners = () => {
                     )}
                   </div>
 
-                  {/* Close button */}
-                  <button
-                    onClick={() => {
-                      setCuratorPicksDesigner(null);
-                      setCuratorPickIndex(0);
-                      setIsZoomed(false);
-                      window.history.back();
-                    }}
-                    className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors z-10"
-                    aria-label="Close"
-                  >
-                    <X size={24} />
-                  </button>
 
                   {/* Nav arrows */}
                   {curatorPicksDesigner.curatorPicks.length > 1 && !isZoomed && (
