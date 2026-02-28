@@ -81,7 +81,7 @@ const Overview = () => {
                 onClick={() => {
                   const target = document.getElementById("sociable-environment");
                   if (target) {
-                    target.scrollIntoView({ behavior: "smooth" });
+                    target.scrollIntoView({ behavior: "smooth", block: "start" });
                   }
                 }}
                 className="text-left cursor-pointer group transition-all duration-300 hover:scale-105"
