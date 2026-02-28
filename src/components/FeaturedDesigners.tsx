@@ -2755,7 +2755,7 @@ const FeaturedDesigners = () => {
                               shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
                               trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
                             }}
-                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-full bg-foreground/10 hover:bg-foreground/20 transition-all duration-300"
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-full bg-white hover:bg-white/80 border border-border/40 transition-all duration-300"
                             aria-label={`Share ${designer.name} on WhatsApp`}
                           >
                             <svg className="w-4 h-4 text-foreground" viewBox="0 0 24 24" fill="currentColor">
@@ -2855,7 +2855,7 @@ const FeaturedDesigners = () => {
                                   shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
                                   trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
                                 }}
-                                className="md:hidden inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-full bg-foreground/10 hover:bg-foreground/20 transition-all duration-300"
+                                className="md:hidden inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-full bg-white hover:bg-white/80 border border-border/40 transition-all duration-300"
                                 aria-label={`Share ${designer.name} on WhatsApp`}
                               >
                                 <svg className="w-4 h-4 text-foreground" viewBox="0 0 24 24" fill="currentColor">
