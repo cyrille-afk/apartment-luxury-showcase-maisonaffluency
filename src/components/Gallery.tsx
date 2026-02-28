@@ -689,48 +689,48 @@ const Gallery = () => {
                   <X className="h-6 w-6 text-white" />
                </button>
 
-               {/* Title */}
-               <h3 className="text-xl font-serif text-white mt-14 mb-3 text-center px-4 shrink-0">
-                 {currentSectionItems[currentItemIndex]?.title}
-               </h3>
+                {/* Title */}
+                <h3 className="text-lg font-serif text-white mt-4 mb-2 text-center px-4 shrink-0">
+                  {currentSectionItems[currentItemIndex]?.title}
+                </h3>
 
-               {/* Embla carousel */}
-               <div className="flex-1 min-h-0 overflow-hidden" ref={emblaRef}>
-                 <div className="flex h-full">
-                   {currentSectionItems.map((item, i) => (
-                     <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center px-4">
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          sizes="100vw"
-                          className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[50vh]"
-                          loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
-                          decoding="async"
-                          draggable={false}
-                        />
-                     </div>
-                   ))}
-                 </div>
-               </div>
+                {/* Embla carousel */}
+                <div className="flex-1 min-h-0 overflow-hidden" ref={emblaRef}>
+                  <div className="flex h-full">
+                    {currentSectionItems.map((item, i) => (
+                      <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center px-4">
+                         <img
+                           src={item.image}
+                           alt={item.title}
+                           sizes="100vw"
+                           className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[45vh]"
+                           loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
+                           decoding="async"
+                           draggable={false}
+                         />
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-               {/* Dot indicators */}
-               <div className="flex justify-center gap-1.5 mt-3 shrink-0">
-                 {currentSectionItems.map((_, i) => (
-                   <button
-                     key={i}
-                     onClick={() => { setCurrentItemIndex(i); emblaApi?.scrollTo(i); }}
-                     className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
-                     aria-label={`Go to image ${i + 1}`}
-                   />
-                 ))}
-               </div>
+                {/* Dot indicators */}
+                <div className="flex justify-center gap-1.5 mt-2 shrink-0">
+                  {currentSectionItems.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setCurrentItemIndex(i); emblaApi?.scrollTo(i); }}
+                      className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
+                      aria-label={`Go to image ${i + 1}`}
+                    />
+                  ))}
+                </div>
 
-               {/* Description */}
-               <div className="mt-3 text-center shrink-0 pb-6 px-4 overflow-y-auto max-h-[20vh] scrollbar-hide">
-                 <p className="text-sm text-white/70 font-body max-w-2xl mx-auto text-justify">
-                   {currentSectionItems[currentItemIndex]?.description}
-                 </p>
-               </div>
+                {/* Description */}
+                <div className="mt-2 text-center shrink-0 pb-14 px-4 overflow-y-auto max-h-[30vh] scrollbar-hide" style={{ touchAction: 'pan-y' }}>
+                  <p className="text-sm text-white/70 font-body max-w-2xl mx-auto text-justify">
+                    {currentSectionItems[currentItemIndex]?.description}
+                  </p>
+                </div>
              </div>
            ) : (
              /* ── Desktop: existing layout ── */
