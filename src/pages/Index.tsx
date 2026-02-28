@@ -66,18 +66,32 @@ const Index = () => {
       return;
     }
 
+    const showOnScroll = () => {
+      if (window.scrollY > 24) {
+        setShowScrollProgress(true);
+      }
+      if (window.scrollY > 80) {
+        setShowBelowFoldSections(true);
+      }
+      if (window.scrollY > 80) {
+        window.removeEventListener("scroll", showOnScroll);
+      }
+    };
+
     const cleanups = [
-      scheduleWhenIdle(() => setShowNavigation(true), 350),
-      scheduleWhenIdle(() => setShowScrollProgress(true), 600),
-      scheduleWhenIdle(() => setShowBelowFoldSections(true), 1200),
+      scheduleWhenIdle(() => setShowNavigation(true), 500),
     ];
 
-    return () => cleanups.forEach((cleanup) => cleanup());
+    window.addEventListener("scroll", showOnScroll, { passive: true });
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+      window.removeEventListener("scroll", showOnScroll);
+    };
   }, []);
 
-  // Defer ExitIntentBanner chunk fetch until 5s after mount
+  // Keep exit-intent banner completely out of the critical performance window
   useEffect(() => {
-    const id = setTimeout(() => setShowBanner(true), 5000);
+    const id = setTimeout(() => setShowBanner(true), 30000);
     return () => clearTimeout(id);
   }, []);
 
