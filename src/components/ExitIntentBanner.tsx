@@ -46,30 +46,29 @@ const ExitIntentBanner = () => {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.8, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed bottom-4 right-4 z-[60] flex items-center gap-2 rounded-full bg-white pl-3 pr-2 py-2 shadow-lg cursor-pointer hover:bg-white/90 transition-colors border border-border/40"
-          onClick={handleClick}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } }}
-          role="button"
-          tabIndex={0}
-          aria-label="Chat with us on WhatsApp"
-        >
-          <span className="text-foreground text-xs font-medium whitespace-nowrap">Chat with us</span>
-          <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center" aria-hidden="true">
-            <MessageCircle className="w-4 h-4 text-white" />
-          </div>
+        <div className="fixed bottom-4 right-4 z-[60]">
+          <motion.button
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="flex items-center gap-2 rounded-full bg-white pl-3 pr-2 py-2 shadow-lg cursor-pointer hover:bg-white/90 transition-colors border border-border/40"
+            onClick={handleClick}
+            aria-label="Chat with us on WhatsApp"
+          >
+            <span className="text-foreground text-xs font-medium whitespace-nowrap">Chat with us</span>
+            <span className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center" aria-hidden="true">
+              <MessageCircle className="w-4 h-4 text-white" />
+            </span>
+          </motion.button>
           <button
-            onClick={(e) => { e.stopPropagation(); dismiss(); }}
+            onClick={dismiss}
             className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center shadow-sm"
             aria-label="Dismiss WhatsApp chat prompt"
           >
             <X className="w-3 h-3 text-muted-foreground" />
           </button>
-        </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );
