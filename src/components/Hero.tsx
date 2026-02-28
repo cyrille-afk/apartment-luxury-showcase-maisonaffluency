@@ -82,11 +82,11 @@ const Hero = () => {
             delay: 0.8
           }} className="text-[15px] leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses<br /> and Artisan&nbsp;Workshops</motion.p>
           
-          <div className="mt-6 md:mt-10">
+          <div className="mt-6 md:mt-10 w-full max-w-4xl flex md:justify-end">
             <motion.div
               animate={{ scale: [1, 1.05, 1], opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="cursor-pointer md:ml-[8.5rem] lg:ml-[10rem]"
+              className="cursor-pointer"
               onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
             >
               <Gem className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] hover:drop-shadow-[0_0_14px_rgba(255,255,255,0.9)] transition-all" />
