@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
-import { Instagram, ChevronDown, ExternalLink, Star, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal } from "lucide-react";
+import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
@@ -977,7 +977,7 @@ const Collectibles = () => {
                                 onClick={() => openCuratorPicks(designer)}
                                 className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-body bg-accent/10 hover:bg-accent/20 text-accent-foreground rounded-full transition-all duration-300 cursor-pointer border border-accent/30 md:ml-auto"
                               >
-                                <Star size={14} className="fill-accent text-accent" />
+                                <Gem size={14} className="fill-accent text-accent" />
                                 <span className="font-medium">{link.type}</span>
                               </button>
                             ) : (

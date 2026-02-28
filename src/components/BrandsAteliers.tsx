@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
-import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Star, Maximize2, Minimize2, Share2, Download } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Gem, Maximize2, Minimize2, Share2, Download } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -1710,7 +1710,7 @@ function AlphaStrip({
                   onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
                   className="md:order-1 flex items-center gap-2 md:gap-1.5 text-sm md:text-xs tracking-wider font-body group/picks touch-manipulation transition-all duration-300 text-white whitespace-nowrap"
                 >
-                  <Star className="h-4 w-4 md:h-3 md:w-3 flex-shrink-0 fill-current" />
+                  <Gem className="h-4 w-4 md:h-3 md:w-3 flex-shrink-0 fill-current" />
                   <span className="group-hover/picks:underline underline-offset-2">
                     Curators' Picks
                   </span>
@@ -2342,7 +2342,7 @@ const BrandsAteliers = () => {
                     <X className="h-4 w-4 text-white" />
                   </button>
                   <div className="text-center p-8">
-                    <Star className="h-16 w-16 text-white/30 mx-auto mb-4" />
+                     <Gem className="h-16 w-16 text-white/30 mx-auto mb-4" />
                     <h3 className="text-2xl font-serif text-white mb-2">Curators' Picks</h3>
                     <p className="text-white/70 font-body mb-2">{picksDesigner.name}</p>
                     <p className="text-sm text-white/50 font-body italic">Curated selections coming soon</p>
@@ -2359,7 +2359,7 @@ const BrandsAteliers = () => {
                   <X className="h-4 w-4 text-white" />
                 </button>
                 <div className="text-center p-8">
-                  <Star className="h-16 w-16 text-white/30 mx-auto mb-4" />
+                  <Gem className="h-16 w-16 text-white/30 mx-auto mb-4" />
                   <h3 className="text-2xl font-serif text-white mb-2">Curators' Picks</h3>
                   <p className="text-sm text-white/50 font-body italic">Coming soon</p>
                 </div>
