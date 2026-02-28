@@ -2980,6 +2980,32 @@ const FeaturedDesigners = () => {
                           {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).photoCredit}
                         </span>
                       )}
+                      {/* PDF download button */}
+                      {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl && !isZoomed && (
+                        <button
+                          onClick={async () => {
+                            const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
+                            try {
+                              const res = await fetch(pick.pdfUrl);
+                              const blob = await res.blob();
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = pick.pdfFilename || `${pick.title?.replace(/\s+/g, '_') || 'specification'}.pdf`;
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                              URL.revokeObjectURL(url);
+                            } catch {
+                              window.open(pick.pdfUrl, '_blank');
+                            }
+                          }}
+                          className="absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          aria-label="Download PDF specification"
+                        >
+                          <Download size={16} />
+                        </button>
+                      )}
                     </div>
 
                     {/* Scroll dots — directly under the image */}
