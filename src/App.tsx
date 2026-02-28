@@ -8,6 +8,8 @@ import usePageTracking from "./hooks/usePageTracking";
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
+
+// Defer non-LCP-critical components
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
 const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
 

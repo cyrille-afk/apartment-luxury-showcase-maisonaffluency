@@ -1,6 +1,8 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
-import Navigation from "@/components/Navigation";
+
+// Navigation is heavy (Radix Sheet, Tooltip, DropdownMenu) — lazy-load it
+const Navigation = lazy(() => import("@/components/Navigation"));
 
 // Lazy-load everything below the fold to reduce initial JS
 const Overview = lazy(() => import("@/components/Overview"));
@@ -94,7 +96,9 @@ const [showBanner, setShowBanner] = useState(false);
       <Suspense fallback={null}>
         <ScrollProgress />
       </Suspense>
-      <Navigation />
+      <Suspense fallback={null}>
+        <Navigation />
+      </Suspense>
       <main className="min-h-screen overflow-x-hidden">
         <section id="home">
           <Hero />
