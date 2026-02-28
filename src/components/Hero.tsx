@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 
 // Use a single fallback src (smallest useful size); srcSet handles responsive selection
@@ -10,19 +10,24 @@ const scrollToOverview = () =>
 
 const Hero = () => {
   const ref = useRef<HTMLElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
 
+  // Set fetchpriority as a native attribute to avoid React 18 warning
+  useEffect(() => {
+    imgRef.current?.setAttribute("fetchpriority", "high");
+  }, []);
   return (
     <section ref={ref} className="relative h-screen w-full overflow-hidden">
       {/* Static image — zero JS dependencies, fastest LCP */}
       <div className="absolute inset-0">
         <img
+          ref={imgRef}
           src={heroImageFallback}
           srcSet={heroSrcSet}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
           alt="Luxury living room with Asian-inspired murals and designer furniture"
           className="h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%]"
           loading="eager"
-          fetchPriority="high"
           decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
