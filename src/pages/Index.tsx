@@ -53,22 +53,52 @@ const scheduleWhenIdle = (callback: () => void, timeout: number) => {
 
 const Index = () => {
   const [showBanner, setShowBanner] = useState(false);
-  // Navigation is above-fold — show immediately for Speed Index
-  const [showNavigation] = useState(true);
-  // ScrollProgress is lightweight — show immediately
-  const [showScrollProgress] = useState(true);
-  // Below-fold sections can defer briefly to let hero image win bandwidth
+  const [showNavigation, setShowNavigation] = useState(false);
+  const [showScrollProgress, setShowScrollProgress] = useState(false);
   const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => isDeepLink());
 
+  // Stagger non-LCP content so hero image wins bandwidth on mobile.
+  // Deep-links bypass all delays so content is available instantly.
   useEffect(() => {
-    if (showBelowFoldSections) return; // already showing (deep-link)
-
-    // Reveal after a single rAF + microtask so hero paint isn't blocked
-    const raf = requestAnimationFrame(() => {
+    if (isDeepLink()) {
+      setShowNavigation(true);
+      setShowScrollProgress(true);
       setShowBelowFoldSections(true);
-    });
+      return;
+    }
 
-    return () => cancelAnimationFrame(raf);
+    // Wait for the hero image (LCP element) to finish loading before
+    // allowing lazy chunks to compete for bandwidth.
+    const heroImg = document.querySelector<HTMLImageElement>('#home img');
+
+    const revealAfterHero = () => {
+      // Navigation is above-fold — show first
+      setShowNavigation(true);
+      // Stagger below-fold + scroll indicator slightly so Navigation chunk
+      // doesn't compete with Overview/Gallery chunks on mobile.
+      requestAnimationFrame(() => {
+        setShowScrollProgress(true);
+        setShowBelowFoldSections(true);
+      });
+    };
+
+    if (heroImg?.complete) {
+      // Image already cached / decoded
+      revealAfterHero();
+    } else if (heroImg) {
+      heroImg.addEventListener('load', revealAfterHero, { once: true });
+      // Safety fallback if image takes too long or errors
+      const timeout = setTimeout(revealAfterHero, 4000);
+      heroImg.addEventListener('error', revealAfterHero, { once: true });
+      return () => {
+        clearTimeout(timeout);
+        heroImg.removeEventListener('load', revealAfterHero);
+        heroImg.removeEventListener('error', revealAfterHero);
+      };
+    } else {
+      // Fallback if img element not found
+      revealAfterHero();
+    }
   }, []);
 
   // Keep exit-intent banner completely out of the critical performance window
@@ -122,13 +152,17 @@ const Index = () => {
 
   return (
     <>
-      <Suspense fallback={null}>
-        <ScrollProgress />
-      </Suspense>
+      {showScrollProgress && (
+        <Suspense fallback={null}>
+          <ScrollProgress />
+        </Suspense>
+      )}
 
-      <Suspense fallback={null}>
-        <Navigation />
-      </Suspense>
+      {showNavigation && (
+        <Suspense fallback={null}>
+          <Navigation />
+        </Suspense>
+      )}
 
       <main className="min-h-screen overflow-x-hidden">
         <section id="home">
