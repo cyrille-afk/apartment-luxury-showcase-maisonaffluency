@@ -872,6 +872,7 @@ const Collectibles = () => {
                               <span
                                 role="link"
                                 tabIndex={0}
+                                aria-label={`View ${designer.notableWorksLink!.text} in gallery`}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   const gallerySection = document.getElementById('gallery');
