@@ -39,8 +39,41 @@ const SectionFallback = () => (
   </div>
 );
 
+const scheduleWhenIdle = (callback: () => void, timeout: number) => {
+  const win = window as any;
+
+  if (typeof win.requestIdleCallback === "function") {
+    const idleId = win.requestIdleCallback(callback, { timeout });
+    return () => win.cancelIdleCallback?.(idleId);
+  }
+
+  const timeoutId = window.setTimeout(callback, timeout);
+  return () => window.clearTimeout(timeoutId);
+};
+
 const Index = () => {
-const [showBanner, setShowBanner] = useState(false);
+  const [showBanner, setShowBanner] = useState(false);
+  const [showNavigation, setShowNavigation] = useState(false);
+  const [showScrollProgress, setShowScrollProgress] = useState(false);
+  const [showBelowFoldSections, setShowBelowFoldSections] = useState(false);
+
+  // Defer non-critical UI/chunks so hero image can win bandwidth contention.
+  useEffect(() => {
+    if (isDeepLink()) {
+      setShowNavigation(true);
+      setShowScrollProgress(true);
+      setShowBelowFoldSections(true);
+      return;
+    }
+
+    const cleanups = [
+      scheduleWhenIdle(() => setShowNavigation(true), 350),
+      scheduleWhenIdle(() => setShowScrollProgress(true), 600),
+      scheduleWhenIdle(() => setShowBelowFoldSections(true), 1200),
+    ];
+
+    return () => cleanups.forEach((cleanup) => cleanup());
+  }, []);
 
   // Defer ExitIntentBanner chunk fetch until 5s after mount
   useEffect(() => {
@@ -93,12 +126,18 @@ const [showBanner, setShowBanner] = useState(false);
 
   return (
     <>
-      <Suspense fallback={null}>
-        <ScrollProgress />
-      </Suspense>
-      <Suspense fallback={null}>
-        <Navigation />
-      </Suspense>
+      {showScrollProgress ? (
+        <Suspense fallback={null}>
+          <ScrollProgress />
+        </Suspense>
+      ) : null}
+
+      {showNavigation ? (
+        <Suspense fallback={null}>
+          <Navigation />
+        </Suspense>
+      ) : null}
+
       <main className="min-h-screen overflow-x-hidden">
         <section id="home">
           <Hero />
@@ -113,44 +152,52 @@ const [showBanner, setShowBanner] = useState(false);
             <Gallery />
           </Suspense>
         </section>
-        <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 900px' }}>
-          <Suspense fallback={<SectionFallback />}>
-            <CuratingTeam />
-          </Suspense>
-        </section>
-        <section id="designers" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
-          <Suspense fallback={<SectionFallback />}>
-            <FeaturedDesigners />
-          </Suspense>
-        </section>
-        <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
-          <Suspense fallback={<SectionFallback />}>
-            <Collectibles />
-          </Suspense>
-        </section>
-        <section id="brands" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
-          <Suspense fallback={<SectionFallback />}>
-            <BrandsAteliers />
-          </Suspense>
-        </section>
-        <section id="details" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
-          <Suspense fallback={<SectionFallback />}>
-            <DesignDetails />
-          </Suspense>
-        </section>
-        <section id="contact" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 700px' }}>
-          <Suspense fallback={<SectionFallback />}>
-            <ContactInquiry />
-          </Suspense>
-        </section>
-        <Suspense fallback={null}>
-          <Footer />
-        </Suspense>
+
+        {showBelowFoldSections ? (
+          <>
+            <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 900px' }}>
+              <Suspense fallback={<SectionFallback />}>
+                <CuratingTeam />
+              </Suspense>
+            </section>
+            <section id="designers" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
+              <Suspense fallback={<SectionFallback />}>
+                <FeaturedDesigners />
+              </Suspense>
+            </section>
+            <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
+              <Suspense fallback={<SectionFallback />}>
+                <Collectibles />
+              </Suspense>
+            </section>
+            <section id="brands" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
+              <Suspense fallback={<SectionFallback />}>
+                <BrandsAteliers />
+              </Suspense>
+            </section>
+            <section id="details" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
+              <Suspense fallback={<SectionFallback />}>
+                <DesignDetails />
+              </Suspense>
+            </section>
+            <section id="contact" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 700px' }}>
+              <Suspense fallback={<SectionFallback />}>
+                <ContactInquiry />
+              </Suspense>
+            </section>
+            <Suspense fallback={null}>
+              <Footer />
+            </Suspense>
+          </>
+        ) : null}
       </main>
-      
-      <Suspense fallback={null}>
-        <QuickJumpMenu />
-      </Suspense>
+
+      {showBelowFoldSections ? (
+        <Suspense fallback={null}>
+          <QuickJumpMenu />
+        </Suspense>
+      ) : null}
+
       {showBanner && (
         <Suspense fallback={null}>
           <ExitIntentBanner />
@@ -159,4 +206,6 @@ const [showBanner, setShowBanner] = useState(false);
     </>
   );
 };
+
 export default Index;
+
