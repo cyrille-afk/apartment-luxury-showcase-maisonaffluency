@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { Gem } from "lucide-react";
+
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 const heroImageMobile = cloudinaryUrl("living-room-hero_zxfcxl", { width: 400, quality: "auto:good", crop: "fill" });
 const heroImageDesktop = cloudinaryUrl("living-room-hero_zxfcxl", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -88,7 +88,7 @@ const Hero = () => {
               delay: 0.8
             }} className="text-[15px] leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses<br /> and Artisan&nbsp;Workshops</motion.p>
             
-            <div className="mt-8 md:mt-10 flex items-center gap-5 md:gap-6">
+            <div className="mt-8 md:mt-10">
               <motion.button
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -98,18 +98,6 @@ const Hero = () => {
               >
                 Explore the Collection
               </motion.button>
-              <motion.div
-                animate={{ scale: [1, 1.05, 1], opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="cursor-pointer"
-                role="button"
-                tabIndex={0}
-                aria-label="Scroll to gallery"
-                onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" }); } }}
-              >
-                <Gem className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] hover:drop-shadow-[0_0_14px_rgba(255,255,255,0.9)] transition-all" aria-hidden="true" />
-              </motion.div>
             </div>
           </div>
           
