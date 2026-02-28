@@ -83,7 +83,7 @@ const Hero = () => {
               delay: 0.8
             }} className="text-[15px] leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses<br /> and Artisan&nbsp;Workshops</motion.p>
             
-            <div className="mt-8 md:mt-10 md:mr-4 lg:mr-6">
+            <div className="mt-8 md:mt-10 md:mr-12 lg:mr-16">
               <motion.div
                 animate={{ scale: [1, 1.05, 1], opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
