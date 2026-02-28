@@ -406,7 +406,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Seating",
         tags: ["Seating", "Chair"],
         materials: "Bouclé upholstery • Shagreen leather • Straw marquetry accents",
-        dimensions: "H75 × W80 × D85 cm"
+        dimensions: "H75 × W80 × D85 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Dais_Lounge_Chair.pdf",
+        pdfFilename: "Maison_Affluency-Dais_Lounge_Chair.pdf"
       },
       { 
         image: alexanderLamontPick2, 
