@@ -26,13 +26,13 @@ const Hero = () => {
 
   return <section ref={ref} className="relative h-screen w-full overflow-hidden">
       <motion.div className="absolute inset-0" style={isMobile ? {} : { y }}>
-        <motion.img 
+        <img 
           src={heroImage}
           srcSet={heroSrcSet}
           sizes="100vw"
           alt="Luxury living room with Asian-inspired murals and designer furniture" 
-          className="h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%] will-change-transform md:scale-100"
-          style={{ opacity, imageRendering: "auto", WebkitBackfaceVisibility: "hidden" }}
+          className="h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%] will-change-transform"
+          style={{ imageRendering: "auto", WebkitBackfaceVisibility: "hidden" }}
           loading="eager"
           fetchPriority="high"
           decoding="sync"
