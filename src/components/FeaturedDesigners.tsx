@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { Instagram, Search, X, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Star, Maximize2, Minimize2, SlidersHorizontal, Download } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Gem, Maximize2, Minimize2, SlidersHorizontal, Download } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
@@ -2841,7 +2841,7 @@ const FeaturedDesigners = () => {
                                 }}
                                 className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-body bg-accent/10 hover:bg-accent/20 text-accent-foreground rounded-full transition-all duration-300 cursor-pointer border border-accent/30 md:ml-auto"
                               >
-                                <Star size={14} className="fill-accent text-accent" />
+                                <Gem size={14} className="fill-accent text-accent" />
                                 <span className="font-medium">{link.type}</span>
                               </button>
                               <WhatsAppShareButton
