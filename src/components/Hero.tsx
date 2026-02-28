@@ -3,8 +3,8 @@ import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 import { scrollToSection } from "@/lib/scrollToSection";
 
 // Use a single fallback src (smallest useful size); srcSet handles responsive selection
-const heroImageFallback = cloudinaryUrl("living-room-hero_zxfcxl", { width: 400, quality: "auto:good", crop: "fill" });
-const heroSrcSet = cloudinarySrcSet("living-room-hero_zxfcxl", [400, 600, 828, 1200], { quality: "auto:good", crop: "fill" });
+const heroImageFallback = cloudinaryUrl("living-room-hero_zxfcxl", { width: 320, quality: "auto:good", crop: "fill" });
+const heroSrcSet = cloudinarySrcSet("living-room-hero_zxfcxl", [320, 400, 600, 828, 1200], { quality: "auto:good", crop: "fill" });
 
 const scrollToOverview = () => scrollToSection("overview");
 
