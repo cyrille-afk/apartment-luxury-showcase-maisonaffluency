@@ -82,29 +82,33 @@ export function cloudinarySrcSet(
 export const presets = {
   /** Gallery / hero images — large */
   hero: (publicId: string) => ({
-    src: cloudinaryUrl(publicId, { width: 1600, quality: "auto:good" }),
-    srcSet: cloudinarySrcSet(publicId, [800, 1200, 1600, 2400]),
+    src: cloudinaryUrl(publicId, { width: 1200, quality: "auto:good" }),
+    srcSet: cloudinarySrcSet(publicId, [400, 600, 800, 1200, 1600, 2400]),
+    sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw",
     placeholder: cloudinaryBlurPlaceholder(publicId),
   }),
 
   /** Designer/atelier cards — medium */
   card: (publicId: string) => ({
-    src: cloudinaryUrl(publicId, { width: 800, quality: "auto" }),
-    srcSet: cloudinarySrcSet(publicId, [400, 600, 800, 1200]),
+    src: cloudinaryUrl(publicId, { width: 600, quality: "auto" }),
+    srcSet: cloudinarySrcSet(publicId, [300, 400, 600, 800]),
+    sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw",
     placeholder: cloudinaryBlurPlaceholder(publicId),
   }),
 
   /** Thumbnails — small */
   thumb: (publicId: string) => ({
-    src: cloudinaryUrl(publicId, { width: 400, quality: "auto" }),
-    srcSet: cloudinarySrcSet(publicId, [200, 400, 600]),
+    src: cloudinaryUrl(publicId, { width: 300, quality: "auto" }),
+    srcSet: cloudinarySrcSet(publicId, [150, 200, 300, 400]),
+    sizes: "(max-width: 640px) 33vw, 20vw",
     placeholder: cloudinaryBlurPlaceholder(publicId),
   }),
 
   /** Lightbox / full-screen — max quality */
   lightbox: (publicId: string) => ({
     src: cloudinaryUrl(publicId, { width: 2400, quality: "auto:best" }),
-    srcSet: cloudinarySrcSet(publicId, [800, 1200, 1600, 2400, 3200]),
+    srcSet: cloudinarySrcSet(publicId, [600, 800, 1200, 1600, 2400]),
+    sizes: "100vw",
     placeholder: cloudinaryBlurPlaceholder(publicId),
   }),
 } as const;
