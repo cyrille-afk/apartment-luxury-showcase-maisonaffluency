@@ -481,6 +481,11 @@ const Gallery = () => {
             // Find original index for proper lightbox mapping
             const originalSectionIndex = galleryExperiences.indexOf(section);
             return <div key={section.experience} id={originalSectionIndex === 0 ? "sociable-environment" : undefined} className={`mb-6 md:mb-10${originalSectionIndex === 0 ? " scroll-mt-24" : ""}`}>
+              {originalSectionIndex < 6 && (
+                <span className="inline-block text-[10px] uppercase tracking-[0.25em] font-body font-semibold text-primary/80 bg-primary/5 border border-primary/15 rounded-full px-3 py-1 mb-3">
+                  Couture Collection
+                </span>
+              )}
               <motion.div initial={{
             opacity: 0,
             y: 20
