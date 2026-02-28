@@ -88,42 +88,42 @@ const Index = () => {
         <section id="home">
           <Hero />
         </section>
-        <section id="overview" className="scroll-mt-20 md:scroll-mt-24">
+        <section id="overview" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
           <Suspense fallback={<SectionFallback />}>
             <Overview />
           </Suspense>
         </section>
-        <section id="gallery" className="scroll-mt-20 md:scroll-mt-24">
+        <section id="gallery" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1200px' }}>
           <Suspense fallback={<SectionFallback />}>
             <Gallery />
           </Suspense>
         </section>
-        <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24">
+        <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}>
           <Suspense fallback={<SectionFallback />}>
             <CuratingTeam />
           </Suspense>
         </section>
-        <section id="designers" className="scroll-mt-20 md:scroll-mt-24">
+        <section id="designers" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1000px' }}>
           <Suspense fallback={<SectionFallback />}>
             <FeaturedDesigners />
           </Suspense>
         </section>
-        <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24">
+        <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1000px' }}>
           <Suspense fallback={<SectionFallback />}>
             <Collectibles />
           </Suspense>
         </section>
-        <section id="brands" className="scroll-mt-20 md:scroll-mt-24">
+        <section id="brands" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1000px' }}>
           <Suspense fallback={<SectionFallback />}>
             <BrandsAteliers />
           </Suspense>
         </section>
-        <section id="details" className="scroll-mt-20 md:scroll-mt-24">
+        <section id="details" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}>
           <Suspense fallback={<SectionFallback />}>
             <DesignDetails />
           </Suspense>
         </section>
-        <section id="contact" className="scroll-mt-20 md:scroll-mt-24">
+        <section id="contact" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}>
           <Suspense fallback={<SectionFallback />}>
             <ContactInquiry />
           </Suspense>

@@ -2,7 +2,8 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Gem } from "lucide-react";
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
-const heroImage = cloudinaryUrl("living-room-hero_zxfcxl", { width: 828, quality: "auto:good", crop: "fill" });
+const heroImageMobile = cloudinaryUrl("living-room-hero_zxfcxl", { width: 400, quality: "auto:good", crop: "fill" });
+const heroImageDesktop = cloudinaryUrl("living-room-hero_zxfcxl", { width: 1200, quality: "auto:good", crop: "fill" });
 const heroSrcSet = cloudinarySrcSet("living-room-hero_zxfcxl", [400, 600, 828, 1200, 1600], { quality: "auto:good", crop: "fill" });
 
 const Hero = () => {
@@ -30,7 +31,7 @@ const Hero = () => {
       {/* Static image container for fastest LCP — no motion wrapper delays */}
       <div className="absolute inset-0">
         <img 
-          src={heroImage}
+          src={isMobile ? heroImageMobile : heroImageDesktop}
           srcSet={heroSrcSet}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
           alt="Luxury living room with Asian-inspired murals and designer furniture" 
