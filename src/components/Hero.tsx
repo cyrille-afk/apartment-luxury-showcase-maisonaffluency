@@ -70,7 +70,8 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-}} className="mb-6 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}>Discover World Masters in Furniture & Collectible Design
+}} className="mb-6 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity relative" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}>Discover World Masters in Furniture & Collectible Design
+            <Gem className="hidden md:inline-block w-8 h-8 lg:w-10 lg:h-10 text-white absolute -right-12 lg:-right-14 bottom-1 cursor-pointer hover:opacity-80 transition-opacity" onClick={(e) => { e.stopPropagation(); document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" }); }} />
           </motion.h1>
           
           <div className="flex items-center gap-2 md:gap-3">
@@ -82,7 +83,7 @@ const Hero = () => {
             duration: 0.6,
             delay: 0.8
           }} className="text-[15px] leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses<br /> and Artisan&nbsp;Workshops</motion.p>
-            <Gem className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })} />
+            <Gem className="w-6 h-6 md:hidden text-white flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })} />
           </div>
           
           <motion.div initial={{
