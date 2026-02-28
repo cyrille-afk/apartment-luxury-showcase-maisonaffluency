@@ -63,24 +63,22 @@ const QuickJumpMenu = () => {
       { rootMargin: "-20% 0px -50% 0px", threshold: 0 }
     );
 
-    // Separate observer for hero visibility (controls FAB visibility)
-    const heroEl = document.getElementById("home");
-    const heroObserver = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(!entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
+    // Show FAB after a slight scroll (~150px) instead of waiting for entire hero to pass
+    const handleScroll = () => {
+      setIsVisible(window.scrollY > 150);
+    };
+    handleScroll(); // check initial position
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     sections.forEach((s) => {
       const el = document.getElementById(s.id);
       if (el) observer.observe(el);
     });
-    if (heroEl) heroObserver.observe(heroEl);
+
 
     return () => {
       observer.disconnect();
-      heroObserver.disconnect();
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
