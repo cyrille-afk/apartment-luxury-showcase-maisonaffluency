@@ -88,7 +88,16 @@ const Hero = () => {
               delay: 0.8
             }} className="text-[15px] leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses<br /> and Artisan&nbsp;Workshops</motion.p>
             
-            <div className="mt-10 md:mt-10 md:mr-24 lg:mr-32">
+            <div className="mt-8 md:mt-10 flex items-center gap-5 md:gap-6">
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1 }}
+                onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}
+                className="px-6 py-3 md:px-8 md:py-3.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-sm md:text-base font-serif tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.25)]"
+              >
+                Explore the Collection
+              </motion.button>
               <motion.div
                 animate={{ scale: [1, 1.05, 1], opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
