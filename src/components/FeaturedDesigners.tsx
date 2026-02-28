@@ -419,7 +419,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Lighting",
         tags: ["Lighting", "Lantern"],
         materials: "Hammered bronze base • Rock crystal & frosted glass shades",
-        dimensions: "H28 × W18 × D18 cm"
+        dimensions: "H28 × W18 × D18 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Galea_Lantern.pdf",
+        pdfFilename: "Maison_Affluency-Galea_Lantern.pdf"
       },
       { 
         image: alexanderLamontPick5, 
