@@ -66,7 +66,7 @@ const Hero = () => {
                 onClick={scrollToOverview}
                 className="px-6 py-3 md:px-8 md:py-3.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-sm md:text-base font-serif tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.25)] hero-fade-in-delayed-4"
               >
-                Explore the Collection
+                Explore Our Curation
               </button>
             </div>
           </div>
