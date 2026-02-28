@@ -3123,7 +3123,8 @@ const FeaturedDesigners = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center text-white/60 gap-4 p-8">
-                  <p className="font-body text-sm">No curated picks available yet for this designer.</p>
+                  <Gem className="h-10 w-10 text-white/30" />
+                  <p className="font-body text-sm">Coming soon</p>
                   <button
                     onClick={() => {
                       setCuratorPicksDesigner(null);
