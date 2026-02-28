@@ -480,7 +480,7 @@ const Gallery = () => {
           {filteredExperiences.map((section, sectionIndex) => {
             // Find original index for proper lightbox mapping
             const originalSectionIndex = galleryExperiences.indexOf(section);
-            return <div key={section.experience} id={originalSectionIndex === 0 ? "sociable-environment" : undefined} className={`mb-6 md:mb-10${originalSectionIndex === 0 ? " scroll-mt-24" : ""}`}>
+            return <div key={section.experience} id={originalSectionIndex === 0 ? "sociable-environment" : undefined} className={`mb-6 md:mb-10${originalSectionIndex === 0 ? " scroll-mt-32 md:scroll-mt-36" : ""}`}>
               <motion.div initial={{
             opacity: 0,
             y: 20
