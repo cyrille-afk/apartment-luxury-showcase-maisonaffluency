@@ -53,17 +53,19 @@ const ExitIntentBanner = () => {
           transition={{ duration: 0.3, ease: "easeOut" }}
           className="fixed bottom-4 right-4 z-[60] flex items-center gap-2 rounded-full bg-[#25D366] pl-3 pr-2 py-2 shadow-lg cursor-pointer hover:bg-[#20bd5a] transition-colors"
           onClick={handleClick}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } }}
           role="button"
-          aria-label="Chat on WhatsApp"
+          tabIndex={0}
+          aria-label="Chat with us on WhatsApp"
         >
           <span className="text-white text-xs font-medium whitespace-nowrap">Chat with us</span>
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center" aria-hidden="true">
             <MessageCircle className="w-4 h-4 text-white" />
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); dismiss(); }}
-            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-card border border-border flex items-center justify-center shadow-sm"
-            aria-label="Dismiss"
+            className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center shadow-sm"
+            aria-label="Dismiss WhatsApp chat prompt"
           >
             <X className="w-3 h-3 text-muted-foreground" />
           </button>
