@@ -821,7 +821,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Console"],
         materials: "L120 x W65 x H80 cm\nProduction lead time: 12-14 weeks",
-        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request."
+        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Atelier_Pendhapa-Akar_Desk_Console.pdf",
+        pdfFilename: "Atelier_Pendhapa-Akar_Desk_Console.pdf"
       },
     ],
     links: [
