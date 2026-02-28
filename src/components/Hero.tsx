@@ -70,17 +70,20 @@ const Hero = () => {
         }} transition={{
           duration: 0.8,
           delay: 0.6
-}} className="mb-6 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity inline-flex items-end gap-3 flex-wrap" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}>Discover World Masters in Furniture & Collectible Design <Gem className="inline-block w-7 h-7 md:w-10 md:h-10 lg:w-12 lg:h-12 mb-1" />
+}} className="mb-6 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl cursor-pointer hover:opacity-80 transition-opacity" onClick={() => document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" })}>Discover World Masters in Furniture & Collectible Design
           </motion.h1>
           
-          <motion.p initial={{
-          opacity: 0
-        }} animate={{
-          opacity: 1
-        }} transition={{
-          duration: 0.6,
-          delay: 0.8
-        }} className="max-w-3xl text-[15px] leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium mb-6 mt-2 md:mt-4">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses and Artisan&nbsp;Workshops</motion.p>
+          <div className="flex items-center gap-4 md:gap-6">
+            <motion.p initial={{
+            opacity: 0
+          }} animate={{
+            opacity: 1
+          }} transition={{
+            duration: 0.6,
+            delay: 0.8
+          }} className="max-w-3xl text-[15px] leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium">From Couture Furniture and Collectible Designs in Situ,<br /> To the World's most distinguished Furniture Houses and Artisan&nbsp;Workshops</motion.p>
+            <Gem className="w-7 h-7 md:w-10 md:h-10 lg:w-12 lg:h-12 text-white flex-shrink-0" />
+          </div>
           
           <motion.div initial={{
             opacity: 0
