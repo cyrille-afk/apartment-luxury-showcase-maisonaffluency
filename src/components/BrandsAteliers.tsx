@@ -1973,8 +1973,8 @@ const BrandsAteliers = () => {
                         }}
                         className={`flex-none font-serif text-sm md:text-sm leading-none px-2 py-1.5 md:px-1.5 md:py-1 rounded-full transition-all duration-200 ${
                           isActive
-                            ? "text-foreground/60 hover:text-primary hover:bg-primary/10 cursor-pointer"
-                            : "text-foreground/20 cursor-default"
+                            ? "text-foreground/70 hover:text-primary hover:bg-primary/10 cursor-pointer"
+                            : "text-foreground/30 cursor-default"
                         }`}
                       >
                         {letter}
