@@ -2187,7 +2187,7 @@ const BrandsAteliers = () => {
                   {/* Close button moved inside image container below */}
 
                   <div className={`flex flex-col items-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${picksZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[90vh] pb-4'}`}>
-                    <div className="relative">
+                    <div className="relative inline-flex flex-col items-center">
                       {!picksZoomed && ((picksDesigner.curatorPicks[picksIndex] as any)?.tags?.length > 0 || picksDesigner.curatorPicks[picksIndex]?.edition) && (
                         <div className="text-center mb-2 flex flex-wrap gap-1.5 justify-center">
                           {((picksDesigner.curatorPicks[picksIndex] as any)?.tags || [(picksDesigner.curatorPicks[picksIndex] as any)?.category]).map((tag: string, i: number) => (
