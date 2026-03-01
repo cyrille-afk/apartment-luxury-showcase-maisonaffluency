@@ -2513,7 +2513,7 @@ const FeaturedDesigners = () => {
           </p>
         )}
 
-        <div className="flex mb-4 md:justify-end md:pr-8 pl-[6.5rem] md:pl-0">
+        <div className="flex mb-4 justify-start pl-[6.5rem] md:justify-end md:pr-8 md:pl-0">
           <button
             onClick={toggleAllDesigners}
             className="text-sm text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1.5"
