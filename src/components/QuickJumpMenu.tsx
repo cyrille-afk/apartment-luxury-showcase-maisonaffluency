@@ -104,7 +104,7 @@ const QuickJumpMenu = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed right-4 bottom-[5.5rem] md:right-6 md:bottom-auto z-50"
+          className="fixed right-6 bottom-auto z-50 hidden md:block"
           data-quick-jump
         >
           {/* Desktop dynamic positioning via inline style */}
