@@ -75,7 +75,7 @@ const StickyBottomNav = () => {
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.06 * index, duration: 0.35, ease: "easeOut" }}
-                    onClick={() => scrollTo(id)}
+                    onClick={() => id === "contact" ? window.location.href = "mailto:concierge@myaffluency.com" : scrollTo(id)}
                     className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors duration-200 touch-manipulation min-w-[3.5rem] ${
                       isActive
                         ? "text-primary"
