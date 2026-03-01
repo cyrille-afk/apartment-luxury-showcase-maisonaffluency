@@ -2169,13 +2169,18 @@ const FeaturedDesigners = () => {
     });
   }, [curatorPicksDesigner]);
 
-  // History state: push when lightbox opens so browser back button returns to lightbox
+  // History state: push when lightbox opens so browser back button returns to lightbox.
+  // Track whether close was initiated by popstate to avoid double history.back().
+  const closedViaPopstateRef = useRef(false);
+
   useEffect(() => {
     if (!curatorPicksDesigner) return;
 
+    closedViaPopstateRef.current = false;
     window.history.pushState({ curatorPicksLightbox: true }, '');
 
     const handlePopState = () => {
+      closedViaPopstateRef.current = true;
       setCuratorPicksDesigner(null);
       setCuratorPickIndex(0);
       setIsZoomed(false);
@@ -2883,7 +2888,9 @@ const FeaturedDesigners = () => {
               setCuratorPicksDesigner(null);
               setCuratorPickIndex(0);
               setIsZoomed(false);
-              window.history.back();
+              if (!closedViaPopstateRef.current) {
+                window.history.back();
+              }
             }
           }}
         >
@@ -2975,7 +2982,7 @@ const FeaturedDesigners = () => {
                           setCuratorPicksDesigner(null);
                           setCuratorPickIndex(0);
                           setIsZoomed(false);
-                          window.history.back();
+                          if (!closedViaPopstateRef.current) window.history.back();
                         }}
                         className={`absolute bottom-2 left-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10 md:hidden ${isZoomed ? 'hidden' : ''}`}
                         aria-label="Close"
@@ -2987,7 +2994,7 @@ const FeaturedDesigners = () => {
                           setCuratorPicksDesigner(null);
                           setCuratorPickIndex(0);
                           setIsZoomed(false);
-                          window.history.back();
+                          if (!closedViaPopstateRef.current) window.history.back();
                         }}
                         className="hidden md:flex absolute bottom-2 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
                         aria-label="Close"
