@@ -2513,7 +2513,7 @@ const FeaturedDesigners = () => {
           </p>
         )}
 
-        <div className="flex mb-4 justify-start pl-[6.5rem] md:justify-end md:pr-8 md:pl-0">
+        <div className="flex mb-4 ml-[6.5rem] md:ml-0 md:justify-end md:pr-8">
           <button
             onClick={toggleAllDesigners}
             className="text-sm text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1.5"
@@ -2569,10 +2569,11 @@ const FeaturedDesigners = () => {
                   <div className="flex flex-col w-full gap-3">
                     <div className="flex items-center gap-4 md:gap-6 text-left w-full">
                     {designer.image ? (
+                    <div className="relative flex-shrink-0 w-24 h-24 md:w-32 md:h-32">
                     <Dialog>
                       <DialogTrigger asChild>
                         <div
-                          className="relative flex-shrink-0 cursor-pointer"
+                          className="cursor-pointer w-full h-full"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedImage({ name: designer.name, image: designer.image! });
@@ -2584,7 +2585,7 @@ const FeaturedDesigners = () => {
                             src={designer.image}
                             alt={designer.name}
                             sizes="(max-width: 767px) 96px, 128px"
-                            className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
+                            className="w-full h-full rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
                             style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined}
                             loading="lazy"
                           />
@@ -2602,10 +2603,6 @@ const FeaturedDesigners = () => {
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
                               />
                             </svg>
-                          </div>
-                          {/* Mobile chevron — bottom-right, offset from picture */}
-                          <div className="absolute -bottom-2 -right-3 md:hidden">
-                            <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180 bg-background rounded-full p-0.5 shadow-sm ring-1 ring-border/40" />
                           </div>
                         </div>
                       </DialogTrigger>
@@ -2626,9 +2623,19 @@ const FeaturedDesigners = () => {
                         </div>
                       </DialogContent>
                     </Dialog>
+                    {/* Mobile chevron — bottom-right of profile image */}
+                    <div className="absolute -bottom-2 -right-3 md:hidden pointer-events-none">
+                      <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180 bg-background rounded-full p-0.5 shadow-sm ring-1 ring-border/40" />
+                    </div>
+                    </div>
                     ) : (
-                    <div className="flex-shrink-0 w-24 h-24 md:w-32 md:h-32 rounded-full bg-muted ring-2 ring-border/40 flex items-center justify-center">
-                      <span className="text-2xl font-serif text-muted-foreground">{designer.name.charAt(0)}</span>
+                    <div className="relative flex-shrink-0 w-24 h-24 md:w-32 md:h-32">
+                      <div className="w-full h-full rounded-full bg-muted ring-2 ring-border/40 flex items-center justify-center">
+                        <span className="text-2xl font-serif text-muted-foreground">{designer.name.charAt(0)}</span>
+                      </div>
+                      <div className="absolute -bottom-2 -right-3 md:hidden pointer-events-none">
+                        <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180 bg-background rounded-full p-0.5 shadow-sm ring-1 ring-border/40" />
+                      </div>
                     </div>
                     )}
                     <div className="flex flex-col items-start gap-1 flex-1 min-w-0">
