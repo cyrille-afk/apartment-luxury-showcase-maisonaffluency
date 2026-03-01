@@ -155,14 +155,14 @@ const CuratingTeam = () => {
       >
         <button
           onClick={() => scrollToSection("overview")}
-          className="flex flex-col items-center gap-2 cursor-pointer group mx-auto"
+          className="flex flex-col items-center gap-3 cursor-pointer group mx-auto"
         >
           <motion.div
-            className="h-10 w-[1px] bg-gradient-to-t from-primary/50 to-transparent"
+            className="h-10 w-[1px] bg-gradient-to-t from-[hsl(var(--gold))]/50 to-transparent"
             animate={{ y: [0, -5, 0] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           />
-          <span className="font-body text-xs uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors duration-300">
+          <span className="font-body text-sm bg-white px-6 py-2 rounded-full border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] text-foreground transition-all duration-300">
             Back to Gallery
           </span>
         </button>
