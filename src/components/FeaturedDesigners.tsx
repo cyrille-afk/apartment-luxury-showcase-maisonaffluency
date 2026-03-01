@@ -3014,7 +3014,7 @@ const FeaturedDesigners = () => {
                               window.open(pick.pdfUrl, '_blank');
                             }
                           }}
-                          className="absolute bottom-2 right-2 md:right-10 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          className="absolute bottom-2 right-12 md:right-10 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Download PDF specification"
                         >
                           <Download size={16} />
