@@ -66,7 +66,7 @@ const StickyBottomNav = () => {
         >
           {/* Backdrop */}
           <div className="bg-card/90 backdrop-blur-xl border-t border-border/30 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
-            <div className="flex items-center justify-around px-1 pt-2 pb-[max(1.25rem,calc(env(safe-area-inset-bottom) + 0.5rem))]">
+            <div className="flex items-center justify-around px-1 pt-2 pb-[max(3.5rem,calc(env(safe-area-inset-bottom) + 2.75rem))]">
               {navItems.map(({ id, label, icon: Icon }, index) => {
                 const isActive = activeSection === id;
                 return (
