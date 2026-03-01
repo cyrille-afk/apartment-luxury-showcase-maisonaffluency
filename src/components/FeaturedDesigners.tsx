@@ -2513,13 +2513,13 @@ const FeaturedDesigners = () => {
           </p>
         )}
 
-        <div className="flex justify-start mb-4 md:justify-end md:pr-8">
+        <div className="flex mb-4 md:justify-end md:pr-8 pl-[6.5rem] md:pl-0">
           <button
             onClick={toggleAllDesigners}
             className="text-sm text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1.5"
           >
             <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
-            <ChevronDown className={`h-4.5 w-4.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
           </button>
         </div>
 
@@ -2603,8 +2603,8 @@ const FeaturedDesigners = () => {
                               />
                             </svg>
                           </div>
-                          {/* Mobile chevron — bottom-right of picture */}
-                          <div className="absolute -bottom-1 -right-1 md:hidden">
+                          {/* Mobile chevron — bottom-right, offset from picture */}
+                          <div className="absolute -bottom-2 -right-3 md:hidden">
                             <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180 bg-background rounded-full p-0.5 shadow-sm ring-1 ring-border/40" />
                           </div>
                         </div>
