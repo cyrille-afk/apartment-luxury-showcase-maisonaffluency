@@ -3015,11 +3015,11 @@ const FeaturedDesigners = () => {
                           <Download size={16} />
                         </button>
                       )}
-                      {/* Maximize / Minimize button — rightmost at bottom */}
+                      {/* Desktop Maximize / Minimize button — inside image, bottom-right */}
                       {!isZoomed ? (
                         <button
                           onClick={() => setIsZoomed(true)}
-                          className="absolute bottom-2 left-2 md:left-auto md:right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          className="hidden md:flex absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Expand image"
                         >
                           <Maximize2 size={16} />
@@ -3027,13 +3027,32 @@ const FeaturedDesigners = () => {
                       ) : (
                         <button
                           onClick={() => setIsZoomed(false)}
-                          className="absolute bottom-2 left-2 md:left-auto md:right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          className="hidden md:flex absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Minimize image"
                         >
                           <Minimize2 size={16} />
                         </button>
                       )}
                     </div>
+
+                    {/* Mobile Maximize / Minimize button — below image */}
+                    {!isZoomed ? (
+                      <button
+                        onClick={() => setIsZoomed(true)}
+                        className="md:hidden mt-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10 self-end"
+                        aria-label="Expand image"
+                      >
+                        <Maximize2 className="h-5 w-5" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setIsZoomed(false)}
+                        className="md:hidden mt-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10 self-end"
+                        aria-label="Minimize image"
+                      >
+                        <Minimize2 className="h-5 w-5" />
+                      </button>
+                    )}
 
                     {/* Scroll dots — directly under the image */}
                     {curatorPicksDesigner.curatorPicks.length > 1 && !isZoomed && (
