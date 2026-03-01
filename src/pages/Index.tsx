@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
+import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
 
 // Navigation is heavy (Radix Sheet, Tooltip, DropdownMenu) — lazy-load it
 const Navigation = lazy(() => import("@/components/Navigation"));
@@ -19,6 +20,7 @@ const BrandsAteliers = lazy(() => import("@/components/BrandsAteliers"));
 // ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
 // competing for bandwidth with LCP-critical resources on mobile.
 const ExitIntentBanner = lazy(() => import("@/components/ExitIntentBanner"));
+const StickyBottomNav = lazy(() => import("@/components/StickyBottomNav"));
 
 /**
  * Parse deep-link hash: #designer/<id>, #collectible/<id>, #atelier/<slug>
@@ -75,6 +77,9 @@ const Index = () => {
   const [showScrollProgress, setShowScrollProgress] = useState(false);
   const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => isDeepLink());
   const mainRef = useRef<HTMLElement>(null);
+
+  // Track scroll depth for GA4 engagement
+  useScrollDepthTracking();
 
   // Stagger non-LCP content so hero image wins bandwidth on mobile.
   // Only deep-links (designer/collectible/atelier profiles) bypass delays.
@@ -357,6 +362,12 @@ const Index = () => {
       {showBelowFoldSections ? (
         <Suspense fallback={null}>
           <QuickJumpMenu />
+        </Suspense>
+      ) : null}
+
+      {showBelowFoldSections ? (
+        <Suspense fallback={null}>
+          <StickyBottomNav />
         </Suspense>
       ) : null}
 
