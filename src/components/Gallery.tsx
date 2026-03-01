@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, X, Maximize2, Minimize2, Instagram, Copy } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -752,57 +752,93 @@ const Gallery = () => {
                </button>
 
                {/* Image container */}
-               <div className="flex flex-col items-center w-full max-w-[90vw] px-16 max-h-[85vh] overflow-y-auto scrollbar-hide">
-                 <h3 className="text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
-                   {currentSectionItems[currentItemIndex]?.title}
-                 </h3>
-                 <div className="relative inline-block shrink-0">
-                   <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
-                     {/* Close button — desktop: outside image bottom-right */}
-                     <button
-                       onClick={closeLightbox}
-                       className={`hidden md:flex absolute bottom-2 -right-12 lg:-right-14 z-50 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20 ${isExpanded ? '!hidden' : ''}`}
-                       aria-label="Close lightbox"
-                     >
-                       <X className="h-5 w-5" />
-                     </button>
-                     {/* Maximize / Minimize icon — z-50 to stay above PinchZoomImage overlay */}
-                     {!isExpanded ? (
-                       <button
-                         onClick={() => setIsExpanded(true)}
-                         className="absolute bottom-2 left-2 md:left-auto md:right-2 z-50 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
-                         aria-label="Maximize image"
-                       >
-                         <Maximize2 className="w-3.5 h-3.5 text-white" />
-                       </button>
-                     ) : (
-                       <button
-                         onClick={() => setIsExpanded(false)}
-                         className="absolute bottom-2 left-2 md:left-auto md:right-2 z-50 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
-                         aria-label="Minimize image"
-                       >
-                         <Minimize2 className="w-4 h-4 text-white" />
-                       </button>
-                     )}
-                 </div>
-                 {/* Dot indicators */}
-                 <div className="flex justify-center gap-1.5 mt-3 shrink-0">
-                   {currentSectionItems.map((_, i) => (
-                     <button
-                       key={i}
-                       onClick={() => setCurrentItemIndex(i)}
-                       className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
-                       aria-label={`Go to image ${i + 1}`}
-                     />
-                   ))}
-                 </div>
-                 {/* Description */}
-                 <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
-                   <p className="text-base text-white/70 font-body max-w-2xl text-justify">
-                     {currentSectionItems[currentItemIndex]?.description}
-                   </p>
-                 </div>
-               </div>
+                <div
+                  className="flex flex-col items-center w-full max-w-[90vw] px-16 max-h-[85vh] overflow-y-auto scrollbar-hide relative"
+                  ref={(el) => {
+                    // Check if content overflows and show scroll-down hint
+                    if (!el) return;
+                    const check = () => {
+                      const canScroll = el.scrollHeight > el.clientHeight + 10;
+                      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
+                      const hint = el.querySelector('[data-scroll-hint]') as HTMLElement | null;
+                      if (hint) hint.style.opacity = (canScroll && !atBottom) ? '1' : '0';
+                    };
+                    check();
+                    el.addEventListener('scroll', check, { passive: true });
+                    const obs = new ResizeObserver(check);
+                    obs.observe(el);
+                    // Cleanup via MutationObserver isn't needed — React will re-run on unmount
+                  }}
+                >
+                  <h3 className="text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
+                    {currentSectionItems[currentItemIndex]?.title}
+                  </h3>
+                  <div className="relative inline-block shrink-0">
+                    <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
+                      {/* Close button — desktop: outside image bottom-right */}
+                      <button
+                        onClick={closeLightbox}
+                        className={`hidden md:flex absolute bottom-2 -right-12 lg:-right-14 z-50 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20 ${isExpanded ? '!hidden' : ''}`}
+                        aria-label="Close lightbox"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                      {/* Maximize / Minimize icon — z-50 to stay above PinchZoomImage overlay */}
+                      {!isExpanded ? (
+                        <button
+                          onClick={() => setIsExpanded(true)}
+                          className="absolute bottom-2 left-2 md:left-auto md:right-2 z-50 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                          aria-label="Maximize image"
+                        >
+                          <Maximize2 className="w-3.5 h-3.5 text-white" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setIsExpanded(false)}
+                          className="absolute bottom-2 left-2 md:left-auto md:right-2 z-50 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                          aria-label="Minimize image"
+                        >
+                          <Minimize2 className="w-4 h-4 text-white" />
+                        </button>
+                      )}
+                  </div>
+                  {/* Dot indicators */}
+                  <div className="flex justify-center gap-1.5 mt-3 shrink-0">
+                    {currentSectionItems.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentItemIndex(i)}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
+                        aria-label={`Go to image ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+                  {/* Description */}
+                  <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
+                    <p className="text-base text-white/70 font-body max-w-2xl text-justify">
+                      {currentSectionItems[currentItemIndex]?.description}
+                    </p>
+                  </div>
+
+                  {/* Scroll-down hint — sticky at bottom, fades out when scrolled */}
+                  <div
+                    data-scroll-hint
+                    className="sticky bottom-2 left-1/2 z-50 flex justify-center pointer-events-none transition-opacity duration-300"
+                    style={{ opacity: 0 }}
+                  >
+                    <button
+                      className="pointer-events-auto bg-black/50 backdrop-blur-sm text-white/80 hover:text-white rounded-full p-1.5 animate-bounce shadow-lg border border-white/10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const container = (e.currentTarget as HTMLElement).closest('.overflow-y-auto');
+                        container?.scrollBy({ top: 200, behavior: 'smooth' });
+                      }}
+                      aria-label="Scroll down for details"
+                    >
+                      <ChevronDown className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
 
                {/* Next button */}
                <button onClick={goToNext} className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Next image">
