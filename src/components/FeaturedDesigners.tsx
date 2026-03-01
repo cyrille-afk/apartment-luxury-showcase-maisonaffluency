@@ -2934,20 +2934,26 @@ const FeaturedDesigners = () => {
                 >
                   <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
                     <div className="relative">
-                      {!isZoomed && ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category || ((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags?.length > 0) || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition) && (
-                        <div className="text-center mb-2 flex flex-wrap gap-1.5 justify-center">
-                          {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags?.length > 0 ? (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.tags : [(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.category]).map((tag: string, i: number) => (
-                            <span key={i} className="hidden md:inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
-                              {tag}
-                            </span>
-                          ))}
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition && (
-                            <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-accent/20 text-accent rounded-full border border-accent/30">
-                              {curatorPicksDesigner.curatorPicks[curatorPickIndex].edition}
-                            </span>
-                          )}
-                        </div>
-                      )}
+                      {!isZoomed && (() => {
+                        const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
+                        const tags: string[] = pick?.tags?.length > 0 ? pick.tags : pick?.category ? [pick.category] : [];
+                        const specialTags = tags.filter((t: string) => /couture|edition|limited/i.test(t));
+                        const hasEdition = !!pick?.edition;
+                        return (specialTags.length > 0 || hasEdition) ? (
+                          <div className="text-center mb-2 flex flex-wrap gap-1.5 justify-center">
+                            {specialTags.map((tag: string, i: number) => (
+                              <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
+                                {tag}
+                              </span>
+                            ))}
+                            {hasEdition && (
+                              <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-accent/20 text-accent rounded-full border border-accent/30">
+                                {pick.edition}
+                              </span>
+                            )}
+                          </div>
+                        ) : null;
+                      })()}
                       <img
                         src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image}
                         alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title || "Curator's pick"}
