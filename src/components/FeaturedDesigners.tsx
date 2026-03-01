@@ -2984,7 +2984,7 @@ const FeaturedDesigners = () => {
                           setIsZoomed(false);
                           window.history.back();
                         }}
-                        className="hidden md:flex absolute -bottom-3 -right-3 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
+                        className="hidden md:flex absolute bottom-2 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
                         aria-label="Close"
                       >
                         <X className="h-5 w-5" />
