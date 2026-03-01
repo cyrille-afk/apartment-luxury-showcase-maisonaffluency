@@ -67,11 +67,14 @@ const StickyBottomNav = () => {
           {/* Backdrop */}
           <div className="bg-card/90 backdrop-blur-xl border-t border-border/30 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
             <div className="flex items-center justify-around px-1 py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))]">
-              {navItems.map(({ id, label, icon: Icon }) => {
+              {navItems.map(({ id, label, icon: Icon }, index) => {
                 const isActive = activeSection === id;
                 return (
-                  <button
+                  <motion.button
                     key={id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.06 * index, duration: 0.35, ease: "easeOut" }}
                     onClick={() => scrollTo(id)}
                     className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors duration-200 touch-manipulation min-w-[3.5rem] ${
                       isActive
@@ -92,7 +95,7 @@ const StickyBottomNav = () => {
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       />
                     )}
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
