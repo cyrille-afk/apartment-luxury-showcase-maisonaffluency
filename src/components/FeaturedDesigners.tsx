@@ -2513,13 +2513,13 @@ const FeaturedDesigners = () => {
           </p>
         )}
 
-        <div className="flex mb-4 ml-[6.5rem] md:ml-0 md:justify-end md:pr-8">
+        <div className="flex mb-4 justify-start md:justify-end md:pr-8">
           <button
             onClick={toggleAllDesigners}
             className="text-sm text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1.5"
           >
+            <ChevronDown className={`h-4.5 w-4.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
             <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
-            <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
           </button>
         </div>
 
