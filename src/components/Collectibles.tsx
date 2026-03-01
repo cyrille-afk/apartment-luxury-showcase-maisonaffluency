@@ -369,13 +369,18 @@ const Collectibles = () => {
     });
   }, [curatorPicksDesigner]);
 
-  // History state: push when lightbox opens so browser back button returns to lightbox
+  // History state: push when lightbox opens so browser back button returns to lightbox.
+  // Track whether close was initiated by popstate to avoid double history.back().
+  const closedViaPopstateRef = useRef(false);
+
   useEffect(() => {
     if (!curatorPicksDesigner) return;
 
+    closedViaPopstateRef.current = false;
     window.history.pushState({ curatorPicksLightbox: true }, '');
 
     const handlePopState = () => {
+      closedViaPopstateRef.current = true;
       setCuratorPicksDesigner(null);
       setCuratorPickIndex(0);
       setIsZoomed(false);
@@ -497,7 +502,12 @@ const Collectibles = () => {
   };
 
   const closeCuratorPicks = () => {
-    window.history.back();
+    setCuratorPicksDesigner(null);
+    setCuratorPickIndex(0);
+    setIsZoomed(false);
+    if (!closedViaPopstateRef.current) {
+      window.history.back();
+    }
   };
 
   const goToPreviousPick = () => {

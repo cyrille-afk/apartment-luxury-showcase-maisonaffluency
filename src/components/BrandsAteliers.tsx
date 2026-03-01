@@ -1818,7 +1818,27 @@ const BrandsAteliers = () => {
   const [picksTouchStart, setPicksTouchStart] = useState<number | null>(null);
   const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
+  const closedViaPopstateRef = useRef(false);
 
+  // History state: push when lightbox opens so browser back button closes it
+  useEffect(() => {
+    if (!picksDesignerName) return;
+
+    closedViaPopstateRef.current = false;
+    window.history.pushState({ picksLightbox: true }, '');
+
+    const handlePopState = () => {
+      closedViaPopstateRef.current = true;
+      setPicksDesignerName(null);
+      setPicksIndex(0);
+      setPicksZoomed(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [picksDesignerName]);
   // Brands that should use FeaturedDesigners data instead of Collectibles
   const preferFeatured = new Set(["Pierre Bonnefille"]);
 
@@ -2152,6 +2172,7 @@ const BrandsAteliers = () => {
               setPicksDesignerName(null);
               setPicksIndex(0);
               setPicksZoomed(false);
+              if (!closedViaPopstateRef.current) window.history.back();
             }
           }}
         >
@@ -2239,7 +2260,7 @@ const BrandsAteliers = () => {
                           </p>
                         )}
                         <button
-                          onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
+                          onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
                           className="absolute top-3 left-2 md:top-2 z-50 p-2 md:p-1.5 bg-black/60 hover:bg-black/80 rounded-full backdrop-blur-sm transition-colors"
                           aria-label="Close lightbox"
                         >
@@ -2338,7 +2359,7 @@ const BrandsAteliers = () => {
               ) : (
                 <div className="relative flex items-center justify-center w-full h-full">
                   <button
-                    onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
+                    onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
                     className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
                     aria-label="Close lightbox"
                   >
@@ -2355,7 +2376,7 @@ const BrandsAteliers = () => {
             ) : (
               <div className="relative flex items-center justify-center w-full h-full">
                 <button
-                  onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); }}
+                  onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
                   className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
                   aria-label="Close lightbox"
                 >
