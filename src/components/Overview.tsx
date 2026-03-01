@@ -98,7 +98,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.5
-          }} className="font-body text-sm md:text-base leading-relaxed text-muted-foreground flex-1">This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
+          }} className="font-body text-sm md:text-base leading-relaxed text-muted-foreground flex-1">This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism.<br className="hidden md:block" /> Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
 
             <motion.div initial={{
             opacity: 0,
