@@ -3085,16 +3085,13 @@ const FeaturedDesigners = () => {
                         )}
 
                         <p className="text-xs text-white/40 font-body mt-4">
-                          Inquire about this piece —{" "}
-                          <button
-                            onClick={() => {
-                              setCuratorPicksDesigner(null);
-                              scrollToSection('contact');
-                            }}
-                            className="underline hover:text-white/70 transition-colors cursor-pointer"
+                          For further details, please contact{" "}
+                          <a
+                            href="mailto:concierge@myaffluency.com"
+                            className="underline hover:text-white/70 transition-colors"
                           >
-                            Contact concierge
-                          </button>
+                            concierge@myaffluency.com
+                          </a>
                         </p>
                       </div>
                     )}
