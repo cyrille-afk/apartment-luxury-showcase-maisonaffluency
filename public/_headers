@@ -18,8 +18,8 @@
 /manifest.json
   Cache-Control: public, max-age=86400
 
-# HTML – no cache (always fresh)
+# HTML — always revalidate
 /index.html
   Cache-Control: no-cache
-/*
+/
   Cache-Control: no-cache

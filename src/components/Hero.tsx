@@ -24,7 +24,7 @@ const Hero = () => {
           ref={imgRef}
           src={heroImageFallback}
           srcSet={heroSrcSet}
-          sizes="(max-width: 640px) 100vw, 100vw"
+          sizes="100vw"
           alt="Luxury living room with Asian-inspired murals and designer furniture"
           className="h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%]"
           loading="eager"

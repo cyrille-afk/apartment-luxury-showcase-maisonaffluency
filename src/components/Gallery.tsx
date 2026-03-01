@@ -188,6 +188,47 @@ const galleryExperiences = [{
     description: "Shagreen Panels: Robicara's Sira Credenza details, Matthieu Gicquel's Texture Glass with Gold Leaf rim Géode details"
   }]
 }];
+/** Scrollable container for expanded lightbox images — shows a bounce arrow when content overflows */
+const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean; children: React.ReactNode }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [showHint, setShowHint] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    const check = () => {
+      const canScroll = el.scrollHeight > el.clientHeight + 10;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
+      setShowHint(canScroll && !atBottom);
+    };
+    // Debounce scroll checks via rAF
+    const onScroll = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(check); };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    const obs = new ResizeObserver(check);
+    obs.observe(el);
+    check();
+    return () => { el.removeEventListener('scroll', onScroll); obs.disconnect(); cancelAnimationFrame(raf); };
+  }, [isExpanded]);
+
+  return (
+    <div ref={ref} className="flex flex-col items-center w-full max-w-[90vw] px-16 max-h-[85vh] overflow-y-auto scrollbar-hide relative">
+      {children}
+      {showHint && (
+        <div className="sticky bottom-2 z-50 flex justify-center pointer-events-none w-full">
+          <button
+            className="pointer-events-auto bg-black/50 backdrop-blur-sm text-white/80 hover:text-white rounded-full p-1.5 animate-bounce shadow-lg border border-white/10"
+            onClick={(e) => { e.stopPropagation(); ref.current?.scrollBy({ top: 200, behavior: 'smooth' }); }}
+            aria-label="Scroll down for details"
+          >
+            <ChevronDown className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Gallery = () => {
   const isMobile = useIsMobile();
   const ref = useRef(null);
@@ -752,24 +793,7 @@ const Gallery = () => {
                </button>
 
                {/* Image container */}
-                <div
-                  className="flex flex-col items-center w-full max-w-[90vw] px-16 max-h-[85vh] overflow-y-auto scrollbar-hide relative"
-                  ref={(el) => {
-                    // Check if content overflows and show scroll-down hint
-                    if (!el) return;
-                    const check = () => {
-                      const canScroll = el.scrollHeight > el.clientHeight + 10;
-                      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
-                      const hint = el.querySelector('[data-scroll-hint]') as HTMLElement | null;
-                      if (hint) hint.style.opacity = (canScroll && !atBottom) ? '1' : '0';
-                    };
-                    check();
-                    el.addEventListener('scroll', check, { passive: true });
-                    const obs = new ResizeObserver(check);
-                    obs.observe(el);
-                    // Cleanup via MutationObserver isn't needed — React will re-run on unmount
-                  }}
-                >
+                <ExpandedScrollContainer isExpanded={isExpanded}>
                   <h3 className="text-2xl font-serif text-white mb-3 text-center shrink-0 w-full">
                     {currentSectionItems[currentItemIndex]?.title}
                   </h3>
@@ -819,26 +843,7 @@ const Gallery = () => {
                       {currentSectionItems[currentItemIndex]?.description}
                     </p>
                   </div>
-
-                  {/* Scroll-down hint — sticky at bottom, fades out when scrolled */}
-                  <div
-                    data-scroll-hint
-                    className="sticky bottom-2 left-1/2 z-50 flex justify-center pointer-events-none transition-opacity duration-300"
-                    style={{ opacity: 0 }}
-                  >
-                    <button
-                      className="pointer-events-auto bg-black/50 backdrop-blur-sm text-white/80 hover:text-white rounded-full p-1.5 animate-bounce shadow-lg border border-white/10"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const container = (e.currentTarget as HTMLElement).closest('.overflow-y-auto');
-                        container?.scrollBy({ top: 200, behavior: 'smooth' });
-                      }}
-                      aria-label="Scroll down for details"
-                    >
-                      <ChevronDown className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
+                </ExpandedScrollContainer>
 
                {/* Next button */}
                <button onClick={goToNext} className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Next image">
