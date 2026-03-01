@@ -1038,7 +1038,7 @@ const Collectibles = () => {
               {/* Close button */}
               <button 
                 onClick={closeCuratorPicks} 
-                className="absolute top-5 left-4 md:top-4 md:left-auto md:right-4 z-50 p-2 md:p-1.5 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
+                className="absolute bottom-5 left-4 md:top-4 md:bottom-auto md:left-auto md:right-4 z-50 p-2 md:p-1.5 bg-background/20 hover:bg-background/40 rounded-full transition-colors" 
                 aria-label="Close lightbox"
               >
                 <X className="h-5 w-5 md:h-4 md:w-4 text-white" />
