@@ -766,16 +766,24 @@ const Gallery = () => {
                      >
                        <X className="h-5 w-5" />
                      </button>
-                    {/* Maximize icon — bottom-left on mobile, bottom-right on desktop */}
-                    {!isExpanded && (
-                      <button
-                        onClick={() => setIsExpanded(true)}
-                        className="absolute bottom-2 left-2 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
-                        aria-label="Maximize image"
-                      >
-                        <Maximize2 className="w-3.5 h-3.5 text-white" />
-                      </button>
-                    )}
+                     {/* Maximize / Minimize icon */}
+                     {!isExpanded ? (
+                       <button
+                         onClick={() => setIsExpanded(true)}
+                         className="absolute bottom-2 left-2 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                         aria-label="Maximize image"
+                       >
+                         <Maximize2 className="w-3.5 h-3.5 text-white" />
+                       </button>
+                     ) : (
+                       <button
+                         onClick={() => setIsExpanded(false)}
+                         className="absolute bottom-2 left-2 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                         aria-label="Minimize image"
+                       >
+                         <Minimize2 className="w-3.5 h-3.5 text-white" />
+                       </button>
+                     )}
                  </div>
                  {/* Dot indicators */}
                  <div className="flex justify-center gap-1.5 mt-3 shrink-0">
