@@ -15,12 +15,19 @@ const ExitIntentBanner = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Hide when any Radix Dialog overlay is open (lightboxes)
+  // Debounced to avoid forced reflows on every DOM mutation
   useEffect(() => {
-    const check = () => setDialogOpen(!!document.querySelector('[role="dialog"]'));
+    let raf = 0;
+    const check = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        setDialogOpen(!!document.querySelector('[role="dialog"]'));
+      });
+    };
     const observer = new MutationObserver(check);
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: false });
     check();
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); cancelAnimationFrame(raf); };
   }, []);
 
   const show = useCallback(() => {
