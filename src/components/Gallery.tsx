@@ -766,11 +766,11 @@ const Gallery = () => {
                      >
                        <X className="h-5 w-5" />
                      </button>
-                     {/* Maximize / Minimize icon */}
+                     {/* Maximize / Minimize icon — z-50 to stay above PinchZoomImage overlay */}
                      {!isExpanded ? (
                        <button
                          onClick={() => setIsExpanded(true)}
-                         className="absolute bottom-2 left-2 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                         className="absolute bottom-2 left-2 md:left-auto md:right-2 z-50 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
                          aria-label="Maximize image"
                        >
                          <Maximize2 className="w-3.5 h-3.5 text-white" />
@@ -778,10 +778,10 @@ const Gallery = () => {
                      ) : (
                        <button
                          onClick={() => setIsExpanded(false)}
-                         className="absolute bottom-2 left-2 md:left-auto md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                         className="absolute bottom-2 left-2 md:left-auto md:right-2 z-50 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
                          aria-label="Minimize image"
                        >
-                         <Minimize2 className="w-3.5 h-3.5 text-white" />
+                         <Minimize2 className="w-4 h-4 text-white" />
                        </button>
                      )}
                  </div>
