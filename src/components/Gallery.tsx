@@ -679,38 +679,39 @@ const Gallery = () => {
           </VisuallyHidden>
            {isMobile ? (
              /* ── Mobile: Embla Carousel lightbox ── */
-             <div className="relative w-full h-full flex flex-col">
-                {/* Close button — bottom-left on mobile */}
-                <button
-                  onClick={closeLightbox}
-                  className="absolute bottom-4 left-3 z-50 p-2.5 bg-black/60 backdrop-blur-sm rounded-full"
-                  aria-label="Close lightbox"
-                >
-                  <X className="h-6 w-6 text-white" />
-               </button>
-
+              <div className="relative w-full h-full flex flex-col">
                 {/* Title */}
                 <h3 className="text-lg font-serif text-white mt-4 mb-2 text-center px-4 shrink-0">
                   {currentSectionItems[currentItemIndex]?.title}
                 </h3>
 
-                {/* Embla carousel */}
-                <div className="flex-1 min-h-0 overflow-hidden" ref={emblaRef}>
-                  <div className="flex h-full">
-                    {currentSectionItems.map((item, i) => (
-                      <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center px-4">
-                         <img
-                           src={item.image}
-                           alt={item.title}
-                           sizes="100vw"
-                           className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[45vh]"
-                           loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
-                           decoding="async"
-                           draggable={false}
-                         />
-                      </div>
-                    ))}
+                {/* Embla carousel with close button */}
+                <div className="relative flex-1 min-h-0 overflow-hidden">
+                  <div ref={emblaRef} className="h-full overflow-hidden">
+                    <div className="flex h-full">
+                      {currentSectionItems.map((item, i) => (
+                        <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center px-4">
+                           <img
+                             src={item.image}
+                             alt={item.title}
+                             sizes="100vw"
+                             className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[45vh]"
+                             loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
+                             decoding="async"
+                             draggable={false}
+                           />
+                        </div>
+                      ))}
+                    </div>
                   </div>
+                  {/* Close button — bottom-left of image area */}
+                  <button
+                    onClick={closeLightbox}
+                    className="absolute bottom-2 left-3 z-50 p-2.5 bg-black/60 backdrop-blur-sm rounded-full"
+                    aria-label="Close lightbox"
+                  >
+                    <X className="h-6 w-6 text-white" />
+                  </button>
                 </div>
 
                 {/* Dot indicators */}
