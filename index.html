@@ -67,7 +67,7 @@
     <!-- Critical resource hints - hero image FIRST, then fonts -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
     <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-    <link rel="preload" as="image" imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_320,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 320w, https://res.cloudinary.com/dif1oamtj/image/upload/w_400,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 400w, https://res.cloudinary.com/dif1oamtj/image/upload/w_600,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 600w, https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 828w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 1200w" imagesizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw" fetchpriority="high" />
+    <link rel="preload" as="image" imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_320,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 320w, https://res.cloudinary.com/dif1oamtj/image/upload/w_400,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 400w, https://res.cloudinary.com/dif1oamtj/image/upload/w_600,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 600w, https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 828w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 1200w" imagesizes="(max-width: 640px) 100vw, 100vw" fetchpriority="high" />
 
     <!-- Fonts use font-display:swap — no preload needed; saves bandwidth for hero image on mobile -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -121,7 +121,7 @@
           sizes="(max-width: 640px) 100vw, 100vw"
           alt=""
           fetchpriority="high"
-          decoding="async"
+          decoding="sync"
         />
         <div class="overlay"></div>
         <div class="text">
