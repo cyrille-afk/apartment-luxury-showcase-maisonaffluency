@@ -2513,13 +2513,13 @@ const FeaturedDesigners = () => {
           </p>
         )}
 
-        <div className="flex justify-end mb-4 md:pr-8">
+        <div className="flex justify-start mb-4 md:justify-end md:pr-8">
           <button
             onClick={toggleAllDesigners}
             className="text-sm text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1.5"
           >
-            <ChevronDown className={`h-4.5 w-4.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
             <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
+            <ChevronDown className={`h-4.5 w-4.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
           </button>
         </div>
 
@@ -2602,6 +2602,10 @@ const FeaturedDesigners = () => {
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
                               />
                             </svg>
+                          </div>
+                          {/* Mobile chevron — bottom-right of picture */}
+                          <div className="absolute -bottom-1 -right-1 md:hidden">
+                            <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180 bg-background rounded-full p-0.5 shadow-sm ring-1 ring-border/40" />
                           </div>
                         </div>
                       </DialogTrigger>
@@ -2766,9 +2770,6 @@ const FeaturedDesigners = () => {
                         )}
                       </div>
                     </div>
-                    </div>
-                    <div className="flex justify-end md:hidden">
-                      <ChevronDown className="h-6 w-6 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
                     </div>
                   </div>
                 </AccordionTrigger>
