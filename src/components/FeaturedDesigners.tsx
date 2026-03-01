@@ -2977,7 +2977,7 @@ const FeaturedDesigners = () => {
                           setIsZoomed(false);
                           window.history.back();
                         }}
-                        className="absolute bottom-2 left-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10 md:hidden"
+                        className={`absolute bottom-2 left-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10 md:hidden ${isZoomed ? 'hidden' : ''}`}
                         aria-label="Close"
                       >
                         <X className="h-5 w-5" />
