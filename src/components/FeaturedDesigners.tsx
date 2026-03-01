@@ -2964,7 +2964,7 @@ const FeaturedDesigners = () => {
                           {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).photoCredit}
                         </span>
                       )}
-                      {/* Close button — top-left on mobile only (inside image) */}
+                      {/* Close buttons */}
                       <button
                         onClick={() => {
                           setCuratorPicksDesigner(null);
@@ -2973,6 +2973,18 @@ const FeaturedDesigners = () => {
                           window.history.back();
                         }}
                         className="absolute top-3 left-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10 md:hidden"
+                        aria-label="Close"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setCuratorPicksDesigner(null);
+                          setCuratorPickIndex(0);
+                          setIsZoomed(false);
+                          window.history.back();
+                        }}
+                        className="hidden md:flex absolute -bottom-3 -right-3 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
                         aria-label="Close"
                       >
                         <X className="h-5 w-5" />
@@ -3118,19 +3130,6 @@ const FeaturedDesigners = () => {
                     </>
                   )}
 
-                  {/* Desktop close button — bottom-right, outside content */}
-                  <button
-                    onClick={() => {
-                      setCuratorPicksDesigner(null);
-                      setCuratorPickIndex(0);
-                      setIsZoomed(false);
-                      window.history.back();
-                    }}
-                    className="hidden md:flex fixed bottom-6 right-6 p-3 rounded-full bg-white/15 text-white/80 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-[60] border border-white/20"
-                    aria-label="Close"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center text-white/60 gap-3 p-8">
