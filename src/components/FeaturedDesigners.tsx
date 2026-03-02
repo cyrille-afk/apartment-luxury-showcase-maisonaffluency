@@ -1383,14 +1383,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     philosophy: "Simplicity is the ultimate sophistication—luxury lies in the quality of materials and the perfection of form.",
     curatorPicks: [
       {
-        image: jmfUpholsteredBackSofa,
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433149/Screen_Shot_2026-03-02_at_2.21.39_PM_p8h0pg.png",
         title: "Upholstered Back 3-Seater Sofa",
         subtitle: "1932",
         category: "Furniture",
         tags: ["Furniture", "Sofa"],
         materials: "Varnished Solid Oak • Leather",
         dimensions: "L 230 × P 89 × H 81 cm",
-        description: "Available in 2-seater: L 160 × P 89 × H 81 cm"
+        description: "Available in 2-seater: L 160 × P 89 × H 81 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1924_Upholstered_Back_Sofa_Info_Sheet.pdf",
+        pdfFilename: "JMF-Upholstered_Back_Sofa_Info_Sheet.pdf",
       },
       {
         image: jmfCroisillonLamp,
