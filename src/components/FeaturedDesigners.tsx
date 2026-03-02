@@ -1103,7 +1103,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       {
         image: yvesMacheretPickBeam800,
         title: "BEAM 800",
-        subtitle: "Wall Lamp",
+        subtitle: "By Yves Macheret",
         category: "Lighting",
         tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated Bronze\nProtective Varnish",
