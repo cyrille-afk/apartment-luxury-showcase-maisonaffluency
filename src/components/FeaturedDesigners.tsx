@@ -3069,7 +3069,7 @@ const FeaturedDesigners = () => {
                               window.open(pick.pdfUrl, '_blank');
                             }
                           }}
-                          className="absolute bottom-2 right-2 md:right-12 p-2 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300 z-10"
+                          className="absolute bottom-2 right-2 md:right-10 p-2 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Download PDF specification"
                         >
                           <FileDown size={16} />
