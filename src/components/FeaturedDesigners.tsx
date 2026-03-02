@@ -98,6 +98,7 @@ const yvesMacheretPickBraun650 = "https://res.cloudinary.com/dif1oamtj/image/upl
 const yvesMacheretPickHublot600 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430926/Screen_Shot_2026-03-02_at_1.54.28_PM_vislto.png";
 const yvesMacheretPickMartel = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431407/Screen_Shot_2026-03-02_at_2.02.15_PM_lkvf2p.png";
 const yvesMacheretPickNomad295 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431683/Screen_Shot_2026-03-02_at_2.06.03_PM_aafkbh.png";
+const yvesMacheretPickToast = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431892/Screen_Shot_2026-03-02_at_2.09.47_PM_uwekdn.png";
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
@@ -1061,14 +1062,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "Entrelacs-NOMAD_295_Spec_Sheet.pdf",
       },
       { 
-        image: yvesMacheretPick3, 
+        image: yvesMacheretPickToast, 
         title: "Toast",
         subtitle: "Wall Lamp",
         category: "Lighting",
         tags: ["Lighting", "Wall Lamp"],
-        materials: "Patinated brass • Hand-carved alabaster",
-        dimensions: "H57 × W11 × D8 cm",
-        description: "The Toast wall lamp celebrates the warmth of patinated brass paired with hand-carved alabaster. Its gently rounded form evokes a raised glass—a quiet gesture of conviviality. Crafted entirely by hand at the Entrelacs foundry in central France, each piece carries the subtle variations that distinguish true artisan work from industrial production."
+        materials: "Patinated brass & alabaster",
+        dimensions: "570 × 110 × 80 mm",
+        description: "The Toast wall lamp celebrates the warmth of patinated brass paired with hand-carved alabaster. Its gently rounded form evokes a raised glass—a quiet gesture of conviviality. Crafted entirely by hand at the Entrelacs foundry in central France, each piece carries the subtle variations that distinguish true artisan work from industrial production.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/entrelacs/SPEC-SHEET_TOAST.pdf",
+        pdfFilename: "Entrelacs-TOAST_Spec_Sheet.pdf",
       },
       { 
         image: yvesMacheretPickBraun650, 
