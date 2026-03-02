@@ -3024,7 +3024,7 @@ const FeaturedDesigners = () => {
                         src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image}
                         alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title || "Curator's pick"}
                         sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
-                        className={`rounded-lg shadow-2xl cursor-zoom-in transition-all duration-300 ${isZoomed ? 'max-h-[90vh] max-w-[90vw] object-contain' : 'w-[85vw] h-[55vh] md:w-[70vw] md:h-[60vh] object-contain'}`}
+                        className={`rounded-lg shadow-2xl cursor-zoom-in transition-all duration-300 object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'}`}
                         decoding="sync"
                         loading="eager"
                         fetchPriority="high"
