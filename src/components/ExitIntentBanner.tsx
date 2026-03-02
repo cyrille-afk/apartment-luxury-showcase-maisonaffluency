@@ -66,14 +66,14 @@ const ExitIntentBanner = () => {
   return (
     <AnimatePresence>
       {visible && !dialogOpen && (
-        <div className="fixed bottom-[7rem] md:bottom-4 right-4 z-[60] flex flex-col items-end gap-1.5">
-          {/* Dismiss X — above the pill on mobile for clear access */}
+        <div className="fixed bottom-[5.5rem] md:bottom-4 right-4 z-[60] flex items-end gap-1.5">
+          {/* Mobile dismiss — small, to the left of the pill */}
           <button
             onClick={(e) => { e.stopPropagation(); dismiss(); }}
-            className="w-8 h-8 md:hidden rounded-full bg-card border border-border flex items-center justify-center shadow-md touch-manipulation self-end"
+            className="w-6 h-6 md:hidden rounded-full bg-card/80 border border-border/50 flex items-center justify-center shadow-sm touch-manipulation mb-1"
             aria-label="Dismiss WhatsApp chat prompt"
           >
-            <X className="w-4 h-4 text-muted-foreground" />
+            <X className="w-3 h-3 text-muted-foreground" />
           </button>
           <div className="relative">
             <motion.button
