@@ -1463,15 +1463,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "JMF-Round_Table_1935_Info_Sheet.pdf",
       },
       {
-        image: jmfPresidentDesk2,
-        title: "President Desk",
-        subtitle: "1930 — Fully Opened",
-        category: "Furniture",
-        tags: ["Furniture", "Desk"],
-        materials: "Varnished Oak • Patinated Brass",
-        dimensions: "L 272 × P 85 × H 75 cm (L 160 once closed)"
-      },
-      {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433739/JMF_1934_Round_X_Stool__01_Portrait_HD_mcngzi.jpg",
         title: "X Stool (Round)",
         subtitle: "1934",
