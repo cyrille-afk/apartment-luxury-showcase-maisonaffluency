@@ -2225,16 +2225,26 @@ const BrandsAteliers = () => {
                     }}
                     className={`flex flex-col items-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${picksZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[90vh] pb-4'}`}>
                     <div className="relative inline-flex flex-col items-center">
-                      {!picksZoomed && ((picksDesigner.curatorPicks[picksIndex] as any)?.tags?.length > 0 || picksDesigner.curatorPicks[picksIndex]?.edition) && (
-                        <div className="text-center mb-2 flex flex-wrap gap-1.5 justify-center">
-                          {((picksDesigner.curatorPicks[picksIndex] as any)?.tags || [(picksDesigner.curatorPicks[picksIndex] as any)?.category]).map((tag: string, i: number) => (
-                            <span key={i} className="hidden md:inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">{tag}</span>
-                          ))}
-                          {picksDesigner.curatorPicks[picksIndex]?.edition && (
-                            <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">{picksDesigner.curatorPicks[picksIndex].edition}</span>
-                          )}
-                        </div>
-                      )}
+                      {(() => {
+                        const pick = picksDesigner.curatorPicks[picksIndex] as any;
+                        const tags: string[] = pick?.tags?.length > 0 ? pick.tags : pick?.category ? [pick.category] : [];
+                        const specialTags = tags.filter((t: string) => /couture|edition|limited/i.test(t));
+                        const hasEdition = !!pick?.edition;
+                        return (specialTags.length > 0 || hasEdition) && !picksZoomed ? (
+                          <div className="absolute top-2 right-2 z-20 flex flex-wrap gap-1.5 justify-end">
+                            {specialTags.map((tag: string, i: number) => (
+                              <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
+                                {tag}
+                              </span>
+                            ))}
+                            {pick?.edition && (
+                              <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
+                                {pick.edition}
+                              </span>
+                            )}
+                          </div>
+                        ) : null;
+                      })()}
                       <div className="relative inline-block">
                         {picksDesigner.curatorPicks[picksIndex]?.image ? (
                           <>
