@@ -2353,47 +2353,55 @@ const BrandsAteliers = () => {
                       </div>
                     )}
 
-                    <div className={`mt-3 text-center md:text-justify transition-all duration-300 ${picksZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
-                      <h3 className="text-sm md:text-base font-serif text-white mb-1">
-                        {picksDesigner.curatorPicks[picksIndex]?.title}
-                        {(picksDesigner.curatorPicks[picksIndex] as any)?.subtitle && (
-                          <span className="font-serif"> {(picksDesigner.curatorPicks[picksIndex] as any).subtitle}</span>
-                        )}
-                      </h3>
-                      {picksDesigner.curatorPicks[picksIndex]?.materials && (
-                        <p className="text-white/60 font-body text-xs md:text-sm mb-1 whitespace-pre-line">{picksDesigner.curatorPicks[picksIndex].materials}</p>
-                      )}
-                      {picksDesigner.curatorPicks[picksIndex]?.dimensions && (
-                          <div className="mt-2 max-w-xl space-y-1 mx-auto text-center md:text-justify">
-                          <p className="text-xs md:text-sm text-white/40 font-body italic whitespace-pre-line">{picksDesigner.curatorPicks[picksIndex].dimensions}</p>
-                          {(picksDesigner.curatorPicks[picksIndex] as any)?.description && (
-                            <p className="text-xs md:text-sm text-white/50 font-body leading-relaxed max-w-lg mt-2 mx-auto text-center md:text-justify">{(picksDesigner.curatorPicks[picksIndex] as any).description}</p>
+                    {!picksZoomed && (
+                      <div className="text-center mt-4 max-w-lg relative">
+                        <p className="font-brand text-base md:text-lg text-white tracking-wide">
+                          {picksDesigner.curatorPicks[picksIndex]?.title}
+                          {(picksDesigner.curatorPicks[picksIndex] as any)?.subtitle && (
+                            <span className="text-white/60"> — {(picksDesigner.curatorPicks[picksIndex] as any).subtitle}</span>
                           )}
-                        </div>
-                      )}
+                        </p>
+                        {picksDesigner.curatorPicks[picksIndex]?.materials && (
+                          <p className="text-xs text-white/50 font-body mt-1 whitespace-pre-line">
+                            {picksDesigner.curatorPicks[picksIndex].materials}
+                          </p>
+                        )}
+                        {((picksDesigner.curatorPicks[picksIndex] as any)?.dimensions || (picksDesigner.curatorPicks[picksIndex] as any)?.weight) && (
+                          <p className="text-xs text-white/40 font-body mt-0.5 whitespace-pre-line">
+                            {(picksDesigner.curatorPicks[picksIndex] as any)?.dimensions}
+                            {(picksDesigner.curatorPicks[picksIndex] as any)?.dimensions && (picksDesigner.curatorPicks[picksIndex] as any)?.weight && ' – '}
+                            {(picksDesigner.curatorPicks[picksIndex] as any)?.weight}
+                          </p>
+                        )}
+                        {(picksDesigner.curatorPicks[picksIndex] as any)?.description && (
+                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed text-justify md:text-center">
+                            {(picksDesigner.curatorPicks[picksIndex] as any).description}
+                          </p>
+                        )}
 
-                      {picksDesigner.curatorPicks.length > 1 && (
-                        <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
-                          {picksDesigner.curatorPicks.map((pick: CuratorPick, idx: number) => (
-                            <button key={idx} onClick={() => { setPicksIndex(idx); setPicksZoomed(false); }} aria-label={`View ${pick.title}`}
-                              className={`flex-none relative w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden transition-all duration-300 ${picksIndex === idx ? 'ring-2 ring-white scale-110 opacity-100' : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'}`}>
-                              {pick.image ? (
-                                <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                              ) : (
-                                <div className="w-full h-full bg-white/10 flex items-center justify-center">
-                                  <span className="text-white/40 text-[6px] text-center leading-tight px-0.5">{pick.title}</span>
-                                </div>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                        {picksDesigner.curatorPicks.length > 1 && (
+                          <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
+                            {picksDesigner.curatorPicks.map((pick: CuratorPick, idx: number) => (
+                              <button key={idx} onClick={() => { setPicksIndex(idx); setPicksZoomed(false); }} aria-label={`View ${pick.title}`}
+                                className={`flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200 ${picksIndex === idx ? 'border-white/80 scale-105' : 'border-transparent opacity-50 hover:opacity-80'}`}>
+                                {pick.image ? (
+                                  <img src={pick.image} alt={pick.title} className="w-12 h-12 md:w-14 md:h-14 object-cover" loading="lazy" decoding="async" />
+                                ) : (
+                                  <div className="w-12 h-12 md:w-14 md:h-14 bg-white/10 flex items-center justify-center">
+                                    <span className="text-white/40 text-[6px] text-center leading-tight px-0.5">{pick.title}</span>
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
-                      <p className="mt-6 text-xs text-white font-body italic">
-                        For further details, please contact{" "}
-                        <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/80 transition-colors">concierge@myaffluency.com</a>
-                      </p>
-                    </div>
+                        <p className="text-xs text-white/40 font-body mt-4">
+                          For further details, please contact{" "}
+                          <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/80 transition-colors">concierge@myaffluency.com</a>
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Mobile scroll indicator */}
