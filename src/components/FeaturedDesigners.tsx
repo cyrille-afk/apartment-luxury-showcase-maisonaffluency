@@ -1099,15 +1099,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "Entrelacs-HUBLOT_Mirror_Spec_Sheet.pdf",
       },
       {
-        image: yvesMacheretPickConsole1925,
-        title: "Console 1925",
-        category: "Tables",
-        tags: ["Tables", "Console"],
-        materials: "Patinated cast bronze • Calacatta Oro marble",
-        dimensions: "L160 × D35 × H81 cm",
-        description: "Designed by Arnaud Leman for Entrelacs, the Console 1925 is a refined tribute to early twentieth-century decorative arts. Its slender cast-bronze frame supports a Calacatta Oro marble top, blending structural elegance with the warmth and weight of natural stone. Also available in custom sizes and alternative marble finishes."
-      },
-      {
         image: yvesMacheretPickBeam800,
         title: "BEAM 800",
         subtitle: "Wall Lamp",
