@@ -1049,13 +1049,13 @@ const Collectibles = () => {
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
-              {/* Close button */}
+              {/* Desktop Close button */}
               <button 
                 onClick={closeCuratorPicks} 
-                className="absolute bottom-2 left-2 md:top-4 md:bottom-auto md:left-auto md:right-4 z-50 p-2 md:p-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full transition-colors" 
+                className="hidden md:flex absolute top-4 right-4 z-50 p-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full transition-colors" 
                 aria-label="Close lightbox"
               >
-                <X size={16} className="md:h-4 md:w-4 text-white" />
+                <X className="h-4 w-4 text-white" />
               </button>
 
               {/* Previous button */}
@@ -1119,7 +1119,7 @@ const Collectibles = () => {
                         e.stopPropagation();
                         setIsZoomed(!isZoomed);
                       }}
-                      className={`absolute bottom-2 left-[3.25rem] md:left-auto md:right-2 z-10 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
+                      className={`absolute bottom-2 left-2 md:left-auto md:right-2 z-10 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
                       aria-label={isZoomed ? "Zoom out" : "Zoom in"}
                     >
                       {isZoomed ? (
@@ -1130,6 +1130,18 @@ const Collectibles = () => {
                     </button>
                   </div>
                 </div>
+                {/* Mobile close button — outside, below-left of image */}
+                {!isZoomed && (
+                  <div className="md:hidden flex justify-start w-full mt-2">
+                    <button
+                      onClick={closeCuratorPicks}
+                      className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                      aria-label="Close"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
                 <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
                   <h3 className="text-sm md:text-base font-serif text-white mb-1">
                     {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}

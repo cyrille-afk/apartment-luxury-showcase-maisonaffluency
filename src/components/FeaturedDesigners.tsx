@@ -3036,19 +3036,7 @@ const FeaturedDesigners = () => {
                           {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).photoCredit}
                         </span>
                       )}
-                      {/* Close button — bottom-left on mobile, bottom-right (outside) on desktop */}
-                      <button
-                        onClick={() => {
-                          setCuratorPicksDesigner(null);
-                          setCuratorPickIndex(0);
-                          setIsZoomed(false);
-                          if (!closedViaPopstateRef.current) window.history.back();
-                        }}
-                        className={`absolute bottom-2 left-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10 md:hidden ${isZoomed ? 'hidden' : ''}`}
-                        aria-label="Close"
-                      >
-                        <X size={16} />
-                      </button>
+                      {/* Desktop Close button — bottom-right (outside) */}
                       <button
                         onClick={() => {
                           setCuratorPicksDesigner(null);
@@ -3109,7 +3097,7 @@ const FeaturedDesigners = () => {
                       {!isZoomed ? (
                         <button
                           onClick={() => setIsZoomed(true)}
-                          className="md:hidden absolute bottom-2 left-[3.25rem] p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          className="md:hidden absolute bottom-2 left-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Expand image"
                         >
                           <Maximize2 size={16} />
@@ -3117,13 +3105,31 @@ const FeaturedDesigners = () => {
                       ) : (
                         <button
                           onClick={() => setIsZoomed(false)}
-                          className="md:hidden absolute bottom-2 left-[3.25rem] p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          className="md:hidden absolute bottom-2 left-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Minimize image"
                         >
                           <Minimize2 size={16} />
                         </button>
                       )}
                     </div>
+
+                    {/* Mobile close button — outside, below-left of image */}
+                    {!isZoomed && (
+                      <div className="md:hidden flex justify-start w-full mt-2">
+                        <button
+                          onClick={() => {
+                            setCuratorPicksDesigner(null);
+                            setCuratorPickIndex(0);
+                            setIsZoomed(false);
+                            if (!closedViaPopstateRef.current) window.history.back();
+                          }}
+                          className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                          aria-label="Close"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    )}
 
                     {/* Scroll dots — directly under the image */}
                     {curatorPicksDesigner.curatorPicks.length > 1 && !isZoomed && (

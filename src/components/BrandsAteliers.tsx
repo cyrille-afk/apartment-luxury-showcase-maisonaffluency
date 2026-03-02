@@ -2275,12 +2275,13 @@ const BrandsAteliers = () => {
                             Photo: <a href="https://www.instagram.com/lucabonnefille/?hl=en" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-white/80 transition-colors" onClick={e => e.stopPropagation()} aria-label={`${picksDesigner.curatorPicks[picksIndex].photoCredit} on Instagram`}><Instagram className="w-3 h-3" aria-hidden="true" />{picksDesigner.curatorPicks[picksIndex].photoCredit}</a>
                           </p>
                         )}
+                        {/* Desktop close button */}
                         <button
                           onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
-                          className="absolute bottom-2 left-2 md:top-2 md:bottom-auto md:left-auto md:right-4 z-50 p-2 md:p-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full transition-colors"
+                          className="hidden md:flex absolute top-2 right-4 z-50 p-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full transition-colors"
                           aria-label="Close lightbox"
                         >
-                          <X size={16} className="md:h-4 md:w-4 text-white" />
+                          <X className="h-4 w-4 text-white" />
                         </button>
                         {(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl && (
                           <button
@@ -2312,13 +2313,26 @@ const BrandsAteliers = () => {
                         )}
                         <button
                           onClick={() => setPicksZoomed(!picksZoomed)}
-                          className={`absolute bottom-2 left-[3.25rem] md:left-auto z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'md:right-10' : 'md:right-2'}`}
+                          className={`absolute bottom-2 left-2 md:left-auto z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'md:right-10' : 'md:right-2'}`}
                           aria-label={picksZoomed ? "Minimize image" : "Maximize image"}
                         >
                           {picksZoomed ? <Minimize2 size={16} className="text-white" /> : <Maximize2 size={16} className="text-white" />}
                         </button>
                       </div>
                     </div>
+
+                    {/* Mobile close button — outside, below-left of image */}
+                    {!picksZoomed && (
+                      <div className="md:hidden flex justify-start w-full mt-2">
+                        <button
+                          onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
+                          className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                          aria-label="Close"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    )}
 
                     {picksDesigner.curatorPicks.length > 1 && !picksZoomed && (
                       <div className="flex items-center gap-2 mt-3">
