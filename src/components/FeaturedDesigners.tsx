@@ -1527,7 +1527,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   {
     id: "kerstens",
     name: "Andy Kerstens",
-    displayName: "Kerstens",
+    displayName: "Kerstens - Andy Kerstens",
     specialty: "Architectural Furniture & Objects",
     image: kerstensImg,
     imagePosition: "center 20%",
