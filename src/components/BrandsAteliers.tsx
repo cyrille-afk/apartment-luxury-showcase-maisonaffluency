@@ -262,8 +262,8 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
     name: "Ozone Light",
     curatorPicks: [
       {
-        image: ozoneClassiqueV,
-        title: "CLASSIQUE",
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772453277/Screen_Shot_2026-03-02_at_8.07.31_PM_yi3hfp.png",
+        title: "CLASSIQUE V",
         subtitle: "Gounot & Jähnke",
         tags: ["Lighting", "Chandelier"],
         materials: "Structures in aluminium and brass, medal bronze, mirror nickel or gun metal finish\nWhite paper diffusing material",
