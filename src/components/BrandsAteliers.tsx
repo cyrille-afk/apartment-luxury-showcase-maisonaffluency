@@ -310,6 +310,16 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Brasilia-LP.pdf",
         pdfFilename: "Maison_Affluency-Brasilia-LP.pdf",
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772453509/Screen_Shot_2026-03-02_at_8.10.25_PM_rcj8c8.png",
+        title: "LINE C",
+        subtitle: "Gounot & Jähnke",
+        tags: ["Lighting", "Chandelier"],
+        materials: "White lacquered aluminum structure\nWhite paper diffusing material\nAvailable in multiple LED options:\nWarm white 2200K LED lighting, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nConverter 24V non-integrated, to be placed in a distant box\nCE Class III",
+        dimensions: "LINE C — 1450 × 1450 × H 150 mm\nLINE C110 — 1100 × 1100 × H 160 mm\nLINE C90 — 900 × 900 × H 120 mm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Line-C.pdf",
+        pdfFilename: "Maison_Affluency-Line-C.pdf",
+      },
     ],
   },
 };
