@@ -2975,7 +2975,24 @@ const FeaturedDesigners = () => {
                     setTouchEnd(null);
                   }}
                 >
-                  <div className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
+                  <div
+                    ref={(el) => {
+                      if (!el) return;
+                      const indicator = el.parentElement?.querySelector('[data-scroll-indicator]') as HTMLElement | null;
+                      if (!indicator) return;
+                      const checkScroll = () => {
+                        const hasMore = el.scrollHeight > el.clientHeight + 20;
+                        const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 30;
+                        indicator.style.opacity = (hasMore && !nearBottom) ? '1' : '0';
+                      };
+                      checkScroll();
+                      el.addEventListener('scroll', checkScroll, { passive: true });
+                      const observer = new MutationObserver(checkScroll);
+                      observer.observe(el, { childList: true, subtree: true });
+                      // Recheck after images load
+                      setTimeout(checkScroll, 500);
+                    }}
+                    className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
                     <div className="relative inline-flex flex-col items-center">
                       {!isZoomed && (() => {
                         const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
@@ -3118,7 +3135,7 @@ const FeaturedDesigners = () => {
 
                     {/* Legend */}
                     {!isZoomed && (
-                      <div className="text-center mt-4 max-w-lg">
+                      <div className="text-center mt-4 max-w-lg relative">
                         <p className="font-brand text-base md:text-lg text-white tracking-wide">
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
                           {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.subtitle && (
@@ -3138,7 +3155,7 @@ const FeaturedDesigners = () => {
                           </p>
                         )}
                         {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.description && (
-                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed">
+                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed text-justify md:text-center">
                             {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).description}
                           </p>
                         )}
@@ -3176,8 +3193,20 @@ const FeaturedDesigners = () => {
                     )}
                   </div>
 
+                  {/* Mobile scroll indicator */}
+                  {!isZoomed && (
+                    <div
+                      data-scroll-indicator
+                      className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-opacity duration-300"
+                      style={{ opacity: 0 }}
+                    >
+                      <div className="animate-bounce bg-black/40 backdrop-blur-sm rounded-full p-1.5">
+                        <ChevronDown className="w-4 h-4 text-white/70" />
+                      </div>
+                    </div>
+                  )}
 
-                  {/* Nav arrows */}
+
                   {curatorPicksDesigner.curatorPicks.length > 1 && !isZoomed && (
                     <>
                       <button
