@@ -1121,6 +1121,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Patinated casted bronze & alabaster",
         dimensions: "30 × 15 × 75 cm",
         description: "The Martel wall lamp, designed by Felix Millory for Entrelacs, is a striking sculptural light that pairs patinated cast bronze with hand-carved alabaster. Its bold geometric form pays tribute to the Art Deco heritage while asserting a distinctly contemporary presence on the wall.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Entrelacs-MARTEL_Spec_Sheet.pdf",
+        pdfFilename: "Entrelacs-MARTEL_Spec_Sheet.pdf",
       },
     ],
     links: [
