@@ -97,6 +97,7 @@ const yvesMacheretPickBeam800 = "https://res.cloudinary.com/dif1oamtj/image/uplo
 const yvesMacheretPickBraun650 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430600/Screen_Shot_2026-03-02_at_1.49.08_PM_gzhc8t.png";
 const yvesMacheretPickHublot600 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430926/Screen_Shot_2026-03-02_at_1.54.28_PM_vislto.png";
 const yvesMacheretPickMartel = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431407/Screen_Shot_2026-03-02_at_2.02.15_PM_lkvf2p.png";
+const yvesMacheretPickNomad295 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431683/Screen_Shot_2026-03-02_at_2.06.03_PM_aafkbh.png";
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
@@ -1048,14 +1049,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "The Ghost wall lamp distils the art of bronze lighting to its purest expression. Cast in patinated bronze with a hand-carved alabaster diffuser, its slender, almost ethereal silhouette seems to float against the wall—hence its name. Designed by Yves Macheret, it embodies the Entrelacs philosophy: revealing the inherent beauty of noble materials through restrained, timeless forms."
       },
       { 
-        image: yvesMacheretPick2, 
+        image: yvesMacheretPickNomad295, 
         title: "Nomad 295",
         subtitle: "Table Lamp",
         category: "Lighting",
         tags: ["Lighting", "Table Lamp"],
-        materials: "Patinated bronze base • Natural alabaster shade",
-        dimensions: "H29.5 × Ø16.9 cm",
-        description: "Compact yet sculptural, the Nomad 295 is a portable table lamp that pairs a patinated cast-bronze base with a natural alabaster shade. Its dimmable light, adjusted by a simple knob, casts a warm, diffused glow through the veined stone. Available in three heights, the Nomad collection is designed to move effortlessly from room to room—a nomadic light rooted in artisan tradition."
+        materials: "Patinated casted bronze & alabaster",
+        dimensions: "295 × 75 — Ø 169 mm",
+        description: "Compact yet sculptural, the Nomad 295 is a portable table lamp that pairs a patinated cast-bronze base with a natural alabaster shade. Its dimmable light, adjusted by a simple knob, casts a warm, diffused glow through the veined stone. Available in three heights, the Nomad collection is designed to move effortlessly from room to room—a nomadic light rooted in artisan tradition.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/entrelacs/SPEC-SHEET_NOMAD295.pdf",
+        pdfFilename: "Entrelacs-NOMAD_295_Spec_Sheet.pdf",
       },
       { 
         image: yvesMacheretPick3, 
