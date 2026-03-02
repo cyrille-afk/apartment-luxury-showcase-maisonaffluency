@@ -1079,7 +1079,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { 
         image: yvesMacheretPickBraun650, 
         title: "BRAUN 650",
-        subtitle: "Wall Lamp",
+        subtitle: "By Yves Macheret",
         category: "Lighting",
         tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated Bronze\nProtective Varnish / Alabaster Diffuser",
