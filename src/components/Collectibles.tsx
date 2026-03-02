@@ -1070,7 +1070,23 @@ const Collectibles = () => {
               )}
 
               {/* Image container */}
-              <div className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
+              <div
+                ref={(el) => {
+                  if (!el) return;
+                  const indicator = el.parentElement?.querySelector('[data-scroll-indicator]') as HTMLElement | null;
+                  if (!indicator) return;
+                  const checkScroll = () => {
+                    const hasMore = el.scrollHeight > el.clientHeight + 20;
+                    const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 30;
+                    indicator.style.opacity = (hasMore && !nearBottom) ? '1' : '0';
+                  };
+                  checkScroll();
+                  el.addEventListener('scroll', checkScroll, { passive: true });
+                  const observer = new MutationObserver(checkScroll);
+                  observer.observe(el, { childList: true, subtree: true });
+                  setTimeout(checkScroll, 500);
+                }}
+                className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
                 <div 
                   className={`relative overflow-auto transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}
                   onClick={handleDoubleTap}
@@ -1094,7 +1110,7 @@ const Collectibles = () => {
                       key={curatorPickIndex}
                       src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                       alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                      className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-full max-h-[55vh]'}`}
+                      className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'w-[85vw] h-[55vh] md:w-[70vw] md:h-[60vh]'}`}
                       draggable={false}
                       onZoomChange={(z) => { imageZoomedRef.current = z; }}
                     />
@@ -1160,6 +1176,19 @@ const Collectibles = () => {
                   </p>
                 </div>
               </div>
+
+              {/* Mobile scroll indicator */}
+              {!isZoomed && (
+                <div
+                  data-scroll-indicator
+                  className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-opacity duration-300"
+                  style={{ opacity: 0 }}
+                >
+                  <div className="animate-bounce bg-black/40 backdrop-blur-sm rounded-full p-1.5">
+                    <ChevronDown className="w-4 h-4 text-white/70" />
+                  </div>
+                </div>
+              )}
 
               {/* Next button */}
               {curatorPicksDesigner.curatorPicks.length > 1 && (
