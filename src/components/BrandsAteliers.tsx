@@ -281,6 +281,16 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Brasilia_PL.pdf",
         pdfFilename: "Maison_Affluency-Brasilia_PL.pdf",
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772451922/Screen_Shot_2026-03-02_at_7.26.56_PM_zor899.png",
+        title: "GÉLULE",
+        subtitle: "By Joseph Dirand",
+        tags: ["Lighting", "Wall Lamp"],
+        materials: "Aluminium structure\nPale gold or mirror nickel finish",
+        dimensions: "40 × 10 × H 13 cm – 4 kg\nSilhouette: 175 cm\nWarm white 2200K LED lighting, 12W, 550 Lumens",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Gelule.pdf",
+        pdfFilename: "Maison_Affluency-Gelule.pdf",
+      },
     ],
   },
 };
