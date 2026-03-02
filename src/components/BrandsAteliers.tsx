@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
-import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Gem, Maximize2, Minimize2, Share2, FileDown } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, Gem, Maximize2, Minimize2, Share2, FileDown } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -2435,6 +2435,26 @@ const BrandsAteliers = () => {
                         <ChevronDown className="w-4 h-4 text-white/70" />
                       </div>
                     </div>
+                  )}
+
+                  {/* Desktop prev/next arrows */}
+                  {picksDesigner.curatorPicks.length > 1 && !picksZoomed && (
+                    <>
+                      <button
+                        onClick={() => setPicksIndex(prev => prev === 0 ? picksDesigner.curatorPicks.length - 1 : prev - 1)}
+                        className="hidden md:flex absolute left-2 md:left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                        aria-label="Previous"
+                      >
+                        <ChevronLeft size={32} />
+                      </button>
+                      <button
+                        onClick={() => setPicksIndex(prev => prev === picksDesigner.curatorPicks.length - 1 ? 0 : prev + 1)}
+                        className="hidden md:flex absolute right-2 md:right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                        aria-label="Next"
+                      >
+                        <ChevronRight size={32} />
+                      </button>
+                    </>
                   )}
                 </div>
               ) : (
