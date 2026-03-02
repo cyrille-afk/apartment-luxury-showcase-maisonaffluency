@@ -3033,10 +3033,10 @@ const FeaturedDesigners = () => {
                       {/* Desktop hover overlay — click to enlarge hint */}
                       {!isZoomed && (
                         <div
-                          className="hidden md:flex absolute inset-0 items-center justify-center bg-black/0 hover:bg-black/30 transition-all duration-300 cursor-zoom-in rounded-lg z-[5] group"
+                          className="hidden md:flex absolute inset-0 items-center justify-center bg-white/0 hover:bg-white/10 hover:backdrop-blur-[2px] transition-all duration-500 ease-out cursor-zoom-in rounded-lg z-[5] group"
                           onClick={() => setIsZoomed(true)}
                         >
-                          <Maximize2 size={32} className="text-white/0 group-hover:text-white/80 transition-all duration-300 drop-shadow-lg" />
+                          <Maximize2 size={28} className="text-white/0 group-hover:text-white/70 transition-all duration-500 ease-out drop-shadow-lg" />
                         </div>
                       )}
                       {/* Photo credit overlay */}
