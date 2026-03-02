@@ -2353,7 +2353,7 @@ const BrandsAteliers = () => {
                       </div>
                     )}
 
-                    <div className={`mt-3 text-center transition-all duration-300 ${picksZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
+                    <div className={`mt-3 text-center md:text-justify transition-all duration-300 ${picksZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
                       <h3 className="text-sm md:text-base font-serif text-white mb-1">
                         {picksDesigner.curatorPicks[picksIndex]?.title}
                         {(picksDesigner.curatorPicks[picksIndex] as any)?.subtitle && (
@@ -2364,10 +2364,10 @@ const BrandsAteliers = () => {
                         <p className="text-white/60 font-body text-xs md:text-sm mb-1 whitespace-pre-line">{picksDesigner.curatorPicks[picksIndex].materials}</p>
                       )}
                       {picksDesigner.curatorPicks[picksIndex]?.dimensions && (
-                        <div className="mt-2 max-w-xl space-y-1 mx-auto text-center">
+                          <div className="mt-2 max-w-xl space-y-1 mx-auto text-center md:text-justify">
                           <p className="text-xs md:text-sm text-white/40 font-body italic whitespace-pre-line">{picksDesigner.curatorPicks[picksIndex].dimensions}</p>
                           {(picksDesigner.curatorPicks[picksIndex] as any)?.description && (
-                            <p className="text-xs md:text-sm text-white/50 font-body leading-relaxed max-w-lg mt-2 mx-auto text-center">{(picksDesigner.curatorPicks[picksIndex] as any).description}</p>
+                            <p className="text-xs md:text-sm text-white/50 font-body leading-relaxed max-w-lg mt-2 mx-auto text-center md:text-justify">{(picksDesigner.curatorPicks[picksIndex] as any).description}</p>
                           )}
                         </div>
                       )}
