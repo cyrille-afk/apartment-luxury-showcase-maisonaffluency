@@ -2313,7 +2313,7 @@ const BrandsAteliers = () => {
                         )}
                         <button
                           onClick={() => setPicksZoomed(!picksZoomed)}
-                          className={`absolute bottom-2 left-2 md:left-auto z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'md:right-10' : 'md:right-2'}`}
+                          className={`absolute bottom-2 left-2 md:left-auto z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'md:right-12' : 'md:right-2'}`}
                           aria-label={picksZoomed ? "Minimize image" : "Maximize image"}
                         >
                           {picksZoomed ? <Minimize2 size={16} className="text-white" /> : <Maximize2 size={16} className="text-white" />}
