@@ -69,10 +69,7 @@
     <link rel="dns-prefetch" href="https://res.cloudinary.com" />
     <link rel="preload" as="image" imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_320,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 320w, https://res.cloudinary.com/dif1oamtj/image/upload/w_400,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 400w, https://res.cloudinary.com/dif1oamtj/image/upload/w_600,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 600w, https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 828w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 1200w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,c_fill,q_auto:good,f_auto/living-room-hero_zxfcxl 1600w" imagesizes="100vw" fetchpriority="high" />
 
-    <!-- Fonts use font-display:swap — no preload needed; saves bandwidth for hero image on mobile -->
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-    <!-- Layout-critical styles only; fonts loaded async via stylesheet below -->
+    <!-- Layout-critical styles only -->
     <style>
       /* Prevent layout shift */
       body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
@@ -83,11 +80,15 @@
       .hero-skeleton .overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent, rgba(0,0,0,0.2)); }
       .hero-skeleton .text { position: absolute; z-index: 1; left: 16px; right: 16px; top: 50%; font-family: 'Playfair Display', serif; }
       @media (min-width: 768px) { .hero-skeleton .text { left: 48px; top: 18%; } .hero-skeleton img { height: 120%; object-position: 50% 0%; } }
-    </style>
 
-    <!-- Non-critical font weights loaded async (won't block FCP/LCP) -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Playfair+Display:wght@300;500;600&family=Inter:wght@300;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Playfair+Display:wght@300;500;600&family=Inter:wght@300;500&display=swap" rel="stylesheet" /></noscript>
+      /* Self-hosted fonts — cached 1 year via _headers */
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 300; font-display: swap; src: url('/fonts/Inter-300.woff2') format('woff2'); }
+      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/Inter-500.woff2') format('woff2'); }
+      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 300; font-display: swap; src: url('/fonts/PlayfairDisplay-500.woff2') format('woff2'); }
+      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/PlayfairDisplay-500.woff2') format('woff2'); }
+      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/PlayfairDisplay-600.woff2') format('woff2'); }
+      @font-face { font-family: 'Cinzel'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/Cinzel-Bold.woff2') format('woff2'); }
+    </style>
 
     <!-- Google Analytics - deferred to not block LCP -->
     <script>
