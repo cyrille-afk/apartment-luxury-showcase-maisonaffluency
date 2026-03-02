@@ -100,12 +100,6 @@ const yvesMacheretPickMartel = "https://res.cloudinary.com/dif1oamtj/image/uploa
 const yvesMacheretPickNomad295 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431683/Screen_Shot_2026-03-02_at_2.06.03_PM_aafkbh.png";
 const yvesMacheretPickToast = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431892/Screen_Shot_2026-03-02_at_2.09.47_PM_uwekdn.png";
 const yvesMacheretPickGhost = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772432160/Screen_Shot_2026-03-02_at_2.14.27_PM_rmq49u.png";
-import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
-import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
-import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
-import yvesMacheretPick4 from "@/assets/curators-picks/yves-macheret-4.jpg";
-import yvesMacheretPickHublo from "@/assets/curators-picks/yves-macheret-hublo.png";
-import yvesMacheretPickConsole1925 from "@/assets/curators-picks/yves-macheret-console-1925.jpg";
 const apparatusPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772162190/Screen_Shot_2026-02-27_at_11.14.28_AM_skwebb.png";
 const apparatusPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772162191/Screen_Shot_2026-02-27_at_11.16.07_AM_qjfogh.png";
 const apparatusPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772162190/Screen_Shot_2026-02-27_at_11.14.45_AM_n1pxgg.png";
