@@ -82,7 +82,7 @@ const StickyBottomNav = () => {
                         : "text-muted-foreground active:text-foreground"
                     }`}
                     aria-label={`Go to ${label}`}
-                    aria-current={isActive ? "true" : undefined}
+                    aria-current={isActive ? "page" : undefined}
                   >
                     <Icon className="h-4 w-4" strokeWidth={isActive ? 2.5 : 1.5} />
                     <span className={`text-[10px] leading-tight font-body ${isActive ? "font-medium" : ""}`}>
