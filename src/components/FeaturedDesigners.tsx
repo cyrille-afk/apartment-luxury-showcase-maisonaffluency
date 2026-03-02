@@ -217,12 +217,12 @@ import manOfPartsSandyCoveSofa from "@/assets/curators-picks/man-of-parts-sandy-
 import manOfPartsCoffeeTable from "@/assets/curators-picks/man-of-parts-coffee-table.png";
 import manOfPartsCocktailTable from "@/assets/curators-picks/man-of-parts-cocktail-table.png";
 import felixAgostiniCaryatide from "@/assets/curators-picks/felix-agostini-caryatide.jpg";
-import felixAgostiniTaureauFD from "@/assets/curators-picks/felix-agostini-taureau-lamp.png";
-import felixAgostiniSocleFD from "@/assets/curators-picks/felix-agostini-socle-lamp.png";
-import felixAgostiniEtrierFD from "@/assets/curators-picks/felix-agostini-etrier.png";
-import felixAgostiniArcheoptryxFD from "@/assets/curators-picks/felix-agostini-archeoptryx.png";
-import felixAgostiniConsoleChevalFD from "@/assets/curators-picks/felix-agostini-console-cheval.png";
-import felixAgostiniConsoleInsituFD from "@/assets/curators-picks/felix-agostini-console-insitu.png";
+const felixAgostiniTaureauFD = cloudinaryUrl("Screen_Shot_2026-02-22_at_4.07.24_PM_r3c4vn", { width: 1200, quality: "auto:good", crop: "fill" });
+const felixAgostiniSocleFD = cloudinaryUrl("Screen_Shot_2026-02-22_at_4.21.37_PM_j4gimq", { width: 1200, quality: "auto:good", crop: "fill" });
+const felixAgostiniEtrierFD = cloudinaryUrl("Screen_Shot_2026-02-22_at_4.23.59_PM_sttrhl", { width: 1200, quality: "auto:good", crop: "fill" });
+const felixAgostiniArcheoptryxFD = cloudinaryUrl("Screen_Shot_2026-02-22_at_4.26.49_PM_apag7a", { width: 1200, quality: "auto:good", crop: "fill" });
+const felixAgostiniConsoleChevalFD = cloudinaryUrl("Screen_Shot_2026-02-22_at_4.30.01_PM_hd6dek", { width: 1200, quality: "auto:good", crop: "fill" });
+const felixAgostiniConsoleInsituFD = cloudinaryUrl("Screen_Shot_2026-02-22_at_4.32.42_PM_rlvkxs", { width: 1200, quality: "auto:good", crop: "fill" });
 import kiraToshiroLamp from "@/assets/curators-picks/kira-toshiro-lamp.jpg";
 
 import tristanAuerYsaWallLightH from "@/assets/curators-picks/tristan-auer-ysa-wall-light-h.jpg";
