@@ -95,7 +95,7 @@ const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/
 const alexanderLamontPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161406/Koi-Carp_01_alexander-lamont_1_kxayax.jpg";
 const yvesMacheretPickBeam800 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430078/Screen_Shot_2026-03-02_at_1.39.34_PM_bap4rz.png";
 const yvesMacheretPickBraun650 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430600/Screen_Shot_2026-03-02_at_1.49.08_PM_gzhc8t.png";
-const yvesMacheretPickHublot600 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430926/Screen_Shot_2026-03-02_at_1.54.28_PM_vislto.png";
+const yvesMacheretPickHublot600 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772448616/Screen_Shot_2026-03-02_at_6.48.18_PM_ohm9tw.png";
 const yvesMacheretPickMartel = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431407/Screen_Shot_2026-03-02_at_2.02.15_PM_lkvf2p.png";
 const yvesMacheretPickNomad295 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431683/Screen_Shot_2026-03-02_at_2.06.03_PM_aafkbh.png";
 const yvesMacheretPickToast = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431892/Screen_Shot_2026-03-02_at_2.09.47_PM_uwekdn.png";
@@ -1091,7 +1091,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       {
         image: yvesMacheretPickHublot600,
         title: "HUBLOT",
-        subtitle: "Mirror",
+        subtitle: "By Yves Macheret",
         category: "Lighting",
         tags: ["Lighting", "Mirror"],
         materials: "Body lamp patinated bronze - Protective varnish - Alabaster diffuser",
