@@ -95,6 +95,7 @@ const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/
 const alexanderLamontPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161406/Koi-Carp_01_alexander-lamont_1_kxayax.jpg";
 const yvesMacheretPickBeam800 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430078/Screen_Shot_2026-03-02_at_1.39.34_PM_bap4rz.png";
 const yvesMacheretPickBraun650 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430600/Screen_Shot_2026-03-02_at_1.49.08_PM_gzhc8t.png";
+const yvesMacheretPickHublot600 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430926/Screen_Shot_2026-03-02_at_1.54.28_PM_vislto.png";
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
@@ -1078,14 +1079,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "Entrelacs-BRAUN_650_Spec_Sheet.pdf",
       },
       {
-        image: yvesMacheretPickHublo,
-        title: "Hublot 600",
+        image: yvesMacheretPickHublot600,
+        title: "HUBLOT",
         subtitle: "Mirror",
         category: "Lighting",
         tags: ["Lighting", "Mirror"],
-        materials: "Patinated bronze • Alabaster diffuser",
-        dimensions: "Ø60 × D3 cm",
-        description: "The Hublot is a luminous mirror inspired by the porthole motif. Hand-cast in patinated bronze with a hand-carved alabaster diffuser, it combines lighting and reflection in a single sculptural object. Available in multiple bronze patinas and alabaster vein options, it is dimmable and IP44 rated."
+        materials: "Body lamp patinated bronze\nProtective varnish\nAlabaster diffuser",
+        dimensions: "Dimmable light with knob\n220-240V / 50-60HZ / 24V\nLED cannot be changed / 13W",
+        description: "The Hublot is a luminous mirror inspired by the porthole motif. Hand-cast in patinated bronze with a hand-carved alabaster diffuser, it combines lighting and reflection in a single sculptural object. Available in multiple bronze patinas and alabaster vein options, it is dimmable and IP44 rated.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/entrelacs/SPEC-SHEET-MIRHT600RO.pdf",
+        pdfFilename: "Entrelacs-HUBLOT_Mirror_Spec_Sheet.pdf",
       },
       {
         image: yvesMacheretPickConsole1925,
