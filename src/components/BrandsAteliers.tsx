@@ -2249,7 +2249,7 @@ const BrandsAteliers = () => {
                               key={picksIndex}
                               src={picksDesigner.curatorPicks[picksIndex]?.image}
                               alt={picksDesigner.curatorPicks[picksIndex]?.title}
-                              className={`object-contain select-none transition-all duration-300 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'w-[85vw] h-[55vh] md:w-[70vw] md:h-[60vh]'}`}
+                              className={`object-contain select-none transition-all duration-300 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'}`}
                               draggable={false}
                               decoding="sync"
                               loading="eager"

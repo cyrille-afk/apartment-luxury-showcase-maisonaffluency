@@ -1110,7 +1110,7 @@ const Collectibles = () => {
                       key={curatorPickIndex}
                       src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
                       alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                      className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'w-[85vw] h-[55vh] md:w-[70vw] md:h-[60vh]'}`}
+                      className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'}`}
                       draggable={false}
                       onZoomChange={(z) => { imageZoomedRef.current = z; }}
                     />
