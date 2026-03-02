@@ -1114,12 +1114,21 @@ const Collectibles = () => {
                       draggable={false}
                       onZoomChange={(z) => { imageZoomedRef.current = z; }}
                     />
+                    {/* Desktop hover overlay — click to enlarge hint */}
+                    {!isZoomed && (
+                      <div
+                        className="hidden md:flex absolute inset-0 items-center justify-center bg-black/0 hover:bg-black/30 transition-all duration-300 cursor-zoom-in z-[5] group"
+                        onClick={(e) => { e.stopPropagation(); setIsZoomed(true); }}
+                      >
+                        <ZoomIn size={32} className="text-white/0 group-hover:text-white/80 transition-all duration-300 drop-shadow-lg" />
+                      </div>
+                    )}
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
                         setIsZoomed(!isZoomed);
                       }}
-                      className={`absolute bottom-2 left-2 md:left-auto md:right-2 z-10 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100 md:animate-expand-hint'}`}
+                      className={`absolute bottom-2 left-2 md:left-auto md:right-2 z-10 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 cursor-pointer ${isZoomed ? 'opacity-70' : 'opacity-70 hover:opacity-100'}`}
                       aria-label={isZoomed ? "Zoom out" : "Zoom in"}
                     >
                       {isZoomed ? (

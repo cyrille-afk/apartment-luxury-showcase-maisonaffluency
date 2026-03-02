@@ -3030,6 +3030,15 @@ const FeaturedDesigners = () => {
                         fetchPriority="high"
                         onClick={() => setIsZoomed(!isZoomed)}
                       />
+                      {/* Desktop hover overlay — click to enlarge hint */}
+                      {!isZoomed && (
+                        <div
+                          className="hidden md:flex absolute inset-0 items-center justify-center bg-black/0 hover:bg-black/30 transition-all duration-300 cursor-zoom-in rounded-lg z-[5] group"
+                          onClick={() => setIsZoomed(true)}
+                        >
+                          <Maximize2 size={32} className="text-white/0 group-hover:text-white/80 transition-all duration-300 drop-shadow-lg" />
+                        </div>
+                      )}
                       {/* Photo credit overlay */}
                       {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.photoCredit && !isZoomed && (
                         <span className="absolute bottom-2 left-2 text-[9px] text-white/50 font-body tracking-wide">
@@ -3079,7 +3088,7 @@ const FeaturedDesigners = () => {
                       {!isZoomed ? (
                         <button
                           onClick={() => setIsZoomed(true)}
-className="hidden md:flex absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10 animate-expand-hint"
+className="hidden md:flex absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Expand image"
                         >
                           <Maximize2 size={16} />

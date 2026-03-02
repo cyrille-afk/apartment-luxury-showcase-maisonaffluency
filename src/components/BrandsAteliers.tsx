@@ -2257,6 +2257,15 @@ const BrandsAteliers = () => {
                               onLoad={() => setPicksImageLoaded(true)}
                               onZoomChange={(z) => { imageZoomedRef.current = z; }}
                             />
+                            {/* Desktop hover overlay — click to enlarge hint */}
+                            {!picksZoomed && (
+                              <div
+                                className="hidden md:flex absolute inset-0 items-center justify-center bg-black/0 hover:bg-black/30 transition-all duration-300 cursor-zoom-in z-[5] group"
+                                onClick={() => setPicksZoomed(true)}
+                              >
+                                <Maximize2 size={32} className="text-white/0 group-hover:text-white/80 transition-all duration-300 drop-shadow-lg" />
+                              </div>
+                            )}
                             {/* Preload adjacent images */}
                             {picksDesigner.curatorPicks.length > 1 && [
                               picksDesigner.curatorPicks[(picksIndex + 1) % picksDesigner.curatorPicks.length]?.image,
@@ -2313,7 +2322,7 @@ const BrandsAteliers = () => {
                         )}
                         <button
                           onClick={() => setPicksZoomed(!picksZoomed)}
-                          className={`absolute bottom-2 left-2 md:left-auto z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer md:animate-expand-hint ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'md:right-12' : 'md:right-2'}`}
+                          className={`absolute bottom-2 left-2 md:left-auto z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'md:right-12' : 'md:right-2'}`}
                           aria-label={picksZoomed ? "Minimize image" : "Maximize image"}
                         >
                           {picksZoomed ? <Minimize2 size={16} className="text-white" /> : <Maximize2 size={16} className="text-white" />}
