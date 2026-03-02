@@ -1468,13 +1468,15 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "L 272 × P 85 × H 75 cm (L 160 once closed)"
       },
       {
-        image: jmfXStoolRound,
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433739/JMF_1934_Round_X_Stool__01_Portrait_HD_mcngzi.jpg",
         title: "X Stool (Round)",
         subtitle: "1934",
         category: "Furniture",
         tags: ["Furniture", "Stool"],
         materials: "Sandblasted Varnished Oak • Foal Hide",
-        dimensions: "Ø 55 × H 43 cm"
+        dimensions: "Ø 55 × H 43 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1930_X_Stool_Round_Info_Sheet.pdf",
+        pdfFilename: "JMF-X_Stool_Round_Info_Sheet.pdf",
       },
     ],
     links: [
