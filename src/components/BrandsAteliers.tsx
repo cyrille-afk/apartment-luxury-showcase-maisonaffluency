@@ -2257,7 +2257,7 @@ const BrandsAteliers = () => {
                       observer.observe(el, { childList: true, subtree: true });
                       setTimeout(checkScroll, 500);
                     }}
-                    className={`flex flex-col items-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${picksZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[90vh] pb-4'}`}>
+                    className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${picksZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
                     <div className="relative inline-flex flex-col items-center">
                       {(() => {
                         const pick = picksDesigner.curatorPicks[picksIndex] as any;
@@ -2283,7 +2283,7 @@ const BrandsAteliers = () => {
                         {picksDesigner.curatorPicks[picksIndex]?.image ? (
                           <>
                             {!picksImageLoaded && (
-                              <div className={`flex items-center justify-center ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[45vh] md:max-h-[55vh]'} w-64 h-64 animate-pulse`}>
+                              <div className={`flex items-center justify-center ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} w-64 h-64 animate-pulse`}>
                                 <div className="w-full h-full bg-white/5 rounded-lg flex items-center justify-center">
                                   <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
                                 </div>
