@@ -2284,13 +2284,13 @@ const BrandsAteliers = () => {
                             Photo: <a href="https://www.instagram.com/lucabonnefille/?hl=en" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-white/80 transition-colors" onClick={e => e.stopPropagation()} aria-label={`${picksDesigner.curatorPicks[picksIndex].photoCredit} on Instagram`}><Instagram className="w-3 h-3" aria-hidden="true" />{picksDesigner.curatorPicks[picksIndex].photoCredit}</a>
                           </p>
                         )}
-                        {/* Desktop close button */}
+                        {/* Desktop close button — bottom-right (outside) */}
                         <button
                           onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
-                          className="hidden md:flex absolute top-2 right-4 z-50 p-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full transition-colors"
+                          className="hidden md:flex absolute bottom-2 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
                           aria-label="Close lightbox"
                         >
-                          <X className="h-4 w-4 text-white" />
+                          <X className="h-5 w-5" />
                         </button>
                         {(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl && (
                           <button
