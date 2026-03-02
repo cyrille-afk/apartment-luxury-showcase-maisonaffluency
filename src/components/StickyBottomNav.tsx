@@ -49,8 +49,18 @@ const StickyBottomNav = () => {
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
-    const top = el.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT + 2;
-    window.scrollTo({ top, behavior: "smooth" });
+    // First pass: jump near the target so contentVisibility: auto renders it
+    const top1 = el.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT + 2;
+    window.scrollTo({ top: top1, behavior: "instant" as ScrollBehavior });
+    // Second pass: recalculate after layout settles (content now rendered)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el2 = document.getElementById(id);
+        if (!el2) return;
+        const top2 = el2.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT + 2;
+        window.scrollTo({ top: top2, behavior: "smooth" });
+      });
+    });
   };
 
   return (
