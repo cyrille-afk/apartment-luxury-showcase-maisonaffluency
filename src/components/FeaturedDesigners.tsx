@@ -1452,13 +1452,15 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "JMF-Round_Table_1935_Info_Sheet.pdf",
       },
       {
-        image: jmfRoundTable2,
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772434431/Screen_Shot_2026-03-02_at_2.51.03_PM_ripmic.png",
         title: "Round Table",
         subtitle: "1935 — Close-Up",
         category: "Furniture",
         tags: ["Furniture", "Dining Table"],
         materials: "Sandblasted Oak Marquetry • Deep Sandblasted Oak",
-        dimensions: "Ø 150 × H 75 cm"
+        dimensions: "Ø 150 × H 75 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1935_Round_Table_Close_Up_Info_Sheet.pdf",
+        pdfFilename: "JMF-Round_Table_1935_Info_Sheet.pdf",
       },
       {
         image: jmfPresidentDesk2,
