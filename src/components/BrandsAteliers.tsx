@@ -301,6 +301,15 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Tennessee-S2.pdf",
         pdfFilename: "Maison_Affluency-Tennessee-S2.pdf",
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772452984/Screen_Shot_2026-03-02_at_8.01.21_PM_m95xmw.png",
+        title: "BRASILIA LP",
+        subtitle: "Michel Boyer",
+        tags: ["Lighting", "Table Lamp"],
+        materials: "Brass, aluminium, steel\nLamp base in gloss black or polished stainless steel\nShade structure in white lacquered\nWhite paper diffusing material",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Brasilia-LP.pdf",
+        pdfFilename: "Maison_Affluency-Brasilia-LP.pdf",
+      },
     ],
   },
 };
