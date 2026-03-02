@@ -1033,7 +1033,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     name: "Entrelacs Creation - Yves Macheret",
     specialty: "Bronze Lighting & Artisan Foundry",
     image: yvesMacheretImg,
-    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-03-02_at_6.45.28_PM_ianzin.png",
+    logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-03-02_at_6.53.46_PM_sh5m0r.png",
     biography:
       "Founded by the Macheret family in central France, Entrelacs is an artisan foundry where bronze and alabaster—materials inherited from the origins of our world—are crafted into timeless, pared-down expressions. Yves Macheret, who has been running the foundry with his brother Paul since 2015, trained alongside his father to master all techniques of bronze work: modelling, mould-making, casting, chasing, and patination. His vision to create minimal lighting designs at accessible prices has naturally steered him towards a timeless aesthetic that fully expresses the beauty and simplicity of these noble materials.",
     notableWorks: "Bronze & Alabaster Lighting Collection, Martell Wall Lamp",
