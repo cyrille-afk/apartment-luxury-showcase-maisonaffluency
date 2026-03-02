@@ -2268,7 +2268,7 @@ const BrandsAteliers = () => {
                         </button>
                         {(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl && (
                           <button
-                            className="absolute bottom-2 right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                            className="absolute bottom-2 right-12 md:right-2 z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
                             aria-label="Download PDF"
                             onClick={async (e) => {
                               e.stopPropagation();
@@ -2296,7 +2296,7 @@ const BrandsAteliers = () => {
                         )}
                         <button
                           onClick={() => setPicksZoomed(!picksZoomed)}
-                          className={`absolute bottom-2 left-2 md:left-auto z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'md:right-12' : 'md:right-2'}`}
+                          className={`absolute bottom-2 left-2 md:left-auto z-10 bg-black/40 backdrop-blur-sm p-1.5 rounded-full hover:bg-black/60 transition-colors cursor-pointer ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'md:right-10' : 'md:right-2'}`}
                           aria-label={picksZoomed ? "Minimize image" : "Maximize image"}
                         >
                           {picksZoomed ? <Minimize2 className="w-3.5 h-3.5 text-white" /> : <Maximize2 className="w-3.5 h-3.5 text-white" />}
