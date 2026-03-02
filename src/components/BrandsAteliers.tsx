@@ -266,7 +266,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         title: "CLASSIQUE",
         subtitle: "By Gounot & Jähnke",
         tags: ["Lighting", "Chandelier"],
-        materials: "Structures in aluminium and brass, medal bronze, mirror nickel or gun metal finish, white paper diffusing material",
+        materials: "Structures in aluminium and brass, medal bronze, mirror nickel or gun metal finish\nWhite paper diffusing material",
         dimensions: "120 × 120 × H 12 cm – 48 kg\nSilhouette: 175 cm\nWarm white 2700K LED lighting, 230W, 11000 Lumens",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Classique_V.pdf",
         pdfFilename: "Maison_Affluency-Classique_V.pdf",
