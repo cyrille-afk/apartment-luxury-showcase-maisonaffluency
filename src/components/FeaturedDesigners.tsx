@@ -120,11 +120,11 @@ const atelierFevrierPick4 = cloudinaryUrl("Screen_Shot_2026-02-16_at_9.41.04_AM_
 const atelierFevrierPick5 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.47.18_AM_o3qliv", { width: 1200, quality: "auto:good", crop: "fill" });
 const atelierFevrierPick6 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.46.17_AM_c5irzd", { width: 1200, quality: "auto:good", crop: "fill" });
 const atelierFevrierPick7 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.46.48_AM_saicfe", { width: 1200, quality: "auto:good", crop: "fill" });
-import emmanuelLevetStennePick1 from "@/assets/curators-picks/emmanuel-levet-stenne-1.jpg";
-import emmanuelLevetStennePick2 from "@/assets/curators-picks/emmanuel-levet-stenne-2.jpg";
-import emmanuelLevetStennePick3 from "@/assets/curators-picks/emmanuel-levet-stenne-3.jpg";
-import emmanuelLevetStennePick4 from "@/assets/curators-picks/emmanuel-levet-stenne-4.jpg";
-import emmanuelLevetStennePick5 from "@/assets/curators-picks/emmanuel-levet-stenne-5.jpg";
+const emmanuelLevetStennePick1 = cloudinaryUrl("Screen_Shot_2026-03-02_at_10.01.00_AM_dml7fd", { width: 1200, quality: "auto:good", crop: "fill" });
+const emmanuelLevetStennePick2 = cloudinaryUrl("Screen_Shot_2026-03-02_at_10.01.37_AM_xawh16", { width: 1200, quality: "auto:good", crop: "fill" });
+const emmanuelLevetStennePick3 = cloudinaryUrl("Screen_Shot_2026-03-02_at_10.02.14_AM_vpqtab", { width: 1200, quality: "auto:good", crop: "fill" });
+const emmanuelLevetStennePick4 = cloudinaryUrl("Screen_Shot_2026-03-02_at_10.05.16_AM_rzrgtj", { width: 1200, quality: "auto:good", crop: "fill" });
+const emmanuelLevetStennePick5 = cloudinaryUrl("Screen_Shot_2026-03-02_at_10.00.36_AM_sctfyk", { width: 1200, quality: "auto:good", crop: "fill" });
 const emmanuelLevetStennePick6 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.23.51_PM_gyeqne", { width: 1200, quality: "auto:good", crop: "fill" });
 const emmanuelLevetStennePick7 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.29.54_PM_cfncv6", { width: 1200, quality: "auto:good", crop: "fill" });
 import hamreiPick1 from "@/assets/curators-picks/hamrei-1.jpg";
