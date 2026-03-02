@@ -2207,7 +2207,23 @@ const BrandsAteliers = () => {
                 >
                   {/* Close button moved inside image container below */}
 
-                  <div className={`flex flex-col items-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${picksZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[90vh] pb-4'}`}>
+                  <div
+                    ref={(el) => {
+                      if (!el) return;
+                      const indicator = el.parentElement?.querySelector('[data-scroll-indicator]') as HTMLElement | null;
+                      if (!indicator) return;
+                      const checkScroll = () => {
+                        const hasMore = el.scrollHeight > el.clientHeight + 20;
+                        const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 30;
+                        indicator.style.opacity = (hasMore && !nearBottom) ? '1' : '0';
+                      };
+                      checkScroll();
+                      el.addEventListener('scroll', checkScroll, { passive: true });
+                      const observer = new MutationObserver(checkScroll);
+                      observer.observe(el, { childList: true, subtree: true });
+                      setTimeout(checkScroll, 500);
+                    }}
+                    className={`flex flex-col items-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${picksZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[90vh] pb-4'}`}>
                     <div className="relative inline-flex flex-col items-center">
                       {!picksZoomed && ((picksDesigner.curatorPicks[picksIndex] as any)?.tags?.length > 0 || picksDesigner.curatorPicks[picksIndex]?.edition) && (
                         <div className="text-center mb-2 flex flex-wrap gap-1.5 justify-center">
@@ -2233,7 +2249,7 @@ const BrandsAteliers = () => {
                               key={picksIndex}
                               src={picksDesigner.curatorPicks[picksIndex]?.image}
                               alt={picksDesigner.curatorPicks[picksIndex]?.title}
-                              className={`object-contain select-none transition-all duration-300 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-full max-h-[45vh] md:max-h-[55vh]'}`}
+                              className={`object-contain select-none transition-all duration-300 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'w-[85vw] h-[55vh] md:w-[70vw] md:h-[60vh]'}`}
                               draggable={false}
                               decoding="sync"
                               loading="eager"
@@ -2355,6 +2371,19 @@ const BrandsAteliers = () => {
                       </p>
                     </div>
                   </div>
+
+                  {/* Mobile scroll indicator */}
+                  {!picksZoomed && (
+                    <div
+                      data-scroll-indicator
+                      className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-opacity duration-300"
+                      style={{ opacity: 0 }}
+                    >
+                      <div className="animate-bounce bg-black/40 backdrop-blur-sm rounded-full p-1.5">
+                        <ChevronDown className="w-4 h-4 text-white/70" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="relative flex items-center justify-center w-full h-full">
