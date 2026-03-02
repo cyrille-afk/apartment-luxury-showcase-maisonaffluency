@@ -3081,7 +3081,7 @@ const FeaturedDesigners = () => {
                               window.open(pick.pdfUrl, '_blank');
                             }
                           }}
-                          className="absolute bottom-2 right-[4.5rem] md:right-12 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          className="absolute bottom-2 right-2 md:right-12 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Download PDF specification"
                         >
                           <Download size={16} />
@@ -3105,11 +3105,11 @@ const FeaturedDesigners = () => {
                           <Minimize2 size={16} />
                         </button>
                       )}
-                      {/* Mobile Maximize / Minimize button — inside image, bottom-right */}
+                      {/* Mobile Maximize / Minimize button — bottom-left, spaced from X */}
                       {!isZoomed ? (
                         <button
                           onClick={() => setIsZoomed(true)}
-                          className="md:hidden absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          className="md:hidden absolute bottom-2 left-[3.25rem] p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Expand image"
                         >
                           <Maximize2 size={16} />
@@ -3117,7 +3117,7 @@ const FeaturedDesigners = () => {
                       ) : (
                         <button
                           onClick={() => setIsZoomed(false)}
-                          className="md:hidden absolute bottom-2 right-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          className="md:hidden absolute bottom-2 left-[3.25rem] p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Minimize image"
                         >
                           <Minimize2 size={16} />
