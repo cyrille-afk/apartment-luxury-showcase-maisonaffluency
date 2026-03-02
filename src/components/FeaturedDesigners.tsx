@@ -2822,10 +2822,10 @@ const FeaturedDesigners = () => {
                 </AccordionTrigger>
                 <AccordionContent className="pt-2 pb-6">
                   <div className="space-y-4 text-muted-foreground font-body">
-                    <p className="text-sm md:text-base leading-relaxed">{designer.biography}</p>
+                    <p className="text-sm md:text-base leading-relaxed text-justify">{designer.biography}</p>
 
                     <div className="pt-2 border-t border-border/30 mt-4">
-                      <p className="text-sm md:text-base italic leading-relaxed text-foreground/80 mb-4">
+                      <p className="text-sm md:text-base italic leading-relaxed text-foreground/80 mb-4 text-justify">
                         "{designer.philosophy}"
                       </p>
 
