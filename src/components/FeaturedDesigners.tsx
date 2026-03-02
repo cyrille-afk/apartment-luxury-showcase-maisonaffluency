@@ -96,6 +96,7 @@ const alexanderLamontPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/
 const yvesMacheretPickBeam800 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430078/Screen_Shot_2026-03-02_at_1.39.34_PM_bap4rz.png";
 const yvesMacheretPickBraun650 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430600/Screen_Shot_2026-03-02_at_1.49.08_PM_gzhc8t.png";
 const yvesMacheretPickHublot600 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430926/Screen_Shot_2026-03-02_at_1.54.28_PM_vislto.png";
+const yvesMacheretPickMartel = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431407/Screen_Shot_2026-03-02_at_2.02.15_PM_lkvf2p.png";
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
@@ -1110,6 +1111,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "The BEAM 800 wall lamp by Yves Macheret is a masterful expression of linear minimalism in patinated bronze. Protected with a hand-applied varnish, it combines enduring craftsmanship with a contemporary silhouette.",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/entrelacs/SPEC-SHEET_WLBM800CY.pdf",
         pdfFilename: "Entrelacs-BEAM_800_Spec_Sheet.pdf",
+      },
+      {
+        image: yvesMacheretPickMartel,
+        title: "MARTEL",
+        subtitle: "Wall Lamp — By Felix Millory",
+        category: "Lighting",
+        tags: ["Lighting", "Wall Lamp"],
+        materials: "Patinated casted bronze & alabaster",
+        dimensions: "30 × 15 × 75 cm",
+        description: "The Martel wall lamp, designed by Felix Millory for Entrelacs, is a striking sculptural light that pairs patinated cast bronze with hand-carved alabaster. Its bold geometric form pays tribute to the Art Deco heritage while asserting a distinctly contemporary presence on the wall.",
       },
     ],
     links: [
