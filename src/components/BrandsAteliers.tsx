@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
-import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Gem, Maximize2, Minimize2, Share2, Download } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, Gem, Maximize2, Minimize2, Share2, FileDown } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -2268,7 +2268,7 @@ const BrandsAteliers = () => {
                         </button>
                         {(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl && (
                           <button
-                            className="absolute bottom-2 right-2 md:right-2 z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                            className="absolute bottom-2 right-2 md:right-2 z-10 bg-[#d32f2f]/80 backdrop-blur-sm p-2 rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
                             aria-label="Download PDF"
                             onClick={async (e) => {
                               e.stopPropagation();
@@ -2291,7 +2291,7 @@ const BrandsAteliers = () => {
                               }
                             }}
                           >
-                            <Download size={16} className="text-white" />
+                            <FileDown size={16} className="text-white" />
                           </button>
                         )}
                         <button
