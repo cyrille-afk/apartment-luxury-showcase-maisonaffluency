@@ -66,7 +66,7 @@ const ExitIntentBanner = () => {
   return (
     <AnimatePresence>
       {visible && !dialogOpen && (
-        <div className="fixed bottom-[9rem] md:bottom-4 right-4 z-[60] flex flex-col items-end gap-1.5">
+        <div className="fixed bottom-[7rem] md:bottom-4 right-4 z-[60] flex flex-col items-end gap-1.5">
           {/* Dismiss X — above the pill on mobile for clear access */}
           <button
             onClick={(e) => { e.stopPropagation(); dismiss(); }}
