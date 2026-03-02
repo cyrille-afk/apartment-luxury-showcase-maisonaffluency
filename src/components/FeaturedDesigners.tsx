@@ -1395,14 +1395,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "JMF-Upholstered_Back_Sofa_Info_Sheet.pdf",
       },
       {
-        image: jmfCroisillonLamp,
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772434426/Screen_Shot_2026-03-02_at_2.50.16_PM_clwjui.png",
         title: "Croisillon Lamp",
-        subtitle: "1928",
+        subtitle: "1924",
         category: "Lighting",
         tags: ["Lighting", "Table Lamp"],
         materials: "Varnished Solid Oak Base • Patinated Brass • Cotton Lamp Shade",
         dimensions: "Ø 34 × H 51 cm",
-        description: "Also available with a solid Walnut, Golden Brass or Black Patinated Brass base"
+        description: "Also available with a solid Walnut, Golden Brass or Black Patinated Brass base",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1924_Croisillon_Lamp_Info_Sheet.pdf",
+        pdfFilename: "JMF-Croisillon_Lamp_Info_Sheet.pdf",
       },
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433798/Screen_Shot_2026-03-02_at_2.42.46_PM_efdury.png",
