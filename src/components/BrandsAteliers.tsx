@@ -2267,15 +2267,15 @@ const BrandsAteliers = () => {
                               onLoad={() => setPicksImageLoaded(true)}
                               onZoomChange={(z) => { imageZoomedRef.current = z; }}
                             />
-                            {/* Desktop hover overlay — click to enlarge hint */}
-                            {!picksZoomed && (
-                              <div
-                                className="hidden md:flex absolute inset-0 items-center justify-center bg-white/0 hover:bg-white/10 hover:backdrop-blur-[2px] transition-all duration-500 ease-out cursor-zoom-in z-[5] group"
-                                onClick={() => setPicksZoomed(true)}
-                              >
+                            {/* Desktop hover overlay — click to enlarge/minimize */}
+                            <div
+                              className={`hidden md:flex absolute inset-0 items-center justify-center transition-all duration-500 ease-out z-[5] group ${picksZoomed ? 'cursor-zoom-out' : 'bg-white/0 hover:bg-white/10 hover:backdrop-blur-[2px] cursor-zoom-in'}`}
+                              onClick={() => setPicksZoomed(!picksZoomed)}
+                            >
+                              {!picksZoomed && (
                                 <Maximize2 size={28} className="text-white/0 group-hover:text-white/70 transition-all duration-500 ease-out drop-shadow-lg" />
-                              </div>
-                            )}
+                              )}
+                            </div>
                             {/* Preload adjacent images */}
                             {picksDesigner.curatorPicks.length > 1 && [
                               picksDesigner.curatorPicks[(picksIndex + 1) % picksDesigner.curatorPicks.length]?.image,
