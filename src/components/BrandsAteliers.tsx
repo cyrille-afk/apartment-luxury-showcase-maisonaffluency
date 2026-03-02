@@ -280,7 +280,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         pdfFilename: "Maison_Affluency-Brasilia_PL.pdf",
       },
       {
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772451922/Screen_Shot_2026-03-02_at_7.26.56_PM_zor899.png",
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772452356/Screen_Shot_2026-03-02_at_7.26.56_PM_iyecho.png",
         title: "GÉLULE",
         subtitle: "Joseph Dirand",
         tags: ["Lighting", "Wall Lamp"],
