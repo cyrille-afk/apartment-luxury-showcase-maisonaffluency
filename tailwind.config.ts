@@ -146,6 +146,16 @@ export default {
             opacity: "0.88",
           },
         },
+        "expand-hint": {
+          "0%, 100%": {
+            opacity: "0.6",
+            transform: "scale(1)",
+          },
+          "50%": {
+            opacity: "1",
+            transform: "scale(1.18)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.3s ease-out",
@@ -155,6 +165,7 @@ export default {
         "pulse-fade": "pulse-fade 2.5s ease-in-out infinite",
         "pulse-glow": "pulse-glow 10s ease-in-out infinite",
         "text-glow-pulse": "text-glow-pulse 16s ease-in-out infinite",
+        "expand-hint": "expand-hint 1s ease-in-out 3",
       },
     },
   },
