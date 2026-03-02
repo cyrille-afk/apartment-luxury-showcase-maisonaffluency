@@ -272,7 +272,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         pdfFilename: "Maison_Affluency-Classique_V.pdf",
       },
       {
-        image: ozoneBrasiliaPl,
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772452776/Screen_Shot_2026-03-02_at_7.58.48_PM_ncitni.png",
         title: "Brasilia PL",
         subtitle: "Michel Boyer",
         tags: ["Lighting", "Chandelier"],
