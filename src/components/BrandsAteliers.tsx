@@ -264,7 +264,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
       {
         image: ozoneClassiqueV,
         title: "CLASSIQUE",
-        subtitle: "By Gounot & Jähnke",
+        subtitle: "Gounot & Jähnke",
         tags: ["Lighting", "Chandelier"],
         materials: "Structures in aluminium and brass, medal bronze, mirror nickel or gun metal finish\nWhite paper diffusing material",
         dimensions: "120 × 120 × H 12 cm – 48 kg\nSilhouette: 175 cm\nWarm white 2700K LED lighting, 230W, 11000 Lumens",
@@ -284,7 +284,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772451922/Screen_Shot_2026-03-02_at_7.26.56_PM_zor899.png",
         title: "GÉLULE",
-        subtitle: "By Joseph Dirand",
+        subtitle: "Joseph Dirand",
         tags: ["Lighting", "Wall Lamp"],
         materials: "Aluminium structure\nPale gold or mirror nickel finish",
         dimensions: "40 × 10 × H 13 cm – 4 kg\nSilhouette: 175 cm\nWarm white 2200K LED lighting, 12W, 550 Lumens",
@@ -294,7 +294,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772452374/Screen_Shot_2026-03-02_at_7.52.16_PM_ljyj4g.png",
         title: "TENNESSEE S2",
-        subtitle: "By Glenn Sestig",
+        subtitle: "Glenn Sestig",
         tags: ["Lighting", "Suspension"],
         materials: "Available in multiple LED options:\nWarm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nConverter 24V non-integrated, to be placed in a distant box\nCE Class III",
         dimensions: "TENNESSEE S2 48 — H 482 × 344 × 72 mm + height of the hanging structure\nTENNESSEE S2 96 — H 962 × 344 × 72 mm + height of the hanging structure",

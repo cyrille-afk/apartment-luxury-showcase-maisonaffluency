@@ -1067,7 +1067,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { 
         image: yvesMacheretPickBraun650, 
         title: "BRAUN 650",
-        subtitle: "By Yves Macheret",
+        subtitle: "Yves Macheret",
         category: "Lighting",
         tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated Bronze\nProtective Varnish / Alabaster Diffuser",
@@ -1079,7 +1079,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       {
         image: yvesMacheretPickHublot600,
         title: "HUBLOT",
-        subtitle: "By Yves Macheret",
+        subtitle: "Yves Macheret",
         category: "Lighting",
         tags: ["Lighting", "Mirror"],
         materials: "Body lamp patinated bronze - Protective varnish - Alabaster diffuser",
@@ -1091,7 +1091,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       {
         image: yvesMacheretPickBeam800,
         title: "BEAM 800",
-        subtitle: "By Yves Macheret",
+        subtitle: "Yves Macheret",
         category: "Lighting",
         tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated Bronze\nProtective Varnish",
@@ -1746,13 +1746,13 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     philosophy: "We believe in furniture made with integrity — pieces conceived by great designers and realized by the best craftspeople in the world.",
     curatorPicks: [
-      { image: manOfPartsCoffeeTable, title: "Praia da Granja Coffee Table", subtitle: "by Sebastian Herkner", category: "Tables", materials: "A mixed textured stone top with a solid walnut or oak base", dimensions: "W 125 × D 40 × H 34 cm" },
-      { image: manOfPartsLoungeChair, title: "Frenchmen Street Lounge Chair", subtitle: "by Sebastian Herkner", category: "Armchair", materials: "Solid oak frame, Fully upholstered in fabric or leather", dimensions: "W 82 × D 77 × H 73 cm — SH 40 cm" },
-      { image: manOfPartsFloorLamp, title: "Cinnamon Gardens Floor Lamp", subtitle: "by Yabu Pushelberg", category: "Lighting", materials: "Solid Ash Wood, Esprit Nuvola — 100% Linen Shade", dimensions: "D 55 × H 156 cm" },
-      { image: manOfPartsRuaLeblon, title: "Rua Leblon", subtitle: "by Yabu Pushelberg", category: "Armchair", materials: "Upholstered in fabric or leather with return swivel. Powder coated black steel with walnut or anthracite base", dimensions: "W 90 × D 92 × H 76 cm — SH 44 cm" },
-      { image: manOfPartsBondStreetStool, title: "Bond Street Stool", subtitle: "by Yabu Pushelberg", category: "Stool", materials: "Full upholstery in fabric or leather with a Powdercoat Bronze swivel base", dimensions: "W 62.5 × D 46 × H 63.5 cm — SH 49.3 cm" },
-      { image: manOfPartsSandyCoveSofa, title: "Sandy Cove Sofa", subtitle: "by Sebastian Herkner", category: "Sofa", materials: "Full upholstered in fabric or leather", dimensions: "W 190 × D 108 × H 70 cm — SH 40 cm" },
-      { image: manOfPartsCocktailTable, title: "Madison Avenue Cocktail Table", subtitle: "by Yabu Pushelberg", category: "Side Table", materials: "Marble top with aged brass base", dimensions: "Ø 40.5 × H 47 cm" },
+      { image: manOfPartsCoffeeTable, title: "Praia da Granja Coffee Table", subtitle: "Sebastian Herkner", category: "Tables", materials: "A mixed textured stone top with a solid walnut or oak base", dimensions: "W 125 × D 40 × H 34 cm" },
+      { image: manOfPartsLoungeChair, title: "Frenchmen Street Lounge Chair", subtitle: "Sebastian Herkner", category: "Armchair", materials: "Solid oak frame, Fully upholstered in fabric or leather", dimensions: "W 82 × D 77 × H 73 cm — SH 40 cm" },
+      { image: manOfPartsFloorLamp, title: "Cinnamon Gardens Floor Lamp", subtitle: "Yabu Pushelberg", category: "Lighting", materials: "Solid Ash Wood, Esprit Nuvola — 100% Linen Shade", dimensions: "D 55 × H 156 cm" },
+      { image: manOfPartsRuaLeblon, title: "Rua Leblon", subtitle: "Yabu Pushelberg", category: "Armchair", materials: "Upholstered in fabric or leather with return swivel. Powder coated black steel with walnut or anthracite base", dimensions: "W 90 × D 92 × H 76 cm — SH 44 cm" },
+      { image: manOfPartsBondStreetStool, title: "Bond Street Stool", subtitle: "Yabu Pushelberg", category: "Stool", materials: "Full upholstery in fabric or leather with a Powdercoat Bronze swivel base", dimensions: "W 62.5 × D 46 × H 63.5 cm — SH 49.3 cm" },
+      { image: manOfPartsSandyCoveSofa, title: "Sandy Cove Sofa", subtitle: "Sebastian Herkner", category: "Sofa", materials: "Full upholstered in fabric or leather", dimensions: "W 190 × D 108 × H 70 cm — SH 40 cm" },
+      { image: manOfPartsCocktailTable, title: "Madison Avenue Cocktail Table", subtitle: "Yabu Pushelberg", category: "Side Table", materials: "Marble top with aged brass base", dimensions: "Ø 40.5 × H 47 cm" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/manofparts/" },
