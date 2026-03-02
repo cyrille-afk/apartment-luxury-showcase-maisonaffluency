@@ -99,6 +99,7 @@ const yvesMacheretPickHublot600 = "https://res.cloudinary.com/dif1oamtj/image/up
 const yvesMacheretPickMartel = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431407/Screen_Shot_2026-03-02_at_2.02.15_PM_lkvf2p.png";
 const yvesMacheretPickNomad295 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431683/Screen_Shot_2026-03-02_at_2.06.03_PM_aafkbh.png";
 const yvesMacheretPickToast = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772431892/Screen_Shot_2026-03-02_at_2.09.47_PM_uwekdn.png";
+const yvesMacheretPickGhost = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772432160/Screen_Shot_2026-03-02_at_2.14.27_PM_rmq49u.png";
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
@@ -1040,13 +1041,13 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     philosophy: "Revealing the beauty and simplicity of bronze, making exceptional craftsmanship accessible while honoring a heritage passed down from father to son.",
     curatorPicks: [
       { 
-        image: yvesMacheretPick1, 
+        image: yvesMacheretPickGhost, 
         title: "Ghost",
         subtitle: "Wall Lamp",
         category: "Lighting",
         tags: ["Lighting", "Wall Lamp"],
-        materials: "Patinated bronze • Hand-carved alabaster diffuser",
-        dimensions: "H57 × W13 × D6 cm",
+        materials: "Patinated casted bronze & alabaster",
+        dimensions: "570 × 130 × 60 mm",
         description: "The Ghost wall lamp distils the art of bronze lighting to its purest expression. Cast in patinated bronze with a hand-carved alabaster diffuser, its slender, almost ethereal silhouette seems to float against the wall—hence its name. Designed by Yves Macheret, it embodies the Entrelacs philosophy: revealing the inherent beauty of noble materials through restrained, timeless forms."
       },
       { 
