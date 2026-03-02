@@ -1084,7 +1084,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Mirror",
         category: "Lighting",
         tags: ["Lighting", "Mirror"],
-        materials: "Body lamp patinated bronze\nProtective varnish\nAlabaster diffuser",
+        materials: "Body lamp patinated bronze - Protective varnish - Alabaster diffuser",
         dimensions: "Dimmable light with knob\n220-240V / 50-60HZ / 24V\nLED cannot be changed / 13W",
         description: "The Hublot is a luminous mirror inspired by the porthole motif. Hand-cast in patinated bronze with a hand-carved alabaster diffuser, it combines lighting and reflection in a single sculptural object. Available in multiple bronze patinas and alabaster vein options, it is dimmable and IP44 rated.",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/entrelacs/SPEC-SHEET-MIRHT600RO.pdf",
