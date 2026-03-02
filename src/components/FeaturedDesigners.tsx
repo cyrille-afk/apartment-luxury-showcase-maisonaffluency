@@ -1433,13 +1433,15 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "Various Oak and Walnut finishes available on request"
       },
       {
-        image: jmfRoundTable1,
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433153/Screen_Shot_2026-03-02_at_2.20.57_PM_w34cg9.png",
         title: "Round Table",
         subtitle: "1935",
         category: "Furniture",
         tags: ["Furniture", "Dining Table"],
         materials: "Sandblasted Oak Marquetry • Deep Sandblasted Oak",
-        dimensions: "Ø 150 × H 75 cm"
+        dimensions: "Ø 150 × H 75 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1935_Round_Table_Info_Sheet.pdf",
+        pdfFilename: "JMF-Round_Table_1935_Info_Sheet.pdf",
       },
       {
         image: jmfRoundTable2,
