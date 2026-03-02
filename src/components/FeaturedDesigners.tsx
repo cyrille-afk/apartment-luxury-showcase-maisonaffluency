@@ -94,6 +94,7 @@ const alexanderLamontPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/
 const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161289/Barbican-Cabinet_13_alexander-lamont_2_hyp2sd.jpg";
 const alexanderLamontPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161406/Koi-Carp_01_alexander-lamont_1_kxayax.jpg";
 const yvesMacheretPickBeam800 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430078/Screen_Shot_2026-03-02_at_1.39.34_PM_bap4rz.png";
+const yvesMacheretPickBraun650 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430600/Screen_Shot_2026-03-02_at_1.49.08_PM_gzhc8t.png";
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
@@ -1065,14 +1066,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "The Toast wall lamp celebrates the warmth of patinated brass paired with hand-carved alabaster. Its gently rounded form evokes a raised glass—a quiet gesture of conviviality. Crafted entirely by hand at the Entrelacs foundry in central France, each piece carries the subtle variations that distinguish true artisan work from industrial production."
       },
       { 
-        image: yvesMacheretPick4, 
-        title: "Braun 650",
+        image: yvesMacheretPickBraun650, 
+        title: "BRAUN 650",
         subtitle: "Wall Lamp",
         category: "Lighting",
         tags: ["Lighting", "Wall Lamp"],
-        materials: "Patinated bronze • Hand-carved alabaster diffuser",
-        dimensions: "H65 × W11.5 × D6.2 cm",
-        description: "The Braun 650 is a vertical wall lamp whose clean, elongated lines recall the rigour of mid-century industrial design. Cast in patinated bronze with an alabaster diffuser, it projects a soft, ambient light that accentuates the natural veining of the stone. Designed by Yves Macheret, it is fitted with a replaceable LED module for lasting, sustainable use."
+        materials: "Patinated Bronze\nProtective Varnish / Alabaster Diffuser",
+        dimensions: "220-240V / 50-60HZ / 24V\nLed can be changed / Replaceable Led / 11W",
+        description: "The BRAUN 650 is a vertical wall lamp whose clean, elongated lines recall the rigour of mid-century industrial design. Cast in patinated bronze with an alabaster diffuser, it projects a soft, ambient light that accentuates the natural veining of the stone. Designed by Yves Macheret, it is fitted with a replaceable LED module for lasting, sustainable use.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/entrelacs/SPEC-SHEET_WLBN650RC.pdf",
+        pdfFilename: "Entrelacs-BRAUN_650_Spec_Sheet.pdf",
       },
       {
         image: yvesMacheretPickHublo,
