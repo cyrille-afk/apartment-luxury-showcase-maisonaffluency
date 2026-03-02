@@ -291,6 +291,16 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Gelule.pdf",
         pdfFilename: "Maison_Affluency-Gelule.pdf",
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772452374/Screen_Shot_2026-03-02_at_7.52.16_PM_ljyj4g.png",
+        title: "TENNESSEE S2",
+        subtitle: "By Glenn Sestig",
+        tags: ["Lighting", "Suspension"],
+        materials: "Available in multiple LED options:\nWarm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nConverter 24V non-integrated, to be placed in a distant box\nCE Class III",
+        dimensions: "TENNESSEE S2 48 — H 482 × 344 × 72 mm + height of the hanging structure\nTENNESSEE S2 96 — H 962 × 344 × 72 mm + height of the hanging structure",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Tennessee-S2.pdf",
+        pdfFilename: "Maison_Affluency-Tennessee-S2.pdf",
+      },
     ],
   },
 };
