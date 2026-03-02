@@ -1423,14 +1423,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "Ø 85 × H 35 cm"
       },
       {
-        image: jmfElephantArmchair,
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433160/Screen_Shot_2026-03-02_at_2.20.10_PM_cfq0rl.png",
         title: "Elephant Armchair",
         subtitle: "1939",
         category: "Furniture",
         tags: ["Furniture", "Armchair"],
         materials: "Smooth Solid Oak Frame • Fabric",
         dimensions: "L 87 × D 100 × H 73 cm",
-        description: "Various Oak and Walnut finishes available on request"
+        description: "Various Oak and Walnut finishes available on request",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1939_Elephant_Armchair_Info_Sheet.pdf",
+        pdfFilename: "JMF-Elephant_Armchair_Info_Sheet.pdf",
       },
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433153/Screen_Shot_2026-03-02_at_2.20.57_PM_w34cg9.png",
