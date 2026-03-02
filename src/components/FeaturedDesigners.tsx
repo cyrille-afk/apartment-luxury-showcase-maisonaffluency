@@ -1418,13 +1418,15 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "JMF-Soleil_Coffee_Table_Info_Sheet.pdf",
       },
       {
-        image: jmfSoleilTable2,
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772434598/Screen_Shot_2026-03-02_at_2.51.57_PM_fmoydq.png",
         title: "Soleil Coffee Table",
         subtitle: "1930 — Close-Up",
         category: "Furniture",
         tags: ["Furniture", "Coffee Table"],
         materials: "Straw Marquetry",
-        dimensions: "Ø 85 × H 35 cm"
+        dimensions: "Ø 85 × H 35 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1930_Soleil_Coffee_Table_Oak_Close_Up_Info_Sheet.pdf",
+        pdfFilename: "JMF-Soleil_Coffee_Table_Info_Sheet.pdf",
       },
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433160/Screen_Shot_2026-03-02_at_2.20.10_PM_cfq0rl.png",
