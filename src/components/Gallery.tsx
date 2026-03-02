@@ -720,23 +720,23 @@ const Gallery = () => {
           </VisuallyHidden>
            {isMobile ? (
              /* ── Mobile: Embla Carousel lightbox ── */
-              <div className="relative w-full h-full flex flex-col">
+              <div className="relative w-full h-full flex flex-col items-center justify-center overflow-y-auto">
                 {/* Title */}
-                <h3 className="text-lg font-serif text-white mt-4 mb-2 text-center px-4 shrink-0">
+                <h3 className="text-lg font-serif text-white mt-2 mb-1.5 text-center px-4 shrink-0">
                   {currentSectionItems[currentItemIndex]?.title}
                 </h3>
 
                 {/* Embla carousel with close button */}
-                <div className="relative flex-1 min-h-0 overflow-hidden">
-                  <div ref={emblaRef} className="h-full overflow-hidden">
-                    <div className="flex h-full">
+                <div className="relative w-full shrink-0 overflow-hidden">
+                  <div ref={emblaRef} className="overflow-hidden">
+                    <div className="flex">
                       {currentSectionItems.map((item, i) => (
                         <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center px-4">
                            <img
                              src={item.image}
                              alt={item.title}
                              sizes="100vw"
-                             className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[45vh]"
+                             className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[50vh]"
                              loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
                              decoding="async"
                              draggable={false}
@@ -756,7 +756,7 @@ const Gallery = () => {
                 </div>
 
                 {/* Dot indicators */}
-                <div className="flex justify-center gap-1.5 mt-2 shrink-0">
+                <div className="flex justify-center gap-1.5 mt-1.5 shrink-0">
                   {currentSectionItems.map((_, i) => (
                     <button
                       key={i}
@@ -768,7 +768,7 @@ const Gallery = () => {
                 </div>
 
                 {/* Description */}
-                <div className="mt-2 text-center shrink-0 pb-14 px-4 overflow-y-auto max-h-[30vh] scrollbar-hide" style={{ touchAction: 'pan-y' }}>
+                <div className="mt-1.5 text-center shrink-0 pb-6 px-4 overflow-y-auto max-h-[25vh] scrollbar-hide" style={{ touchAction: 'pan-y' }}>
                   <p className="text-sm text-white/70 font-body max-w-2xl mx-auto text-justify">
                     {currentSectionItems[currentItemIndex]?.description}
                   </p>
