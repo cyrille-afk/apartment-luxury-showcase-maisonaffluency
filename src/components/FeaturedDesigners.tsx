@@ -2338,7 +2338,7 @@ const FeaturedDesigners = () => {
   const designerAlphaGroups = useMemo(() => {
     const groups: Record<string, typeof filteredDesigners> = {};
     filteredDesigners.forEach(d => {
-      const letter = d.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
+      const letter = (d.displayName || d.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
       if (!groups[letter]) groups[letter] = [];
       groups[letter].push(d);
     });
