@@ -266,8 +266,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         title: "CLASSIQUE V",
         subtitle: "Gounot & Jähnke",
         tags: ["Lighting", "Chandelier"],
-        materials: "Structures in aluminium and brass, medal bronze, mirror nickel or gun metal finish\nWhite paper diffusing material",
-        dimensions: "120 × 120 × H 12 cm – 48 kg\nSilhouette: 175 cm\nWarm white 2700K LED lighting, 230W, 11000 Lumens",
+        materials: "Structures in aluminium and brass, medal bronze, mirror nickel or gun metal finish\nWhite paper diffusing material\n120 × 120 × H 12 cm – 48 kg\nSilhouette: 175 cm\nWarm white 2700K LED lighting, 230W, 11000 Lumens\n\nAvailable in multiple LED options:\nWarm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nIntegrated 24V converters and drivers\nCE Class I",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Classique_V.pdf",
         pdfFilename: "Maison_Affluency-Classique_V.pdf",
       },
@@ -276,8 +275,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         title: "Brasilia PL",
         subtitle: "Michel Boyer",
         tags: ["Lighting", "Chandelier"],
-        materials: "Structures and stem in white lacquered aluminium\nWhite paper diffusing material\nWarm white 2700K LED lighting, 144W, 6600 Lumens",
-        dimensions: "70 × 70 × H 80 cm – 22 kg\nSilhouette: 175 cm",
+        materials: "Structures and stem in white lacquered aluminium\nWhite paper diffusing material\n70 × 70 × H 80 cm – 22 kg\nSilhouette: 175 cm\nWarm white 2700K LED lighting, 144W, 6600 Lumens\n\nAvailable in multiple LED options:\nWarm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nIntegrated 24V converters and drivers\nCE Class I",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Brasilia_PL.pdf",
         pdfFilename: "Maison_Affluency-Brasilia_PL.pdf",
       },
@@ -286,8 +284,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         title: "GÉLULE",
         subtitle: "Joseph Dirand",
         tags: ["Lighting", "Wall Lamp"],
-        materials: "Aluminium structure\nPale gold or mirror nickel finish",
-        dimensions: "40 × 10 × H 13 cm – 4 kg\nSilhouette: 175 cm\nWarm white 2200K LED lighting, 12W, 550 Lumens",
+        materials: "Aluminium structure\nPale gold or mirror nickel finish\n40 × 10 × H 13 cm – 4 kg\nSilhouette: 175 cm\nWarm white 2200K LED lighting, 12W, 550 Lumens\n\nAvailable in multiple LED options:\nWarm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nIntegrated 24V converters and drivers\nCE Class I",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Gelule.pdf",
         pdfFilename: "Maison_Affluency-Gelule.pdf",
       },
@@ -296,7 +293,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         title: "TENNESSEE S2",
         subtitle: "Glenn Sestig",
         tags: ["Lighting", "Suspension"],
-        materials: "TENNESSEE S2 48 — H 482 × 344 × 72 mm + height of the hanging structure\nTENNESSEE S2 96 — H 962 × 344 × 72 mm + height of the hanging structure\nAvailable in multiple LED options:\nWarm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nConverter 24V non-integrated, to be placed in a distant box\nCE Class III",
+        materials: "TENNESSEE S2 48 — H 482 × 344 × 72 mm + height of the hanging structure\nTENNESSEE S2 96 — H 962 × 344 × 72 mm + height of the hanging structure\n\nAvailable in multiple LED options:\nWarm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nConverter 24V non-integrated, to be placed in a distant box\nCE Class III",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Tennessee-S2.pdf",
         pdfFilename: "Maison_Affluency-Tennessee-S2.pdf",
       },
@@ -305,7 +302,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         title: "BRASILIA LP",
         subtitle: "Michel Boyer",
         tags: ["Lighting", "Table Lamp"],
-        materials: "Brass, aluminium, steel\nLamp base in gloss black or polished stainless steel\nShade structure in white lacquered\nWhite paper diffusing material\n280 × 280 × H 710 mm\nAvailable in multiple LED options:\nWarm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nIntegrated 24V converters and drivers\nCE Class I",
+        materials: "Brass, aluminium, steel\nLamp base in gloss black or polished stainless steel\nShade structure in white lacquered\nWhite paper diffusing material\n280 × 280 × H 710 mm\n\nAvailable in multiple LED options:\nWarm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nIntegrated 24V converters and drivers\nCE Class I",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Brasilia-LP.pdf",
         pdfFilename: "Maison_Affluency-Brasilia-LP.pdf",
       },
@@ -314,7 +311,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         title: "LINE C",
         subtitle: "Gounot & Jähnke",
         tags: ["Lighting", "Chandelier"],
-        materials: "White lacquered aluminum structure\nWhite paper diffusing material\nLINE C — 1450 × 1450 × H 150 mm\nLINE C110 — 1100 × 1100 × H 160 mm\nLINE C90 — 900 × 900 × H 120 mm\nAvailable in multiple LED options:\nWarm white 2200K LED lighting, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nConverter 24V non-integrated, to be placed in a distant box\nCE Class III",
+        materials: "White lacquered aluminum structure\nWhite paper diffusing material\nLINE C — 1450 × 1450 × H 150 mm\nLINE C110 — 1100 × 1100 × H 160 mm\nLINE C90 — 900 × 900 × H 120 mm\n\nAvailable in multiple LED options:\nWarm white 2200K LED lighting, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity)\nConverter 24V non-integrated, to be placed in a distant box\nCE Class III",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Line-C.pdf",
         pdfFilename: "Maison_Affluency-Line-C.pdf",
       },
@@ -2408,11 +2405,29 @@ const BrandsAteliers = () => {
                             <span className="text-white/60"> — {(picksDesigner.curatorPicks[picksIndex] as any).subtitle}</span>
                           )}
                         </p>
-                        {picksDesigner.curatorPicks[picksIndex]?.materials && (
-                          <p className="text-xs text-white/50 font-body mt-1 whitespace-pre-line">
-                            {picksDesigner.curatorPicks[picksIndex].materials}
-                          </p>
-                        )}
+                        {picksDesigner.curatorPicks[picksIndex]?.materials && (() => {
+                          const mat = picksDesigner.curatorPicks[picksIndex].materials!;
+                          const ledIdx = mat.indexOf("\n\nAvailable in multiple LED options:");
+                          if (ledIdx === -1) {
+                            return (
+                              <p className="text-xs text-white/50 font-body mt-1 whitespace-pre-line">
+                                {mat}
+                              </p>
+                            );
+                          }
+                          const before = mat.slice(0, ledIdx);
+                          const after = mat.slice(ledIdx + 2); // skip the \n\n
+                          return (
+                            <>
+                              <p className="text-xs text-white/50 font-body mt-1 whitespace-pre-line">
+                                {before}
+                              </p>
+                              <p className="text-xs text-white/50 font-body mt-3 whitespace-pre-line text-justify">
+                                {after}
+                              </p>
+                            </>
+                          );
+                        })()}
                         {((picksDesigner.curatorPicks[picksIndex] as any)?.dimensions || (picksDesigner.curatorPicks[picksIndex] as any)?.weight) && (
                           <p className="text-xs text-white/40 font-body mt-0.5 whitespace-pre-line">
                             {(picksDesigner.curatorPicks[picksIndex] as any)?.dimensions}
