@@ -93,6 +93,7 @@ const alexanderLamontPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/
 const alexanderLamontPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160703/Corteza-Console-Table-Dark_03_alexander-lamont_r2ubvz.jpg";
 const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161289/Barbican-Cabinet_13_alexander-lamont_2_hyp2sd.jpg";
 const alexanderLamontPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161406/Koi-Carp_01_alexander-lamont_1_kxayax.jpg";
+const yvesMacheretPickBeam800 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772430078/Screen_Shot_2026-03-02_at_1.39.34_PM_bap4rz.png";
 import yvesMacheretPick1 from "@/assets/curators-picks/yves-macheret-1.jpg";
 import yvesMacheretPick2 from "@/assets/curators-picks/yves-macheret-2.jpg";
 import yvesMacheretPick3 from "@/assets/curators-picks/yves-macheret-3.png";
@@ -1091,6 +1092,18 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Patinated cast bronze • Calacatta Oro marble",
         dimensions: "L160 × D35 × H81 cm",
         description: "Designed by Arnaud Leman for Entrelacs, the Console 1925 is a refined tribute to early twentieth-century decorative arts. Its slender cast-bronze frame supports a Calacatta Oro marble top, blending structural elegance with the warmth and weight of natural stone. Also available in custom sizes and alternative marble finishes."
+      },
+      {
+        image: yvesMacheretPickBeam800,
+        title: "BEAM 800",
+        subtitle: "Wall Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Wall Lamp"],
+        materials: "Patinated Bronze\nProtective Varnish",
+        dimensions: "220-240V / 50-60HZ / 24V\nLed can be changed / 6W",
+        description: "The BEAM 800 wall lamp by Yves Macheret is a masterful expression of linear minimalism in patinated bronze. Protected with a hand-applied varnish, it combines enduring craftsmanship with a contemporary silhouette.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/entrelacs/SPEC-SHEET_WLBM800CY.pdf",
+        pdfFilename: "Entrelacs-BEAM_800_Spec_Sheet.pdf",
       },
     ],
     links: [
