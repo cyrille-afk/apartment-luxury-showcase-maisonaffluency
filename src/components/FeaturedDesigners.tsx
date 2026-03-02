@@ -1405,13 +1405,15 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "Also available with a solid Walnut, Golden Brass or Black Patinated Brass base"
       },
       {
-        image: jmfSoleilTable1,
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772433798/Screen_Shot_2026-03-02_at_2.42.46_PM_efdury.png",
         title: "Soleil Coffee Table",
         subtitle: "1930",
         category: "Furniture",
         tags: ["Furniture", "Coffee Table"],
         materials: "Straw Marquetry",
-        dimensions: "Ø 85 × H 35 cm"
+        dimensions: "Ø 85 × H 35 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/jean-michel-frank/JMF_1930_Soleil_Coffee_Table_Oak_Info_Sheet.pdf",
+        pdfFilename: "JMF-Soleil_Coffee_Table_Info_Sheet.pdf",
       },
       {
         image: jmfSoleilTable2,
