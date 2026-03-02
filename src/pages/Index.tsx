@@ -96,32 +96,39 @@ const Index = () => {
     // Wait for the hero image (LCP element) to finish loading before
     // allowing lazy chunks to compete for bandwidth.
     const heroImg = document.querySelector<HTMLImageElement>('#home img');
+    let cancelDeferredReveal: (() => void) | null = null;
+    let timeoutId: number | null = null;
 
     const revealAfterHero = () => {
       // Navigation is above-fold — show first
       setShowNavigation(true);
-      // Stagger below-fold + scroll indicator slightly so Navigation chunk
-      // doesn't compete with Overview/Gallery chunks on mobile.
-      requestAnimationFrame(() => {
-        setShowScrollProgress(true);
-        setShowBelowFoldSections(true);
-      });
+
+      // Defer non-critical UI + below-fold sections until idle time.
+      // This keeps mobile main-thread/network free for LCP.
+      if (!cancelDeferredReveal) {
+        cancelDeferredReveal = scheduleWhenIdle(() => {
+          setShowScrollProgress(true);
+          setShowBelowFoldSections(true);
+        }, 1200);
+      }
     };
 
     if (heroImg?.complete) {
       revealAfterHero();
     } else if (heroImg) {
       heroImg.addEventListener('load', revealAfterHero, { once: true });
-      const timeout = setTimeout(revealAfterHero, 4000);
+      timeoutId = window.setTimeout(revealAfterHero, 4000);
       heroImg.addEventListener('error', revealAfterHero, { once: true });
-      return () => {
-        clearTimeout(timeout);
-        heroImg.removeEventListener('load', revealAfterHero);
-        heroImg.removeEventListener('error', revealAfterHero);
-      };
     } else {
       revealAfterHero();
     }
+
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      heroImg?.removeEventListener('load', revealAfterHero);
+      heroImg?.removeEventListener('error', revealAfterHero);
+      cancelDeferredReveal?.();
+    };
   }, []);
 
   // Persist scroll position to sessionStorage for refresh restoration
