@@ -1048,7 +1048,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Lighting", "Wall Lamp"],
         materials: "Patinated casted bronze & alabaster",
         dimensions: "570 × 130 × 60 mm",
-        description: "The Ghost wall lamp distils the art of bronze lighting to its purest expression. Cast in patinated bronze with a hand-carved alabaster diffuser, its slender, almost ethereal silhouette seems to float against the wall—hence its name. Designed by Yves Macheret, it embodies the Entrelacs philosophy: revealing the inherent beauty of noble materials through restrained, timeless forms."
+        description: "The Ghost wall lamp distils the art of bronze lighting to its purest expression. Cast in patinated bronze with a hand-carved alabaster diffuser, its slender, almost ethereal silhouette seems to float against the wall—hence its name. Designed by Yves Macheret, it embodies the Entrelacs philosophy: revealing the inherent beauty of noble materials through restrained, timeless forms.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/entrelacs/SPEC-SHEET_GHOST.pdf",
+        pdfFilename: "Entrelacs-GHOST_Spec_Sheet.pdf",
       },
       { 
         image: yvesMacheretPickNomad295, 
