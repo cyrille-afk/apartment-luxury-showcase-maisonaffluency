@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { Instagram, Search, X, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Gem, Maximize2, Minimize2, SlidersHorizontal, Download } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Gem, Maximize2, Minimize2, SlidersHorizontal, FileDown } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -3081,10 +3081,10 @@ const FeaturedDesigners = () => {
                               window.open(pick.pdfUrl, '_blank');
                             }
                           }}
-                          className="absolute bottom-2 right-2 md:right-12 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
+                          className="absolute bottom-2 right-2 md:right-12 p-2 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Download PDF specification"
                         >
-                          <Download size={16} />
+                          <FileDown size={16} />
                         </button>
                       )}
                       {/* Desktop Maximize / Minimize button — inside image, bottom-right */}
