@@ -2173,11 +2173,15 @@ const FeaturedDesigners = () => {
       const designer = featuredDesigners.find(d => d.id === detail.id);
       if (designer) {
         setOpenDesigners(prev => prev.includes(designer.id) ? prev : [...prev, designer.id]);
-        // Scroll to the specific designer after accordion opens
-        requestAnimationFrame(() => {
+        // Wait for accordion to fully expand, then scroll with nav offset
+        setTimeout(() => {
           const el = document.getElementById(`designer-${designer.id}`);
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
+          if (el) {
+            const navHeight = document.querySelector('nav')?.getBoundingClientRect().height ?? 64;
+            const top = el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+            window.scrollTo({ top, behavior: "smooth" });
+          }
+        }, 400);
       }
     };
     window.addEventListener("deeplink-open-profile", handler);

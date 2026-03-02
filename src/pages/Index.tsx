@@ -268,7 +268,9 @@ const Index = () => {
       // Instant scroll for fast landing
       const sectionEl = document.getElementById(sectionId);
       if (sectionEl) {
-        sectionEl.scrollIntoView({ behavior: "instant", block: "start" });
+        const navHeight = document.querySelector('nav')?.getBoundingClientRect().height ?? 64;
+        const top = sectionEl.getBoundingClientRect().top + window.scrollY - navHeight + 2;
+        window.scrollTo({ top, behavior: "instant" });
       }
 
       // Retry dispatching until the lazy component has mounted and can handle it

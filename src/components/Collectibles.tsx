@@ -350,10 +350,14 @@ const Collectibles = () => {
       if (designer) {
         const designerId = designer.id ?? designer.name;
         setOpenDesigners(prev => prev.includes(designerId) ? prev : [...prev, designerId]);
-        requestAnimationFrame(() => {
+        setTimeout(() => {
           const el = document.getElementById(`collectible-${designerId}`);
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
+          if (el) {
+            const navHeight = document.querySelector('nav')?.getBoundingClientRect().height ?? 64;
+            const top = el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+            window.scrollTo({ top, behavior: "smooth" });
+          }
+        }, 400);
       }
     };
     window.addEventListener("deeplink-open-profile", handler);
