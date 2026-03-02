@@ -131,8 +131,8 @@ const martaSalaElisabeth = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.51.46_AM_v
 const martaSalaMurena = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.48.51_AM_e0yej8", { width: 1200, quality: "auto:good", crop: "fill" });
 
 // Ozone Light Curators' Picks image
-const ozoneClassiqueV = "/images/ozone-classique-v.jpg";
-const ozoneBrasiliaPl = "/images/ozone-brasilia-pl.jpg";
+import ozoneClassiqueV from "@/assets/curators-picks/ozone-classique-v.jpg";
+import ozoneBrasiliaPl from "@/assets/curators-picks/ozone-brasilia-pl.jpg";
 
 // Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
 const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
