@@ -1,6 +1,9 @@
 /**
  * Scroll to a section element by ID with consistent nav offset.
  * Uses a settle-and-correct strategy to handle sections using content-visibility.
+ *
+ * content-visibility: auto sections above the target may change height as they
+ * render; we use delayed passes (not just rAF) to let the browser finish layout.
  */
 export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth") {
   const navHeight = 96;
@@ -21,8 +24,8 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
 
   let passes = 0;
   let previousTop = firstTop;
-  const maxPasses = 8;
-  const settleThreshold = 1;
+  const maxPasses = 12;
+  const settleThreshold = 2;
 
   const refine = () => {
     const nextTop = getTargetTop();
@@ -34,7 +37,9 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
     if (delta > settleThreshold && passes < maxPasses) {
       window.scrollTo({ top: nextTop, behavior: instant });
       passes += 1;
-      requestAnimationFrame(refine);
+      // Use a real delay (not just rAF) so the browser has time to lay out
+      // content-visibility sections that just became visible.
+      setTimeout(() => requestAnimationFrame(refine), 60);
       return;
     }
 
@@ -42,6 +47,8 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
     window.scrollTo({ top: nextTop, behavior });
   };
 
+  // Double-rAF to let the initial jump trigger content-visibility rendering,
+  // then start the settle loop with delays.
   requestAnimationFrame(() => requestAnimationFrame(refine));
 }
 
