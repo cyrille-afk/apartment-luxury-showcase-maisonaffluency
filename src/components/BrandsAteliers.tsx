@@ -290,10 +290,10 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
       },
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772452374/Screen_Shot_2026-03-02_at_7.52.16_PM_ljyj4g.png",
-        title: "TENNESSEE S2",
+        title: "TENNESSEE S4",
         subtitle: "Glenn Sestig",
         tags: ["Lighting", "Suspension"],
-        materials: "TENNESSEE S2 48 — H 482 × 344 × 72 mm + height of the hanging structure\nTENNESSEE S2 96 — H 962 × 344 × 72 mm + height of the hanging structure\n\nAvailable in multiple LED options: Warm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity), Converter 24V non-integrated, to be placed in a distant box, CE Class III",
+        materials: "Aluminium and brass structure. Finish in brushed bronze. White paper diffusing material.\n\nTENNESSEE S4 48 — H 482 × 366 × 366 mm + height of the hanging structure\nTENNESSEE S4 96 — H 962 × 366 × 366 mm + height of the hanging structure\n\nAvailable in multiple LED options: Warm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity), Converter 24V non-integrated, to be placed in a distant box, CE Class III",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Tennessee-S2.pdf",
         pdfFilename: "Maison_Affluency-Tennessee-S2.pdf",
       },
