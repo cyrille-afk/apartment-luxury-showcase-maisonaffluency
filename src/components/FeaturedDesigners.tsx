@@ -3078,11 +3078,12 @@ const FeaturedDesigners = () => {
                               window.open(pick.pdfUrl, '_blank');
                             }
                           }}
-                          className="absolute bottom-2 right-2 p-2 md:p-2.5 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300 z-10"
+                          className="absolute bottom-2 right-2 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Download PDF specification"
                         >
-                          <FileDown size={16} className="md:hidden" />
-                          <FileDown size={20} className="hidden md:block" />
+                          <FileDown size={14} className="md:hidden" />
+                          <FileDown size={16} className="hidden md:block" />
+                          <span className="text-[10px] md:text-xs font-medium leading-none">PDF</span>
                         </button>
                       )}
                       {/* Mobile Maximize / Minimize button — bottom-left, spaced from X */}

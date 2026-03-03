@@ -2338,7 +2338,7 @@ const BrandsAteliers = () => {
                         </button>
                         {(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl && (
                           <button
-                            className="absolute bottom-2 right-2 z-10 bg-[#d32f2f]/80 backdrop-blur-sm p-2 md:p-2.5 rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
+                            className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
                             aria-label="Download PDF"
                             onClick={async (e) => {
                               e.stopPropagation();
@@ -2361,8 +2361,9 @@ const BrandsAteliers = () => {
                               }
                             }}
                           >
-                            <FileDown size={16} className="md:hidden text-white" />
-                            <FileDown size={20} className="hidden md:block text-white" />
+                            <FileDown size={14} className="md:hidden text-white" />
+                            <FileDown size={16} className="hidden md:block text-white" />
+                            <span className="text-[10px] md:text-xs font-medium leading-none text-white">PDF</span>
                           </button>
                         )}
                         <button
