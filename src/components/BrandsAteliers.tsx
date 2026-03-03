@@ -2418,13 +2418,13 @@ const BrandsAteliers = () => {
                             );
                           }
                           const before = mat.slice(0, ledIdx);
-                          const after = mat.slice(ledIdx + 2); // skip the \n\n
+                          const after = mat.slice(ledIdx + 2).replace(/\n/g, ' '); // collapse into single justified paragraph
                           return (
                             <>
                               <p className="text-xs text-white/50 font-body mt-1 whitespace-pre-line">
                                 {before}
                               </p>
-                              <p className="text-xs text-white/50 font-body mt-3 whitespace-pre-line text-justify">
+                              <p className="text-xs text-white/50 font-body mt-3 text-justify">
                                 {after}
                               </p>
                             </>
