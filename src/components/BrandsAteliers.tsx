@@ -2226,7 +2226,8 @@ const BrandsAteliers = () => {
             {picksDesigner ? (
               picksDesigner.curatorPicks && picksDesigner.curatorPicks.length > 0 ? (
                 <div
-                  className="relative w-full h-full flex items-center justify-center"
+                  className="relative w-full h-full flex items-center justify-center touch-pan-y select-none"
+                  style={{ WebkitUserSelect: 'none' }}
                   onTouchStart={(e) => { if (imageZoomedRef.current) return; setPicksTouchEnd(null); setPicksTouchStart(e.targetTouches[0].clientX); }}
                   onTouchMove={(e) => { if (imageZoomedRef.current) return; setPicksTouchEnd(e.targetTouches[0].clientX); }}
                   onTouchEnd={() => {
