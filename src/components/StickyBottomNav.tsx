@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Image, Users, Palette, Gem, Building2, Mail } from "lucide-react";
+import { scrollToSection } from "@/lib/scrollToSection";
 
 const navItems = [
   { id: "gallery", label: "Gallery", icon: Image },
@@ -46,22 +47,7 @@ const StickyBottomNav = () => {
     return () => observer.disconnect();
   }, []);
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    // First pass: jump near the target so contentVisibility: auto renders it
-    const top1 = el.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT + 2;
-    window.scrollTo({ top: top1, behavior: "instant" as ScrollBehavior });
-    // Second pass: recalculate after layout settles (content now rendered)
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const el2 = document.getElementById(id);
-        if (!el2) return;
-        const top2 = el2.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT + 2;
-        window.scrollTo({ top: top2, behavior: "smooth" });
-      });
-    });
-  };
+  const scrollTo = (id: string) => scrollToSection(id);
 
   return (
     <AnimatePresence>
