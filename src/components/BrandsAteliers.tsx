@@ -2258,7 +2258,19 @@ const BrandsAteliers = () => {
                       observer.observe(el, { childList: true, subtree: true });
                       setTimeout(checkScroll, 500);
                     }}
-                    className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${picksZoomed ? 'max-h-[95vh] pb-4 pt-2' : 'max-h-[85vh] pb-4 pt-6 md:pt-4'}`}>
+                    onTouchStart={(e) => { if (imageZoomedRef.current) return; setPicksTouchEnd(null); setPicksTouchStart(e.targetTouches[0].clientX); }}
+                    onTouchMove={(e) => { if (imageZoomedRef.current) return; setPicksTouchEnd(e.targetTouches[0].clientX); }}
+                    onTouchEnd={() => {
+                      if (imageZoomedRef.current) return;
+                      if (!picksTouchStart || !picksDesigner.curatorPicks?.length) return;
+                      if (picksTouchEnd !== null) {
+                        const distance = picksTouchStart - picksTouchEnd;
+                        if (distance > 50) setPicksIndex(prev => prev === picksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+                        else if (distance < -50) setPicksIndex(prev => prev === 0 ? picksDesigner.curatorPicks.length - 1 : prev - 1);
+                      }
+                    }}
+                    className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto select-none touch-pan-y ${picksZoomed ? 'max-h-[95vh] pb-4 pt-2' : 'max-h-[85vh] pb-4 pt-6 md:pt-4'}`}
+                    style={{ WebkitUserSelect: 'none' }}>
                     <div className="relative inline-flex flex-col items-center">
                       {(() => {
                         const pick = picksDesigner.curatorPicks[picksIndex] as any;
