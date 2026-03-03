@@ -1545,6 +1545,7 @@ const brandToDesignerMap: Record<string, string> = {
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
 type ConsolidatedBrand = {
+  id: string;
   name: string;
   origin: string;
   description: string;
@@ -1591,7 +1592,7 @@ function AlphaStrip({
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail.section !== "atelier") return;
-      const matchedBrand = brands.find(b => b.name.replace(/\s+/g, "-").toLowerCase() === detail.id);
+      const matchedBrand = brands.find(b => b.id === detail.id || b.name.replace(/\s+/g, "-").toLowerCase() === detail.id);
       if (matchedBrand) {
         setExpandedCard(matchedBrand.name);
         // Scroll the strip to show the matched card
@@ -1632,7 +1633,7 @@ function AlphaStrip({
           return (
             <div
               key={brand.name}
-              id={`brand-${brand.name.replace(/\s+/g, "-").toLowerCase()}`}
+              id={`brand-${brand.id}`}
               role="button"
               tabIndex={0}
               aria-expanded={expandedCard === brand.name}
@@ -1761,7 +1762,7 @@ function AlphaStrip({
                   onClick={(e) => {
                     e.stopPropagation();
                     const featuredText = brand.featuredItems.find(i => i.featured)?.featured;
-                    shareProfileOnWhatsApp("atelier", brand.name.replace(/\s+/g, "-").toLowerCase(), brand.name, featuredText);
+                    shareProfileOnWhatsApp("atelier", brand.id, brand.name, featuredText);
                     trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                   }}
                   label={`Share ${brand.name} on WhatsApp`}
@@ -1964,6 +1965,7 @@ const BrandsAteliers = () => {
       if (!brand.name) return; // skip entries with no name
       if (!brandMap[brand.name]) {
         brandMap[brand.name] = {
+          id: brand.id || brand.name.replace(/\s+/g, "-").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
           name: brand.name,
           origin: brand.origin,
           description: brand.description,
