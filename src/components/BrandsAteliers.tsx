@@ -1751,7 +1751,7 @@ function AlphaStrip({
                   onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
                   className="md:order-1 flex items-center gap-2 md:gap-1.5 text-sm md:text-xs tracking-wider font-body group/picks touch-manipulation transition-all duration-300 text-white whitespace-nowrap"
                 >
-                  <Gem className="h-4 w-4 md:h-3 md:w-3 flex-shrink-0 fill-current" />
+                  <Gem className="h-4 w-4 md:h-3 md:w-3 flex-shrink-0 fill-accent text-accent" />
                   <span className="group-hover/picks:underline underline-offset-2">
                     Curators' Picks
                   </span>
