@@ -2433,13 +2433,13 @@ const BrandsAteliers = () => {
                             );
                           };
                           if (ledIdx === -1) {
-                            return renderWithBoldDims(mat, 'whitespace-pre-line text-justify');
+                            return renderWithBoldDims(mat, 'whitespace-pre-line');
                           }
                           const before = mat.slice(0, ledIdx);
                           const after = mat.slice(ledIdx + 2).replace(/\n/g, ' ');
                           return (
                             <>
-                              {renderWithBoldDims(before, 'whitespace-pre-line text-justify')}
+                              {renderWithBoldDims(before, 'whitespace-pre-line')}
                               <p className="text-xs text-white/50 font-body mt-3 text-justify">
                                 {after}
                               </p>
