@@ -583,7 +583,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Lighting",
         tags: ["Lighting", "Table Lamp"],
         materials: "Brass armature • Pressed glass shade",
-        dimensions: "H18\" × Ø10\""
+        dimensions: "H18\" × Ø10\"",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_LANTERN_TABLE_LAMP.pdf",
+        pdfFilename: "Apparatus_Studio-Lantern_Table_Lamp.pdf"
       },
       { 
         image: apparatusPick5, 
@@ -592,7 +594,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Furniture",
         tags: ["Furniture", "Console"],
         materials: "Hand-Cast Resin Legs • Lacquer or Sand-Blasted Ash Table Surface",
-        dimensions: "W 147 × D 45 × H 84 cm"
+        dimensions: "W 147 × D 45 × H 84 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_SEGMENT_CONSOLE_TABLE.pdf",
+        pdfFilename: "Apparatus_Studio-Segment_Console_Table.pdf"
       },
       { 
         image: apparatusPick2, 
@@ -601,7 +605,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Lighting",
         tags: ["Lighting", "Pendant"],
         materials: "Blackened brass • Mold-blown glass",
-        dimensions: "H16\" × Ø6.5\""
+        dimensions: "H16\" × Ø6.5\"",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_LARIAT_PENDANT.pdf",
+        pdfFilename: "Apparatus_Studio-Lariat_Pendant.pdf"
       },
       { 
         image: apparatusPick6, 
@@ -611,7 +617,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Furniture", "Table"],
         materials: "Brass Armature • Stone • Hand-Cut Leather",
         dimensions: "Ø 31 × H 61 cm",
-        description: "Also available in Noir Saint-Laurent Marble Top, Ebene Leather and Oil-Rubbed Bronze"
+        description: "Also available in Noir Saint-Laurent Marble Top, Ebene Leather and Oil-Rubbed Bronze",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_PARS_COCKTAIL_TABLE.pdf",
+        pdfFilename: "Apparatus_Studio-Pars_Cocktail_Table.pdf"
       },
       { 
         image: apparatusPick3, 
@@ -620,7 +628,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Lighting",
         tags: ["Lighting", "Table Lamp"],
         materials: "Brass armature • Pressed glass",
-        dimensions: "H23.5\" × Ø17.25\""
+        dimensions: "H23.5\" × Ø17.25\"",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_SIGNAL_Y_TABLE_LAMP.pdf",
+        pdfFilename: "Apparatus_Studio-Signal_Y_Table_Lamp.pdf"
       },
       { 
         image: apparatusPick4, 
@@ -629,7 +639,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Lighting",
         tags: ["Lighting", "Pendant"],
         materials: "Mold-blown glass cylinders • Brass dome and armature",
-        dimensions: "Ø32.5\""
+        dimensions: "Ø32.5\"",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_TASSEL_57.pdf",
+        pdfFilename: "Apparatus_Studio-Tassel_57.pdf"
       },
       { 
         image: apparatusPick7, 
