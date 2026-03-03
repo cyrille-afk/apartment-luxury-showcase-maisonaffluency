@@ -2431,7 +2431,7 @@ const BrandsAteliers = () => {
                           );
                         })()}
                         {((picksDesigner.curatorPicks[picksIndex] as any)?.dimensions || (picksDesigner.curatorPicks[picksIndex] as any)?.weight) && (
-                          <p className="text-xs text-white/40 font-body mt-0.5 whitespace-pre-line">
+                          <p className="text-xs text-white font-body font-medium mt-0.5 whitespace-pre-line">
                             {(picksDesigner.curatorPicks[picksIndex] as any)?.dimensions}
                             {(picksDesigner.curatorPicks[picksIndex] as any)?.dimensions && (picksDesigner.curatorPicks[picksIndex] as any)?.weight && ' – '}
                             {(picksDesigner.curatorPicks[picksIndex] as any)?.weight}
