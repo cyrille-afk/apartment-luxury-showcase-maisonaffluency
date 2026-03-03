@@ -2258,7 +2258,7 @@ const BrandsAteliers = () => {
                       observer.observe(el, { childList: true, subtree: true });
                       setTimeout(checkScroll, 500);
                     }}
-                    className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${picksZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
+                    className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${picksZoomed ? 'max-h-[95vh] pb-4 pt-2' : 'max-h-[85vh] pb-4 pt-6 md:pt-4'}`}>
                     <div className="relative inline-flex flex-col items-center">
                       {(() => {
                         const pick = picksDesigner.curatorPicks[picksIndex] as any;
