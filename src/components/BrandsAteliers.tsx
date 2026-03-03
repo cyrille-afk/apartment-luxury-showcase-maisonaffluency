@@ -2404,7 +2404,7 @@ const BrandsAteliers = () => {
                         <p className="font-brand text-base md:text-lg text-white tracking-wide">
                           {picksDesigner.curatorPicks[picksIndex]?.title}
                           {(picksDesigner.curatorPicks[picksIndex] as any)?.subtitle && (
-                            <span className="text-white/60"> — {(picksDesigner.curatorPicks[picksIndex] as any).subtitle}</span>
+                            <span className="text-white font-medium"> — {(picksDesigner.curatorPicks[picksIndex] as any).subtitle}</span>
                           )}
                         </p>
                         {picksDesigner.curatorPicks[picksIndex]?.materials && (() => {
