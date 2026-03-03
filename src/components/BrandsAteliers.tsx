@@ -1821,24 +1821,20 @@ const BrandsAteliers = () => {
     setSelectedSubcategoryRaw(sub);
     broadcastFilter(selectedCategory, sub);
   }, [selectedCategory, broadcastFilter]);
-  // Deep-link handler: scroll to brand card and click to expand
+  // Deep-link handler: scroll to brand card (AlphaStrip handles expansion)
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail.section !== "atelier") return;
-      requestAnimationFrame(() => {
+      // Wait for AlphaStrip to expand the card first, then scroll
+      setTimeout(() => {
         const card = document.getElementById(`brand-${detail.id}`);
         if (card) {
-          // Click to expand the card (triggers the AlphaStrip onClick)
-          card.click();
-          // Scroll into view after a brief delay to let expansion render
-          setTimeout(() => {
-            card.scrollIntoView({ behavior: "smooth", block: "center" });
-            card.classList.add('ring-2', 'ring-primary');
-            setTimeout(() => card.classList.remove('ring-2', 'ring-primary'), 3000);
-          }, 100);
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+          card.classList.add('ring-2', 'ring-primary');
+          setTimeout(() => card.classList.remove('ring-2', 'ring-primary'), 3000);
         }
-      });
+      }, 200);
     };
     window.addEventListener("deeplink-open-profile", handler);
     return () => window.removeEventListener("deeplink-open-profile", handler);
