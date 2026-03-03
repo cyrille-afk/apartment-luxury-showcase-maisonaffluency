@@ -2414,7 +2414,7 @@ const BrandsAteliers = () => {
                           const renderWithBoldDims = (text: string, extraClass?: string) => {
                             const lines = text.split('\n');
                             return (
-                              <p className={`text-xs font-body mt-1 ${extraClass || ''}`}>
+                              <p className={`text-xs font-body mt-1 text-center ${extraClass || ''}`}>
                                 {lines.map((line, i) => {
                                   const isDim = dimRegex.test(line);
                                   dimRegex.lastIndex = 0;
