@@ -302,7 +302,7 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
         title: "BRASILIA LP",
         subtitle: "Michel Boyer",
         tags: ["Lighting", "Table Lamp"],
-        materials: "Brass, aluminium, steel\nLamp base in gloss black or polished stainless steel\nShade structure in white lacquered\nWhite paper diffusing material\n280 × 280 × H 710 mm\n\nAvailable in multiple LED options: Warm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity), Integrated 24V converters and drivers, CE Class I",
+        materials: "Brass, aluminium, steel, gloss black or polished stainless steel base, white lacquered shade, white paper diffuser\n280 × 280 × H 710 mm\n\nWarm white LED 2200K or 2700K Optional Dim to Warm 1900K–2500K, integrated 24V converters & drivers, CE Class I",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Brasilia-LP.pdf",
         pdfFilename: "Maison_Affluency-Brasilia-LP.pdf",
       },
