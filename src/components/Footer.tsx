@@ -1,6 +1,7 @@
 import { Instagram } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { scrollToSection } from "@/lib/scrollToSection";
 const affluencyLogo = cloudinaryUrl("affluency-footer-logo_gvpt4u", { width: 800, quality: "auto", crop: "fill" });
 import {
   Tooltip,
@@ -36,15 +37,15 @@ const Footer = () => {
           </TooltipProvider>
           
           <div className="flex gap-8 items-center">
-            <a href="#curating-team" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
+            <button onClick={() => scrollToSection("curating-team")} className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               About Us
-            </a>
+            </button>
             <a href="https://www.instagram.com/myaffluency/?hl=en" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Maison Affluency on Instagram" onClick={() => trackCTA.instagram("Footer", "Maison Affluency")}>
               <Instagram size={20} />
             </a>
-            <a href="#contact" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
+            <button onClick={() => scrollToSection("contact")} className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               Contact
-            </a>
+            </button>
           </div>
         </div>
         

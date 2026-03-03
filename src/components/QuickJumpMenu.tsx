@@ -13,6 +13,7 @@ import {
   ChevronUp,
   Gem
 } from "lucide-react";
+import { scrollToSection as scrollToSectionUtil } from "@/lib/scrollToSection";
 
 const sections = [
   { id: "home", label: "Home", icon: Home },
@@ -82,16 +83,13 @@ const QuickJumpMenu = () => {
     };
   }, []);
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      // Trigger haptic feedback on mobile
-      if ('vibrate' in navigator) {
-        navigator.vibrate(10);
-      }
-      element.scrollIntoView({ behavior: "smooth" });
-      setIsOpen(false);
+  const handleScrollTo = (sectionId: string) => {
+    // Trigger haptic feedback on mobile
+    if ('vibrate' in navigator) {
+      navigator.vibrate(10);
     }
+    scrollToSectionUtil(sectionId);
+    setIsOpen(false);
   };
 
   const desktopTop = sectionPositionMap[activeSection] || defaultDesktopTop;
@@ -134,7 +132,7 @@ const QuickJumpMenu = () => {
                 return (
                   <button
                     key={section.id}
-                    onClick={() => scrollToSection(section.id)}
+                    onClick={() => handleScrollTo(section.id)}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-body transition-colors duration-200 touch-manipulation ${
                       isActive
                         ? "bg-primary/10 text-primary"
