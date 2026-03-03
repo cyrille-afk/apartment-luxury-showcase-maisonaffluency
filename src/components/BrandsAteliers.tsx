@@ -2410,20 +2410,36 @@ const BrandsAteliers = () => {
                         {picksDesigner.curatorPicks[picksIndex]?.materials && (() => {
                           const mat = picksDesigner.curatorPicks[picksIndex].materials!;
                           const ledIdx = mat.indexOf("\n\nAvailable in multiple LED options:");
-                          if (ledIdx === -1) {
+                          const dimRegex = /^.*\d+\s*[×x]\s*\d+.*(?:mm|cm|kg).*$/gmi;
+                          const renderWithBoldDims = (text: string, extraClass?: string) => {
+                            const lines = text.split('\n');
                             return (
-                              <p className="text-xs text-white/50 font-body mt-1 whitespace-pre-line">
-                                {mat}
+                              <p className={`text-xs font-body mt-1 ${extraClass || ''}`}>
+                                {lines.map((line, i) => {
+                                  const isDim = dimRegex.test(line);
+                                  dimRegex.lastIndex = 0;
+                                  const isSilhouette = /silhouette/i.test(line);
+                                  const bold = isDim || isSilhouette;
+                                  return (
+                                    <span key={i}>
+                                      {i > 0 && <br />}
+                                      <span className={bold ? "text-white font-medium" : "text-white/50"}>
+                                        {line}
+                                      </span>
+                                    </span>
+                                  );
+                                })}
                               </p>
                             );
+                          };
+                          if (ledIdx === -1) {
+                            return renderWithBoldDims(mat, 'whitespace-pre-line');
                           }
                           const before = mat.slice(0, ledIdx);
-                          const after = mat.slice(ledIdx + 2).replace(/\n/g, ' '); // collapse into single justified paragraph
+                          const after = mat.slice(ledIdx + 2).replace(/\n/g, ' ');
                           return (
                             <>
-                              <p className="text-xs text-white/50 font-body mt-1 whitespace-pre-line">
-                                {before}
-                              </p>
+                              {renderWithBoldDims(before, 'whitespace-pre-line')}
                               <p className="text-xs text-white/50 font-body mt-3 text-justify">
                                 {after}
                               </p>
