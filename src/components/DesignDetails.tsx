@@ -127,7 +127,7 @@ const DesignDetails = () => {
               />
               {/* Title & subtitle at top */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 -translate-y-24 sm:-translate-y-32">
-                <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-white drop-shadow-lg tracking-wide">
+                <h2 className="font-display text-[1.65rem] sm:text-[2.1rem] md:text-[2.6rem] text-white drop-shadow-lg tracking-wide">
                   Trade Program
                 </h2>
                 <p className="font-display text-lg sm:text-xl md:text-2xl text-white/90 mt-3 sm:mt-4 drop-shadow tracking-widest font-light">
