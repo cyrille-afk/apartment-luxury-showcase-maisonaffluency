@@ -159,6 +159,8 @@ const Navigation = () => {
   }, [megaMenuOpen]);
 
   const scrollToTop = () => {
+    // Clear saved scroll position so the settle-and-correct loop won't fight back
+    sessionStorage.removeItem("__scroll_y");
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
