@@ -46,10 +46,10 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
         <button
           onClick={handleClearAll}
           className={cn(
-            "px-4 py-1.5 rounded-full border text-[11px] font-body uppercase tracking-[0.15em] transition-all duration-200",
+            "px-5 py-1.5 rounded-full border text-[11px] font-body uppercase tracking-[0.15em] transition-all duration-300",
             hasActiveFilter
-              ? "border-primary/40 text-primary bg-primary/5 hover:bg-primary/10"
-              : "border-border/40 text-muted-foreground/50 cursor-default"
+              ? "bg-white border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] text-foreground"
+              : "bg-white/60 border-border/40 text-muted-foreground/50 cursor-default"
           )}
         >
           Clear All

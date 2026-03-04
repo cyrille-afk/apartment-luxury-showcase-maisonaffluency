@@ -245,7 +245,7 @@ const Navigation = () => {
                       onClick={() => {
                         window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
                       }}
-                      className="font-body text-[10px] uppercase tracking-[0.15em] text-primary hover:text-primary/70 transition-colors font-semibold"
+                      className="font-body text-[10px] uppercase tracking-[0.15em] transition-all duration-300 px-4 py-1 rounded-full bg-white border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] text-foreground"
                     >
                       Clear All
                     </button>
@@ -476,7 +476,7 @@ const Navigation = () => {
                       setActiveMegaSub(null);
                       setMegaMenuOpen(false);
                     }}
-                    className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 text-primary hover:text-primary/70 font-semibold border border-primary/30 rounded px-3 py-1.5 hover:bg-primary/5"
+                    className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 px-5 py-1.5 rounded-full bg-white border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] text-foreground"
                   >
                     Clear All
                   </button>
