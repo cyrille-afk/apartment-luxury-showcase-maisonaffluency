@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { ChevronDown, X, SlidersHorizontal } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
 
@@ -36,73 +37,96 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
   };
 
   const hasActiveFilter = activeCategory || activeSubcategory;
+  const hasSubs = (cat: string) => (SUBCATEGORY_MAP[cat]?.length ?? 0) > 0;
 
   return (
-    <aside className="hidden md:flex flex-col w-48 lg:w-52 shrink-0 border-r border-border/40 py-4 pr-4 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 px-1">
-        <h4 className="font-serif text-sm text-foreground flex items-center gap-2">
-          <SlidersHorizontal className="h-3.5 w-3.5" /> Filter
-        </h4>
+    <aside className="hidden md:flex flex-col w-56 lg:w-60 shrink-0 pr-6 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-[11rem]">
+      {/* Top bar: filter count + clear all */}
+      <div className="flex items-center justify-end gap-3 mb-5">
         {hasActiveFilter && (
-          <button
-            onClick={handleClearAll}
-            className="font-body text-[9px] uppercase tracking-[0.15em] text-primary hover:text-primary/70 transition-colors flex items-center gap-1"
-          >
-            <X className="h-3 w-3" />
-            Clear
-          </button>
+          <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            F<span className="font-body">·</span>1
+          </span>
         )}
+        <button
+          onClick={handleClearAll}
+          className={cn(
+            "font-body text-[10px] uppercase tracking-[0.2em] transition-colors",
+            hasActiveFilter ? "text-foreground hover:text-primary" : "text-muted-foreground/40 cursor-default"
+          )}
+        >
+          Clear All
+        </button>
       </div>
 
-      {/* Categories */}
-      <nav className="flex flex-col gap-0.5">
+      {/* Categories heading */}
+      <h4 className="font-serif text-base text-foreground mb-5 pl-1">Categories</h4>
+
+      {/* Category list */}
+      <nav className="flex flex-col">
         {CATEGORY_ORDER.map(cat => {
           const isExpanded = expandedCats.has(cat);
           const isActiveCat = activeCategory === cat;
           const subs = SUBCATEGORY_MAP[cat] || [];
+          const hasSubcats = hasSubs(cat);
 
           return (
-            <div key={cat}>
-              {/* Category header row */}
-              <button
-                onClick={() => toggleExpand(cat)}
-                className={cn(
-                  "w-full flex items-center justify-between py-2 px-1 font-body text-[11px] uppercase tracking-[0.15em] transition-colors rounded",
-                  isActiveCat && !activeSubcategory
-                    ? "text-primary font-semibold"
-                    : "text-foreground/80 hover:text-primary"
-                )}
-              >
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelect(cat, null);
+            <div key={cat} className="border-b border-border/20 last:border-b-0">
+              {/* Category row */}
+              <div className="flex items-center gap-3 py-3 px-1">
+                <Checkbox
+                  checked={isActiveCat}
+                  onCheckedChange={() => {
+                    if (isActiveCat) {
+                      onSelect(null, null);
+                    } else {
+                      onSelect(cat, null);
+                    }
                   }}
-                  className="cursor-pointer"
+                  className="h-4.5 w-4.5 rounded-sm border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                />
+                <span
+                  onClick={() => {
+                    if (isActiveCat) {
+                      onSelect(null, null);
+                    } else {
+                      onSelect(cat, null);
+                    }
+                  }}
+                  className={cn(
+                    "flex-1 font-body text-sm tracking-wide cursor-pointer transition-colors",
+                    isActiveCat ? "text-foreground font-medium" : "text-foreground/80 hover:text-foreground"
+                  )}
                 >
                   {cat}
                 </span>
-                <ChevronDown
-                  className={cn(
-                    "h-3 w-3 text-muted-foreground transition-transform duration-200",
-                    isExpanded && "rotate-180"
-                  )}
-                />
-              </button>
+                {hasSubcats && (
+                  <button
+                    onClick={() => toggleExpand(cat)}
+                    className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                  >
+                    <ChevronRight
+                      className={cn(
+                        "h-4 w-4 transition-transform duration-200",
+                        isExpanded && "rotate-90"
+                      )}
+                    />
+                  </button>
+                )}
+              </div>
 
               {/* Subcategories */}
               {isExpanded && subs.length > 0 && (
-                <div className="ml-2 border-l border-border/30 pl-3 flex flex-col gap-0.5 pb-1">
+                <div className="ml-8 pl-3 border-l border-border/30 flex flex-col gap-0.5 pb-3">
                   {subs.map(sub => (
                     <button
                       key={sub}
                       onClick={() => onSelect(cat, sub)}
                       className={cn(
-                        "text-left py-1 font-body text-[10px] uppercase tracking-[0.12em] transition-colors",
+                        "text-left py-1.5 font-body text-[12px] tracking-wide transition-colors",
                         activeSubcategory === sub && activeCategory === cat
-                          ? "text-primary font-semibold"
-                          : "text-muted-foreground hover:text-primary"
+                          ? "text-primary font-medium"
+                          : "text-muted-foreground hover:text-foreground"
                       )}
                     >
                       {sub}
