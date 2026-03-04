@@ -2428,8 +2428,7 @@ const FeaturedDesigners = () => {
           </p>
           {/* A-Z alphabet jump bar + Search + Filter */}
           <div className="flex flex-col gap-4 mb-5 md:mb-6">
-            <div
-              className="flex items-center gap-2 md:gap-3 px-1 py-1 overflow-x-auto w-full"
+            <div className="flex items-center gap-2 md:gap-3 px-1 py-2 overflow-x-auto w-full border-t border-b border-border/30"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}
             >
               {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
