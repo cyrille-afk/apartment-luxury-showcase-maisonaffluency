@@ -2487,7 +2487,7 @@ const FeaturedDesigners = () => {
           </div>
         </motion.div>
 
-        <div className="flex">
+        <div className="relative">
           <CategorySidebar
             activeCategory={selectedCategory}
             activeSubcategory={selectedSubcategory}
@@ -2501,7 +2501,6 @@ const FeaturedDesigners = () => {
               }
             }}
           />
-          <div className="flex-1 min-w-0">
 
         {(searchQuery || selectedCategory) && (
           <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
@@ -2871,7 +2870,6 @@ const FeaturedDesigners = () => {
             ))}
             </Accordion>
           </motion.div>
-          </div>
         </div>
 
         {/* Curators' Picks Lightbox Dialog */}

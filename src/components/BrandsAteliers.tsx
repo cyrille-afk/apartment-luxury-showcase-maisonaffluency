@@ -2177,7 +2177,7 @@ const BrandsAteliers = () => {
           })()}
         </motion.div>
 
-        <div className="flex">
+        <div className="relative">
           <CategorySidebar
             activeCategory={selectedCategory}
             activeSubcategory={selectedSubcategory}
@@ -2191,7 +2191,6 @@ const BrandsAteliers = () => {
               }
             }}
           />
-          <div className="flex-1 min-w-0">
 
         {(searchQuery || selectedCategory) && (
           <p className="text-left text-[10px] text-muted-foreground/50 mb-6 font-body tracking-wider">
@@ -2215,7 +2214,6 @@ const BrandsAteliers = () => {
             </div>
           ))}
         </div>
-          </div>
         </div>
 
         {/* Curators' Picks Lightbox */}
