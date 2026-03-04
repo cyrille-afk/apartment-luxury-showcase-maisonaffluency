@@ -2041,7 +2041,7 @@ const BrandsAteliers = () => {
             return (
               <div className="flex flex-col gap-2 md:gap-3 mb-3 md:mb-6">
                 <div
-                  className="flex items-center gap-2 md:gap-3 px-1 py-2 border-t border-b border-border/30 overflow-x-auto w-full"
+                  className="flex items-center gap-2 md:gap-3 px-1 py-4 border-t border-b border-border/30 overflow-x-auto max-w-3xl"
                   style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}
                 >
                   {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
