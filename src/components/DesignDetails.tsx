@@ -151,7 +151,7 @@ const DesignDetails = () => {
             
             <Accordion type="single" collapsible className="space-y-4">
               {philosophyPoints.map((item, index) => <AccordionItem key={index} value={`philosophy-${index}`} className="border border-border bg-card px-8 py-2 transition-colors hover:bg-muted/30">
-                  <AccordionTrigger className="text-left hover:no-underline">
+                  <AccordionTrigger className="text-left hover:no-underline flex-row-reverse md:flex-row justify-end md:justify-between gap-3 md:gap-0">
                     <div>
                       <div className="font-display text-xl text-foreground md:text-2xl">
                         {item.title}
