@@ -126,25 +126,23 @@ const DesignDetails = () => {
                 decoding="async"
               />
               {/* Title & subtitle at top */}
-              <div className="absolute top-1/3 left-0 right-0 flex flex-col items-center text-center px-4">
+              <div className="absolute top-8 sm:top-12 left-0 right-0 flex flex-col items-center text-center px-4">
                 <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-white drop-shadow-lg">
                   Trade Program
                 </h2>
                 <p className="font-body text-sm sm:text-base md:text-lg text-white mt-3 sm:mt-4 drop-shadow">
                   Join &amp; Enjoy Exclusive Benefits
                 </p>
-              </div>
-              {/* Button centred lower */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-12 left-0 right-0 flex justify-center">
                 <button 
                   onClick={() => setIsOpen(true)}
-                  className="flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
+                  className="mt-8 sm:mt-10 flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
                 >
                   <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
                   Join Now
                 </button>
               </div>
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
             </div>
 
             <div className="mb-10 flex items-center justify-center pl-8 pr-8">
