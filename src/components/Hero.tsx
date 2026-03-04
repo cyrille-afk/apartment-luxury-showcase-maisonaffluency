@@ -45,11 +45,11 @@ const Hero = () => {
 
           <div className="inline-flex flex-col items-center md:items-end">
             <p className="text-lg leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
-              <span className="hidden md:inline">From Couture Furniture and Collectible Designs in Situ,
+              <span className="hidden md:inline">From Couture Furniture and Collectible Designs <em>in Situ</em>,
               <br /> To the World's most distinguished Furniture Houses
               <br /> and Design&nbsp;Workshops</span>
               <span className="md:hidden leading-[2.2]">From Couture Furniture and Collectible Design
-              <br />in situ,
+              <br /><em>in situ</em>,
               <br />To the World's most distinguished
               <br />Furniture Houses and Design&nbsp;Workshops</span>
             </p>
