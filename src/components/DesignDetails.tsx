@@ -119,7 +119,7 @@ const DesignDetails = () => {
             {/* Professional imagery banner with overlaid CTA */}
             <div className="mb-10 overflow-hidden rounded-sm relative">
               <img
-                src={cloudinaryUrl("IMG_3387_1_p1mhex", { width: 1200, quality: "auto:good", crop: "fill" })}
+                src={cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 1200, quality: "auto:good", crop: "fill" })}
                 alt="Luxury furniture styled in a professionally designed interior at Maison Affluency showroom"
                 className="w-full h-64 sm:h-80 md:h-[28rem] object-cover object-center"
                 loading="lazy"
