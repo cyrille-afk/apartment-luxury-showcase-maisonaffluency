@@ -126,11 +126,11 @@ const DesignDetails = () => {
                 decoding="async"
               />
               {/* Title & subtitle at top */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 -translate-y-20 sm:-translate-y-24">
-                <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-white drop-shadow-lg tracking-wide">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 -translate-y-24 sm:-translate-y-32">
+                <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-white drop-shadow-lg tracking-wide">
                   Trade Program
                 </h2>
-                <p className="font-display text-base sm:text-lg md:text-xl text-white/90 mt-3 sm:mt-4 drop-shadow tracking-widest font-light">
+                <p className="font-display text-lg sm:text-xl md:text-2xl text-white/90 mt-3 sm:mt-4 drop-shadow tracking-widest font-light">
                   Join &amp; Enjoy Exclusive Benefits
                 </p>
                 <button 
