@@ -117,11 +117,11 @@ const DesignDetails = () => {
         <div className="mx-auto max-w-5xl">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8, delay: 0.2 }}>
             {/* Professional imagery banner with overlaid CTA */}
-            <div className="mb-10 overflow-hidden rounded-sm relative max-w-3xl mx-auto">
+            <div className="mb-10 overflow-hidden rounded-sm relative max-w-3xl mx-auto max-h-[70vh] md:max-h-[75vh]">
               <img
                 src={cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 1400, quality: "auto:good", crop: "limit" })}
                 alt="Luxury furniture styled in a professionally designed interior at Maison Affluency showroom"
-                className="w-full object-contain"
+                className="w-full object-cover object-top"
                 loading="lazy"
                 decoding="async"
               />
