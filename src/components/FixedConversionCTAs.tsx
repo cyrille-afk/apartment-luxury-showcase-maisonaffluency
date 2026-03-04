@@ -51,7 +51,8 @@ const FixedConversionCTAs = () => {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 30 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="fixed bottom-28 right-20 z-30 hidden md:flex flex-col items-end gap-2"
+          className="fixed bottom-6 right-6 z-40 hidden md:flex flex-col items-end gap-2"
+          style={{ marginBottom: "60px" }} /* clear chat widget */
         >
           <button
             onClick={() => setDismissed(true)}
