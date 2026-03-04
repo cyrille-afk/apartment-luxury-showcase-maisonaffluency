@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Briefcase } from "lucide-react";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -124,18 +125,23 @@ const DesignDetails = () => {
                 loading="lazy"
                 decoding="async"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-white drop-shadow-lg">
+              {/* Title & subtitle at top */}
+              <div className="absolute top-4 left-0 right-0 flex flex-col items-center text-center px-4">
+                <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-foreground">
                   Trade Program
                 </h2>
-                <p className="font-body text-xs sm:text-sm text-white mt-2 drop-shadow">
+                <p className="font-body text-xs sm:text-sm text-foreground/70 mt-1">
                   Exclusive services for design professionals
                 </p>
+              </div>
+              {/* Button centred lower */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute bottom-6 left-0 right-0 flex justify-center">
                 <button 
                   onClick={() => setIsOpen(true)}
-                  className="mt-5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
+                  className="flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
                 >
+                  <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
                   Join Now
                 </button>
               </div>
