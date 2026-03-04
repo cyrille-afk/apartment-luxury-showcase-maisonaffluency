@@ -740,7 +740,7 @@ const Collectibles = () => {
             })()}
           </motion.div>
 
-          <div className="flex">
+          <div className="relative">
             <CategorySidebar
               activeCategory={selectedCategory}
               activeSubcategory={selectedSubcategory}
@@ -754,7 +754,6 @@ const Collectibles = () => {
                 }
               }}
             />
-            <div className="flex-1 min-w-0">
 
           {(searchQuery || selectedCategory) && (
             <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
@@ -1053,7 +1052,6 @@ const Collectibles = () => {
             </Accordion>
             )}
           </motion.div>
-            </div>
           </div>
         </div>
       </section>
