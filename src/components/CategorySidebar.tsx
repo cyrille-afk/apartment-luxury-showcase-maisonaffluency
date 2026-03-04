@@ -23,9 +23,6 @@ interface CategorySidebarProps {
 const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect }) => {
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
 
-  const allExpandable = CATEGORY_ORDER.filter(cat => (SUBCATEGORY_MAP[cat]?.length ?? 0) > 0);
-  const allExpanded = allExpandable.every(cat => expandedCats.has(cat));
-
   const toggleExpand = (cat: string) => {
     setExpandedCats(prev => {
       const next = new Set(prev);
@@ -33,14 +30,6 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
       else next.add(cat);
       return next;
     });
-  };
-
-  const toggleExpandAll = () => {
-    if (allExpanded) {
-      setExpandedCats(new Set());
-    } else {
-      setExpandedCats(new Set(allExpandable));
-    }
   };
 
   const handleClearAll = () => {
@@ -52,8 +41,8 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
 
   return (
     <aside className="hidden md:flex flex-col w-44 lg:w-48 shrink-0 pr-1 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-[17.5rem]">
-      {/* Categories heading + Clear All */}
-      <div className="flex items-center justify-between mb-1 pl-1 pr-0.5">
+      {/* Categories heading + Clear All aligned right (above chevrons) */}
+      <div className="flex items-center justify-between mb-3 pl-1 pr-0.5">
         <h4 className="font-serif text-sm text-foreground">Categories</h4>
         <button
           onClick={handleClearAll}
@@ -65,26 +54,6 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
           )}
         >
           Clear All
-        </button>
-      </div>
-      {/* Expand All toggle */}
-      <div className="flex items-center justify-between mb-2 pl-1 pr-0.5">
-        <button
-          onClick={toggleExpandAll}
-          className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {allExpanded ? "Collapse All" : "Expand All"}
-        </button>
-        <button
-          onClick={toggleExpandAll}
-          className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
-        >
-          <ChevronRight
-            className={cn(
-              "h-4 w-4 transition-transform duration-200",
-              allExpanded && "rotate-90"
-            )}
-          />
         </button>
       </div>
 
