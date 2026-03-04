@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, X, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
@@ -41,9 +41,9 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
     <aside className="hidden md:flex flex-col w-48 lg:w-52 shrink-0 border-r border-border/40 py-4 pr-4 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 px-1">
-        <span className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">
-          Filter by Category
-        </span>
+        <h4 className="font-serif text-sm text-foreground flex items-center gap-2">
+          <SlidersHorizontal className="h-3.5 w-3.5" /> Filter
+        </h4>
         {hasActiveFilter && (
           <button
             onClick={handleClearAll}
