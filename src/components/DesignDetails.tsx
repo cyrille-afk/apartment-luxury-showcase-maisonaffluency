@@ -124,19 +124,17 @@ const DesignDetails = () => {
                 loading="lazy"
                 decoding="async"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                <div>
-                  <h2 className="font-display text-xl sm:text-2xl text-white drop-shadow-lg">
-                    Trade Program
-                  </h2>
-                  <p className="font-body text-xs sm:text-sm text-white/80 mt-1">
-                    Exclusive services for design professionals
-                  </p>
-                </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+                <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-white drop-shadow-lg">
+                  Trade Program
+                </h2>
+                <p className="font-body text-xs sm:text-sm text-white mt-2 drop-shadow">
+                  Exclusive services for design professionals
+                </p>
                 <button 
                   onClick={() => setIsOpen(true)}
-                  className="flex-shrink-0 bg-accent text-accent-foreground px-5 py-2.5 font-body text-xs uppercase tracking-wider rounded-full hover:bg-accent/90 transition-colors shadow-lg font-bold"
+                  className="mt-5 bg-accent text-accent-foreground px-5 py-2.5 font-body text-xs uppercase tracking-wider rounded-full hover:bg-accent/90 transition-colors shadow-lg font-bold"
                 >
                   Join Now
                 </button>
