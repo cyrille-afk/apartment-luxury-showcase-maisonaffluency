@@ -2014,13 +2014,13 @@ const BrandsAteliers = () => {
   };
 
   return (
-    <section ref={ref} className="py-10 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-16">
+    <section ref={ref} className="py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-16">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
-          className="mb-12 md:mb-16 text-left"
+          className="mb-8 md:mb-16 text-left"
         >
           <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
@@ -2030,7 +2030,7 @@ const BrandsAteliers = () => {
               {totalBrands}
             </span>
           </div>
-          <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
+          <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-3 md:mb-4 text-justify">
             We collaborate with the world's most distinguished furniture houses, textile ateliers, and artisan workshops 
             to bring exceptional pieces to discerning collectors and design professionals.
           </p>
@@ -2038,7 +2038,7 @@ const BrandsAteliers = () => {
           {(() => {
             const activeLettersArr = alphaGroups.map(([l]) => l);
             return (
-              <div className="flex flex-col gap-3 mb-5 md:mb-6">
+              <div className="flex flex-col gap-2 md:gap-3 mb-3 md:mb-6">
                 <div
                   className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto w-full"
                   style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}
