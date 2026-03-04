@@ -379,7 +379,7 @@ const Index = () => {
               </Suspense>
             </section>
             {/* Sidebar + 3 sections layout */}
-            <div className="flex max-w-6xl mx-auto px-4 md:px-12 lg:px-20">
+            <div className="flex">
               <CategorySidebar
                 activeCategory={sidebarCategory}
                 activeSubcategory={sidebarSubcategory}
