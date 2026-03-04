@@ -2095,6 +2095,7 @@ const BrandsAteliers = () => {
                       <Search className="h-5 w-5" />
                     </button>
                   )}
+                  <div className="md:hidden">
                   <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                     <PopoverTrigger asChild>
                       <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none flex items-center gap-1.5" aria-label="Filter">
@@ -2168,6 +2169,7 @@ const BrandsAteliers = () => {
                       </div>
                     </PopoverContent>
                   </Popover>
+                  </div>
                 </div>
               </div>
             );
