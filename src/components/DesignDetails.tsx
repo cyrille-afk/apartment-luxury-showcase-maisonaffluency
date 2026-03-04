@@ -145,7 +145,7 @@ const DesignDetails = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
             </div>
 
-            <div className="mb-10 flex items-center justify-center pl-8 pr-8">
+            <div className="mb-10 mt-[-1rem] md:mt-0 flex items-center justify-center pl-8 pr-8">
               <h3 className="font-display text-xl text-foreground md:text-2xl text-left underline underline-offset-4 decoration-1">Our Guiding Principles</h3>
             </div>
             
