@@ -49,8 +49,9 @@ const Hero = () => {
               <br /> To the World's most distinguished Furniture Houses
               <br /> and Design&nbsp;Workshops</span>
               <span className="md:hidden leading-[2.2]">From Couture Furniture and Collectible Design
-              <br />in situ, to the World's most distinguished
-              <br />Furniture Houses and Design&nbsp;Workshops</span>
+              <br />in situ,
+              <br />To the World's most distinguished Furniture Houses
+              <br />and Design&nbsp;Workshops</span>
             </p>
 
             <div className="mt-16 md:mt-10">
