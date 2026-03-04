@@ -2402,7 +2402,7 @@ const FeaturedDesigners = () => {
   };
 
   return (
-    <section ref={ref} id="curators-picks" className="py-10 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-20">
+    <section ref={ref} id="curators-picks" className="py-10 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
       <div className="mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
