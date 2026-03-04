@@ -40,7 +40,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
   const hasSubs = (cat: string) => (SUBCATEGORY_MAP[cat]?.length ?? 0) > 0;
 
   return (
-    <aside className="hidden md:flex flex-col w-48 lg:w-52 shrink-0 pr-3 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-[14.5rem]">
+    <aside className="hidden md:flex flex-col w-44 lg:w-48 shrink-0 pr-1 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-[14.5rem]">
       {/* Categories heading + Clear All aligned right (above chevrons) */}
       <div className="flex items-center justify-between mb-3 pl-1 pr-0.5">
         <h4 className="font-serif text-sm text-foreground">Categories</h4>
