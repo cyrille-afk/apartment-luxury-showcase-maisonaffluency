@@ -58,7 +58,7 @@ const Hero = () => {
             <div className="mt-16 md:mt-10 flex flex-col items-start md:items-center gap-6">
               <button
                 onClick={scrollToOverview}
-                className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-3.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-sm md:text-base font-serif tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.25)] hero-fade-in-delayed-4"
+                className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-3.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-sm md:text-base font-serif font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.25)] hero-fade-in-delayed-4"
               >
                 <Compass className="w-4 h-4 md:w-5 md:h-5 text-[hsl(var(--accent))]" />
                 Explore Our Curation
