@@ -381,7 +381,7 @@ const Navigation = () => {
             {leftNavItems.map((item) => (
               <button 
                 key={item.href} 
-                onClick={() => handleNavClick(item.href)} 
+                onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
                 className={cn(
                   "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap",
                   activeSection === item.href 
