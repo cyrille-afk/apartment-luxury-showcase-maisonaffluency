@@ -87,27 +87,19 @@ const Index = () => {
     setSidebarCategory(category);
     setSidebarSubcategory(subcategory);
     window.dispatchEvent(new CustomEvent('setDesignerCategory', {
-      detail: { category, subcategory, source: 'sidebar' }
-    }));
-    window.dispatchEvent(new CustomEvent('syncCategoryFilter', {
-      detail: { category, subcategory, source: 'sidebar' }
+      detail: { category, subcategory, source: 'designers' }
     }));
   }, []);
 
-  // Sync sidebar state when any section or mega-menu dispatches filter events
+  // Sync sidebar state when mega-menu dispatches filter events
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
-      if (detail?.source === 'sidebar') return; // avoid echo
       setSidebarCategory(detail?.category ?? null);
       setSidebarSubcategory(detail?.subcategory ?? null);
     };
     window.addEventListener('setDesignerCategory', handler);
-    window.addEventListener('syncCategoryFilter', handler);
-    return () => {
-      window.removeEventListener('setDesignerCategory', handler);
-      window.removeEventListener('syncCategoryFilter', handler);
-    };
+    return () => window.removeEventListener('setDesignerCategory', handler);
   }, []);
 
   // Track scroll depth for GA4 engagement
