@@ -434,18 +434,7 @@ const Navigation = () => {
               ref={megaMenuRef}
               className="w-full border-t border-border/30 bg-background py-4 animate-in slide-in-from-top-1 duration-200"
             >
-              <div className="flex justify-center gap-8 lg:gap-12">
-                <div className="flex flex-col">
-                  <button
-                    onClick={() => {
-                      window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
-                      setMegaMenuOpen(false);
-                    }}
-                    className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 text-primary hover:text-primary/70 font-semibold text-left"
-                  >
-                    Clear All
-                  </button>
-                </div>
+              <div className="flex justify-center gap-8 lg:gap-12 relative">
                 {CATEGORY_ORDER.map(cat => (
                   <div key={cat} className="flex flex-col">
                     <button
@@ -477,6 +466,17 @@ const Navigation = () => {
                     )}
                   </div>
                 ))}
+                <div className="flex flex-col justify-start">
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
+                      setMegaMenuOpen(false);
+                    }}
+                    className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 text-primary hover:text-primary/70 font-semibold border border-primary/30 rounded px-3 py-1.5 hover:bg-primary/5"
+                  >
+                    Clear All
+                  </button>
+                </div>
               </div>
             </div>
           )}
