@@ -135,7 +135,7 @@ const DesignDetails = () => {
                 </p>
                 <button 
                   onClick={() => setIsOpen(true)}
-                  className="mt-16 sm:mt-20 flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
+                  className="mt-20 sm:mt-28 flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
                 >
                   <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
                   Join Now
