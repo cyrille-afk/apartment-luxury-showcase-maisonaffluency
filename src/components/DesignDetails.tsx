@@ -121,7 +121,7 @@ const DesignDetails = () => {
               <img
                 src={cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 1400, quality: "auto:good", crop: "limit" })}
                 alt="Luxury furniture styled in a professionally designed interior at Maison Affluency showroom"
-                className="w-full h-72 sm:h-96 md:h-[32rem] object-cover object-[center_35%]"
+                className="w-full object-contain"
                 loading="lazy"
                 decoding="async"
               />
