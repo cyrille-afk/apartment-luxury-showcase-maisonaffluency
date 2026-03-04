@@ -2429,7 +2429,7 @@ const FeaturedDesigners = () => {
           {/* A-Z alphabet jump bar + Search + Filter */}
           <div className="flex flex-col gap-4 mb-5 md:mb-6">
             <div
-              className="flex items-center gap-1 px-3 py-1.5 bg-background/90 backdrop-blur-md border border-border/40 rounded-full shadow-sm overflow-x-auto w-full"
+              className="flex items-center gap-2 md:gap-3 px-1 py-1 overflow-x-auto w-full"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}
             >
               {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
@@ -2443,10 +2443,10 @@ const FeaturedDesigners = () => {
                         if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                       }
                     }}
-                    className={`flex-none font-serif text-sm md:text-sm leading-none px-2 py-1.5 md:px-1.5 md:py-1 rounded-full transition-all duration-200 ${
+                    className={`flex-none font-serif text-base md:text-lg leading-none transition-all duration-200 ${
                       isActive
-                        ? "text-foreground/70 hover:text-primary hover:bg-primary/10 cursor-pointer"
-                        : "text-foreground/30 cursor-default"
+                        ? "text-foreground/70 hover:text-primary cursor-pointer"
+                        : "text-foreground/20 cursor-default"
                     }`}
                   >
                     {letter}
