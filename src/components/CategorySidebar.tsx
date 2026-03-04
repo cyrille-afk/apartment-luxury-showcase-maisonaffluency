@@ -40,9 +40,9 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
   const hasSubs = (cat: string) => (SUBCATEGORY_MAP[cat]?.length ?? 0) > 0;
 
   return (
-    <aside className="hidden md:flex flex-col w-56 lg:w-60 shrink-0 pr-6 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-6">
-      {/* Clear All button — aligned with A-Z bar */}
-      <div className="mb-4">
+    <aside className="hidden md:flex flex-col w-56 lg:w-60 shrink-0 pr-6 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-[14.5rem]">
+      {/* Clear All pill — vertically aligned with A-Z bar */}
+      <div className="mb-5">
         <button
           onClick={handleClearAll}
           className={cn(
