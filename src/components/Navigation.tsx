@@ -237,7 +237,17 @@ const Navigation = () => {
                   className="animate-fade-in opacity-0 border-t border-border/30 pt-4"
                   style={{ animationDelay: `${leftNavItems.length * 120}ms`, animationFillMode: 'forwards' }}
                 >
-                  <p className="font-body text-[11px] uppercase tracking-[0.25em] text-muted-foreground mb-3 text-center font-semibold">All Categories</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-body text-[11px] uppercase tracking-[0.25em] text-muted-foreground text-center font-semibold flex-1">All Categories</p>
+                    <button
+                      onClick={() => {
+                        window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
+                      }}
+                      className="font-body text-[10px] uppercase tracking-[0.15em] text-primary hover:text-primary/70 transition-colors font-semibold"
+                    >
+                      Clear All
+                    </button>
+                  </div>
                   <div className="flex flex-col gap-0">
                     {CATEGORY_ORDER.map(cat => (
                       <div key={cat} className="mb-3">
@@ -425,6 +435,17 @@ const Navigation = () => {
               className="w-full border-t border-border/30 bg-background py-4 animate-in slide-in-from-top-1 duration-200"
             >
               <div className="flex justify-center gap-8 lg:gap-12">
+                <div className="flex flex-col">
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
+                      setMegaMenuOpen(false);
+                    }}
+                    className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 text-primary hover:text-primary/70 font-semibold text-left"
+                  >
+                    Clear All
+                  </button>
+                </div>
                 {CATEGORY_ORDER.map(cat => (
                   <div key={cat} className="flex flex-col">
                     <button
