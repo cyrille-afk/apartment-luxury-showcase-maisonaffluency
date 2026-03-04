@@ -40,19 +40,16 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
   const hasSubs = (cat: string) => (SUBCATEGORY_MAP[cat]?.length ?? 0) > 0;
 
   return (
-    <aside className="hidden md:flex flex-col w-56 lg:w-60 shrink-0 pr-6 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-[11rem]">
-      {/* Top bar: filter count + clear all */}
-      <div className="flex items-center justify-end gap-3 mb-5">
-        {hasActiveFilter && (
-          <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-            F<span className="font-body">·</span>1
-          </span>
-        )}
+    <aside className="hidden md:flex flex-col w-56 lg:w-60 shrink-0 pr-6 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-6">
+      {/* Clear All button — aligned with A-Z bar */}
+      <div className="mb-4">
         <button
           onClick={handleClearAll}
           className={cn(
-            "font-body text-[10px] uppercase tracking-[0.2em] transition-colors",
-            hasActiveFilter ? "text-foreground hover:text-primary" : "text-muted-foreground/40 cursor-default"
+            "px-4 py-1.5 rounded-full border text-[11px] font-body uppercase tracking-[0.15em] transition-all duration-200",
+            hasActiveFilter
+              ? "border-primary/40 text-primary bg-primary/5 hover:bg-primary/10"
+              : "border-border/40 text-muted-foreground/50 cursor-default"
           )}
         >
           Clear All
@@ -60,7 +57,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
       </div>
 
       {/* Categories heading */}
-      <h4 className="font-serif text-base text-foreground mb-5 pl-1">Categories</h4>
+      <h4 className="font-serif text-sm text-foreground mb-3 pl-1">Categories</h4>
 
       {/* Category list */}
       <nav className="flex flex-col">
