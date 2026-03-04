@@ -2154,6 +2154,13 @@ const FeaturedDesigners = () => {
     broadcastFilter(selectedCategory, sub);
   }, [selectedCategory, broadcastFilter]);
 
+  // Collapse all when a filter is applied
+  useEffect(() => {
+    if (selectedCategory || selectedSubcategory) {
+      setOpenDesigners([]);
+    }
+  }, [selectedCategory, selectedSubcategory]);
+
   const [showSearch, setShowSearch] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
