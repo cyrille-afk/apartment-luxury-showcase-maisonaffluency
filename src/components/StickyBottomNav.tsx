@@ -74,7 +74,7 @@ const StickyBottomNav = () => {
                     onClick={() => id === "contact" ? window.location.href = "mailto:concierge@myaffluency.com" : scrollTo(id)}
                     className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors duration-200 touch-manipulation min-w-[3.5rem] ${
                       isActive
-                        ? "text-primary"
+                        ? "text-[hsl(var(--accent))]"
                         : "text-muted-foreground active:text-foreground"
                     }`}
                     aria-label={`Go to ${label}`}
@@ -87,7 +87,7 @@ const StickyBottomNav = () => {
                     {isActive && (
                       <motion.div
                         layoutId="activeTab"
-                        className="absolute bottom-0.5 w-5 h-0.5 rounded-full bg-primary"
+                        className="absolute bottom-0.5 w-5 h-0.5 rounded-full bg-[hsl(var(--accent))]"
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       />
                     )}
