@@ -127,15 +127,15 @@ const DesignDetails = () => {
               />
               {/* Title & subtitle at top */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 -translate-y-20 sm:-translate-y-24">
-                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-white drop-shadow-lg">
+                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-white drop-shadow-lg italic tracking-wide">
                   Trade Program
                 </h2>
-                <p className="font-body text-base sm:text-lg md:text-xl text-white mt-3 sm:mt-4 drop-shadow">
+                <p className="font-display text-base sm:text-lg md:text-xl text-white/90 mt-3 sm:mt-4 drop-shadow tracking-widest uppercase font-light">
                   Join &amp; Enjoy Exclusive Benefits
                 </p>
                 <button 
                   onClick={() => setIsOpen(true)}
-                  className="mt-8 sm:mt-10 flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
+                  className="mt-12 sm:mt-14 flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
                 >
                   <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
                   Join Now
