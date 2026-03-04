@@ -41,12 +41,13 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
 
   return (
     <aside className="hidden md:flex flex-col w-56 lg:w-60 shrink-0 pr-6 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-[14.5rem]">
-      {/* Clear All pill — vertically aligned with A-Z bar */}
-      <div className="mb-5">
+      {/* Categories heading + Clear All aligned right (above chevrons) */}
+      <div className="flex items-center justify-between mb-3 pl-1 pr-0.5">
+        <h4 className="font-serif text-sm text-foreground">Categories</h4>
         <button
           onClick={handleClearAll}
           className={cn(
-            "px-5 py-1.5 rounded-full border text-[11px] font-body uppercase tracking-[0.15em] transition-all duration-300",
+            "px-4 py-1 rounded-full border text-[10px] font-body uppercase tracking-[0.15em] transition-all duration-300",
             hasActiveFilter
               ? "bg-white border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] text-foreground"
               : "bg-white/60 border-border/40 text-muted-foreground/50 cursor-default"
@@ -55,9 +56,6 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
           Clear All
         </button>
       </div>
-
-      {/* Categories heading */}
-      <h4 className="font-serif text-sm text-foreground mb-3 pl-1">Categories</h4>
 
       {/* Category list */}
       <nav className="flex flex-col">
