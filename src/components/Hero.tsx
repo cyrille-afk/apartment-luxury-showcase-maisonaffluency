@@ -1,7 +1,7 @@
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackCTA } from "@/lib/analytics";
-import { Calendar, Briefcase, Mail, Compass } from "lucide-react";
+import { Calendar, Briefcase, Compass } from "lucide-react";
 
 // Use a single fallback src (smallest useful size); srcSet handles responsive selection
 const HERO_ID = "AffluencySG_194-22.jpg_macpwj";
@@ -80,23 +80,16 @@ const Hero = () => {
                   <Briefcase className="w-3.5 h-3.5" />
                   Trade Programme
                 </button>
-                <button
-                  onClick={() => { trackCTA.email("HeroCTA"); window.location.href = "mailto:concierge@myaffluency.com"; }}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs font-sans font-bold tracking-wide rounded-full transition-all duration-300"
-                >
-                  <Mail className="w-3.5 h-3.5" />
-                  Enquire
-                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Desktop: bottom-right of hero, to the left of Chat widget */}
+      {/* Desktop: bottom-right of hero, next to Chat widget */}
       <div
         className="hidden md:flex absolute bottom-6 z-20 items-center gap-2 hero-fade-in-delayed-4"
-        style={{ right: "260px", animationDelay: "1.2s" }}
+        style={{ right: "200px", animationDelay: "1.2s" }}
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
@@ -111,13 +104,6 @@ const Hero = () => {
         >
           <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
           Trade Programme
-        </button>
-        <button
-          onClick={() => { trackCTA.email("HeroCTA"); window.location.href = "mailto:concierge@myaffluency.com"; }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 hover:border-white/45 text-white text-xs font-sans font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
-        >
-          <Mail className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
-          Enquire
         </button>
       </div>
     </section>
