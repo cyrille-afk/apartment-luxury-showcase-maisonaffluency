@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
+import CategorySidebar from "@/components/CategorySidebar";
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
@@ -739,6 +740,22 @@ const Collectibles = () => {
             })()}
           </motion.div>
 
+          <div className="flex">
+            <CategorySidebar
+              activeCategory={selectedCategory}
+              activeSubcategory={selectedSubcategory}
+              onSelect={(cat, sub) => {
+                if (cat === null) {
+                  setSelectedCategory(null);
+                } else {
+                  setSelectedCategoryRaw(cat);
+                  if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
+                  broadcastFilter(cat, sub);
+                }
+              }}
+            />
+            <div className="flex-1 min-w-0">
+
           {(searchQuery || selectedCategory) && (
             <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
               {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
@@ -1036,6 +1053,8 @@ const Collectibles = () => {
             </Accordion>
             )}
           </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 

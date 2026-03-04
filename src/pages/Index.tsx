@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback, lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
 import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
-import CategorySidebar from "@/components/CategorySidebar";
+
 
 // Navigation is heavy (Radix Sheet, Tooltip, DropdownMenu) — lazy-load it
 const Navigation = lazy(() => import("@/components/Navigation"));
@@ -80,27 +80,6 @@ const Index = () => {
   const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => isDeepLink());
   const needsScrollRestore = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
-  const [sidebarCategory, setSidebarCategory] = useState<string | null>(null);
-  const [sidebarSubcategory, setSidebarSubcategory] = useState<string | null>(null);
-
-  const handleSidebarSelect = useCallback((category: string | null, subcategory: string | null) => {
-    setSidebarCategory(category);
-    setSidebarSubcategory(subcategory);
-    window.dispatchEvent(new CustomEvent('setDesignerCategory', {
-      detail: { category, subcategory, source: 'designers' }
-    }));
-  }, []);
-
-  // Sync sidebar state when mega-menu dispatches filter events
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      setSidebarCategory(detail?.category ?? null);
-      setSidebarSubcategory(detail?.subcategory ?? null);
-    };
-    window.addEventListener('setDesignerCategory', handler);
-    return () => window.removeEventListener('setDesignerCategory', handler);
-  }, []);
 
   // Track scroll depth for GA4 engagement
   useScrollDepthTracking();
@@ -378,31 +357,21 @@ const Index = () => {
                 <CuratingTeam />
               </Suspense>
             </section>
-            {/* Sidebar + 3 sections layout */}
-            <div className="flex">
-              <CategorySidebar
-                activeCategory={sidebarCategory}
-                activeSubcategory={sidebarSubcategory}
-                onSelect={handleSidebarSelect}
-              />
-              <div className="flex-1 min-w-0">
-                <section id="designers" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
-                  <Suspense fallback={<SectionFallback />}>
-                    <FeaturedDesigners />
-                  </Suspense>
-                </section>
-                <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
-                  <Suspense fallback={<SectionFallback />}>
-                    <Collectibles />
-                  </Suspense>
-                </section>
-                <section id="brands" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
-                  <Suspense fallback={<SectionFallback />}>
-                    <BrandsAteliers />
-                  </Suspense>
-                </section>
-              </div>
-            </div>
+            <section id="designers" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
+              <Suspense fallback={<SectionFallback />}>
+                <FeaturedDesigners />
+              </Suspense>
+            </section>
+            <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
+              <Suspense fallback={<SectionFallback />}>
+                <Collectibles />
+              </Suspense>
+            </section>
+            <section id="brands" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
+              <Suspense fallback={<SectionFallback />}>
+                <BrandsAteliers />
+              </Suspense>
+            </section>
             <section id="details" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
               <Suspense fallback={<SectionFallback />}>
                 <DesignDetails />
