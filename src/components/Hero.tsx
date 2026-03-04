@@ -1,5 +1,7 @@
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 import { scrollToSection } from "@/lib/scrollToSection";
+import { trackCTA } from "@/lib/analytics";
+import { Calendar, Briefcase, Mail } from "lucide-react";
 
 // Use a single fallback src (smallest useful size); srcSet handles responsive selection
 const HERO_ID = "AffluencySG_194-22.jpg_macpwj";
@@ -53,13 +55,37 @@ const Hero = () => {
               <br />Furniture Houses and Design&nbsp;Workshops</span>
             </p>
 
-            <div className="mt-16 md:mt-10">
+            <div className="mt-16 md:mt-10 flex flex-col items-start md:items-center gap-6">
               <button
                 onClick={scrollToOverview}
                 className="px-6 py-3 md:px-8 md:py-3.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-sm md:text-base font-serif tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.25)] hero-fade-in-delayed-4"
               >
                 Explore Our Curation
               </button>
+
+              <div className="flex flex-row flex-wrap gap-3 hero-fade-in-delayed-4" style={{ animationDelay: '1.2s' }}>
+                <button
+                  onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
+                  className="flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs md:text-sm font-sans tracking-wide rounded-full transition-all duration-300"
+                >
+                  <Calendar className="w-3.5 h-3.5" />
+                  Book a Viewing
+                </button>
+                <button
+                  onClick={() => scrollToSection("contact")}
+                  className="flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs md:text-sm font-sans tracking-wide rounded-full transition-all duration-300"
+                >
+                  <Briefcase className="w-3.5 h-3.5" />
+                  Trade Programme
+                </button>
+                <button
+                  onClick={() => { trackCTA.email("HeroCTA"); window.location.href = "mailto:concierge@myaffluency.com"; }}
+                  className="flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs md:text-sm font-sans tracking-wide rounded-full transition-all duration-300"
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  Enquire
+                </button>
+              </div>
             </div>
           </div>
         </div>
