@@ -125,7 +125,7 @@ const DesignDetails = () => {
                 loading="lazy"
                 decoding="async"
               />
-              {/* Title & subtitle at top */}
+              {/* Title & subtitle */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 -translate-y-24 sm:-translate-y-32">
                 <h2 className="font-display text-[1.65rem] sm:text-[2.1rem] md:text-[2.6rem] text-white drop-shadow-lg tracking-wide">
                   Trade Program
@@ -133,9 +133,12 @@ const DesignDetails = () => {
                 <p className="font-display text-lg sm:text-xl md:text-2xl text-white/90 mt-3 sm:mt-4 drop-shadow tracking-widest font-light">
                   Join &amp; Enjoy Exclusive Benefits
                 </p>
+              </div>
+              {/* Button positioned independently */}
+              <div className="absolute inset-x-0 bottom-[18%] sm:bottom-[22%] flex justify-center">
                 <button 
                   onClick={() => setIsOpen(true)}
-                  className="mt-20 sm:mt-28 flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
+                  className="flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
                 >
                   <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
                   Join Now
