@@ -336,10 +336,10 @@ const Navigation = () => {
                 <button 
                   key={item.href} 
                   onClick={() => handleNavClick(item.href)} 
-                  className="font-body text-[10px] uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap px-2.5 py-1 border border-accent rounded-sm bg-accent/10 text-accent hover:bg-accent hover:text-accent-foreground"
+                  className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap relative group text-foreground/70 hover:text-primary hover:[text-shadow:0_0_8px_hsl(var(--primary)/0.3)]"
                 >
-                  
                   {item.label}
+                  <span className="absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 w-0 group-hover:w-full" />
                 </button>
               ))}
             </div>
