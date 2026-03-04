@@ -78,7 +78,7 @@ const Hero = () => {
                   className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs font-sans font-bold tracking-wide rounded-full transition-all duration-300"
                 >
                   <Briefcase className="w-3.5 h-3.5" />
-                  Trade Programme
+                  Trade Program
                 </button>
               </div>
             </div>
@@ -103,7 +103,7 @@ const Hero = () => {
           className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 hover:border-white/45 text-white text-xs font-sans font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
         >
           <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
-          Trade Programme
+          Trade Program
         </button>
       </div>
     </section>
