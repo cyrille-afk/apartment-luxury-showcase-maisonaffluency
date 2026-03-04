@@ -27,12 +27,12 @@ const leftNavItems = [{
 }, {
   label: "Designers",
   mobileLabel: "Designers & Makers",
-  mobileSubtitle: <><em>in situ</em></>,
+  mobileSubtitle: "in situ",
   href: "#designers"
 }, {
   label: "Collectible Design",
   mobileLabel: "Collectible Design",
-  mobileSubtitle: <><em>in situ</em></>,
+  mobileSubtitle: "in situ",
   href: "#collectibles"
 }, {
   label: "Ateliers",
@@ -223,7 +223,7 @@ const Navigation = () => {
                     <span className="flex flex-col">
                       <span>{item.mobileLabel}</span>
                       {item.mobileSubtitle && (
-                        <span className="text-[10px] tracking-[0.2em] text-muted-foreground font-normal normal-case">{item.mobileSubtitle}</span>
+                        <span className="text-[10px] tracking-[0.2em] text-muted-foreground font-normal normal-case italic">{item.mobileSubtitle}</span>
                       )}
                     </span>
                     <ChevronRight className="h-4 w-4" />
