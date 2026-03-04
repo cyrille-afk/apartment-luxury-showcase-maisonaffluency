@@ -14,6 +14,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
+import CategorySidebar from "@/components/CategorySidebar";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
 const alexanderLamontBg = cloudinaryUrl("alexander-lamont-bg_prdpsy", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -2176,6 +2177,22 @@ const BrandsAteliers = () => {
           })()}
         </motion.div>
 
+        <div className="flex">
+          <CategorySidebar
+            activeCategory={selectedCategory}
+            activeSubcategory={selectedSubcategory}
+            onSelect={(cat, sub) => {
+              if (cat === null) {
+                setSelectedCategory(null);
+              } else {
+                setSelectedCategoryRaw(cat);
+                if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
+                broadcastFilter(cat, sub);
+              }
+            }}
+          />
+          <div className="flex-1 min-w-0">
+
         {(searchQuery || selectedCategory) && (
           <p className="text-left text-[10px] text-muted-foreground/50 mb-6 font-body tracking-wider">
             {totalBrands} brand{totalBrands !== 1 ? "s" : ""} found
@@ -2197,6 +2214,8 @@ const BrandsAteliers = () => {
               />
             </div>
           ))}
+        </div>
+          </div>
         </div>
 
         {/* Curators' Picks Lightbox */}

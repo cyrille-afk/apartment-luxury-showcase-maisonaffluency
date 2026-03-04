@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
+import CategorySidebar from "@/components/CategorySidebar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -2486,6 +2487,22 @@ const FeaturedDesigners = () => {
           </div>
         </motion.div>
 
+        <div className="flex">
+          <CategorySidebar
+            activeCategory={selectedCategory}
+            activeSubcategory={selectedSubcategory}
+            onSelect={(cat, sub) => {
+              if (cat === null) {
+                setSelectedCategory(null);
+              } else {
+                setSelectedCategoryRaw(cat);
+                if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
+                broadcastFilter(cat, sub);
+              }
+            }}
+          />
+          <div className="flex-1 min-w-0">
+
         {(searchQuery || selectedCategory) && (
           <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
             {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
@@ -2854,6 +2871,7 @@ const FeaturedDesigners = () => {
             ))}
             </Accordion>
           </motion.div>
+          </div>
         </div>
 
         {/* Curators' Picks Lightbox Dialog */}
@@ -3184,6 +3202,7 @@ const FeaturedDesigners = () => {
             )}
           </DialogContent>
         </Dialog>
+      </div>
     </section>
   );
 };
