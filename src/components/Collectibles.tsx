@@ -430,6 +430,13 @@ const Collectibles = () => {
     window.addEventListener('syncCategoryFilter', handleCategorySync as EventListener);
     return () => window.removeEventListener('syncCategoryFilter', handleCategorySync as EventListener);
   }, []);
+  // Collapse all when a filter is applied
+  useEffect(() => {
+    if (selectedCategory || selectedSubcategory) {
+      setOpenDesigners([]);
+    }
+  }, [selectedCategory, selectedSubcategory]);
+
   const lastTapRef = useRef<number>(0);
   const minSwipeDistance = 50;
 
