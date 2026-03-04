@@ -93,6 +93,8 @@ const Navigation = () => {
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
   const [megaMenuHoverCat, setMegaMenuHoverCat] = useState<string | null>(null);
+  const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
+  const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -439,11 +441,11 @@ const Navigation = () => {
                   <div key={cat} className="flex flex-col">
                     <button
                       onClick={() => {
-                        window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                        setMegaMenuOpen(false);
-                        handleNavClick('#designers');
+                         window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
+                        setActiveMegaCat(cat);
+                        setActiveMegaSub(null);
                       }}
-                      className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 text-foreground hover:text-primary font-semibold text-left"
+                      className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 font-semibold text-left", activeMegaCat === cat && !activeMegaSub ? "text-primary" : "text-foreground hover:text-primary")}
                     >
                       {cat}
                     </button>
@@ -454,10 +456,10 @@ const Navigation = () => {
                             key={sub}
                             onClick={() => {
                               window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
-                              setMegaMenuOpen(false);
-                              handleNavClick('#designers');
+                              setActiveMegaCat(cat);
+                              setActiveMegaSub(sub);
                             }}
-                            className="text-left text-[10px] uppercase tracking-[0.15em] font-body text-muted-foreground hover:text-primary transition-colors py-1"
+                            className={cn("text-left text-[10px] uppercase tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-primary font-semibold" : "text-muted-foreground hover:text-primary")}
                           >
                             {sub}
                           </button>
@@ -470,6 +472,8 @@ const Navigation = () => {
                   <button
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
+                      setActiveMegaCat(null);
+                      setActiveMegaSub(null);
                       setMegaMenuOpen(false);
                     }}
                     className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 text-primary hover:text-primary/70 font-semibold border border-primary/30 rounded px-3 py-1.5 hover:bg-primary/5"
