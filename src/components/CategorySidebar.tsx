@@ -113,20 +113,41 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
               {/* Subcategories */}
               {isExpanded && subs.length > 0 && (
                 <div className="ml-8 pl-3 border-l border-border/30 flex flex-col gap-0.5 pb-3">
-                  {subs.map(sub => (
-                    <button
-                      key={sub}
-                      onClick={() => onSelect(cat, sub)}
-                      className={cn(
-                        "text-left py-1.5 font-body text-[12px] tracking-wide transition-colors",
-                        activeSubcategory === sub && activeCategory === cat
-                          ? "text-primary font-medium"
-                          : "text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      {sub}
-                    </button>
-                  ))}
+                  {subs.map(sub => {
+                    const isActiveSub = activeSubcategory === sub && activeCategory === cat;
+                    return (
+                      <div key={sub} className="flex items-center gap-2.5 py-1.5">
+                        <Checkbox
+                          checked={isActiveSub}
+                          onCheckedChange={() => {
+                            if (isActiveSub) {
+                              onSelect(cat, null);
+                            } else {
+                              onSelect(cat, sub);
+                            }
+                          }}
+                          className="h-4 w-4 rounded-none border-2 border-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        />
+                        <span
+                          onClick={() => {
+                            if (isActiveSub) {
+                              onSelect(cat, null);
+                            } else {
+                              onSelect(cat, sub);
+                            }
+                          }}
+                          className={cn(
+                            "font-body text-[12px] tracking-wide cursor-pointer transition-colors",
+                            isActiveSub
+                              ? "text-primary font-medium"
+                              : "text-muted-foreground hover:text-foreground"
+                          )}
+                        >
+                          {sub}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
