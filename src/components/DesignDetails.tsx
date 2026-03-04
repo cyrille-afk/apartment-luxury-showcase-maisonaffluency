@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { cloudinaryUrl } from "@/lib/cloudinary";
 
 const philosophyPoints = [{
   title: "Dedicated Client Advisor",
@@ -113,20 +114,25 @@ const DesignDetails = () => {
     <>
       <section ref={ref} className="py-12 px-4 md:py-24 md:px-12 lg:px-20 bg-background">
         <div className="mx-auto max-w-5xl">
-          <motion.div initial={{
-            opacity: 0,
-            y: 30
-          }} animate={isInView ? {
-            opacity: 1,
-            y: 0
-          } : {}} transition={{
-            duration: 0.8,
-            delay: 0.2
-          }}>
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8, delay: 0.2 }}>
+            {/* Professional imagery banner */}
+            <div className="mb-10 overflow-hidden rounded-sm">
+              <img
+                src={cloudinaryUrl("AffluencySG_204_1_qbbpqb", { width: 1200, quality: "auto:good", crop: "fill" })}
+                alt="Luxury furniture styled in a professionally designed interior at Maison Affluency showroom"
+                className="w-full h-48 sm:h-64 md:h-80 object-cover object-center"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+
             <div className="mb-3 flex flex-col items-center sm:items-center gap-2">
               <h2 className="font-display text-xl sm:text-2xl text-foreground self-start pl-8 sm:self-center sm:pl-0">
                 Trade Program
               </h2>
+              <p className="font-body text-sm text-muted-foreground text-center max-w-lg px-4">
+                Exclusive services for architecture and interior design professionals
+              </p>
             </div>
             <div className="mb-10 flex items-center justify-between pl-8 pr-8">
               <h3 className="font-display text-xl text-foreground md:text-2xl text-left underline underline-offset-4 decoration-1">Our Guiding Principles</h3>
