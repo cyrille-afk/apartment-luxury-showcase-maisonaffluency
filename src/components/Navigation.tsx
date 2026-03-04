@@ -27,12 +27,12 @@ const leftNavItems = [{
 }, {
   label: "Designers",
   mobileLabel: "Designers & Makers",
-  mobileSubtitle: "In Situ",
+  mobileSubtitle: <><em>in situ</em></>,
   href: "#designers"
 }, {
   label: "Collectible Design",
   mobileLabel: "Collectible Design",
-  mobileSubtitle: "In Situ",
+  mobileSubtitle: <><em>in situ</em></>,
   href: "#collectibles"
 }, {
   label: "Ateliers",
