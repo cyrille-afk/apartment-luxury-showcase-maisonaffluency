@@ -76,6 +76,7 @@ const Index = () => {
   const [showNavigation, setShowNavigation] = useState(false);
   const [showScrollProgress, setShowScrollProgress] = useState(false);
   const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => isDeepLink());
+  const needsScrollRestore = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
 
   // Track scroll depth for GA4 engagement
@@ -86,7 +87,10 @@ const Index = () => {
   // Section hashes (#designers, #brands) still wait for hero to load first,
   // then mount sections and scroll — preserving LCP on mobile.
   useEffect(() => {
-    if (isDeepLink()) {
+    // Deep-links and scroll restore both need sections immediately
+    const hasRestore = Number(sessionStorage.getItem("__scroll_y") || 0) > 0;
+    if (isDeepLink() || hasRestore) {
+      needsScrollRestore.current = hasRestore;
       setShowNavigation(true);
       setShowScrollProgress(true);
       setShowBelowFoldSections(true);
@@ -153,36 +157,51 @@ const Index = () => {
 
     const savedY = sessionStorage.getItem("__scroll_y");
     const sectionId = parseSectionHash(window.location.hash);
+    const instant = "instant" as ScrollBehavior;
 
-    // If there's a saved scroll position AND the hash matches a section (not a deep-link),
-    // restore the exact pixel position instead of just jumping to the section top.
     if (savedY && Number(savedY) > 0) {
-      let attempts = 0;
+      const targetY = Number(savedY);
+      let waitAttempts = 0;
+
       const tryRestore = () => {
         // Wait until the document is tall enough to scroll to the saved position
-        const targetY = Number(savedY);
         if (document.documentElement.scrollHeight >= targetY + window.innerHeight * 0.5) {
-          window.scrollTo({ top: targetY, behavior: "instant" as ScrollBehavior });
+          window.scrollTo({ top: targetY, behavior: instant });
           sessionStorage.removeItem("__scroll_y");
-        } else if (attempts < 25) {
-          attempts++;
+
+          // Settle loop: content-visibility sections change height after scroll.
+          // Re-check and correct position for up to ~3s.
+          let settlePass = 0;
+          const maxSettlePasses = 15;
+          const settle = () => {
+            settlePass++;
+            const currentY = window.scrollY;
+            // If the page shifted us away from target, jump back
+            if (Math.abs(currentY - targetY) > 3) {
+              window.scrollTo({ top: targetY, behavior: instant });
+            }
+            if (settlePass < maxSettlePasses) {
+              setTimeout(settle, 200);
+            }
+          };
+          setTimeout(settle, 200);
+        } else if (waitAttempts < 25) {
+          waitAttempts++;
           setTimeout(tryRestore, 200);
         } else {
-          // Fallback: scroll to section hash if pixel restore fails
           if (sectionId && sectionId !== "home") {
-            document.getElementById(sectionId)?.scrollIntoView({ behavior: "instant", block: "start" });
+            document.getElementById(sectionId)?.scrollIntoView({ behavior: instant, block: "start" });
           }
           sessionStorage.removeItem("__scroll_y");
         }
       };
       setTimeout(tryRestore, 100);
     } else if (sectionId && sectionId !== "home") {
-      // No saved position — fall back to section hash scroll
       let attempts = 0;
       const tryScroll = () => {
         const el = document.getElementById(sectionId);
         if (el) {
-          el.scrollIntoView({ behavior: "instant", block: "start" });
+          el.scrollIntoView({ behavior: instant, block: "start" });
         } else if (attempts < 15) {
           attempts++;
           setTimeout(tryScroll, 200);
