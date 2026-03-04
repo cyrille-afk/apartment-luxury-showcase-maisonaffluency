@@ -113,7 +113,7 @@ const DesignDetails = () => {
 
   return (
     <>
-      <section ref={ref} className="py-12 px-4 md:py-24 md:px-12 lg:px-20 bg-background">
+      <section ref={ref} className="pt-0 pb-12 px-4 md:pt-0 md:pb-24 md:px-12 lg:px-20 bg-background">
         <div className="mx-auto max-w-5xl">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8, delay: 0.2 }}>
             {/* Professional imagery banner with overlaid CTA */}
