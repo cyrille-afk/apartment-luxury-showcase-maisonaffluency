@@ -17,7 +17,7 @@ const Footer = lazy(() => import("@/components/Footer"));
 const FeaturedDesigners = lazy(() => import("@/components/FeaturedDesigners"));
 const Collectibles = lazy(() => import("@/components/Collectibles"));
 const BrandsAteliers = lazy(() => import("@/components/BrandsAteliers"));
-const ConversionCTAs = lazy(() => import("@/components/ConversionCTAs"));
+const FixedConversionCTAs = lazy(() => import("@/components/FixedConversionCTAs"));
 // ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
 // competing for bandwidth with LCP-critical resources on mobile.
 const ExitIntentBanner = lazy(() => import("@/components/ExitIntentBanner"));
@@ -342,7 +342,7 @@ const Index = () => {
         {showBelowFoldSections ? (
           <>
             <Suspense fallback={null}>
-              <ConversionCTAs />
+              <FixedConversionCTAs />
             </Suspense>
             <section id="overview" className="scroll-mt-20 md:scroll-mt-24">
               <Suspense fallback={<SectionFallback />}>
