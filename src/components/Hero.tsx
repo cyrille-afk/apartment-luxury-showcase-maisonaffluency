@@ -64,26 +64,30 @@ const Hero = () => {
                 Explore Our Curation
               </button>
 
-              {/* Mobile: inline below CTA */}
-              <div className="flex md:hidden flex-row flex-wrap gap-3 hero-fade-in-delayed-4" style={{ animationDelay: '1.2s' }}>
-                <button
-                  onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs font-sans font-bold tracking-wide rounded-full transition-all duration-300"
-                >
-                  <Calendar className="w-3.5 h-3.5" />
-                  Book a Viewing
-                </button>
-                <button
-                  onClick={() => scrollToSection("details")}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs font-sans font-bold tracking-wide rounded-full transition-all duration-300"
-                >
-                  <Briefcase className="w-3.5 h-3.5" />
-                  Trade Program
-                </button>
-              </div>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Mobile: bottom-right of hero, above Chat widget */}
+      <div
+        className="flex md:hidden absolute bottom-20 right-4 z-20 items-center gap-2 hero-fade-in-delayed-4"
+        style={{ animationDelay: "1.2s" }}
+      >
+        <button
+          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-xs font-serif font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+        >
+          <Calendar className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
+          Book a Viewing
+        </button>
+        <button
+          onClick={() => scrollToSection("details")}
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-xs font-serif font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+        >
+          <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
+          Trade Program
+        </button>
       </div>
 
       {/* Desktop: bottom-right of hero, next to Chat widget */}
