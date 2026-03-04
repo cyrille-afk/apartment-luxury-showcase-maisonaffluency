@@ -18,7 +18,7 @@ const Hero = () => {
           srcSet={heroSrcSet}
           sizes="100vw"
           alt="Luxury living room with Asian-inspired murals and designer furniture"
-          className="h-full w-full object-cover object-[50%_30%] md:h-[120%] md:object-[50%_0%]"
+          className="h-full w-full object-cover object-[50%_45%] md:h-[120%] md:object-[50%_0%]"
           loading="eager"
           /* @ts-ignore — React 18 supports fetchPriority */
           fetchPriority="high"
