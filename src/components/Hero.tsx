@@ -28,7 +28,7 @@ const Hero = () => {
       </div>
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
-      <div className="relative z-10 h-full px-4 pb-32 pt-[50%] md:px-12 md:pb-20 md:pt-[18%] lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
+      <div className="relative z-10 h-full px-4 pb-32 pt-[45%] md:px-12 md:pb-20 md:pt-[18%] lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <div className="max-w-4xl md:text-left hero-fade-in">
           <p className="mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-cream/90 font-extrabold font-sans text-sm md:text-xl lg:text-2xl hero-fade-in-delayed-1">
           </p>
@@ -48,7 +48,7 @@ const Hero = () => {
               <span className="hidden md:inline">From Couture Furniture and Collectible Designs in Situ,
               <br /> To the World's most distinguished Furniture Houses
               <br /> and Design&nbsp;Workshops</span>
-              <span className="md:hidden">From Couture Furniture and Collectible Design
+              <span className="md:hidden leading-[2.2]">From Couture Furniture and Collectible Design
               <br />in Situ, to the World's most distinguished
               <br />Furniture Houses and Design&nbsp;Workshops</span>
             </p>
