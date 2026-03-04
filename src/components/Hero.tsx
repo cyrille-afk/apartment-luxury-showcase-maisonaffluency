@@ -63,24 +63,25 @@ const Hero = () => {
                 Explore Our Curation
               </button>
 
-              <div className="flex flex-row flex-wrap gap-3 hero-fade-in-delayed-4" style={{ animationDelay: '1.2s' }}>
+              {/* Mobile: inline below CTA */}
+              <div className="flex md:hidden flex-row flex-wrap gap-3 hero-fade-in-delayed-4" style={{ animationDelay: '1.2s' }}>
                 <button
                   onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
-                  className="flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs md:text-sm font-sans tracking-wide rounded-full transition-all duration-300"
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs font-sans tracking-wide rounded-full transition-all duration-300"
                 >
                   <Calendar className="w-3.5 h-3.5" />
                   Book a Viewing
                 </button>
                 <button
                   onClick={() => scrollToSection("contact")}
-                  className="flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs md:text-sm font-sans tracking-wide rounded-full transition-all duration-300"
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs font-sans tracking-wide rounded-full transition-all duration-300"
                 >
                   <Briefcase className="w-3.5 h-3.5" />
                   Trade Programme
                 </button>
                 <button
                   onClick={() => { trackCTA.email("HeroCTA"); window.location.href = "mailto:concierge@myaffluency.com"; }}
-                  className="flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs md:text-sm font-sans tracking-wide rounded-full transition-all duration-300"
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/25 hover:border-white/45 text-white text-xs font-sans tracking-wide rounded-full transition-all duration-300"
                 >
                   <Mail className="w-3.5 h-3.5" />
                   Enquire
@@ -89,6 +90,34 @@ const Hero = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Desktop: bottom-right of hero, to the left of Chat widget */}
+      <div
+        className="hidden md:flex absolute bottom-6 z-20 items-center gap-2 hero-fade-in-delayed-4"
+        style={{ right: "260px", animationDelay: "1.2s" }}
+      >
+        <button
+          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 hover:border-white/45 text-white text-xs font-sans tracking-wide rounded-full transition-all duration-300 shadow-lg"
+        >
+          <Calendar className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
+          Book a Viewing
+        </button>
+        <button
+          onClick={() => scrollToSection("contact")}
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 hover:border-white/45 text-white text-xs font-sans tracking-wide rounded-full transition-all duration-300 shadow-lg"
+        >
+          <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
+          Trade Programme
+        </button>
+        <button
+          onClick={() => { trackCTA.email("HeroCTA"); window.location.href = "mailto:concierge@myaffluency.com"; }}
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 hover:border-white/45 text-white text-xs font-sans tracking-wide rounded-full transition-all duration-300 shadow-lg"
+        >
+          <Mail className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
+          Enquire
+        </button>
       </div>
     </section>
   );
