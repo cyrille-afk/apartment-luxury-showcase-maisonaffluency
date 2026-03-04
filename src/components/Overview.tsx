@@ -53,7 +53,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.8,
               delay: 0.3
-            }} className="font-display text-base md:text-xl lg:text-2xl leading-tight text-foreground">A 2,400 sq ft showroom where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors
+            }} className="font-display text-base md:text-xl lg:text-2xl leading-tight text-foreground">A 2,400 sq ft showroom located in Singapore District 9, where professionals and design connoisseurs can find the loving pieces they are looking for to elevate their interiors
               </motion.h2>
             </div>
             
