@@ -115,8 +115,8 @@ const DesignDetails = () => {
       <section ref={ref} className="py-12 px-4 md:py-24 md:px-12 lg:px-20 bg-background">
         <div className="mx-auto max-w-5xl">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8, delay: 0.2 }}>
-            {/* Professional imagery banner */}
-            <div className="mb-10 overflow-hidden rounded-sm">
+            {/* Professional imagery banner with overlaid CTA */}
+            <div className="mb-10 overflow-hidden rounded-sm relative">
               <img
                 src={cloudinaryUrl("AffluencySG_204_1_qbbpqb", { width: 1200, quality: "auto:good", crop: "fill" })}
                 alt="Luxury furniture styled in a professionally designed interior at Maison Affluency showroom"
@@ -124,24 +124,27 @@ const DesignDetails = () => {
                 loading="lazy"
                 decoding="async"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+                <div>
+                  <h2 className="font-display text-xl sm:text-2xl text-white drop-shadow-lg">
+                    Trade Program
+                  </h2>
+                  <p className="font-body text-xs sm:text-sm text-white/80 mt-1">
+                    Exclusive services for design professionals
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setIsOpen(true)}
+                  className="flex-shrink-0 bg-accent text-accent-foreground px-5 py-2.5 font-body text-xs uppercase tracking-wider rounded-full hover:bg-accent/90 transition-colors shadow-lg font-bold"
+                >
+                  Join Now
+                </button>
+              </div>
             </div>
 
-            <div className="mb-3 flex flex-col items-center sm:items-center gap-2">
-              <h2 className="font-display text-xl sm:text-2xl text-foreground self-start pl-8 sm:self-center sm:pl-0">
-                Trade Program
-              </h2>
-              <p className="font-body text-sm text-muted-foreground text-center max-w-lg px-4">
-                Exclusive services for architecture and interior design professionals
-              </p>
-            </div>
-            <div className="mb-10 flex items-center justify-between pl-8 pr-8">
+            <div className="mb-10 flex items-center justify-center pl-8 pr-8">
               <h3 className="font-display text-xl text-foreground md:text-2xl text-left underline underline-offset-4 decoration-1">Our Guiding Principles</h3>
-              <button 
-                onClick={() => setIsOpen(true)}
-                className="bg-muted text-foreground px-4 py-2 font-body text-xs uppercase tracking-wider hover:bg-muted-foreground/20 transition-colors sm:px-5 sm:py-2 sm:text-xs whitespace-nowrap ml-4"
-              >
-                Join Now
-              </button>
             </div>
             
             <Accordion type="single" collapsible className="space-y-4">
