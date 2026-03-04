@@ -130,7 +130,7 @@ const DesignDetails = () => {
                 <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-white drop-shadow-lg">
                   Trade Program
                 </h2>
-                <p className="font-body text-xs sm:text-sm text-white/80 mt-1 drop-shadow">
+                <p className="font-body text-xs sm:text-sm text-white mt-1 drop-shadow">
                   Join &amp; Enjoy Exclusive Benefits
                 </p>
               </div>
