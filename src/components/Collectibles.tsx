@@ -422,7 +422,8 @@ const Collectibles = () => {
   useEffect(() => {
     const handleCategorySync = (e: CustomEvent) => {
       const { category, subcategory, source } = e.detail || {};
-      if (source === 'collectibles') return;
+      // Only sync from designers (Navigation mega-menu); ignore brands to avoid cross-section jumps
+      if (source !== 'designers') return;
       setSelectedCategoryRaw(category || null);
       setSelectedSubcategoryRaw(subcategory || null);
     };

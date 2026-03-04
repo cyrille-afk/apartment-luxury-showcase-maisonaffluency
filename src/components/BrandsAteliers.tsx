@@ -1902,7 +1902,8 @@ const BrandsAteliers = () => {
   useEffect(() => {
     const handleCategorySync = (e: CustomEvent) => {
       const { category, subcategory, source } = e.detail || {};
-      if (source === 'brands') return;
+      // Only sync from designers (Navigation mega-menu); ignore collectibles to avoid cross-section jumps
+      if (source !== 'designers') return;
       setSelectedCategoryRaw(category || null);
       setSelectedSubcategoryRaw(subcategory || null);
     };
