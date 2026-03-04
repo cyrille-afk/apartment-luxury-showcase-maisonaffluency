@@ -126,7 +126,7 @@ const DesignDetails = () => {
                 decoding="async"
               />
               {/* Title & subtitle at top */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 -translate-y-20 sm:-translate-y-28">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 -translate-y-28 sm:-translate-y-36">
                 <h2 className="font-display text-[1.65rem] sm:text-[2.1rem] md:text-[2.6rem] text-white drop-shadow-lg tracking-wide">
                   Trade Program
                 </h2>
