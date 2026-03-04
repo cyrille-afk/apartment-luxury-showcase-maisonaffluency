@@ -78,7 +78,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
                       onSelect(cat, null);
                     }
                   }}
-                  className="h-4.5 w-4.5 rounded-sm border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  className="h-[18px] w-[18px] rounded-none border-2 border-foreground/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
                 <span
                   onClick={() => {
