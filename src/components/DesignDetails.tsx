@@ -131,7 +131,7 @@ const DesignDetails = () => {
                   Trade Program
                 </h2>
                 <p className="font-body text-xs sm:text-sm text-white/80 mt-1 drop-shadow">
-                  Exclusive services for design professionals
+                  Join &amp; Enjoy Exclusive Benefits
                 </p>
               </div>
               {/* Button centred lower */}
