@@ -124,9 +124,9 @@ export const collectibleDesigners: Array<{
     philosophy: "I explore the boundaries between art and design, creating objects that challenge perception and celebrate material beauty.",
     curatorPicks: [
       { image: emmanuelBabledPick1, title: "Osmosi — Console", category: "Tables", subcategory: "Console", materials: "Carrara marble, Murano blown glass", dimensions: "H80 × L160 × D35 cm", edition: "" },
-      { image: emmanuelBabledPick2, title: "Coral — Coffee Table", category: "Tables", subcategory: "Coffee Table", materials: "Bianco Carrara marble, plexiglass", dimensions: "L150 × W100 × H28 cm", edition: "" },
+      { image: emmanuelBabledPick2, title: "Coral Coffee Table", category: "Tables", subcategory: "Coffee Table", materials: "Bianco Carrara marble, plexiglass", dimensions: "L150 × W100 × H28 cm", edition: "" },
       { image: emmanuelBabledPick3, title: "Pyros Marini — Vase", category: "Decorative Object", subcategory: "Vase", materials: "Murano blown glass (Venini)", dimensions: "H45 × Ø30 cm", edition: "" },
-      { image: emmanuelBabledPick4, title: "Quark Bronze — Coffee Table", category: "Tables", subcategory: "Coffee Table", materials: "Bronze", dimensions: "H30 × L122.5 × W83 cm", edition: "" },
+      { image: emmanuelBabledPick4, title: "Quark Bronze Coffee Table", category: "Tables", subcategory: "Coffee Table", materials: "Bronze", dimensions: "H30 × L122.5 × W83 cm", edition: "" },
       { image: emmanuelBabledPick5, title: "Siliceaarenaria — Vessels", category: "Decorative Object", subcategory: "Vessel", materials: "Murano blown glass (Venini)", dimensions: "Ø25 × H22 cm (each)", edition: "" },
       { image: emmanuelBabledPick6, title: "Etna Cabinet — Stripes", category: "Storage", subcategory: "Cabinet", materials: "Murano glass doors • Lava stone legs", dimensions: "H85 × L120 × D45 cm", edition: "" },
       { image: emmanuelBabledPick7, title: "Osmosi — Side Table", category: "Tables", subcategory: "Side Table", materials: "Carrara marble • Murano blown glass", dimensions: "H55 × Ø60 cm", edition: "" },
