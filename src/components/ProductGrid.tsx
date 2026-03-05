@@ -328,9 +328,10 @@ const ProductGrid = () => {
                     download={lightboxItem.pick.pdfFilename || true}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute bottom-2 right-6 md:right-14 z-30 p-2 md:p-2.5 rounded-full bg-black/40 text-white/70 hover:text-white transition-colors"
+                    className="absolute bottom-2 right-6 md:right-14 z-30 flex items-center gap-1 p-2 md:p-2.5 rounded-full bg-[#d32f2f]/80 text-white/90 hover:text-white transition-colors"
                   >
                     <FileDown className="h-4 w-4 md:h-5 md:w-5" />
+                    <span className="text-[10px] md:text-xs font-body font-medium">PDF</span>
                   </a>
                 )}
               </div>
