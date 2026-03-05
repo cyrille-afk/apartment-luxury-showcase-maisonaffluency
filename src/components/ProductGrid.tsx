@@ -297,16 +297,21 @@ function singularizeSub(s: string): string {
             const currentItem = filtered[lightboxIndex];
             return (
             <div className="relative flex flex-col items-center pt-3 pb-3 md:pt-4 md:pb-4">
-              {/* Close */}
-              <button
-                onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
-                className="absolute top-3 right-3 md:top-4 md:right-4 z-50 p-2 rounded-full bg-black/40 text-white/80 hover:text-white transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              {/* Counter + Close */}
+              <div className="absolute top-3 right-3 md:top-4 md:right-4 z-50 flex items-center gap-2">
+                <div className="px-3 py-1 rounded-full bg-black/40 text-white/60 text-[10px] font-body tracking-wider">
+                  {lightboxIndex + 1} / {filtered.length}
+                </div>
+                <button
+                  onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
+                  className="p-2 rounded-full bg-black/40 text-white/80 hover:text-white transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
               {/* Image */}
-              <div className="relative w-full flex items-center justify-center px-4 md:px-12">
+              <div className="relative w-full flex flex-col items-center justify-center px-4 md:px-12">
                 {lightboxIndex > 0 && (
                   <button
                     onClick={() => navigateLightbox(-1)}
@@ -325,19 +330,15 @@ function singularizeSub(s: string): string {
                 )}
 
                 <div
-                  className="relative h-[55vh] md:h-[60vh] w-full flex items-center justify-center"
+                  className="relative inline-flex items-center justify-center"
                   onClick={() => setIsZoomed(!isZoomed)}
                 >
-                  {/* Counter pill - top right inside image */}
-                  <div className="absolute top-2 right-2 z-30 px-3 py-1 rounded-full bg-black/40 text-white/60 text-[10px] font-body tracking-wider">
-                    {lightboxIndex + 1} / {filtered.length}
-                  </div>
                   <PinchZoomImage
                     key={currentItem.pick.image || `${currentItem.designerId}-${lightboxIndex}`}
                     src={currentItem.pick.image || ""}
                     alt={currentItem.pick.title}
                     className={cn(
-                      "h-[55vh] md:h-[60vh] w-auto object-contain transition-transform duration-300",
+                      "max-h-[55vh] md:max-h-[60vh] max-w-[85vw] md:max-w-[70vw] w-auto object-contain transition-transform duration-300",
                       isZoomed ? "cursor-zoom-out scale-150" : "cursor-zoom-in"
                     )}
                     onLoad={() => setIsLightboxImageLoaded(true)}
