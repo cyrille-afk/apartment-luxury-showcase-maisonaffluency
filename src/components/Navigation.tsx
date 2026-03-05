@@ -191,7 +191,7 @@ const Navigation = () => {
           <div className="flex flex-col items-center ml-6">
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
               <span className="font-brand text-[1.6rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
-                MAISON AFFLUENCY
+                MAISON <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
               </span>
             </button>
             <div className="flex items-center gap-2 mt-0.5">
@@ -217,7 +217,7 @@ const Navigation = () => {
               <div className="flex flex-col items-center pt-2 pb-4 border-b border-border/30 mb-6">
                 <button onClick={() => { setIsOpen(false); scrollToTop(); }} className="group cursor-pointer whitespace-nowrap">
                   <span className="font-brand text-[1.4rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
-                    MAISON AFFLUENCY
+                    MAISON <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
                   </span>
                 </button>
                 <div className="flex items-center gap-2 mt-0.5">
@@ -371,7 +371,7 @@ const Navigation = () => {
             <div className="flex flex-col items-center">
               <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
                 <span className="font-brand text-3xl lg:text-4xl font-bold tracking-[0.25em] text-foreground transition-all duration-300 group-hover:text-primary">
-                  MAISON AFFLUENCY
+                  MAISON <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
                 </span>
               </button>
               <div className="flex items-center gap-3 mt-1 mb-2">
