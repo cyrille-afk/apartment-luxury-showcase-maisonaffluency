@@ -299,12 +299,12 @@ function singularizeSub(s: string): string {
             <div className="relative flex flex-col items-center pt-3 pb-3 md:pt-4 md:pb-4">
               {/* Counter + Close */}
               <div className="absolute top-3 right-3 md:top-4 md:right-4 z-50 flex items-center gap-2">
-                <div className="px-3 py-1 rounded-full bg-foreground/75 text-background text-[10px] font-body tracking-wider border border-background/30 shadow-lg">
+                <div className="px-3 py-1.5 rounded-full bg-background/95 text-foreground text-[11px] font-body tracking-wider border border-foreground/20 shadow-xl">
                   {lightboxIndex + 1} / {filtered.length}
                 </div>
                 <button
                   onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
-                  className="p-2 rounded-full bg-foreground/75 text-background hover:opacity-90 transition-colors border border-background/30 shadow-lg"
+                  className="p-2.5 rounded-full bg-background/95 text-foreground hover:bg-background transition-colors border border-foreground/20 shadow-xl"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -315,7 +315,7 @@ function singularizeSub(s: string): string {
                 {lightboxIndex > 0 && (
                   <button
                     onClick={() => navigateLightbox(-1)}
-                    className="flex absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-foreground/75 text-background hover:opacity-90 transition-colors border border-background/30 shadow-lg"
+                    className="flex absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-background/95 text-foreground hover:bg-background transition-colors border border-foreground/20 shadow-xl"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
@@ -323,7 +323,7 @@ function singularizeSub(s: string): string {
                 {lightboxIndex < filtered.length - 1 && (
                   <button
                     onClick={() => navigateLightbox(1)}
-                    className="flex absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-foreground/75 text-background hover:opacity-90 transition-colors border border-background/30 shadow-lg"
+                    className="flex absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-background/95 text-foreground hover:bg-background transition-colors border border-foreground/20 shadow-xl"
                   >
                     <ChevronRight className="h-5 w-5" />
                   </button>
@@ -351,7 +351,7 @@ function singularizeSub(s: string): string {
                       download={currentItem.pick.pdfFilename || true}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute bottom-3 right-3 z-30 flex items-center gap-1 p-2 md:p-2.5 rounded-full bg-[#d32f2f]/80 text-white/90 hover:text-white transition-colors"
+                      className="absolute bottom-3 right-3 z-30 flex items-center gap-1 p-2 md:p-2.5 rounded-full bg-[#d32f2f]/90 text-white hover:text-white transition-colors border border-background/60 shadow-xl"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <FileDown className="h-4 w-4 md:h-5 md:w-5" />
