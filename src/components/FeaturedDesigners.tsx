@@ -768,7 +768,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
         materials: "Natural teak • Raku blanc écru tabletop",
-        dimensions: "L190 × W180 × H35 cm\nProduction lead time: 14-16 weeks\nAll pieces are handmade to order · Bespoke finishes and dimensions upon request",
+        dimensions: "L190 × W180 × H35 cm\nProduction lead time: 14-16 weeks",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Atelier_Pendhapa-Mangala_Coffee_Table.pdf",
         pdfFilename: "Atelier_Pendhapa-Mangala_Coffee_Table.pdf"
       },
@@ -779,7 +779,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Seating",
         tags: ["Seating", "Chair"],
         materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery\nL49 × W52 × H85 cm\nProduction lead time: 10-12 weeks",
-        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request.",
+        dimensions: "",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Atelier_Pendhapa-Akar_Dining_Chair.pdf",
         pdfFilename: "Atelier_Pendhapa-Akar_Dining_Chair.pdf"
       },
@@ -790,7 +790,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Side Table"],
         materials: "Natural oak • White lacquer tabletop\nL75 × W48 × H50 cm\nProduction lead time: 12-14 weeks",
-        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request."
+        dimensions: ""
       },
       { 
         image: pendhapaPick4, 
@@ -799,7 +799,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
         materials: "Black oak • Black lacquer tabletop\nL110 × W80 × H35 cm\nProduction lead time: 14-16 weeks",
-        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request.",
+        dimensions: "",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Atelier_Pendhapa-Anemos_Coffee_Table.pdf",
         pdfFilename: "Atelier_Pendhapa-Anemos_Coffee_Table.pdf"
       },
@@ -810,7 +810,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Side Table"],
         materials: "Ø40 x H50 cm\nProduction lead time: 8-10 weeks",
-        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request.",
+        dimensions: "",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Atelier_Pendhapa-Deepah_Side_Table.pdf",
         pdfFilename: "Atelier_Pendhapa-Deepah_Side_Table.pdf"
       },
@@ -821,7 +821,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Dining Table"],
         materials: "L250 x W120 x H74 cm\nProduction lead time: 12-14 weeks",
-        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request.",
+        dimensions: "",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Atelier_Pendhapa-Astra_Dining_Table.pdf",
         pdfFilename: "Atelier_Pendhapa-Astra_Dining_Table.pdf"
       },
@@ -832,7 +832,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Tables",
         tags: ["Tables", "Console"],
         materials: "L120 x W65 x H80 cm\nProduction lead time: 12-14 weeks",
-        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request.",
+        dimensions: "",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Atelier_Pendhapa-Akar_Desk_Console.pdf",
         pdfFilename: "Atelier_Pendhapa-Akar_Desk_Console.pdf"
       },
