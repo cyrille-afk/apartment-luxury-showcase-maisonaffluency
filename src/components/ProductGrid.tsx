@@ -299,12 +299,12 @@ function singularizeSub(s: string): string {
             <div className="relative flex flex-col items-center pt-3 pb-3 md:pt-4 md:pb-4">
               {/* Counter + Close */}
               <div className="absolute top-3 right-3 md:top-4 md:right-4 z-50 flex items-center gap-2">
-                <div className="px-3 py-1 rounded-full bg-white/15 text-white/70 text-[10px] font-body tracking-wider">
+                <div className="px-3 py-1 rounded-full bg-foreground/75 text-background text-[10px] font-body tracking-wider border border-background/30 shadow-lg">
                   {lightboxIndex + 1} / {filtered.length}
                 </div>
                 <button
                   onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
-                  className="p-2 rounded-full bg-white/15 text-white/80 hover:text-white transition-colors"
+                  className="p-2 rounded-full bg-foreground/75 text-background hover:opacity-90 transition-colors border border-background/30 shadow-lg"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -315,7 +315,7 @@ function singularizeSub(s: string): string {
                 {lightboxIndex > 0 && (
                   <button
                     onClick={() => navigateLightbox(-1)}
-                    className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-white/15 text-white/70 hover:text-white transition-colors"
+                    className="flex absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-foreground/75 text-background hover:opacity-90 transition-colors border border-background/30 shadow-lg"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
@@ -323,7 +323,7 @@ function singularizeSub(s: string): string {
                 {lightboxIndex < filtered.length - 1 && (
                   <button
                     onClick={() => navigateLightbox(1)}
-                    className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-white/15 text-white/70 hover:text-white transition-colors"
+                    className="flex absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-foreground/75 text-background hover:opacity-90 transition-colors border border-background/30 shadow-lg"
                   >
                     <ChevronRight className="h-5 w-5" />
                   </button>
