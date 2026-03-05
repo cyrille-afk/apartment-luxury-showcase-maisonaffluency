@@ -444,13 +444,14 @@ const Navigation = () => {
                          window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
                         setActiveMegaCat(cat);
                         setActiveMegaSub(null);
+                        scrollToSection('designers');
                       }}
-                      className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 font-semibold text-left", activeMegaCat === cat && !activeMegaSub ? "text-primary" : "text-foreground hover:text-primary")}
+                      className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 text-left w-full", activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))] font-bold" : "text-foreground font-semibold hover:text-primary")}
                     >
                       {cat}
                     </button>
-                    {SUBCATEGORY_MAP[cat]?.length > 0 && (
-                      <div className="flex flex-col gap-0.5">
+                    {SUBCATEGORY_MAP[cat] && (
+                      <div className="flex flex-col gap-1 mt-1.5 ml-0">
                         {SUBCATEGORY_MAP[cat].map(sub => (
                           <button
                             key={sub}
@@ -458,6 +459,7 @@ const Navigation = () => {
                               window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
                               setActiveMegaCat(cat);
                               setActiveMegaSub(sub);
+                              scrollToSection('designers');
                             }}
                             className={cn("text-left text-[10px] tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-foreground hover:text-primary")}
                           >
