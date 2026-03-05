@@ -296,7 +296,7 @@ function singularizeSub(s: string): string {
           {lightboxOpen && filtered[lightboxIndex] && (() => {
             const currentItem = filtered[lightboxIndex];
             return (
-            <div className="relative flex flex-col items-center pt-6 pb-4 md:pt-8 md:pb-6">
+            <div className="relative flex flex-col items-center pt-3 pb-3 md:pt-4 md:pb-4">
               {/* Close */}
               <button
                 onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
@@ -361,7 +361,7 @@ function singularizeSub(s: string): string {
               </div>
 
               {isLightboxImageLoaded && (
-                <div className="mt-1.5 text-center w-full px-6 md:px-12">
+                <div className="-mt-1 text-center w-full px-6 md:px-12">
                   <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
                     {(() => {
                       const baseTitle = currentItem.pick.title;
