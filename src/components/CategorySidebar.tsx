@@ -140,7 +140,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
                           className={cn(
                             "font-body text-[12px] tracking-wide cursor-pointer transition-colors",
                             isActiveSub
-                              ? "text-primary font-medium"
+                              ? "text-[hsl(var(--accent))] font-medium"
                               : "text-muted-foreground hover:text-foreground"
                           )}
                         >
