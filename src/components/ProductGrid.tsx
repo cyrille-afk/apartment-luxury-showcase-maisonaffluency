@@ -217,7 +217,20 @@ const ProductGrid = () => {
               className="group cursor-pointer"
               onClick={() => handleCardClick(item, idx)}
             >
-              <div className="aspect-[4/5] overflow-hidden rounded-sm bg-muted/30 mb-3">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-muted/30 mb-3">
+                {(() => {
+                  const tags: string[] = item.pick.tags || [];
+                  const specialTags = tags.filter(t => /couture|edition|limited|re-edition/i.test(t));
+                  return specialTags.length > 0 ? (
+                    <div className="absolute top-2 right-2 z-10 flex flex-wrap gap-1 justify-end">
+                      {specialTags.map((tag, i) => (
+                        <span key={i} className="inline-block px-2 py-0.5 text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
                 <img
                   src={item.pick.image}
                   alt={item.pick.title}
