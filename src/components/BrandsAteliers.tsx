@@ -328,6 +328,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         subcategory: "Chairs",
         tags: ["Seating", "Chair"],
         materials: "Upholstered in solid walnut with varnish finish",
+        dimensions: "H 84 × 50 × 55 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/ma-chair-1.pdf",
         pdfFilename: "MA_Chair_1.pdf",
       },
