@@ -318,6 +318,21 @@ const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick
       },
     ],
   },
+  "victoria-magniant": {
+    name: "Victoria Magniant",
+    curatorPicks: [
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772688897/Screen_Shot_2026-03-05_at_1.33.31_PM_srdpp4.png",
+        title: "MA Chair",
+        category: "Seating",
+        subcategory: "Chairs",
+        tags: ["Seating", "Chair"],
+        materials: "Upholstered in solid walnut with varnish finish",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/ma-chair-1.pdf",
+        pdfFilename: "MA_Chair_1.pdf",
+      },
+    ],
+  },
 };
 
 // Gallery image index mapping (based on flattened gallery items order)
@@ -1542,6 +1557,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Stéphane CG": "stephane-cg",
   "Marta Sala Éditions": "marta-sala-editions",
   "Ozone Light": "ozone-light",
+  "Victoria Magniant": "victoria-magniant",
 };
 
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
