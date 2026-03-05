@@ -767,8 +767,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         subtitle: "Coffee Table",
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
-        materials: "Natural teak • Raku blanc écru tabletop\nL190 × W180 × H35 cm\nProduction lead time: 14-16 weeks",
-        dimensions: "All pieces are handmade to order.\nBespoke finishes and dimensions upon request.",
+        materials: "Natural teak • Raku blanc écru tabletop",
+        dimensions: "L190 × W180 × H35 cm\nProduction lead time: 14-16 weeks\nAll pieces are handmade to order · Bespoke finishes and dimensions upon request",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Atelier_Pendhapa-Mangala_Coffee_Table.pdf",
         pdfFilename: "Atelier_Pendhapa-Mangala_Coffee_Table.pdf"
       },
