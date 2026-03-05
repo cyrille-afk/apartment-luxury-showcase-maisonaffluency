@@ -120,7 +120,15 @@ const ProductGrid = () => {
 
   const filtered = useMemo(() => {
     if (!category && !subcategory) return [];
-    return allProducts.filter(item => pickMatchesFilter(item.pick, category, subcategory));
+    const matched = allProducts.filter(item => pickMatchesFilter(item.pick, category, subcategory));
+    // Deduplicate: keep only the first image per product title per designer
+    const seen = new Set<string>();
+    return matched.filter(item => {
+      const key = `${item.designerId}::${item.pick.title}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }, [allProducts, category, subcategory]);
 
   const isActive = (category || subcategory) && filtered.length > 0;
