@@ -344,14 +344,13 @@ const ProductGrid = () => {
               {/* Info */}
               <div className="mt-4 text-center w-full px-6 md:px-12">
                 <h3 className="font-display text-lg md:text-xl text-white">
-                  {lightboxItem.pick.title}
+                  {subcategory && !lightboxItem.pick.title.toLowerCase().includes(subcategory.replace(/s$/, '').toLowerCase().split(' ').pop() || '')
+                    ? `${lightboxItem.pick.title} ${subcategory.replace(/s$/, '')}`
+                    : lightboxItem.pick.title}
                 </h3>
                 {lightboxItem.pick.subtitle && (
                   <p className="font-body text-sm text-white/60 mt-0.5">{lightboxItem.pick.subtitle}</p>
                 )}
-                <p className="font-body text-xs text-white/40 uppercase tracking-[0.15em] mt-1">
-                  {lightboxItem.designerName} · {SECTION_LABELS[lightboxItem.section]}
-                </p>
                 {lightboxItem.pick.materials && (
                   <p className="font-body text-xs text-white/50 mt-2 leading-relaxed">
                     {lightboxItem.pick.materials.replace(/\n/g, " · ")}
