@@ -206,7 +206,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         title: "Laviana Hexagonal",
         subtitle: "P3 Armchair",
         tags: ["Furniture", "Armchair"],
-        materials: "Frame: solid and multilayer wood, elastic belts, upholstery in different densities polyurethane foam\nSlide feet or lacquered solid wood base",
+        materials: "Frame: solid and multilayer wood, elastic belts, upholstery in different densities polyurethane foam · Slide feet or lacquered solid wood base",
         dimensions: "85 x 85 x H 110 cm · SH 36 cm",
       },
       {
@@ -214,7 +214,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         title: "Ranieri",
         subtitle: "T5 Side Table",
         tags: ["Furniture", "Side Table"],
-        materials: "Lightened Calacatta 5mm thick gold marble top, stain-resistant treatment\nBrass or Iron Frame",
+        materials: "Lightened Calacatta 5mm thick gold marble top, stain-resistant treatment · Brass or Iron Frame",
         dimensions: "Ø 80 x H 60/90/110 cm",
       },
       {
@@ -222,7 +222,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         title: "Inge",
         subtitle: "D3 Sofa",
         tags: ["Furniture", "Sofa"],
-        materials: "Solid and multilayer wood, elastic belts Frame\nUpholstery in different densities polyurethane foam\nLacquered back solid wood base\nCompartmentalized feathers with removable cover cushions",
+        materials: "Solid and multilayer wood, elastic belts Frame · Upholstery in different densities polyurethane foam · Lacquered back solid wood base · Compartmentalized feathers with removable cover cushions",
         dimensions: "210 / 270 / 330 / 390 x 69 — H 77 cm · SH 41 cm",
       },
       {
@@ -230,7 +230,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         title: "Murena",
         subtitle: "S2 Dining Chair",
         tags: ["Furniture", "Chair"],
-        materials: "Metal laser-cut, curved, grind, hand-assembled before final finishing Frame\nSeat: multilayer wood with foam, resinated layer\nCushion: expanded foam with removable cover",
+        materials: "Metal laser-cut, curved, grind, hand-assembled before final finishing Frame · Seat: multilayer wood with foam, resinated layer · Cushion: expanded foam with removable cover",
         dimensions: "55 x 51 x H 68 cm · SH 45 cm",
       },
       {
@@ -238,7 +238,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         title: "Achille",
         subtitle: "LTA1 Table Lamp",
         tags: ["Lighting", "Table Lamp"],
-        materials: "Metal plate, laser-cut and hand-curved Frame\nPolished Calacatta gold marble, bevelled edge Base, stain-resistant treatment\nSilk with PVC lid\nE27 bulb holder",
+        materials: "Metal plate, laser-cut and hand-curved Frame · Polished Calacatta gold marble, bevelled edge Base, stain-resistant treatment · Silk with PVC lid · E27 bulb holder",
         dimensions: "Ø 30 x 64 cm\nSilk Shade — H 30 cm",
       },
       {
@@ -246,7 +246,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         title: "Elisabeth",
         subtitle: "D1 Sofa",
         tags: ["Furniture", "Sofa"],
-        materials: "Solid and Multilayer Wood, Elastic Belts, Upholstery in different densities polyurethane foam Frame\nLacquered Solid Wood Back Base\nExpanded foam with removable cover Cushions",
+        materials: "Solid and Multilayer Wood, Elastic Belts, Upholstery in different densities polyurethane foam Frame · Lacquered Solid Wood Back Base · Expanded foam with removable cover Cushions",
         dimensions: "W 160 / 220 / 280 / 340 / 400 x D 110 x H 81 cm · SH 41 cm",
       },
       {
