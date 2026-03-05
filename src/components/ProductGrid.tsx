@@ -325,7 +325,7 @@ function singularizeSub(s: string): string {
                 )}
 
                 <div
-                  className="max-h-[60vh] md:max-h-[65vh] flex items-center justify-center"
+                  className="h-[55vh] md:h-[60vh] w-full flex items-center justify-center"
                   onClick={() => setIsZoomed(!isZoomed)}
                 >
                   <PinchZoomImage
@@ -333,7 +333,7 @@ function singularizeSub(s: string): string {
                     src={currentItem.pick.image || ""}
                     alt={currentItem.pick.title}
                     className={cn(
-                      "max-h-[60vh] md:max-h-[65vh] w-auto object-contain transition-transform duration-300",
+                      "h-[55vh] md:h-[60vh] w-auto object-contain transition-transform duration-300",
                       isZoomed ? "cursor-zoom-out scale-150" : "cursor-zoom-in"
                     )}
                     onLoad={() => setIsLightboxImageLoaded(true)}
