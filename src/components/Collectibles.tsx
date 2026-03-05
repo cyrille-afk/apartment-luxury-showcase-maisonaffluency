@@ -733,9 +733,13 @@ const Collectibles = () => {
                 "Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"];
               const counts: Record<string, number> = {};
               SUBCATS.forEach(sub => {
-                counts[sub] = collectibleDesigners.filter(d =>
-                  d.curatorPicks?.some(pick => pick.subcategory === sub || pick.category === sub)
-                ).length;
+                let total = 0;
+                collectibleDesigners.forEach(d => {
+                  d.curatorPicks?.forEach(pick => {
+                    if (pick.subcategory === sub || pick.category === sub) total++;
+                  });
+                });
+                counts[sub] = total;
               });
               return (
                 <CategorySidebar

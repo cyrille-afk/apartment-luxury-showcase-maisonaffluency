@@ -2499,13 +2499,15 @@ const FeaturedDesigners = () => {
             };
             const counts: Record<string, number> = {};
             Object.entries(SUBCATEGORY_TO_TAGS_LOCAL).forEach(([sub, tags]) => {
-              counts[sub] = featuredDesigners.filter(d =>
-                d.curatorPicks?.some((pick: any) => {
+              let total = 0;
+              featuredDesigners.forEach(d => {
+                d.curatorPicks?.forEach((pick: any) => {
                   const matchesTags = pick.tags?.some((tag: string) => tags.some(mt => tag.toLowerCase() === mt.toLowerCase()));
                   const matchesCat = tags.some(mt => pick.category?.toLowerCase() === mt.toLowerCase());
-                  return matchesTags || matchesCat;
-                })
-              ).length;
+                  if (matchesTags || matchesCat) total++;
+                });
+              });
+              counts[sub] = total;
             });
             return (
               <CategorySidebar

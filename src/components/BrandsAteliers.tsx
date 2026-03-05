@@ -2186,10 +2186,12 @@ const BrandsAteliers = () => {
               "Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"];
             const counts: Record<string, number> = {};
             SUBCATS.forEach(sub => {
-              counts[sub] = partnerBrands.filter(b => {
+              let total = 0;
+              partnerBrands.forEach(b => {
                 const bSub = (b as any).subcategory || (b as any).seatType || (b as any).tableType;
-                return bSub === sub || b.category === sub;
-              }).length;
+                if (bSub === sub || b.category === sub) total++;
+              });
+              counts[sub] = total;
             });
             return (
               <CategorySidebar
