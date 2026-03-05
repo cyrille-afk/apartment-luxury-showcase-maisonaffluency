@@ -230,7 +230,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         title: "Murena",
         subtitle: "S2 Dining Chair",
         tags: ["Furniture", "Chair"],
-        materials: "Metal laser-cut, curved, grind, hand-assembled before final finishing Frame · Seat: multilayer wood with foam, resinated layer · Cushion: expanded foam with removable cover",
+        materials: "Frame: metal laser-cut, curved, grind, hand-assembled before final finishing · Iron powder coat RAL colour, similar bronze, galvanic brass or bronze · Stainless steel: polished or mat · 316 marine outdoor version · Seat: multilayer wood with foam, resinated layer · Cushion: expanded foam, removable cover, loose or fix - In client's fabric (mt. 1) · leather · Mohair velvet · silk velvet · pure wool Tiepolo Loro Piana Interiors",
         dimensions: "55 x 51 x H 68 cm · SH 45 cm",
       },
       {
