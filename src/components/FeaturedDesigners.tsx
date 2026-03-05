@@ -538,7 +538,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         title: "Angelo W",
         subtitle: "Limited Edition of 7",
         category: "Tables",
-        tags: ["Tables", "Coffee Table"],
+        tags: ["Tables", "Dining Table"],
         materials: "Macassar ebony veneer • Natural stone",
         dimensions: "Custom",
         description: "The Angelo W is a strictly limited edition of seven pieces — its Macassar ebony veneer surface paired with a natural stone base to create a collectible of extraordinary rarity and beauty."
