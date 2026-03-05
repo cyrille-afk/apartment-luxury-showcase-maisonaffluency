@@ -2070,35 +2070,25 @@ const BrandsAteliers = () => {
                     );
                   })}
                 </div>
-                <div className="flex items-center gap-6 flex-shrink-0">
-                  {searchOpen ? (
-                    <div className="relative flex-1 sm:flex-none sm:w-48 animate-in slide-in-from-right-2 duration-200">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="text"
-                        placeholder="Search by brand..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        autoFocus
-                        className="pl-9 pr-8 h-9 text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
-                      />
+                <div className="flex items-center gap-4 flex-shrink-0">
+                  <div className="relative flex-1 sm:flex-none sm:w-48">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Search by brand..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 pr-8 h-9 text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
+                    />
+                    {searchQuery && (
                       <button
-                        onClick={() => { setSearchQuery(""); setSearchOpen(false); ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+                        onClick={() => { setSearchQuery(""); ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setSearchOpen(true)}
-                      className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
-                      aria-label="Search"
-                    >
-                      <span className="text-xs font-body uppercase tracking-wider">Search</span>
-                      <Search className="h-5 w-5" />
-                    </button>
-                  )}
+                    )}
+                  </div>
                   <div className="md:hidden">
                   <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                     <PopoverTrigger asChild>
