@@ -222,7 +222,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         title: "Inge",
         subtitle: "D3 Sofa",
         tags: ["Furniture", "Sofa"],
-        materials: "Solid and multilayer wood, elastic belts Frame · Upholstery in different densities polyurethane foam · Lacquered back solid wood base · Compartmentalized feathers with removable cover cushions",
+        materials: "Solid and multilayer wood, elastic belts Frame · Upholstery in different densities polyurethane foam · Lacquered back solid wood base\nCompartmentalized feathers with removable cover cushions",
         dimensions: "210 / 270 / 330 / 390 x 69 — H 77 cm · SH 41 cm",
       },
       {
