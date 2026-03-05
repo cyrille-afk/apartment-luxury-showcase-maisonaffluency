@@ -291,7 +291,7 @@ function singularizeSub(s: string): string {
 
       {/* ─── Lightbox ─────────────────────────────────────────────────── */}
       <Dialog open={lightboxOpen} onOpenChange={() => { setLightboxOpen(false); setIsZoomed(false); setIsLightboxImageLoaded(false); }}>
-        <DialogContent className="max-w-[95vw] md:max-w-4xl p-0 border-none bg-[#181818] shadow-2xl overflow-hidden [&>button]:hidden">
+        <DialogContent className="max-w-[95vw] md:max-w-4xl p-0 border-none bg-[#181818] shadow-2xl overflow-visible [&>button]:hidden">
           <VisuallyHidden><DialogTitle>Product Detail</DialogTitle></VisuallyHidden>
           {lightboxOpen && filtered[lightboxIndex] && (() => {
             const currentItem = filtered[lightboxIndex];
