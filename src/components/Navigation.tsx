@@ -255,7 +255,7 @@ const Navigation = () => {
                       <div key={cat} className="mb-3">
                         <button
                           onClick={() => setExpandedCategory(expandedCategory === cat ? null : cat)}
-                          className="text-left font-body text-[15px] uppercase tracking-wide transition-colors py-1.5 w-full text-foreground hover:text-primary font-semibold flex items-center justify-between"
+                          className="text-left font-body text-[15px] tracking-wide transition-colors py-1.5 w-full text-foreground hover:text-primary font-semibold flex items-center justify-between"
                         >
                           {cat}
                           <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedCategory === cat ? "rotate-90" : ""}`} />
@@ -268,7 +268,7 @@ const Navigation = () => {
                                 window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
                                 handleNavClick('#designers');
                               }}
-                              className="block text-[12px] uppercase tracking-[0.15em] font-body text-muted-foreground hover:text-primary transition-colors py-1.5 font-semibold"
+                              className="block text-[12px] tracking-[0.15em] font-body text-muted-foreground hover:text-primary transition-colors py-1.5 font-semibold"
                             >
                               All {cat}
                             </button>
@@ -280,7 +280,7 @@ const Navigation = () => {
                                   window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } })); 
                                   handleNavClick('#designers'); 
                                 }}
-                                className="block text-[12px] uppercase tracking-[0.15em] font-body text-muted-foreground hover:text-[hsl(var(--accent))] transition-colors py-1.5 font-semibold"
+                                className="block text-[12px] tracking-[0.15em] font-body text-muted-foreground hover:text-[hsl(var(--accent))] transition-colors py-1.5 font-semibold"
                               >
                                 {sub}
                               </button>
@@ -445,7 +445,7 @@ const Navigation = () => {
                         setActiveMegaCat(cat);
                         setActiveMegaSub(null);
                       }}
-                      className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 font-semibold text-left", activeMegaCat === cat && !activeMegaSub ? "text-primary" : "text-foreground hover:text-primary")}
+                      className={cn("font-body text-[11px] tracking-[0.2em] transition-all duration-300 pb-2 font-semibold text-left", activeMegaCat === cat && !activeMegaSub ? "text-primary" : "text-foreground hover:text-primary")}
                     >
                       {cat}
                     </button>
@@ -459,7 +459,7 @@ const Navigation = () => {
                               setActiveMegaCat(cat);
                               setActiveMegaSub(sub);
                             }}
-                            className={cn("text-left text-[10px] uppercase tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-muted-foreground hover:text-primary")}
+                            className={cn("text-left text-[10px] tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-muted-foreground hover:text-primary")}
                           >
                             {sub}
                           </button>
