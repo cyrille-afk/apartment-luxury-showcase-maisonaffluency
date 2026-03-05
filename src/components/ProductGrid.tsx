@@ -240,10 +240,10 @@ const ProductGrid = () => {
                 />
               </div>
               <div className="text-center mt-1">
-                <p className="font-body text-[11px] md:text-xs uppercase tracking-[0.12em] text-foreground font-semibold">
+                <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-foreground/80 font-semibold">
                   {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
                 </p>
-                <h3 className="font-body text-xs md:text-sm text-muted-foreground leading-tight mt-0.5">
+                <h3 className="font-body text-sm md:text-base text-foreground leading-tight mt-0.5 font-medium">
                   {item.pick.title}
                 </h3>
                 {item.pick.materials && (
