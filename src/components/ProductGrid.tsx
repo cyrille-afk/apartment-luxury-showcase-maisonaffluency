@@ -361,7 +361,7 @@ function singularizeSub(s: string): string {
               </div>
 
               {isLightboxImageLoaded && (
-                <div className="mt-4 text-center w-full px-6 md:px-12">
+                <div className="mt-1.5 text-center w-full px-6 md:px-12">
                   <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
                     {(() => {
                       const baseTitle = currentItem.pick.title;
