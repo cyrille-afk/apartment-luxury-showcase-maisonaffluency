@@ -348,9 +348,14 @@ const ProductGrid = () => {
                     const baseTitle = subcategory && !lightboxItem.pick.title.toLowerCase().includes(subcategory.replace(/s$/, '').toLowerCase().split(' ').pop() || '')
                       ? `${lightboxItem.pick.title} ${subcategory.replace(/s$/, '')}`
                       : lightboxItem.pick.title;
-                    return lightboxItem.pick.subtitle ? `${baseTitle} ${lightboxItem.pick.subtitle}` : baseTitle;
+                    // Only merge subtitle into title if it looks like a year (e.g. "1930")
+                    const isYear = lightboxItem.pick.subtitle && /^\d{4}/.test(lightboxItem.pick.subtitle.trim());
+                    return isYear ? `${baseTitle} ${lightboxItem.pick.subtitle}` : baseTitle;
                   })()}
                 </h3>
+                {lightboxItem.pick.subtitle && !/^\d{4}/.test(lightboxItem.pick.subtitle.trim()) && (
+                  <p className="font-body text-sm text-white/60 mt-0.5">{lightboxItem.pick.subtitle}</p>
+                )}
                 {lightboxItem.pick.materials && (
                   <p className="font-body text-xs text-white/50 mt-2 leading-relaxed">
                     {lightboxItem.pick.materials.replace(/\n/g, " · ")}
