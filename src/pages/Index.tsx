@@ -18,6 +18,7 @@ const Footer = lazy(() => import("@/components/Footer"));
 const FeaturedDesigners = lazy(() => import("@/components/FeaturedDesigners"));
 const Collectibles = lazy(() => import("@/components/Collectibles"));
 const BrandsAteliers = lazy(() => import("@/components/BrandsAteliers"));
+const ProductGrid = lazy(() => import("@/components/ProductGrid"));
 
 // ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
 // competing for bandwidth with LCP-critical resources on mobile.
@@ -357,6 +358,9 @@ const Index = () => {
                 <CuratingTeam />
               </Suspense>
             </section>
+            <Suspense fallback={null}>
+              <ProductGrid />
+            </Suspense>
             <section id="designers" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
               <Suspense fallback={<SectionFallback />}>
                 <FeaturedDesigners />

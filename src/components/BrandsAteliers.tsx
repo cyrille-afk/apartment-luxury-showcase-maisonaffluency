@@ -136,7 +136,7 @@ import ozoneClassiqueV from "@/assets/curators-picks/ozone-classique-v.jpg";
 import ozoneBrasiliaPl from "@/assets/curators-picks/ozone-brasilia-pl.jpg";
 
 // Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
-const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
+export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
   "stephane-cg": {
     name: "Stéphane CG",
     curatorPicks: [
