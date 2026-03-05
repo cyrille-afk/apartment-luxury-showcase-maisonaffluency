@@ -142,7 +142,7 @@ import jmwPick4 from "@/assets/curators-picks/jmw-4.png";
 import jmwPick5 from "@/assets/curators-picks/jmw-5.png";
 import jmwPick6 from "@/assets/curators-picks/jmw-6.png";
 
-import jmwPick8 from "@/assets/curators-picks/jmw-8.webp";
+const jmwPick8 = cloudinaryUrl("Screen_Shot_2026-03-05_at_8.04.48_PM_x3wzpt", { width: 1200, quality: "auto:good", crop: "fill" });
 import leoSentouPickJBL from "@/assets/curators-picks/leo-sentou-jbl-armchair.png";
 import leoSentouPickGJ from "@/assets/curators-picks/leo-sentou-gj-chair.png";
 import leoSentouPickLA from "@/assets/curators-picks/leo-sentou-side-table-la.png";
