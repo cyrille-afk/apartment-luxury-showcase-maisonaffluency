@@ -125,7 +125,7 @@ const stephaneCgHallway = cloudinaryUrl("Screen_Shot_2026-02-24_at_9.42.54_PM_v5
 // Marta Sala Éditions Curators' Picks images (Cloudinary)
 const martaSalaLaviana = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.09.48_AM_saz2sv", { width: 1200, quality: "auto:good", crop: "fill" });
 const martaSalaVelazquez = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.48.51_AM_e0yej8", { width: 1200, quality: "auto:good", crop: "fill" });
-const martaSalaRanieri = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.04.52_AM_fm0uws", { width: 1200, quality: "auto:good", crop: "fill" });
+const martaSalaRanieri = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.51.46_AM_vnvbwi", { width: 1200, quality: "auto:good", crop: "fill" });
 const martaSalaInge = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.00.51_AM_ypryzi", { width: 1200, quality: "auto:good", crop: "fill" });
 const martaSalaAchille = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.56.20_AM_aq4khq", { width: 1200, quality: "auto:good", crop: "fill" });
 const martaSalaElisabeth = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.51.46_AM_vnvbwi", { width: 1200, quality: "auto:good", crop: "fill" });
