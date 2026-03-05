@@ -343,21 +343,21 @@ function singularizeSub(s: string): string {
                     onLoad={() => setIsLightboxImageLoaded(true)}
                     onZoomChange={setIsZoomed}
                   />
+                  {/* PDF download */}
+                  {currentItem.pick.pdfUrl && (
+                    <a
+                      href={currentItem.pick.pdfUrl}
+                      download={currentItem.pick.pdfFilename || true}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute bottom-3 right-3 z-30 flex items-center gap-1 p-2 md:p-2.5 rounded-full bg-[#d32f2f]/80 text-white/90 hover:text-white transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <FileDown className="h-4 w-4 md:h-5 md:w-5" />
+                      <span className="text-[10px] md:text-xs font-body font-medium">PDF</span>
+                    </a>
+                  )}
                 </div>
-
-                {/* PDF download */}
-                {currentItem.pick.pdfUrl && (
-                  <a
-                    href={currentItem.pick.pdfUrl}
-                    download={currentItem.pick.pdfFilename || true}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute bottom-2 right-6 md:right-14 z-30 flex items-center gap-1 p-2 md:p-2.5 rounded-full bg-[#d32f2f]/80 text-white/90 hover:text-white transition-colors"
-                  >
-                    <FileDown className="h-4 w-4 md:h-5 md:w-5" />
-                    <span className="text-[10px] md:text-xs font-body font-medium">PDF</span>
-                  </a>
-                )}
               </div>
 
               {isLightboxImageLoaded && (
