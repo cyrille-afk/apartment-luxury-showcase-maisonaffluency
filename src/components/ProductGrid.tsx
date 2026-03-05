@@ -132,16 +132,24 @@ const ProductGrid = () => {
   }, []);
 
   const handleNavigateToDesigner = useCallback((item: ProductItem) => {
-    const sectionMap: Record<string, string> = {
-      designers: "designers",
-      collectibles: "collectibles",
-      ateliers: "brands",
+    const sectionMap: Record<string, { scrollId: string; deeplinkSection: string }> = {
+      designers: { scrollId: "designers", deeplinkSection: "designer" },
+      collectibles: { scrollId: "collectibles", deeplinkSection: "collectible" },
+      ateliers: { scrollId: "brands", deeplinkSection: "atelier" },
     };
-    const sectionId = sectionMap[item.section];
-    const el = document.getElementById(sectionId);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    const mapped = sectionMap[item.section];
+    if (!mapped) return;
+
+    // Dispatch deeplink event to expand the profile
+    window.dispatchEvent(new CustomEvent("deeplink-open-profile", {
+      detail: { section: mapped.deeplinkSection, id: item.designerId }
+    }));
+
+    // Scroll to the section after a short delay for expansion
+    setTimeout(() => {
+      const el = document.getElementById(mapped.scrollId);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
   }, []);
 
   const handleClearFilter = useCallback(() => {
