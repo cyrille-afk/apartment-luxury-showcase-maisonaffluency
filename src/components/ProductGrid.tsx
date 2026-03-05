@@ -248,11 +248,6 @@ const ProductGrid = () => {
                     ? `${item.pick.title} Table`
                     : item.pick.title}
                 </h3>
-                {item.pick.materials && (
-                  <p className="font-body text-[9px] md:text-[10px] text-muted-foreground/60 mt-0.5 line-clamp-2">
-                    {item.pick.materials.replace(/\n/g, ' · ')}
-                  </p>
-                )}
               </div>
             </motion.div>
           ))}
