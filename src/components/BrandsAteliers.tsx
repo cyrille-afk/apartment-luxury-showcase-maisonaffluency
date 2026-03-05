@@ -207,7 +207,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         subtitle: "P3 Armchair",
         tags: ["Furniture", "Armchair"],
         materials: "Frame: solid and multilayer wood, elastic belts, upholstery in different densities polyurethane foam\nSlide feet or lacquered solid wood base",
-        dimensions: "85 x 85 x H 110 cm\nSH 36 cm",
+        dimensions: "85 x 85 x H 110 cm · SH 36 cm",
       },
       {
         image: martaSalaRanieri,
@@ -223,7 +223,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         subtitle: "D3 Sofa",
         tags: ["Furniture", "Sofa"],
         materials: "Solid and multilayer wood, elastic belts Frame\nUpholstery in different densities polyurethane foam\nLacquered back solid wood base\nCompartmentalized feathers with removable cover cushions",
-        dimensions: "210 / 270 / 330 / 390 x 69 — H 77 cm\nSH 41 cm",
+        dimensions: "210 / 270 / 330 / 390 x 69 — H 77 cm · SH 41 cm",
       },
       {
         image: martaSalaMurena,
@@ -231,7 +231,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         subtitle: "S2 Dining Chair",
         tags: ["Furniture", "Chair"],
         materials: "Metal laser-cut, curved, grind, hand-assembled before final finishing Frame\nSeat: multilayer wood with foam, resinated layer\nCushion: expanded foam with removable cover",
-        dimensions: "55 x 51 x H 68 cm\nSH 45 cm",
+        dimensions: "55 x 51 x H 68 cm · SH 45 cm",
       },
       {
         image: martaSalaAchille,
@@ -247,7 +247,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         subtitle: "D1 Sofa",
         tags: ["Furniture", "Sofa"],
         materials: "Solid and Multilayer Wood, Elastic Belts, Upholstery in different densities polyurethane foam Frame\nLacquered Solid Wood Back Base\nExpanded foam with removable cover Cushions",
-        dimensions: "W 160 / 220 / 280 / 340 / 400 x D 110 x H 81 cm\nSH 41 cm",
+        dimensions: "W 160 / 220 / 280 / 340 / 400 x D 110 x H 81 cm · SH 41 cm",
       },
       {
         image: martaSalaVelazquez,
