@@ -133,12 +133,6 @@ const ProductGrid = () => {
 
   const isActive = (category || subcategory) && filtered.length > 0;
 
-  const handleCardClick = useCallback((item: ProductItem, index: number) => {
-    setLightboxItem(item);
-    setLightboxIndex(index);
-    setIsZoomed(false);
-  }, []);
-
   const handleNavigateToDesigner = useCallback((item: ProductItem) => {
     const sectionMap: Record<string, { scrollId: string; deeplinkSection: string }> = {
       designers: { scrollId: "designers", deeplinkSection: "designer" },
@@ -148,17 +142,19 @@ const ProductGrid = () => {
     const mapped = sectionMap[item.section];
     if (!mapped) return;
 
-    // Dispatch deeplink event to expand the profile
     window.dispatchEvent(new CustomEvent("deeplink-open-profile", {
       detail: { section: mapped.deeplinkSection, id: item.designerId }
     }));
 
-    // Scroll to the section after a short delay for expansion
     setTimeout(() => {
       const el = document.getElementById(mapped.scrollId);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 150);
   }, []);
+
+  const handleCardClick = useCallback((item: ProductItem, _index: number) => {
+    handleNavigateToDesigner(item);
+  }, [handleNavigateToDesigner]);
 
   const handleClearFilter = useCallback(() => {
     setCategory(null);
