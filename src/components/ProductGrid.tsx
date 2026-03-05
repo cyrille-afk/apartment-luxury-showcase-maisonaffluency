@@ -180,7 +180,7 @@ const ProductGrid = () => {
             <h2 className="font-display text-2xl md:text-3xl text-foreground">
               {filterLabel}
             </h2>
-            <p className="font-body text-sm text-muted-foreground mt-1">
+            <p className="font-body text-sm text-[hsl(var(--accent))] mt-1">
               {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across all collections
             </p>
           </div>
