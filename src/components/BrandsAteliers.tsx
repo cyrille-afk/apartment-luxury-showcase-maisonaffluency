@@ -1459,7 +1459,7 @@ const brandBgMap: Record<string, string> = {
   "Galerie MCDE": galerieMcdeBg,
   "Gilles & Boissier": gillesBoissierBg,
   "Jacob Hashimoto Studio": jacobHashimotoBg,
-  "Paul Cocksedge Studio": paulCocksedgeBg,
+  
   "Le Berre Vevaud": leBerreVevaudBg,
   "Charles Paris": charlesParisBg,
   "Victoria Magniant": victoriaMagniantBg,
