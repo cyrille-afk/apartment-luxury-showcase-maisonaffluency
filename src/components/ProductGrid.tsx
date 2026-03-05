@@ -152,9 +152,11 @@ const ProductGrid = () => {
     }, 150);
   }, []);
 
-  const handleCardClick = useCallback((item: ProductItem, _index: number) => {
-    handleNavigateToDesigner(item);
-  }, [handleNavigateToDesigner]);
+  const handleCardClick = useCallback((item: ProductItem, index: number) => {
+    setLightboxItem(item);
+    setLightboxIndex(index);
+    setIsZoomed(false);
+  }, []);
 
   const handleClearFilter = useCallback(() => {
     setCategory(null);
