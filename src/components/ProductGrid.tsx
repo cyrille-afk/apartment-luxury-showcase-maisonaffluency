@@ -365,9 +365,7 @@ function singularizeSub(s: string): string {
                 <div className="mt-4 text-center w-full px-6 md:px-12">
                   <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
                     {(() => {
-                      const baseTitle = subcategory && !currentItem.pick.title.toLowerCase().includes(singularizeSub(subcategory).toLowerCase().split(' ').pop() || '')
-                        ? `${currentItem.pick.title} ${singularizeSub(subcategory)}`
-                        : currentItem.pick.title;
+                      const baseTitle = currentItem.pick.title;
                       const isYear = currentItem.pick.subtitle && /^\d{4}/.test(currentItem.pick.subtitle.trim());
                       return isYear ? `${baseTitle} ${currentItem.pick.subtitle}` : baseTitle;
                     })()}
