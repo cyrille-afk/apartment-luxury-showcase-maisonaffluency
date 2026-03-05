@@ -54,7 +54,7 @@ const herveTumulteMirror = cloudinaryUrl("Screen_Shot_2026-02-23_at_11.10.56_AM_
 const herveEmpileeConsole = cloudinaryUrl("Screen_Shot_2026-02-23_at_11.16.19_AM_p0jbm0", { width: 1200, quality: "auto:good", crop: "fill" });
 const emmanuelBabledImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_7.32.25_AM_wujvd4", { width: 800, quality: "auto", crop: "fill" });
 import emmanuelBabledPick1 from "@/assets/curators-picks/emmanuel-babled-1.jpg";
-import emmanuelBabledPick2 from "@/assets/curators-picks/emmanuel-babled-2.jpg";
+const emmanuelBabledPick2 = cloudinaryUrl("Screen_Shot_2026-03-05_at_8.08.08_PM_e3yqrd", { width: 1200, quality: "auto:good", crop: "fill" });
 import emmanuelBabledPick3 from "@/assets/curators-picks/emmanuel-babled-3.jpg";
 import emmanuelBabledPick4 from "@/assets/curators-picks/emmanuel-babled-4.jpg";
 import emmanuelBabledPick5 from "@/assets/curators-picks/emmanuel-babled-5.jpg";
