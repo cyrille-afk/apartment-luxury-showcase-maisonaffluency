@@ -243,7 +243,7 @@ const ProductGrid = () => {
                 <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-foreground/80 font-semibold">
                   {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
                 </p>
-                <h3 className="font-body text-sm md:text-base text-foreground leading-tight mt-0.5 font-medium">
+                <h3 className="font-body text-sm md:text-base text-foreground leading-tight mt-1.5 font-medium">
                   {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
                     ? `${item.pick.title} Table`
                     : item.pick.title}
