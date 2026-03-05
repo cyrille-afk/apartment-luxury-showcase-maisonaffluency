@@ -1358,13 +1358,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Hand-chiseled stone top, textured earthenware ceramic base",
         dimensions: "Ø120 × H75 cm (customisable)"
       },
-      {
-        image: hamreiPick6,
-        title: "TRIO Dining Table & Pépé Chair Composition",
-        category: "Tables & Seating",
-        tags: ["Tables", "Dining Table", "Chairs"],
-        materials: "Hand-chiseled stone top, textured earthenware ceramic base, brass chair frame with woven upholstery",
-      },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/hamrei" },
