@@ -290,7 +290,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     curatorPicks: [
       {
         image: adamCourtsVoidTable,
-        title: "Tectra 2",
+        title: "Tectra 2 Coffee Table",
         subtitle: "Gun Metal Base & Custom Stone Top",
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
@@ -1544,8 +1544,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       {
         image: jmwPick8,
-        title: "Gravity",
-        subtitle: "Coffee Table",
+        title: "Gravity Coffee Table",
+        subtitle: "",
         category: "Tables",
         tags: ["Tables", "Coffee Table"],
         materials: "Blown glass spheres • Lacquered wood top",
@@ -1603,7 +1603,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       {
         image: kertensPick4,
-        title: "Rift CTW",
+        title: "Rift CTW Coffee Table",
         subtitle: "Ebonised oak",
         category: "Tables",
         tags: ["Tables", "Coffee Table", "open edition + 1 AP"],
