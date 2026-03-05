@@ -94,6 +94,7 @@ const ProductGrid = () => {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [showBackToGrid, setShowBackToGrid] = useState(false);
+  const [isLightboxImageLoaded, setIsLightboxImageLoaded] = useState(false);
   const gridRef = useRef<HTMLElement>(null);
 
 
@@ -135,6 +136,11 @@ const ProductGrid = () => {
 
   const isActive = (category || subcategory) && filtered.length > 0;
 
+  // Reset image-loaded state on lightbox slide changes
+  useEffect(() => {
+    if (lightboxOpen) setIsLightboxImageLoaded(false);
+  }, [lightboxOpen, lightboxIndex]);
+
   // Track whether user has scrolled away from the grid
   useEffect(() => {
     if (!isActive) { setShowBackToGrid(false); return; }
@@ -173,6 +179,7 @@ const ProductGrid = () => {
 
   const handleCardClick = useCallback((_item: ProductItem, index: number) => {
     setLightboxIndex(index);
+    setIsLightboxImageLoaded(false);
     setLightboxOpen(true);
     setIsZoomed(false);
   }, []);
@@ -187,6 +194,7 @@ const ProductGrid = () => {
     const newIdx = lightboxIndex + dir;
     if (newIdx >= 0 && newIdx < filtered.length) {
       setLightboxIndex(newIdx);
+      setIsLightboxImageLoaded(false);
       setIsZoomed(false);
     }
   }, [lightboxIndex, filtered]);
@@ -272,7 +280,7 @@ const ProductGrid = () => {
       </div>
 
       {/* ─── Lightbox ─────────────────────────────────────────────────── */}
-      <Dialog open={lightboxOpen} onOpenChange={() => { setLightboxOpen(false); setIsZoomed(false); }}>
+      <Dialog open={lightboxOpen} onOpenChange={() => { setLightboxOpen(false); setIsZoomed(false); setIsLightboxImageLoaded(false); }}>
         <DialogContent className="max-w-[95vw] md:max-w-4xl p-0 border-none bg-[#181818] shadow-2xl overflow-hidden [&>button]:hidden">
           <VisuallyHidden><DialogTitle>Product Detail</DialogTitle></VisuallyHidden>
           {lightboxOpen && filtered[lightboxIndex] && (() => {
@@ -311,12 +319,14 @@ const ProductGrid = () => {
                   onClick={() => setIsZoomed(!isZoomed)}
                 >
                   <PinchZoomImage
+                    key={currentItem.pick.image || `${currentItem.designerId}-${lightboxIndex}`}
                     src={currentItem.pick.image || ""}
                     alt={currentItem.pick.title}
                     className={cn(
                       "max-h-[60vh] md:max-h-[65vh] w-auto object-contain transition-transform duration-300",
                       isZoomed ? "cursor-zoom-out scale-150" : "cursor-zoom-in"
                     )}
+                    onLoad={() => setIsLightboxImageLoaded(true)}
                     onZoomChange={setIsZoomed}
                   />
                 </div>
@@ -341,46 +351,47 @@ const ProductGrid = () => {
                 {lightboxIndex + 1} / {filtered.length}
               </div>
 
-              {/* Info */}
-              <div className="mt-4 text-center w-full px-6 md:px-12">
-                <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
-                  {(() => {
-                    const baseTitle = subcategory && !currentItem.pick.title.toLowerCase().includes(subcategory.replace(/s$/, '').toLowerCase().split(' ').pop() || '')
-                      ? `${currentItem.pick.title} ${subcategory.replace(/s$/, '')}`
-                      : currentItem.pick.title;
-                    const isYear = currentItem.pick.subtitle && /^\d{4}/.test(currentItem.pick.subtitle.trim());
-                    return isYear ? `${baseTitle} ${currentItem.pick.subtitle}` : baseTitle;
+              {isLightboxImageLoaded && (
+                <div className="mt-4 text-center w-full px-6 md:px-12">
+                  <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
+                    {(() => {
+                      const baseTitle = subcategory && !currentItem.pick.title.toLowerCase().includes(subcategory.replace(/s$/, '').toLowerCase().split(' ').pop() || '')
+                        ? `${currentItem.pick.title} ${subcategory.replace(/s$/, '')}`
+                        : currentItem.pick.title;
+                      const isYear = currentItem.pick.subtitle && /^\d{4}/.test(currentItem.pick.subtitle.trim());
+                      return isYear ? `${baseTitle} ${currentItem.pick.subtitle}` : baseTitle;
+                    })()}
+                  </h3>
+                  {currentItem.pick.subtitle && !/^\d{4}/.test(currentItem.pick.subtitle.trim()) && (() => {
+                    const sub = currentItem.pick.subtitle.trim().toLowerCase();
+                    const filterType = subcategory ? subcategory.replace(/s$/, '').toLowerCase() : '';
+                    if (filterType && sub === filterType) return null;
+                    return <p className="font-body text-sm text-white/60 mt-0.5">{currentItem.pick.subtitle}</p>;
                   })()}
-                </h3>
-                {currentItem.pick.subtitle && !/^\d{4}/.test(currentItem.pick.subtitle.trim()) && (() => {
-                  const sub = currentItem.pick.subtitle.trim().toLowerCase();
-                  const filterType = subcategory ? subcategory.replace(/s$/, '').toLowerCase() : '';
-                  if (filterType && sub === filterType) return null;
-                  return <p className="font-body text-sm text-white/60 mt-0.5">{currentItem.pick.subtitle}</p>;
-                })()}
-                {currentItem.pick.materials && (
-                  <p className="font-body text-xs text-white/50 mt-2 leading-relaxed">
-                    {currentItem.pick.materials.replace(/\n/g, " · ")}
-                  </p>
-                )}
-                {currentItem.pick.dimensions && (
-                  <p className="font-body text-sm md:text-base text-white font-medium mt-1.5">
-                    {currentItem.pick.dimensions.replace(/\n/g, " · ")}
-                  </p>
-                )}
+                  {currentItem.pick.materials && (
+                    <p className="font-body text-xs text-white/50 mt-2 leading-relaxed">
+                      {currentItem.pick.materials.replace(/\n/g, " · ")}
+                    </p>
+                  )}
+                  {currentItem.pick.dimensions && (
+                    <p className="font-body text-sm md:text-base text-white font-medium mt-1.5">
+                      {currentItem.pick.dimensions.replace(/\n/g, " · ")}
+                    </p>
+                  )}
 
-                {/* View designer link */}
-                <button
-                  onClick={() => {
-                    setLightboxOpen(false);
-                    setIsZoomed(false);
-                    handleNavigateToDesigner(currentItem);
-                  }}
-                  className="mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white/80 underline underline-offset-4 transition-colors"
-                >
-                  View {currentItem.designerName}'s Profile
-                </button>
-              </div>
+                  {/* View designer link */}
+                  <button
+                    onClick={() => {
+                      setLightboxOpen(false);
+                      setIsZoomed(false);
+                      handleNavigateToDesigner(currentItem);
+                    }}
+                    className="mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white/80 underline underline-offset-4 transition-colors"
+                  >
+                    View {currentItem.designerName}'s Profile
+                  </button>
+                </div>
+              )}
             </div>
             );
           })()}
