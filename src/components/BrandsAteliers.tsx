@@ -2146,7 +2146,7 @@ const BrandsAteliers = () => {
                               <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
                                 <button
                                   onClick={() => setSelectedSubcategory(null)}
-                                  className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                                  className={`block text-[11px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${
                                     !selectedSubcategory ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
                                   }`}
                                 >
@@ -2156,7 +2156,7 @@ const BrandsAteliers = () => {
                                   <button
                                     key={sub}
                                     onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
-                                    className={`block text-[10px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
+                                    className={`block text-[10px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${
                                       selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-muted-foreground/60 hover:text-primary'
                                     }`}
                                   >
