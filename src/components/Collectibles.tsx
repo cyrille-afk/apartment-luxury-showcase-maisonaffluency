@@ -1208,7 +1208,7 @@ const Collectibles = () => {
                         </p>
                       )}
                       {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions && (
-                        <p className="text-xs md:text-sm text-white/40 font-body italic">
+                        <p className="text-xs md:text-sm text-white font-body font-medium">
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex].dimensions}
                         </p>
                       )}

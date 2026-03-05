@@ -327,7 +327,7 @@ const ProductGrid = () => {
                   </p>
                 )}
                 {lightboxItem.pick.dimensions && (
-                  <p className="font-body text-[10px] text-white/35 mt-1">
+                  <p className="font-body text-[10px] text-white font-medium mt-1">
                     {lightboxItem.pick.dimensions.replace(/\n/g, " · ")}
                   </p>
                 )}
