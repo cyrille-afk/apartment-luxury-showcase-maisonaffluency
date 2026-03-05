@@ -2147,7 +2147,7 @@ const BrandsAteliers = () => {
                                 <button
                                   onClick={() => setSelectedSubcategory(null)}
                                   className={`block text-[11px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                    !selectedSubcategory ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
+                                    !selectedSubcategory ? 'text-primary' : 'text-foreground/60 hover:text-primary'
                                   }`}
                                 >
                                   All {category}
@@ -2157,7 +2157,7 @@ const BrandsAteliers = () => {
                                     key={sub}
                                     onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
                                     className={`block text-[10px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                      selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-muted-foreground/60 hover:text-primary'
+                                      selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-foreground/60 hover:text-primary'
                                     }`}
                                   >
                                     {sub}
