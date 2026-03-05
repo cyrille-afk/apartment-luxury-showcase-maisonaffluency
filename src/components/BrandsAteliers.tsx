@@ -2458,10 +2458,21 @@ const BrandsAteliers = () => {
                           const mat = picksDesigner.curatorPicks[picksIndex].materials!;
                           const ledIdx = mat.indexOf("\n\nAvailable in multiple LED options:");
                           const dimRegex = /^.*\d+\s*[×x]\s*\d+.*(?:mm|cm|kg).*$/gmi;
-                          const renderWithBoldDims = (text: string, extraClass?: string) => {
-                            const lines = text.split('\n');
+                          if (ledIdx === -1) {
+                            // No LED section — join all lines with · for a flowing sentence
                             return (
-                              <p className={`text-[10px] md:text-xs font-body mt-1 text-center ${extraClass || ''}`}>
+                              <p className="text-[10px] md:text-xs font-body mt-1 text-center text-white/50">
+                                {mat.replace(/\n/g, ' · ')}
+                              </p>
+                            );
+                          }
+                          // Has LED section — keep dimension lines with breaks, bold dims
+                          const before = mat.slice(0, ledIdx);
+                          const after = mat.slice(ledIdx + 2).replace(/\n/g, ' ');
+                          const lines = before.split('\n');
+                          return (
+                            <>
+                              <p className="text-[10px] md:text-xs font-body mt-1 text-center whitespace-pre-line">
                                 {lines.map((line, i) => {
                                   const isDim = dimRegex.test(line);
                                   dimRegex.lastIndex = 0;
@@ -2477,16 +2488,6 @@ const BrandsAteliers = () => {
                                   );
                                 })}
                               </p>
-                            );
-                          };
-                          if (ledIdx === -1) {
-                            return renderWithBoldDims(mat, 'whitespace-pre-line');
-                          }
-                          const before = mat.slice(0, ledIdx);
-                          const after = mat.slice(ledIdx + 2).replace(/\n/g, ' ');
-                          return (
-                            <>
-                              {renderWithBoldDims(before, 'whitespace-pre-line')}
                               <p className="text-xs text-white/50 font-body mt-3 text-justify">
                                 {after}
                               </p>

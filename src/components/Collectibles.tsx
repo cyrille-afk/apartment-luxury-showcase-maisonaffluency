@@ -1201,10 +1201,10 @@ const Collectibles = () => {
                     {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
                   </h3>
                   {(curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions) && (
-                    <div className="mt-2 max-w-xl space-y-1">
+                    <div className="mt-2 w-full space-y-1">
                       {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
                         <p className="text-xs md:text-sm text-white/60 font-body">
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials}
+                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials!.replace(/\n/g, ' · ')}
                         </p>
                       )}
                       {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions && (
