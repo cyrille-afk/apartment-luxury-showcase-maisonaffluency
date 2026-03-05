@@ -160,6 +160,17 @@ const Navigation = () => {
     return () => document.removeEventListener('click', handleClick);
   }, [megaMenuOpen]);
 
+  // Sync mega-menu highlight when filter is cleared externally (e.g. ProductGrid "Clear Filter")
+  useEffect(() => {
+    const handleExternalClear = (e: CustomEvent) => {
+      const { category: cat, subcategory: sub } = e.detail || {};
+      setActiveMegaCat(cat || null);
+      setActiveMegaSub(sub || null);
+    };
+    window.addEventListener('setDesignerCategory', handleExternalClear as EventListener);
+    return () => window.removeEventListener('setDesignerCategory', handleExternalClear as EventListener);
+  }, []);
+
   const scrollToTop = () => {
     // Clear saved scroll position so the settle-and-correct loop won't fight back
     sessionStorage.removeItem("__scroll_y");
