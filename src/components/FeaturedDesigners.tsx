@@ -3207,7 +3207,7 @@ const FeaturedDesigners = () => {
                           </p>
                         )}
                         {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.dimensions || (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.weight) && (
-                          <p className="text-xs text-white/40 font-body mt-0.5">
+                          <p className="text-xs text-white font-body font-medium mt-0.5">
                             {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.dimensions}
                             {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.dimensions && (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.weight && ' – '}
                             {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.weight}
