@@ -2185,11 +2185,29 @@ const BrandsAteliers = () => {
               "Bookcases", "Cabinets", "Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs",
               "Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"];
             const counts: Record<string, number> = {};
+            const SUB_TAGS: Record<string, string[]> = {
+              "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+              "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+              "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+              "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+              "Wall Lights": ["Wall Light", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant"],
+              "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+              "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+              "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+              "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+              "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+              "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+            };
             SUBCATS.forEach(sub => {
+              const tags = SUB_TAGS[sub] || [sub];
               let total = 0;
               partnerBrands.forEach(b => {
                 const bSub = (b as any).subcategory || (b as any).seatType || (b as any).tableType;
-                if (bSub === sub || b.category === sub) total++;
+                if (tags.some(tag =>
+                  bSub === tag || bSub === sub ||
+                  b.category === tag ||
+                  ((b as any).tags && (b as any).tags.some((t: string) => t.toLowerCase() === tag.toLowerCase()))
+                )) total++;
               });
               counts[sub] = total;
             });
