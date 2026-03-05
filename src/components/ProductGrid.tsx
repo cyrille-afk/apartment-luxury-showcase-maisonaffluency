@@ -226,17 +226,17 @@ const ProductGrid = () => {
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
               </div>
-              <h3 className="font-body text-xs md:text-sm font-medium text-foreground leading-tight">
-                {item.pick.title}
-              </h3>
-              {item.pick.subtitle && (
-                <p className="font-body text-[10px] md:text-xs text-muted-foreground mt-0.5">
-                  {item.pick.subtitle}
-                </p>
-              )}
-              <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 mt-1">
+              <p className="font-body text-[11px] md:text-xs uppercase tracking-[0.12em] text-foreground font-semibold mt-0.5">
                 {item.designerName}
               </p>
+              <h3 className="font-body text-xs md:text-sm text-muted-foreground leading-tight mt-0.5">
+                {item.pick.title}
+              </h3>
+              {item.pick.materials && (
+                <p className="font-body text-[9px] md:text-[10px] text-muted-foreground/60 mt-0.5 line-clamp-2">
+                  {item.pick.materials.replace(/\n/g, ' · ')}
+                </p>
+              )}
             </motion.div>
           ))}
         </motion.div>
