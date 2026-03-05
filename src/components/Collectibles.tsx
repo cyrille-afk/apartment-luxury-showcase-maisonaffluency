@@ -62,7 +62,7 @@ import emmanuelBabledPick6 from "@/assets/curators-picks/emmanuel-babled-6.jpg";
 import emmanuelBabledPick7 from "@/assets/curators-picks/emmanuel-babled-7.jpg";
 const ericSchmittImg = cloudinaryUrl("Screen_Shot_2026-02-26_at_4.16.30_PM_ijgqlu", { width: 800, quality: "auto", crop: "fill" });
 const ericSchmittDrageeConsole = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.45.40_PM_biri0t", { width: 1200, quality: "auto:good", crop: "fill" });
-const ericSchmittSaturneTable = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.48.46_PM_hczjbw", { width: 1200, quality: "auto:good", crop: "fill" });
+const ericSchmittSaturneTable = cloudinaryUrl("Screen_Shot_2026-03-05_at_8.31.49_PM_clsiml", { width: 1200, quality: "auto:good", crop: "fill" });
 const ericSchmittFrameTable = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.51.08_PM_kwaasy", { width: 1200, quality: "auto:good", crop: "fill" });
 const ericSchmittAnneauLamp = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.56.09_PM_ocju7w", { width: 1200, quality: "auto:good", crop: "fill" });
 const ericSchmittDentelleConsole = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.59.30_PM_jxhhdg", { width: 1200, quality: "auto:good", crop: "fill" });
