@@ -45,7 +45,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
   const activeCount = (activeCategory ? 1 : 0) + (activeSubcategory ? 1 : 0);
 
   return (
-    <aside className={cn("hidden md:flex flex-col shrink-0 pr-1 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto absolute right-full mr-2 pt-4", isOpen ? "w-44 lg:w-48" : "w-auto", className)}>
+    <aside className={cn("hidden md:flex flex-col shrink-0 pr-1 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto absolute right-full mr-4 pt-4", isOpen ? "w-44 lg:w-48" : "w-auto", className)}>
       {/* Collapsed state: Filter button */}
       {!isOpen && (
         <button
