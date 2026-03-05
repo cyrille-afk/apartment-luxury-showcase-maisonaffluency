@@ -2518,6 +2518,10 @@ const FeaturedDesigners = () => {
                     setSelectedCategoryRaw(cat);
                     if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
                     broadcastFilter(cat, sub);
+                    // Scroll to product grid when a filter is applied
+                    setTimeout(() => {
+                      document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 150);
                   }
                 }}
                 itemCounts={counts}

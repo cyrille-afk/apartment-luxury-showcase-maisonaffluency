@@ -2202,6 +2202,9 @@ const BrandsAteliers = () => {
                     setSelectedCategoryRaw(cat);
                     if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
                     broadcastFilter(cat, sub);
+                    setTimeout(() => {
+                      document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 150);
                   }
                 }}
                 itemCounts={counts}
