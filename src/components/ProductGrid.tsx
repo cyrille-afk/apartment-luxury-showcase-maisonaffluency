@@ -353,9 +353,13 @@ const ProductGrid = () => {
                     return isYear ? `${baseTitle} ${lightboxItem.pick.subtitle}` : baseTitle;
                   })()}
                 </h3>
-                {lightboxItem.pick.subtitle && !/^\d{4}/.test(lightboxItem.pick.subtitle.trim()) && (
-                  <p className="font-body text-sm text-white/60 mt-0.5">{lightboxItem.pick.subtitle}</p>
-                )}
+                {lightboxItem.pick.subtitle && !/^\d{4}/.test(lightboxItem.pick.subtitle.trim()) && (() => {
+                  // Hide subtitle if it's redundant with the appended subcategory type
+                  const sub = lightboxItem.pick.subtitle.trim().toLowerCase();
+                  const filterType = subcategory ? subcategory.replace(/s$/, '').toLowerCase() : '';
+                  if (filterType && sub === filterType) return null;
+                  return <p className="font-body text-sm text-white/60 mt-0.5">{lightboxItem.pick.subtitle}</p>;
+                })()}
                 {lightboxItem.pick.materials && (
                   <p className="font-body text-xs text-white/50 mt-2 leading-relaxed">
                     {lightboxItem.pick.materials.replace(/\n/g, " · ")}
