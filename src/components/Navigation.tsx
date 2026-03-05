@@ -444,7 +444,7 @@ const Navigation = () => {
                          window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
                         setActiveMegaCat(cat);
                         setActiveMegaSub(null);
-                        scrollToSection('product-grid');
+                        setTimeout(() => scrollToSection('product-grid'), 120);
                       }}
                       className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 text-left w-full", activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))] font-bold" : "text-foreground font-semibold hover:text-primary")}
                     >
@@ -459,7 +459,7 @@ const Navigation = () => {
                               window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } }));
                               setActiveMegaCat(cat);
                               setActiveMegaSub(sub);
-                              scrollToSection('product-grid');
+                              setTimeout(() => scrollToSection('product-grid'), 120);
                             }}
                             className={cn("text-left text-[10px] tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-foreground hover:text-primary")}
                           >
