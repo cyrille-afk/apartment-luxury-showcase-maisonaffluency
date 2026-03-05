@@ -3065,16 +3065,22 @@ const FeaturedDesigners = () => {
                           </div>
                         ) : null;
                       })()}
-                      <img
-                        src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image}
-                        alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title || "Curator's pick"}
-                        sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
-                        className={`rounded-lg shadow-2xl cursor-zoom-in transition-all duration-300 object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'}`}
-                        decoding="sync"
-                        loading="eager"
-                        fetchPriority="high"
-                        onClick={() => setIsZoomed(!isZoomed)}
-                      />
+                      {(() => {
+                        const currentPick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
+                        const isFiltered = !pickMatchesFilter(currentPick);
+                        return (
+                          <img
+                            src={currentPick?.image}
+                            alt={currentPick?.title || "Curator's pick"}
+                            sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
+                            className={`rounded-lg shadow-2xl cursor-zoom-in transition-all duration-300 object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40' : ''}`}
+                            decoding="sync"
+                            loading="eager"
+                            fetchPriority="high"
+                            onClick={() => setIsZoomed(!isZoomed)}
+                          />
+                        );
+                      })()}
                       {/* Desktop hover overlay — click to enlarge hint */}
                       {!isZoomed && (
                         <div
@@ -3172,14 +3178,17 @@ const FeaturedDesigners = () => {
                     {/* Scroll dots — directly under the image */}
                     {curatorPicksDesigner.curatorPicks.length > 1 && !isZoomed && (
                       <div className="flex items-center gap-2 mt-3">
-                        {curatorPicksDesigner.curatorPicks.map((_, idx) => (
+                        {curatorPicksDesigner.curatorPicks.map((pick, idx) => {
+                          const matches = pickMatchesFilter(pick);
+                          return (
                           <button
                             key={idx}
                             onClick={() => setCuratorPickIndex(idx)}
-                            className={`w-2 h-2 rounded-full transition-all duration-300 ${idx === curatorPickIndex ? 'bg-white scale-125' : 'bg-white/30 hover:bg-white/60'}`}
+                            className={`w-2 h-2 rounded-full transition-all duration-300 ${idx === curatorPickIndex ? 'bg-white scale-125' : 'bg-white/30 hover:bg-white/60'} ${!matches ? 'opacity-20' : ''}`}
                             aria-label={`View pick ${idx + 1}`}
                           />
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
 
@@ -3213,11 +3222,13 @@ const FeaturedDesigners = () => {
                         {/* Thumbnail strip — inline, above contact line */}
                         {curatorPicksDesigner.curatorPicks.length > 1 && (
                           <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
-                            {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
+                            {curatorPicksDesigner.curatorPicks.map((pick, idx) => {
+                              const matches = pickMatchesFilter(pick);
+                              return (
                               <button
                                 key={idx}
                                 onClick={() => setCuratorPickIndex(idx)}
-                                className={`flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200 ${idx === curatorPickIndex ? 'border-white/80 scale-105' : 'border-transparent opacity-50 hover:opacity-80'}`}
+                                className={`flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200 ${idx === curatorPickIndex ? 'border-white/80 scale-105' : 'border-transparent opacity-50 hover:opacity-80'} ${!matches ? 'blur-[2px] opacity-30' : ''}`}
                               >
                                 <img
                                   src={pick.image}
@@ -3226,7 +3237,8 @@ const FeaturedDesigners = () => {
                                   className="w-12 h-12 md:w-14 md:h-14 object-cover"
                                 />
                               </button>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
 

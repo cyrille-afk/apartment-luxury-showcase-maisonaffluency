@@ -495,21 +495,21 @@ const Collectibles = () => {
     }
   };
 
+  // Helper: check if a curator pick matches the active subcategory/category filter
+  const pickMatchesFilter = useMemo(() => {
+    if (!selectedSubcategory && !selectedCategory) return () => true;
+    return (pick: any) => {
+      if (selectedSubcategory) return pick.subcategory === selectedSubcategory;
+      return pick.category === selectedCategory;
+    };
+  }, [selectedSubcategory, selectedCategory]);
+
   const openCuratorPicks = (designer: typeof collectibleDesigners[0]) => {
     if (designer.curatorPicks && designer.curatorPicks.length > 0) {
-      // Filter picks based on active category/subcategory filter
-      let filteredPicks = designer.curatorPicks;
-      if (selectedSubcategory) {
-        filteredPicks = designer.curatorPicks.filter((pick: any) => pick.subcategory === selectedSubcategory);
-      } else if (selectedCategory) {
-        filteredPicks = designer.curatorPicks.filter((pick: any) => pick.category === selectedCategory);
-      }
-      if (filteredPicks.length > 0) {
-        setCuratorPicksDesigner({ ...designer, curatorPicks: filteredPicks });
-      } else {
-        setCuratorPicksDesigner(designer);
-      }
-      setCuratorPickIndex(0);
+      // Show all picks but start at the first matching one
+      setCuratorPicksDesigner(designer);
+      const firstMatch = designer.curatorPicks.findIndex((pick: any) => pickMatchesFilter(pick));
+      setCuratorPickIndex(firstMatch >= 0 ? firstMatch : 0);
       setIsZoomed(false);
     }
   };
@@ -1145,14 +1145,20 @@ const Collectibles = () => {
                     </div>
                   )}
                   <div className="relative inline-block">
-                    <PinchZoomImage 
-                      key={curatorPickIndex}
-                      src={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.image} 
-                      alt={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title} 
-                      className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'}`}
-                      draggable={false}
-                      onZoomChange={(z) => { imageZoomedRef.current = z; }}
-                    />
+                    {(() => {
+                      const currentPick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
+                      const isFiltered = !pickMatchesFilter(currentPick);
+                      return (
+                        <PinchZoomImage 
+                          key={curatorPickIndex}
+                          src={currentPick?.image} 
+                          alt={currentPick?.title} 
+                          className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40' : ''}`}
+                          draggable={false}
+                          onZoomChange={(z) => { imageZoomedRef.current = z; }}
+                        />
+                      );
+                    })()}
                     {/* Desktop hover overlay — click to enlarge hint */}
                     {!isZoomed && (
                       <div
@@ -1211,7 +1217,9 @@ const Collectibles = () => {
                   {/* Thumbnail strip — inline, above contact line */}
                   {curatorPicksDesigner.curatorPicks.length > 1 && (
                     <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
-                      {curatorPicksDesigner.curatorPicks.map((pick, idx) => (
+                      {curatorPicksDesigner.curatorPicks.map((pick, idx) => {
+                        const matches = pickMatchesFilter(pick);
+                        return (
                         <button
                           key={idx}
                           onClick={() => { setCuratorPickIndex(idx); setIsZoomed(false); }}
@@ -1220,11 +1228,12 @@ const Collectibles = () => {
                             curatorPickIndex === idx
                               ? 'ring-2 ring-white scale-110 opacity-100'
                               : 'ring-1 ring-white/20 opacity-50 hover:opacity-90 hover:ring-white/50'
-                          }`}
+                          } ${!matches ? 'blur-[2px] opacity-30' : ''}`}
                         >
                           <img src={pick.image} alt={pick.title} sizes="(max-width: 767px) 40px, 48px" className="w-full h-full object-cover" loading="lazy" />
                         </button>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
