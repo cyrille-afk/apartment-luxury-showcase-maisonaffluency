@@ -1963,15 +1963,6 @@ const BrandsAteliers = () => {
       );
     }
     
-    if (selectedCategory || selectedSubcategory) {
-      brands = brands.filter(brand => {
-        if (selectedSubcategory) {
-          const sub = (brand as any).subcategory || (brand as any).seatType || (brand as any).tableType;
-          return sub === selectedSubcategory || brand.category === selectedSubcategory;
-        }
-        return brand.category === selectedCategory;
-      });
-    }
     
     return brands;
   }, [searchQuery, selectedCategory, selectedSubcategory]);
