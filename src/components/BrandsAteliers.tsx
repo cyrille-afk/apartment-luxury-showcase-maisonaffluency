@@ -2447,7 +2447,7 @@ const BrandsAteliers = () => {
                     )}
 
                     {!picksZoomed && (
-                      <div className="text-center mt-4 max-w-2xl md:max-w-4xl relative">
+                      <div className="text-center mt-4 w-full px-4 md:px-12 relative">
                         <p className="font-brand text-base md:text-lg text-white tracking-wide">
                           {picksDesigner.curatorPicks[picksIndex]?.title}
                           {(picksDesigner.curatorPicks[picksIndex] as any)?.subtitle && (
