@@ -3194,7 +3194,7 @@ const FeaturedDesigners = () => {
 
                     {/* Legend */}
                     {!isZoomed && (
-                      <div className="text-center mt-4 max-w-lg relative">
+                      <div className="text-center mt-4 w-full px-4 md:px-12 relative">
                         <p className="font-brand text-base md:text-lg text-white tracking-wide">
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
                           {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.subtitle && (
@@ -3202,8 +3202,8 @@ const FeaturedDesigners = () => {
                           )}
                         </p>
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
-                          <p className="text-xs text-white/50 font-body mt-1 whitespace-pre-line">
-                            {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials}
+                          <p className="text-xs text-white/50 font-body mt-1">
+                            {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials!.replace(/\n/g, ' · ')}
                           </p>
                         )}
                         {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.dimensions || (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.weight) && (

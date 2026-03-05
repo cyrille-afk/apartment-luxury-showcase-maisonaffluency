@@ -311,7 +311,7 @@ const ProductGrid = () => {
               </div>
 
               {/* Info */}
-              <div className="mt-4 text-center px-6 md:px-12 max-w-2xl">
+              <div className="mt-4 text-center w-full px-6 md:px-12">
                 <h3 className="font-display text-lg md:text-xl text-white">
                   {lightboxItem.pick.title}
                 </h3>
