@@ -1803,28 +1803,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     notableWorks: "Saint Just Custom Glass Chandelier (Maison Affluency), Gold Leaves+Glass Snake Vase, Sculptural Glass Lighting",
     notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: 8 },
     philosophy: "Glass holds light the way memory holds experience — transforming it into something luminous and lasting.",
-    curatorPicks: [
-      {
-        image: nathalieZieglerChandelier,
-        title: "Custom Chandelier",
-        subtitle: "Bespoke Commission",
-        category: "Lighting",
-        tags: ["Lighting", "Chandelier"],
-        materials: "Hand-blown glass • Custom gold leaf inclusions",
-        dimensions: "Bespoke — dimensions upon commission",
-        description: "Each chandelier by Nathalie Ziegler is entirely unique, conceived as a bespoke commission. Her signature technique involves hand-blowing individual glass elements that are then assembled into dramatic sculptural compositions, where light plays through amber, gold and translucent tones."
-      },
-      {
-        image: nathalieZieglerSnakeVessel,
-        title: "Snake Vessel",
-        subtitle: "Gold Leaves + Glass",
-        category: "Decorative Object",
-        tags: ["Decorative Object", "Vessel"],
-        materials: "Hand-blown glass • 24k gold leaf",
-        dimensions: "H55 × Ø20 cm (approx.)",
-        description: "The Snake Vessel is a signature work by Nathalie Ziegler — a sinuous, hand-blown glass form with 24k gold leaf inclusions that catch and diffuse light in ever-changing ways. Each piece is unique and unrepeatable."
-      },
-    ],
+    curatorPicks: [],
     links: [
       { type: "Instagram", url: "https://instagram.com/nathaliezieglerpasqua" },
       { type: "Curators' Picks" },
