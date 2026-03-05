@@ -2157,7 +2157,7 @@ const BrandsAteliers = () => {
                                     key={sub}
                                     onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
                                     className={`block text-[11px] uppercase tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                      selectedSubcategory === sub ? 'text-primary' : 'text-muted-foreground/60 hover:text-primary'
+                                      selectedSubcategory === sub ? 'text-[hsl(var(--accent))]' : 'text-muted-foreground/60 hover:text-primary'
                                     }`}
                                   >
                                     {sub}
