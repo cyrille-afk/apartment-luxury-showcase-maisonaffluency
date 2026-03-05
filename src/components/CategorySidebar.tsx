@@ -90,7 +90,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
                     }
                   }}
                   className={cn(
-                    "flex-1 font-body text-[11px] tracking-[0.2em] cursor-pointer transition-colors",
+                    "flex-1 font-body text-[11px] uppercase tracking-[0.2em] cursor-pointer transition-colors",
                     isActiveCat ? "text-foreground font-semibold" : "text-foreground/80 hover:text-foreground"
                   )}
                 >

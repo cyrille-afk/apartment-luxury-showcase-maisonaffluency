@@ -255,7 +255,7 @@ const Navigation = () => {
                       <div key={cat} className="mb-3">
                         <button
                           onClick={() => setExpandedCategory(expandedCategory === cat ? null : cat)}
-                          className="text-left font-body text-[15px] tracking-wide transition-colors py-1.5 w-full text-foreground hover:text-primary font-semibold flex items-center justify-between"
+                          className="text-left font-body text-[15px] uppercase tracking-wide transition-colors py-1.5 w-full text-foreground hover:text-primary font-semibold flex items-center justify-between"
                         >
                           {cat}
                           <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedCategory === cat ? "rotate-90" : ""}`} />
@@ -445,7 +445,7 @@ const Navigation = () => {
                         setActiveMegaCat(cat);
                         setActiveMegaSub(null);
                       }}
-                      className={cn("font-body text-[11px] tracking-[0.2em] transition-all duration-300 pb-2 font-semibold text-left", activeMegaCat === cat && !activeMegaSub ? "text-primary" : "text-foreground hover:text-primary")}
+                      className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 pb-2 font-semibold text-left", activeMegaCat === cat && !activeMegaSub ? "text-primary" : "text-foreground hover:text-primary")}
                     >
                       {cat}
                     </button>
