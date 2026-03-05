@@ -472,14 +472,6 @@ const Collectibles = () => {
       );
     }
     
-    if (selectedCategory) {
-      designers = designers.filter(designer =>
-        designer.curatorPicks?.some((pick: any) => {
-          if (selectedSubcategory) return pick.subcategory === selectedSubcategory;
-          return pick.category === selectedCategory;
-        })
-      );
-    }
     
     return designers;
   }, [searchQuery, selectedCategory, selectedSubcategory]);

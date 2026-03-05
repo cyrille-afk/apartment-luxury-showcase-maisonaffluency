@@ -2330,51 +2330,6 @@ const FeaturedDesigners = () => {
           )
       );
     }
-    if (selectedCategory || selectedSubcategory) {
-      // Map nav subcategory names to tag values used in data
-      const SUBCATEGORY_TO_TAGS: Record<string, string[]> = {
-        "Sofas": ["Sofa"],
-        "Armchairs": ["Armchair", "Armchairs"],
-        "Chairs": ["Chair"],
-        "Daybeds & Benches": ["Daybed", "Bench"],
-        "Ottomans & Stools": ["Ottoman", "Stool"],
-        "Bar Stools": ["Bar Stool"],
-        "Consoles": ["Console"],
-        "Coffee Tables": ["Coffee Table"],
-        "Desks": ["Desk"],
-        "Dining Tables": ["Dining Table"],
-        "Side Tables": ["Side Table"],
-        "Wall Lights": ["Wall Light", "Sconce"],
-        "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant"],
-        "Floor Lights": ["Floor Light", "Floor Lamp"],
-        "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
-        "Bookcases": ["Bookcase"],
-        "Cabinets": ["Cabinet"],
-        "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"],
-        "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
-        "Hand-Woven Rugs": ["Hand-Woven Rug"],
-        "Vases & Vessels": ["Vase", "Vessel"],
-        "Mirrors": ["Mirror"],
-        "Books": ["Book"],
-        "Candle Holders": ["Candle Holder"],
-        "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
-      };
-      designers = designers.filter(designer =>
-        designer.curatorPicks?.some((pick: any) => {
-          if (selectedSubcategory) {
-            const mappedTags = SUBCATEGORY_TO_TAGS[selectedSubcategory];
-            if (mappedTags) {
-              const matchesTags = pick.tags?.some((tag: string) => mappedTags.some(mt => tag.toLowerCase() === mt.toLowerCase()));
-              const matchesCategory = mappedTags.some(mt => pick.category?.toLowerCase() === mt.toLowerCase());
-              return matchesTags || matchesCategory;
-            }
-            return pick.tags?.includes(selectedSubcategory) || pick.category === selectedSubcategory;
-          }
-          if (selectedCategory) return pick.tags?.includes(selectedCategory) || pick.category === selectedCategory;
-          return true;
-        })
-      );
-    }
     return designers;
   }, [searchQuery, selectedCategory, selectedSubcategory]);
 
