@@ -280,7 +280,7 @@ const Navigation = () => {
                                   window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } })); 
                                   handleNavClick('#designers'); 
                                 }}
-                                className="block text-[12px] uppercase tracking-[0.15em] font-body text-muted-foreground hover:text-primary transition-colors py-1.5 font-semibold"
+                                className="block text-[12px] uppercase tracking-[0.15em] font-body text-muted-foreground hover:text-[hsl(var(--accent))] transition-colors py-1.5 font-semibold"
                               >
                                 {sub}
                               </button>
@@ -459,7 +459,7 @@ const Navigation = () => {
                               setActiveMegaCat(cat);
                               setActiveMegaSub(sub);
                             }}
-                            className={cn("text-left text-[10px] uppercase tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-primary font-semibold" : "text-muted-foreground hover:text-primary")}
+                            className={cn("text-left text-[10px] uppercase tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-muted-foreground hover:text-primary")}
                           >
                             {sub}
                           </button>
