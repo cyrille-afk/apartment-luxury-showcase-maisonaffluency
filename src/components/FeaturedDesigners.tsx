@@ -774,12 +774,12 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       { 
         image: pendhapaPick2, 
-        title: "Akar",
-        subtitle: "Dining Chair",
+        title: "Akar Dining Chair",
+        subtitle: "",
         category: "Seating",
         tags: ["Seating", "Chair"],
-        materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery\nL49 × W52 × H85 cm\nProduction lead time: 10-12 weeks",
-        dimensions: "",
+        materials: "Brown oak • Alpilles Camargue Trente by Elitis upholstery",
+        dimensions: "L49 × W52 × H85 cm - Production lead time: 10-12 weeks",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Atelier_Pendhapa-Akar_Dining_Chair.pdf",
         pdfFilename: "Atelier_Pendhapa-Akar_Dining_Chair.pdf"
       },
