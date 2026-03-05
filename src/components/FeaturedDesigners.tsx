@@ -129,7 +129,7 @@ const emmanuelLevetStennePick4 = cloudinaryUrl("Screen_Shot_2026-03-02_at_10.05.
 const emmanuelLevetStennePick5 = cloudinaryUrl("Screen_Shot_2026-03-02_at_10.00.36_AM_sctfyk", { width: 1200, quality: "auto:good", crop: "fill" });
 const emmanuelLevetStennePick6 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.23.51_PM_gyeqne", { width: 1200, quality: "auto:good", crop: "fill" });
 const emmanuelLevetStennePick7 = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.29.54_PM_cfncv6", { width: 1200, quality: "auto:good", crop: "fill" });
-import hamreiPick1 from "@/assets/curators-picks/hamrei-1.jpg";
+const hamreiPick1 = cloudinaryUrl("Screen_Shot_2026-03-05_at_8.00.00_PM_tgola4", { width: 1200, quality: "auto:good", crop: "fill" });
 import hamreiPick2 from "@/assets/curators-picks/hamrei-2.jpg";
 import hamreiPick3 from "@/assets/curators-picks/hamrei-3.jpg";
 import hamreiPick4 from "@/assets/curators-picks/hamrei-4.jpg";
