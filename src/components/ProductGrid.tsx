@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { motion } from "framer-motion";
-import { X, FileDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, FileDown, ChevronLeft, ChevronRight, ArrowUp } from "lucide-react";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
 import PinchZoomImage from "./PinchZoomImage";
@@ -93,6 +93,8 @@ const ProductGrid = () => {
   const [lightboxItem, setLightboxItem] = useState<ProductItem | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [showBackToGrid, setShowBackToGrid] = useState(false);
+  const gridRef = useRef<HTMLElement>(null);
 
 
   // Listen for global filter events
@@ -132,6 +134,23 @@ const ProductGrid = () => {
   }, [allProducts, category, subcategory]);
 
   const isActive = (category || subcategory) && filtered.length > 0;
+
+  // Track whether user has scrolled away from the grid
+  useEffect(() => {
+    if (!isActive) { setShowBackToGrid(false); return; }
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowBackToGrid(!entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    const el = gridRef.current;
+    if (el) observer.observe(el);
+    return () => { if (el) observer.unobserve(el); };
+  }, [isActive]);
+
+  const scrollBackToGrid = useCallback(() => {
+    const el = document.getElementById("product-grid");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const handleNavigateToDesigner = useCallback((item: ProductItem) => {
     const sectionMap: Record<string, { scrollId: string; deeplinkSection: string }> = {
@@ -178,7 +197,8 @@ const ProductGrid = () => {
   const filterLabel = subcategory || category || "";
 
   return (
-    <section id="product-grid" className="py-12 md:py-16 bg-background scroll-mt-28 md:scroll-mt-32">
+    <>
+    <section ref={gridRef} id="product-grid" className="py-12 md:py-16 bg-background scroll-mt-28 md:scroll-mt-32">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -359,6 +379,24 @@ const ProductGrid = () => {
         </DialogContent>
       </Dialog>
     </section>
+
+    {/* Floating "Back to Grid" button */}
+    <AnimatePresence>
+      {showBackToGrid && (
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.3 }}
+          onClick={scrollBackToGrid}
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background shadow-lg hover:shadow-xl font-body text-[11px] uppercase tracking-[0.15em] transition-all duration-300 hover:scale-105"
+        >
+          <ArrowUp className="h-3.5 w-3.5" />
+          Back to Grid
+        </motion.button>
+      )}
+    </AnimatePresence>
+    </>
   );
 };
 
