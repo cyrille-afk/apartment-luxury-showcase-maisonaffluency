@@ -124,7 +124,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
                         }
                       }}
                       className={cn(
-                        "flex-1 font-display text-[11px] uppercase tracking-[0.2em] cursor-pointer transition-colors",
+                        "flex-1 font-body text-[11px] uppercase tracking-[0.2em] cursor-pointer transition-colors",
                         isActiveCat ? "text-foreground font-semibold" : "text-foreground hover:text-foreground"
                       )}
                     >
@@ -172,7 +172,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
                                 }
                               }}
                               className={cn(
-                                "font-display text-[10px] tracking-[0.15em] cursor-pointer transition-colors",
+                                "font-body text-[10px] tracking-[0.15em] cursor-pointer transition-colors",
                                 isActiveSub
                                   ? "text-[hsl(var(--accent))] font-semibold"
                                   : "text-foreground hover:text-foreground"
