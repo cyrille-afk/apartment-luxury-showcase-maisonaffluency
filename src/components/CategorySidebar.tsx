@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronRight, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,11 +19,28 @@ interface CategorySidebarProps {
   activeSubcategory: string | null;
   onSelect: (category: string | null, subcategory: string | null) => void;
   className?: string;
+  itemCounts?: Record<string, number>;
 }
 
-const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect, className }) => {
+const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect, className, itemCounts }) => {
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
+
+  // Auto-open sidebar and expand parent category when a subcategory is selected
+  useEffect(() => {
+    if (activeSubcategory) {
+      setIsOpen(true);
+      // Find and expand parent category
+      const parentCat = CATEGORY_ORDER.find(cat => SUBCATEGORY_MAP[cat]?.includes(activeSubcategory));
+      if (parentCat) {
+        setExpandedCats(prev => {
+          const next = new Set(prev);
+          next.add(parentCat);
+          return next;
+        });
+      }
+    }
+  }, [activeSubcategory]);
 
   const toggleExpand = (cat: string) => {
     setExpandedCats(prev => {
@@ -179,6 +196,11 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
                               )}
                             >
                               {sub}
+                              {itemCounts && itemCounts[sub] !== undefined && (
+                                <span className="ml-1.5 text-[9px] text-muted-foreground/60 font-normal">
+                                  ({itemCounts[sub]})
+                                </span>
+                              )}
                             </span>
                           </div>
                         );

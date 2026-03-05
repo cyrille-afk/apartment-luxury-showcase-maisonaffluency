@@ -2555,19 +2555,48 @@ const FeaturedDesigners = () => {
           </div>
 
 
-          <CategorySidebar
-            activeCategory={selectedCategory}
-            activeSubcategory={selectedSubcategory}
-            onSelect={(cat, sub) => {
-              if (cat === null) {
-                setSelectedCategory(null);
-              } else {
-                setSelectedCategoryRaw(cat);
-                if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
-                broadcastFilter(cat, sub);
-              }
-            }}
-          />
+          {(() => {
+            // Compute per-subcategory item counts
+            const SUBCATEGORY_TO_TAGS_LOCAL: Record<string, string[]> = {
+              "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+              "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+              "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+              "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+              "Wall Lights": ["Wall Light", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant"],
+              "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+              "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+              "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+              "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+              "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+              "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+            };
+            const counts: Record<string, number> = {};
+            Object.entries(SUBCATEGORY_TO_TAGS_LOCAL).forEach(([sub, tags]) => {
+              counts[sub] = featuredDesigners.filter(d =>
+                d.curatorPicks?.some((pick: any) => {
+                  const matchesTags = pick.tags?.some((tag: string) => tags.some(mt => tag.toLowerCase() === mt.toLowerCase()));
+                  const matchesCat = tags.some(mt => pick.category?.toLowerCase() === mt.toLowerCase());
+                  return matchesTags || matchesCat;
+                })
+              ).length;
+            });
+            return (
+              <CategorySidebar
+                activeCategory={selectedCategory}
+                activeSubcategory={selectedSubcategory}
+                onSelect={(cat, sub) => {
+                  if (cat === null) {
+                    setSelectedCategory(null);
+                  } else {
+                    setSelectedCategoryRaw(cat);
+                    if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
+                    broadcastFilter(cat, sub);
+                  }
+                }}
+                itemCounts={counts}
+              />
+            );
+          })()}
 
         {(searchQuery || selectedCategory) && (
           <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">

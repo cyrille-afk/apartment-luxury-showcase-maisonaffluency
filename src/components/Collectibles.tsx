@@ -733,19 +733,35 @@ const Collectibles = () => {
             })()}
 
 
-            <CategorySidebar
-              activeCategory={selectedCategory}
-              activeSubcategory={selectedSubcategory}
-              onSelect={(cat, sub) => {
-                if (cat === null) {
-                  setSelectedCategory(null);
-                } else {
-                  setSelectedCategoryRaw(cat);
-                  if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
-                  broadcastFilter(cat, sub);
-                }
-              }}
-            />
+            {(() => {
+              const SUBCATS = ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools",
+                "Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables",
+                "Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights",
+                "Bookcases", "Cabinets", "Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs",
+                "Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"];
+              const counts: Record<string, number> = {};
+              SUBCATS.forEach(sub => {
+                counts[sub] = collectibleDesigners.filter(d =>
+                  d.curatorPicks?.some(pick => pick.subcategory === sub || pick.category === sub)
+                ).length;
+              });
+              return (
+                <CategorySidebar
+                  activeCategory={selectedCategory}
+                  activeSubcategory={selectedSubcategory}
+                  onSelect={(cat, sub) => {
+                    if (cat === null) {
+                      setSelectedCategory(null);
+                    } else {
+                      setSelectedCategoryRaw(cat);
+                      if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
+                      broadcastFilter(cat, sub);
+                    }
+                  }}
+                  itemCounts={counts}
+                />
+              );
+            })()}
 
           {(searchQuery || selectedCategory) && (
             <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
