@@ -2036,6 +2036,9 @@ const BrandsAteliers = () => {
             We collaborate with the world's most distinguished furniture houses, textile ateliers, and artisan workshops 
             to bring exceptional pieces to discerning collectors and design professionals.
           </p>
+        </motion.div>
+
+        <div className="relative">
           {/* A-Z alphabet jump bar + Search + Filter */}
           {(() => {
             const activeLettersArr = alphaGroups.map(([l]) => l);
@@ -2175,9 +2178,8 @@ const BrandsAteliers = () => {
               </div>
             );
           })()}
-        </motion.div>
 
-        <div className="relative">
+
           <CategorySidebar
             activeCategory={selectedCategory}
             activeSubcategory={selectedSubcategory}

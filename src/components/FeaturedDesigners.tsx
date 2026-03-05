@@ -2427,6 +2427,9 @@ const FeaturedDesigners = () => {
             Discover the visionary designers whose exceptional work defines Maison Affluency. Each brings
             their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture. Presented in situ at our showroom.
           </p>
+        </motion.div>
+
+        <div className="relative">
           {/* A-Z alphabet jump bar + Search + Filter */}
           <div className="flex flex-col gap-4 mb-5 md:mb-6">
             <div className="flex items-center gap-3 md:gap-4 lg:gap-5 px-1 py-4 overflow-x-auto max-w-3xl border-t border-b border-border/30"
@@ -2560,9 +2563,8 @@ const FeaturedDesigners = () => {
               </div>
             </div>
           </div>
-        </motion.div>
 
-        <div className="relative">
+
           <CategorySidebar
             activeCategory={selectedCategory}
             activeSubcategory={selectedSubcategory}
