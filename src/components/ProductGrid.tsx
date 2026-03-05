@@ -325,9 +325,13 @@ function singularizeSub(s: string): string {
                 )}
 
                 <div
-                  className="h-[55vh] md:h-[60vh] w-full flex items-center justify-center"
+                  className="relative h-[55vh] md:h-[60vh] w-full flex items-center justify-center"
                   onClick={() => setIsZoomed(!isZoomed)}
                 >
+                  {/* Counter pill - top right inside image */}
+                  <div className="absolute top-2 right-2 z-30 px-3 py-1 rounded-full bg-black/40 text-white/60 text-[10px] font-body tracking-wider">
+                    {lightboxIndex + 1} / {filtered.length}
+                  </div>
                   <PinchZoomImage
                     key={currentItem.pick.image || `${currentItem.designerId}-${lightboxIndex}`}
                     src={currentItem.pick.image || ""}
@@ -354,11 +358,6 @@ function singularizeSub(s: string): string {
                     <span className="text-[10px] md:text-xs font-body font-medium">PDF</span>
                   </a>
                 )}
-              </div>
-
-              {/* Counter pill */}
-              <div className="mt-3 px-3 py-1 rounded-full bg-white/10 text-white/60 text-[10px] font-body tracking-wider">
-                {lightboxIndex + 1} / {filtered.length}
               </div>
 
               {isLightboxImageLoaded && (
