@@ -97,16 +97,16 @@ const Hero = () => {
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 hover:border-white/45 text-white text-xs font-sans font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
+          className="flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-sm lg:text-base font-sans font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
         >
-          <Calendar className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
+          <Calendar className="w-4 h-4 lg:w-5 lg:h-5 text-[hsl(var(--accent))]" />
           Book a Viewing
         </button>
         <button
           onClick={() => scrollToSection("details")}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/25 hover:border-white/45 text-white text-xs font-sans font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
+          className="flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-sm lg:text-base font-sans font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
         >
-          <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
+          <Briefcase className="w-4 h-4 lg:w-5 lg:h-5 text-[hsl(var(--accent))]" />
           Trade Program
         </button>
       </div>
