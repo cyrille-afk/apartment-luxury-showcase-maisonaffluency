@@ -78,7 +78,7 @@ import forestGiaconiaIhiLamp from "@/assets/curators-picks/forest-giaconia-ihi-f
 import forestGiaconiaConsole from "@/assets/forrest-giaconia-console.png";
 import forestGiaconiaTable from "@/assets/forrest-giaconia-table.png";
 import forestGiaconiaCoffee from "@/assets/forrest-giaconia-coffee.png";
-const adamCourtsVoidTable = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772110305/Screen_Shot_2026-02-18_at_10.39.49_AM_noqdtn.png";
+const adamCourtsVoidTable = cloudinaryUrl("Screen_Shot_2026-03-05_at_8.29.22_PM_gi6slx", { width: 1200, quality: "auto:good", crop: "fill" });
 const adamCourtsVoidChair = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772110437/Screen_Shot_2026-02-18_at_10.41.11_AM_msssmi.png";
 const adamCourtsGeometerChair = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772159510/Screen_Shot_2026-02-18_at_10.41.39_AM_t1lxrt.png";
 const adamCourtsReposeSofa = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772159511/Screen_Shot_2026-02-18_at_10.42.26_AM_oglbl5.png";
