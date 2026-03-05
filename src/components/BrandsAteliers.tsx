@@ -129,7 +129,7 @@ const martaSalaRanieri = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.51.46_AM_vnv
 const martaSalaInge = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.00.51_AM_ypryzi", { width: 1200, quality: "auto:good", crop: "fill" });
 const martaSalaAchille = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.56.20_AM_aq4khq", { width: 1200, quality: "auto:good", crop: "fill" });
 const martaSalaElisabeth = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.04.52_AM_fm0uws", { width: 1200, quality: "auto:good", crop: "fill" });
-const martaSalaMurena = cloudinaryUrl("Screen_Shot_2026-02-26_at_8.09.20_AM_cm62ud", { width: 1200, quality: "auto:good", crop: "fill" });
+const martaSalaMurena = cloudinaryUrl("Screen_Shot_2026-03-05_at_6.44.00_PM_xkggyx", { width: 1200, quality: "auto:good", crop: "fill" });
 
 // Ozone Light Curators' Picks image
 import ozoneClassiqueV from "@/assets/curators-picks/ozone-classique-v.jpg";
