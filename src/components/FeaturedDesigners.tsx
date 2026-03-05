@@ -1352,7 +1352,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       {
         image: hamreiPick5,
-        title: "TRIO Dining Table",
+        title: "TRIO Table",
         category: "Tables",
         tags: ["Tables", "Dining Table"],
         materials: "Hand-chiseled stone top, textured earthenware ceramic base",

@@ -244,7 +244,9 @@ const ProductGrid = () => {
                   {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
                 </p>
                 <h3 className="font-body text-sm md:text-base text-foreground leading-tight mt-0.5 font-medium">
-                  {item.pick.title}
+                  {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
+                    ? `${item.pick.title} Table`
+                    : item.pick.title}
                 </h3>
                 {item.pick.materials && (
                   <p className="font-body text-[9px] md:text-[10px] text-muted-foreground/60 mt-0.5 line-clamp-2">
