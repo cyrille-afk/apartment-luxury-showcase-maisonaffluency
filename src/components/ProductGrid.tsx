@@ -97,7 +97,17 @@ const ProductGrid = () => {
   const [isLightboxImageLoaded, setIsLightboxImageLoaded] = useState(false);
   const gridRef = useRef<HTMLElement>(null);
 
-
+/** Singularize a subcategory label: "Daybeds & Benches" → "Daybed & Bench" */
+function singularizeSub(s: string): string {
+  return s.replace(/\b\w+/g, (word) => {
+    if (/ches$/i.test(word)) return word.slice(0, -2);
+    if (/shes$/i.test(word)) return word.slice(0, -2);
+    if (/sses$/i.test(word)) return word.slice(0, -2);
+    if (/ies$/i.test(word)) return word.slice(0, -3) + 'y';
+    if (/s$/i.test(word) && !/ss$/i.test(word)) return word.slice(0, -1);
+    return word;
+  });
+}
   // Listen for global filter events
   useEffect(() => {
     const handleSetCategory = (e: CustomEvent) => {
@@ -355,8 +365,8 @@ const ProductGrid = () => {
                 <div className="mt-4 text-center w-full px-6 md:px-12">
                   <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
                     {(() => {
-                      const baseTitle = subcategory && !currentItem.pick.title.toLowerCase().includes(subcategory.replace(/s$/, '').toLowerCase().split(' ').pop() || '')
-                        ? `${currentItem.pick.title} ${subcategory.replace(/s$/, '')}`
+                      const baseTitle = subcategory && !currentItem.pick.title.toLowerCase().includes(singularizeSub(subcategory).toLowerCase().split(' ').pop() || '')
+                        ? `${currentItem.pick.title} ${singularizeSub(subcategory)}`
                         : currentItem.pick.title;
                       const isYear = currentItem.pick.subtitle && /^\d{4}/.test(currentItem.pick.subtitle.trim());
                       return isYear ? `${baseTitle} ${currentItem.pick.subtitle}` : baseTitle;
@@ -364,7 +374,7 @@ const ProductGrid = () => {
                   </h3>
                   {currentItem.pick.subtitle && !/^\d{4}/.test(currentItem.pick.subtitle.trim()) && (() => {
                     const sub = currentItem.pick.subtitle.trim().toLowerCase();
-                    const filterType = subcategory ? subcategory.replace(/s$/, '').toLowerCase() : '';
+                    const filterType = subcategory ? singularizeSub(subcategory).toLowerCase() : '';
                     if (filterType && sub === filterType) return null;
                     return <p className="font-body text-sm text-white/60 mt-0.5">{currentItem.pick.subtitle}</p>;
                   })()}
