@@ -343,21 +343,21 @@ const ProductGrid = () => {
 
               {/* Info */}
               <div className="mt-4 text-center w-full px-6 md:px-12">
-                <h3 className="font-display text-lg md:text-xl text-white">
-                  {subcategory && !lightboxItem.pick.title.toLowerCase().includes(subcategory.replace(/s$/, '').toLowerCase().split(' ').pop() || '')
-                    ? `${lightboxItem.pick.title} ${subcategory.replace(/s$/, '')}`
-                    : lightboxItem.pick.title}
+                <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
+                  {(() => {
+                    const baseTitle = subcategory && !lightboxItem.pick.title.toLowerCase().includes(subcategory.replace(/s$/, '').toLowerCase().split(' ').pop() || '')
+                      ? `${lightboxItem.pick.title} ${subcategory.replace(/s$/, '')}`
+                      : lightboxItem.pick.title;
+                    return lightboxItem.pick.subtitle ? `${baseTitle} ${lightboxItem.pick.subtitle}` : baseTitle;
+                  })()}
                 </h3>
-                {lightboxItem.pick.subtitle && (
-                  <p className="font-body text-sm text-white/60 mt-0.5">{lightboxItem.pick.subtitle}</p>
-                )}
                 {lightboxItem.pick.materials && (
                   <p className="font-body text-xs text-white/50 mt-2 leading-relaxed">
                     {lightboxItem.pick.materials.replace(/\n/g, " · ")}
                   </p>
                 )}
                 {lightboxItem.pick.dimensions && (
-                  <p className="font-body text-[10px] text-white font-medium mt-1">
+                  <p className="font-body text-sm md:text-base text-white font-medium mt-1.5">
                     {lightboxItem.pick.dimensions.replace(/\n/g, " · ")}
                   </p>
                 )}
