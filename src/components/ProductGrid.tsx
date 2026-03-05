@@ -90,7 +90,7 @@ const ProductGrid = () => {
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const allProducts = useMemo(() => buildProductList(atelierOnlyPicks), []);
-  const [lightboxItem, setLightboxItem] = useState<ProductItem | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [showBackToGrid, setShowBackToGrid] = useState(false);
@@ -171,9 +171,9 @@ const ProductGrid = () => {
     }, 150);
   }, []);
 
-  const handleCardClick = useCallback((item: ProductItem, index: number) => {
-    setLightboxItem(item);
+  const handleCardClick = useCallback((_item: ProductItem, index: number) => {
     setLightboxIndex(index);
+    setLightboxOpen(true);
     setIsZoomed(false);
   }, []);
 
@@ -187,7 +187,6 @@ const ProductGrid = () => {
     const newIdx = lightboxIndex + dir;
     if (newIdx >= 0 && newIdx < filtered.length) {
       setLightboxIndex(newIdx);
-      setLightboxItem(filtered[newIdx]);
       setIsZoomed(false);
     }
   }, [lightboxIndex, filtered]);
@@ -273,14 +272,16 @@ const ProductGrid = () => {
       </div>
 
       {/* ─── Lightbox ─────────────────────────────────────────────────── */}
-      <Dialog open={!!lightboxItem} onOpenChange={() => { setLightboxItem(null); setIsZoomed(false); }}>
+      <Dialog open={lightboxOpen} onOpenChange={() => { setLightboxOpen(false); setIsZoomed(false); }}>
         <DialogContent className="max-w-[95vw] md:max-w-4xl p-0 border-none bg-[#181818] shadow-2xl overflow-hidden [&>button]:hidden">
           <VisuallyHidden><DialogTitle>Product Detail</DialogTitle></VisuallyHidden>
-          {lightboxItem && (
+          {lightboxOpen && filtered[lightboxIndex] && (() => {
+            const currentItem = filtered[lightboxIndex];
+            return (
             <div className="relative flex flex-col items-center pt-6 pb-4 md:pt-8 md:pb-6">
               {/* Close */}
               <button
-                onClick={() => { setLightboxItem(null); setIsZoomed(false); }}
+                onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
                 className="absolute top-3 right-3 md:top-4 md:right-4 z-50 p-2 rounded-full bg-black/40 text-white/80 hover:text-white transition-colors"
               >
                 <X className="h-5 w-5" />
@@ -288,7 +289,6 @@ const ProductGrid = () => {
 
               {/* Image */}
               <div className="relative w-full flex items-center justify-center px-4 md:px-12">
-                {/* Desktop nav arrows */}
                 {lightboxIndex > 0 && (
                   <button
                     onClick={() => navigateLightbox(-1)}
@@ -311,8 +311,8 @@ const ProductGrid = () => {
                   onClick={() => setIsZoomed(!isZoomed)}
                 >
                   <PinchZoomImage
-                    src={lightboxItem.pick.image || ""}
-                    alt={lightboxItem.pick.title}
+                    src={currentItem.pick.image || ""}
+                    alt={currentItem.pick.title}
                     className={cn(
                       "max-h-[60vh] md:max-h-[65vh] w-auto object-contain transition-transform duration-300",
                       isZoomed ? "cursor-zoom-out scale-150" : "cursor-zoom-in"
@@ -322,10 +322,10 @@ const ProductGrid = () => {
                 </div>
 
                 {/* PDF download */}
-                {lightboxItem.pick.pdfUrl && (
+                {currentItem.pick.pdfUrl && (
                   <a
-                    href={lightboxItem.pick.pdfUrl}
-                    download={lightboxItem.pick.pdfFilename || true}
+                    href={currentItem.pick.pdfUrl}
+                    download={currentItem.pick.pdfFilename || true}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="absolute bottom-2 right-6 md:right-14 z-30 flex items-center gap-1 p-2 md:p-2.5 rounded-full bg-[#d32f2f]/80 text-white/90 hover:text-white transition-colors"
@@ -345,46 +345,45 @@ const ProductGrid = () => {
               <div className="mt-4 text-center w-full px-6 md:px-12">
                 <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
                   {(() => {
-                    const baseTitle = subcategory && !lightboxItem.pick.title.toLowerCase().includes(subcategory.replace(/s$/, '').toLowerCase().split(' ').pop() || '')
-                      ? `${lightboxItem.pick.title} ${subcategory.replace(/s$/, '')}`
-                      : lightboxItem.pick.title;
-                    // Only merge subtitle into title if it looks like a year (e.g. "1930")
-                    const isYear = lightboxItem.pick.subtitle && /^\d{4}/.test(lightboxItem.pick.subtitle.trim());
-                    return isYear ? `${baseTitle} ${lightboxItem.pick.subtitle}` : baseTitle;
+                    const baseTitle = subcategory && !currentItem.pick.title.toLowerCase().includes(subcategory.replace(/s$/, '').toLowerCase().split(' ').pop() || '')
+                      ? `${currentItem.pick.title} ${subcategory.replace(/s$/, '')}`
+                      : currentItem.pick.title;
+                    const isYear = currentItem.pick.subtitle && /^\d{4}/.test(currentItem.pick.subtitle.trim());
+                    return isYear ? `${baseTitle} ${currentItem.pick.subtitle}` : baseTitle;
                   })()}
                 </h3>
-                {lightboxItem.pick.subtitle && !/^\d{4}/.test(lightboxItem.pick.subtitle.trim()) && (() => {
-                  // Hide subtitle if it's redundant with the appended subcategory type
-                  const sub = lightboxItem.pick.subtitle.trim().toLowerCase();
+                {currentItem.pick.subtitle && !/^\d{4}/.test(currentItem.pick.subtitle.trim()) && (() => {
+                  const sub = currentItem.pick.subtitle.trim().toLowerCase();
                   const filterType = subcategory ? subcategory.replace(/s$/, '').toLowerCase() : '';
                   if (filterType && sub === filterType) return null;
-                  return <p className="font-body text-sm text-white/60 mt-0.5">{lightboxItem.pick.subtitle}</p>;
+                  return <p className="font-body text-sm text-white/60 mt-0.5">{currentItem.pick.subtitle}</p>;
                 })()}
-                {lightboxItem.pick.materials && (
+                {currentItem.pick.materials && (
                   <p className="font-body text-xs text-white/50 mt-2 leading-relaxed">
-                    {lightboxItem.pick.materials.replace(/\n/g, " · ")}
+                    {currentItem.pick.materials.replace(/\n/g, " · ")}
                   </p>
                 )}
-                {lightboxItem.pick.dimensions && (
+                {currentItem.pick.dimensions && (
                   <p className="font-body text-sm md:text-base text-white font-medium mt-1.5">
-                    {lightboxItem.pick.dimensions.replace(/\n/g, " · ")}
+                    {currentItem.pick.dimensions.replace(/\n/g, " · ")}
                   </p>
                 )}
 
                 {/* View designer link */}
                 <button
                   onClick={() => {
-                    setLightboxItem(null);
+                    setLightboxOpen(false);
                     setIsZoomed(false);
-                    handleNavigateToDesigner(lightboxItem);
+                    handleNavigateToDesigner(currentItem);
                   }}
                   className="mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white/80 underline underline-offset-4 transition-colors"
                 >
-                  View {lightboxItem.designerName}'s Profile
+                  View {currentItem.designerName}'s Profile
                 </button>
               </div>
             </div>
-          )}
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </section>
