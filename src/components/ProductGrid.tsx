@@ -324,16 +324,23 @@ function singularizeSub(s: string): string {
                   </button>
                 )}
 
-                <div
-                  className="max-h-[60vh] md:max-h-[65vh] flex items-center justify-center"
+              <div
+                  className="w-full max-w-[85vw] md:max-w-[600px] aspect-[3/4] flex items-center justify-center overflow-hidden rounded-sm"
                   onClick={() => setIsZoomed(!isZoomed)}
                 >
                   <PinchZoomImage
                     key={currentItem.pick.image || `${currentItem.designerId}-${lightboxIndex}`}
-                    src={currentItem.pick.image || ""}
+                    src={(() => {
+                      const raw = currentItem.pick.image || "";
+                      // Apply Cloudinary smart crop for consistent sizing
+                      if (raw.includes("res.cloudinary.com") && raw.includes("/upload/")) {
+                        return raw.replace("/upload/", "/upload/c_fill,g_auto,w_800,h_1067,q_auto,f_auto/");
+                      }
+                      return raw;
+                    })()}
                     alt={currentItem.pick.title}
                     className={cn(
-                      "max-h-[60vh] md:max-h-[65vh] w-auto object-contain transition-transform duration-300",
+                      "w-full h-full object-cover transition-transform duration-300",
                       isZoomed ? "cursor-zoom-out scale-150" : "cursor-zoom-in"
                     )}
                     onLoad={() => setIsLightboxImageLoaded(true)}
