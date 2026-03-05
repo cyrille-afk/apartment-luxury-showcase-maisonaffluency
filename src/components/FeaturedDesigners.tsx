@@ -3130,10 +3130,10 @@ const FeaturedDesigners = () => {
                       <div className="text-center mt-4 w-full px-4 md:px-12 relative">
                         <p className="font-brand text-base md:text-lg text-white tracking-wide">
                           {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
-                          {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.subtitle && (
-                            <span className="text-white/60"> — {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).subtitle}</span>
-                          )}
                         </p>
+                        {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.subtitle && (
+                          <p className="text-xs text-white/50 font-body mt-0.5 italic">{(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).subtitle}</p>
+                        )}
                         {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
                           <p className="text-xs text-white/50 font-body mt-1">
                             {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials!.replace(/\n/g, ' · ')}

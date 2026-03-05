@@ -2464,10 +2464,10 @@ const BrandsAteliers = () => {
                       <div className="text-center mt-4 w-full px-4 md:px-12 relative">
                         <p className="font-brand text-base md:text-lg text-white tracking-wide">
                           {picksDesigner.curatorPicks[picksIndex]?.title}
-                          {(picksDesigner.curatorPicks[picksIndex] as any)?.subtitle && (
-                            <span className="text-white font-medium"> — {(picksDesigner.curatorPicks[picksIndex] as any).subtitle}</span>
-                          )}
                         </p>
+                        {(picksDesigner.curatorPicks[picksIndex] as any)?.subtitle && (
+                          <p className="text-xs text-white/50 font-body mt-0.5 italic">{(picksDesigner.curatorPicks[picksIndex] as any).subtitle}</p>
+                        )}
                         {picksDesigner.curatorPicks[picksIndex]?.materials && (() => {
                           const mat = picksDesigner.curatorPicks[picksIndex].materials!;
                           const ledIdx = mat.indexOf("\n\nAvailable in multiple LED options:");
