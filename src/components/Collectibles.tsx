@@ -460,6 +460,20 @@ const Collectibles = () => {
     return [...CATEGORY_ORDER, ...extra];
   }, [categoryMap]);
 
+  const normalizeFilterLabel = (value?: string) => (value || "")
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b(\w+?)s\b/g, "$1");
+
+  const labelsMatch = (a?: string, b?: string) => {
+    const na = normalizeFilterLabel(a);
+    const nb = normalizeFilterLabel(b);
+    if (!na || !nb) return false;
+    return na === nb || na.includes(nb) || nb.includes(na);
+  };
+
   const filteredDesigners = useMemo(() => {
     let designers = collectibleDesigners;
     
@@ -492,9 +506,30 @@ const Collectibles = () => {
   // Helper: check if a curator pick matches the active subcategory/category filter
   const pickMatchesFilter = useMemo(() => {
     if (!selectedSubcategory && !selectedCategory) return () => true;
+    const SUB_TAGS: Record<string, string[]> = {
+      "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+      "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+      "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+      "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+      "Wall Lights": ["Wall Light", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant"],
+      "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+      "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+      "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+      "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+      "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+      "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+    };
     return (pick: any) => {
-      if (selectedSubcategory) return pick.subcategory === selectedSubcategory;
-      return pick.category === selectedCategory;
+      if (selectedSubcategory) {
+        const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
+        return tags.some(tag =>
+          labelsMatch(pick.subcategory, tag) ||
+          labelsMatch(pick.subcategory, selectedSubcategory) ||
+          labelsMatch(pick.category, tag) ||
+          (pick.tags && pick.tags.some((t: string) => labelsMatch(t, tag)))
+        );
+      }
+      return labelsMatch(pick.category, selectedCategory || undefined) || (pick.tags && pick.tags.some((t: string) => labelsMatch(t, selectedCategory || undefined)));
     };
   }, [selectedSubcategory, selectedCategory]);
 
@@ -685,9 +720,9 @@ const Collectibles = () => {
                             collectibleDesigners.forEach(d => {
                               d.curatorPicks?.forEach(pick => {
                                 if (tags.some(tag =>
-                                  pick.subcategory === tag || pick.subcategory === sub ||
-                                  pick.category === tag ||
-                                  (pick.tags && pick.tags.some((t: string) => t.toLowerCase() === tag.toLowerCase()))
+                                  labelsMatch(pick.subcategory, tag) || labelsMatch(pick.subcategory, sub) ||
+                                  labelsMatch(pick.category, tag) ||
+                                  (pick.tags && pick.tags.some((t: string) => labelsMatch(t, tag)))
                                 )) total++;
                               });
                             });
@@ -798,9 +833,9 @@ const Collectibles = () => {
                 collectibleDesigners.forEach(d => {
                   d.curatorPicks?.forEach(pick => {
                     if (tags.some(tag =>
-                      pick.subcategory === tag || pick.subcategory === sub ||
-                      pick.category === tag ||
-                      (pick.tags && pick.tags.some((t: string) => t.toLowerCase() === tag.toLowerCase()))
+                      labelsMatch(pick.subcategory, tag) || labelsMatch(pick.subcategory, sub) ||
+                      labelsMatch(pick.category, tag) ||
+                      (pick.tags && pick.tags.some((t: string) => labelsMatch(t, tag)))
                     )) total++;
                   });
                 });
