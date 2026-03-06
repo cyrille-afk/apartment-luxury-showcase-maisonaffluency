@@ -100,10 +100,10 @@ function pickMatchesFilter(pick: CuratorPick, category: string | null, subcatego
   if (subcategory) {
     const tags = SUB_TAGS[subcategory] || [subcategory];
     return tags.some(tag =>
-      labelsMatch(pick.subcategory, tag) ||
-      labelsMatch(pick.subcategory, subcategory) ||
-      labelsMatch(pick.category, tag) ||
-      (pick.tags && pick.tags.some(t => labelsMatch(t, tag)))
+      categoryMatch(pick.subcategory, tag) ||
+      categoryMatch(pick.subcategory, subcategory) ||
+      categoryMatch(pick.category, tag) ||
+      (pick.tags && pick.tags.some(t => categoryMatch(t, tag)))
     );
   }
   return categoryMatch(pick.category, category || undefined) || (pick.tags && pick.tags.some(t => categoryMatch(t, category || undefined))) || false;
