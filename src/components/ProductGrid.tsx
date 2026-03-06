@@ -93,7 +93,7 @@ const ProductGrid = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [showBackToGrid, setShowBackToGrid] = useState(false);
+  const [navigatedToProfile, setNavigatedToProfile] = useState(false);
   const [isLightboxImageLoaded, setIsLightboxImageLoaded] = useState(false);
   const gridRef = useRef<HTMLElement>(null);
 
@@ -151,17 +151,13 @@ function singularizeSub(s: string): string {
     if (lightboxOpen) setIsLightboxImageLoaded(false);
   }, [lightboxOpen, lightboxIndex]);
 
-  // Track whether user has scrolled away from the grid
+  // Track whether user has scrolled away from the grid AND navigated to a profile
+  const showBackToGrid = navigatedToProfile && isActive;
+
+  // Reset navigatedToProfile when filter changes
   useEffect(() => {
-    if (!isActive) { setShowBackToGrid(false); return; }
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowBackToGrid(!entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-    const el = gridRef.current;
-    if (el) observer.observe(el);
-    return () => { if (el) observer.unobserve(el); };
-  }, [isActive]);
+    setNavigatedToProfile(false);
+  }, [category, subcategory]);
 
   const scrollBackToGrid = useCallback(() => {
     const el = document.getElementById("product-grid");
@@ -181,6 +177,7 @@ function singularizeSub(s: string): string {
       detail: { section: mapped.deeplinkSection, id: item.designerId }
     }));
 
+    setNavigatedToProfile(true);
     setTimeout(() => {
       const el = document.getElementById(mapped.scrollId);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
