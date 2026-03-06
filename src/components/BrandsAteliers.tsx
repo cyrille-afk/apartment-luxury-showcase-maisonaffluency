@@ -2118,12 +2118,12 @@ const BrandsAteliers = () => {
                         {selectedCategory && (
                           <button
                             onClick={() => { setSelectedCategory(null); }}
-                            className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                            className="px-3 py-1 rounded-full border border-[hsl(var(--gold))] bg-white text-xs font-body font-medium text-foreground shadow-sm hover:shadow-md transition-all duration-200"
                           >
                             Clear
                           </button>
                         )}
-                        <button onClick={() => setFilterOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Close filter">
+                        <button onClick={() => setFilterOpen(false)} className="p-1.5 rounded-full bg-muted hover:bg-muted-foreground/20 text-foreground transition-colors" aria-label="Close filter">
                           <X className="h-4 w-4" />
                         </button>
                         </div>
