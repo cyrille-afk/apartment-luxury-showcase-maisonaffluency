@@ -332,6 +332,17 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/ma-chair-1.pdf",
         pdfFilename: "MA_Chair_1.pdf",
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772759733/Screen_Shot_2026-03-06_at_9.14.45_AM_ug5coz.png",
+        title: "MA Coffee Table",
+        category: "Tables",
+        subcategory: "Coffee Table",
+        tags: ["Tables", "Coffee Table"],
+        materials: "Solid Oak or Walnut",
+        dimensions: "Ø 90 × H 44 cm — Ø 130 × H 44 cm",
+        pdfUrl: "/pdfs/MA_Coffee_Table_130.pdf",
+        pdfFilename: "MA_Coffee_Table_130.pdf",
+      },
     ],
   },
 };
