@@ -126,6 +126,21 @@
       #root { min-height: 100vh; }
       /* FOUC guard: hide React content until main CSS loads (prevents raw text flash on scroll-restored refresh) */
       html:not(.css-ready) #root > :not(.hero-skeleton) { visibility: hidden; }
+      /* Hide skeleton text to prevent raw text flash */
+      .hero-skeleton .text { visibility: hidden; }
+    </style>
+    <!-- Fallback: ensure css-ready is added even if onload races or in dev mode -->
+    <script>
+      if (document.documentElement.className.indexOf('css-ready') === -1) {
+        // In dev mode, CSS is injected via JS — mark ready after a tick
+        if (location.port || location.hostname === 'localhost' || location.hostname.includes('lovable')) {
+          document.documentElement.classList.add('css-ready');
+        } else {
+          // Production fallback: if css-ready not set after 2s, force it
+          setTimeout(function(){ document.documentElement.classList.add('css-ready'); }, 2000);
+        }
+      }
+    </script>
       /* Inline hero skeleton — visible BEFORE React boots (fixes FCP) */
       .hero-skeleton { position: relative; height: 100vh; width: 100%; overflow: hidden; background: #1a1a1a url('https://res.cloudinary.com/dif1oamtj/image/upload/w_20,c_fill,q_auto:low,e_blur:1000,f_webp/AffluencySG_194-22.jpg_macpwj') center/cover no-repeat; }
       .hero-skeleton img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
