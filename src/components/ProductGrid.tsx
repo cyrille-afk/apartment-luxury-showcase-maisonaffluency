@@ -197,6 +197,7 @@ function singularizeSub(s: string): string {
   }, [category, subcategory]);
 
   const scrollBackToGrid = useCallback(() => {
+    setNavigatedToProfile(false);
     const el = document.getElementById("product-grid");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
