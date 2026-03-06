@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, FileDown, ChevronLeft, ChevronRight, ArrowUp } from "lucide-react";
+import { X, FileDown, ChevronLeft, ChevronRight, ArrowUp, Maximize2, Minimize2 } from "lucide-react";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
 import PinchZoomImage from "./PinchZoomImage";
@@ -96,6 +96,8 @@ const ProductGrid = () => {
   const [navigatedToProfile, setNavigatedToProfile] = useState(false);
   const [isLightboxImageLoaded, setIsLightboxImageLoaded] = useState(false);
   const gridRef = useRef<HTMLElement>(null);
+  const touchStartRef = useRef<number | null>(null);
+  const touchEndRef = useRef<number | null>(null);
 
 /** Singularize a subcategory label: "Daybeds & Benches" → "Daybed & Bench" */
 function singularizeSub(s: string): string {
@@ -288,142 +290,220 @@ function singularizeSub(s: string): string {
 
       {/* ─── Lightbox ─────────────────────────────────────────────────── */}
       <Dialog open={lightboxOpen} onOpenChange={() => { setLightboxOpen(false); setIsZoomed(false); setIsLightboxImageLoaded(false); }}>
-        <DialogContent className="max-w-[95vw] md:max-w-4xl p-0 border-none bg-[#181818] shadow-2xl overflow-hidden [&>button]:hidden">
+        <DialogContent
+          hideClose
+          className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none"
+          aria-describedby={undefined}
+          onKeyDown={(e) => {
+            if (!filtered.length) return;
+            if (e.key === "ArrowLeft") navigateLightbox(-1);
+            if (e.key === "ArrowRight") navigateLightbox(1);
+          }}
+        >
           <VisuallyHidden><DialogTitle>Product Detail</DialogTitle></VisuallyHidden>
           {lightboxOpen && filtered[lightboxIndex] && (() => {
             const currentItem = filtered[lightboxIndex];
             return (
-            <div className="relative flex flex-col items-center w-full">
-              {/* Top control bar (always visible, non-overlay) */}
-              <div className="w-full flex items-center justify-end gap-2 px-3 pt-3 md:px-4 md:pt-4">
-                <div className="px-3 py-1.5 rounded-full bg-foreground/85 text-background text-[11px] font-body tracking-wider border border-background/20 shadow-md">
-                  {lightboxIndex + 1} / {filtered.length}
-                </div>
-                <button
-                  onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
-                  className="p-2 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
-                  aria-label="Close lightbox"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Image area with arrows */}
-              <div className="w-full flex items-center justify-center px-4 md:px-8 pt-2 pb-2">
-                {/* Left arrow - outside image on mobile, inside on desktop */}
-                {lightboxIndex > 0 && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}
-                    className="shrink-0 mr-2 md:mr-0 md:absolute md:left-3 md:top-1/2 md:-translate-y-1/2 z-30 p-2 md:p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
-                    aria-label="Previous image"
-                  >
-                    <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
-                  </button>
-                )}
-
-                <div
-                  className="relative inline-flex items-center justify-center"
-                  onClick={() => setIsZoomed(!isZoomed)}
-                >
-                  {/* Desktop-only arrows inside image container */}
-                  {lightboxIndex > 0 && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}
-                      className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
-                      aria-label="Previous image"
-                    >
-                      <ChevronLeft className="h-5 w-5" />
-                    </button>
-                  )}
-
-                  {lightboxIndex < filtered.length - 1 && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}
-                      className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
-                      aria-label="Next image"
-                    >
-                      <ChevronRight className="h-5 w-5" />
-                    </button>
-                  )}
-
-                  <PinchZoomImage
-                    key={currentItem.pick.image || `${currentItem.designerId}-${lightboxIndex}`}
-                    src={currentItem.pick.image || ""}
-                    alt={currentItem.pick.title}
-                    className={cn(
-                      "max-h-[55vh] md:max-h-[60vh] max-w-[75vw] md:max-w-[60vw] w-auto object-contain transition-transform duration-300",
-                      isZoomed ? "cursor-zoom-out scale-150" : "cursor-zoom-in"
-                    )}
-                    onLoad={() => setIsLightboxImageLoaded(true)}
-                    onZoomChange={setIsZoomed}
-                  />
-
-                  {/* PDF download */}
-                  {currentItem.pick.pdfUrl && (
-                    <a
-                      href={currentItem.pick.pdfUrl}
-                      download={currentItem.pick.pdfFilename || true}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute bottom-3 right-3 z-30 flex items-center gap-1 p-2 md:p-2.5 rounded-full bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity border border-background/30 shadow-md"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <FileDown className="h-4 w-4 md:h-5 md:w-5" />
-                      <span className="text-[10px] md:text-xs font-body font-medium">PDF</span>
-                    </a>
-                  )}
-                </div>
-
-                {/* Right arrow - outside image on mobile */}
-                {lightboxIndex < filtered.length - 1 && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}
-                    className="shrink-0 ml-2 md:hidden p-2 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
-                    aria-label="Next image"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Metadata */}
-              {isLightboxImageLoaded && (
-                <div className="text-center w-full max-w-[75vw] md:max-w-[60vw] px-4 pb-4">
-                  <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
-                    {(() => {
-                      const baseTitle = currentItem.pick.title;
-                      const isYear = currentItem.pick.subtitle && /^\d{4}/.test(currentItem.pick.subtitle.trim());
-                      return isYear ? `${baseTitle} ${currentItem.pick.subtitle}` : baseTitle;
-                    })()}
-                  </h3>
-                  {currentItem.pick.subtitle && !/^\d{4}/.test(currentItem.pick.subtitle.trim()) && (() => {
-                    const sub = currentItem.pick.subtitle.trim().toLowerCase();
-                    const filterType = subcategory ? singularizeSub(subcategory).toLowerCase() : '';
-                    if (filterType && sub === filterType) return null;
-                    return <p className="font-body text-sm text-white/60 mt-0.5">{currentItem.pick.subtitle}</p>;
+            <div className="relative w-full h-full flex items-center justify-center touch-pan-y select-none" style={{ WebkitUserSelect: 'none' }}>
+              <div
+                onTouchStart={(e) => { if (isZoomed) return; touchStartRef.current = e.targetTouches[0].clientX; touchEndRef.current = null; }}
+                onTouchMove={(e) => { if (isZoomed) return; touchEndRef.current = e.targetTouches[0].clientX; }}
+                onTouchEnd={() => {
+                  if (isZoomed || touchStartRef.current === null) return;
+                  if (touchEndRef.current !== null) {
+                    const distance = touchStartRef.current - touchEndRef.current;
+                    if (distance > 50) navigateLightbox(1);
+                    else if (distance < -50) navigateLightbox(-1);
+                  }
+                  touchStartRef.current = null;
+                  touchEndRef.current = null;
+                }}
+                className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto select-none touch-pan-y ${isZoomed ? 'max-h-[95vh] pb-4 pt-2' : 'max-h-[85vh] pb-4 pt-6 md:pt-4'}`}
+                style={{ WebkitUserSelect: 'none' }}
+              >
+                <div className="relative inline-flex flex-col items-center">
+                  {/* Special tags */}
+                  {(() => {
+                    const tags: string[] = currentItem.pick.tags || [];
+                    const specialTags = tags.filter(t => /couture|edition|limited|re-edition/i.test(t));
+                    return specialTags.length > 0 && !isZoomed ? (
+                      <div className="absolute top-2 right-2 z-20 flex flex-wrap gap-1.5 justify-end">
+                        {specialTags.map((tag, i) => (
+                          <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null;
                   })()}
-                  {currentItem.pick.materials && (
-                    <p className="font-body text-xs text-white/50 mt-2 leading-relaxed">
-                      {currentItem.pick.materials.replace(/\n/g, " · ")}
-                    </p>
-                  )}
-                  {currentItem.pick.dimensions && (
-                    <p className="font-body text-sm md:text-base text-white font-medium mt-1.5">
-                      {currentItem.pick.dimensions.replace(/\n/g, " · ")}
-                    </p>
-                  )}
-                  <button
-                    onClick={() => {
-                      setLightboxOpen(false);
-                      setIsZoomed(false);
-                      handleNavigateToDesigner(currentItem);
-                    }}
-                    className="mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white/80 underline underline-offset-4 transition-colors"
-                  >
-                    View {currentItem.designerName}'s Profile
-                  </button>
+
+                  <div className="relative inline-block">
+                    <PinchZoomImage
+                      key={currentItem.pick.image || `${currentItem.designerId}-${lightboxIndex}`}
+                      src={currentItem.pick.image || ""}
+                      alt={currentItem.pick.title}
+                      className={cn(
+                        "object-contain select-none transition-all duration-300",
+                        isZoomed
+                          ? "max-h-[88vh] max-w-[90vw]"
+                          : "max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]",
+                        isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
+                      )}
+                      draggable={false}
+                      decoding="sync"
+                      loading="eager"
+                      fetchPriority="high"
+                      onLoad={() => setIsLightboxImageLoaded(true)}
+                      onZoomChange={setIsZoomed}
+                    />
+
+                    {/* Desktop hover overlay — click to enlarge/minimize */}
+                    <div
+                      className={`hidden md:flex absolute inset-0 items-center justify-center transition-all duration-500 ease-out z-[5] group ${isZoomed ? 'cursor-zoom-out' : 'bg-white/0 hover:bg-white/10 hover:backdrop-blur-[2px] cursor-zoom-in'}`}
+                      onClick={() => setIsZoomed(!isZoomed)}
+                    >
+                      {!isZoomed && (
+                        <Maximize2 size={28} className="text-white/0 group-hover:text-white/70 transition-all duration-500 ease-out drop-shadow-lg" />
+                      )}
+                    </div>
+
+                    {/* Desktop close button — bottom-right outside */}
+                    <button
+                      onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
+                      className="hidden md:flex absolute bottom-2 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
+                      aria-label="Close lightbox"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+
+                    {/* Desktop navigation arrows */}
+                    {lightboxIndex > 0 && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}
+                        className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                        aria-label="Previous image"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                    )}
+                    {lightboxIndex < filtered.length - 1 && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}
+                        className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                        aria-label="Next image"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    )}
+
+                    {/* PDF download */}
+                    {currentItem.pick.pdfUrl && (
+                      <button
+                        className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
+                        aria-label="Download PDF"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const url = currentItem.pick.pdfUrl as string;
+                          const filename = currentItem.pick.pdfFilename || `${currentItem.pick.title.replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
+                          try {
+                            const res = await fetch(url);
+                            const blob = await res.blob();
+                            const blobUrl = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = blobUrl;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                            URL.revokeObjectURL(blobUrl);
+                          } catch {
+                            window.open(url, '_blank');
+                          }
+                        }}
+                      >
+                        <FileDown size={14} className="md:hidden text-white" />
+                        <FileDown size={16} className="hidden md:block text-white" />
+                        <span className="text-[10px] md:text-xs font-medium leading-none text-white">PDF</span>
+                      </button>
+                    )}
+
+                    {/* Mobile expand/minimize button — bottom-left */}
+                    <button
+                      onClick={() => setIsZoomed(!isZoomed)}
+                      className="md:hidden absolute bottom-2 left-2 z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
+                      aria-label={isZoomed ? "Minimize image" : "Maximize image"}
+                    >
+                      {isZoomed ? <Minimize2 size={16} className="text-white" /> : <Maximize2 size={16} className="text-white" />}
+                    </button>
+                  </div>
                 </div>
-              )}
+
+                {/* Mobile close button — outside, below-left of image */}
+                {!isZoomed && (
+                  <div className="md:hidden flex justify-start w-full mt-2">
+                    <button
+                      onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
+                      className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                      aria-label="Close"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
+
+                {/* Scroll dots — mobile and desktop */}
+                {filtered.length > 1 && !isZoomed && (
+                  <div className="flex items-center gap-2 mt-3">
+                    {filtered.map((_, idx) => (
+                      <button
+                        key={idx}
+                        aria-label={`Go to image ${idx + 1}`}
+                        onClick={() => { setLightboxIndex(idx); setIsZoomed(false); setIsLightboxImageLoaded(false); }}
+                        className={`rounded-full transition-all duration-300 ${lightboxIndex === idx ? 'w-4 h-2 bg-white' : 'w-2 h-2 bg-white/30 hover:bg-white/60'}`}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Metadata */}
+                {isLightboxImageLoaded && !isZoomed && (
+                  <div className="text-center w-full px-4 md:px-12 mt-4">
+                    <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
+                      {(() => {
+                        const baseTitle = currentItem.pick.title;
+                        const isYear = currentItem.pick.subtitle && /^\d{4}/.test(currentItem.pick.subtitle.trim());
+                        return isYear ? `${baseTitle} ${currentItem.pick.subtitle}` : baseTitle;
+                      })()}
+                    </h3>
+                    {currentItem.pick.subtitle && !/^\d{4}/.test(currentItem.pick.subtitle.trim()) && (() => {
+                      const sub = currentItem.pick.subtitle.trim().toLowerCase();
+                      const filterType = subcategory ? singularizeSub(subcategory).toLowerCase() : '';
+                      if (filterType && sub === filterType) return null;
+                      return <p className="font-body text-sm text-white/60 mt-0.5">{currentItem.pick.subtitle}</p>;
+                    })()}
+                    {currentItem.pick.materials && (
+                      <p className="font-body text-xs text-white/50 mt-2 leading-relaxed">
+                        {currentItem.pick.materials.replace(/\n/g, " · ")}
+                      </p>
+                    )}
+                    {currentItem.pick.dimensions && (
+                      <p className="font-body text-sm md:text-base text-white font-medium mt-1.5">
+                        {currentItem.pick.dimensions.replace(/\n/g, " · ")}
+                      </p>
+                    )}
+                    <button
+                      onClick={() => {
+                        setLightboxOpen(false);
+                        setIsZoomed(false);
+                        handleNavigateToDesigner(currentItem);
+                      }}
+                      className="mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white/80 underline underline-offset-4 transition-colors"
+                    >
+                      View {currentItem.designerName}'s Profile
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             );
           })()}
