@@ -128,7 +128,7 @@
       html:not(.css-ready) #root > :not(.hero-skeleton) { visibility: hidden; }
       /* Inline hero skeleton — visible BEFORE React boots (fixes FCP) */
       .hero-skeleton { position: relative; height: 100vh; width: 100%; overflow: hidden; background: #1a1a1a url('https://res.cloudinary.com/dif1oamtj/image/upload/w_20,c_fill,q_auto:low,e_blur:1000,f_webp/AffluencySG_194-22.jpg_macpwj') center/cover no-repeat; }
-      .hero-skeleton img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+      .hero-skeleton img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; color: transparent; }
       .hero-skeleton .overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent, rgba(0,0,0,0.2)); }
       @media (min-width: 768px) { .hero-skeleton img { height: 120%; object-position: 50% 0%; } }
 
