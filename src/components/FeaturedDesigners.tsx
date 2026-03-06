@@ -2460,14 +2460,14 @@ const FeaturedDesigners = () => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="relative w-20 sm:flex-none sm:w-56 order-last md:order-first">
+              <div className="relative w-16 sm:flex-none sm:w-56 order-last md:order-first">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search by Designer..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-6 md:pl-9 pr-6 md:pr-8 h-6 md:h-9 text-[10px] md:text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
+                  className="pl-6 md:pl-9 pr-6 md:pr-8 h-6 md:h-9 text-[16px] md:text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body origin-left scale-[0.625] md:scale-100 w-[160%] md:w-full"
                 />
                 {searchQuery && (
                   <button
