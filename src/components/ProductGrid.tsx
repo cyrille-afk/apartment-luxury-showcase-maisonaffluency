@@ -296,27 +296,29 @@ function singularizeSub(s: string): string {
           {lightboxOpen && filtered[lightboxIndex] && (() => {
             const currentItem = filtered[lightboxIndex];
             return (
-            <div className="relative flex flex-col items-center">
-              {/* Counter + Close — inside dialog top-right */}
-              <div className="absolute top-3 right-3 z-50 flex items-center gap-2">
-                <div className="px-3 py-1.5 rounded-full bg-black/60 text-white text-[11px] font-body tracking-wider backdrop-blur-sm">
+            <div className="relative flex flex-col items-center w-full">
+              {/* Top control bar (always visible, non-overlay) */}
+              <div className="w-full flex items-center justify-end gap-2 px-3 pt-3 md:px-4 md:pt-4">
+                <div className="px-3 py-1.5 rounded-full bg-foreground/85 text-background text-[11px] font-body tracking-wider border border-background/20 shadow-md">
                   {lightboxIndex + 1} / {filtered.length}
                 </div>
                 <button
                   onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
-                  className="p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors backdrop-blur-sm"
+                  className="p-2 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                  aria-label="Close lightbox"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
               {/* Image area with arrows */}
-              <div className="relative w-full flex items-center justify-center px-12 pt-4 pb-2">
+              <div className="relative w-full flex items-center justify-center px-4 md:px-12 pt-2 pb-2">
                 {/* Left arrow */}
                 {lightboxIndex > 0 && (
                   <button
                     onClick={() => navigateLightbox(-1)}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors backdrop-blur-sm"
+                    className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                    aria-label="Previous image"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
@@ -325,7 +327,8 @@ function singularizeSub(s: string): string {
                 {lightboxIndex < filtered.length - 1 && (
                   <button
                     onClick={() => navigateLightbox(1)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors backdrop-blur-sm"
+                    className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                    aria-label="Next image"
                   >
                     <ChevronRight className="h-5 w-5" />
                   </button>
@@ -353,7 +356,7 @@ function singularizeSub(s: string): string {
                       download={currentItem.pick.pdfFilename || true}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute bottom-3 right-3 z-30 flex items-center gap-1 p-2 md:p-2.5 rounded-full bg-[#d32f2f]/90 text-white hover:text-white transition-colors backdrop-blur-sm"
+                      className="absolute bottom-3 right-3 z-30 flex items-center gap-1 p-2 md:p-2.5 rounded-full bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity border border-background/30 shadow-md"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <FileDown className="h-4 w-4 md:h-5 md:w-5" />
