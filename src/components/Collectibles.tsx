@@ -629,7 +629,7 @@ const Collectibles = () => {
                     <div className="md:hidden order-first">
                     <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                       <PopoverTrigger asChild>
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[hsl(var(--gold))] bg-background shadow-sm hover:shadow-md text-foreground transition-all duration-300 relative" aria-label="Filter">
+                        <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-[hsl(var(--gold))] bg-background shadow-sm hover:shadow-md text-foreground transition-all duration-300 relative" aria-label="Filter">
                           <SlidersHorizontal className="h-3.5 w-3.5" />
                           <span className="text-[10px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
                           {selectedCategory && (
