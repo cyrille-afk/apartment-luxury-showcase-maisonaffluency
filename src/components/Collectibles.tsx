@@ -533,10 +533,10 @@ const Collectibles = () => {
       if (selectedSubcategory) {
         const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
         return tags.some(tag =>
-          labelsMatch(pick.subcategory, tag) ||
-          labelsMatch(pick.subcategory, selectedSubcategory) ||
-          labelsMatch(pick.category, tag) ||
-          (pick.tags && pick.tags.some((t: string) => labelsMatch(t, tag)))
+          categoryMatchLocal(pick.subcategory, tag) ||
+          categoryMatchLocal(pick.subcategory, selectedSubcategory) ||
+          categoryMatchLocal(pick.category, tag) ||
+          (pick.tags && pick.tags.some((t: string) => categoryMatchLocal(t, tag)))
         );
       }
       return categoryMatchLocal(pick.category, selectedCategory || undefined) || (pick.tags && pick.tags.some((t: string) => categoryMatchLocal(t, selectedCategory || undefined)));
@@ -730,9 +730,9 @@ const Collectibles = () => {
                             collectibleDesigners.forEach(d => {
                               d.curatorPicks?.forEach(pick => {
                                 if (tags.some(tag =>
-                                  labelsMatch(pick.subcategory, tag) || labelsMatch(pick.subcategory, sub) ||
-                                  labelsMatch(pick.category, tag) ||
-                                  (pick.tags && pick.tags.some((t: string) => labelsMatch(t, tag)))
+                                  categoryMatchLocal(pick.subcategory, tag) || categoryMatchLocal(pick.subcategory, sub) ||
+                                  categoryMatchLocal(pick.category, tag) ||
+                                  (pick.tags && pick.tags.some((t: string) => categoryMatchLocal(t, tag)))
                                 )) total++;
                               });
                             });
@@ -843,9 +843,9 @@ const Collectibles = () => {
                 collectibleDesigners.forEach(d => {
                   d.curatorPicks?.forEach(pick => {
                     if (tags.some(tag =>
-                      labelsMatch(pick.subcategory, tag) || labelsMatch(pick.subcategory, sub) ||
-                      labelsMatch(pick.category, tag) ||
-                      (pick.tags && pick.tags.some((t: string) => labelsMatch(t, tag)))
+                      categoryMatchLocal(pick.subcategory, tag) || categoryMatchLocal(pick.subcategory, sub) ||
+                      categoryMatchLocal(pick.category, tag) ||
+                      (pick.tags && pick.tags.some((t: string) => categoryMatchLocal(t, tag)))
                     )) total++;
                   });
                 });
