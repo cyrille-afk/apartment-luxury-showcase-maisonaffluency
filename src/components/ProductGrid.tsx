@@ -89,6 +89,7 @@ const SECTION_LABELS: Record<string, string> = {
 const ProductGrid = () => {
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
+  const [filterSource, setFilterSource] = useState<string | null>(null);
   const allProducts = useMemo(() => buildProductList(atelierOnlyPicks), []);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -110,21 +111,21 @@ function singularizeSub(s: string): string {
     return word;
   });
 }
-  // Listen for global filter events
+  // Listen for global filter events from all sections
   useEffect(() => {
     const handleSetCategory = (e: CustomEvent) => {
       const { category: cat, subcategory: sub } = e.detail || {};
       setCategory(cat || null);
       setSubcategory(sub || null);
+      setFilterSource('designers');
     };
     window.addEventListener('setDesignerCategory', handleSetCategory as EventListener);
-    // Also listen for sync events from mega-menu source
+    // Listen for sync events from all sources
     const handleSync = (e: CustomEvent) => {
       const { category: cat, subcategory: sub, source } = e.detail || {};
-      if (source === 'designers') {
-        setCategory(cat || null);
-        setSubcategory(sub || null);
-      }
+      setCategory(cat || null);
+      setSubcategory(sub || null);
+      setFilterSource(source || 'designers');
     };
     window.addEventListener('syncCategoryFilter', handleSync as EventListener);
     return () => {
@@ -135,7 +136,12 @@ function singularizeSub(s: string): string {
 
   const filtered = useMemo(() => {
     if (!category && !subcategory) return [];
-    const matched = allProducts.filter(item => pickMatchesFilter(item.pick, category, subcategory));
+    // Scope results based on which section triggered the filter
+    const sectionFilter = filterSource === 'collectibles' ? 'collectibles'
+      : filterSource === 'brands' ? 'ateliers'
+      : null; // 'designers' or mega-menu → show all
+    let pool = sectionFilter ? allProducts.filter(item => item.section === sectionFilter) : allProducts;
+    const matched = pool.filter(item => pickMatchesFilter(item.pick, category, subcategory));
     // Deduplicate: keep only the first image per product title per designer
     const seen = new Set<string>();
     return matched.filter(item => {
@@ -144,7 +150,7 @@ function singularizeSub(s: string): string {
       seen.add(key);
       return true;
     });
-  }, [allProducts, category, subcategory]);
+  }, [allProducts, category, subcategory, filterSource]);
 
   const isActive = (category || subcategory) && filtered.length > 0;
 

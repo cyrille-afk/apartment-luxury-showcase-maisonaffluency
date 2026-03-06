@@ -1841,10 +1841,12 @@ const BrandsAteliers = () => {
     window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'brands' } }));
   }, []);
 
-  const setSelectedCategory = useCallback((cat: string | null) => {
+  const setSelectedCategory = useCallback((cat: string | null, skipBroadcast?: boolean) => {
     setSelectedCategoryRaw(cat);
     setSelectedSubcategoryRaw(null);
-    broadcastFilter(cat, null);
+    if (!skipBroadcast) {
+      broadcastFilter(cat, null);
+    }
   }, [broadcastFilter]);
 
   const setSelectedSubcategory = useCallback((sub: string | null) => {
@@ -2091,7 +2093,13 @@ const BrandsAteliers = () => {
                 </div>
                 <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
                   <div className="md:hidden order-first">
-                  <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+                  <Popover open={filterOpen} onOpenChange={(open) => {
+                          setFilterOpen(open);
+                          if (!open && selectedCategory) {
+                            broadcastFilter(selectedCategory, selectedSubcategory);
+                            setTimeout(() => { document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
+                          }
+                        }}>
                     <PopoverTrigger asChild>
                       <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-[hsl(var(--gold))] bg-background shadow-sm hover:shadow-md text-foreground transition-all duration-300 relative" aria-label="Filter">
                         <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -2120,6 +2128,40 @@ const BrandsAteliers = () => {
                         </button>
                         </div>
                       </div>
+                      {(() => {
+                        // Compute per-subcategory item counts scoped to ateliers only
+                        const SUB_TAGS_LOCAL: Record<string, string[]> = {
+                          "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+                          "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+                          "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+                          "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+                          "Wall Lights": ["Wall Light", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant"],
+                          "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+                          "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+                          "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+                          "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+                          "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+                          "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+                        };
+                        const subCounts: Record<string, number> = {};
+                        Object.entries(SUB_TAGS_LOCAL).forEach(([sub, tags]) => {
+                          let total = 0;
+                          partnerBrands.forEach(b => {
+                            const bSub = (b as any).subcategory || (b as any).seatType || (b as any).tableType;
+                            if (tags.some(tag =>
+                              bSub === tag || bSub === sub ||
+                              b.category === tag ||
+                              ((b as any).tags && (b as any).tags.some((t: string) => t.toLowerCase() === tag.toLowerCase()))
+                            )) total++;
+                          });
+                          subCounts[sub] = total;
+                        });
+                        const catCounts: Record<string, number> = {};
+                        categories.forEach(cat => {
+                          const subs = categoryMap[cat] || [];
+                          catCounts[cat] = subs.reduce((sum, s) => sum + (subCounts[s] || 0), 0);
+                        });
+                        return (
                       <div className="space-y-1">
                         {categories.map((category) => (
                           <div key={category}>
@@ -2128,13 +2170,14 @@ const BrandsAteliers = () => {
                                 checked={selectedCategory === category}
                                 onCheckedChange={() => {
                                   if (selectedCategory === category) {
-                                    setSelectedCategory(null);
+                                    setSelectedCategory(null, true);
                                   } else {
-                                    setSelectedCategory(category);
+                                    setSelectedCategory(category, true);
                                   }
                                 }}
                               />
                               <span className="text-sm text-foreground font-body">{category}</span>
+                              <span className="ml-auto text-[9px] text-muted-foreground/60 font-body">{catCounts[category] || 0}</span>
                             </label>
                             {selectedCategory === category && categoryMap[category]?.length > 0 && (
                               <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
@@ -2154,7 +2197,7 @@ const BrandsAteliers = () => {
                                       selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-foreground/60 hover:text-primary'
                                     }`}
                                   >
-                                    {sub}
+                                    {sub} <span className="text-[9px] text-muted-foreground/50">({subCounts[sub] || 0})</span>
                                   </button>
                                 ))}
                               </div>
@@ -2162,6 +2205,8 @@ const BrandsAteliers = () => {
                           </div>
                         ))}
                       </div>
+                        );
+                      })()}
                     </PopoverContent>
                   </Popover>
                   </div>
