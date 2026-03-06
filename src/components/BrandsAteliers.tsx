@@ -2156,7 +2156,7 @@ const BrandsAteliers = () => {
                                 {categoryMap[category].map(sub => (
                                   <button
                                     key={sub}
-                                    onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
+                                    onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); setTimeout(() => { document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150); }}
                                     className={`block text-[10px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${
                                       selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-foreground/60 hover:text-primary'
                                     }`}
