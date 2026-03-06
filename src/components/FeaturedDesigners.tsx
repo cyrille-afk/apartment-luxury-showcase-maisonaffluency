@@ -2384,31 +2384,13 @@ const FeaturedDesigners = () => {
                 );
               })}
             </div>
-            <div className="flex items-center gap-4 flex-shrink-0">
-              <div className="relative flex-1 sm:flex-none sm:w-56">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search by Designer..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-8 h-9 text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => { setSearchQuery(""); ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-              <div className="md:hidden">
+            <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
+              <div className="md:hidden order-first">
                 <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                   <PopoverTrigger asChild>
-                    <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none flex items-center gap-1.5" aria-label="Filter">
-                      <span className="text-sm font-body uppercase tracking-wider">Filter</span>
-                      <SlidersHorizontal className="h-5.5 w-5.5" />
+                    <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none flex items-center gap-1" aria-label="Filter">
+                      <SlidersHorizontal className="h-4 w-4" />
+                      <span className="text-[10px] font-body uppercase tracking-wider">Filter</span>
                       {selectedCategory && (
                         <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
                           1
@@ -2477,6 +2459,24 @@ const FeaturedDesigners = () => {
                     </div>
                   </PopoverContent>
                 </Popover>
+              </div>
+              <div className="relative flex-1 sm:flex-none sm:w-56 order-last md:order-first">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search by Designer..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 md:pl-9 pr-7 md:pr-8 h-7 md:h-9 text-xs md:text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => { setSearchQuery(""); ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
