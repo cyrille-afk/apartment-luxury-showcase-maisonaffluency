@@ -75,7 +75,7 @@ const StickyBottomNav = () => {
                     className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors duration-200 touch-manipulation min-w-[3.5rem] ${
                       isActive
                         ? "text-[hsl(var(--accent))]"
-                        : "text-muted-foreground active:text-foreground"
+                        : "text-foreground active:text-foreground"
                     }`}
                     aria-label={`Go to ${label}`}
                     aria-current={isActive ? "page" : undefined}
