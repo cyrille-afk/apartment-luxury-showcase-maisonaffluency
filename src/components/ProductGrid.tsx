@@ -67,17 +67,34 @@ function buildProductList(atelierPicks: Record<string, { name: string; curatorPi
   return items;
 }
 
+function normalizeLabel(value?: string): string {
+  return (value || "")
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b(\w+?)s\b/g, "$1");
+}
+
+function labelsMatch(a?: string, b?: string): boolean {
+  const na = normalizeLabel(a);
+  const nb = normalizeLabel(b);
+  if (!na || !nb) return false;
+  return na === nb || na.includes(nb) || nb.includes(na);
+}
+
 function pickMatchesFilter(pick: CuratorPick, category: string | null, subcategory: string | null): boolean {
   if (!category && !subcategory) return true;
   if (subcategory) {
     const tags = SUB_TAGS[subcategory] || [subcategory];
     return tags.some(tag =>
-      pick.subcategory === tag ||
-      pick.category === tag ||
-      (pick.tags && pick.tags.some(t => t.toLowerCase() === tag.toLowerCase()))
+      labelsMatch(pick.subcategory, tag) ||
+      labelsMatch(pick.subcategory, subcategory) ||
+      labelsMatch(pick.category, tag) ||
+      (pick.tags && pick.tags.some(t => labelsMatch(t, tag)))
     );
   }
-  return pick.category === category || (pick.tags && pick.tags.includes(category!)) || false;
+  return labelsMatch(pick.category, category || undefined) || (pick.tags && pick.tags.some(t => labelsMatch(t, category || undefined))) || false;
 }
 
 const SECTION_LABELS: Record<string, string> = {
