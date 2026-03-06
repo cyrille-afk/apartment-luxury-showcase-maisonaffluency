@@ -2295,19 +2295,21 @@ const FeaturedDesigners = () => {
       const query = normalize(searchQuery.trim());
       // Escape special regex characters in the query, then match whole words only
       const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const wordRegex = new RegExp(`\\b${escapedQuery}`, "i");
-      const matchesWord = (s: string) => wordRegex.test(normalize(s));
+      const wordRegex = new RegExp(`\\b${escapedQuery}\\b`, "i");
+      const looseRegex = new RegExp(`\\b${escapedQuery}`, "i");
+      const matchesWordStrict = (s: string) => wordRegex.test(normalize(s));
+      const matchesWordLoose = (s: string) => looseRegex.test(normalize(s));
       designers = designers.filter(
         (designer) =>
-          matchesWord(designer.name) ||
-          matchesWord(designer.specialty) ||
-          (designer.biography && matchesWord(designer.biography)) ||
-          (designer.notableWorks && matchesWord(designer.notableWorks)) ||
+          matchesWordLoose(designer.name) ||
+          matchesWordLoose(designer.specialty) ||
+          (designer.biography && matchesWordLoose(designer.biography)) ||
+          (designer.notableWorks && matchesWordLoose(designer.notableWorks)) ||
           designer.curatorPicks?.some((pick: any) =>
-            pick.tags?.some((tag: string) => matchesWord(tag)) ||
-            (pick.title && matchesWord(pick.title)) ||
-            (pick.subtitle && matchesWord(pick.subtitle)) ||
-            (pick.description && matchesWord(pick.description))
+            pick.tags?.some((tag: string) => matchesWordStrict(tag)) ||
+            (pick.category && matchesWordStrict(pick.category)) ||
+            (pick.title && matchesWordStrict(pick.title)) ||
+            (pick.subtitle && matchesWordStrict(pick.subtitle))
           )
       );
     }
