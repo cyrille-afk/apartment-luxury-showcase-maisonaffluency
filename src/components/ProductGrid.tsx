@@ -291,39 +291,41 @@ function singularizeSub(s: string): string {
 
       {/* ─── Lightbox ─────────────────────────────────────────────────── */}
       <Dialog open={lightboxOpen} onOpenChange={() => { setLightboxOpen(false); setIsZoomed(false); setIsLightboxImageLoaded(false); }}>
-        <DialogContent className="max-w-[95vw] md:max-w-4xl p-0 border-none bg-[#181818] shadow-2xl overflow-visible [&>button]:hidden">
+        <DialogContent className="max-w-[95vw] md:max-w-4xl p-0 border-none bg-[#181818] shadow-2xl overflow-hidden [&>button]:hidden">
           <VisuallyHidden><DialogTitle>Product Detail</DialogTitle></VisuallyHidden>
           {lightboxOpen && filtered[lightboxIndex] && (() => {
             const currentItem = filtered[lightboxIndex];
             return (
-            <div className="relative flex flex-col items-center pt-3 pb-3 md:pt-4 md:pb-4">
-              {/* Counter + Close */}
-              <div className="absolute top-3 right-3 md:top-4 md:right-4 z-50 flex items-center gap-2">
-                <div className="px-3 py-1.5 rounded-full bg-background/95 text-foreground text-[11px] font-body tracking-wider border border-foreground/20 shadow-xl">
+            <div className="relative flex flex-col items-center">
+              {/* Counter + Close — inside dialog top-right */}
+              <div className="absolute top-3 right-3 z-50 flex items-center gap-2">
+                <div className="px-3 py-1.5 rounded-full bg-black/60 text-white text-[11px] font-body tracking-wider backdrop-blur-sm">
                   {lightboxIndex + 1} / {filtered.length}
                 </div>
                 <button
                   onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
-                  className="p-2.5 rounded-full bg-background/95 text-foreground hover:bg-background transition-colors border border-foreground/20 shadow-xl"
+                  className="p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors backdrop-blur-sm"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              {/* Image */}
-              <div className="relative w-full flex flex-col items-center justify-center px-4 md:px-12">
+              {/* Image area with arrows */}
+              <div className="relative w-full flex items-center justify-center px-12 pt-4 pb-2">
+                {/* Left arrow */}
                 {lightboxIndex > 0 && (
                   <button
                     onClick={() => navigateLightbox(-1)}
-                    className="flex absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-background/95 text-foreground hover:bg-background transition-colors border border-foreground/20 shadow-xl"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors backdrop-blur-sm"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
                 )}
+                {/* Right arrow */}
                 {lightboxIndex < filtered.length - 1 && (
                   <button
                     onClick={() => navigateLightbox(1)}
-                    className="flex absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-background/95 text-foreground hover:bg-background transition-colors border border-foreground/20 shadow-xl"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors backdrop-blur-sm"
                   >
                     <ChevronRight className="h-5 w-5" />
                   </button>
@@ -338,7 +340,7 @@ function singularizeSub(s: string): string {
                     src={currentItem.pick.image || ""}
                     alt={currentItem.pick.title}
                     className={cn(
-                      "max-h-[55vh] md:max-h-[60vh] max-w-[85vw] md:max-w-[70vw] w-auto object-contain transition-transform duration-300",
+                      "max-h-[55vh] md:max-h-[60vh] max-w-[75vw] md:max-w-[60vw] w-auto object-contain transition-transform duration-300",
                       isZoomed ? "cursor-zoom-out scale-150" : "cursor-zoom-in"
                     )}
                     onLoad={() => setIsLightboxImageLoaded(true)}
@@ -351,7 +353,7 @@ function singularizeSub(s: string): string {
                       download={currentItem.pick.pdfFilename || true}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute bottom-3 right-3 z-30 flex items-center gap-1 p-2 md:p-2.5 rounded-full bg-[#d32f2f]/90 text-white hover:text-white transition-colors border border-background/60 shadow-xl"
+                      className="absolute bottom-3 right-3 z-30 flex items-center gap-1 p-2 md:p-2.5 rounded-full bg-[#d32f2f]/90 text-white hover:text-white transition-colors backdrop-blur-sm"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <FileDown className="h-4 w-4 md:h-5 md:w-5" />
@@ -361,8 +363,9 @@ function singularizeSub(s: string): string {
                 </div>
               </div>
 
+              {/* Metadata */}
               {isLightboxImageLoaded && (
-                <div className="-mt-1 text-center w-full px-6 md:px-12">
+                <div className="text-center w-full px-6 md:px-12 pb-4">
                   <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
                     {(() => {
                       const baseTitle = currentItem.pick.title;
@@ -386,8 +389,6 @@ function singularizeSub(s: string): string {
                       {currentItem.pick.dimensions.replace(/\n/g, " · ")}
                     </p>
                   )}
-
-                  {/* View designer link */}
                   <button
                     onClick={() => {
                       setLightboxOpen(false);
