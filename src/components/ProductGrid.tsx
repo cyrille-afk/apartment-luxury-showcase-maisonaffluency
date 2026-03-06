@@ -83,6 +83,18 @@ function labelsMatch(a?: string, b?: string): boolean {
   return na === nb || na.includes(nb) || nb.includes(na);
 }
 
+/** Stricter match for top-level categories — requires full-word boundary match
+ *  to prevent "Table Lamp" from matching the "Tables" category. */
+function categoryMatch(pickValue?: string, category?: string): boolean {
+  const na = normalizeLabel(pickValue);
+  const nb = normalizeLabel(category);
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  // Check word-boundary match: "table" should match "table" but not "table lamp"
+  const regex = new RegExp(`(^|\\s)${nb.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`);
+  return regex.test(na);
+}
+
 function pickMatchesFilter(pick: CuratorPick, category: string | null, subcategory: string | null): boolean {
   if (!category && !subcategory) return true;
   if (subcategory) {
@@ -94,7 +106,7 @@ function pickMatchesFilter(pick: CuratorPick, category: string | null, subcatego
       (pick.tags && pick.tags.some(t => labelsMatch(t, tag)))
     );
   }
-  return labelsMatch(pick.category, category || undefined) || (pick.tags && pick.tags.some(t => labelsMatch(t, category || undefined))) || false;
+  return categoryMatch(pick.category, category || undefined) || (pick.tags && pick.tags.some(t => categoryMatch(t, category || undefined))) || false;
 }
 
 const SECTION_LABELS: Record<string, string> = {
