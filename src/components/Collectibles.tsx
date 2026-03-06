@@ -474,6 +474,16 @@ const Collectibles = () => {
     return na === nb || na.includes(nb) || nb.includes(na);
   };
 
+  /** Stricter match for top-level categories — word-boundary only */
+  const categoryMatchLocal = (pickValue?: string, cat?: string) => {
+    const na = normalizeFilterLabel(pickValue);
+    const nb = normalizeFilterLabel(cat);
+    if (!na || !nb) return false;
+    if (na === nb) return true;
+    const regex = new RegExp(`(^|\\s)${nb.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`);
+    return regex.test(na);
+  };
+
   const filteredDesigners = useMemo(() => {
     let designers = collectibleDesigners;
     
@@ -529,7 +539,7 @@ const Collectibles = () => {
           (pick.tags && pick.tags.some((t: string) => labelsMatch(t, tag)))
         );
       }
-      return labelsMatch(pick.category, selectedCategory || undefined) || (pick.tags && pick.tags.some((t: string) => labelsMatch(t, selectedCategory || undefined)));
+      return categoryMatchLocal(pick.category, selectedCategory || undefined) || (pick.tags && pick.tags.some((t: string) => categoryMatchLocal(t, selectedCategory || undefined)));
     };
   }, [selectedSubcategory, selectedCategory]);
 
