@@ -1642,10 +1642,10 @@ function AlphaStrip({
     >
       {/* Letter heading */}
       <div className="flex items-center gap-3 mb-3 px-1">
-        <span className="font-serif text-2xl text-primary/60">{letter}</span>
+        <span className="font-serif text-2xl text-foreground md:text-primary/60">{letter}</span>
         <div className="flex-1 h-px bg-border/30" />
-        <span className="text-[10px] text-muted-foreground/40 tracking-widest font-body uppercase">
-          {brands.length} {brands.length === 1 ? "brand" : "brands"}
+        <span className="text-[10px] text-foreground/70 md:text-muted-foreground/40 tracking-widest font-body uppercase">
+          {brands.length} {brands.length === 1 ? "partner" : "partners"}
         </span>
       </div>
 

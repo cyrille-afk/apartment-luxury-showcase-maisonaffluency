@@ -2587,8 +2587,12 @@ const FeaturedDesigners = () => {
           >
             {designerAlphaGroups.map(([letter, designers]) => (
               <div key={letter}>
-                <div id={`designer-alpha-${letter}`} className="scroll-mt-32 pt-4 pb-2">
-                  <span className="font-serif text-lg text-muted-foreground">{letter}</span>
+                <div id={`designer-alpha-${letter}`} className="scroll-mt-32 pt-4 pb-2 flex items-center gap-3 px-1">
+                  <span className="font-serif text-lg md:text-lg text-foreground md:text-muted-foreground">{letter}</span>
+                  <div className="flex-1 h-px bg-border/30 md:hidden" />
+                  <span className="text-[10px] text-foreground/70 tracking-widest font-body uppercase md:hidden">
+                    {designers.length}
+                  </span>
                 </div>
                 {designers.map((designer, index) => (
               <AccordionItem
