@@ -309,32 +309,33 @@ function singularizeSub(s: string): string {
               </div>
 
               {/* Image area with arrows */}
-              <div className="relative w-full flex items-center justify-center px-4 md:px-12 pt-2 pb-2">
-                {/* Left arrow */}
-                {lightboxIndex > 0 && (
-                  <button
-                    onClick={() => navigateLightbox(-1)}
-                    className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
-                    aria-label="Previous image"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-                )}
-                {/* Right arrow */}
-                {lightboxIndex < filtered.length - 1 && (
-                  <button
-                    onClick={() => navigateLightbox(1)}
-                    className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
-                    aria-label="Next image"
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
-                )}
-
+              <div className="w-full flex items-center justify-center px-4 md:px-8 pt-2 pb-2">
                 <div
                   className="relative inline-flex items-center justify-center"
                   onClick={() => setIsZoomed(!isZoomed)}
                 >
+                  {/* Left arrow */}
+                  {lightboxIndex > 0 && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}
+                      className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                  )}
+
+                  {/* Right arrow */}
+                  {lightboxIndex < filtered.length - 1 && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}
+                      className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                      aria-label="Next image"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  )}
+
                   <PinchZoomImage
                     key={currentItem.pick.image || `${currentItem.designerId}-${lightboxIndex}`}
                     src={currentItem.pick.image || ""}
@@ -346,6 +347,7 @@ function singularizeSub(s: string): string {
                     onLoad={() => setIsLightboxImageLoaded(true)}
                     onZoomChange={setIsZoomed}
                   />
+
                   {/* PDF download */}
                   {currentItem.pick.pdfUrl && (
                     <a
@@ -365,7 +367,7 @@ function singularizeSub(s: string): string {
 
               {/* Metadata */}
               {isLightboxImageLoaded && (
-                <div className="text-center w-full px-6 md:px-12 pb-4">
+                <div className="text-center w-full max-w-[75vw] md:max-w-[60vw] px-4 pb-4">
                   <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
                     {(() => {
                       const baseTitle = currentItem.pick.title;
