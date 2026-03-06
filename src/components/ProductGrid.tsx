@@ -310,26 +310,36 @@ function singularizeSub(s: string): string {
 
               {/* Image area with arrows */}
               <div className="w-full flex items-center justify-center px-4 md:px-8 pt-2 pb-2">
+                {/* Left arrow - outside image on mobile, inside on desktop */}
+                {lightboxIndex > 0 && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}
+                    className="shrink-0 mr-2 md:mr-0 md:absolute md:left-3 md:top-1/2 md:-translate-y-1/2 z-30 p-2 md:p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
+                  </button>
+                )}
+
                 <div
                   className="relative inline-flex items-center justify-center"
                   onClick={() => setIsZoomed(!isZoomed)}
                 >
-                  {/* Left arrow */}
+                  {/* Desktop-only arrows inside image container */}
                   {lightboxIndex > 0 && (
                     <button
                       onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}
-                      className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                      className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
                       aria-label="Previous image"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </button>
                   )}
 
-                  {/* Right arrow */}
                   {lightboxIndex < filtered.length - 1 && (
                     <button
                       onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}
-                      className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                      className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
                       aria-label="Next image"
                     >
                       <ChevronRight className="h-5 w-5" />
@@ -363,6 +373,17 @@ function singularizeSub(s: string): string {
                     </a>
                   )}
                 </div>
+
+                {/* Right arrow - outside image on mobile */}
+                {lightboxIndex < filtered.length - 1 && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}
+                    className="shrink-0 ml-2 md:hidden p-2 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                    aria-label="Next image"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                )}
               </div>
 
               {/* Metadata */}
