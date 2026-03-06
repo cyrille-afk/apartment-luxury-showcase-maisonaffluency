@@ -629,9 +629,9 @@ const Collectibles = () => {
                     <div className="md:hidden order-first">
                     <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                       <PopoverTrigger asChild>
-                        <button className="text-muted-foreground hover:text-primary transition-colors relative flex-none flex items-center gap-1" aria-label="Filter">
-                          <SlidersHorizontal className="h-4 w-4" />
-                          <span className="text-[10px] font-body uppercase tracking-wider">Filter</span>
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[hsl(var(--gold))] bg-background shadow-sm hover:shadow-md text-foreground transition-all duration-300 relative" aria-label="Filter">
+                          <SlidersHorizontal className="h-3.5 w-3.5" />
+                          <span className="text-[10px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
                           {selectedCategory && (
                             <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
                               1
@@ -701,14 +701,14 @@ const Collectibles = () => {
                       </PopoverContent>
                     </Popover>
                     </div>
-                    <div className="relative flex-1 sm:flex-none sm:w-56 order-last md:order-first">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
+                    <div className="relative w-20 sm:flex-none sm:w-56 order-last md:order-first">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                       <Input
                         type="text"
                         placeholder="Search by Designer..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-8 md:pl-9 pr-7 md:pr-8 h-7 md:h-9 text-xs md:text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
+                        className="pl-6 md:pl-9 pr-6 md:pr-8 h-6 md:h-9 text-[10px] md:text-sm bg-background/90 backdrop-blur-md border-border/40 rounded-full focus:border-primary/60 font-body"
                       />
                       {searchQuery && (
                         <button
