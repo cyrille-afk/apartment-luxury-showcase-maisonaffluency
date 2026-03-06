@@ -126,27 +126,11 @@
       #root { min-height: 100vh; }
       /* FOUC guard: hide React content until main CSS loads (prevents raw text flash on scroll-restored refresh) */
       html:not(.css-ready) #root > :not(.hero-skeleton) { visibility: hidden; }
-      /* Hide skeleton text to prevent raw text flash */
-      .hero-skeleton .text { visibility: hidden; }
-    </style>
-    <!-- Fallback: ensure css-ready is added even if onload races or in dev mode -->
-    <script>
-      if (document.documentElement.className.indexOf('css-ready') === -1) {
-        // In dev mode, CSS is injected via JS — mark ready after a tick
-        if (location.port || location.hostname === 'localhost' || location.hostname.includes('lovable')) {
-          document.documentElement.classList.add('css-ready');
-        } else {
-          // Production fallback: if css-ready not set after 2s, force it
-          setTimeout(function(){ document.documentElement.classList.add('css-ready'); }, 2000);
-        }
-      }
-    </script>
       /* Inline hero skeleton — visible BEFORE React boots (fixes FCP) */
       .hero-skeleton { position: relative; height: 100vh; width: 100%; overflow: hidden; background: #1a1a1a url('https://res.cloudinary.com/dif1oamtj/image/upload/w_20,c_fill,q_auto:low,e_blur:1000,f_webp/AffluencySG_194-22.jpg_macpwj') center/cover no-repeat; }
       .hero-skeleton img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
       .hero-skeleton .overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent, rgba(0,0,0,0.2)); }
-      .hero-skeleton .text { position: absolute; z-index: 1; left: 16px; right: 16px; top: 50%; font-family: 'Playfair Display', serif; }
-      @media (min-width: 768px) { .hero-skeleton .text { left: 48px; top: 18%; } .hero-skeleton img { height: 120%; object-position: 50% 0%; } }
+      @media (min-width: 768px) { .hero-skeleton img { height: 120%; object-position: 50% 0%; } }
 
       /* Self-hosted fonts — cached 1 year via _headers */
       @font-face { font-family: 'Inter'; font-style: normal; font-weight: 300; font-display: swap; src: url('/fonts/Inter-300.woff2') format('woff2'); }
@@ -156,6 +140,16 @@
       @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/PlayfairDisplay-600.woff2') format('woff2'); }
       @font-face { font-family: 'Cinzel'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/Cinzel-Bold.woff2') format('woff2'); }
     </style>
+    <!-- Fallback: ensure css-ready is added even if onload races or in dev mode -->
+    <script>
+      if (document.documentElement.className.indexOf('css-ready') === -1) {
+        if (location.port || location.hostname === 'localhost' || location.hostname.includes('lovable')) {
+          document.documentElement.classList.add('css-ready');
+        } else {
+          setTimeout(function(){ document.documentElement.classList.add('css-ready'); }, 2000);
+        }
+      }
+    </script>
 
     <!-- Google Analytics - deferred to not block LCP -->
     <script>
@@ -190,11 +184,6 @@
           decoding="sync"
         />
         <div class="overlay"></div>
-        <div class="text">
-          <h1 style="color:white; font-size:1.875rem; line-height:1.2; margin:0;">
-            Discover World Masters in Furniture &amp; Collectible Design
-          </h1>
-        </div>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
