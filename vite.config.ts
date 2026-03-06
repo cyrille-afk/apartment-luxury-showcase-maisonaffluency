@@ -17,7 +17,7 @@ function optimizeHtmlPlugin(): Plugin {
       // 1. Convert render-blocking CSS to async preload
       html = html.replace(
         /<link rel="stylesheet" crossorigin href="(\/assets\/[^"]+\.css)">/g,
-        '<link rel="preload" as="style" href="$1" onload="this.onload=null;this.rel=\'stylesheet\'">' +
+        '<link rel="preload" as="style" href="$1" onload="this.onload=null;this.rel=\'stylesheet\';document.documentElement.classList.add(\'css-ready\')">' +
         '<noscript><link rel="stylesheet" href="$1"></noscript>'
       );
 
