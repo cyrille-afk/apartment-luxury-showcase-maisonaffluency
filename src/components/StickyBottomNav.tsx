@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Image, Users, Palette, Gem, Building2, Mail } from "lucide-react";
+import { Image, Users, Palette, Gem, Building2, Briefcase } from "lucide-react";
 import { scrollToSection } from "@/lib/scrollToSection";
 
 const navItems = [
@@ -8,7 +8,7 @@ const navItems = [
   { id: "designers", label: "Designers", icon: Palette },
   { id: "collectibles", label: "Collectibles", icon: Gem },
   { id: "brands", label: "Ateliers", icon: Building2 },
-  { id: "contact", label: "Contact", icon: Mail },
+  { id: "details", label: "Trade", icon: Briefcase },
 ];
 
 const SCROLL_THRESHOLD = 300;
@@ -71,7 +71,7 @@ const StickyBottomNav = () => {
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.06 * index, duration: 0.35, ease: "easeOut" }}
-                    onClick={() => id === "contact" ? window.location.href = "mailto:concierge@myaffluency.com" : scrollTo(id)}
+                    onClick={() => scrollTo(id)}
                     className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors duration-200 touch-manipulation min-w-[3.5rem] ${
                       isActive
                         ? "text-[hsl(var(--accent))]"
