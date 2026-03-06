@@ -2116,10 +2116,12 @@ const FeaturedDesigners = () => {
     window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'designers' } }));
   }, []);
 
-  const setSelectedCategory = useCallback((cat: string | null) => {
+  const setSelectedCategory = useCallback((cat: string | null, skipBroadcast?: boolean) => {
     setSelectedCategoryRaw(cat);
     setSelectedSubcategoryRaw(null);
-    broadcastFilter(cat, null);
+    if (!skipBroadcast) {
+      broadcastFilter(cat, null);
+    }
   }, [broadcastFilter]);
 
   const setSelectedSubcategory = useCallback((sub: string | null) => {
@@ -2386,7 +2388,12 @@ const FeaturedDesigners = () => {
             </div>
             <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
               <div className="md:hidden order-first">
-                <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+                <Popover open={filterOpen} onOpenChange={(open) => {
+                          setFilterOpen(open);
+                          if (!open && selectedCategory) {
+                            broadcastFilter(selectedCategory, selectedSubcategory);
+                          }
+                        }}>
                   <PopoverTrigger asChild>
                     <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[hsl(var(--gold))] bg-background shadow-sm hover:shadow-md text-foreground transition-all duration-300 relative" aria-label="Filter">
                       <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -2423,9 +2430,9 @@ const FeaturedDesigners = () => {
                               checked={selectedCategory === category}
                               onCheckedChange={() => {
                                 if (selectedCategory === category) {
-                                  setSelectedCategory(null);
+                                  setSelectedCategory(null, true);
                                 } else {
-                                  setSelectedCategory(category);
+                                  setSelectedCategory(category, true);
                                 }
                               }}
                             />
