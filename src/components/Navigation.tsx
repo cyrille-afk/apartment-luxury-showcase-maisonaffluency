@@ -251,7 +251,10 @@ const Navigation = () => {
                   style={{ animationDelay: `${leftNavItems.length * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <p className="font-body text-[11px] uppercase tracking-[0.25em] text-muted-foreground text-center font-semibold flex-1">All Categories</p>
+                    <p className="font-body text-[11px] uppercase tracking-[0.25em] text-[hsl(var(--accent))] text-center font-semibold flex-1 flex items-center justify-center gap-1.5">
+                      <LayoutGrid className="h-3 w-3" />
+                      All Categories
+                    </p>
                     <button
                       onClick={() => {
                         window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
