@@ -789,8 +789,8 @@ const Gallery = () => {
                </div>
 
                {/* Previous button */}
-               <button onClick={goToPrevious} className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Previous image">
-                 <ChevronLeft className="h-8 w-8 text-white" />
+               <button onClick={goToPrevious} className="hidden md:flex absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-50 text-white/50 hover:text-white transition-colors" aria-label="Previous image">
+                 <ChevronLeft className="h-8 w-8" />
                </button>
 
                {/* Image container */}
@@ -847,8 +847,8 @@ const Gallery = () => {
                 </ExpandedScrollContainer>
 
                {/* Next button */}
-               <button onClick={goToNext} className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-background/20 hover:bg-background/40 rounded-full transition-colors" aria-label="Next image">
-                 <ChevronRight className="h-8 w-8 text-white" />
+               <button onClick={goToNext} className="hidden md:flex absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-50 text-white/50 hover:text-white transition-colors" aria-label="Next image">
+                 <ChevronRight className="h-8 w-8" />
                </button>
              </div>
            )}
