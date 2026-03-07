@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
-import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, Gem, Maximize2, Minimize2, Share2, FileDown } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, Gem, Maximize2, Minimize2, Share2, FileDown, MessageSquareQuote } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -2594,10 +2594,19 @@ const BrandsAteliers = () => {
                           </div>
                         )}
 
-                        <p className="text-xs text-white/40 font-body mt-4">
-                          For further details, please contact{" "}
-                          <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/80 transition-colors">concierge@myaffluency.com</a>
-                        </p>
+                        <div className="hidden md:flex justify-end w-full mt-4">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPicksLightboxOpen(false);
+                              setTimeout(() => scrollToSection("contact"), 300);
+                            }}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-[10px] font-bold uppercase tracking-[0.12em] hover:bg-white/25 transition-all duration-300 whitespace-nowrap"
+                          >
+                            <MessageSquareQuote className="h-3.5 w-3.5" />
+                            Request a Quote
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
