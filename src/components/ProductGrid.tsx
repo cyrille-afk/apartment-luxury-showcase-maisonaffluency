@@ -522,16 +522,29 @@ function singularizeSub(s: string): string {
                         {currentItem.pick.dimensions.replace(/\n/g, " · ")}
                       </p>
                     )}
-                    <button
-                      onClick={() => {
-                        setLightboxOpen(false);
-                        setIsZoomed(false);
-                        handleNavigateToDesigner(currentItem);
-                      }}
-                      className="mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white/80 underline underline-offset-4 transition-colors"
-                    >
-                      View {currentItem.designerName}'s Profile
-                    </button>
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-3 mt-4">
+                      <button
+                        onClick={() => {
+                          setLightboxOpen(false);
+                          setIsZoomed(false);
+                          handleNavigateToDesigner(currentItem);
+                        }}
+                        className="font-body text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white/80 underline underline-offset-4 transition-colors"
+                      >
+                        View {currentItem.designerName}'s Profile
+                      </button>
+                      <button
+                        onClick={() => {
+                          setLightboxOpen(false);
+                          setIsZoomed(false);
+                          setTimeout(() => scrollToSection("contact"), 300);
+                        }}
+                        className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-xs font-bold uppercase tracking-[0.15em] hover:bg-white/25 transition-all duration-300"
+                      >
+                        <MessageSquareQuote className="h-3.5 w-3.5" />
+                        Request a Quote
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
