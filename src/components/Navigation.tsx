@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Fragment } from "react";
-import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail } from "lucide-react";
+import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
@@ -426,12 +426,13 @@ const Navigation = () => {
                   <button
                     onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
                     className={cn(
-                      "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1 whitespace-nowrap outline-none relative group",
+                      "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-[hsl(var(--accent))]",
                       megaMenuOpen
-                        ? "text-[hsl(var(--accent))] font-medium"
-                        : "text-foreground/70 hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
+                        ? "font-medium"
+                        : "hover:[text-shadow:0_0_10px_hsl(var(--accent)/0.4)]"
                     )}
                   >
+                    <LayoutGrid className="h-3.5 w-3.5" />
                     All Categories
                     <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
                     <span className={cn(
