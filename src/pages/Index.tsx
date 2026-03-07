@@ -359,7 +359,7 @@ const Index = () => {
               </Suspense>
             </section>
             <Suspense fallback={null}>
-              <ProductGrid />
+              <ProductGrid sectionScope="designers" />
             </Suspense>
             <section id="designers" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
               <Suspense fallback={<SectionFallback />}>
