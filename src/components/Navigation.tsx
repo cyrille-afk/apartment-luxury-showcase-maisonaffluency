@@ -369,8 +369,9 @@ const Navigation = () => {
                 <button 
                   key={item.href} 
                   onClick={() => handleNavClick(item.href)} 
-                  className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap relative group text-foreground hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
+                  className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap relative group text-foreground hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)] flex items-center gap-1.5"
                 >
+                  <item.icon className="h-3.5 w-3.5 text-[hsl(var(--accent))]" strokeWidth={1.5} />
                   {item.label}
                   <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
                 </button>
