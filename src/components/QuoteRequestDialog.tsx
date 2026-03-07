@@ -83,13 +83,31 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
           .join("\n"),
       };
 
-      const { error } = await supabase.functions.invoke("send-inquiry", { body });
+      // Send to backend (fire-and-forget, don't block mailto)
+      supabase.functions.invoke("send-inquiry", { body }).catch(() => {});
 
-      if (error) throw error;
+      // Open mailto with form data
+      const subject = encodeURIComponent(
+        `Quote Request${productName ? ` – ${productName}` : ''}${designerName ? ` by ${designerName}` : ''}`
+      );
+      const mailBody = encodeURIComponent(
+        [
+          `Name: ${form.firstName} ${form.lastName}`,
+          `Email: ${form.email}`,
+          `Phone: ${form.phone}`,
+          `Country: ${form.country}`,
+          form.city ? `City: ${form.city}` : '',
+          `Shipping: ${form.shipping === "white-glove" ? "White Glove Delivery" : form.shipping === "front-door" ? "Front Door Delivery" : "Not Needed"}`,
+          productName ? `Product: ${productName}` : '',
+          designerName ? `Designer: ${designerName}` : '',
+          form.message ? `\nMessage: ${form.message}` : '',
+        ].filter(Boolean).join('\n')
+      );
+      window.location.href = `mailto:concierge@myaffluency.com?subject=${subject}&body=${mailBody}`;
 
       toast({
         title: "Quote Request Sent",
-        description: "Our team will get back to you within 24 hours.",
+        description: "Our team will get back to you within a day.",
       });
 
       onOpenChange(false);
@@ -285,31 +303,13 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
               </label>
             </div>
 
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                const subject = encodeURIComponent(
-                  `Quote Request${productName ? ` – ${productName}` : ''}${designerName ? ` by ${designerName}` : ''}`
-                );
-                const bodyParts = [
-                  `Name: ${form.firstName} ${form.lastName}`,
-                  `Email: ${form.email}`,
-                  `Phone: ${form.phone}`,
-                  `Country: ${form.country}`,
-                  form.city ? `City: ${form.city}` : '',
-                  `Shipping: ${form.shipping === "white-glove" ? "White Glove Delivery" : form.shipping === "front-door" ? "Front Door Delivery" : "Not Needed"}`,
-                  productName ? `Product: ${productName}` : '',
-                  designerName ? `Designer: ${designerName}` : '',
-                  form.message ? `\nMessage: ${form.message}` : '',
-                ].filter(Boolean).join('\n');
-                const body = encodeURIComponent(bodyParts);
-                window.location.href = `mailto:concierge@myaffluency.com?subject=${subject}&body=${body}`;
-              }}
-              className="px-10 py-4 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300 whitespace-nowrap text-center cursor-pointer"
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-10 py-4 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300 whitespace-nowrap text-center cursor-pointer disabled:opacity-50"
             >
-              Submit Inquiry
-            </a>
+              {isSubmitting ? "Sending..." : "Submit Inquiry"}
+            </button>
           </div>
         </form>
       </DialogContent>
