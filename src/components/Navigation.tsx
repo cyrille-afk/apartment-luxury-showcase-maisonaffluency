@@ -452,7 +452,7 @@ const Navigation = () => {
           {megaMenuOpen && (
             <div
               ref={megaMenuRef}
-              className="w-full border-t border-border/30 bg-background py-4 animate-in slide-in-from-top-1 duration-200"
+              className="w-full border-t border-border/30 bg-background shadow-[0_8px_30px_rgba(0,0,0,0.08)] py-4 animate-in slide-in-from-top-1 duration-200"
             >
               <div className="flex justify-center gap-8 lg:gap-12 relative">
                 {CATEGORY_ORDER.map(cat => (
