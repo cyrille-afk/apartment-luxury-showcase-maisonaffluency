@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Fragment } from "react";
-import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid } from "lucide-react";
+import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Building2, Briefcase } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
@@ -23,26 +23,31 @@ const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quali
 const leftNavItems = [{
   label: "Gallery",
   mobileLabel: "Gallery",
-  href: "#overview"
+  href: "#overview",
+  icon: Image,
 }, {
   label: "Designers",
   mobileLabel: "Designers & Makers",
   mobileSubtitle: "in situ",
-  href: "#designers"
+  href: "#designers",
+  icon: Palette,
 }, {
   label: "Collectible Design",
   mobileLabel: "Collectible Design",
   mobileSubtitle: "in situ",
-  href: "#collectibles"
+  href: "#collectibles",
+  icon: Gem,
 }, {
   label: "Ateliers",
   mobileLabel: "Ateliers & Partners",
-  href: "#brands"
+  href: "#brands",
+  icon: Building2,
 }];
 
 const rightNavItems = [{
   label: "Trade Program",
-  href: "#details"
+  href: "#details",
+  icon: Briefcase,
 }];
 
 const contactOptions = [
