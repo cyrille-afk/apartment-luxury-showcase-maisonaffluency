@@ -412,25 +412,8 @@ function singularizeSub(s: string): string {
                       <X className="h-5 w-5" />
                     </button>
 
-                    {/* Desktop navigation arrows */}
-                    {lightboxIndex > 0 && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}
-                        className="hidden md:flex absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-30 text-white/50 hover:text-white transition-colors"
-                        aria-label="Previous image"
-                      >
-                        <ChevronLeft size={32} />
-                      </button>
-                    )}
-                    {lightboxIndex < filtered.length - 1 && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}
-                        className="hidden md:flex absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-30 text-white/50 hover:text-white transition-colors"
-                        aria-label="Next image"
-                      >
-                        <ChevronRight size={32} />
-                      </button>
-                    )}
+
+
 
                     {/* PDF download */}
                     {currentItem.pick.pdfUrl && (
@@ -540,6 +523,25 @@ function singularizeSub(s: string): string {
                   </div>
                 )}
               </div>
+              {/* Desktop navigation arrows — at screen edges */}
+              {lightboxIndex > 0 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}
+                  className="hidden md:flex absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-30 text-white/50 hover:text-white transition-colors"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft size={32} />
+                </button>
+              )}
+              {lightboxIndex < filtered.length - 1 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}
+                  className="hidden md:flex absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-30 text-white/50 hover:text-white transition-colors"
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={32} />
+                </button>
+              )}
             </div>
             );
           })()}
