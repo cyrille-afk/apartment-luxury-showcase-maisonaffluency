@@ -359,18 +359,24 @@ const Index = () => {
               </Suspense>
             </section>
             <Suspense fallback={null}>
-              <ProductGrid />
+              <ProductGrid sectionScope="designers" />
             </Suspense>
             <section id="designers" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
               <Suspense fallback={<SectionFallback />}>
                 <FeaturedDesigners />
               </Suspense>
             </section>
+            <Suspense fallback={null}>
+              <ProductGrid sectionScope="collectibles" />
+            </Suspense>
             <section id="collectibles" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
               <Suspense fallback={<SectionFallback />}>
                 <Collectibles />
               </Suspense>
             </section>
+            <Suspense fallback={null}>
+              <ProductGrid sectionScope="ateliers" />
+            </Suspense>
             <section id="brands" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
               <Suspense fallback={<SectionFallback />}>
                 <BrandsAteliers />
