@@ -418,11 +418,26 @@ function singularizeSub(s: string): string {
                     {/* Desktop close button — bottom-right outside */}
                     <button
                       onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
-                      className="hidden md:flex absolute bottom-2 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
+                      className="hidden md:flex absolute bottom-14 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
                       aria-label="Close lightbox"
                     >
                       <X className="h-5 w-5" />
                     </button>
+
+                    {/* Desktop Request a Quote — bottom-right outside, below close */}
+                    {!isZoomed && (
+                      <button
+                        onClick={() => {
+                          setLightboxOpen(false);
+                          setIsZoomed(false);
+                          setTimeout(() => scrollToSection("contact"), 300);
+                        }}
+                        className="hidden md:flex absolute bottom-2 -right-[4.5rem] lg:-right-[5.5rem] items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-[10px] font-bold uppercase tracking-[0.12em] hover:bg-white/25 transition-all duration-300 z-20 whitespace-nowrap"
+                      >
+                        <MessageSquareQuote className="h-3.5 w-3.5" />
+                        Quote
+                      </button>
+                    )}
 
 
 
