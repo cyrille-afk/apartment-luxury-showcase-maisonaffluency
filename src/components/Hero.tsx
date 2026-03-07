@@ -30,7 +30,7 @@ const Hero = () => {
       </div>
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
-      <div className="relative z-10 h-full px-4 pb-32 pt-[34%] md:px-12 md:pb-20 md:pt-[22%] lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
+      <div className="relative z-10 h-full px-4 pb-32 pt-[34%] md:px-12 md:pb-20 md:pt-[28%] lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <div className="max-w-4xl md:text-left hero-fade-in">
           <p className="mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-cream/90 font-extrabold font-sans text-sm md:text-xl lg:text-2xl hero-fade-in-delayed-1">
           </p>
