@@ -251,8 +251,8 @@ const Navigation = () => {
                   style={{ animationDelay: `${leftNavItems.length * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <p className="font-body text-[11px] uppercase tracking-[0.25em] text-[hsl(var(--accent))] text-center font-semibold flex-1 flex items-center justify-center gap-1.5">
-                      <LayoutGrid className="h-3 w-3" />
+                    <p className="font-body text-[11px] uppercase tracking-[0.25em] text-muted-foreground text-center font-semibold flex-1 flex items-center justify-center gap-1.5">
+                      <LayoutGrid className="h-3 w-3 text-[hsl(var(--accent))]" />
                       All Categories
                     </p>
                     <button
@@ -429,13 +429,13 @@ const Navigation = () => {
                   <button
                     onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
                     className={cn(
-                      "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-[hsl(var(--accent))]",
+                      "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group",
                       megaMenuOpen
-                        ? "font-medium"
-                        : "hover:[text-shadow:0_0_10px_hsl(var(--accent)/0.4)]"
+                        ? "text-[hsl(var(--accent))] font-medium"
+                        : "text-foreground/70 hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
                     )}
                   >
-                    <LayoutGrid className="h-3.5 w-3.5" />
+                    <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
                     All Categories
                     <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
                     <span className={cn(
