@@ -287,7 +287,7 @@ function singularizeSub(s: string): string {
               className="group cursor-pointer"
               onClick={() => handleCardClick(item, idx)}
             >
-              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#f0eeeb] mb-3">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#f0eeeb] mb-3 flex items-center justify-center">
                 {(() => {
                   const tags: string[] = item.pick.tags || [];
                   const specialTags = tags.filter(t => /couture|edition|limited|re-edition/i.test(t));
@@ -304,7 +304,7 @@ function singularizeSub(s: string): string {
                 <img
                   src={item.pick.image}
                   alt={item.pick.title}
-                  className="w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+                  className="max-w-[90%] max-h-[90%] object-contain transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
