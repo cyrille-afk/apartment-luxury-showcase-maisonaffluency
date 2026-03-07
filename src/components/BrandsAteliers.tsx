@@ -2600,8 +2600,7 @@ const BrandsAteliers = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back();
-                              setTimeout(() => scrollToSection("contact"), 300);
+                              setQuoteOpen(true);
                             }}
                             className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-[10px] font-bold uppercase tracking-[0.12em] hover:bg-white/25 transition-all duration-300 whitespace-nowrap"
                           >
