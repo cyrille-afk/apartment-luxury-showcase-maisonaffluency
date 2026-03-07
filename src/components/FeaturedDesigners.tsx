@@ -3261,6 +3261,12 @@ const FeaturedDesigners = () => {
           </DialogContent>
         </Dialog>
       </div>
+      <QuoteRequestDialog
+        open={quoteOpen}
+        onOpenChange={setQuoteOpen}
+        productName={curatorPicksDesigner?.curatorPicks[curatorPickIndex]?.title}
+        designerName={curatorPicksDesigner?.name}
+      />
     </section>
   );
 };

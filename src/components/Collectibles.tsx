@@ -1391,6 +1391,12 @@ const Collectibles = () => {
           )}
         </DialogContent>
       </Dialog>
+    <QuoteRequestDialog
+      open={quoteOpen}
+      onOpenChange={setQuoteOpen}
+      productName={curatorPicksDesigner?.curatorPicks[curatorPickIndex]?.title}
+      designerName={curatorPicksDesigner?.name}
+    />
     </>
   );
 };

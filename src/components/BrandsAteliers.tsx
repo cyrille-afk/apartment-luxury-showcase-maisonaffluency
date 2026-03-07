@@ -2681,6 +2681,12 @@ const BrandsAteliers = () => {
           </DialogContent>
         </Dialog>
       </div>
+      <QuoteRequestDialog
+        open={quoteOpen}
+        onOpenChange={setQuoteOpen}
+        productName={picksDesignerName ? picksDesigner?.curatorPicks[picksIndex]?.title : undefined}
+        designerName={picksDesignerName || undefined}
+      />
     </section>
   );
 };
