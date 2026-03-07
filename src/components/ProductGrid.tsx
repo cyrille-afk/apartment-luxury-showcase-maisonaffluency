@@ -115,7 +115,14 @@ const SECTION_LABELS: Record<string, string> = {
   ateliers: "Ateliers & Partners",
 };
 
-const ProductGrid = () => {
+/** Map filterSource values to sectionScope values */
+const SOURCE_TO_SCOPE: Record<string, string> = {
+  designers: "designers",
+  collectibles: "collectibles",
+  brands: "ateliers",
+};
+
+const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
@@ -243,6 +250,10 @@ function singularizeSub(s: string): string {
       setIsZoomed(false);
     }
   }, [lightboxIndex, filtered]);
+
+  // If scoped, only render when the filter source matches this instance
+  const activeScope = filterSource ? (SOURCE_TO_SCOPE[filterSource] || "designers") : null;
+  if (sectionScope && activeScope !== sectionScope) return null;
 
   if (!isActive) return null;
 
