@@ -304,7 +304,7 @@ function singularizeSub(s: string): string {
                 <img
                   src={item.pick.image}
                   alt={item.pick.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
