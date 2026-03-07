@@ -1311,7 +1311,7 @@ const Collectibles = () => {
 
                 {/* Desktop Request a Quote — outside image, below-right on black frame */}
                 {!isZoomed && (
-                  <div className="hidden md:flex justify-end w-full mt-2">
+                  <div className="flex justify-end w-full mt-2">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
