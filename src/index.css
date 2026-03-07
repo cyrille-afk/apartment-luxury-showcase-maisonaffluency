@@ -26,7 +26,7 @@ All colors MUST be HSL.
     --muted: 32 15% 90%;
     --muted-foreground: 168 10% 38%;
 
-    --accent: 38 65% 60%;
+    --accent: 36 40% 65%;
     --accent-foreground: 168 15% 15%;
 
     --destructive: 0 84.2% 60.2%;
@@ -44,7 +44,7 @@ All colors MUST be HSL.
     --jade-soft: 168 25% 85%;
     --terracotta: 15 70% 58%;
     --terracotta-light: 15 60% 70%;
-    --gold: 38 65% 60%;
+    --gold: 36 40% 65%;
     --cream: 32 20% 97%;
     --warm-gray: 32 10% 50%;
     
@@ -101,7 +101,7 @@ All colors MUST be HSL.
     --muted: 168 10% 20%;
     --muted-foreground: 168 5% 65%;
 
-    --accent: 38 55% 55%;
+    --accent: 36 38% 60%;
     --accent-foreground: 168 15% 12%;
 
     --destructive: 0 62.8% 40%;
@@ -116,7 +116,7 @@ All colors MUST be HSL.
     --jade-soft: 168 20% 25%;
     --terracotta: 15 65% 55%;
     --terracotta-light: 15 55% 65%;
-    --gold: 38 65% 62%;
+    --gold: 36 38% 60%;
     --cream: 32 15% 90%;
     --warm-gray: 32 8% 60%;
 
