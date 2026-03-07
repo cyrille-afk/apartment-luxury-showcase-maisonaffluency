@@ -403,42 +403,45 @@ const Navigation = () => {
           </div>
 
           <div className="flex items-center gap-8 lg:gap-14 pb-3">
-            {leftNavItems.map((item) => (
-              <button 
-                key={item.href} 
-                onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
-                className={cn(
-                  "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap",
-                  activeSection === item.href 
-                    ? "text-[hsl(var(--accent))] font-medium"
-                    : "text-foreground/70 hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
-                )}
-              >
-                {item.label}
-                <span className={cn(
-                  "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
-                  activeSection === item.href ? "w-full" : "w-0 group-hover:w-full"
-                )} />
-              </button>
-            ))}
+            {leftNavItems.map((item, index) => (
+              <React.Fragment key={item.href}>
+                <button 
+                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
+                  className={cn(
+                    "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap",
+                    activeSection === item.href 
+                      ? "text-[hsl(var(--accent))] font-medium"
+                      : "text-foreground/70 hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
+                  )}
+                >
+                  {item.label}
+                  <span className={cn(
+                    "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
+                    activeSection === item.href ? "w-full" : "w-0 group-hover:w-full"
+                  )} />
+                </button>
 
-            {/* Categories mega menu trigger */}
-            <button
-              onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
-              className={cn(
-                "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1 whitespace-nowrap outline-none relative group",
-                megaMenuOpen
-                  ? "text-[hsl(var(--accent))] font-medium"
-                  : "text-foreground/70 hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
-              )}
-            >
-              All Categories
-              <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
-              <span className={cn(
-                "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
-                megaMenuOpen ? "w-full" : "w-0 group-hover:w-full"
-              )} />
-            </button>
+                {/* Insert All Categories after Gallery (index 0) */}
+                {index === 0 && (
+                  <button
+                    onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
+                    className={cn(
+                      "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1 whitespace-nowrap outline-none relative group",
+                      megaMenuOpen
+                        ? "text-[hsl(var(--accent))] font-medium"
+                        : "text-foreground/70 hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
+                    )}
+                  >
+                    All Categories
+                    <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
+                    <span className={cn(
+                      "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
+                      megaMenuOpen ? "w-full" : "w-0 group-hover:w-full"
+                    )} />
+                  </button>
+                )}
+              </React.Fragment>
+            ))}
           </div>
 
           {/* Horizontal mega menu */}
