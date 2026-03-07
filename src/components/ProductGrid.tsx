@@ -287,7 +287,7 @@ function singularizeSub(s: string): string {
               className="group cursor-pointer"
               onClick={() => handleCardClick(item, idx)}
             >
-              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-muted/30 mb-3">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#f0eeeb] mb-3">
                 {(() => {
                   const tags: string[] = item.pick.tags || [];
                   const specialTags = tags.filter(t => /couture|edition|limited|re-edition/i.test(t));
