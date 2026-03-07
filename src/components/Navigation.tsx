@@ -434,10 +434,8 @@ const Navigation = () => {
                   <button
                     onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
                     className={cn(
-                      "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group",
-                      megaMenuOpen
-                        ? "text-[hsl(var(--accent))] font-medium"
-                        : "text-foreground hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
+                      "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-foreground",
+                      megaMenuOpen && "font-medium"
                     )}
                   >
                     <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
