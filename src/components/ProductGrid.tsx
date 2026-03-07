@@ -303,7 +303,7 @@ function singularizeSub(s: string): string {
                 })()}
                 <img
                   src={item.pick.image}
-                  alt={item.pick.title}
+                  alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
                   className="max-w-[90%] max-h-[90%] object-contain transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
