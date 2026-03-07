@@ -2456,22 +2456,6 @@ const BrandsAteliers = () => {
                         >
                           <X className="h-5 w-5" />
                         </button>
-                        {/* Request a Quote — inside image, bottom-right, above PDF */}
-                        {!picksZoomed && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setQuoteOpen(true);
-                            }}
-                            className={`absolute ${(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl ? 'bottom-12 md:bottom-14' : 'bottom-2'} right-2 z-10 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer`}
-                            aria-label="Request a Quote"
-                          >
-                            <MessageSquareQuote size={14} className="md:hidden" />
-                            <MessageSquareQuote size={16} className="hidden md:block" />
-                            <span className="text-[10px] md:text-xs font-display font-bold uppercase tracking-[0.08em] leading-none md:hidden">Quote</span>
-                            <span className="text-[10px] md:text-xs font-display font-bold uppercase tracking-[0.08em] leading-none hidden md:inline">Request a Quote</span>
-                          </button>
-                        )}
                         {(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrl && (
                           <button
                             className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
@@ -2512,15 +2496,30 @@ const BrandsAteliers = () => {
                       </div>
                     </div>
 
-                    {/* Mobile close button — outside, below-left of image */}
+                    {/* Outside image: mobile close (left) + quote button (right) */}
                     {!picksZoomed && (
-                      <div className="md:hidden flex justify-start w-full mt-2">
+                      <div className="flex justify-between items-center w-full mt-2">
+                        <div className="md:hidden">
+                          <button
+                            onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
+                            className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                            aria-label="Close"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
                         <button
-                          onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
-                          className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
-                          aria-label="Close"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuoteOpen(true);
+                          }}
+                          className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto"
+                          aria-label="Request a Quote"
                         >
-                          <X size={16} />
+                          <MessageSquareQuote size={14} className="md:hidden" />
+                          <MessageSquareQuote size={16} className="hidden md:block" />
+                          <span className="text-[10px] md:text-xs font-display font-bold uppercase tracking-[0.08em] leading-none md:hidden">Quote</span>
+                          <span className="text-[10px] md:text-xs font-display font-bold uppercase tracking-[0.08em] leading-none hidden md:inline">Request a Quote</span>
                         </button>
                       </div>
                     )}
