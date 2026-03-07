@@ -418,34 +418,62 @@ function singularizeSub(s: string): string {
                     {/* Desktop close button — bottom-right outside */}
                     <button
                       onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
-                      className="hidden md:flex absolute bottom-14 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
+                      className="hidden md:flex absolute bottom-2 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
                       aria-label="Close lightbox"
                     >
                       <X className="h-5 w-5" />
                     </button>
 
-                    {/* Desktop Request a Quote — bottom-right outside, below close */}
+                    {/* Desktop: PDF + Quote stacked bottom-right */}
                     {!isZoomed && (
-                      <button
-                        onClick={() => {
-                          setLightboxOpen(false);
-                          setIsZoomed(false);
-                          setTimeout(() => scrollToSection("contact"), 300);
-                        }}
-                        className="hidden md:flex absolute bottom-2 -right-[4.5rem] lg:-right-[5.5rem] items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-[10px] font-bold uppercase tracking-[0.12em] hover:bg-white/25 transition-all duration-300 z-20 whitespace-nowrap"
-                      >
-                        <MessageSquareQuote className="h-3.5 w-3.5" />
-                        Quote
-                      </button>
+                      <div className="hidden md:flex absolute bottom-2 right-2 z-10 flex-col items-end gap-1.5">
+                        {currentItem.pick.pdfUrl && (
+                          <button
+                            className="flex items-center gap-1 px-3 py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
+                            aria-label="Download PDF"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const url = currentItem.pick.pdfUrl as string;
+                              const filename = currentItem.pick.pdfFilename || `${currentItem.pick.title.replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
+                              try {
+                                const res = await fetch(url);
+                                const blob = await res.blob();
+                                const blobUrl = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = blobUrl;
+                                a.download = filename;
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
+                                URL.revokeObjectURL(blobUrl);
+                              } catch {
+                                window.open(url, '_blank');
+                              }
+                            }}
+                          >
+                            <FileDown size={16} className="text-white" />
+                            <span className="text-xs font-medium leading-none text-white">PDF</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLightboxOpen(false);
+                            setIsZoomed(false);
+                            setTimeout(() => scrollToSection("contact"), 300);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-[10px] font-bold uppercase tracking-[0.12em] hover:bg-white/25 transition-all duration-300 whitespace-nowrap"
+                        >
+                          <MessageSquareQuote className="h-3.5 w-3.5" />
+                          Quote
+                        </button>
+                      </div>
                     )}
 
-
-
-
-                    {/* PDF download */}
+                    {/* Mobile-only PDF download */}
                     {currentItem.pick.pdfUrl && (
                       <button
-                        className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
+                        className="md:hidden absolute bottom-2 right-2 z-10 flex items-center gap-1 px-2.5 py-1.5 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
                         aria-label="Download PDF"
                         onClick={async (e) => {
                           e.stopPropagation();
@@ -467,9 +495,8 @@ function singularizeSub(s: string): string {
                           }
                         }}
                       >
-                        <FileDown size={14} className="md:hidden text-white" />
-                        <FileDown size={16} className="hidden md:block text-white" />
-                        <span className="text-[10px] md:text-xs font-medium leading-none text-white">PDF</span>
+                        <FileDown size={14} className="text-white" />
+                        <span className="text-[10px] font-medium leading-none text-white">PDF</span>
                       </button>
                     )}
 
