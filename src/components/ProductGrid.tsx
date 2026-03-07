@@ -416,19 +416,19 @@ function singularizeSub(s: string): string {
                     {lightboxIndex > 0 && (
                       <button
                         onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}
-                        className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                        className="hidden md:flex absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-30 text-white/50 hover:text-white transition-colors"
                         aria-label="Previous image"
                       >
-                        <ChevronLeft className="h-5 w-5" />
+                        <ChevronLeft size={32} />
                       </button>
                     )}
                     {lightboxIndex < filtered.length - 1 && (
                       <button
                         onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}
-                        className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-foreground/85 text-background hover:opacity-90 transition-opacity border border-background/20 shadow-md"
+                        className="hidden md:flex absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-30 text-white/50 hover:text-white transition-colors"
                         aria-label="Next image"
                       >
-                        <ChevronRight className="h-5 w-5" />
+                        <ChevronRight size={32} />
                       </button>
                     )}
 
