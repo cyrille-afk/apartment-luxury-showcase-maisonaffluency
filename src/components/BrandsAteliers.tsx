@@ -1877,6 +1877,7 @@ const BrandsAteliers = () => {
   const [picksDesignerName, setPicksDesignerName] = useState<string | null>(null);
   const [picksIndex, setPicksIndex] = useState(0);
   const [picksZoomed, setPicksZoomed] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const [picksImageLoaded, setPicksImageLoaded] = useState(false);
   const [picksTouchStart, setPicksTouchStart] = useState<number | null>(null);
   const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
