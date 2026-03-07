@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote } from "lucide-react";
+import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
@@ -340,6 +341,7 @@ const Collectibles = () => {
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof collectibleDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
 
@@ -1351,8 +1353,7 @@ const Collectibles = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        closeCuratorPicks();
-                        setTimeout(() => scrollToSection("contact"), 300);
+                        setQuoteOpen(true);
                       }}
                       className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-[10px] font-bold uppercase tracking-[0.12em] hover:bg-white/25 transition-all duration-300 whitespace-nowrap"
                     >
@@ -1390,6 +1391,12 @@ const Collectibles = () => {
           )}
         </DialogContent>
       </Dialog>
+    <QuoteRequestDialog
+      open={quoteOpen}
+      onOpenChange={setQuoteOpen}
+      productName={curatorPicksDesigner?.curatorPicks[curatorPickIndex]?.title}
+      designerName={curatorPicksDesigner?.name}
+    />
     </>
   );
 };

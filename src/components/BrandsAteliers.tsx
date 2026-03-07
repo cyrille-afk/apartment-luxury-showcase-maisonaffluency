@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, Gem, Maximize2, Minimize2, Share2, FileDown, MessageSquareQuote } from "lucide-react";
+import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -1876,6 +1877,7 @@ const BrandsAteliers = () => {
   const [picksDesignerName, setPicksDesignerName] = useState<string | null>(null);
   const [picksIndex, setPicksIndex] = useState(0);
   const [picksZoomed, setPicksZoomed] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const [picksImageLoaded, setPicksImageLoaded] = useState(false);
   const [picksTouchStart, setPicksTouchStart] = useState<number | null>(null);
   const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
@@ -2598,8 +2600,7 @@ const BrandsAteliers = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back();
-                              setTimeout(() => scrollToSection("contact"), 300);
+                              setQuoteOpen(true);
                             }}
                             className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-[10px] font-bold uppercase tracking-[0.12em] hover:bg-white/25 transition-all duration-300 whitespace-nowrap"
                           >
@@ -2680,6 +2681,12 @@ const BrandsAteliers = () => {
           </DialogContent>
         </Dialog>
       </div>
+      <QuoteRequestDialog
+        open={quoteOpen}
+        onOpenChange={setQuoteOpen}
+        productName={picksDesignerName ? picksDesigner?.curatorPicks[picksIndex]?.title : undefined}
+        designerName={picksDesignerName || undefined}
+      />
     </section>
   );
 };
