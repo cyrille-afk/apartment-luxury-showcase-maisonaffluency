@@ -285,13 +285,12 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
               </label>
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-10 py-4 bg-foreground text-background font-body text-sm uppercase tracking-[0.2em] hover:bg-foreground/90 transition-colors disabled:opacity-50 whitespace-nowrap"
+            <a
+              href="mailto:concierge@myaffluency.com"
+              className="px-10 py-4 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300 whitespace-nowrap text-center"
             >
-              {isSubmitting ? "Sending..." : "Submit"}
-            </button>
+              Submit Inquiry
+            </a>
           </div>
         </form>
       </DialogContent>
