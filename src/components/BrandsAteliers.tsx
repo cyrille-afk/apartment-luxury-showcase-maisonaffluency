@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, Gem, Maximize2, Minimize2, Share2, FileDown, MessageSquareQuote } from "lucide-react";
+import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
