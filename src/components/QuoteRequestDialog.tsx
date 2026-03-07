@@ -133,7 +133,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
             Request A Quote Or Customisation
           </h2>
           <p className="font-body text-sm text-muted-foreground text-center mt-2 mb-10">
-            Our team will get back to you within 24 hours maximum
+            Our team will get back to you within a day
           </p>
 
           {/* Row 1: Email, First Name, Last Name, Phone */}
