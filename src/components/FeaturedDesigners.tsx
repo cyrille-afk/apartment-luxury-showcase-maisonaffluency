@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { Instagram, Search, X, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Gem, Maximize2, Minimize2, SlidersHorizontal, FileDown } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Gem, Maximize2, Minimize2, SlidersHorizontal, FileDown, MessageSquareQuote } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -3189,15 +3189,19 @@ const FeaturedDesigners = () => {
                           </div>
                         )}
 
-                        <p className="text-xs text-white/40 font-body mt-4">
-                          For further details, please contact{" "}
-                          <a
-                            href="mailto:concierge@myaffluency.com"
-                            className="underline hover:text-white/70 transition-colors"
+                        <div className="hidden md:flex justify-end w-full mt-4">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCuratorPicksDesigner(null); setCuratorPickIndex(0); setIsZoomed(false);
+                              setTimeout(() => scrollToSection("contact"), 300);
+                            }}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-[10px] font-bold uppercase tracking-[0.12em] hover:bg-white/25 transition-all duration-300 whitespace-nowrap"
                           >
-                            concierge@myaffluency.com
-                          </a>
-                        </p>
+                            <MessageSquareQuote className="h-3.5 w-3.5" />
+                            Request a Quote
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

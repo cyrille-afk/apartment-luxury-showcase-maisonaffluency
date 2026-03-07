@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
-import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal } from "lucide-react";
+import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
+import { scrollToSection } from "@/lib/scrollToSection";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { Input } from "@/components/ui/input";
@@ -1346,12 +1347,19 @@ const Collectibles = () => {
                     </div>
                   )}
 
-                  <p className="mt-6 text-xs text-white font-body italic">
-                    For further details, please contact{" "}
-                    <a href="mailto:concierge@myaffluency.com" className="underline hover:text-white/80 transition-colors">
-                      concierge@myaffluency.com
-                    </a>
-                  </p>
+                  <div className="hidden md:flex justify-end w-full mt-4">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        closeCuratorPicks();
+                        setTimeout(() => scrollToSection("contact"), 300);
+                      }}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-[10px] font-bold uppercase tracking-[0.12em] hover:bg-white/25 transition-all duration-300 whitespace-nowrap"
+                    >
+                      <MessageSquareQuote className="h-3.5 w-3.5" />
+                      Request a Quote
+                    </button>
+                  </div>
                 </div>
               </div>
 
