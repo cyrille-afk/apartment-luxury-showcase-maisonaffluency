@@ -417,10 +417,8 @@ const Navigation = () => {
                 <button 
                   onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
                   className={cn(
-                    "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5",
-                    activeSection === item.href 
-                      ? "text-[hsl(var(--accent))] font-medium"
-                      : "text-foreground hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
+                    "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
+                    activeSection === item.href && "font-medium"
                   )}
                 >
                   <item.icon className="h-3.5 w-3.5 text-[hsl(var(--accent))]" strokeWidth={1.5} />
