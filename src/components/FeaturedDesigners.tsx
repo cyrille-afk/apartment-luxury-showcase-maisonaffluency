@@ -3121,6 +3121,22 @@ const FeaturedDesigners = () => {
                         >
                           <X size={16} />
                         </button>
+                    </div>
+                    )}
+
+                    {/* Desktop Request a Quote — outside image, below-right on black frame */}
+                    {!isZoomed && (
+                      <div className="hidden md:flex justify-end w-full mt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuoteOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-[10px] font-bold uppercase tracking-[0.12em] hover:bg-white/25 transition-all duration-300 whitespace-nowrap"
+                        >
+                          <MessageSquareQuote className="h-3.5 w-3.5" />
+                          Request a Quote
+                        </button>
                       </div>
                     )}
 
@@ -3191,18 +3207,6 @@ const FeaturedDesigners = () => {
                           </div>
                         )}
 
-                        <div className="hidden md:flex justify-end w-full mt-4">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setQuoteOpen(true);
-                            }}
-                            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white font-display text-[10px] font-bold uppercase tracking-[0.12em] hover:bg-white/25 transition-all duration-300 whitespace-nowrap"
-                          >
-                            <MessageSquareQuote className="h-3.5 w-3.5" />
-                            Request a Quote
-                          </button>
-                        </div>
                       </div>
                     )}
                   </div>
