@@ -364,7 +364,7 @@ const Navigation = () => {
                 <button 
                   key={item.href} 
                   onClick={() => handleNavClick(item.href)} 
-                  className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap relative group text-foreground/70 hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
+                  className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap relative group text-foreground hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
                 >
                   {item.label}
                   <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
@@ -385,7 +385,7 @@ const Navigation = () => {
             </div>
             <div className="flex justify-end">
               <DropdownMenu>
-                <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground/70 hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)] flex items-center gap-1 whitespace-nowrap outline-none">
+                <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)] flex items-center gap-1 whitespace-nowrap outline-none">
                   Contact Us
                   <ChevronDown className="h-3 w-3" />
                 </DropdownMenuTrigger>
@@ -414,7 +414,7 @@ const Navigation = () => {
                     "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap",
                     activeSection === item.href 
                       ? "text-[hsl(var(--accent))] font-medium"
-                      : "text-foreground/70 hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
+                      : "text-foreground hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
                   )}
                 >
                   {item.label}
@@ -432,7 +432,7 @@ const Navigation = () => {
                       "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group",
                       megaMenuOpen
                         ? "text-[hsl(var(--accent))] font-medium"
-                        : "text-foreground/70 hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
+                        : "text-foreground hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)]"
                     )}
                   >
                     <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
