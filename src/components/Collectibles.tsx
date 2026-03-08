@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { GALLERY } from "@/constants/galleryIndex";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote } from "lucide-react";
