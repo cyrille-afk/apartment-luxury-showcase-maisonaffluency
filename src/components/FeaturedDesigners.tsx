@@ -648,12 +648,14 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { 
         image: apparatusPick7, 
         title: "Portal",
-        subtitle: "Dining Lamp",
+        subtitle: "Dining Table",
         category: "Furniture",
         tags: ["Furniture", "Table"],
         materials: "Nero Kinatra Marble",
         dimensions: "Ø 137 × H 74 cm",
-        description: "Available in various Marbles, Travertine and Bleached Ash Wood"
+        description: "Available in various Marbles, Travertine and Bleached Ash Wood",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_PORTAL_DINING_TABLE.pdf",
+        pdfFilename: "Apparatus_Studio-Portal_Dining_Table.pdf"
       },
     ],
     links: [
