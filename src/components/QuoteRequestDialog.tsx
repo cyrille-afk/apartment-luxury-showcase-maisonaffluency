@@ -136,16 +136,18 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
       >
         <VisuallyHidden><DialogTitle>Request a Quote</DialogTitle></VisuallyHidden>
 
-        {/* Close button */}
-        <button
-          onClick={() => onOpenChange(false)}
-          className="absolute top-4 right-4 z-10 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Close"
-        >
-          <X className="h-5 w-5" />
-        </button>
+        {/* Close button — sticky so it stays visible when scrolling */}
+        <div className="sticky top-0 z-20 flex justify-end pt-3 pr-3">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-background/80 backdrop-blur-sm rounded-full"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit} className="px-8 md:px-12 py-10 md:py-12">
+        <form onSubmit={handleSubmit} className="px-8 md:px-12 pb-10 md:pb-12 -mt-4">
           {/* Header */}
           <h2 className="font-display text-2xl md:text-3xl text-foreground text-center">
             Request A Quote Or Customisation
