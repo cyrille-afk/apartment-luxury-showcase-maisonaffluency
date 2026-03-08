@@ -638,7 +638,7 @@ const Collectibles = () => {
               </h2>
             </div>
             <p className="font-body text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed mb-4 text-justify">
-              Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance. Presented in situ at our showroom.
+              Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance. All Gallery Featured Collectibles are presented in situ at our gallery.
             </p>
           </motion.div>
 
