@@ -3109,7 +3109,7 @@ const FeaturedDesigners = () => {
 
                       {/* Desktop Quote — stacked under PDF, right-aligned to image */}
                       {!isZoomed && (
-                        <div className="hidden md:flex w-full justify-end mt-2">
+                        <div className="hidden md:flex mt-2 self-end">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
