@@ -270,7 +270,7 @@ const Index = () => {
 
   // Keep exit-intent banner completely out of the critical performance window
   useEffect(() => {
-    const id = setTimeout(() => setShowBanner(true), 30000);
+    const id = setTimeout(() => setShowBanner(true), 12000);
     return () => clearTimeout(id);
   }, []);
 
