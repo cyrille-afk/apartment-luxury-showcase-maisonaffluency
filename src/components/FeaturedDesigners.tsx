@@ -630,7 +630,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Lighting",
         tags: ["Lighting", "Table Lamp"],
         materials: "Brass armature • Pressed glass",
-        dimensions: "H23.5\" × Ø17.25\"",
+        dimensions: "H 60 × Ø 44 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_SIGNAL_Y_TABLE_LAMP.pdf",
         pdfFilename: "Apparatus_Studio-Signal_Y_Table_Lamp.pdf"
       },
