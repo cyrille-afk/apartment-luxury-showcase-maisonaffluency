@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Image, Users, Palette, Gem, Building2, Briefcase } from "lucide-react";
+import { Image, Palette, Gem, Building2, MessageCircle } from "lucide-react";
 import { scrollToSection } from "@/lib/scrollToSection";
+import { trackCTA } from "@/lib/analytics";
 
-const navItems = [
+const WHATSAPP_URL = "https://wa.me/6591393850";
+
+const sectionItems = [
   { id: "gallery", label: "Gallery", icon: Image },
   { id: "designers", label: "Designers", icon: Palette },
   { id: "collectibles", label: "Collectibles", icon: Gem },
   { id: "brands", label: "Ateliers", icon: Building2 },
-  { id: "details", label: "Trade", icon: Briefcase },
 ];
 
 const SCROLL_THRESHOLD = 300;
