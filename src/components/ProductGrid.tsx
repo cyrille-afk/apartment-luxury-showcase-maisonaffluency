@@ -97,6 +97,17 @@ function categoryMatch(pickValue?: string, category?: string): boolean {
   return regex.test(na);
 }
 
+/** Map top-level categories to the set of subcategory tags they contain,
+ *  so "Tables" only matches Table-related subs, not "Table Lamp". */
+const CATEGORY_SUBCATS: Record<string, string[]> = {
+  "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
+  "Tables": ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables", "Centre Tables"],
+  "Storage": ["Bookcases", "Cabinets"],
+  "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
+  "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
+  "Décor": ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
+};
+
 function pickMatchesFilter(pick: CuratorPick, category: string | null, subcategory: string | null): boolean {
   if (!category && !subcategory) return true;
   if (subcategory) {
@@ -108,7 +119,21 @@ function pickMatchesFilter(pick: CuratorPick, category: string | null, subcatego
       (pick.tags && pick.tags.some(t => categoryMatch(t, tag)))
     );
   }
-  return categoryMatch(pick.category, category || undefined) || (pick.tags && pick.tags.some(t => categoryMatch(t, category || undefined))) || false;
+  // Top-level category: match against all its subcategory tags to avoid false positives
+  const subs = CATEGORY_SUBCATS[category!];
+  if (subs) {
+    return subs.some(sub => {
+      const tags = SUB_TAGS[sub] || [sub];
+      return tags.some(tag =>
+        categoryMatch(pick.subcategory, tag) ||
+        categoryMatch(pick.subcategory, sub) ||
+        categoryMatch(pick.category, tag) ||
+        (pick.tags && pick.tags.some(t => categoryMatch(t, tag)))
+      );
+    });
+  }
+  // Fallback: exact category match only (no tag matching to prevent cross-category leaks)
+  return categoryMatch(pick.category, category || undefined) || false;
 }
 
 const SECTION_LABELS: Record<string, string> = {
