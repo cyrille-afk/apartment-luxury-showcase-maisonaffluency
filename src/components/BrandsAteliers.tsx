@@ -625,6 +625,8 @@ const partnerBrands = [
     featured: "Limited Edition Osmosi Series Sculptured Book Cover",
     instagram: "https://instagram.com/emmanuelbabled",
     galleryIndex: GALLERY.PANORAMIC_CITYSCAPE_VIEWS,
+  },
+  {
     id: "eric-schmitt-studio",
     name: "Eric Schmitt Studio",
     category: "Seating",
@@ -634,7 +636,7 @@ const partnerBrands = [
     description: "French designer creating bold sculptural furniture in bronze and iron, each piece a statement of artistic vision and master craftsmanship.",
     featured: "Chairie Dining Chair",
     instagram: "https://instagram.com/studio_eric_schmitt_",
-    galleryIndex: 2, // With Panoramic Cityscape Views
+    galleryIndex: GALLERY.PANORAMIC_CITYSCAPE_VIEWS,
   },
   {
     id: "garnier-linker",
