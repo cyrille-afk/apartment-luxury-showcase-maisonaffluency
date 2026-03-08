@@ -468,7 +468,7 @@ const partnerBrands = [
     description: "New York-based design studio creating refined lighting and furniture that bridges art and function through meticulous craftsmanship and material exploration.",
     featured: "Lantern Table Lamp",
     instagram: "https://instagram.com/apparatusstudio",
-    galleryIndex: 13, // Compact Elegance in A Small Room with Massive Personality
+    galleryIndex: 17, // Compact Elegance in A Small Room with Massive Personality
   },
   {
     id: "bieke-casteleyn",
