@@ -20,9 +20,10 @@ interface CategorySidebarProps {
   onSelect: (category: string | null, subcategory: string | null) => void;
   className?: string;
   itemCounts?: Record<string, number>;
+  sectionLabel?: string;
 }
 
-const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect, className, itemCounts }) => {
+const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect, className, itemCounts, sectionLabel }) => {
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
 
@@ -198,7 +199,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
                               {sub}
                               {itemCounts && itemCounts[sub] !== undefined && isActiveSub && (
                                 <span className="ml-1.5 text-[9px] text-muted-foreground/60 font-normal">
-                                  — {itemCounts[sub]} {itemCounts[sub] === 1 ? 'piece' : 'pieces'}
+                                  — {itemCounts[sub]} {itemCounts[sub] === 1 ? 'piece' : 'pieces'}{sectionLabel ? ` across ${sectionLabel}` : ''}
                                 </span>
                               )}
                             </span>

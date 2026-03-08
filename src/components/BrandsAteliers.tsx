@@ -2286,6 +2286,7 @@ const BrandsAteliers = () => {
                   }
                 }}
                 itemCounts={counts}
+                sectionLabel="all Ateliers"
               />
             );
           })()}
