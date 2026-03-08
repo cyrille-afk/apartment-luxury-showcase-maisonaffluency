@@ -281,6 +281,7 @@ function singularizeSub(s: string): string {
           <div className="flex items-center gap-3">
             {/* Grid columns toggle — desktop only */}
             <div className="hidden md:block">
+              <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
