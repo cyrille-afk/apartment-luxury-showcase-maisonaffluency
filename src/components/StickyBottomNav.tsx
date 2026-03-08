@@ -70,7 +70,7 @@ const StickyBottomNav = () => {
           {/* Backdrop */}
           <div className="bg-card/90 backdrop-blur-xl border-t border-border/30 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
             <div className="flex items-center justify-around px-1 pt-2 pb-[max(3.5rem,calc(env(safe-area-inset-bottom) + 2.75rem))]">
-              {navItems.map(({ id, label, icon: Icon }, index) => {
+              {sectionItems.map(({ id, label, icon: Icon }, index) => {
                 const isActive = activeSection === id;
                 return (
                   <motion.button
@@ -101,6 +101,21 @@ const StickyBottomNav = () => {
                   </motion.button>
                 );
               })}
+              {/* WhatsApp CTA */}
+              <motion.a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.06 * sectionItems.length, duration: 0.35, ease: "easeOut" }}
+                onClick={handleWhatsApp}
+                className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors duration-200 touch-manipulation min-w-[3.5rem] text-green-600 active:text-green-700"
+                aria-label="Contact us via WhatsApp"
+              >
+                <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
+                <span className="text-[10px] leading-tight font-body">WhatsApp</span>
+              </motion.a>
             </div>
           </div>
         </motion.nav>
