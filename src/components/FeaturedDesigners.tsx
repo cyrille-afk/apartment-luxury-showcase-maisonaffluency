@@ -571,7 +571,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       "Apparatus Studio is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
     notableWorks: "Lantern Table Lamp, Metronome Reading Floor Lamp, Sculptural Lighting Series",
     notableWorksLinks: [
-      { text: "Lantern Table Lamp", galleryIndex: 13 },
+      { text: "Lantern Table Lamp", galleryIndex: 17 },
       { text: "Median 3 Surface Alabaster Lights", galleryIndex: 0 },
       { text: "Metronome Reading Floor Lamp", galleryIndex: 10 }
     ],
