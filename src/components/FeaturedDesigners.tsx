@@ -3088,20 +3088,6 @@ const FeaturedDesigners = () => {
                           <span className="text-[10px] md:text-xs font-medium leading-none">PDF</span>
                         </button>
                       )}
-                      {/* Desktop Request a Quote — stacked under PDF, outside image */}
-                      {!isZoomed && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setQuoteOpen(true);
-                          }}
-                          className="hidden md:flex absolute top-full right-2 mt-2 items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer z-20"
-                          aria-label="Request a Quote"
-                        >
-                          <MessageSquareQuote size={16} />
-                          <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
-                        </button>
-                      )}
                       {/* Mobile Maximize / Minimize button — bottom-left */}
                       {!isZoomed ? (
                         <button
@@ -3122,10 +3108,11 @@ const FeaturedDesigners = () => {
                       )}
                     </div>
 
-                    {/* Outside image (mobile only): close (left) + quote button (right) */}
+                    {/* Outside image: controls row */}
                     {!isZoomed && (
-                      <div className="md:hidden flex justify-between items-center w-full mt-2">
-                        <div>
+                      <div className="flex justify-between items-start w-full mt-2">
+                        {/* Mobile close button */}
+                        <div className="md:hidden">
                           <button
                             onClick={() => {
                               setCuratorPicksDesigner(null);
@@ -3139,16 +3126,19 @@ const FeaturedDesigners = () => {
                             <X size={16} />
                           </button>
                         </div>
+                        {/* Quote button — right-aligned, stacked under PDF on desktop */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setQuoteOpen(true);
                           }}
-                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto"
+                          className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto"
                           aria-label="Request a Quote"
                         >
-                          <MessageSquareQuote size={14} />
-                          <span className="text-[10px] font-display font-bold uppercase tracking-[0.08em] leading-none">Quote</span>
+                          <MessageSquareQuote size={14} className="md:hidden" />
+                          <MessageSquareQuote size={16} className="hidden md:block" />
+                          <span className="text-[10px] md:text-xs font-display font-bold uppercase tracking-[0.08em] leading-none md:hidden">Quote</span>
+                          <span className="text-[10px] md:text-xs font-display font-bold uppercase tracking-[0.08em] leading-none hidden md:inline">Request a Quote</span>
                         </button>
                       </div>
                     )}
