@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, FileDown, ChevronLeft, ChevronRight, ArrowUp, Maximize2, Minimize2, MessageSquareQuote } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
 import PinchZoomImage from "./PinchZoomImage";
@@ -281,6 +281,7 @@ function singularizeSub(s: string): string {
           <div className="flex items-center gap-3">
             {/* Grid columns toggle — desktop only */}
             <div className="hidden md:block">
+              <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -310,6 +311,7 @@ function singularizeSub(s: string): string {
                   {gridCols === 3 ? "Display 4" : "Display 3"}
                 </TooltipContent>
               </Tooltip>
+              </TooltipProvider>
             </div>
             <button
               onClick={handleClearFilter}
