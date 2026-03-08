@@ -585,7 +585,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Lighting",
         tags: ["Lighting", "Table Lamp"],
         materials: "Brass armature • Pressed glass shade",
-        dimensions: "H18\" × Ø10\"",
+        dimensions: "70 H × Ø 23 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_LANTERN_TABLE_LAMP.pdf",
         pdfFilename: "Apparatus_Studio-Lantern_Table_Lamp.pdf"
       },
