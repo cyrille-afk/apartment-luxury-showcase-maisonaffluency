@@ -131,7 +131,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         hideClose
-        className="max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 border border-border bg-background [&>button]:hidden"
+        className="max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 border border-border bg-background"
         aria-describedby={undefined}
       >
         <VisuallyHidden><DialogTitle>Request a Quote</DialogTitle></VisuallyHidden>
