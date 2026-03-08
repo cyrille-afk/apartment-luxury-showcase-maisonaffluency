@@ -1298,10 +1298,27 @@ const Collectibles = () => {
                   </div>
                 </div>
 
-                {/* Outside image: mobile close (left) + quote button (right) */}
+                {/* Desktop Quote — stacked under PDF, right-aligned to image */}
                 {!isZoomed && (
-                  <div className="flex justify-between items-center w-full mt-2">
-                    <div className="md:hidden">
+                  <div className="hidden md:flex w-full justify-end mt-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setQuoteOpen(true);
+                      }}
+                      className="flex items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
+                      aria-label="Request a Quote"
+                    >
+                      <MessageSquareQuote size={16} />
+                      <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Mobile: close (left) + quote (right) */}
+                {!isZoomed && (
+                  <div className="md:hidden flex justify-between items-center w-full mt-2">
+                    <div>
                       <button
                         onClick={closeCuratorPicks}
                         className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
@@ -1315,13 +1332,11 @@ const Collectibles = () => {
                         e.stopPropagation();
                         setQuoteOpen(true);
                       }}
-                      className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto"
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto"
                       aria-label="Request a Quote"
                     >
-                      <MessageSquareQuote size={14} className="md:hidden" />
-                      <MessageSquareQuote size={16} className="hidden md:block" />
-                      <span className="text-[10px] md:text-xs font-display font-bold uppercase tracking-[0.08em] leading-none md:hidden">Quote</span>
-                      <span className="text-[10px] md:text-xs font-display font-bold uppercase tracking-[0.08em] leading-none hidden md:inline">Request a Quote</span>
+                      <MessageSquareQuote size={14} />
+                      <span className="text-[10px] font-display font-bold uppercase tracking-[0.08em] leading-none">Quote</span>
                     </button>
                   </div>
                 )}

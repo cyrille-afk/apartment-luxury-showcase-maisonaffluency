@@ -466,20 +466,22 @@ function singularizeSub(s: string): string {
                       {isZoomed ? <Minimize2 size={16} className="text-white" /> : <Maximize2 size={16} className="text-white" />}
                     </button>
 
-                    {/* Desktop Quote — stacked under PDF, outside image */}
+                    {/* Desktop Quote — stacked under PDF, right-aligned to image */}
                     {!isZoomed && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setQuoteProduct({ name: currentItem.pick.title, designer: currentItem.designerName });
-                          setQuoteOpen(true);
-                        }}
-                        className="hidden md:flex mt-2 ml-auto items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
-                        aria-label="Request a Quote"
-                      >
-                        <MessageSquareQuote size={16} />
-                        <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
-                      </button>
+                      <div className="hidden md:flex w-full justify-end mt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuoteProduct({ name: currentItem.pick.title, designer: currentItem.designerName });
+                            setQuoteOpen(true);
+                          }}
+                          className="flex items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
+                          aria-label="Request a Quote"
+                        >
+                          <MessageSquareQuote size={16} />
+                          <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
