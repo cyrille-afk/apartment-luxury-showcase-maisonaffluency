@@ -311,6 +311,7 @@ function singularizeSub(s: string): string {
                   {gridCols === 3 ? "Display 4" : "Display 3"}
                 </TooltipContent>
               </Tooltip>
+              </TooltipProvider>
             </div>
             <button
               onClick={handleClearFilter}
