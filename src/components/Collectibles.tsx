@@ -1196,14 +1196,7 @@ const Collectibles = () => {
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
-              {/* Desktop Close button */}
-              <button 
-                onClick={closeCuratorPicks} 
-                className="hidden md:flex absolute top-4 right-4 z-50 p-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full transition-colors" 
-                aria-label="Close lightbox"
-              >
-                <X className="h-4 w-4 text-white" />
-              </button>
+              {/* Desktop Close button moved inside image container below */}
 
               {/* Previous button */}
               {curatorPicksDesigner.curatorPicks.length > 1 && (
@@ -1280,6 +1273,14 @@ const Collectibles = () => {
                         <ZoomIn size={28} className="text-white/0 group-hover:text-white/70 transition-all duration-500 ease-out drop-shadow-lg" />
                       </div>
                     )}
+                    {/* Desktop Close button — bottom-right (outside) */}
+                    <button
+                      onClick={closeCuratorPicks}
+                      className="hidden md:flex absolute bottom-2 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
+                      aria-label="Close lightbox"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1314,7 +1315,7 @@ const Collectibles = () => {
                         e.stopPropagation();
                         setQuoteOpen(true);
                       }}
-                      className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto"
+                      className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto md:ml-0 md:mx-auto"
                       aria-label="Request a Quote"
                     >
                       <MessageSquareQuote size={14} className="md:hidden" />

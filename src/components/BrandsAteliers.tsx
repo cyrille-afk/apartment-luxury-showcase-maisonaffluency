@@ -2513,7 +2513,7 @@ const BrandsAteliers = () => {
                             e.stopPropagation();
                             setQuoteOpen(true);
                           }}
-                          className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto"
+                          className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto md:ml-0 md:mx-auto"
                           aria-label="Request a Quote"
                         >
                           <MessageSquareQuote size={14} className="md:hidden" />
