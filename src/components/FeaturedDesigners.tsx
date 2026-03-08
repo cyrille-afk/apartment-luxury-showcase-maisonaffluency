@@ -607,7 +607,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Lighting",
         tags: ["Lighting", "Pendant"],
         materials: "Blackened brass • Mold-blown glass",
-        dimensions: "H16\" × Ø6.5\"",
+        dimensions: "Pendant Small: H 30 × W 13 cm · Brass mesh line: Height to order — Pendant Large: H 41 × W 17 cm · Brass mesh line: Height to order",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_LARIAT_PENDANT.pdf",
         pdfFilename: "Apparatus_Studio-Lariat_Pendant.pdf"
       },
