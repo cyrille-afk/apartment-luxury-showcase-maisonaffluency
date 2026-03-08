@@ -41,7 +41,7 @@ const StickyBottomNav = () => {
       { rootMargin: "-30% 0px -60% 0px", threshold: 0 }
     );
 
-    navItems.forEach(({ id }) => {
+    sectionItems.forEach(({ id }) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
@@ -50,6 +50,11 @@ const StickyBottomNav = () => {
   }, []);
 
   const scrollTo = (id: string) => scrollToSection(id);
+
+  const handleWhatsApp = () => {
+    trackCTA.whatsapp("sticky_bottom_nav");
+    window.open(WHATSAPP_URL, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <AnimatePresence>
