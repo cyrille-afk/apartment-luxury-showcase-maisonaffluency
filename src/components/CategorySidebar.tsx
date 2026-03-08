@@ -199,7 +199,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
                               {sub}
                               {itemCounts && itemCounts[sub] !== undefined && isActiveSub && (
                                 <span className="ml-1.5 text-[9px] text-muted-foreground/60 font-normal">
-                                  — {itemCounts[sub]} {itemCounts[sub] === 1 ? 'piece' : 'pieces'}{sectionLabel ? ` across ${sectionLabel}` : ''}
+                                  ({itemCounts[sub]})
                                 </span>
                               )}
                             </span>
