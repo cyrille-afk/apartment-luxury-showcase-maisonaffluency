@@ -132,6 +132,7 @@ const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectib
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [navigatedToProfile, setNavigatedToProfile] = useState(false);
   const [isLightboxImageLoaded, setIsLightboxImageLoaded] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
