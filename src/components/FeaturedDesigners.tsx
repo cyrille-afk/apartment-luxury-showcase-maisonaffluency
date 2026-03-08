@@ -3125,6 +3125,7 @@ const FeaturedDesigners = () => {
                     {!isZoomed && <div className="hidden md:block h-12" aria-hidden="true" />}
 
                     {/* Outside image: mobile controls row */}
+                    {!isZoomed && (
                       <div className="md:hidden flex justify-between items-start w-full mt-2">
                         <div>
                           <button

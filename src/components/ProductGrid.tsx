@@ -486,6 +486,7 @@ function singularizeSub(s: string): string {
                 {!isZoomed && <div className="hidden md:block h-12" aria-hidden="true" />}
 
                 {/* Outside image: mobile close (left) + quote button (right) */}
+                {!isZoomed && (
                   <div className="md:hidden flex justify-between items-center w-full mt-2">
                     <div>
                       <button
