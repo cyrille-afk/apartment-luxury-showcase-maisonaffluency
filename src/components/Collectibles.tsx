@@ -871,6 +871,7 @@ const Collectibles = () => {
                     }
                   }}
                   itemCounts={counts}
+                  sectionLabel="Collectible Design"
                 />
               );
             })()}

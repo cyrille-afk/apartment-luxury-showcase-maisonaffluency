@@ -2541,6 +2541,7 @@ const FeaturedDesigners = () => {
                   }
                 }}
                 itemCounts={counts}
+                sectionLabel="all Designers"
               />
             );
           })()}
