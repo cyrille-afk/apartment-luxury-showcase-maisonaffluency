@@ -3107,23 +3107,22 @@ const FeaturedDesigners = () => {
                         </button>
                       )}
 
-                      {/* Desktop Quote — stacked under PDF, right-aligned to image */}
+                      {/* Desktop Quote — stacked under PDF, anchored to image */}
                       {!isZoomed && (
-                        <div className="hidden md:flex mt-2 self-end">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setQuoteOpen(true);
-                            }}
-                            className="flex items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
-                            aria-label="Request a Quote"
-                          >
-                            <MessageSquareQuote size={16} />
-                            <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
-                          </button>
-                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuoteOpen(true);
+                          }}
+                          className="hidden md:flex absolute top-full right-2 mt-2 items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer z-20"
+                          aria-label="Request a Quote"
+                        >
+                          <MessageSquareQuote size={16} />
+                          <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
+                        </button>
                       )}
                     </div>
+                    {!isZoomed && <div className="hidden md:block h-12" aria-hidden="true" />}
 
                     {/* Outside image: mobile controls row */}
                     {!isZoomed && (
