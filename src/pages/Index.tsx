@@ -116,7 +116,7 @@ const Index = () => {
         cancelDeferredReveal = scheduleWhenIdle(() => {
           setShowScrollProgress(true);
           setShowBelowFoldSections(true);
-        }, 1200);
+        }, 500);
       }
     };
 
