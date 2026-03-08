@@ -20,9 +20,10 @@ interface CategorySidebarProps {
   onSelect: (category: string | null, subcategory: string | null) => void;
   className?: string;
   itemCounts?: Record<string, number>;
+  sectionLabel?: string;
 }
 
-const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect, className, itemCounts }) => {
+const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect, className, itemCounts, sectionLabel }) => {
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
 
