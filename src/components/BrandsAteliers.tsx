@@ -448,6 +448,7 @@ const partnerBrands = [
     featured: "Median 3 Surface Alabaster Lights",
     instagram: "https://instagram.com/apparatusstudio",
     galleryIndex: GALLERY.AN_INVITING_LOUNGE_AREA,
+  },
   {
     id: "apparatus-studio-metronome",
     name: "Apparatus Studio",
@@ -510,8 +511,8 @@ const partnerBrands = [
     featured: "Augusta Dining Chairs",
     instagram: "https://instagram.com/thierryconquet",
     galleryIndex: GALLERY.PANORAMIC_CITYSCAPE_VIEWS,
+  },
   {
-    id: "cc-tapis",
     name: "CC-Tapis",
     category: "Rugs",
     origin: "Italy",
@@ -560,8 +561,8 @@ const partnerBrands = [
     featured: "BOB Armchair",
     instagram: "https://instagram.com/delcourtcollection",
     galleryIndex: GALLERY.A_RELAXED_SETTING,
+  },
   {
-    id: "celso-de-lemos",
     name: "Celso de Lemos",
     category: "Decorative Object",
     subcategory: "Linens",
@@ -570,8 +571,8 @@ const partnerBrands = [
     featured: "Silk Bed Cover",
     instagram: "https://instagram.com/celso.de.lemos",
     galleryIndex: GALLERY.A_MASTERFUL_SUITE,
+  },
   {
-    id: "entrelacs-creation",
     name: "Entrelacs Création",
     category: "Seating",
     subcategory: "Sofas & Loveseats",
@@ -722,8 +723,8 @@ const partnerBrands = [
     featured: "Brunelleschi Perspective Wallcover",
     instagram: "https://instagram.com/iksel_decorative_arts",
     galleryIndex: GALLERY.A_MASTERFUL_SUITE,
+  },
   {
-    id: "iksel-white-blossom",
     name: "Iksel",
     category: "Decorative Object",
     subcategory: "Wallcoverings",
