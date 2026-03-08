@@ -641,7 +641,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Lighting",
         tags: ["Lighting", "Pendant"],
         materials: "Mold-blown glass cylinders • Brass dome and armature",
-        dimensions: "Ø32.5\"",
+        dimensions: "H 63 × Ø 83 cm — Armature Height to order",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_TASSEL_57.pdf",
         pdfFilename: "Apparatus_Studio-Tassel_57.pdf"
       },
