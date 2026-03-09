@@ -94,7 +94,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.6,
               delay: 0.5
-            }} className="font-serif text-sm leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire — a curated venue where design and art congregate.</motion.p>
+            }} className="font-serif text-base leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire — a curated venue where design and art congregate.</motion.p>
             </div>
 
             {/* Gallery overview — order-3 mobile, hidden on desktop */}
