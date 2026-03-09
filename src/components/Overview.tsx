@@ -98,7 +98,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.5
-          }} className="font-serif text-sm md:text-base leading-relaxed text-foreground flex-1">From Thierry Lemaire and Hervé van der Straeten to Pierre Bonnefille and Jeremy Maxwell Wintrebert — a curated venue where design and art congregate.</motion.p>
+          }} className="font-serif text-sm md:text-base leading-relaxed text-foreground flex-1">From Thierry Lemaire and Hervé van der Straeten to Pierre Bonnefille and Jeremy Maxwell Wintrebert<br />— a curated venue where design and art congregate.</motion.p>
 
             <motion.div initial={{
             opacity: 0,
