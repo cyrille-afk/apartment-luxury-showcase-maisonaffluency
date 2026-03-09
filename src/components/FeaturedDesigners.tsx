@@ -2363,7 +2363,7 @@ const FeaturedDesigners = () => {
             </h2>
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
-            Discover the visionary designers whose exceptional work defines Maison Affluency. Each brings
+            Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings
             their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
           </p>
         </motion.div>
