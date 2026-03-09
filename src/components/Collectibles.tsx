@@ -625,7 +625,7 @@ const Collectibles = () => {
 
   return (
     <>
-      <section id="collectibles" ref={ref} className="py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-card scroll-mt-16">
+      <section id="collectibles" ref={ref} className="py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
         <div className="mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

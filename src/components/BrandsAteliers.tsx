@@ -2036,7 +2036,7 @@ const BrandsAteliers = () => {
   };
 
   return (
-    <section ref={ref} className="py-6 px-4 md:py-24 md:px-12 lg:px-20 scroll-mt-16 bg-[hsl(var(--section-dark))] text-[hsl(var(--section-dark-foreground))]">
+    <section ref={ref} className="py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-16">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
