@@ -2347,7 +2347,7 @@ const FeaturedDesigners = () => {
   };
 
   return (
-    <section ref={ref} id="curators-picks" className="py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
+    <section ref={ref} id="curators-picks" className="py-6 px-4 md:py-24 md:px-12 lg:px-20 scroll-mt-16 bg-[hsl(var(--section-dark))] text-[hsl(var(--section-dark-foreground))]">
       <div className="mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
