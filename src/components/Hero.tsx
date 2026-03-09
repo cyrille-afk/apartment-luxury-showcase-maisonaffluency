@@ -61,7 +61,7 @@ const Hero = () => {
             <div className="mt-16 md:mt-10 flex flex-col items-start md:items-center gap-6">
               <button
                 onClick={scrollToOverview}
-                className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-3.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm md:backdrop-blur-xl border border-white/30 hover:border-white/50 text-white text-sm md:text-base font-serif font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.25)] hero-fade-in-delayed-4"
+                className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-3.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm md:backdrop-blur-xl border border-white/30 hover:border-white/50 text-white text-sm md:text-base font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.25)] hero-fade-in-delayed-4"
               >
                 <Compass className="w-4 h-4 md:w-5 md:h-5 text-[hsl(var(--accent))]" />
                 Explore Our Curated Collection
@@ -79,13 +79,13 @@ const Hero = () => {
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-xs font-serif font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-xs font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
         >
           Book a Viewing
         </button>
         <button
           onClick={() => scrollToSection("details")}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-xs font-serif font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-xs font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
         >
           Trade Program
         </button>
@@ -98,13 +98,13 @@ const Hero = () => {
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
-          className="flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-sm lg:text-base font-sans font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
+          className="flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-sm lg:text-base font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
         >
           Book a Viewing
         </button>
         <button
           onClick={() => scrollToSection("details")}
-          className="flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-sm lg:text-base font-sans font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
+          className="flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-sm lg:text-base font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
         >
           Trade Program
         </button>
