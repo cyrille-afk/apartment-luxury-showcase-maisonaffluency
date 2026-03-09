@@ -52,7 +52,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.8,
               delay: 0.3
-            }} className="font-serif text-sm md:text-base lg:text-lg leading-relaxed text-foreground text-justify">A 2,400 sq ft showroom located at 1 Grange Garden, Singapore 249631, where professionals and design connoisseurs can find the perfect pieces they are looking for to elevate their interiors.
+            }} className="font-serif text-base md:text-base lg:text-lg leading-relaxed text-foreground text-justify">A 2,400 sq ft showroom located at 1 Grange Garden, Singapore 249631, where professionals and design connoisseurs can find the perfect pieces they are looking for to elevate their interiors.
               </motion.h2>
             </div>
             
@@ -94,7 +94,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.6,
               delay: 0.5
-            }} className="font-serif text-sm leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire — a curated venue where design and art congregate.</motion.p>
+            }} className="font-serif text-base leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire — a curated venue where design and art congregate.</motion.p>
             </div>
 
             {/* Gallery overview — order-3 mobile, hidden on desktop */}
@@ -108,7 +108,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.6,
               delay: 0.55
-            }} className="font-serif text-sm leading-relaxed text-foreground text-justify">This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
+            }} className="font-serif text-base leading-relaxed text-foreground text-justify">This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
             </div>
 
             {/* CTA — order-4 mobile, hidden on desktop (shown in row 2) */}
