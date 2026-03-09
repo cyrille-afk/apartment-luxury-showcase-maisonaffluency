@@ -149,54 +149,8 @@ const Overview = () => {
             </div>
           </div>
           
-          {/* Desktop Row 2: Designer paragraph + 3rd paragraph + CTA */}
-          <div className="hidden md:flex md:flex-col gap-4">
-            <div className="flex flex-row gap-8 items-start">
-              <motion.p initial={{
-              opacity: 0,
-              y: 20
-            }} animate={isInView ? {
-              opacity: 1,
-              y: 0
-            } : {}} transition={{
-              duration: 0.6,
-              delay: 0.5
-            }} className="font-serif text-base md:text-base lg:text-lg leading-relaxed text-foreground text-justify flex-1">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire<br />— a curated venue where design and art congregate.</motion.p>
-
-              <motion.div initial={{
-              opacity: 0,
-              y: 20
-            }} animate={isInView ? {
-              opacity: 1,
-              y: 0
-            } : {}} transition={{
-              duration: 0.6,
-              delay: 0.6
-            }} className="shrink-0">
-                <button
-                  onClick={scrollToTeam}
-                  className="group relative flex items-center cursor-pointer transition-all duration-300"
-                  aria-label="Meet The Curating Team"
-                >
-                  <div className="flex -space-x-3 relative z-10 -mr-4">
-                    <img
-                      src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 160, quality: "auto", crop: "fill" })}
-                      alt="Cyrille Delval"
-                      className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <img
-                      src={cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 160, quality: "auto", crop: "fill" })}
-                      alt="Elsa Lemarignier"
-                      className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                    />
-                  </div>
-                  <span className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 text-sm rounded-full pl-5 pr-4 py-2.5 font-body">
-                    Meet The Curating Team
-                  </span>
-                </button>
-              </motion.div>
-            </div>
-
+          {/* Desktop Row 2: Designer paragraph + CTA side by side */}
+          <div className="hidden md:flex md:flex-row gap-8 md:items-start">
             <motion.p initial={{
             opacity: 0,
             y: 20
@@ -205,8 +159,41 @@ const Overview = () => {
             y: 0
           } : {}} transition={{
             duration: 0.6,
-            delay: 0.55
-          }} className="font-serif text-base md:text-base lg:text-lg leading-relaxed text-foreground text-justify">This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
+            delay: 0.5
+          }} className="font-serif text-base md:text-base lg:text-lg leading-relaxed text-foreground text-justify flex-1">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire<br />— a curated venue where design and art congregate.</motion.p>
+
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} animate={isInView ? {
+            opacity: 1,
+            y: 0
+          } : {}} transition={{
+            duration: 0.6,
+            delay: 0.6
+          }} className="shrink-0">
+              <button
+                onClick={scrollToTeam}
+                className="group relative flex items-center cursor-pointer transition-all duration-300"
+                aria-label="Meet The Curating Team"
+              >
+                <div className="flex -space-x-3 relative z-10 -mr-4">
+                  <img
+                    src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 160, quality: "auto", crop: "fill" })}
+                    alt="Cyrille Delval"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                  />
+                  <img
+                    src={cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 160, quality: "auto", crop: "fill" })}
+                    alt="Elsa Lemarignier"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
+                <span className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 text-sm rounded-full pl-5 pr-4 py-2.5 font-body">
+                  Meet The Curating Team
+                </span>
+              </button>
+            </motion.div>
           </div>
         </motion.div>
       </div>
