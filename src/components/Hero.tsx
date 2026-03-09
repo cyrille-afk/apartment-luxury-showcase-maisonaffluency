@@ -47,12 +47,13 @@ const Hero = () => {
 
           <div className="inline-flex flex-col items-center md:items-end">
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-lg lg:text-xl font-medium hero-fade-in-delayed-3">
-              <span className="hidden md:inline">From Couture Furniture and Collectible Designs <em>On View</em>,
-              <br /> To the World's most distinguished Furniture Houses
-              <br /> and Design&nbsp;Workshops</span>
-              <span className="md:hidden leading-[2.2] text-justify">From Couture Furniture and Collectible Design
-              <br /><em>On View</em>, To the World's most distinguished
-              <br />Furniture Houses and Design&nbsp;Workshops</span>
+              <span className="hidden md:inline">From Couture Furniture and Collectible Designs Items <em>On View</em>,
+              <br /> Discover emerging talents and design masters handpicked
+              <br /> for their relevance assembled in our curated&nbsp;collection.</span>
+              <span className="md:hidden leading-[2.2] text-justify">From Couture Furniture and Collectible Designs
+              <br />Items <em>On View</em>, Discover emerging talents
+              <br />and design masters handpicked for their relevance
+              <br />assembled in our curated&nbsp;collection.</span>
             </p>
 
             <div className="mt-16 md:mt-10 flex flex-col items-start md:items-center gap-6">
