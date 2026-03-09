@@ -493,7 +493,7 @@ const Gallery = () => {
     };
   }, [lightboxOpen]);
   return <>
-      <section id="gallery" ref={ref} className="pt-2 pb-16 px-4 md:pt-4 md:pb-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
+      <section id="gallery" ref={ref} className="pt-0 pb-16 px-4 md:pt-0 md:pb-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
         <div className="mx-auto max-w-7xl">
           <motion.div initial={{
           opacity: 0,
