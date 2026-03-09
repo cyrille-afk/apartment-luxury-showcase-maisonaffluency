@@ -53,7 +53,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.8,
               delay: 0.3
-            }} className="font-display text-sm md:text-base lg:text-lg leading-tight text-foreground">A 2,400 sq ft showroom located in Singapore District 9, where professionals and design connoisseurs can find the perfect pieces they are looking for to elevate their interiors
+            }} className="font-display text-sm md:text-base lg:text-lg leading-tight text-foreground text-justify">A 2,400 sq ft showroom located in Singapore District 9, where professionals and design connoisseurs can find the perfect pieces they are looking for to elevate their interiors
               </motion.h2>
             </div>
             
@@ -98,7 +98,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.5
-          }} className="font-serif text-sm md:text-base leading-relaxed text-foreground flex-1">From Thierry Lemaire and Hervé van der Straeten to Pierre Bonnefille and Jeremy Maxwell Wintrebert<br />— a curated venue where design and art congregate.</motion.p>
+          }} className="font-serif text-sm md:text-base leading-relaxed text-foreground text-justify flex-1">From Thierry Lemaire and Hervé van der Straeten to Pierre Bonnefille and Jeremy Maxwell Wintrebert<br />— a curated venue where design and art congregate.</motion.p>
 
             <motion.div initial={{
             opacity: 0,
