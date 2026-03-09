@@ -73,14 +73,14 @@ const Overview = () => {
               aria-label="View 5 atmospheres in the gallery"
               className="text-left cursor-pointer group transition-all duration-300 hover:scale-105">
                 <div className="font-display text-2xl md:text-3xl text-primary animate-text-glow-pulse group-hover:text-accent group-hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300" aria-hidden="true">5</div>
-                <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300 flex items-center gap-0.5">Atmospheres <ChevronRight className="w-3 h-3 opacity-60" /></div>
+                <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300 flex items-center gap-0.5">Atmospheres <ChevronRight className="w-3 h-3 text-foreground" /></div>
               </button>
                <button
               onClick={() => scrollToSection("designers")}
               aria-label="View 50+ designers works and collectible design pieces"
               className="text-left cursor-pointer group transition-all duration-300 hover:scale-105">
                 <div className="font-display text-2xl md:text-3xl text-primary animate-text-glow-pulse group-hover:text-accent group-hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300" aria-hidden="true">50+</div>
-                <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300 leading-tight flex items-start gap-0.5"><span className="hidden md:inline">Designers works and<br />collectible design pieces<br /><em>in situ</em></span><span className="md:hidden">Designers works and<br />collectible design<br />pieces <em>in situ</em></span> <ChevronRight className="w-3 h-3 opacity-60 mt-0.5 shrink-0" /></div>
+                <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300 leading-tight flex items-start gap-0.5"><span className="hidden md:inline">Designers works and<br />collectible design pieces<br /><em>in situ</em></span><span className="md:hidden">Designers works and<br />collectible design<br />pieces <em>in situ</em></span> <ChevronRight className="w-3 h-3 text-foreground mt-0.5 shrink-0" /></div>
               </button>
             </motion.div>
 
