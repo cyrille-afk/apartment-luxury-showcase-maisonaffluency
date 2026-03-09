@@ -7,12 +7,17 @@
  */
 export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth") {
   const navHeight = 96;
+  // Extra padding for sections that need more breathing room below the nav
+  const extraOffset: Record<string, number> = {
+    "sociable-environment": 40,
+  };
   const instant = "instant" as ScrollBehavior;
 
   const getTargetTop = () => {
     const el = document.getElementById(id);
     if (!el) return null;
-    const y = el.getBoundingClientRect().top + window.scrollY - navHeight + 2;
+    const extra = extraOffset[id] ?? 0;
+    const y = el.getBoundingClientRect().top + window.scrollY - navHeight - extra + 2;
     return Math.max(0, y);
   };
 
