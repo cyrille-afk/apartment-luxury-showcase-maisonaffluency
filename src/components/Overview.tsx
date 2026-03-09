@@ -112,7 +112,7 @@ const Overview = () => {
             </div>
 
             {/* CTA — order-4 mobile, hidden on desktop (shown in row 2) */}
-            <div className="order-4 md:hidden py-4">
+            <div className="order-4 md:hidden py-4 flex justify-center">
               <motion.div initial={{
               opacity: 0,
               y: 20
