@@ -625,7 +625,9 @@ const Collectibles = () => {
 
   return (
     <>
-      <section id="collectibles" ref={ref} className="py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
+      <section id="collectibles" ref={ref} className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
+        {/* Gradient accent band */}
+        <div className="absolute top-0 left-0 right-0 h-1 md:h-1.5 bg-gradient-to-r from-secondary via-terracotta-light to-accent opacity-80" />
         <div className="mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
