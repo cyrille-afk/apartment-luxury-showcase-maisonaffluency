@@ -27,7 +27,7 @@ const Overview = () => {
           {/* Desktop Row 1: Title+desc left, Stats right */}
           {/* Mobile: Title is order-1, Stats is order-4 */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-6">
-            <div className="flex-1 order-1">
+            <div className="flex-1 order-1 md:order-1">
               <motion.p initial={{
               opacity: 0
             }} animate={isInView ? {
@@ -66,7 +66,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.4
-          }} className="order-4 md:order-none flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
+          }} className="order-4 md:order-2 flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
                <button
               onClick={() => scrollToSection("sociable-environment")}
               aria-label="View 5 atmospheres in the gallery"
