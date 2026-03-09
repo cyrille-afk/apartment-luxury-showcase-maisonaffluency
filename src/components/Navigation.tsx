@@ -390,7 +390,7 @@ const Navigation = () => {
             </div>
             <div className="flex justify-end">
               <DropdownMenu>
-                <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)] flex items-center gap-1 whitespace-nowrap outline-none">
+                <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)] data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none">
                   Contact Us
                   <ChevronDown className="h-3 w-3" />
                 </DropdownMenuTrigger>
