@@ -164,7 +164,7 @@
     <!-- Layout-critical styles only -->
     <style>
       /* Prevent layout shift */
-      body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+      body { margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; }
       #root { min-height: 100vh; }
       /* FOUC guard: hide React content until main CSS loads (prevents raw text flash on scroll-restored refresh) */
       html:not(.css-ready) #root > :not(.hero-skeleton) { visibility: hidden; }
@@ -175,8 +175,8 @@
       @media (min-width: 768px) { .hero-skeleton img { height: 120%; object-position: 50% 0%; } }
 
       /* Self-hosted fonts — cached 1 year via _headers */
-      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 300; font-display: swap; src: url('/fonts/Inter-300.woff2') format('woff2'); }
-      @font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/Inter-500.woff2') format('woff2'); }
+      @font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/CormorantGaramond-Regular.woff2') format('woff2'); }
+      @font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 400; font-display: swap; src: url('/fonts/CormorantGaramond-Italic.woff2') format('woff2'); }
       @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 300; font-display: swap; src: url('/fonts/PlayfairDisplay-500.woff2') format('woff2'); }
       @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/PlayfairDisplay-500.woff2') format('woff2'); }
       @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/PlayfairDisplay-600.woff2') format('woff2'); }
@@ -232,7 +232,7 @@
 
     <!-- Fallback content for non-JS crawlers (Bing, Yandex, etc.) -->
     <noscript>
-      <div style="max-width:960px;margin:0 auto;padding:40px 20px;font-family:'Inter',sans-serif;color:#222;line-height:1.6;">
+      <div style="max-width:960px;margin:0 auto;padding:40px 20px;font-family:'Cormorant Garamond',Georgia,serif;color:#222;line-height:1.6;">
         <h1 style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:8px;">Maison Affluency — Curated Luxury Design &amp; Collectible Furniture</h1>
         <p>From Couture Furniture and Collectible Designs in situ, to the world's most distinguished Furniture Houses and Artisan Workshops. Based in Singapore's District 9.</p>
 

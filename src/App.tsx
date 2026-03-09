@@ -4,7 +4,6 @@ import Index from "./pages/Index";
 
 // Lazy-load non-landing pages and non-critical UI
 const NotFound = lazy(() => import("./pages/NotFound"));
-const FontPreview = lazy(() => import("./pages/FontPreview"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
@@ -55,7 +54,6 @@ const App = () => {
       ) : (
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/font-preview" element={<Suspense fallback={null}><FontPreview /></Suspense>} />
           <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
         </Routes>
       )}

@@ -78,7 +78,7 @@ export default {
         display: ["Playfair Display", "serif"],
         serif: ["Playfair Display", "serif"],
         brand: ["Cinzel", "Georgia", "serif"],
-        body: ["Inter", "sans-serif"],
+        body: ["Cormorant Garamond", "Georgia", "serif"],
       },
       keyframes: {
         "accordion-down": {
