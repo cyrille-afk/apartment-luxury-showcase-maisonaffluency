@@ -66,7 +66,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.4
-          }} className="order-5 md:order-2 flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0 bg-white rounded-lg px-5 py-3">
+          }} className="order-5 md:order-2 flex items-start gap-12 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0 bg-white rounded-lg px-5 py-3">
                <button
               onClick={() => scrollToSection("sociable-environment")}
               aria-label="View 5 atmospheres in the gallery"
@@ -79,7 +79,7 @@ const Overview = () => {
               aria-label="View 50+ designers works and collectible design pieces"
               className="text-left cursor-pointer group transition-all duration-300 hover:scale-105">
                 <div className="font-display text-2xl md:text-3xl text-primary animate-text-glow-pulse group-hover:text-accent group-hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300" aria-hidden="true">50+</div>
-                <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300 leading-tight"><span className="hidden md:inline">Designers works and<br />collectible design pieces<br /><em>in situ</em></span><span className="md:hidden">Designers works and<br />collectible design pieces <em>in situ</em></span></div>
+                <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300 leading-tight"><span className="hidden md:inline">Designers works and<br />collectible design pieces<br /><em>in situ</em></span><span className="md:hidden">Designers works and<br />collectible design<br />pieces <em>in situ</em></span></div>
               </button>
             </motion.div>
 
