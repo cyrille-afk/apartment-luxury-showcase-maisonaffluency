@@ -509,7 +509,7 @@ const Gallery = () => {
                 {filteredExperiences.length} {filteredExperiences.length === 1 ? "scene" : "scenes"} · {activeCategory}
               </p>
             )}
-            <h2 className="text-sm leading-relaxed md:text-3xl text-foreground text-justify px-1 md:px-2 font-serif lg:text-lg">
+            <h2 className="text-sm md:text-base leading-relaxed text-foreground text-justify px-1 md:px-2 font-serif">
               This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.
             </h2>
           </motion.div>
