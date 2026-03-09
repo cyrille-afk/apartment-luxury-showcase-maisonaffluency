@@ -64,7 +64,7 @@ const Hero = () => {
                 className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-3.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm md:backdrop-blur-xl border border-white/30 hover:border-white/50 text-white text-sm md:text-base font-serif font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.25)] hero-fade-in-delayed-4"
               >
                 <Compass className="w-4 h-4 md:w-5 md:h-5 text-[hsl(var(--accent))]" />
-                Explore Our Curation
+                Explore Our Curated Collection
               </button>
 
             </div>
