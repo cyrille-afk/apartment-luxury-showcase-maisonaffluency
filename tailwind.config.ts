@@ -76,6 +76,7 @@ export default {
       },
       fontFamily: {
         display: ["Playfair Display", "serif"],
+        serif: ["Playfair Display", "serif"],
         brand: ["Cinzel", "Georgia", "serif"],
         body: ["Inter", "sans-serif"],
       },
