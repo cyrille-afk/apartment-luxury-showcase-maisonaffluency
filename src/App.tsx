@@ -55,6 +55,7 @@ const App = () => {
       ) : (
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/font-preview" element={<Suspense fallback={null}><FontPreview /></Suspense>} />
           <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
         </Routes>
       )}
