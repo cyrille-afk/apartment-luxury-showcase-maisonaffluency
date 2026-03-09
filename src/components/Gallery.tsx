@@ -539,7 +539,7 @@ const Gallery = () => {
                         <TooltipTrigger asChild>
                           <button
                             onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
-                            className="flex items-center p-1.5 rounded transition-all hover:opacity-70"
+                            className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
                             aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
                           >
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
