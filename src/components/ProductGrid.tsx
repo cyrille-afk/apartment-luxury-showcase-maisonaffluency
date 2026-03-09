@@ -482,7 +482,7 @@ function singularizeSub(s: string): string {
                     >
                       {!isZoomed && (
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out">
-                          <Search size={24} className="text-white/80 drop-shadow-lg" />
+                          <Search size={24} className="text-foreground drop-shadow-lg" />
                         </div>
                       )}
                     </div>
