@@ -81,13 +81,13 @@ const ExitIntentBanner = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="flex items-center gap-2.5 rounded-full bg-white pl-3.5 pr-2.5 py-2 shadow-lg cursor-pointer hover:bg-white/90 transition-colors border border-border/40 min-h-[44px] touch-manipulation"
+              className="flex items-center gap-2 rounded-full bg-white pl-3 pr-2 py-1.5 shadow-lg cursor-pointer hover:bg-white/90 transition-colors border border-border/40 min-h-[36px] touch-manipulation"
               onClick={handleClick}
               aria-label="Chat with us on WhatsApp"
             >
               <span className="text-muted-foreground text-xs font-medium font-body whitespace-nowrap">Chat with us</span>
-              <span className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center flex-shrink-0" aria-hidden="true">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="white">
+              <span className="w-6 h-6 rounded-full bg-[#25D366] flex items-center justify-center flex-shrink-0" aria-hidden="true">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="white">
                   <path d={WA_ICON_PATH} />
                 </svg>
               </span>
