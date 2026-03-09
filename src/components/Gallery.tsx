@@ -504,11 +504,6 @@ const Gallery = () => {
         } : {}} transition={{
           duration: 0.8
         }} className="mb-6 md:mb-10 text-left">
-            <div className="mb-2 md:mb-3">
-              <p className="text-foreground text-xl md:text-2xl lg:text-2xl font-serif font-bold">
-                A Uniquely Curated Venue
-              </p>
-            </div>
             {activeCategory && (
               <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-body mb-2">
                 {filteredExperiences.length} {filteredExperiences.length === 1 ? "scene" : "scenes"} · {activeCategory}
