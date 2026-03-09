@@ -2364,7 +2364,7 @@ const FeaturedDesigners = () => {
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
             Discover the visionary designers whose exceptional work defines Maison Affluency. Each brings
-            their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture. <span className="text-[hsl(var(--gold))]">All Gallery Featured Designers items are presented <em>in situ</em> at our gallery.</span>
+            their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture. <span className="text-[hsl(var(--gold))]">All <em>In Situ</em> Designers items are presented at our gallery.</span>
           </p>
         </motion.div>
 
@@ -2741,7 +2741,7 @@ const FeaturedDesigners = () => {
                         <>
                           <span className="text-primary/40 text-xs tracking-[0.3em] mt-1">• • •</span>
                           <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                          <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider">Gallery Featured:</span>
+                          <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>In Situ</em>:</span>
                           {designer.notableWorksLinks ? (
                             designer.notableWorksLinks.map((link, linkIdx) => (
                               <span key={linkIdx} className="flex items-center">
