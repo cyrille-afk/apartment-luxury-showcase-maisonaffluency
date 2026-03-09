@@ -1,7 +1,7 @@
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackCTA } from "@/lib/analytics";
-import { Calendar, Briefcase, Compass } from "lucide-react";
+import { Compass } from "lucide-react";
 
 // Use a single fallback src (smallest useful size); srcSet handles responsive selection
 const HERO_ID = "AffluencySG_194-22.jpg_macpwj";
@@ -81,14 +81,12 @@ const Hero = () => {
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
           className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-xs font-serif font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
         >
-          <Calendar className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
           Book a Viewing
         </button>
         <button
           onClick={() => scrollToSection("details")}
           className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-xs font-serif font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
         >
-          <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
           Trade Program
         </button>
       </div>
@@ -102,14 +100,12 @@ const Hero = () => {
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
           className="flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-sm lg:text-base font-sans font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
         >
-          <Calendar className="w-4 h-4 lg:w-5 lg:h-5 text-[hsl(var(--accent))]" />
           Book a Viewing
         </button>
         <button
           onClick={() => scrollToSection("details")}
           className="flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-sm lg:text-base font-sans font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
         >
-          <Briefcase className="w-4 h-4 lg:w-5 lg:h-5 text-[hsl(var(--accent))]" />
           Trade Program
         </button>
       </div>
