@@ -2803,16 +2803,16 @@ const FeaturedDesigners = () => {
                             }}
                             label={`Share ${designer.name} on WhatsApp`}
                           />
-                      <div className="flex items-center justify-center w-24 h-24 border border-border/40 rounded-sm">
-                        {(designer as any).logoUrl && (
+                      {(designer as any).logoUrl && (
+                        <div className="flex items-center justify-center w-16 h-16">
                           <img
                             src={(designer as any).logoUrl}
                             alt={`${(designer as any).displayName || designer.name} logo`}
-                            sizes="96px"
-                            className="max-w-full max-h-full object-contain aspect-square"
+                            sizes="64px"
+                            className="max-w-full max-h-full object-contain opacity-60"
                           />
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                     </div>
                     <div className="flex justify-start md:hidden">
