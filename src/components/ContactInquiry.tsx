@@ -122,7 +122,7 @@ const ContactInquiry = () => {
               <Input
                 id="name"
                 placeholder="Your full name"
-                className="border-border bg-background font-body"
+                className="border-border bg-background font-body rounded-lg"
                 value={formData.name}
                 onChange={handleInputChange}
                 required
@@ -135,7 +135,7 @@ const ContactInquiry = () => {
               <Input
                 id="firm"
                 placeholder="Company name"
-                className="border-border bg-background font-body"
+                className="border-border bg-background font-body rounded-lg"
                 value={formData.firm}
                 onChange={handleInputChange}
               />
@@ -151,7 +151,7 @@ const ContactInquiry = () => {
                 id="email"
                 type="email"
                 placeholder="your@email.com"
-                className="border-border bg-background font-body"
+                className="border-border bg-background font-body rounded-lg"
                 value={formData.email}
                 onChange={handleInputChange}
                 required
@@ -165,7 +165,7 @@ const ContactInquiry = () => {
                 id="phone"
                 type="tel"
                 placeholder="+65 XXXX XXXX"
-                className="border-border bg-background font-body"
+                className="border-border bg-background font-body rounded-lg"
                 value={formData.phone}
                 onChange={handleInputChange}
               />
@@ -179,7 +179,7 @@ const ContactInquiry = () => {
             <Textarea
               id="message"
               placeholder="Please share details about your inquiry..."
-              className="min-h-[150px] border-border bg-background font-body"
+              className="min-h-[150px] border-border bg-background font-body rounded-lg"
               value={formData.message}
               onChange={handleInputChange}
               required
@@ -191,7 +191,7 @@ const ContactInquiry = () => {
               type="submit"
               size="lg"
               disabled={isSubmitting}
-              className="bg-white px-12 py-6 font-body text-sm uppercase tracking-widest text-foreground transition-all hover:bg-white/90 disabled:opacity-50 border-2 border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)]"
+              className="bg-white px-12 py-6 font-body text-sm uppercase tracking-widest text-foreground transition-all hover:bg-white/90 disabled:opacity-50 border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] rounded-full"
             >
               {isSubmitting ? "Sending..." : "Submit Inquiry"}
             </Button>
