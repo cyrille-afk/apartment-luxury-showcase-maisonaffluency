@@ -41,7 +41,7 @@ const Hero = () => {
               onClick={scrollToOverview}
               className="text-left text-inherit font-inherit leading-inherit cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-none p-0 m-0"
             >
-              Discover The World's Best Interior Designers Iconic Pieces
+              Discover The World's Best Interior Designers' Iconic Pieces
             </button>
           </h1>
 
