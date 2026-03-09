@@ -189,7 +189,7 @@ const Navigation = () => {
     setTimeout(() => scrollToSection(id), 350);
   };
 
-  return <nav className="fixed top-0 left-0 right-0 z-50 bg-background backdrop-blur-sm border-b border-border/50">
+  return <nav className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-sm border-b border-border/50">
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         {/* Mobile: single row */}
         <div className="flex h-24 items-center justify-center md:hidden relative">
