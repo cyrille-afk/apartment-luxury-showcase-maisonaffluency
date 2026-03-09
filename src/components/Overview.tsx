@@ -13,7 +13,7 @@ const Overview = () => {
 
   const scrollToTeam = () => scrollToSection("curating-team");
 
-  return <section id="overview" ref={ref} className="pt-10 md:pt-20 pb-4 md:pb-6 px-4 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
+  return <section id="overview" ref={ref} className="pt-4 md:pt-20 pb-4 md:pb-6 px-4 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
       <div className="mx-auto max-w-7xl">
         <motion.div initial={{
         opacity: 0,
