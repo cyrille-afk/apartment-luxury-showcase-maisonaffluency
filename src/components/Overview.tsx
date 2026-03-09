@@ -118,12 +118,12 @@ const Overview = () => {
                   <img
                     src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 80, quality: "auto", crop: "fill" })}
                     alt="Cyrille Delval"
-                    className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                    className="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                   />
                   <img
                     src={cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 80, quality: "auto", crop: "fill" })}
                     alt="Elsa Lemarignier"
-                    className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                    className="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
                 <span className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 text-xs md:text-sm rounded-full pl-5 pr-4 py-1.5 md:py-2 font-body">
