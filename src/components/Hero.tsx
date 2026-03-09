@@ -48,8 +48,7 @@ const Hero = () => {
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
               <span className="hidden md:inline">From Couture Furniture and Collectible Designs Items,
               <br /> Discover Emerging Talents and Design Masters In Our Gallery
-              <br /> or Through the Best Ateliers
-              <br /> and Designer Workshops We Partner&nbsp;With</span>
+              <br /> or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
               <span className="md:hidden leading-[2.2] text-justify">From Couture Furniture and Collectible
               <br />Designs Items, Discover Emerging Talents
               <br />and Design Masters In Our Gallery
