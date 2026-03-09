@@ -390,9 +390,10 @@ const Navigation = () => {
             </div>
             <div className="flex justify-end">
               <DropdownMenu>
-                <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground hover:text-[hsl(var(--accent))] hover:[text-shadow:0_0_8px_hsl(var(--accent)/0.3)] data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none">
+                <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground hover:text-[hsl(var(--accent))] data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none relative group">
                   Contact Us
-                  <ChevronDown className="h-3 w-3" />
+                  <ChevronDown className="h-4 w-4" />
+                  <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
                   {contactOptions.map((option) => (
