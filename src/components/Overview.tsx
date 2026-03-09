@@ -98,7 +98,7 @@ const Overview = () => {
             </div>
 
             {/* CTA — order-3 mobile, hidden on desktop (shown in row 2) */}
-            <div className="order-3 md:hidden">
+            <div className="order-3 md:hidden py-4">
               <motion.div initial={{
               opacity: 0,
               y: 20
