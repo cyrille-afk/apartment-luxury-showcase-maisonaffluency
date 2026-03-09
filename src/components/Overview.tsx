@@ -35,7 +35,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.6,
               delay: 0.2
-            }} className="mb-2 text-foreground text-xl md:text-2xl lg:text-2xl font-serif font-bold">
+            }} className="mb-6 text-foreground text-xl md:text-2xl lg:text-2xl font-serif font-bold">
                 <button
                 onClick={() => scrollToSection("gallery")}
                 className="hover:text-foreground/70 transition-colors duration-300 cursor-pointer">
