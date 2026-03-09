@@ -52,7 +52,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.8,
               delay: 0.3
-            }} className="font-serif text-sm md:text-base lg:text-lg leading-relaxed text-foreground text-justify">A 2,400 sq ft showroom located at 1 Grange Garden, Singapore 249631, where professionals and design connoisseurs can find the perfect pieces they are looking for to elevate their interiors.
+            }} className="font-serif text-base md:text-base lg:text-lg leading-relaxed text-foreground text-justify">A 2,400 sq ft showroom located at 1 Grange Garden, Singapore 249631, where professionals and design connoisseurs can find the perfect pieces they are looking for to elevate their interiors.
               </motion.h2>
             </div>
             
