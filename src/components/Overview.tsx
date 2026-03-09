@@ -23,68 +23,39 @@ const Overview = () => {
         y: 0
       } : {}} transition={{
         duration: 0.8
-      }} className="flex flex-col gap-6 md:gap-10">
-          {/* Title + Showroom description */}
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-            <div className="flex-1">
-              <motion.p initial={{
-              opacity: 0
-            }} animate={isInView ? {
-              opacity: 1
-            } : {}} transition={{
-              duration: 0.6,
-              delay: 0.2
-            }} className="mb-2 text-foreground text-xl md:text-2xl lg:text-2xl font-serif font-bold">
-                <button
-                onClick={() => scrollToSection("gallery")}
-                className="hover:text-foreground/70 transition-colors duration-300 cursor-pointer">
-                  Gallery Overview
-                </button>
-              </motion.p>
-              
-              <motion.h2 initial={{
-              opacity: 0,
-              y: 20
-            }} animate={isInView ? {
-              opacity: 1,
-              y: 0
-            } : {}} transition={{
-              duration: 0.8,
-              delay: 0.3
-            }} className="font-display text-sm md:text-base lg:text-lg leading-tight text-foreground text-justify">A 2,400 sq ft showroom located in Singapore District 9, where professionals and design connoisseurs can find the perfect pieces they are looking for to elevate their interiors
-              </motion.h2>
-            </div>
+      }} className="flex flex-col gap-4 md:gap-10">
+          {/* Title + Showroom description — order-1 mobile */}
+          <div className="order-1 md:order-none">
+            <motion.p initial={{
+            opacity: 0
+          }} animate={isInView ? {
+            opacity: 1
+          } : {}} transition={{
+            duration: 0.6,
+            delay: 0.2
+          }} className="mb-2 text-foreground text-xl md:text-2xl lg:text-2xl font-serif font-bold">
+              <button
+              onClick={() => scrollToSection("gallery")}
+              className="hover:text-foreground/70 transition-colors duration-300 cursor-pointer">
+                Gallery Overview
+              </button>
+            </motion.p>
             
-            {/* Stats - After CTA on mobile, side on desktop */}
-            <motion.div initial={{
+            <motion.h2 initial={{
             opacity: 0,
             y: 20
           }} animate={isInView ? {
             opacity: 1,
             y: 0
           } : {}} transition={{
-            duration: 0.6,
-            delay: 0.4
-          }} className="order-3 md:order-none flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
-               <button
-              onClick={() => scrollToSection("sociable-environment")}
-              aria-label="View 5 atmospheres in the gallery"
-              className="text-left cursor-pointer group transition-all duration-300 hover:scale-105">
-                <div className="font-display text-2xl md:text-3xl text-primary animate-text-glow-pulse group-hover:text-accent group-hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300" aria-hidden="true">5</div>
-                <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300">Atmospheres</div>
-              </button>
-               <button
-              onClick={() => scrollToSection("designers")}
-              aria-label="View 50+ designers works and collectible design pieces"
-              className="text-left cursor-pointer group transition-all duration-300 hover:scale-105">
-                <div className="font-display text-2xl md:text-3xl text-primary animate-text-glow-pulse group-hover:text-accent group-hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300" aria-hidden="true">50+</div>
-                <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300 leading-tight"><span className="hidden md:inline">Designers works and<br />collectible design pieces<br /><em>in situ</em></span><span className="md:hidden">Designers works and<br />collectible design pieces <em>in situ</em></span></div>
-              </button>
-            </motion.div>
+            duration: 0.8,
+            delay: 0.3
+          }} className="font-display text-sm md:text-base lg:text-lg leading-tight text-foreground text-justify">A 2,400 sq ft showroom located in Singapore District 9, where professionals and design connoisseurs can find the perfect pieces they are looking for to elevate their interiors
+            </motion.h2>
           </div>
-          
-          {/* Designer names paragraph */}
-          <div className="order-1 md:order-none">
+
+          {/* Designer names — order-2 mobile */}
+          <div className="order-2 md:order-none">
             <motion.p initial={{
             opacity: 0,
             y: 20
@@ -97,8 +68,8 @@ const Overview = () => {
           }} className="font-serif text-sm md:text-base leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire<br />— a curated venue where design and art congregate.</motion.p>
           </div>
 
-          {/* Meet The Curating Team CTA */}
-          <div className="order-2 md:order-none">
+          {/* Meet The Curating Team CTA — order-3 mobile */}
+          <div className="order-3 md:order-none">
             <motion.div initial={{
             opacity: 0,
             y: 20
@@ -108,7 +79,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.6
-          }} className="shrink-0">
+          }}>
               <button
                 onClick={scrollToTeam}
                 className="group relative flex items-center cursor-pointer transition-all duration-300"
@@ -132,6 +103,33 @@ const Overview = () => {
               </button>
             </motion.div>
           </div>
+
+          {/* Stats — order-4 mobile (last) */}
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} animate={isInView ? {
+          opacity: 1,
+          y: 0
+        } : {}} transition={{
+          duration: 0.6,
+          delay: 0.4
+        }} className="order-4 md:order-none flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 border-border shrink-0">
+             <button
+            onClick={() => scrollToSection("sociable-environment")}
+            aria-label="View 5 atmospheres in the gallery"
+            className="text-left cursor-pointer group transition-all duration-300 hover:scale-105">
+              <div className="font-display text-2xl md:text-3xl text-primary animate-text-glow-pulse group-hover:text-accent group-hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300" aria-hidden="true">5</div>
+              <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300">Atmospheres</div>
+            </button>
+             <button
+            onClick={() => scrollToSection("designers")}
+            aria-label="View 50+ designers works and collectible design pieces"
+            className="text-left cursor-pointer group transition-all duration-300 hover:scale-105">
+              <div className="font-display text-2xl md:text-3xl text-primary animate-text-glow-pulse group-hover:text-accent group-hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300" aria-hidden="true">50+</div>
+              <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300 leading-tight"><span className="hidden md:inline">Designers works and<br />collectible design pieces<br /><em>in situ</em></span><span className="md:hidden">Designers works and<br />collectible design pieces <em>in situ</em></span></div>
+            </button>
+          </motion.div>
         </motion.div>
       </div>
     </section>;
