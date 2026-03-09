@@ -46,7 +46,7 @@ const Hero = () => {
           </h1>
 
           <div className="inline-flex flex-col items-center md:items-end">
-            <p className="text-base leading-relaxed text-white text-left font-serif md:text-lg lg:text-xl font-medium hero-fade-in-delayed-3">
+            <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
               <span className="hidden md:inline">From Couture Furniture and Collectible Designs Items,
               <br /> Discover Emerging Talents and Design Masters In Our Gallery
               <br /> or Through Our Partners' Network of the Best Ateliers
