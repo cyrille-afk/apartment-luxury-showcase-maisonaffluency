@@ -124,6 +124,9 @@ All colors MUST be HSL.
     --gold: 36 38% 60%;
     --cream: 32 15% 90%;
     --warm-gray: 32 8% 60%;
+    --section-dark: 168 18% 10%;
+    --section-dark-foreground: 32 15% 90%;
+    --section-dark-muted: 168 10% 18%;
 
     --gradient-jade: linear-gradient(135deg, hsl(168 40% 45%) 0%, hsl(168 35% 58%) 100%);
     --gradient-warm: linear-gradient(180deg, hsl(168 15% 12%) 0%, hsl(168 12% 16%) 100%);
