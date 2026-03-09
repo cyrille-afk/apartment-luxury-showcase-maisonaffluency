@@ -510,7 +510,7 @@ const Gallery = () => {
               </p>
             )}
             <h2 className="text-sm md:text-base leading-relaxed text-foreground text-justify px-1 md:px-2 font-serif">
-              This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.
+              This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism.<br />Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.
             </h2>
           </motion.div>
 
