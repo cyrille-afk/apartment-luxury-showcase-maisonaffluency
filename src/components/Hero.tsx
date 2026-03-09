@@ -59,7 +59,7 @@ const Hero = () => {
             <div className="mt-16 md:mt-16 flex flex-col items-start md:items-center gap-6">
               <button
                 onClick={scrollToOverview}
-                className="flex items-center gap-2 px-6 py-3 md:px-10 md:py-4 lg:px-12 lg:py-4.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm md:backdrop-blur-xl border border-white/30 hover:border-white/50 text-white text-sm md:text-lg font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.25)] hero-fade-in-delayed-4"
+                className="flex items-center gap-2 px-6 py-3 md:px-10 md:py-4 lg:px-12 lg:py-4.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm md:backdrop-blur-xl border border-white/30 hover:border-white/50 text-white text-sm md:text-lg font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.25)] hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.3)]"
               >
                 Explore Our Curated Collection
               </button>
