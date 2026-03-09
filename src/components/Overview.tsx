@@ -111,23 +111,23 @@ const Overview = () => {
           }} className="shrink-0">
               <button
                 onClick={scrollToTeam}
-                className="group flex items-center gap-3 cursor-pointer transition-all duration-300 hover:opacity-80"
+                className="group relative flex items-center cursor-pointer transition-all duration-300"
                 aria-label="Meet The Curating Team"
               >
-                <div className="flex -space-x-3">
+                <div className="flex -space-x-2 relative z-10 -mr-3">
                   <img
                     src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 80, quality: "auto", crop: "fill" })}
                     alt="Cyrille Delval"
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-background shadow-sm group-hover:scale-105 transition-transform duration-300"
+                    className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                   />
                   <img
                     src={cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 80, quality: "auto", crop: "fill" })}
                     alt="Elsa Lemarignier"
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-background shadow-sm group-hover:scale-105 transition-transform duration-300"
+                    className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
-                <span className="font-body text-xs md:text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300 leading-tight">
-                  Meet The<br />Curating Team
+                <span className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 text-xs md:text-sm rounded-full pl-5 pr-4 py-1.5 md:py-2 font-body">
+                  Meet The Curating Team
                 </span>
               </button>
             </motion.div>
