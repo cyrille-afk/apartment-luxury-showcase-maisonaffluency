@@ -28,13 +28,13 @@ const leftNavItems = [{
 }, {
   label: "Designers",
   mobileLabel: "Designers & Makers",
-  mobileSubtitle: "in situ",
+  mobileSubtitle: "On View",
   href: "#designers",
   icon: Palette,
 }, {
   label: "Collectible Design",
   mobileLabel: "Collectible Design",
-  mobileSubtitle: "in situ",
+  mobileSubtitle: "On View",
   href: "#collectibles",
   icon: Gem,
 }, {

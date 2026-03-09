@@ -1151,7 +1151,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { image: felixAgostiniEtrierFD, title: "Etrier", category: "Lighting", tags: ["Lighting", "Table Lamps"], materials: "Bronze", dimensions: "W 15 × D 15 × H 71 cm" },
       { image: felixAgostiniArcheoptryxFD, title: "Archeoptryx Double Skin", category: "Lighting", tags: ["Lighting", "Wall Lights"], materials: "Bronze & Parchemin", dimensions: "W 135.3 × D 24.6 × H 30 cm" },
       { image: felixAgostiniConsoleChevalFD, title: "Console Cheval", category: "Tables", tags: ["Tables", "Console"], materials: "Bronze, Cast Glass Top", dimensions: "W 150 × D 40.5 × H 91 cm" },
-      { image: felixAgostiniConsoleInsituFD, title: "Console Cheval — In Situ", category: "Tables", tags: ["Tables", "Console"], materials: "Bronze, Cast Glass Top", dimensions: "W 150 × D 40.5 × H 91 cm" },
+      { image: felixAgostiniConsoleInsituFD, title: "Console Cheval — On View", category: "Tables", tags: ["Tables", "Console"], materials: "Bronze, Cast Glass Top", dimensions: "W 150 × D 40.5 × H 91 cm" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/maisoncharlesparis/" },
@@ -2359,12 +2359,12 @@ const FeaturedDesigners = () => {
         >
           <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
-              Designers & Makers <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">In Situ</span>
+              Designers & Makers <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">On View</span>
             </h2>
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
             Discover the visionary designers whose exceptional work defines Maison Affluency. Each brings
-            their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture. <span className="text-[hsl(var(--gold))]">All <em>In Situ</em> Designers items are presented at our gallery.</span>
+            their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture. <span className="text-[hsl(var(--gold))]">All <em>On View</em> Designers items are presented at our gallery.</span>
           </p>
         </motion.div>
 
@@ -2741,7 +2741,7 @@ const FeaturedDesigners = () => {
                         <>
                           <span className="text-primary/40 text-xs tracking-[0.3em] mt-1">• • •</span>
                           <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                          <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>In Situ</em>:</span>
+                          <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em>:</span>
                           {designer.notableWorksLinks ? (
                             designer.notableWorksLinks.map((link, linkIdx) => (
                               <span key={linkIdx} className="flex items-center">
