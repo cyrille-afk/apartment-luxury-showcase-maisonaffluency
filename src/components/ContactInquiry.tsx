@@ -98,6 +98,9 @@ const ContactInquiry = () => {
           <h2 className="mb-6 font-display text-4xl text-foreground md:text-5xl">
             Visit Us By Appointment
           </h2>
+          <p className="font-body text-sm text-muted-foreground mb-4">
+            1 Grange Garden, Singapore 249631
+          </p>
           <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
             For architects, interior designers, and design connoisseurs interested
             in detailed and custom specifications, material sourcing, and/or collaborative opportunities.
