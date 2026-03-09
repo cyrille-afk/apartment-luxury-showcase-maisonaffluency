@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import { ChevronRight } from "lucide-react";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
