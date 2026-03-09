@@ -2364,7 +2364,7 @@ const FeaturedDesigners = () => {
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
             Discover the visionary designers whose exceptional work defines Maison Affluency. Each brings
-            their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture. <span className="text-[hsl(var(--gold))]">All <em>On View</em> Designers items are presented at our gallery.</span>
+            their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
           </p>
         </motion.div>
 
