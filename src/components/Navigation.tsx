@@ -371,7 +371,6 @@ const Navigation = () => {
                   onClick={() => handleNavClick(item.href)} 
                   className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap relative group text-foreground flex items-center gap-1.5"
                 >
-                  <item.icon className="h-3.5 w-3.5 text-[hsl(var(--accent))]" strokeWidth={1.5} />
                   {item.label}
                   <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
                 </button>
@@ -421,7 +420,6 @@ const Navigation = () => {
                     activeSection === item.href && "font-medium"
                   )}
                 >
-                  <item.icon className="h-3.5 w-3.5 text-[hsl(var(--accent))]" strokeWidth={1.5} />
                   {item.label}
                   <span className={cn(
                     "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
