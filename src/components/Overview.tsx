@@ -97,8 +97,8 @@ const Overview = () => {
             }} className="font-serif text-sm leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire — a curated venue where design and art congregate. This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
             </div>
 
-            {/* CTA — order-4 mobile, hidden on desktop (shown in row 2) */}
-            <div className="order-4 md:hidden">
+            {/* CTA — order-3 mobile, hidden on desktop (shown in row 2) */}
+            <div className="order-3 md:hidden">
               <motion.div initial={{
               opacity: 0,
               y: 20
