@@ -24,7 +24,7 @@ const Overview = () => {
       } : {}} transition={{
         duration: 0.8
       }} className="flex flex-col gap-6 md:gap-10">
-          {/* Header Row - Title and Stats side by side on mobile */}
+          {/* Title + Showroom description */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
             <div className="flex-1">
               <motion.p initial={{
@@ -38,7 +38,6 @@ const Overview = () => {
                 <button
                 onClick={() => scrollToSection("gallery")}
                 className="hover:text-foreground/70 transition-colors duration-300 cursor-pointer">
-                
                   Gallery Overview
                 </button>
               </motion.p>
@@ -56,7 +55,7 @@ const Overview = () => {
               </motion.h2>
             </div>
             
-            {/* Stats - Compact row on mobile */}
+            {/* Stats - After CTA on mobile, side on desktop */}
             <motion.div initial={{
             opacity: 0,
             y: 20
@@ -66,12 +65,11 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.4
-          }} className="flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
+          }} className="order-3 md:order-none flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
                <button
               onClick={() => scrollToSection("sociable-environment")}
               aria-label="View 5 atmospheres in the gallery"
               className="text-left cursor-pointer group transition-all duration-300 hover:scale-105">
-              
                 <div className="font-display text-2xl md:text-3xl text-primary animate-text-glow-pulse group-hover:text-accent group-hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300" aria-hidden="true">5</div>
                 <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300">Atmospheres</div>
               </button>
@@ -79,15 +77,14 @@ const Overview = () => {
               onClick={() => scrollToSection("designers")}
               aria-label="View 50+ designers works and collectible design pieces"
               className="text-left cursor-pointer group transition-all duration-300 hover:scale-105">
-              
                 <div className="font-display text-2xl md:text-3xl text-primary animate-text-glow-pulse group-hover:text-accent group-hover:[text-shadow:0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300" aria-hidden="true">50+</div>
                 <div className="font-body text-xs uppercase tracking-wider text-primary/80 group-hover:text-accent transition-all duration-300 leading-tight"><span className="hidden md:inline">Designers works and<br />collectible design pieces<br /><em>in situ</em></span><span className="md:hidden">Designers works and<br />collectible design pieces <em>in situ</em></span></div>
               </button>
             </motion.div>
           </div>
           
-          {/* Description and CTA */}
-          <div className="flex flex-col md:flex-row gap-4 md:gap-8 md:items-start">
+          {/* Designer names paragraph */}
+          <div className="order-1 md:order-none">
             <motion.p initial={{
             opacity: 0,
             y: 20
@@ -97,8 +94,11 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.5
-          }} className="font-serif text-sm md:text-base leading-relaxed text-foreground text-justify flex-1">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire<br />— a curated venue where design and art congregate.</motion.p>
+          }} className="font-serif text-sm md:text-base leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire<br />— a curated venue where design and art congregate.</motion.p>
+          </div>
 
+          {/* Meet The Curating Team CTA */}
+          <div className="order-2 md:order-none">
             <motion.div initial={{
             opacity: 0,
             y: 20
