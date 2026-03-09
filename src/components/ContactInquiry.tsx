@@ -101,7 +101,7 @@ const ContactInquiry = () => {
           <p className="font-body text-sm text-muted-foreground mb-4">
             1 Grange Garden, Singapore 249631
           </p>
-          <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto text-justify">
             For architects, interior designers, and design connoisseurs interested
             in detailed and custom specifications, material sourcing, and/or collaborative opportunities.
           </p>
