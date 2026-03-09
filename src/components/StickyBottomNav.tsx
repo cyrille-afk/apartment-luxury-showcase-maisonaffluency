@@ -13,7 +13,7 @@ const sectionItems = [
   { id: "brands", label: "Ateliers", icon: Building2 },
 ];
 
-const SCROLL_THRESHOLD = 300;
+const SCROLL_THRESHOLD = 600;
 const NAV_HEIGHT = 96;
 
 const StickyBottomNav = () => {
