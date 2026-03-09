@@ -518,7 +518,7 @@ const Gallery = () => {
             // Find original index for proper lightbox mapping
             const originalSectionIndex = galleryExperiences.indexOf(section);
             return <div key={section.experience} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-6 md:pt-0' : ''}`}>
-              {originalSectionIndex === 0 && <div id="sociable-environment" className="scroll-mt-[8.5rem] md:scroll-mt-32" style={{ pointerEvents: "none" }} aria-hidden="true" />}
+              {originalSectionIndex === 0 && <div id="sociable-environment" className="scroll-mt-[8.5rem] md:scroll-mt-[11rem]" style={{ pointerEvents: "none" }} aria-hidden="true" />}
               <motion.div initial={{
             opacity: 0,
             y: 20
