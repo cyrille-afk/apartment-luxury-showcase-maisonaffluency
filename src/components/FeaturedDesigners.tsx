@@ -2357,7 +2357,7 @@ const FeaturedDesigners = () => {
         >
           <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground">
-              Designers & Makers <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic">In Situ</span>
+              Designers & Makers <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">In Situ</span>
             </h2>
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
