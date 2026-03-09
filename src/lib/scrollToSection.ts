@@ -8,8 +8,9 @@
 export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth") {
   const navHeight = 96;
   // Extra padding for sections that need more breathing room below the nav
+  const isMobile = window.innerWidth < 768;
   const extraOffset: Record<string, number> = {
-    "sociable-environment": 16,
+    "sociable-environment": isMobile ? 16 : 40,
   };
   const instant = "instant" as ScrollBehavior;
 
