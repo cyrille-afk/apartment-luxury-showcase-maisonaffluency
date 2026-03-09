@@ -95,7 +95,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.6,
               delay: 0.5
-            }} className="font-serif text-base leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire — a curated venue where design and art congregate.</motion.p>
+            }} className="font-serif text-base md:text-base lg:text-lg leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire — a curated venue where design and art congregate.</motion.p>
             </div>
 
             {/* Gallery overview — order-3 mobile, hidden on desktop */}
@@ -109,7 +109,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.6,
               delay: 0.55
-            }} className="font-serif text-base leading-relaxed text-foreground text-justify">This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
+            }} className="font-serif text-base md:text-base lg:text-lg leading-relaxed text-foreground text-justify">This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
             </div>
 
             {/* CTA — order-4 mobile, hidden on desktop (shown in row 2) */}
@@ -160,7 +160,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.5
-          }} className="font-serif text-sm md:text-base leading-relaxed text-foreground text-justify flex-1">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire<br />— a curated venue where design and art congregate.</motion.p>
+          }} className="font-serif text-base md:text-base lg:text-lg leading-relaxed text-foreground text-justify flex-1">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire<br />— a curated venue where design and art congregate.</motion.p>
 
             <motion.div initial={{
             opacity: 0,
