@@ -641,7 +641,7 @@ const Collectibles = () => {
               </h2>
             </div>
             <p className="font-body text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed mb-4 text-justify">
-              Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance. <span className="text-[hsl(var(--gold))]">All Gallery Featured Collectibles are presented <em>in situ</em> at our gallery.</span>
+              Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance. <span className="text-[hsl(var(--gold))]">All <em>In Situ</em> Collectibles are presented at our gallery.</span>
             </p>
           </motion.div>
 
@@ -1036,7 +1036,7 @@ const Collectibles = () => {
                           <>
                             <span className="text-primary/40 text-xs tracking-[0.3em] mt-1">• • •</span>
                             <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-                              <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider">Gallery Featured:</span>
+                              <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>In Situ</em>:</span>
                               <span
                                 tabIndex={-1}
                                 onClick={(e) => {
