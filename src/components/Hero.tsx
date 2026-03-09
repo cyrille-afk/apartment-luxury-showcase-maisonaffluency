@@ -35,7 +35,7 @@ const Hero = () => {
           <p className="mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-cream/90 font-extrabold font-sans text-sm md:text-xl lg:text-2xl hero-fade-in-delayed-1">
           </p>
 
-          <h1 className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-5xl font-serif lg:text-6xl hero-fade-in-delayed-2">
+          <h1 className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl hero-fade-in-delayed-2">
             <button
               type="button"
               onClick={scrollToOverview}
@@ -46,7 +46,7 @@ const Hero = () => {
           </h1>
 
           <div className="inline-flex flex-col items-center md:items-end">
-            <p className="text-lg leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
+            <p className="text-base leading-relaxed text-white text-left font-serif md:text-lg lg:text-xl font-medium hero-fade-in-delayed-3">
               <span className="hidden md:inline">From Couture Furniture and Collectible Designs <em>On View</em>,
               <br /> To the World's most distinguished Furniture Houses
               <br /> and Design&nbsp;Workshops</span>
