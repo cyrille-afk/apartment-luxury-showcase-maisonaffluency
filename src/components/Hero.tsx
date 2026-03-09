@@ -48,12 +48,14 @@ const Hero = () => {
           <div className="inline-flex flex-col items-center md:items-end">
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-lg lg:text-xl font-medium hero-fade-in-delayed-3">
               <span className="hidden md:inline">From Couture Furniture and Collectible Designs Items,
-              <br /> discover Emerging Talents and Design Masters
-              <br /> <em>On View</em> At Our&nbsp;Gallery</span>
+              <br /> Discover Emerging Talents and Design Masters In Our Gallery
+              <br /> or Through Our Partners Network of the Best Ateliers
+              <br /> and Designer&nbsp;Workshops</span>
               <span className="md:hidden leading-[2.2] text-justify">From Couture Furniture and Collectible
-              <br />Designs Items, discover Emerging Talents
-              <br />and Design Masters <em>On View</em>
-              <br />At Our&nbsp;Gallery</span>
+              <br />Designs Items, Discover Emerging Talents
+              <br />and Design Masters In Our Gallery
+              <br />or Through Our Partners Network
+              <br />of the Best Ateliers and Designer&nbsp;Workshops</span>
             </p>
 
             <div className="mt-16 md:mt-10 flex flex-col items-start md:items-center gap-6">
