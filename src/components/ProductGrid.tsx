@@ -386,14 +386,10 @@ function singularizeSub(s: string): string {
                 <img
                   src={item.pick.image}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
-                  className="max-w-[90%] max-h-[90%] object-contain transition-transform duration-500"
+                  className="max-w-[90%] max-h-[90%] object-contain transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
-                {/* Magnifying glass icon — desktop hover only */}
-                <div className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/40 shadow-sm">
-                  <Maximize2 className="w-4 h-4 text-foreground/70" />
-                </div>
               </div>
               <div className="text-center mt-1">
                 <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-foreground/80 font-semibold">
