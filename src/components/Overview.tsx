@@ -66,7 +66,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.4
-          }} className="order-3 md:order-2 flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
+          }} className="order-5 md:order-2 flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
                <button
               onClick={() => scrollToSection("sociable-environment")}
               aria-label="View 5 atmospheres in the gallery"
@@ -97,7 +97,21 @@ const Overview = () => {
             }} className="font-serif text-sm md:text-base leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire<br />— a curated venue where design and art congregate.</motion.p>
             </div>
 
-            {/* CTA — order-3 mobile, hidden on desktop (shown in row 2) */}
+            {/* Gallery overview paragraph — order-3 mobile */}
+            <div className="order-3 md:hidden">
+              <motion.p initial={{
+              opacity: 0,
+              y: 20
+            }} animate={isInView ? {
+              opacity: 1,
+              y: 0
+            } : {}} transition={{
+              duration: 0.6,
+              delay: 0.55
+            }} className="font-serif text-sm md:text-base leading-relaxed text-foreground text-justify">This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism.<br />Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
+            </div>
+
+            {/* CTA — order-4 mobile, hidden on desktop (shown in row 2) */}
             <div className="order-4 md:hidden">
               <motion.div initial={{
               opacity: 0,
