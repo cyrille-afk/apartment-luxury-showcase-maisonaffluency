@@ -668,7 +668,7 @@ function singularizeSub(s: string): string {
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.3 }}
           onClick={scrollBackToGrid}
-          className="fixed bottom-20 left-4 md:bottom-auto md:left-auto md:top-28 md:right-10 z-50 flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background shadow-lg hover:shadow-xl font-body text-[11px] uppercase tracking-[0.15em] transition-all duration-300 hover:scale-105"
+          className="fixed bottom-20 left-4 md:bottom-auto md:left-auto md:top-1/2 md:-translate-y-1/2 md:right-10 z-50 flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background shadow-lg hover:shadow-xl font-body text-[11px] uppercase tracking-[0.15em] transition-all duration-300 hover:scale-105"
         >
           <ArrowUp className="h-3.5 w-3.5" />
           Back to Grid
