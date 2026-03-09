@@ -95,13 +95,13 @@ const Hero = () => {
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
-          className="flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-sm lg:text-base font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
+          className="flex items-center gap-2 px-5 py-2.5 lg:px-6 lg:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-xs lg:text-sm font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
         >
           Book a Viewing
         </button>
         <button
           onClick={() => scrollToSection("details")}
-          className="flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-sm lg:text-base font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
+          className="flex items-center gap-2 px-5 py-2.5 lg:px-6 lg:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-xs lg:text-sm font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
         >
           Trade Program
         </button>
