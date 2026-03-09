@@ -140,7 +140,7 @@ const Overview = () => {
                       className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                     />
                   </div>
-                  <span className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 text-xs rounded-full pl-4 pr-5 py-1.5 font-body">
+                  <span className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 text-base rounded-full pl-4 pr-5 py-1.5 font-body">
                     Meet The Curating Team
                   </span>
                 </button>
