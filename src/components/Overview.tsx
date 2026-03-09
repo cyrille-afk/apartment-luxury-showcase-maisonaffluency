@@ -66,7 +66,7 @@ const Overview = () => {
           } : {}} transition={{
             duration: 0.6,
             delay: 0.4
-          }} className="order-5 md:order-2 flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0">
+          }} className="order-5 md:order-2 flex items-start gap-8 md:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-6 shrink-0 bg-white rounded-lg px-5 py-3">
                <button
               onClick={() => scrollToSection("sociable-environment")}
               aria-label="View 5 atmospheres in the gallery"
