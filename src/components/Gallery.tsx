@@ -515,7 +515,7 @@ const Gallery = () => {
               </p>
             )}
             <h2 className="text-sm leading-relaxed md:text-3xl text-foreground text-justify px-1 md:px-2 font-serif lg:text-lg">
-              From Thierry Lemaire's Orsay Mds Centre Table to Hervé van der Straeten's MicMac Chandelier, from Hamrei's whimsical Pépé Chair to Jeremy Maxwell Wintrebert's Cloud Bulle Pendants, from Pierre Bonnefille's Bronze Painting and Stéphane CG Abstract Diasecs, Maison Affluency Singapore is a uniquely curated venue where design and art congregate
+              From Thierry Lemaire and Hervé van der Straeten to Pierre Bonnefille and Jeremy Maxwell Wintrebert — a curated venue where design and art congregate.
             </h2>
           </motion.div>
 
