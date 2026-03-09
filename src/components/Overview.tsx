@@ -130,14 +130,14 @@ const Overview = () => {
                 >
                   <div className="flex -space-x-2 relative z-10 -ml-3">
                     <img
-                      src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 96, quality: "auto", crop: "fill" })}
+                      src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 128, quality: "auto", crop: "fill" })}
                       alt="Cyrille Delval"
-                      className="w-14 h-14 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                     />
                     <img
-                      src={cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 96, quality: "auto", crop: "fill" })}
+                      src={cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 128, quality: "auto", crop: "fill" })}
                       alt="Elsa Lemarignier"
-                      className="w-14 h-14 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                     />
                   </div>
                   <span className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 text-xs rounded-full pl-4 pr-5 py-1.5 font-body">
@@ -178,14 +178,14 @@ const Overview = () => {
               >
                 <div className="flex -space-x-2 relative z-10 -mr-3">
                   <img
-                    src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 80, quality: "auto", crop: "fill" })}
+                    src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 128, quality: "auto", crop: "fill" })}
                     alt="Cyrille Delval"
-                    className="w-14 h-14 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                   />
                   <img
-                    src={cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 80, quality: "auto", crop: "fill" })}
+                    src={cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 128, quality: "auto", crop: "fill" })}
                     alt="Elsa Lemarignier"
-                    className="w-14 h-14 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
                 <span className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 text-sm rounded-full pl-5 pr-4 py-2 font-body">
