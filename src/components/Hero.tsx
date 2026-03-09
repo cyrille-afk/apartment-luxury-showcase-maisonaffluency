@@ -30,8 +30,8 @@ const Hero = () => {
       </div>
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
-      <div className="relative z-10 h-full px-4 pb-32 pt-[34%] md:px-12 md:pb-20 md:pt-[20%] lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
-        <div className="max-w-4xl md:text-left hero-fade-in">
+      <div className="relative z-10 h-full px-4 pb-32 pt-[34%] md:px-12 md:pb-20 md:pt-[20%] lg:px-20 flex-col border rounded-none opacity-100 shadow-none flex items-end justify-start md:justify-start md:items-end">
+        <div className="max-w-4xl text-right hero-fade-in">
           <p className="mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-cream/90 font-extrabold font-sans text-sm md:text-xl lg:text-2xl hero-fade-in-delayed-1">
           </p>
 
@@ -39,14 +39,14 @@ const Hero = () => {
             <button
               type="button"
               onClick={scrollToOverview}
-              className="text-left text-inherit font-inherit leading-inherit cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-none p-0 m-0"
+              className="text-right text-inherit font-inherit leading-inherit cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-none p-0 m-0"
             >
               Discover World Masters in Furniture &amp; Collectible Design
             </button>
           </h1>
 
           <div className="inline-flex flex-col items-center md:items-end">
-            <p className="text-base leading-relaxed text-white text-left font-serif md:text-lg lg:text-xl font-medium hero-fade-in-delayed-3">
+            <p className="text-base leading-relaxed text-white text-right font-serif md:text-lg lg:text-xl font-medium hero-fade-in-delayed-3">
               <span className="hidden md:inline">From Couture Furniture and Collectible Designs <em>On View</em>,
               <br /> To the World's most distinguished Furniture Houses
               <br /> and Design&nbsp;Workshops</span>
@@ -55,7 +55,7 @@ const Hero = () => {
               <br />Furniture Houses and Design&nbsp;Workshops</span>
             </p>
 
-            <div className="mt-16 md:mt-10 flex flex-col items-start md:items-center gap-6">
+            <div className="mt-16 md:mt-10 flex flex-col items-end md:items-end gap-6">
               <button
                 onClick={scrollToOverview}
                 className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-3.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm md:backdrop-blur-xl border border-white/30 hover:border-white/50 text-white text-sm md:text-base font-serif font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.25)] hero-fade-in-delayed-4"
