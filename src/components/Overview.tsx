@@ -108,7 +108,7 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.6,
               delay: 0.55
-            }} className="font-serif text-sm leading-relaxed text-foreground text-justify">This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
+            }} className="font-serif text-base leading-relaxed text-foreground text-justify">This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
             </div>
 
             {/* CTA — order-4 mobile, hidden on desktop (shown in row 2) */}
