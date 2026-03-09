@@ -2,7 +2,6 @@ import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackCTA } from "@/lib/analytics";
 
-
 // Use a single fallback src (smallest useful size); srcSet handles responsive selection
 const HERO_ID = "AffluencySG_194-22.jpg_macpwj";
 const heroImageFallback = cloudinaryUrl(HERO_ID, { width: 320, quality: "auto:good", crop: "fill" });
@@ -49,13 +48,13 @@ const Hero = () => {
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
               <span className="hidden md:inline">From Couture Furniture and Collectible Designs Items,
               <br /> Discover Emerging Talents and Design Masters In Our Gallery
-              <br /> or Through Our Partners' Network of the Best Ateliers
-              <br /> and Designer&nbsp;Workshops</span>
+              <br /> or Through the Best Ateliers
+              <br /> and Designer Workshops We Partner&nbsp;With</span>
               <span className="md:hidden leading-[2.2] text-justify">From Couture Furniture and Collectible
               <br />Designs Items, Discover Emerging Talents
               <br />and Design Masters In Our Gallery
-              <br />or Through Our Partners' Network
-              <br />of the Best Ateliers and Designer&nbsp;Workshops</span>
+              <br />or Through the Best Ateliers
+              <br />and Designer Workshops We Partner&nbsp;With</span>
             </p>
 
             <div className="mt-16 md:mt-10 flex flex-col items-start md:items-center gap-6">
