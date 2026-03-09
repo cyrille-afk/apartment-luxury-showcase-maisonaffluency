@@ -83,7 +83,7 @@ const Overview = () => {
               </button>
             </motion.div>
 
-            {/* Designer names — order-2 mobile, hidden on desktop (shown in row 2) */}
+            {/* Designer names + Gallery overview — order-2 mobile, hidden on desktop */}
             <div className="order-2 md:hidden">
               <motion.p initial={{
               opacity: 0,
@@ -94,25 +94,11 @@ const Overview = () => {
             } : {}} transition={{
               duration: 0.6,
               delay: 0.5
-            }} className="font-serif text-sm md:text-base leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire<br />— a curated venue where design and art congregate.</motion.p>
+            }} className="font-serif text-sm leading-relaxed text-foreground text-justify">From Jeremy Maxwell Wintrebert and Pierre Bonnefille to Hervé van der Straeten and Thierry Lemaire — a curated venue where design and art congregate. This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism. Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
             </div>
 
-            {/* Gallery overview paragraph — order-3 mobile */}
+            {/* CTA — order-3 mobile, hidden on desktop (shown in row 2) */}
             <div className="order-3 md:hidden">
-              <motion.p initial={{
-              opacity: 0,
-              y: 20
-            }} animate={isInView ? {
-              opacity: 1,
-              y: 0
-            } : {}} transition={{
-              duration: 0.6,
-              delay: 0.55
-            }} className="font-serif text-sm md:text-base leading-relaxed text-foreground text-justify">This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism.<br />Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.</motion.p>
-            </div>
-
-            {/* CTA — order-4 mobile, hidden on desktop (shown in row 2) */}
-            <div className="order-4 md:hidden">
               <motion.div initial={{
               opacity: 0,
               y: 20
