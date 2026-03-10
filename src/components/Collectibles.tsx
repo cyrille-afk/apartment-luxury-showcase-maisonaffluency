@@ -135,6 +135,7 @@ export const collectibleDesigners: Array<{
       { image: emmanuelBabledPick5, title: "Siliceaarenaria — Vessels", category: "Decorative Object", subcategory: "Vessel", materials: "Murano blown glass (Venini)", dimensions: "Ø25 × H22 cm (each)", edition: "" },
       { image: emmanuelBabledPick6, title: "Etna Cabinet — Stripes", category: "Storage", subcategory: "Cabinet", materials: "Murano glass doors • Lava stone legs", dimensions: "H85 × L120 × D45 cm", edition: "" },
       { image: emmanuelBabledPick7, title: "Osmosi — Side Table", category: "Tables", subcategory: "Side Table", materials: "Carrara marble • Murano blown glass", dimensions: "H55 × Ø60 cm", edition: "" },
+      { image: emmanuelBabledPick8, title: "OSMOSIS Series — Sculptural Book Cover", category: "Decorative Object", subcategory: "Sculptural Object", materials: "Murano blown glass", dimensions: "", edition: "" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/emmanuelbabled" },
