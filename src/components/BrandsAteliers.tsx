@@ -2060,6 +2060,17 @@ const BrandsAteliers = () => {
   // Brands that should use FeaturedDesigners data instead of Collectibles
   const preferFeatured = new Set(["Pierre Bonnefille", "Thierry Lemaire"]);
 
+  const preloadPickImages = useCallback((brandName: string, index: number) => {
+    const designerId = brandToDesignerMap[brandName];
+    if (!designerId) return Promise.resolve();
+    const designer =
+      atelierOnlyPicks[designerId] as any ||
+      (!preferFeatured.has(brandName) && collectibleDesigners.find(d => d.id === designerId || d.name === brandName)) ||
+      featuredDesigners.find(d => d.id === designerId);
+    if (!designer?.curatorPicks?.length) return Promise.resolve();
+    return warmCuratorPickSet(designer.curatorPicks, index);
+  }, []);
+
   const picksDesigner = useMemo(() => {
     if (!picksDesignerName) return null;
     const designerId = brandToDesignerMap[picksDesignerName];
@@ -2073,17 +2084,6 @@ const BrandsAteliers = () => {
     }
     return featuredDesigners.find(d => d.id === designerId) || null;
   }, [picksDesignerName]);
-
-  const preloadPickImages = useCallback((brandName: string, index: number) => {
-    const designerId = brandToDesignerMap[brandName];
-    if (!designerId) return Promise.resolve();
-    const designer =
-      atelierOnlyPicks[designerId] as any ||
-      (!preferFeatured.has(brandName) && collectibleDesigners.find(d => d.id === designerId || d.name === brandName)) ||
-      featuredDesigners.find(d => d.id === designerId);
-    if (!designer?.curatorPicks?.length) return Promise.resolve();
-    return warmCuratorPickSet(designer.curatorPicks, index);
-  }, []);
 
   const openPicks = useCallback((brandName: string, index?: number) => {
     const idx = index ?? 0;
