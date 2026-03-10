@@ -798,7 +798,7 @@ const Gallery = () => {
                      <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
                      <GalleryHotspots
                        imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
-                       visible={!imageZoomed && !isExpanded}
+                       visible={!imageZoomed}
                      />
                       {/* Close button — desktop: outside image bottom-right */}
                       <button
