@@ -98,16 +98,16 @@ export function warmCuratorPickSet(picks: CuratorPickWithImage[], startIndex = 0
     deferredIndices.forEach((pickIndex, orderIndex) => {
       const src = picks[pickIndex]?.image;
       if (!src) return;
-      window.setTimeout(() => {
+      globalThis.setTimeout(() => {
         void preloadImage(src, "low");
       }, orderIndex * 80);
     });
   };
 
-  if ("requestIdleCallback" in window) {
+  if (window.requestIdleCallback) {
     window.requestIdleCallback(scheduleDeferred, { timeout: 1200 });
   } else {
-    window.setTimeout(scheduleDeferred, 240);
+    globalThis.setTimeout(scheduleDeferred, 240);
   }
 
   return preloadImage(picks[order[0]]?.image, "high");

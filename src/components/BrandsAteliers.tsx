@@ -2013,9 +2013,8 @@ const BrandsAteliers = () => {
     }
   }, [picksDesignerName, picksIndex]);
 
-  // Deep-link: parse #curators/{designerId}/{index} on mount, hash changes, and custom events
   useEffect(() => {
-    const openFromHash = (hashStr?: string) => {
+    const openFromHash = async (hashStr?: string) => {
       const hash = hashStr || window.location.hash;
       const match = hash.match(/#\/?curators\/([^/]+)(?:\/(\d+))?$/);
       if (match) {
@@ -2023,12 +2022,12 @@ const BrandsAteliers = () => {
         const index = match[2] ? parseInt(match[2], 10) : 0;
         const brandName = designerIdToBrandMap[designerId];
         if (brandName) {
-          preloadPickImages(brandName, index);
+          await preloadPickImages(brandName, index);
           const applyOpen = () => {
             setPicksDesignerName(brandName);
             setPicksIndex(index);
             setPicksZoomed(false);
-            setPicksImageLoaded(false);
+            setPicksImageLoaded(true);
           };
 
           if (hashStr) {
@@ -2041,19 +2040,21 @@ const BrandsAteliers = () => {
     };
 
     const handleCustomEvent = (e: Event) => {
-      openFromHash((e as CustomEvent).detail);
+      void openFromHash((e as CustomEvent).detail);
     };
 
-    const handleHashChange = () => openFromHash();
+    const handleHashChange = () => {
+      void openFromHash();
+    };
 
-    openFromHash();
+    void openFromHash();
     window.addEventListener('hashchange', handleHashChange);
     window.addEventListener('open-curators-pick', handleCustomEvent);
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
       window.removeEventListener('open-curators-pick', handleCustomEvent);
     };
-  }, []);
+  }, [preloadPickImages]);
 
   // Brands that should use FeaturedDesigners data instead of Collectibles
   const preferFeatured = new Set(["Pierre Bonnefille", "Thierry Lemaire"]);
