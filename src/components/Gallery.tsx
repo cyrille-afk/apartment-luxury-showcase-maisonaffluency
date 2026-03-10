@@ -911,12 +911,7 @@ const Gallery = () => {
                       />
                     ))}
                   </div>
-                  {/* Description */}
-                  <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
-                    <p className="text-base text-white/70 font-body max-w-2xl text-justify">
-                      {currentSectionItems[currentItemIndex]?.description}
-                    </p>
-                  </div>
+                  <div className="pb-6" />
                 </ExpandedScrollContainer>
 
                {/* Next button */}
