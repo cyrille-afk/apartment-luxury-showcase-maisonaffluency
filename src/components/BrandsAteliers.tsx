@@ -2072,25 +2072,15 @@ const BrandsAteliers = () => {
     return featuredDesigners.find(d => d.id === designerId) || null;
   }, [picksDesignerName]);
 
-  // Eagerly preload curator pick images for a designer to avoid slow first load
   const preloadPickImages = useCallback((brandName: string, index: number) => {
     const designerId = brandToDesignerMap[brandName];
-    if (!designerId) return;
+    if (!designerId) return Promise.resolve();
     const designer =
       atelierOnlyPicks[designerId] as any ||
       (!preferFeatured.has(brandName) && collectibleDesigners.find(d => d.id === designerId || d.name === brandName)) ||
       featuredDesigners.find(d => d.id === designerId);
-    if (!designer?.curatorPicks?.length) return;
-    // Preload current + adjacent
-    const indices = [index];
-    if (designer.curatorPicks.length > 1) {
-      indices.push((index + 1) % designer.curatorPicks.length);
-      indices.push((index - 1 + designer.curatorPicks.length) % designer.curatorPicks.length);
-    }
-    indices.forEach(i => {
-      const src = designer.curatorPicks[i]?.image;
-      if (src) { const img = new Image(); img.src = src; }
-    });
+    if (!designer?.curatorPicks?.length) return Promise.resolve();
+    return warmCuratorPickSet(designer.curatorPicks, index);
   }, []);
 
   const openPicks = useCallback((brandName: string, index?: number) => {
