@@ -262,7 +262,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
     ],
   },
   "ozone-light": {
-    name: "Ozone Light",
+    name: "Ozone",
     curatorPicks: [
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772453277/Screen_Shot_2026-03-02_at_8.07.31_PM_yi3hfp.png",
