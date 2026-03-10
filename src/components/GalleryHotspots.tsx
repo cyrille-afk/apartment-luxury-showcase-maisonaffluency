@@ -126,6 +126,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
 
   const handleDragMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!draggingId || !editMode) return;
+    didDragRef.current = true;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
