@@ -831,7 +831,7 @@ const Gallery = () => {
                       )}
                   </div>
                   {/* Dot indicators */}
-                  <div className="flex justify-center gap-1.5 mt-3 shrink-0">
+                  <div className="flex justify-center gap-1.5 mt-1.5 shrink-0">
                     {currentSectionItems.map((_, i) => (
                       <button
                         key={i}
