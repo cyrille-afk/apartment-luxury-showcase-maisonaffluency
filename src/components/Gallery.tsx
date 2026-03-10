@@ -245,15 +245,35 @@ const Gallery = () => {
     if (!("ontouchstart" in window)) return false;
     return !sessionStorage.getItem("__hotspot_hint_seen");
   });
+  const hotspotHintRef = useRef<HTMLDivElement>(null);
+  const [hintVisible, setHintVisible] = useState(false);
 
+  // Only start the dismiss timer once the hint is actually visible on screen
   useEffect(() => {
     if (!showHotspotHint) return;
+    const el = hotspotHintRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHintVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [showHotspotHint]);
+
+  useEffect(() => {
+    if (!hintVisible) return;
     const timer = setTimeout(() => {
       setShowHotspotHint(false);
       sessionStorage.setItem("__hotspot_hint_seen", "1");
     }, 4000);
     return () => clearTimeout(timer);
-  }, [showHotspotHint]);
+  }, [hintVisible]);
 
   // Embla carousel for mobile lightbox
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, startIndex: currentItemIndex });
