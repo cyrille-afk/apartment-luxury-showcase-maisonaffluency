@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Plus, X, Trash2, GripVertical } from "lucide-react";
+import { Plus, X, Trash2, GripVertical, Pencil, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
