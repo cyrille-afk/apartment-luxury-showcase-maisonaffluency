@@ -17,6 +17,7 @@ interface Hotspot {
 interface GalleryHotspotsProps {
   imageIdentifier: string;
   visible: boolean;
+  onCloseLightbox?: () => void;
 }
 
 interface PendingHotspot {
@@ -24,7 +25,7 @@ interface PendingHotspot {
   y_percent: number;
 }
 
-const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => {
+const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox }: GalleryHotspotsProps) => {
   const isMobile = useIsMobile();
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -278,15 +279,17 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
                             onClick={(e) => {
                               e.stopPropagation();
                               const url = hotspot.link_url!;
-                              if (url.match(/^#\/?curators\//) || url.startsWith('/#curators/')) {
-                                // Normalize to #curators/... format
-                                let hash = url;
-                                if (url.startsWith('/#')) hash = url.slice(1);
-                                if (hash.startsWith('#/curators/')) hash = '#curators/' + hash.slice('#/curators/'.length);
-                                window.dispatchEvent(new CustomEvent('open-curators-pick', { detail: hash }));
-                              } else {
-                                window.location.href = url;
-                              }
+                              onCloseLightbox?.();
+                              setTimeout(() => {
+                                if (url.match(/^#\/?curators\//) || url.startsWith('/#curators/')) {
+                                  let hash = url;
+                                  if (url.startsWith('/#')) hash = url.slice(1);
+                                  if (hash.startsWith('#/curators/')) hash = '#curators/' + hash.slice('#/curators/'.length);
+                                  window.dispatchEvent(new CustomEvent('open-curators-pick', { detail: hash }));
+                                } else {
+                                  window.location.href = url;
+                                }
+                              }, 300);
                             }}
                           >
                             View details →
