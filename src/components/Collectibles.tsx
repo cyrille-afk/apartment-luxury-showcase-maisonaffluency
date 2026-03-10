@@ -1144,7 +1144,7 @@ const Collectibles = () => {
                                 <img
                                   src={(designer as any).logoUrl}
                                   alt={`${designer.name} logo`}
-                                  className="h-10 w-auto object-contain md:hidden"
+                                  className="h-14 w-auto object-contain md:hidden"
                                 />
                               )}
                               <button
