@@ -374,6 +374,21 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
+  "jindrich-halabala": {
+    name: "Jindrich Halabala",
+    curatorPicks: [
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773134242/art-deco-model-h-269-lounge-chair-by-jindrich-halabala-for-up-zavody-1930s-1_zc1i1v.jpg",
+        title: "Art Deco 269 H Lounge Chair",
+        subtitle: "c.1970",
+        category: "Seating",
+        subcategory: "Armchairs",
+        tags: ["Seating", "Armchairs"],
+        materials: "Bentwood beech frame\nOriginal upholstery",
+        dimensions: "Vintage piece — dimensions vary",
+      },
+    ],
+  },
 };
 
 // Gallery image index mapping (based on flattened gallery items order)
@@ -1596,6 +1611,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Ozone": "ozone-light",
   "Victoria Magniant": "victoria-magniant",
   "Poltrona Frau": "poltrona-frau",
+  "Jindrich Halabala": "jindrich-halabala",
 };
 
 // Reverse map: designer ID → brand name (for deep-link resolution)
