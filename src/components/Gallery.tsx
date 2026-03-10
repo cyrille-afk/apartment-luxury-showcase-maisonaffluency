@@ -239,6 +239,22 @@ const Gallery = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
 
+  // Pulsing hotspot hint — show once per session on the first hotspot section image
+  const [showHotspotHint, setShowHotspotHint] = useState(() => {
+    if (typeof window === "undefined") return false;
+    if (!("ontouchstart" in window)) return false;
+    return !sessionStorage.getItem("__hotspot_hint_seen");
+  });
+
+  useEffect(() => {
+    if (!showHotspotHint) return;
+    const timer = setTimeout(() => {
+      setShowHotspotHint(false);
+      sessionStorage.setItem("__hotspot_hint_seen", "1");
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [showHotspotHint]);
+
   // Embla carousel for mobile lightbox
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, startIndex: currentItemIndex });
 
