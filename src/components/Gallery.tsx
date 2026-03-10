@@ -23,6 +23,7 @@ const boudoirImage = g("boudoir_ll5spn");
 const bedroomAltImage = g("bedroom-alt_yk0j0d");
 const bedroomThirdImage = g("bedroom-third_ol56sx");
 const bespokeSofaImage = g("bespoke-sofa_gxidtx");
+const sunLitReadingImage = g("IMG_2402_y3atdm");
 const artMasterBronzeImage = g("art-master-bronze_hf6bad");
 const detailsConsoleImage = g("details-console_hk6uxt");
 const intimateDiningImage = g("intimate-dining_ux4pee");
@@ -58,7 +59,7 @@ const galleryExperiences = [{
     title: "Panoramic Cityscape Views",
     description: ""
   }, {
-    image: "/gallery/sociable-4.jpeg",
+    image: sunLitReadingImage,
     title: "A Sun Lit Reading Corner",
     description: ""
   }]
