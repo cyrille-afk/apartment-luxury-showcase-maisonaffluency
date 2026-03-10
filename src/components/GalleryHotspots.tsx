@@ -202,17 +202,17 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
                 setActiveId(activeId === hotspot.id ? null : hotspot.id);
               }
             }}
-            className={`relative w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm border border-black/10 flex items-center justify-center text-black hover:bg-white hover:scale-110 transition-all duration-200 shadow-lg ${editMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
+            className={`relative w-5 h-5 rounded-full bg-white/90 backdrop-blur-sm border border-black/10 flex items-center justify-center text-black hover:bg-white hover:scale-110 transition-all duration-200 shadow-lg ${editMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
             aria-label={`View details for ${hotspot.product_name}`}
           >
             <AnimatePresence mode="wait">
               {activeId === hotspot.id ? (
                 <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-2.5 h-2.5" />
                 </motion.div>
               ) : (
                 <motion.div key="plus" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-2.5 h-2.5" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -313,8 +313,8 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
             transform: "translate(-50%, -50%)",
           }}
         >
-          <div className="w-7 h-7 rounded-full bg-amber-400 border-2 border-amber-600 flex items-center justify-center shadow-lg">
-            <Plus className="w-3.5 h-3.5 text-amber-900" />
+          <div className="w-5 h-5 rounded-full bg-amber-400 border-2 border-amber-600 flex items-center justify-center shadow-lg">
+            <Plus className="w-2.5 h-2.5 text-amber-900" />
           </div>
           {/* Form */}
           <div
