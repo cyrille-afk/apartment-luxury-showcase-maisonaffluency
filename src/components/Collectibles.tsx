@@ -1155,7 +1155,6 @@ const Collectibles = () => {
                               </span>
                             )
                           ))}
-                          {/* WhatsApp share button — mobile only (desktop version is in trigger) */}
                           <WhatsAppShareButton
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1164,10 +1163,22 @@ const Collectibles = () => {
                                 }}
                                 label={`Share ${designer.name} on WhatsApp`}
                                 hideOn="desktop"
-                                variant="branded"
+                                variant="prominent"
                               />
                         </div>
                       )}
+
+                      {/* Mobile logo — positioned at bottom-right, separate from other elements */}
+                      {(designer as any).logoUrl && (
+                        <div className="flex justify-end mt-3 md:hidden">
+                          <img
+                            src={(designer as any).logoUrl}
+                            alt={`${designer.name} logo`}
+                            className="h-16 w-auto object-contain"
+                          />
+                        </div>
+                      )}
+
                     </div>
                   </AccordionContent>
               </AccordionItem>
