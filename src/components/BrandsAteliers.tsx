@@ -417,6 +417,20 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
+  "cazes-conquet": {
+    name: "Cazes & Conquet",
+    curatorPicks: [
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773147405/Chair_Augusta_02_m7ochq.jpg",
+        title: "Augusta Dining Chair",
+        category: "Seating",
+        subcategory: "Chairs",
+        tags: ["Seating", "Chairs"],
+        materials: "Natural Oak structure · Fabric or Leather seat",
+        dimensions: "W 48 × D 51 × H 75 cm",
+      },
+    ],
+  },
 };
 
 // Gallery image index mapping (based on flattened gallery items order)
