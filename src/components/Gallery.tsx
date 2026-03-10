@@ -70,19 +70,19 @@ const galleryExperiences = [{
   items: [{
     image: intimateDiningImage,
     title: "A Dreamy Tuscan Landscape",
-    description: "Dining Table: Atelier Pendhapa's Astra Dining Table, Dining Chairs: Hamrei's Pépé Custom Chairs in FJ Hamikian Fabric, Pendant Lights: Jeremy Maxwell Wintrebert's Murano Cloud Bulle Pendants, Blue Vessel: Milan Pekař's Crystalline Vase Volume 3, Pierre Frey's Tuscan Journey Wallcover"
+    description: ""
   }, {
     image: intimateTableImage,
     title: "A Highly Customised Dining Room",
-    description: "Dining Table: Atelier Pendhapa's Astra Dining Table, Dining Chairs: Hamrei's Pépé Custom Chairs in FJ Hamikian Fabric, Blue Vessel: Milan Pekař's Crystalline Vase Volume 3, Pierre Frey's Tuscan Journey Wallcover"
+    description: ""
   }, {
     image: intimateLoungeImage,
     title: "A Relaxed Setting",
-    description: "Armchair: Forest & Giaconia's BOB Armchair for Delcourt Collection, Side Table: Alinea Design Objects' Angelo M Side Table, Mirror: Kiko Lopez' Shadow Drawings (Unique Piece), Cushion: Takayokaya's Ojami Cushion, Vessel: Milan Pekař's Crystalline Green Vessel Volume 5"
+    description: ""
   }, {
     image: cloudinaryUrl("IMG_2133_wtxd62", { width: 1200, quality: "auto:good", crop: "fill" }),
     title: "A Colourful Nook",
-    description: "Armchair: Forest & Giaconia's BOB Armchair for Delcourt Collection, Side Table: Alinea Design Objects' Angelo M Side Table, Mirror: Kiko Lopez' Shadow Drawings (Unique Piece), Cushion: Takayokaya's Ojami Cushion, Ottoman: Bina Baitel's Sublime Ottoman M in Métaphores Fabric, Vessel: Milan Pekař's Crystalline Green Vessel Volume 5"
+    description: ""
   }]
 }, {
   experience: "A Personal Sanctuary",
@@ -91,19 +91,19 @@ const galleryExperiences = [{
   items: [{
     image: boudoirImage,
     title: "A Sophisticated Boudoir",
-    description: "Sofa/Loveseat: Nika Zupanc's Stardust Loveseat for Sé Collections, Desk: BdM's Lyric Desk, Chair: Hamrei's Pépé Chair, Table Lamp: Made in Kira's Toshiro Lamp, Chandelier: Nathalie Ziegler's Custom Saint-Just Glass Chandelier, Vessel: Nathalie Ziegler's Gold Leaves+Glass Snake Vessel (Unique Piece)"
+    description: ""
   }, {
     image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,e_brightness:-15/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg",
     title: "A Jewelry Box Like Setting",
-    description: "Desk Close-Up: BdM's Lyric Desk, Chair: Hamrei's Pépé Chair, Lamp: Félix Agostini's Etrier Lamp - Charles Paris, Sofa/Loveseat: Nika Zupanc's Stardust Loveseat for Sé Collections"
+    description: ""
   }, {
     image: bedroomSecondImage,
     title: "A Serene Decor",
-    description: "Sofa/Loveseat: Nika Zupanc's Stardust Loveseat for Sé Collections, Floor Lamp: Apparatus' Metronome Reading Floor Lamp"
+    description: ""
   }, {
     image: artMasterBronzeImage,
     title: "A Design Treasure Trove",
-    description: "Top Left Box: Alexander Lamont's Straw Marquetry Mantle Box, Painting: Pierre Bonnefille's Bronze Painting 204, Bookcase: Baleri Italia's Marble Carved and Solid Wood Plato Bookcase"
+    description: ""
   }]
 }, {
   experience: "A Calming and Dreamy Environment",
@@ -112,19 +112,19 @@ const galleryExperiences = [{
   items: [{
     image: bedroomImage,
     title: "A Masterful Suite",
-    description: "Rug: Zanellato and Bortotto's Giudecca Rug (Custom) for CC-Tapis, Bed Throw: Celso de Lemos' Silk Bed Throw, Chandelier: Hervé van der Straeten's Bronze MicMac Chandelier, Nightstand: Adam Courts' Villa Pedestal for Okha, Table Lamps: Atelier DeMichelis' Bronze Bud Table Lamps (Edition of 20), Vessel: Milan Pekař's Crystalline Blue Vessel Volume 5, Nightstand Rug: Pinton 1867 'After the Rain' Custom Rug, Iksel's Brunelleschi Perspective Wallcover"
+    description: ""
   }, {
     image: bedroomThirdImage,
     title: "Design Tableau",
-    description: "Console: Damien Langlois-Meurinne's Ooh La La Console for Sé Collections, Table Lamp: Toni Grilo's Marble Marie Lamp for Hayman Editions, Mirror: Kiko Lopez' Silver Glass Hammer Mirror (Unique Piece), Bench: Gallery S.Bensimon's MB02 Bench, Candle: Dan Yeffet's Lyra Marble Candle for oOumm"
+    description: ""
   }, {
     image: "/gallery/calming-2.jpg",
     title: "A Venitian Cocoon",
-    description: "Rug: CC-Tapis Giudecca Rug (Custom), Bed Throw: Peter Reed 1861's Riyad Double Faced Throw and Cushions, Chandelier: Hervé van der Straeten's Bronze MicMac Chandelier, Nightstand: Adam Courts' Villa Pedestal for Okha, Table Lamps: Atelier DeMichelis' Bronze Bud Table Lamps (Edition of 20), Console: Damien Langlois-Meurinne's Ooh La La Console for Sé Collections, Table Lamp: Toni Grilo's Marble Marie Lamp for Hayman Editions, Mirror: Kiko Lopez' Silver Glass Hammer Mirror (Unique Piece), Bench: Gallery S.Bensimon's MB02 Bench, Candle: Dan Yeffet's Lyra Marble Candle for oOumm"
+    description: ""
   }, {
     image: bedroomAltImage,
     title: "Unique By Design Vignette",
-    description: "Nightstand: Adam Courts' Villa Pedestal for Okha, Table Lamps: Atelier DeMichelis' Bronze Bud Table Lamps (Edition of 20), Nightstand Rug: Pinton 1867 'After the Rain' Custom Rug, Iksel's Brunelleschi Perspective Wallcover, Curtains: Pierre Frey's Le Manach Fountain Toile de Tours"
+    description: ""
   }]
 }, {
   experience: "A Small Room with Massive Personality",
@@ -133,19 +133,19 @@ const galleryExperiences = [{
   items: [{
     image: smallRoomBedroomImage,
     title: "An Artistic Statement",
-    description: "Wall Light: Felix Millory Martell Wall Lamp for Entrelacs, Table Lamp: Apparatus Studio Lantern, Side Table: Reda Amalou's Eggshell DOT Side Table, Armchair: Pierre Frey's Kagura Headboard Fabric, Wallcovering: Pierre Frey's Natte, Bed Throw: Peter Reed 1861's Riyad Double Faced Throw"
+    description: ""
   }, {
     image: smallRoomPersonalityImage,
     title: "Compact Elegance",
-    description: "Headboard: Pierre Frey's Kagura Fabric, Apparatus Studio Lantern Table, Reda Amalou Eggshell DOT side table, Pierre Frey Kagura and Kasimir Fabrics, Pierre Frey Natte Wallcovering, Peter Reed's Riyad Double Faced Throw"
+    description: ""
   }, {
     image: smallRoomVaseImage,
     title: "Yellow Crystalline",
-    description: "Vessel: Milan Pekař's Yellow Crystalline Vessel Volume 5, Bed Throw: Peter Reed 1861's Riyad Double Faced Throw"
+    description: ""
   }, {
     image: smallRoomChairImage,
     title: "Golden Hour",
-    description: "Bar/Counter Stool: Yabu Pushelberg's Park Place Stool for Man of Parts, Side Table: Jaime Hayon's Time Piece Ceramic for Sé Collections"
+    description: ""
   }]
 }, {
   experience: "Home Office with a View",
@@ -154,19 +154,19 @@ const galleryExperiences = [{
   items: [{
     image: homeOfficeDeskImage,
     title: "A Workspace of Distinction",
-    description: "Executive Desk: Bernt Petersen 4-Drawer Desk, Wall Lamp at Right of Desk: Kheops Wall Lamp by Kelly Boukobza for Entrelacs, Table Lamp at Left: RoWin' Atelier's None II Table Lamp, Pendant Light: Mernøe N1 Pendant, Office Chair: Vitra Eames Soft Pad EA 219 by Charles & Ray Eames"
+    description: ""
   }, {
     image: homeOfficeDesk2Image,
     title: "Refined Details",
-    description: "Executive Desk: Bernt Petersen 4-Drawer Desk, Table Lamp: RoWin' Atelier's None II Table Lamp (Unique Piece)"
+    description: ""
   }, {
     image: homeOffice3Image,
     title: "Light & Focus",
-    description: "Executive Desk: Bernt Petersen 4-Drawer Desk, Office Chair: Vitra Eames' Soft Pad EA 219 Chair by Charles & Ray Eames, Wall Light: Tristan Auer's YSA Wall Light for Véronèse, Desk Display Wall Lamp: Kheops Wall Lamp by Kelly Boukobza for Entrelacs"
+    description: ""
   }, {
     image: officeBooksCornerImage,
     title: "Design & Fine Art Books Corner",
-    description: "Executive Desk: Bernt Petersen 4-Drawer Desk details, Table Lamp: RoWin' Atelier's None II Table Lamp (Unique Piece)"
+    description: ""
   }]
 }, {
   experience: "The Details Make the Design",
@@ -175,19 +175,19 @@ const galleryExperiences = [{
   items: [{
     image: detailsSectionImage,
     title: "Curated Vignette",
-    description: "Console: Alexandre Lamont's Corteza Console, Table Lamp: Thierry Lemaire's Kedis Lamp, Small Vase: Milan Pekař's small Crystalline Vase, Blue Vessel: Marcantonio Brandolini D'Adda's Vase 'Unknown N.83', Side Table: Jaime Hayon's Time Piece Ceramic for Sé Collections, Lounge Chair: Jindrich Halabala's Lounge Chair in Dedar's UKIYO MONOGATARI 003, Bookcase: Gianfranco Frattini's Albero Bookcase for Poltrona Frau, Vessel: Maarten Vrolijk's Sakura TRP 22001 Vessel"
+    description: ""
   }, {
     image: detailsConsoleImage,
     title: "The Details Make The Design",
-    description: "Console Details: Alexandre Lamont's Corteza Console featuring shagreen leather with curved bullnose edge, Blue Vessel: Marcantonio Brandolini D'Adda's Cotissi Vessel 'Unknown N.83', Small Vase: Milan Pekař's small Crystalline Vase"
+    description: ""
   }, {
     image: detailsLampImage,
     title: "Light & Texture",
-    description: "Noe Duchaufour Lawrance's Amber Folia Portable Lamp for Cristallerie Saint-Louis"
+    description: ""
   }, {
     image: detailsConsole4Image,
     title: "Craftsmanship At Every Corner",
-    description: "Shagreen Panels: Robicara's Sira Credenza details, Matthieu Gicquel's Texture Glass with Gold Leaf rim Géode details"
+    description: ""
   }]
 }];
 /** Scrollable container for expanded lightbox images — shows a bounce arrow when content overflows */
@@ -840,12 +840,7 @@ const Gallery = () => {
                   ))}
                 </div>
 
-                {/* Description */}
-                <div className="mt-1.5 text-center shrink-0 pb-6 px-4 overflow-y-auto max-h-[25vh] scrollbar-hide" style={{ touchAction: 'pan-y' }}>
-                  <p className="text-sm text-white/70 font-body max-w-2xl mx-auto text-justify">
-                    {currentSectionItems[currentItemIndex]?.description}
-                  </p>
-                </div>
+                <div className="pb-6" />
              </div>
            ) : (
              /* ── Desktop: existing layout ── */
@@ -916,12 +911,7 @@ const Gallery = () => {
                       />
                     ))}
                   </div>
-                  {/* Description */}
-                  <div className="mt-3 text-center shrink-0 pb-6 overflow-y-auto max-h-[20vh] scrollbar-hide">
-                    <p className="text-base text-white/70 font-body max-w-2xl text-justify">
-                      {currentSectionItems[currentItemIndex]?.description}
-                    </p>
-                  </div>
+                  <div className="pb-6" />
                 </ExpandedScrollContainer>
 
                {/* Next button */}
