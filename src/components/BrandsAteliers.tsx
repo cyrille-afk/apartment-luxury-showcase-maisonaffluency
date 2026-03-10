@@ -1971,7 +1971,7 @@ const BrandsAteliers = () => {
   }, []);
 
   // Brands that should use FeaturedDesigners data instead of Collectibles
-  const preferFeatured = new Set(["Pierre Bonnefille"]);
+  const preferFeatured = new Set(["Pierre Bonnefille", "Thierry Lemaire"]);
 
   const picksDesigner = useMemo(() => {
     if (!picksDesignerName) return null;
