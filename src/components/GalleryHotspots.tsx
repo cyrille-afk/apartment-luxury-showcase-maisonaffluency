@@ -174,21 +174,20 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
           <button
             onClick={(e) => {
               e.stopPropagation();
-              if (!draggingId) setActiveId(activeId === hotspot.id ? null : hotspot.id);
+              // In edit mode, only toggle popup if we didn't drag
+              if (editMode) return; // handled by onMouseUp
+              setActiveId(activeId === hotspot.id ? null : hotspot.id);
             }}
             onMouseDown={(e) => {
               if (editMode) {
                 e.stopPropagation();
                 e.preventDefault();
-                // Track start position; only begin drag on mousemove (handled in handleDragMove)
+                didDragRef.current = false;
                 setDraggingId(hotspot.id);
-                // Store that we haven't actually moved yet
-                (e.currentTarget as any).__dragStarted = false;
               }
             }}
             onMouseUp={(e) => {
-              if (editMode && draggingId === hotspot.id) {
-                // If we didn't actually move, treat as click to toggle popup
+              if (editMode && draggingId === hotspot.id && !didDragRef.current) {
                 e.stopPropagation();
                 setDraggingId(null);
                 setActiveId(activeId === hotspot.id ? null : hotspot.id);
