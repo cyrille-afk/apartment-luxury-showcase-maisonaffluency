@@ -215,17 +215,6 @@ const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean
   return (
     <div ref={ref} className="flex flex-col items-center w-full max-w-[90vw] px-16 max-h-[85vh] overflow-y-auto scrollbar-hide relative">
       {children}
-      {showHint && (
-        <div className="sticky bottom-2 z-50 flex justify-center pointer-events-none w-full">
-          <button
-            className="pointer-events-auto bg-black/50 backdrop-blur-sm text-white/80 hover:text-white rounded-full p-1.5 animate-bounce shadow-lg border border-white/10"
-            onClick={(e) => { e.stopPropagation(); ref.current?.scrollBy({ top: 200, behavior: 'smooth' }); }}
-            aria-label="Scroll down for details"
-          >
-            <ChevronDown className="w-5 h-5" />
-          </button>
-        </div>
-      )}
     </div>
   );
 };
