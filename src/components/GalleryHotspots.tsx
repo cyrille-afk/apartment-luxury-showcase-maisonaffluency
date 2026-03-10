@@ -17,6 +17,7 @@ interface Hotspot {
 interface GalleryHotspotsProps {
   imageIdentifier: string;
   visible: boolean;
+  onCloseLightbox?: () => void;
 }
 
 interface PendingHotspot {
