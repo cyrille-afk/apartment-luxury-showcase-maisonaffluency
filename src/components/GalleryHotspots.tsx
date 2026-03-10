@@ -191,6 +191,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
                 e.stopPropagation();
                 e.preventDefault();
                 didDragRef.current = false;
+                dragStartRef.current = { x: e.clientX, y: e.clientY };
                 setDraggingId(hotspot.id);
               }
             }}
