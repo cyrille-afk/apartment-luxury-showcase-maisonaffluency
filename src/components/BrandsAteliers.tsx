@@ -772,7 +772,7 @@ const partnerBrands = [
     galleryIndex: GALLERY.CURATED_VIGNETTE,
   },
   {
-    id: "iksel-brunelleschi",
+    id: "iksel",
     name: "Iksel",
     category: "Decorative Object",
     subcategory: "Wallcoverings",
