@@ -561,7 +561,7 @@ const Gallery = () => {
                     </TooltipProvider>
                   )}
                 </div>
-                <p className="text-sm md:text-base text-muted-foreground font-body italic">
+                <p className="hidden md:block text-sm md:text-base text-muted-foreground font-body italic">
                   {section.subtitle}
                 </p>
               </motion.div>
