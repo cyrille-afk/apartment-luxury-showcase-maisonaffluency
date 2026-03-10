@@ -1937,11 +1937,11 @@ const BrandsAteliers = () => {
     }
   }, [picksDesignerName, picksIndex]);
 
-  // Deep-link: parse #curators/{designerId}/{index} on mount and hash changes
+  // Deep-link: parse #curators/{designerId}/{index} on mount, hash changes, and custom events
   useEffect(() => {
-    const openFromHash = () => {
-      const hash = window.location.hash;
-      const match = hash.match(/^#curators\/([^/]+)(?:\/(\d+))?$/);
+    const openFromHash = (hashStr?: string) => {
+      const hash = hashStr || window.location.hash;
+      const match = hash.match(/#curators\/([^/]+)(?:\/(\d+))?$/);
       if (match) {
         const designerId = match[1];
         const index = match[2] ? parseInt(match[2], 10) : 0;
@@ -1957,9 +1957,17 @@ const BrandsAteliers = () => {
       }
     };
 
+    const handleCustomEvent = (e: Event) => {
+      openFromHash((e as CustomEvent).detail);
+    };
+
     openFromHash();
-    window.addEventListener('hashchange', openFromHash);
-    return () => window.removeEventListener('hashchange', openFromHash);
+    window.addEventListener('hashchange', () => openFromHash());
+    window.addEventListener('open-curators-pick', handleCustomEvent);
+    return () => {
+      window.removeEventListener('hashchange', () => openFromHash());
+      window.removeEventListener('open-curators-pick', handleCustomEvent);
+    };
   }, []);
 
   // Brands that should use FeaturedDesigners data instead of Collectibles
