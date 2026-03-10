@@ -477,6 +477,17 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Reef_Vessels.pdf",
         pdfFilename: "Alexander_Lamont-Reef_Vessels.pdf"
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773144743/f_31121842_1667436301725_bg_processed_tdh7ln.jpg",
+        title: "Hammered Bowls",
+        subtitle: "",
+        category: "Decorative",
+        tags: ["Decorative", "Vessels", "Bronze"],
+        materials: "Textured bronze globes lined with pure gold · UNESCO Award for Design & Craft Excellence",
+        dimensions: "FG000133 - Hammered Bowl 1: Dia 7.5 × H 5.5 cm\nFG000132 - Hammered Bowl 2: Dia 12.5 × H 8 cm\nFG000131 - Hammered Bowl 3: Dia 15 × H 10.5 cm\nRefer to PDF Tearsheet for all sizes",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Hammered_Bowls.pdf",
+        pdfFilename: "Alexander_Lamont-Hammered_Bowls.pdf"
+      },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
