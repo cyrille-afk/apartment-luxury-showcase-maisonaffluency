@@ -212,7 +212,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
                 </motion.div>
               ) : (
                 <motion.div key="plus" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-2.5 h-2.5" />
                 </motion.div>
               )}
             </AnimatePresence>
