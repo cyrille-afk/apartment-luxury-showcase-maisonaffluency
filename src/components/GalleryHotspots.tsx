@@ -260,8 +260,11 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
                             onClick={(e) => {
                               e.stopPropagation();
                               const url = hotspot.link_url!;
-                              if (url.startsWith('#curators/') || url.startsWith('/#curators/')) {
-                                const hash = url.startsWith('/#') ? url.slice(1) : url;
+                              if (url.match(/^#\/?curators\//) || url.startsWith('/#curators/')) {
+                                // Normalize to #curators/... format
+                                let hash = url;
+                                if (url.startsWith('/#')) hash = url.slice(1);
+                                if (hash.startsWith('#/curators/')) hash = '#curators/' + hash.slice('#/curators/'.length);
                                 window.dispatchEvent(new CustomEvent('open-curators-pick', { detail: hash }));
                               } else {
                                 window.location.href = url;
