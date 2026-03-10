@@ -11,6 +11,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
