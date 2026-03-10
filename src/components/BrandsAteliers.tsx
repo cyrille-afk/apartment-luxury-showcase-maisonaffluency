@@ -2569,7 +2569,7 @@ const BrandsAteliers = () => {
                           }
                           // Has LED section — keep dimension lines with breaks, bold dims
                           const before = mat.slice(0, ledIdx);
-                          const after = mat.slice(ledIdx + 2).replace(/\n/g, ' ');
+                          const after = mat.slice(ledIdx + 2);
                           const lines = before.split('\n');
                           return (
                             <>
