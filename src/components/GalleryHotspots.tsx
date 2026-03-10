@@ -39,6 +39,9 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
 
   useEffect(() => {
     if (!imageIdentifier) return;
+    // Clear old hotspots immediately to avoid showing stale markers on new image
+    setHotspots([]);
+    setActiveId(null);
     const fetchHotspots = async () => {
       const { data } = await supabase
         .from("gallery_hotspots")
