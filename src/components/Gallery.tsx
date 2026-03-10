@@ -70,19 +70,19 @@ const galleryExperiences = [{
   items: [{
     image: intimateDiningImage,
     title: "A Dreamy Tuscan Landscape",
-    description: "Dining Table: Atelier Pendhapa's Astra Dining Table, Dining Chairs: Hamrei's Pépé Custom Chairs in FJ Hamikian Fabric, Pendant Lights: Jeremy Maxwell Wintrebert's Murano Cloud Bulle Pendants, Blue Vessel: Milan Pekař's Crystalline Vase Volume 3, Pierre Frey's Tuscan Journey Wallcover"
+    description: ""
   }, {
     image: intimateTableImage,
     title: "A Highly Customised Dining Room",
-    description: "Dining Table: Atelier Pendhapa's Astra Dining Table, Dining Chairs: Hamrei's Pépé Custom Chairs in FJ Hamikian Fabric, Blue Vessel: Milan Pekař's Crystalline Vase Volume 3, Pierre Frey's Tuscan Journey Wallcover"
+    description: ""
   }, {
     image: intimateLoungeImage,
     title: "A Relaxed Setting",
-    description: "Armchair: Forest & Giaconia's BOB Armchair for Delcourt Collection, Side Table: Alinea Design Objects' Angelo M Side Table, Mirror: Kiko Lopez' Shadow Drawings (Unique Piece), Cushion: Takayokaya's Ojami Cushion, Vessel: Milan Pekař's Crystalline Green Vessel Volume 5"
+    description: ""
   }, {
     image: cloudinaryUrl("IMG_2133_wtxd62", { width: 1200, quality: "auto:good", crop: "fill" }),
     title: "A Colourful Nook",
-    description: "Armchair: Forest & Giaconia's BOB Armchair for Delcourt Collection, Side Table: Alinea Design Objects' Angelo M Side Table, Mirror: Kiko Lopez' Shadow Drawings (Unique Piece), Cushion: Takayokaya's Ojami Cushion, Ottoman: Bina Baitel's Sublime Ottoman M in Métaphores Fabric, Vessel: Milan Pekař's Crystalline Green Vessel Volume 5"
+    description: ""
   }]
 }, {
   experience: "A Personal Sanctuary",
