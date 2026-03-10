@@ -213,7 +213,7 @@ const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean
   }, [isExpanded]);
 
   return (
-    <div ref={ref} className="flex flex-col items-center w-full max-w-[95vw] px-16 max-h-[95vh] overflow-y-auto scrollbar-hide relative">
+    <div ref={ref} className="flex flex-col items-center w-full max-w-[98vw] px-12 max-h-[96vh] overflow-y-auto scrollbar-hide relative">
       {children}
     </div>
   );
@@ -798,7 +798,7 @@ const Gallery = () => {
                     {currentSectionItems[currentItemIndex]?.title}
                   </h3>
                    <div className="relative inline-block shrink-0">
-                     <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[85vh] max-w-[90vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
+                     <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[95vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
                      <GalleryHotspots
                        imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
                        visible={!imageZoomed}
