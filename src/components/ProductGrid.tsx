@@ -597,7 +597,7 @@ function singularizeSub(s: string): string {
                 )}
 
                 {/* Metadata */}
-                {isLightboxImageLoaded && !isZoomed && (
+                {!isZoomed && (
                   <div className="text-center w-full px-4 md:px-12 mt-4">
                     <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
                       {(() => {
