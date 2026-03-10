@@ -213,7 +213,7 @@ const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean
   }, [isExpanded]);
 
   return (
-    <div ref={ref} className="flex flex-col items-center w-full max-w-[90vw] px-16 max-h-[85vh] overflow-y-auto scrollbar-hide relative">
+    <div ref={ref} className="flex flex-col items-center w-full max-w-[95vw] px-16 max-h-[95vh] overflow-y-auto scrollbar-hide relative">
       {children}
     </div>
   );
