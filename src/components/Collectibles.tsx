@@ -66,6 +66,8 @@ import emmanuelBabledPick6 from "@/assets/curators-picks/emmanuel-babled-6.jpg";
 import emmanuelBabledPick7 from "@/assets/curators-picks/emmanuel-babled-7.jpg";
 const emmanuelBabledPick8 = cloudinaryUrl("babled-osmosi-verde-cipria-_rukmyr", { width: 1200, quality: "auto:good", crop: "fill" });
 const ericSchmittImg = cloudinaryUrl("Screen_Shot_2026-02-26_at_4.16.30_PM_ijgqlu", { width: 800, quality: "auto", crop: "fill" });
+const cazesConquetImg = cloudinaryUrl("cazes-conquet-bg_b6lzhk", { width: 800, quality: "auto", crop: "fill" });
+const cazesConquetAugusta = cloudinaryUrl("Chair_Augusta_02_m7ochq", { width: 1200, quality: "auto:good", crop: "fill" });
 const ericSchmittDrageeConsole = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.45.40_PM_biri0t", { width: 1200, quality: "auto:good", crop: "fill" });
 const ericSchmittSaturneTable = cloudinaryUrl("Screen_Shot_2026-03-05_at_8.31.49_PM_clsiml", { width: 1200, quality: "auto:good", crop: "fill" });
 const ericSchmittFrameTable = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.51.08_PM_kwaasy", { width: 1200, quality: "auto:good", crop: "fill" });
