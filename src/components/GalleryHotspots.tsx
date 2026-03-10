@@ -82,7 +82,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
             </AnimatePresence>
             {/* Pulse ring */}
             {activeId !== hotspot.id && (
-              <span className="absolute inset-0 rounded-full border border-white/30 animate-ping" style={{ animationDuration: "2s" }} />
+              <span className="absolute inset-0 rounded-full border border-black/20 animate-ping" style={{ animationDuration: "2s" }} />
             )}
           </button>
 
