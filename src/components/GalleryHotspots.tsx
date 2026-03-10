@@ -178,7 +178,18 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
               if (editMode) {
                 e.stopPropagation();
                 e.preventDefault();
+                // Track start position; only begin drag on mousemove (handled in handleDragMove)
                 setDraggingId(hotspot.id);
+                // Store that we haven't actually moved yet
+                (e.currentTarget as any).__dragStarted = false;
+              }
+            }}
+            onMouseUp={(e) => {
+              if (editMode && draggingId === hotspot.id) {
+                // If we didn't actually move, treat as click to toggle popup
+                e.stopPropagation();
+                setDraggingId(null);
+                setActiveId(activeId === hotspot.id ? null : hotspot.id);
               }
             }}
             className={`relative w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm border border-black/10 flex items-center justify-center text-black hover:bg-white hover:scale-110 transition-all duration-200 shadow-lg ${editMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
