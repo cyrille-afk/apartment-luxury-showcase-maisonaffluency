@@ -744,6 +744,7 @@ const Gallery = () => {
                              <GalleryHotspots
                                imageIdentifier={item.title}
                                visible={true}
+                               onCloseLightbox={closeLightbox}
                              />
                            )}
                           </div>
