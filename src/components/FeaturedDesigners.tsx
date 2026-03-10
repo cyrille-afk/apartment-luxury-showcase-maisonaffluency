@@ -2830,7 +2830,7 @@ const FeaturedDesigners = () => {
                       </p>
 
                       {designer.links && designer.links.filter(l => l.type !== "Instagram").length > 0 && (
-                        <div className="flex flex-wrap gap-3 mt-4 md:pr-8">
+                        <div className="flex items-center justify-between gap-3 mt-4 md:flex-wrap md:justify-start md:pr-8">
                           {designer.links.filter(l => l.type !== "Instagram").map((link, idx) => (
                             link.url ? (
                               <a
@@ -2858,7 +2858,7 @@ const FeaturedDesigners = () => {
                                 <img
                                   src={(designer as any).logoUrl}
                                   alt={`${(designer as any).displayName || designer.name} logo`}
-                                  className="h-10 w-auto object-contain md:hidden"
+                                  className="h-14 w-auto object-contain md:hidden"
                                 />
                               )}
                               <button
@@ -2892,9 +2892,9 @@ const FeaturedDesigners = () => {
                                     setCuratorPickIndex(0);
                                   }
                                 }}
-                                className="inline-flex items-center gap-1.5 md:px-4 md:py-2 text-sm font-body md:bg-accent/10 md:hover:bg-accent/20 text-accent-foreground md:rounded-full transition-all duration-300 cursor-pointer md:border md:border-accent/30 md:ml-auto"
+                                className="inline-flex items-center gap-1.5 md:px-4 md:py-2 text-base md:text-sm font-body md:bg-accent/10 md:hover:bg-accent/20 text-accent-foreground md:rounded-full transition-all duration-300 cursor-pointer md:border md:border-accent/30 md:ml-auto"
                               >
-                                <Gem size={14} className="fill-accent text-accent" />
+                                <Gem size={16} className="fill-accent text-accent md:w-3.5 md:h-3.5" />
                                 <span className="font-medium underline underline-offset-2 decoration-accent/40 md:no-underline">{link.type}</span>
                               </button>
                               <WhatsAppShareButton
