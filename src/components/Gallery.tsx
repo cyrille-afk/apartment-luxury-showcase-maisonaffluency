@@ -567,81 +567,96 @@ const Gallery = () => {
               </motion.div>
 
               {/* Mobile: swipeable carousel like Instagram */}
-              <div className="md:hidden relative">
-                <div
-                  ref={el => { scrollStripRefs.current[originalSectionIndex] = el; }}
-                  onScroll={() => handleStripScroll(originalSectionIndex)}
-                  className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-                >
-                  {section.items.map((item, index) => (
+              {(() => {
+                const isHotspotSection = !section.items.some(item => item.description);
+                const activeIdx = activeScrollIndices[originalSectionIndex] || 0;
+                return (
+                  <div className="md:hidden relative">
                     <div
-                      key={`${item.title}-${index}-mobile`}
-                      className="relative flex-none w-full snap-center aspect-[3/4] cursor-pointer"
-                      onClick={() => openLightbox(originalSectionIndex, index)}
+                      ref={el => { scrollStripRefs.current[originalSectionIndex] = el; }}
+                      onScroll={() => handleStripScroll(originalSectionIndex)}
+                      className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
                     >
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        sizes="100vw"
-                        className={`h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage ? "object-[center_35%]" : ""}`}
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                      {/* Expand icon - bottom left */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openLightbox(originalSectionIndex, index);
-                        }}
-                        className="absolute bottom-2 left-2 z-10"
-                        aria-label="View full image"
-                      >
-                        <span className="bg-black/60 text-white p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center justify-center">
-                          <Maximize2 className="w-3 h-3" />
-                        </span>
-                      </button>
+                      {section.items.map((item, index) => (
+                        <div
+                          key={`${item.title}-${index}-mobile`}
+                          className={`relative flex-none w-full snap-center cursor-pointer ${isHotspotSection ? 'aspect-[4/5]' : 'aspect-[3/4]'}`}
+                          onClick={() => openLightbox(originalSectionIndex, index)}
+                        >
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            sizes="100vw"
+                            className={`h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage ? "object-[center_35%]" : ""}`}
+                            loading="lazy"
+                          />
+                          {!isHotspotSection && (
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                          )}
+                          {/* Hotspots overlay on mobile for hotspot sections */}
+                          {isHotspotSection && (
+                            <GalleryHotspots
+                              imageIdentifier={item.title}
+                              visible={true}
+                            />
+                          )}
+                          {/* Expand icon - bottom left */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openLightbox(originalSectionIndex, index);
+                            }}
+                            className="absolute bottom-2 left-2 z-10"
+                            aria-label="View full image"
+                          >
+                            <span className="bg-black/60 text-white p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center justify-center">
+                              <Maximize2 className="w-3 h-3" />
+                            </span>
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                {/* Instagram-style indicator — top right: icon on first photo, counter on others */}
-                {section.items.length > 1 && (
-                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-full pointer-events-none w-7 h-7 flex items-center justify-center">
-                    {(activeScrollIndices[originalSectionIndex] || 0) === 0 ? (
-                      <Copy className="w-3.5 h-3.5 text-white" />
-                    ) : (
-                      <span className="text-white text-[10px] font-body font-medium leading-none">
-                        {(activeScrollIndices[originalSectionIndex] || 0) + 1}/{section.items.length}
-                      </span>
+                    {/* Instagram-style indicator — top right: icon on first photo, counter on others */}
+                    {section.items.length > 1 && (
+                      <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-full pointer-events-none w-7 h-7 flex items-center justify-center">
+                        {activeIdx === 0 ? (
+                          <Copy className="w-3.5 h-3.5 text-white" />
+                        ) : (
+                          <span className="text-white text-[10px] font-body font-medium leading-none">
+                            {activeIdx + 1}/{section.items.length}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {/* Photo title below carousel */}
+                    <h4 className="font-serif text-foreground text-base mt-3 px-1">
+                      {section.items[activeIdx]?.title}
+                    </h4>
+                    {/* Dot indicators */}
+                    {section.items.length > 1 && (
+                      <div className="flex justify-center gap-1.5 mt-2">
+                        {section.items.map((_, dotIndex) => (
+                          <button
+                            key={dotIndex}
+                            aria-label={`Go to photo ${dotIndex + 1}`}
+                            onClick={() => {
+                              const strip = scrollStripRefs.current[originalSectionIndex];
+                              if (!strip) return;
+                              const cardWidth = strip.scrollWidth / section.items.length;
+                              strip.scrollTo({ left: cardWidth * dotIndex, behavior: 'smooth' });
+                            }}
+                            className={`rounded-full transition-all duration-300 ${
+                              activeIdx === dotIndex
+                                ? 'w-1.5 h-1.5 bg-primary'
+                                : 'w-1.5 h-1.5 bg-primary/30'
+                            }`}
+                          />
+                        ))}
+                      </div>
                     )}
                   </div>
-                )}
-                {/* Photo title below carousel */}
-                <h4 className="font-serif text-foreground text-base mt-3 px-1">
-                  {section.items[activeScrollIndices[originalSectionIndex] || 0]?.title}
-                </h4>
-                {/* Dot indicators */}
-                {section.items.length > 1 && (
-                  <div className="flex justify-center gap-1.5 mt-2">
-                    {section.items.map((_, dotIndex) => (
-                      <button
-                        key={dotIndex}
-                        aria-label={`Go to photo ${dotIndex + 1}`}
-                        onClick={() => {
-                          const strip = scrollStripRefs.current[originalSectionIndex];
-                          if (!strip) return;
-                          const cardWidth = strip.scrollWidth / section.items.length;
-                          strip.scrollTo({ left: cardWidth * dotIndex, behavior: 'smooth' });
-                        }}
-                        className={`rounded-full transition-all duration-300 ${
-                          (activeScrollIndices[originalSectionIndex] || 0) === dotIndex
-                            ? 'w-1.5 h-1.5 bg-primary'
-                            : 'w-1.5 h-1.5 bg-primary/30'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+                );
+              })()}
 
               <div className={`hidden md:grid md:gap-8 md:grid-cols-2 ${gridCols === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} transition-all duration-300`}>
                 {(gridCols === 3 ? section.items.slice(0, 3) : section.items).map((item, index) => {
