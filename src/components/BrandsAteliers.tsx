@@ -1553,7 +1553,6 @@ const brandToDesignerMap: Record<string, string> = {
   "Leo Sentou": "leo-sentou",
   "Made in Kira": "roman-frankel",
   "Man of Parts": "man-of-parts",
-  "Maarten Vrolijk": "maarten-vrolijk",
   "Nathalie Ziegler": "nathalie-ziegler",
   "Okha Design Studio": "adam-courts-okha",
   "Olivia Cognet": "olivia-cognet",
@@ -1972,7 +1971,7 @@ const BrandsAteliers = () => {
   }, []);
 
   // Brands that should use FeaturedDesigners data instead of Collectibles
-  const preferFeatured = new Set(["Pierre Bonnefille", "Thierry Lemaire", "Maarten Vrolijk"]);
+  const preferFeatured = new Set(["Pierre Bonnefille", "Thierry Lemaire"]);
 
   const picksDesigner = useMemo(() => {
     if (!picksDesignerName) return null;
