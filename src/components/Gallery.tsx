@@ -133,19 +133,19 @@ const galleryExperiences = [{
   items: [{
     image: smallRoomBedroomImage,
     title: "An Artistic Statement",
-    description: "Wall Light: Felix Millory Martell Wall Lamp for Entrelacs, Table Lamp: Apparatus Studio Lantern, Side Table: Reda Amalou's Eggshell DOT Side Table, Armchair: Pierre Frey's Kagura Headboard Fabric, Wallcovering: Pierre Frey's Natte, Bed Throw: Peter Reed 1861's Riyad Double Faced Throw"
+    description: ""
   }, {
     image: smallRoomPersonalityImage,
     title: "Compact Elegance",
-    description: "Headboard: Pierre Frey's Kagura Fabric, Apparatus Studio Lantern Table, Reda Amalou Eggshell DOT side table, Pierre Frey Kagura and Kasimir Fabrics, Pierre Frey Natte Wallcovering, Peter Reed's Riyad Double Faced Throw"
+    description: ""
   }, {
     image: smallRoomVaseImage,
     title: "Yellow Crystalline",
-    description: "Vessel: Milan Pekař's Yellow Crystalline Vessel Volume 5, Bed Throw: Peter Reed 1861's Riyad Double Faced Throw"
+    description: ""
   }, {
     image: smallRoomChairImage,
     title: "Golden Hour",
-    description: "Bar/Counter Stool: Yabu Pushelberg's Park Place Stool for Man of Parts, Side Table: Jaime Hayon's Time Piece Ceramic for Sé Collections"
+    description: ""
   }]
 }, {
   experience: "Home Office with a View",
