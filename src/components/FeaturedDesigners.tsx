@@ -2830,7 +2830,7 @@ const FeaturedDesigners = () => {
                       </p>
 
                       {designer.links && designer.links.filter(l => l.type !== "Instagram").length > 0 && (
-                        <div className="flex flex-row flex-wrap items-center gap-3 mt-4 md:flex-nowrap md:pr-8">
+                        <div className="flex flex-row flex-wrap items-center gap-2 mt-4 md:flex-nowrap md:gap-3 md:pr-8">
                           {designer.links.filter(l => l.type !== "Instagram").map((link, idx) => (
                             link.url ? (
                               <a
@@ -2885,21 +2885,21 @@ const FeaturedDesigners = () => {
                                     setCuratorPickIndex(0);
                                   }
                                 }}
-                                className="inline-flex items-center gap-1.5 md:px-4 md:py-2 text-base md:text-sm font-body md:bg-accent/10 md:hover:bg-accent/20 text-accent-foreground md:rounded-full transition-all duration-300 cursor-pointer md:border md:border-accent/30 md:ml-auto"
+                                className="inline-flex items-center gap-1.5 md:px-4 md:py-2 text-base md:text-sm font-body md:bg-accent/10 md:hover:bg-accent/20 text-foreground md:text-accent-foreground md:rounded-full transition-all duration-300 cursor-pointer md:border md:border-accent/30 md:ml-auto"
                               >
                                 <Gem size={16} className="fill-accent text-accent md:w-3.5 md:h-3.5" />
-                                <span className="font-medium underline underline-offset-2 decoration-accent/40 md:no-underline">{link.type}</span>
+                                <span className="font-semibold underline underline-offset-2 decoration-accent/40 md:font-medium md:no-underline">{link.type}</span>
                               </button>
                               {/* Mobile: Logo at extreme right, same line as Curators' Picks */}
                               {(designer as any).logoUrl && (
                                 <img
                                   src={(designer as any).logoUrl}
                                   alt={`${(designer as any).displayName || designer.name} logo`}
-                                  className="h-14 w-auto object-contain ml-auto md:hidden"
+                                  className="h-[4.5rem] w-auto object-contain ml-auto md:hidden"
                                 />
                               )}
-                              {/* Mobile Line 2: WhatsApp centered below */}
-                              <div className="flex items-center justify-center w-full md:hidden">
+                              {/* Mobile: WhatsApp below Curators' Picks */}
+                              <div className="flex items-center md:hidden">
                                 <WhatsAppShareButton
                                   onClick={(e) => {
                                     e.stopPropagation();
