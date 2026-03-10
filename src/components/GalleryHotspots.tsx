@@ -212,31 +212,54 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="bg-white rounded-lg shadow-2xl border border-primary/10 overflow-hidden">
-                  {hotspot.product_image_url && (
-                    <div className="w-full h-32 overflow-hidden bg-muted/10">
-                      <img src={hotspot.product_image_url} alt={hotspot.product_name} className="w-full h-full object-contain" />
+                  {editMode && editingId === hotspot.id ? (
+                    /* Inline edit form */
+                    <div className="p-3 w-[260px]">
+                      <h5 className="font-serif text-sm text-foreground mb-2">Edit Hotspot</h5>
+                      <div className="space-y-2">
+                        <input type="text" placeholder="Product name *" value={editData.product_name} onChange={e => setEditData(d => ({ ...d, product_name: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" autoFocus />
+                        <input type="text" placeholder="Designer name" value={editData.designer_name} onChange={e => setEditData(d => ({ ...d, designer_name: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                        <input type="text" placeholder="Product image URL" value={editData.product_image_url} onChange={e => setEditData(d => ({ ...d, product_image_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                        <input type="text" placeholder="Link URL" value={editData.link_url} onChange={e => setEditData(d => ({ ...d, link_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <button onClick={saveEdit} disabled={!editData.product_name.trim() || saving} className="flex-1 flex items-center justify-center gap-1 text-xs font-body bg-primary text-primary-foreground rounded px-3 py-1.5 hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                          <Check className="w-3 h-3" /> {saving ? "Saving..." : "Save"}
+                        </button>
+                        <button onClick={() => setEditingId(null)} className="text-xs font-body text-muted-foreground hover:text-foreground px-3 py-1.5 transition-colors">Cancel</button>
+                      </div>
                     </div>
+                  ) : (
+                    /* Normal display */
+                    <>
+                      {hotspot.product_image_url && (
+                        <div className="w-full h-32 overflow-hidden bg-muted/10">
+                          <img src={hotspot.product_image_url} alt={hotspot.product_name} className="w-full h-full object-contain" />
+                        </div>
+                      )}
+                      <div className="p-3">
+                        <h5 className="font-serif text-sm text-foreground leading-tight">{hotspot.product_name}</h5>
+                        {hotspot.designer_name && (
+                          <p className="text-xs text-muted-foreground font-body mt-0.5">{hotspot.designer_name}</p>
+                        )}
+                        {hotspot.link_url && (
+                          <a href={hotspot.link_url} className="inline-block mt-2 text-xs text-primary underline underline-offset-2 font-body hover:text-primary/80 transition-colors" onClick={(e) => e.stopPropagation()}>
+                            View details →
+                          </a>
+                        )}
+                        {editMode && (
+                          <div className="mt-2 flex items-center gap-3">
+                            <button onClick={() => startEditing(hotspot)} className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors">
+                              <Pencil className="w-3 h-3" /> Edit
+                            </button>
+                            <button onClick={() => deleteHotspot(hotspot.id)} className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors">
+                              <Trash2 className="w-3 h-3" /> Remove
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </>
                   )}
-                  <div className="p-3">
-                    <h5 className="font-serif text-sm text-foreground leading-tight">{hotspot.product_name}</h5>
-                    {hotspot.designer_name && (
-                      <p className="text-xs text-muted-foreground font-body mt-0.5">{hotspot.designer_name}</p>
-                    )}
-                    {hotspot.link_url && (
-                      <a href={hotspot.link_url} className="inline-block mt-2 text-xs text-primary underline underline-offset-2 font-body hover:text-primary/80 transition-colors" onClick={(e) => e.stopPropagation()}>
-                        View details →
-                      </a>
-                    )}
-                    {/* Delete button in edit mode */}
-                    {editMode && (
-                      <button
-                        onClick={() => deleteHotspot(hotspot.id)}
-                        className="mt-2 flex items-center gap-1 text-xs text-red-500 hover:text-red-700 transition-colors"
-                      >
-                        <Trash2 className="w-3 h-3" /> Remove
-                      </button>
-                    )}
-                  </div>
                 </div>
               </motion.div>
             )}
