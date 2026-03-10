@@ -905,7 +905,7 @@ const partnerBrands = [
     origin: "France",
     description: "French architect and designer creating collectible furniture editions that transcend the boundaries between architecture and design, with pieces of geometric precision and sculptural elegance.",
     featured: "DOT Side Table",
-    instagram: "https://instagram.com/redaamalou",
+    instagram: "https://www.instagram.com/redaamaloudesign/",
     galleryIndex: GALLERY.COMPACT_ELEGANCE,
   },
   {
