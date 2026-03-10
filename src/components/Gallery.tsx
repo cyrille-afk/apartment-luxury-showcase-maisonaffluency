@@ -840,12 +840,7 @@ const Gallery = () => {
                   ))}
                 </div>
 
-                {/* Description */}
-                <div className="mt-1.5 text-center shrink-0 pb-6 px-4 overflow-y-auto max-h-[25vh] scrollbar-hide" style={{ touchAction: 'pan-y' }}>
-                  <p className="text-sm text-white/70 font-body max-w-2xl mx-auto text-justify">
-                    {currentSectionItems[currentItemIndex]?.description}
-                  </p>
-                </div>
+                <div className="pb-6" />
              </div>
            ) : (
              /* ── Desktop: existing layout ── */
