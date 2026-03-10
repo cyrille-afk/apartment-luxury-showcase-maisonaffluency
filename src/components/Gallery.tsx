@@ -154,19 +154,19 @@ const galleryExperiences = [{
   items: [{
     image: homeOfficeDeskImage,
     title: "A Workspace of Distinction",
-    description: "Executive Desk: Bernt Petersen 4-Drawer Desk, Wall Lamp at Right of Desk: Kheops Wall Lamp by Kelly Boukobza for Entrelacs, Table Lamp at Left: RoWin' Atelier's None II Table Lamp, Pendant Light: Mernøe N1 Pendant, Office Chair: Vitra Eames Soft Pad EA 219 by Charles & Ray Eames"
+    description: ""
   }, {
     image: homeOfficeDesk2Image,
     title: "Refined Details",
-    description: "Executive Desk: Bernt Petersen 4-Drawer Desk, Table Lamp: RoWin' Atelier's None II Table Lamp (Unique Piece)"
+    description: ""
   }, {
     image: homeOffice3Image,
     title: "Light & Focus",
-    description: "Executive Desk: Bernt Petersen 4-Drawer Desk, Office Chair: Vitra Eames' Soft Pad EA 219 Chair by Charles & Ray Eames, Wall Light: Tristan Auer's YSA Wall Light for Véronèse, Desk Display Wall Lamp: Kheops Wall Lamp by Kelly Boukobza for Entrelacs"
+    description: ""
   }, {
     image: officeBooksCornerImage,
     title: "Design & Fine Art Books Corner",
-    description: "Executive Desk: Bernt Petersen 4-Drawer Desk details, Table Lamp: RoWin' Atelier's None II Table Lamp (Unique Piece)"
+    description: ""
   }]
 }, {
   experience: "The Details Make the Design",
