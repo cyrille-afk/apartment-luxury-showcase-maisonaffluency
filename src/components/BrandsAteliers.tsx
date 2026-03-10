@@ -1490,7 +1490,7 @@ const brandBgMap: Record<string, string> = {
   "Andrée Putman": andreePutmanBg,
   "Noom": noomBg,
   "Nicolas Aubagnac": nicolasAubagnacBg,
-  "Ozone Light": ozoneLightBg,
+  "Ozone": ozoneLightBg,
   "Collection Particulière": collectionParticuliereBg,
   "Bieke Casteleyn": biekeCasteleynBg,
   "Galerie MCDE": galerieMcdeBg,
