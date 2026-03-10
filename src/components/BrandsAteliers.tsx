@@ -2023,6 +2023,7 @@ const BrandsAteliers = () => {
         const index = match[2] ? parseInt(match[2], 10) : 0;
         const brandName = designerIdToBrandMap[designerId];
         if (brandName) {
+          preloadPickImages(brandName, index);
           const applyOpen = () => {
             setPicksDesignerName(brandName);
             setPicksIndex(index);
