@@ -215,17 +215,6 @@ const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean
   return (
     <div ref={ref} className="flex flex-col items-center w-full max-w-[90vw] px-16 max-h-[85vh] overflow-y-auto scrollbar-hide relative">
       {children}
-      {showHint && (
-        <div className="sticky bottom-2 z-50 flex justify-center pointer-events-none w-full">
-          <button
-            className="pointer-events-auto bg-black/50 backdrop-blur-sm text-white/80 hover:text-white rounded-full p-1.5 animate-bounce shadow-lg border border-white/10"
-            onClick={(e) => { e.stopPropagation(); ref.current?.scrollBy({ top: 200, behavior: 'smooth' }); }}
-            aria-label="Scroll down for details"
-          >
-            <ChevronDown className="w-5 h-5" />
-          </button>
-        </div>
-      )}
     </div>
   );
 };
@@ -795,7 +784,7 @@ const Gallery = () => {
                     {currentSectionItems[currentItemIndex]?.title}
                   </h3>
                    <div className="relative inline-block shrink-0">
-                     <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[90vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
+                     <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[75vh] max-w-[90vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
                      <GalleryHotspots
                        imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
                        visible={!imageZoomed}
