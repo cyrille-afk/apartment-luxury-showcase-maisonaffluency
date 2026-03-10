@@ -769,12 +769,23 @@ const Gallery = () => {
                ref={swipeContainerRef}
                className="relative w-full h-full flex items-center justify-center"
              >
-               {/* Pill indicator */}
-               <div className={`absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none ${isExpanded ? 'hidden md:flex' : ''}`}>
-                 <span className="text-white text-[10px] font-body font-medium leading-none">
-                   {currentItemIndex + 1}/{currentSectionItems.length}
-                 </span>
-               </div>
+                {/* Close button — desktop expanded: top-right corner */}
+                {isExpanded && (
+                  <button
+                    onClick={closeLightbox}
+                    className="hidden md:flex absolute top-4 right-4 z-50 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                    aria-label="Close lightbox"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+
+                {/* Pill indicator */}
+                <div className={`absolute top-4 ${isExpanded ? 'right-16' : 'right-4'} z-50 bg-black/60 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center pointer-events-none ${isExpanded ? 'hidden md:flex' : ''}`}>
+                  <span className="text-white text-[10px] font-body font-medium leading-none">
+                    {currentItemIndex + 1}/{currentSectionItems.length}
+                  </span>
+                </div>
 
                {/* Previous button */}
                <button onClick={goToPrevious} className="hidden md:flex absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-50 text-white/50 hover:text-white transition-colors" aria-label="Previous image">
