@@ -1582,6 +1582,11 @@ const brandToDesignerMap: Record<string, string> = {
   "Victoria Magniant": "victoria-magniant",
 };
 
+// Reverse map: designer ID → brand name (for deep-link resolution)
+const designerIdToBrandMap: Record<string, string> = Object.fromEntries(
+  Object.entries(brandToDesignerMap).map(([brand, id]) => [id, brand])
+);
+
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
 type ConsolidatedBrand = {
   id: string;
