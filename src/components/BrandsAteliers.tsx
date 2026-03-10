@@ -2057,10 +2057,7 @@ const BrandsAteliers = () => {
     };
   }, [preloadPickImages]);
 
-  // Brands that should use FeaturedDesigners data instead of Collectibles
-  const preferFeatured = new Set(["Pierre Bonnefille", "Thierry Lemaire"]);
-
-  const preloadPickImages = useCallback((brandName: string, index: number) => {
+  function preloadPickImages(brandName: string, index: number) {
     const designerId = brandToDesignerMap[brandName];
     if (!designerId) return Promise.resolve();
     const designer =
@@ -2069,7 +2066,7 @@ const BrandsAteliers = () => {
       featuredDesigners.find(d => d.id === designerId);
     if (!designer?.curatorPicks?.length) return Promise.resolve();
     return warmCuratorPickSet(designer.curatorPicks, index);
-  }, []);
+  }
 
   const picksDesigner = useMemo(() => {
     if (!picksDesignerName) return null;
