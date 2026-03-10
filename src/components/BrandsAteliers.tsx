@@ -2697,7 +2697,7 @@ const BrandsAteliers = () => {
                       <div className="md:hidden flex justify-between items-center w-full mt-2">
                         <div>
                           <button
-                            onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
+                            onClick={requestClosePicks}
                             className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
                             aria-label="Close"
                           >
