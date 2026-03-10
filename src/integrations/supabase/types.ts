@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      gallery_hotspots: {
+        Row: {
+          created_at: string
+          designer_name: string | null
+          id: string
+          image_identifier: string
+          link_url: string | null
+          product_image_url: string | null
+          product_name: string
+          x_percent: number
+          y_percent: number
+        }
+        Insert: {
+          created_at?: string
+          designer_name?: string | null
+          id?: string
+          image_identifier: string
+          link_url?: string | null
+          product_image_url?: string | null
+          product_name: string
+          x_percent: number
+          y_percent: number
+        }
+        Update: {
+          created_at?: string
+          designer_name?: string | null
+          id?: string
+          image_identifier?: string
+          link_url?: string | null
+          product_image_url?: string | null
+          product_name?: string
+          x_percent?: number
+          y_percent?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
