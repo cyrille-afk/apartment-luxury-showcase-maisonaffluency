@@ -388,6 +388,21 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
+  "iksel-brunelleschi": {
+    name: "Iksel",
+    curatorPicks: [
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1773137878/Screen_Shot_2026-03-10_at_6.16.34_PM_yv06mg.png",
+        title: "SC106 Japanese Cranes cs01",
+        subtitle: "Wallcover cs01",
+        category: "Decorative Object",
+        subcategory: "Wallcoverings",
+        tags: ["Decorative Object", "Wallcoverings"],
+        materials: "Printed on nonwoven ground",
+        dimensions: "Original H 300 × W 243 cm",
+      },
+    ],
+  },
 };
 
 // Gallery image index mapping (based on flattened gallery items order)
