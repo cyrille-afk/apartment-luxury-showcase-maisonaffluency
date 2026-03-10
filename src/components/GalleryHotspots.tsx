@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Plus, X, Trash2, GripVertical, Pencil, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
