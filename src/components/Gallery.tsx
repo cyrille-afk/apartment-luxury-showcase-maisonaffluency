@@ -729,13 +729,13 @@ const Gallery = () => {
                   <div ref={emblaRef} className="overflow-hidden">
                     <div className="flex">
                       {currentSectionItems.map((item, i) => (
-                        <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center px-4">
-                          <div className="relative inline-block">
+                        <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center">
+                          <div className="relative w-full">
                            <img
                              src={item.image}
                              alt={item.title}
                              sizes="100vw"
-                             className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[50vh]"
+                             className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[65vh]"
                              loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
                              decoding="async"
                              draggable={false}
