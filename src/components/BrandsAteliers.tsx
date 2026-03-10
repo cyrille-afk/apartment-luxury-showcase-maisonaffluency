@@ -1982,14 +1982,20 @@ const BrandsAteliers = () => {
     setPicksIndex(0);
     setPicksZoomed(false);
     setPicksImageLoaded(false);
+    // Clear curators hash so hashchange listener doesn't reopen the dialog
+    if (window.location.hash.startsWith('#curators/')) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
   }, []);
 
   const requestClosePicks = useCallback(() => {
     if (isClosingPicksRef.current) return;
     isClosingPicksRef.current = true;
 
-    if (window.location.hash.startsWith('#curators/')) {
+    // Always go through history.back() if we pushed a state
+    if (!closedViaPopstateRef.current) {
       window.history.back();
+      // popstate handler will call resetPicksState
       return;
     }
 
