@@ -208,7 +208,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
             <AnimatePresence mode="wait">
               {activeId === hotspot.id ? (
                 <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-2.5 h-2.5" />
                 </motion.div>
               ) : (
                 <motion.div key="plus" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
