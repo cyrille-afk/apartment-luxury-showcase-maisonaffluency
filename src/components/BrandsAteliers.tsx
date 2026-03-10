@@ -262,7 +262,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
     ],
   },
   "ozone-light": {
-    name: "Ozone Light",
+    name: "Ozone",
     curatorPicks: [
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772453277/Screen_Shot_2026-03-02_at_8.07.31_PM_yi3hfp.png",
@@ -1095,7 +1095,7 @@ const partnerBrands = [
   },
   {
     id: "ozone-light",
-    name: "Ozone Light",
+    name: "Ozone",
     category: "Lighting",
     subcategory: "Lighting",
     origin: "France",
@@ -1490,7 +1490,7 @@ const brandBgMap: Record<string, string> = {
   "Andrée Putman": andreePutmanBg,
   "Noom": noomBg,
   "Nicolas Aubagnac": nicolasAubagnacBg,
-  "Ozone Light": ozoneLightBg,
+  "Ozone": ozoneLightBg,
   "Collection Particulière": collectionParticuliereBg,
   "Bieke Casteleyn": biekeCasteleynBg,
   "Galerie MCDE": galerieMcdeBg,
@@ -1578,7 +1578,7 @@ const brandToDesignerMap: Record<string, string> = {
   "De La Espada": "de-la-espada",
   "Stéphane CG": "stephane-cg",
   "Marta Sala Éditions": "marta-sala-editions",
-  "Ozone Light": "ozone-light",
+  "Ozone": "ozone-light",
   "Victoria Magniant": "victoria-magniant",
 };
 
