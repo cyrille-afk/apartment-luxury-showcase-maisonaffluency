@@ -1138,14 +1138,23 @@ const Collectibles = () => {
                                 </svg>
                               </a>
                             ) : link.type === "Curators' Picks" ? (
+                              <Fragment key={idx}>
+                              {/* Mobile logo — inline left of Curators' Picks */}
+                              {(designer as any).logoUrl && (
+                                <img
+                                  src={(designer as any).logoUrl}
+                                  alt={`${designer.name} logo`}
+                                  className="h-10 w-auto object-contain md:hidden"
+                                />
+                              )}
                               <button
-                                key={idx}
                                 onClick={() => openCuratorPicks(designer)}
                                 className="inline-flex items-center gap-1.5 md:px-4 md:py-2 text-sm font-body md:bg-accent/10 md:hover:bg-accent/20 text-accent-foreground md:rounded-full transition-all duration-300 cursor-pointer md:border md:border-accent/30 md:ml-auto"
                               >
                                 <Gem size={14} className="fill-accent text-accent" />
                                 <span className="font-medium underline underline-offset-2 decoration-accent/40 md:no-underline">{link.type}</span>
                               </button>
+                              </Fragment>
                             ) : (
                               <span
                                 key={idx}
@@ -1168,16 +1177,6 @@ const Collectibles = () => {
                         </div>
                       )}
 
-                      {/* Mobile logo — positioned at bottom-right, separate from other elements */}
-                      {(designer as any).logoUrl && (
-                        <div className="flex justify-end mt-3 md:hidden">
-                          <img
-                            src={(designer as any).logoUrl}
-                            alt={`${designer.name} logo`}
-                            className="h-16 w-auto object-contain"
-                          />
-                        </div>
-                      )}
 
                     </div>
                   </AccordionContent>
