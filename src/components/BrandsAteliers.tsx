@@ -2023,12 +2023,18 @@ const BrandsAteliers = () => {
         const index = match[2] ? parseInt(match[2], 10) : 0;
         const brandName = designerIdToBrandMap[designerId];
         if (brandName) {
-          setTimeout(() => {
+          const applyOpen = () => {
             setPicksDesignerName(brandName);
             setPicksIndex(index);
             setPicksZoomed(false);
             setPicksImageLoaded(false);
-          }, 300);
+          };
+
+          if (hashStr) {
+            applyOpen();
+          } else {
+            setTimeout(applyOpen, 300);
+          }
         }
       }
     };
@@ -2037,11 +2043,13 @@ const BrandsAteliers = () => {
       openFromHash((e as CustomEvent).detail);
     };
 
+    const handleHashChange = () => openFromHash();
+
     openFromHash();
-    window.addEventListener('hashchange', () => openFromHash());
+    window.addEventListener('hashchange', handleHashChange);
     window.addEventListener('open-curators-pick', handleCustomEvent);
     return () => {
-      window.removeEventListener('hashchange', () => openFromHash());
+      window.removeEventListener('hashchange', handleHashChange);
       window.removeEventListener('open-curators-pick', handleCustomEvent);
     };
   }, []);
