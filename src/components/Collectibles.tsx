@@ -64,6 +64,7 @@ import emmanuelBabledPick4 from "@/assets/curators-picks/emmanuel-babled-4.jpg";
 import emmanuelBabledPick5 from "@/assets/curators-picks/emmanuel-babled-5.jpg";
 import emmanuelBabledPick6 from "@/assets/curators-picks/emmanuel-babled-6.jpg";
 import emmanuelBabledPick7 from "@/assets/curators-picks/emmanuel-babled-7.jpg";
+const emmanuelBabledPick8 = cloudinaryUrl("babled-osmosi-verde-cipria-_rukmyr", { width: 1200, quality: "auto:good", crop: "fill" });
 const ericSchmittImg = cloudinaryUrl("Screen_Shot_2026-02-26_at_4.16.30_PM_ijgqlu", { width: 800, quality: "auto", crop: "fill" });
 const ericSchmittDrageeConsole = cloudinaryUrl("Screen_Shot_2026-02-22_at_3.45.40_PM_biri0t", { width: 1200, quality: "auto:good", crop: "fill" });
 const ericSchmittSaturneTable = cloudinaryUrl("Screen_Shot_2026-03-05_at_8.31.49_PM_clsiml", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -134,6 +135,7 @@ export const collectibleDesigners: Array<{
       { image: emmanuelBabledPick5, title: "Siliceaarenaria — Vessels", category: "Decorative Object", subcategory: "Vessel", materials: "Murano blown glass (Venini)", dimensions: "Ø25 × H22 cm (each)", edition: "" },
       { image: emmanuelBabledPick6, title: "Etna Cabinet — Stripes", category: "Storage", subcategory: "Cabinet", materials: "Murano glass doors • Lava stone legs", dimensions: "H85 × L120 × D45 cm", edition: "" },
       { image: emmanuelBabledPick7, title: "Osmosi — Side Table", category: "Tables", subcategory: "Side Table", materials: "Carrara marble • Murano blown glass", dimensions: "H55 × Ø60 cm", edition: "" },
+      { image: emmanuelBabledPick8, title: "OSMOSIS Series — Sculptural Book Cover", category: "Decorative Object", subcategory: "Sculptural Object", materials: "Murano blown glass", dimensions: "", edition: "" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/emmanuelbabled" },
