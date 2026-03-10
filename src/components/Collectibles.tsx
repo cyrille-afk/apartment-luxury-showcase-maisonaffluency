@@ -316,7 +316,7 @@ export const collectibleDesigners: Array<{
     ],
   },
   {
-    id: "thierry-lemaire",
+    id: "thierry-lemaire-collectible",
     name: "Thierry Lemaire",
     specialty: "Sculptural Furniture & Limited Editions",
     image: thierryLemaireImg,
