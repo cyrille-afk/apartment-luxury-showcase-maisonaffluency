@@ -1164,6 +1164,7 @@ const Collectibles = () => {
                                 }}
                                 label={`Share ${designer.name} on WhatsApp`}
                                 hideOn="desktop"
+                                variant="branded"
                               />
                         </div>
                       )}

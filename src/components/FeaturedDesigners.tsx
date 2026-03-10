@@ -2898,6 +2898,7 @@ const FeaturedDesigners = () => {
                                   }}
                                   label={`Share ${designer.name} on WhatsApp`}
                                   hideOn="desktop"
+                                  variant="branded"
                                 />
                                 {(designer as any).logoUrl && (
                                   <img

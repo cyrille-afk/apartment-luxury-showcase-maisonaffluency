@@ -21,7 +21,7 @@ type WhatsAppShareButtonProps = {
   /** "default" for inline sections, "sm" for card overlays */
   size?: "default" | "sm";
   /** Use "glass" on image overlays for translucent backdrop */
-  variant?: "solid" | "glass";
+  variant?: "solid" | "glass" | "branded";
   /** Extra classes */
   className?: string;
   /** Hide on certain breakpoints */
