@@ -245,15 +245,35 @@ const Gallery = () => {
     if (!("ontouchstart" in window)) return false;
     return !sessionStorage.getItem("__hotspot_hint_seen");
   });
+  const hotspotHintRef = useRef<HTMLDivElement>(null);
+  const [hintVisible, setHintVisible] = useState(false);
 
+  // Only start the dismiss timer once the hint is actually visible on screen
   useEffect(() => {
     if (!showHotspotHint) return;
+    const el = hotspotHintRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHintVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [showHotspotHint]);
+
+  useEffect(() => {
+    if (!hintVisible) return;
     const timer = setTimeout(() => {
       setShowHotspotHint(false);
       sessionStorage.setItem("__hotspot_hint_seen", "1");
     }, 4000);
     return () => clearTimeout(timer);
-  }, [showHotspotHint]);
+  }, [hintVisible]);
 
   // Embla carousel for mobile lightbox
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, startIndex: currentItemIndex });
@@ -611,7 +631,7 @@ const Gallery = () => {
                           )}
                           {/* Pulsing hotspot hint — first image of first hotspot section only */}
                           {isHotspotSection && index === 0 && originalSectionIndex === 0 && showHotspotHint && (
-                            <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+                            <div ref={hotspotHintRef} className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
                               {/* Pulsing dot */}
                               <div className="relative">
                                 <span className="absolute -inset-3 rounded-full bg-primary/30 animate-ping" />
