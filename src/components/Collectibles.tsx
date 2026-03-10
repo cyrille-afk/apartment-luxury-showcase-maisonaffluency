@@ -382,6 +382,9 @@ const Collectibles = () => {
       const index = match[2] ? parseInt(match[2], 10) : 0;
       const designer = collectibleDesigners.find(d => d.id === designerId);
       if (designer && designer.curatorPicks?.length) {
+        // Preload current + adjacent images immediately
+        [index, (index + 1) % designer.curatorPicks.length, (index - 1 + designer.curatorPicks.length) % designer.curatorPicks.length]
+          .forEach(i => { const src = designer.curatorPicks[i]?.image; if (src) { const img = new Image(); img.src = src; } });
         setCuratorPicksDesigner(designer);
         setCuratorPickIndex(index);
         setIsZoomed(false);

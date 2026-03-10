@@ -2023,6 +2023,7 @@ const BrandsAteliers = () => {
         const index = match[2] ? parseInt(match[2], 10) : 0;
         const brandName = designerIdToBrandMap[designerId];
         if (brandName) {
+          preloadPickImages(brandName, index);
           const applyOpen = () => {
             setPicksDesignerName(brandName);
             setPicksIndex(index);
@@ -2071,12 +2072,35 @@ const BrandsAteliers = () => {
     return featuredDesigners.find(d => d.id === designerId) || null;
   }, [picksDesignerName]);
 
+  // Eagerly preload curator pick images for a designer to avoid slow first load
+  const preloadPickImages = useCallback((brandName: string, index: number) => {
+    const designerId = brandToDesignerMap[brandName];
+    if (!designerId) return;
+    const designer =
+      atelierOnlyPicks[designerId] as any ||
+      (!preferFeatured.has(brandName) && collectibleDesigners.find(d => d.id === designerId || d.name === brandName)) ||
+      featuredDesigners.find(d => d.id === designerId);
+    if (!designer?.curatorPicks?.length) return;
+    // Preload current + adjacent
+    const indices = [index];
+    if (designer.curatorPicks.length > 1) {
+      indices.push((index + 1) % designer.curatorPicks.length);
+      indices.push((index - 1 + designer.curatorPicks.length) % designer.curatorPicks.length);
+    }
+    indices.forEach(i => {
+      const src = designer.curatorPicks[i]?.image;
+      if (src) { const img = new Image(); img.src = src; }
+    });
+  }, []);
+
   const openPicks = useCallback((brandName: string, index?: number) => {
+    const idx = index ?? 0;
+    preloadPickImages(brandName, idx);
     setPicksDesignerName(brandName);
-    setPicksIndex(index ?? 0);
+    setPicksIndex(idx);
     setPicksZoomed(false);
     setPicksImageLoaded(false);
-  }, []);
+  }, [preloadPickImages]);
 
   // Reset image loaded state when switching picks
   useEffect(() => {
