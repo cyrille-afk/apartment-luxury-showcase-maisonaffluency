@@ -2023,7 +2023,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { text: "Niko 420 Custom Sofa", galleryIndex: GALLERY.AN_INVITING_LOUNGE_AREA },
     ],
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
-    curatorPicks: [],
+    curatorPicks: [
+      { image: cloudinaryUrl("Screen_Shot_2026-03-10_at_3.06.48_PM_kohqxi", { width: 1200, quality: "auto:good", crop: "fill" }), title: "Niko Sofa 300", category: "Seating", tags: ["Seating", "Sofas"], materials: "Sofa upholstered in fabric · Base in metal", dimensions: "L 300 cm x D 92 cm x H 78 cm - SH 40 cm" },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
       { type: "Curators' Picks" },
