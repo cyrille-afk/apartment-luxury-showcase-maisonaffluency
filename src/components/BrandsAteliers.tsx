@@ -2001,28 +2001,20 @@ const BrandsAteliers = () => {
     if (!picksDesignerName) return;
 
     closedViaPopstateRef.current = false;
-    // Save current hash before overriding
-    prevHashRef.current = window.location.hash;
+    isClosingPicksRef.current = false;
     window.history.pushState({ picksLightbox: true }, '');
 
     const handlePopState = () => {
       closedViaPopstateRef.current = true;
-      setPicksDesignerName(null);
-      setPicksIndex(0);
-      setPicksZoomed(false);
-      // Restore previous hash
-      if (prevHashRef.current) {
-        window.history.replaceState(null, '', prevHashRef.current);
-      } else {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
+      isClosingPicksRef.current = false;
+      resetPicksState();
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [picksDesignerName]);
+  }, [picksDesignerName, resetPicksState]);
 
   // Update hash when picks lightbox is open or index changes
   useEffect(() => {
