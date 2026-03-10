@@ -730,6 +730,7 @@ const Gallery = () => {
                     <div className="flex">
                       {currentSectionItems.map((item, i) => (
                         <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center px-4">
+                          <div className="relative inline-block">
                            <img
                              src={item.image}
                              alt={item.title}
@@ -739,6 +740,13 @@ const Gallery = () => {
                              decoding="async"
                              draggable={false}
                            />
+                           {i === currentItemIndex && (
+                             <GalleryHotspots
+                               imageIdentifier={item.title}
+                               visible={true}
+                             />
+                           )}
+                          </div>
                         </div>
                       ))}
                     </div>
