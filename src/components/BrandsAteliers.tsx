@@ -1965,6 +1965,7 @@ const BrandsAteliers = () => {
     return () => window.removeEventListener("deeplink-open-profile", handler);
   }, []);
 
+  const isMobile = useIsMobile();
   // Curators' Picks lightbox state
   const [picksDesignerName, setPicksDesignerName] = useState<string | null>(null);
   const [picksIndex, setPicksIndex] = useState(0);
