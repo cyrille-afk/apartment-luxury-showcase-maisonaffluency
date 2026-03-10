@@ -239,6 +239,22 @@ const Gallery = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
 
+  // Pulsing hotspot hint — show once per session on the first hotspot section image
+  const [showHotspotHint, setShowHotspotHint] = useState(() => {
+    if (typeof window === "undefined") return false;
+    if (!("ontouchstart" in window)) return false;
+    return !sessionStorage.getItem("__hotspot_hint_seen");
+  });
+
+  useEffect(() => {
+    if (!showHotspotHint) return;
+    const timer = setTimeout(() => {
+      setShowHotspotHint(false);
+      sessionStorage.setItem("__hotspot_hint_seen", "1");
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [showHotspotHint]);
+
   // Embla carousel for mobile lightbox
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, startIndex: currentItemIndex });
 
@@ -592,6 +608,22 @@ const Gallery = () => {
                           />
                           {!isHotspotSection && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                          )}
+                          {/* Pulsing hotspot hint — first image of first hotspot section only */}
+                          {isHotspotSection && index === 0 && originalSectionIndex === 0 && showHotspotHint && (
+                            <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+                              {/* Pulsing dot */}
+                              <div className="relative">
+                                <span className="absolute -inset-3 rounded-full bg-white/25 animate-ping" />
+                                <span className="relative block w-3 h-3 rounded-full bg-white/90 shadow-lg" />
+                              </div>
+                              {/* Label */}
+                              <span
+                                className="absolute bottom-16 left-1/2 -translate-x-1/2 text-white/90 text-xs font-body tracking-wide bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full whitespace-nowrap animate-fade-in"
+                              >
+                                Tap to explore products
+                              </span>
+                            </div>
                           )}
                           {/* Expand icon - bottom left */}
                           <button
