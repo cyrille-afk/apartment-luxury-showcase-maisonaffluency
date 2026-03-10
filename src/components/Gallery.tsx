@@ -112,19 +112,19 @@ const galleryExperiences = [{
   items: [{
     image: bedroomImage,
     title: "A Masterful Suite",
-    description: "Rug: Zanellato and Bortotto's Giudecca Rug (Custom) for CC-Tapis, Bed Throw: Celso de Lemos' Silk Bed Throw, Chandelier: Hervé van der Straeten's Bronze MicMac Chandelier, Nightstand: Adam Courts' Villa Pedestal for Okha, Table Lamps: Atelier DeMichelis' Bronze Bud Table Lamps (Edition of 20), Vessel: Milan Pekař's Crystalline Blue Vessel Volume 5, Nightstand Rug: Pinton 1867 'After the Rain' Custom Rug, Iksel's Brunelleschi Perspective Wallcover"
+    description: ""
   }, {
     image: bedroomThirdImage,
     title: "Design Tableau",
-    description: "Console: Damien Langlois-Meurinne's Ooh La La Console for Sé Collections, Table Lamp: Toni Grilo's Marble Marie Lamp for Hayman Editions, Mirror: Kiko Lopez' Silver Glass Hammer Mirror (Unique Piece), Bench: Gallery S.Bensimon's MB02 Bench, Candle: Dan Yeffet's Lyra Marble Candle for oOumm"
+    description: ""
   }, {
     image: "/gallery/calming-2.jpg",
     title: "A Venitian Cocoon",
-    description: "Rug: CC-Tapis Giudecca Rug (Custom), Bed Throw: Peter Reed 1861's Riyad Double Faced Throw and Cushions, Chandelier: Hervé van der Straeten's Bronze MicMac Chandelier, Nightstand: Adam Courts' Villa Pedestal for Okha, Table Lamps: Atelier DeMichelis' Bronze Bud Table Lamps (Edition of 20), Console: Damien Langlois-Meurinne's Ooh La La Console for Sé Collections, Table Lamp: Toni Grilo's Marble Marie Lamp for Hayman Editions, Mirror: Kiko Lopez' Silver Glass Hammer Mirror (Unique Piece), Bench: Gallery S.Bensimon's MB02 Bench, Candle: Dan Yeffet's Lyra Marble Candle for oOumm"
+    description: ""
   }, {
     image: bedroomAltImage,
     title: "Unique By Design Vignette",
-    description: "Nightstand: Adam Courts' Villa Pedestal for Okha, Table Lamps: Atelier DeMichelis' Bronze Bud Table Lamps (Edition of 20), Nightstand Rug: Pinton 1867 'After the Rain' Custom Rug, Iksel's Brunelleschi Perspective Wallcover, Curtains: Pierre Frey's Le Manach Fountain Toile de Tours"
+    description: ""
   }]
 }, {
   experience: "A Small Room with Massive Personality",
