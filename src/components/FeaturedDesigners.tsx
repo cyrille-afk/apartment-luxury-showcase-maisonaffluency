@@ -2889,25 +2889,16 @@ const FeaturedDesigners = () => {
                                 <Gem size={14} className="fill-accent text-accent" />
                                 <span className="font-medium">{link.type}</span>
                               </button>
-                              <div className="inline-flex items-center gap-3 md:hidden">
-                                <WhatsAppShareButton
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
-                                    trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
-                                  }}
-                                  label={`Share ${designer.name} on WhatsApp`}
-                                  hideOn="desktop"
-                                  variant="branded"
-                                />
-                                {(designer as any).logoUrl && (
-                                  <img
-                                    src={(designer as any).logoUrl}
-                                    alt={`${(designer as any).displayName || designer.name} logo`}
-                                    className="h-14 w-auto object-contain"
-                                  />
-                                )}
-                              </div>
+                              <WhatsAppShareButton
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
+                                     trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
+                                   }}
+                                   label={`Share ${designer.name} on WhatsApp`}
+                                   hideOn="desktop"
+                                   variant="prominent"
+                                 />
                               </React.Fragment>
                             ) : (
                               <span
@@ -2921,6 +2912,16 @@ const FeaturedDesigners = () => {
                         </div>
                       )}
 
+                      {/* Mobile logo — positioned at bottom-right, separate from other elements */}
+                      {(designer as any).logoUrl && (
+                        <div className="flex justify-end mt-3 md:hidden">
+                          <img
+                            src={(designer as any).logoUrl}
+                            alt={`${(designer as any).displayName || designer.name} logo`}
+                            className="h-16 w-auto object-contain"
+                          />
+                        </div>
+                      )}
 
                     </div>
                   </div>
