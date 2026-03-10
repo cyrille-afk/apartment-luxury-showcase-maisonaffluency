@@ -2630,7 +2630,7 @@ const BrandsAteliers = () => {
                         )}
                         {/* Desktop close button — bottom-right (outside) */}
                         <button
-                          onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
+                          onClick={requestClosePicks}
                           className="hidden md:flex absolute bottom-2 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
                           aria-label="Close lightbox"
                         >
