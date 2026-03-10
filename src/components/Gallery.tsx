@@ -260,7 +260,7 @@ const Gallery = () => {
   // Preload first section's gallery images only (visible on initial load)
   useEffect(() => {
     if (galleryExperiences.length > 0) {
-      galleryExperiences[0].items.slice(0, 3).forEach(item => {
+      galleryExperiences[0].items.forEach(item => {
         const img = new Image();
         img.src = item.image;
       });
