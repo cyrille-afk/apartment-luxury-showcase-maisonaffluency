@@ -1178,6 +1178,7 @@ const Collectibles = () => {
                           ))}
                         </div>
                       )}
+                    </div>
                   </AccordionContent>
               </AccordionItem>
                 </Fragment>
