@@ -2379,7 +2379,14 @@ const BrandsAteliers = () => {
               setPicksDesignerName(null);
               setPicksIndex(0);
               setPicksZoomed(false);
-              if (!closedViaPopstateRef.current) window.history.back();
+              if (!closedViaPopstateRef.current) {
+                // Restore previous hash before going back
+                window.history.back();
+              }
+              // Clear curators hash
+              if (window.location.hash.startsWith('#curators/')) {
+                window.history.replaceState(null, '', prevHashRef.current || window.location.pathname);
+              }
             }
           }}
         >
