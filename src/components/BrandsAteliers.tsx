@@ -2059,6 +2059,9 @@ const BrandsAteliers = () => {
     };
   }, [preloadPickImages]);
 
+  // Brands that should use FeaturedDesigners data instead of Collectibles
+  const preferFeatured = new Set(["Pierre Bonnefille", "Thierry Lemaire"]);
+
   function preloadPickImages(brandName: string, index: number) {
     const designerId = brandToDesignerMap[brandName];
     if (!designerId) return Promise.resolve();
