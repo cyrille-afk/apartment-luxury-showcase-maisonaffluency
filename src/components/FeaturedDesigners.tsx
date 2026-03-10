@@ -479,7 +479,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "Alexander_Lamont-Reef_Vessels.pdf"
       },
       {
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773144743/f_31121842_1667436301725_bg_processed_tdh7ln.jpg",
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773144737/vintage_contemporary_alexander_l_6__master_txpvau.jpg",
         title: "Hammered Bowls",
         subtitle: "",
         category: "Decorative",
