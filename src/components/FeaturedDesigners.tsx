@@ -2830,7 +2830,7 @@ const FeaturedDesigners = () => {
                       </p>
 
                       {designer.links && designer.links.filter(l => l.type !== "Instagram").length > 0 && (
-                        <div className="flex flex-wrap gap-3 mt-4 md:pr-8">
+                        <div className="flex items-center justify-between gap-3 mt-4 md:flex-wrap md:justify-start md:pr-8">
                           {designer.links.filter(l => l.type !== "Instagram").map((link, idx) => (
                             link.url ? (
                               <a
