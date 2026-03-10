@@ -54,7 +54,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
               e.stopPropagation();
               setActiveId(activeId === hotspot.id ? null : hotspot.id);
             }}
-            className="relative w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-black/10 flex items-center justify-center text-black hover:bg-white hover:scale-110 transition-all duration-200 shadow-lg cursor-pointer"
+            className="relative w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm border border-black/10 flex items-center justify-center text-black hover:bg-white hover:scale-110 transition-all duration-200 shadow-lg cursor-pointer"
             aria-label={`View details for ${hotspot.product_name}`}
           >
             <AnimatePresence mode="wait">
