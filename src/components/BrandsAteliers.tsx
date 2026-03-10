@@ -10,7 +10,7 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
