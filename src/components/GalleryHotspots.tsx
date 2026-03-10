@@ -25,6 +25,7 @@ interface PendingHotspot {
 }
 
 const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => {
+  const isMobile = useIsMobile();
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
