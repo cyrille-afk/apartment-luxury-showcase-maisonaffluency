@@ -2012,8 +2012,8 @@ const BrandsAteliers = () => {
 
     const handlePopState = () => {
       closedViaPopstateRef.current = true;
-      isClosingPicksRef.current = false;
       resetPicksState();
+      isClosingPicksRef.current = false;
     };
 
     window.addEventListener('popstate', handlePopState);
