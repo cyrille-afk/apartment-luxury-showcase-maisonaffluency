@@ -1975,9 +1975,27 @@ const BrandsAteliers = () => {
   const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
   const closedViaPopstateRef = useRef(false);
+  const isClosingPicksRef = useRef(false);
 
-  // History state: push when lightbox opens so browser back button closes it
-  const prevHashRef = useRef<string>('');
+  const resetPicksState = useCallback(() => {
+    setPicksDesignerName(null);
+    setPicksIndex(0);
+    setPicksZoomed(false);
+    setPicksImageLoaded(false);
+  }, []);
+
+  const requestClosePicks = useCallback(() => {
+    if (isClosingPicksRef.current) return;
+    isClosingPicksRef.current = true;
+
+    if (window.location.hash.startsWith('#curators/')) {
+      window.history.back();
+      return;
+    }
+
+    resetPicksState();
+    isClosingPicksRef.current = false;
+  }, [resetPicksState]);
 
   useEffect(() => {
     if (!picksDesignerName) return;
