@@ -110,6 +110,7 @@ const apparatusPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200
 const apparatusPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161859/Screen_Shot_2026-02-22_at_1.58.18_PM_cnfmnc.png";
 const apparatusPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161859/Screen_Shot_2026-02-22_at_2.16.45_PM_t3d8xk.png";
 const apparatusPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772106126/Screen_Shot_2026-02-22_at_2.36.04_PM_ivwy5t.png";
+const apparatusPick8 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773129219/Screen_Shot_2026-03-10_at_3.51.29_PM_xliuck.png";
 const pendhapaPick1 = cloudinaryUrl("Screen_Shot_2026-03-05_at_8.23.37_PM_pj4gi9", { width: 1200, quality: "auto:good", crop: "fill" });
 const pendhapaPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772165616/Screen_Shot_2026-02-27_at_12.10.47_PM_nkmbmx.png";
 const pendhapaPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772165598/Screen_Shot_2026-02-27_at_12.04.23_PM_wlvkcx.png";
@@ -657,6 +658,17 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "Available in various Marbles, Travertine and Bleached Ash Wood",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_PORTAL_DINING_TABLE.pdf",
         pdfFilename: "Apparatus_Studio-Portal_Dining_Table.pdf"
+      },
+      { 
+        image: apparatusPick8, 
+        title: "Median 3",
+        subtitle: "Surface",
+        category: "Furniture",
+        tags: ["Furniture", "Table"],
+        materials: "Alabaster · Fluted Brass",
+        dimensions: "20 H × 75 W × 61 L cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_MEDIAN_3_SURFACE.pdf",
+        pdfFilename: "Apparatus_Studio-Median_3_Surface.pdf"
       },
     ],
     links: [
