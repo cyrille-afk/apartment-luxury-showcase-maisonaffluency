@@ -2907,6 +2907,7 @@ const FeaturedDesigners = () => {
                                   />
                                 )}
                               </div>
+                              </React.Fragment>
                             ) : (
                               <span
                                 key={idx}
