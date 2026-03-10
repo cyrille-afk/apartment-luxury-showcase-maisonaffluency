@@ -1095,7 +1095,7 @@ const partnerBrands = [
   },
   {
     id: "ozone-light",
-    name: "Ozone Light",
+    name: "Ozone",
     category: "Lighting",
     subcategory: "Lighting",
     origin: "France",
