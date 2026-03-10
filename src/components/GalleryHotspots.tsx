@@ -236,7 +236,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
                 transition={{ duration: 0.2 }}
                 className={`absolute z-40 ${
                   isMobile
-                    ? `left-1/2 -translate-x-1/2 min-w-[200px] max-w-[260px] ${hotspot.y_percent > 50 ? "bottom-full mb-2" : "top-full mt-2"}`
+                    ? `min-w-[200px] max-w-[260px] ${hotspot.y_percent > 50 ? "bottom-full mb-2" : "top-full mt-2"} ${hotspot.x_percent > 65 ? "right-0" : hotspot.x_percent < 35 ? "left-0" : "left-1/2 -translate-x-1/2"}`
                     : `min-w-[200px] max-w-[260px] ${hotspot.x_percent > 65 ? "right-full mr-2" : "left-full ml-2"} ${hotspot.y_percent > 65 ? "bottom-0" : hotspot.y_percent < 35 ? "top-0" : "top-1/2 -translate-y-1/2"}`
                 }`}
                 onClick={(e) => e.stopPropagation()}
