@@ -631,7 +631,7 @@ const Gallery = () => {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                           )}
                           {/* Pulsing hotspot hint — first image of first hotspot section only */}
-                          {isHotspotSection && index === 0 && originalSectionIndex === 0 && showHotspotHint && (
+                          {isHotspotSection && index === 0 && originalSectionIndex === firstHotspotSectionIdx && showHotspotHint && (
                             <div ref={hotspotHintRef} className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
                               {/* Pulsing dot */}
                               <div className="relative">
