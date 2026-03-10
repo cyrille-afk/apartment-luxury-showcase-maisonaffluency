@@ -1939,7 +1939,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { image: pierreBonnefilleStoneFloorLamp, title: "Stone Floor Lamp", category: "Lighting", subcategory: "Floor Lamps", tags: ["Lighting", "Floor Lamps"], materials: "Mixed media on wood\nBespoke Dimensions and Colours upon request", dimensions: "Ø 42 × H 142 cm", photoCredit: "Luca Bonnefille" },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/pierre_bonnefille/" },
+      { type: "Instagram", url: "https://www.instagram.com/pierrebonnefille/" },
       { type: "Curators' Picks" },
     ],
   },

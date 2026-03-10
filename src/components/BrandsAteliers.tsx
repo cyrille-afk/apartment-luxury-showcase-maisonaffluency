@@ -872,7 +872,7 @@ const partnerBrands = [
     origin: "France",
     description: "French artist renowned for his bronze paintings and sculptural works, creating pieces that blur the boundaries between painting and sculpture through masterful material exploration.",
     featured: "Bronze Painting 204",
-    instagram: "https://instagram.com/pierrebonnefille",
+    instagram: "https://www.instagram.com/pierrebonnefille/",
     galleryIndex: GALLERY.A_DESIGN_TREASURE_TROVE,
   },
   {

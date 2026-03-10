@@ -292,7 +292,7 @@ export const collectibleDesigners: Array<{
       { image: pierreBonnefilleBronzePainting208, title: "Bronze Painting 208, 2024", category: "Wall Art", tags: ["Wall Art", "Art"], materials: "Mixed media on metallic mesh", dimensions: "H 225 x W 515 cm" },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/pierre_bonnefille/" },
+      { type: "Instagram", url: "https://www.instagram.com/pierrebonnefille/" },
       { type: "Curators' Picks" },
     ],
   },
