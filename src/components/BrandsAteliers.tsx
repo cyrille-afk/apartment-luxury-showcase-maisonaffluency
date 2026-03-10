@@ -1641,6 +1641,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Poltrona Frau": "poltrona-frau",
   "Jindrich Halabala": "jindrich-halabala",
   "Iksel": "iksel",
+  "L'Objet": "lobjet",
 };
 
 // Reverse map: designer ID → brand name (for deep-link resolution)
