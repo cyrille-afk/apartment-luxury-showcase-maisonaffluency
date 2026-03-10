@@ -633,14 +633,15 @@ const Gallery = () => {
                           {/* Pulsing hotspot hint — first image of first hotspot section only */}
                           {isHotspotSection && index === 0 && originalSectionIndex === firstHotspotSectionIdx && showHotspotHint && (
                             <div ref={hotspotHintRef} className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-                              {/* Pulsing dot */}
-                              <div className="relative">
-                                <span className="absolute -inset-3 rounded-full bg-primary/30 animate-ping" />
-                                <span className="relative block w-3 h-3 rounded-full bg-black/70 border-2 border-primary/70 shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />
+                              {/* Pulsing dot + rings */}
+                              <div className="relative flex items-center justify-center">
+                                <span className="absolute w-14 h-14 rounded-full bg-primary/20 animate-ping" />
+                                <span className="absolute w-10 h-10 rounded-full bg-primary/25 animate-pulse" />
+                                <span className="relative block w-5 h-5 rounded-full bg-black/70 border-[2.5px] border-primary shadow-[0_0_12px_hsl(var(--primary)/0.5)]" />
                               </div>
                               {/* Label */}
                               <span
-                                className="absolute bottom-16 left-1/2 -translate-x-1/2 text-white/90 text-xs font-body tracking-wide bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full whitespace-nowrap animate-fade-in"
+                                className="absolute bottom-20 left-1/2 -translate-x-1/2 text-white text-sm font-body font-medium tracking-wide bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full whitespace-nowrap animate-fade-in shadow-lg"
                               >
                                 Tap to explore products
                               </span>
