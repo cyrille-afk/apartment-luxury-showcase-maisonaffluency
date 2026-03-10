@@ -279,18 +279,17 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox }: GalleryH
                             onClick={(e) => {
                               e.stopPropagation();
                               const url = hotspot.link_url!;
-                              onCloseLightbox?.();
-                              setTimeout(() => {
-                                if (url.match(/^#\/?curators\//) || url.startsWith('/#curators/')) {
-                                  let hash = url;
-                                  if (url.startsWith('/#')) hash = url.slice(1);
-                                  if (hash.startsWith('#/curators/')) hash = '#curators/' + hash.slice('#/curators/'.length);
-                                  window.dispatchEvent(new CustomEvent('open-curators-pick', { detail: hash }));
-                                } else {
-                                  window.location.href = url;
-                                }
-                              }, 300);
-                            }}
+                              if (url.match(/^#\/?curators\//) || url.startsWith('/#curators/')) {
+                                let hash = url;
+                                if (url.startsWith('/#')) hash = url.slice(1);
+                                if (hash.startsWith('#/curators/')) hash = '#curators/' + hash.slice('#/curators/'.length);
+                                setActiveId(null);
+                                window.dispatchEvent(new CustomEvent('open-curators-pick', { detail: hash }));
+                              } else {
+                                onCloseLightbox?.();
+                                setTimeout(() => { window.location.href = url; }, 300);
+                              }
+                            }
                           >
                             View details →
                           </button>
