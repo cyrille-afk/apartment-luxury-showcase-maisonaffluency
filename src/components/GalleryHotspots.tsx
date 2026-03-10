@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Plus, X, Trash2, GripVertical, Pencil, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,6 +31,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
   const [formData, setFormData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
   const [saving, setSaving] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const didDragRef = useRef(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
 
@@ -125,6 +126,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
 
   const handleDragMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!draggingId || !editMode) return;
+    didDragRef.current = true;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -172,13 +174,23 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
           <button
             onClick={(e) => {
               e.stopPropagation();
-              if (!draggingId) setActiveId(activeId === hotspot.id ? null : hotspot.id);
+              // In edit mode, only toggle popup if we didn't drag
+              if (editMode) return; // handled by onMouseUp
+              setActiveId(activeId === hotspot.id ? null : hotspot.id);
             }}
             onMouseDown={(e) => {
               if (editMode) {
                 e.stopPropagation();
                 e.preventDefault();
+                didDragRef.current = false;
                 setDraggingId(hotspot.id);
+              }
+            }}
+            onMouseUp={(e) => {
+              if (editMode && draggingId === hotspot.id && !didDragRef.current) {
+                e.stopPropagation();
+                setDraggingId(null);
+                setActiveId(activeId === hotspot.id ? null : hotspot.id);
               }
             }}
             className={`relative w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm border border-black/10 flex items-center justify-center text-black hover:bg-white hover:scale-110 transition-all duration-200 shadow-lg ${editMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
