@@ -659,6 +659,17 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_PORTAL_DINING_TABLE.pdf",
         pdfFilename: "Apparatus_Studio-Portal_Dining_Table.pdf"
       },
+      { 
+        image: apparatusPick8, 
+        title: "Median 3",
+        subtitle: "Surface",
+        category: "Furniture",
+        tags: ["Furniture", "Table"],
+        materials: "Alabaster · Fluted Brass",
+        dimensions: "20 H × 75 W × 61 L cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_MEDIAN_3_SURFACE.pdf",
+        pdfFilename: "Apparatus_Studio-Median_3_Surface.pdf"
+      },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/apparatusstudio" },
