@@ -186,8 +186,8 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
               >
                 <div className="bg-white rounded-lg shadow-2xl border border-primary/10 overflow-hidden">
                   {hotspot.product_image_url && (
-                    <div className="w-full h-32 overflow-hidden">
-                      <img src={hotspot.product_image_url} alt={hotspot.product_name} className="w-full h-full object-cover" />
+                    <div className="w-full h-32 overflow-hidden bg-muted/10">
+                      <img src={hotspot.product_image_url} alt={hotspot.product_name} className="w-full h-full object-contain" />
                     </div>
                   )}
                   <div className="p-3">
