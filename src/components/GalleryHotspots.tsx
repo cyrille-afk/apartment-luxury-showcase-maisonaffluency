@@ -228,11 +228,11 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
           <AnimatePresence>
             {activeId === hotspot.id && (
               <motion.div
-                initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                initial={{ opacity: 0, x: -8, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -8, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="absolute z-40 mt-2 left-1/2 -translate-x-1/2 min-w-[200px] max-w-[260px]"
+                className="absolute z-40 left-full ml-2 top-1/2 -translate-y-1/2 min-w-[200px] max-w-[260px]"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="bg-white rounded-lg shadow-2xl border border-primary/10 overflow-hidden">
