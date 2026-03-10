@@ -370,6 +370,25 @@ const Collectibles = () => {
     return () => window.removeEventListener("deeplink-open-profile", handler);
   }, []);
 
+  // Handle open-curators-pick events for collectible designers
+  useEffect(() => {
+    const handleCuratorsPick = (e: Event) => {
+      const hash = (e as CustomEvent).detail as string;
+      const match = hash.match(/#\/?curators\/([^/]+)(?:\/(\d+))?$/);
+      if (!match) return;
+      const designerId = match[1];
+      const index = match[2] ? parseInt(match[2], 10) : 0;
+      const designer = collectibleDesigners.find(d => d.id === designerId);
+      if (designer && designer.curatorPicks?.length) {
+        setCuratorPicksDesigner(designer);
+        setCuratorPickIndex(index);
+        setIsZoomed(false);
+      }
+    };
+    window.addEventListener('open-curators-pick', handleCuratorsPick);
+    return () => window.removeEventListener('open-curators-pick', handleCuratorsPick);
+  }, []);
+
   // Preload all curator pick images when lightbox opens
   useEffect(() => {
     if (!curatorPicksDesigner?.curatorPicks?.length) return;
