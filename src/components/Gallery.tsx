@@ -270,7 +270,7 @@ const Gallery = () => {
     const timer = setTimeout(() => {
       setShowHotspotHint(false);
       sessionStorage.setItem("__hotspot_hint_seen", "1");
-    }, 4000);
+    }, 6000);
     return () => clearTimeout(timer);
   }, [hintVisible]);
 
