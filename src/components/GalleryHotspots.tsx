@@ -98,6 +98,31 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
     setActiveId(null);
   };
 
+  const startEditing = (hotspot: Hotspot) => {
+    setEditingId(hotspot.id);
+    setEditData({
+      product_name: hotspot.product_name,
+      designer_name: hotspot.designer_name || "",
+      product_image_url: hotspot.product_image_url || "",
+      link_url: hotspot.link_url || "",
+    });
+  };
+
+  const saveEdit = async () => {
+    if (!editingId || !editData.product_name.trim()) return;
+    setSaving(true);
+    const updates = {
+      product_name: editData.product_name.trim(),
+      designer_name: editData.designer_name.trim() || null,
+      product_image_url: editData.product_image_url.trim() || null,
+      link_url: editData.link_url.trim() || null,
+    };
+    await supabase.from("gallery_hotspots").update(updates).eq("id", editingId);
+    setHotspots(prev => prev.map(h => h.id === editingId ? { ...h, ...updates } : h));
+    setEditingId(null);
+    setSaving(false);
+  };
+
   const handleDragMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!draggingId || !editMode) return;
     const rect = e.currentTarget.getBoundingClientRect();
