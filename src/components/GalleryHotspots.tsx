@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Plus, X, Trash2, GripVertical, Pencil, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,6 +25,7 @@ interface PendingHotspot {
 }
 
 const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => {
+  const isMobile = useIsMobile();
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -228,14 +230,14 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
           <AnimatePresence>
             {activeId === hotspot.id && (
               <motion.div
-                initial={{ opacity: 0, x: hotspot.x_percent > 65 ? 8 : -8, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: hotspot.x_percent > 65 ? 8 : -8, scale: 0.95 }}
+                initial={{ opacity: 0, y: isMobile ? (hotspot.y_percent > 50 ? 8 : -8) : 0, x: !isMobile ? (hotspot.x_percent > 65 ? 8 : -8) : 0, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: isMobile ? (hotspot.y_percent > 50 ? 8 : -8) : 0, x: !isMobile ? (hotspot.x_percent > 65 ? 8 : -8) : 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className={`absolute z-40 min-w-[200px] max-w-[260px] ${
-                  hotspot.x_percent > 65 ? "right-full mr-2" : "left-full ml-2"
-                } ${
-                  hotspot.y_percent > 65 ? "bottom-0" : hotspot.y_percent < 35 ? "top-0" : "top-1/2 -translate-y-1/2"
+                className={`absolute z-40 ${
+                  isMobile
+                    ? `left-1/2 -translate-x-1/2 min-w-[200px] max-w-[260px] ${hotspot.y_percent > 50 ? "bottom-full mb-2" : "top-full mt-2"}`
+                    : `min-w-[200px] max-w-[260px] ${hotspot.x_percent > 65 ? "right-full mr-2" : "left-full ml-2"} ${hotspot.y_percent > 65 ? "bottom-0" : hotspot.y_percent < 35 ? "top-0" : "top-1/2 -translate-y-1/2"}`
                 }`}
                 onClick={(e) => e.stopPropagation()}
               >
