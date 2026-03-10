@@ -237,7 +237,7 @@ export const collectibleDesigners: Array<{
       { image: marcantonioCotissiVessel, title: "Cotissi Vessel", category: "Decorative Object", subcategory: "Vessels", materials: "Hand-blown Murano glass", dimensions: "H35 × Ø20 cm", edition: "Unique Piece" },
     ],
     links: [
-      { type: "Instagram", url: "https://instagram.com/marcantoniobrandolinidadda" },
+      { type: "Instagram", url: "https://www.instagram.com/marcantoniobrandolinistudio/" },
       { type: "Curators' Picks" },
     ],
   },
