@@ -1899,10 +1899,14 @@ const BrandsAteliers = () => {
   const closedViaPopstateRef = useRef(false);
 
   // History state: push when lightbox opens so browser back button closes it
+  const prevHashRef = useRef<string>('');
+
   useEffect(() => {
     if (!picksDesignerName) return;
 
     closedViaPopstateRef.current = false;
+    // Save current hash before overriding
+    prevHashRef.current = window.location.hash;
     window.history.pushState({ picksLightbox: true }, '');
 
     const handlePopState = () => {
@@ -1910,6 +1914,12 @@ const BrandsAteliers = () => {
       setPicksDesignerName(null);
       setPicksIndex(0);
       setPicksZoomed(false);
+      // Restore previous hash
+      if (prevHashRef.current) {
+        window.history.replaceState(null, '', prevHashRef.current);
+      } else {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -1917,6 +1927,36 @@ const BrandsAteliers = () => {
       window.removeEventListener('popstate', handlePopState);
     };
   }, [picksDesignerName]);
+
+  // Update hash when picks lightbox is open or index changes
+  useEffect(() => {
+    if (!picksDesignerName) return;
+    const designerId = brandToDesignerMap[picksDesignerName];
+    if (designerId) {
+      window.history.replaceState(null, '', `#curators/${designerId}/${picksIndex}`);
+    }
+  }, [picksDesignerName, picksIndex]);
+
+  // Deep-link: parse #curators/{designerId}/{index} on mount
+  useEffect(() => {
+    const hash = window.location.hash;
+    const match = hash.match(/^#curators\/([^/]+)(?:\/(\d+))?$/);
+    if (match) {
+      const designerId = match[1];
+      const index = match[2] ? parseInt(match[2], 10) : 0;
+      const brandName = designerIdToBrandMap[designerId];
+      if (brandName) {
+        // Small delay to ensure component is mounted
+        setTimeout(() => {
+          setPicksDesignerName(brandName);
+          setPicksIndex(index);
+          setPicksZoomed(false);
+          setPicksImageLoaded(false);
+        }, 300);
+      }
+    }
+  }, []);
+
   // Brands that should use FeaturedDesigners data instead of Collectibles
   const preferFeatured = new Set(["Pierre Bonnefille"]);
 
@@ -1934,9 +1974,9 @@ const BrandsAteliers = () => {
     return featuredDesigners.find(d => d.id === designerId) || null;
   }, [picksDesignerName]);
 
-  const openPicks = useCallback((brandName: string) => {
+  const openPicks = useCallback((brandName: string, index?: number) => {
     setPicksDesignerName(brandName);
-    setPicksIndex(0);
+    setPicksIndex(index ?? 0);
     setPicksZoomed(false);
     setPicksImageLoaded(false);
   }, []);
