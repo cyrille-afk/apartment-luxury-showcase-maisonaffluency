@@ -2890,17 +2890,14 @@ const FeaturedDesigners = () => {
                                 <Gem size={16} className="fill-accent text-accent md:w-3.5 md:h-3.5" />
                                 <span className="font-medium underline underline-offset-2 decoration-accent/40 md:no-underline">{link.type}</span>
                               </button>
-                              {/* Mobile Line 1 wrapper: Curators' Picks left + Logo extreme right */}
-                              <div className="flex items-center justify-between w-full md:hidden">
-                                <div /> {/* spacer — button is above in flow */}
-                                {(designer as any).logoUrl && (
-                                  <img
-                                    src={(designer as any).logoUrl}
-                                    alt={`${(designer as any).displayName || designer.name} logo`}
-                                    className="h-14 w-auto object-contain"
-                                  />
-                                )}
-                              </div>
+                              {/* Mobile: Logo at extreme right, same line as Curators' Picks */}
+                              {(designer as any).logoUrl && (
+                                <img
+                                  src={(designer as any).logoUrl}
+                                  alt={`${(designer as any).displayName || designer.name} logo`}
+                                  className="h-14 w-auto object-contain ml-auto md:hidden"
+                                />
+                              )}
                               {/* Mobile Line 2: WhatsApp centered below */}
                               <div className="flex items-center justify-center w-full md:hidden">
                                 <WhatsAppShareButton
