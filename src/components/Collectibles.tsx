@@ -335,24 +335,6 @@ export const collectibleDesigners: Array<{
       { type: "Curators' Picks" },
     ],
   },
-  {
-    id: "cazes-conquet",
-    name: "Cazes & Conquet",
-    specialty: "Refined Seating & Contemporary Furniture",
-    image: cazesConquetImg,
-    biography:
-      "Cazes & Conquet is a French design duo creating refined furniture pieces that blend contemporary aesthetics with traditional craftsmanship and timeless elegance. Their Augusta Dining Chair exemplifies their mastery of form and material, combining a natural oak structure with exquisite upholstery options.",
-    notableWorks: "Augusta Dining Chairs",
-    notableWorksLink: { text: "Augusta Dining Chairs", galleryIndex: GALLERY.PANORAMIC_CITYSCAPE_VIEWS },
-    philosophy: "We design furniture that marries contemporary vision with the enduring beauty of traditional craftsmanship.",
-    curatorPicks: [
-      { image: cazesConquetAugusta, title: "Augusta Dining Chair", category: "Seating", subcategory: "Chairs", materials: "Natural Oak structure · Fabric or Leather seat", dimensions: "W 48 × D 51 × H 75 cm", edition: "" },
-    ],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/thierryconquet" },
-      { type: "Curators' Picks" },
-    ],
-  },
 ];
 
 const Collectibles = () => {
