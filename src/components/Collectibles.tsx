@@ -1139,14 +1139,7 @@ const Collectibles = () => {
                               </a>
                             ) : link.type === "Curators' Picks" ? (
                               <Fragment key={idx}>
-                              {/* Mobile logo — inline left of Curators' Picks */}
-                              {(designer as any).logoUrl && (
-                                <img
-                                  src={(designer as any).logoUrl}
-                                  alt={`${designer.name} logo`}
-                                  className="h-14 w-auto object-contain md:hidden"
-                                />
-                              )}
+                              {/* Mobile: Curators' Picks standalone on first line */}
                               <button
                                 onClick={() => openCuratorPicks(designer)}
                                 className="inline-flex items-center gap-1.5 md:px-4 md:py-2 text-base md:text-sm font-body md:bg-accent/10 md:hover:bg-accent/20 text-accent-foreground md:rounded-full transition-all duration-300 cursor-pointer md:border md:border-accent/30 md:ml-auto"
@@ -1154,27 +1147,26 @@ const Collectibles = () => {
                                 <Gem size={16} className="fill-accent text-accent md:w-3.5 md:h-3.5" />
                                 <span className="font-medium underline underline-offset-2 decoration-accent/40 md:no-underline">{link.type}</span>
                               </button>
+                              {/* Mobile: WhatsApp left, Logo right on second line */}
+                              <div className="flex items-center justify-between md:hidden">
+                                <WhatsAppShareButton
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    shareProfileOnWhatsApp("collectible", designer.id ?? designer.name, designer.name, designer.specialty);
+                                    trackCTA.whatsapp(`Collectibles_Share_${designer.name}`);
+                                  }}
+                                  label={`Share ${designer.name} on WhatsApp`}
+                                  variant="prominent"
+                                />
+                                {(designer as any).logoUrl && (
+                                  <img
+                                    src={(designer as any).logoUrl}
+                                    alt={`${designer.name} logo`}
+                                    className="h-14 w-auto object-contain"
+                                  />
+                                )}
+                              </div>
                               </Fragment>
-                            ) : (
-                              <span
-                                key={idx}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-primary/10 text-primary rounded-md border border-primary/20"
-                              >
-                                {link.type}
-                              </span>
-                            )
-                          ))}
-                          <WhatsAppShareButton
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  shareProfileOnWhatsApp("collectible", designer.id ?? designer.name, designer.name, designer.specialty);
-                                  trackCTA.whatsapp(`Collectibles_Share_${designer.name}`);
-                                }}
-                                label={`Share ${designer.name} on WhatsApp`}
-                                hideOn="desktop"
-                                variant="prominent"
-                              />
-                        </div>
                       )}
 
 
