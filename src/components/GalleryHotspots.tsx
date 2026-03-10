@@ -32,6 +32,8 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
   const [saving, setSaving] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const didDragRef = useRef(false);
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+  const DRAG_THRESHOLD = 5; // pixels
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
 
