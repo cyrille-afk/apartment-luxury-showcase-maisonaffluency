@@ -269,7 +269,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         title: "CLASSIQUE V",
         subtitle: "Gounot & Jähnke",
         tags: ["Lighting", "Chandelier"],
-        materials: "Aluminium and brass structure in medal bronze, mirror nickel or gun metal finish with white paper diffuser\n1200 × 1200 × H 120 mm – 48 kg\nSilhouette: 1750 mm\nWarm white 2700K LED lighting, 230W, 11000 Lumens\n\nAvailable in multiple LED options: Warm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm, warm white LED lighting from 1900K (low intensity) to 2500K (high intensity), Integrated 24V converters and drivers, CE Class I",
+        materials: "Aluminium and brass structure in medal bronze, mirror nickel or gun metal finish with white paper diffuser\n1200 × 1200 × H 120 mm – 48 kg\nSilhouette: 1750 mm\nWarm white 2700K LED lighting, 230W, 11000 Lumens\n\nAvailable in multiple LED options: Warm white LED lighting 2200K, or alternatively 2700K\nOptional Dim to Warm\nWarm white LED lighting from 1900K (low intensity) to 2500K (high intensity), Integrated 24V converters and drivers, CE Class I",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Classique_V.pdf",
         pdfFilename: "Maison_Affluency-Classique_V.pdf",
       },
