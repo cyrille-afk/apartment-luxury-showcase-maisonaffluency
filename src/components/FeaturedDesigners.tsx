@@ -2005,7 +2005,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
     ],
     links: [
-      { type: "Instagram", url: "https://www.instagram.com/redaamalou/" },
+      { type: "Instagram", url: "https://www.instagram.com/redaamaloudesign/" },
       { type: "Curators' Picks" },
     ],
   },
