@@ -807,10 +807,10 @@ const Gallery = () => {
                   {/* Close button — bottom-left of image area */}
                   <button
                     onClick={closeLightbox}
-                    className="absolute bottom-2 left-3 z-50 p-2.5 bg-black/60 backdrop-blur-sm rounded-full"
+                    className="absolute bottom-2 left-3 z-50 p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
                     aria-label="Close lightbox"
                   >
-                    <X className="h-6 w-6 text-white" />
+                    <X className="h-4 w-4 text-white" />
                   </button>
                 </div>
 
