@@ -393,13 +393,11 @@ const Collectibles = () => {
   }, []);
 
   // Preload all curator pick images when lightbox opens
+  // Staggered preload all curator pick images when lightbox opens
   useEffect(() => {
     if (!curatorPicksDesigner?.curatorPicks?.length) return;
-    curatorPicksDesigner.curatorPicks.forEach(pick => {
-      const img = new Image();
-      img.src = pick.image;
-    });
-  }, [curatorPicksDesigner]);
+    warmCuratorPickSet(curatorPicksDesigner.curatorPicks, curatorPickIndex);
+  }, [curatorPicksDesigner, curatorPickIndex]);
 
   // History state: push when lightbox opens so browser back button returns to lightbox.
   // Track whether close was initiated by popstate to avoid double history.back().

@@ -8,6 +8,7 @@ import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
+import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
@@ -2213,29 +2214,11 @@ const FeaturedDesigners = () => {
     return () => window.removeEventListener("deeplink-open-profile", handler);
   }, []);
 
-  // Preload adjacent curator pick images for smooth transitions
+  // Staggered preload of all curator pick images when lightbox opens or index changes
   useEffect(() => {
     if (!curatorPicksDesigner?.curatorPicks?.length) return;
-    const picks = curatorPicksDesigner.curatorPicks;
-    const toPreload = [curatorPickIndex - 1, curatorPickIndex + 1].filter(
-      i => i >= 0 && i < picks.length
-    );
-    toPreload.forEach(i => {
-      const img = new Image();
-      img.src = picks[i].image;
-    });
+    warmCuratorPickSet(curatorPicksDesigner.curatorPicks, curatorPickIndex);
   }, [curatorPickIndex, curatorPicksDesigner]);
-
-  // Also preload all images when lightbox opens
-  useEffect(() => {
-    if (!curatorPicksDesigner?.curatorPicks?.length) return;
-    curatorPicksDesigner.curatorPicks.forEach(pick => {
-      if (pick.image) {
-        const img = new Image();
-        img.src = pick.image;
-      }
-    });
-  }, [curatorPicksDesigner]);
 
   // History state: push when lightbox opens so browser back button returns to lightbox.
   // Track whether close was initiated by popstate to avoid double history.back().
