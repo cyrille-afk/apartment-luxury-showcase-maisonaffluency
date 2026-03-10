@@ -2025,6 +2025,7 @@ const BrandsAteliers = () => {
         if (brandName) {
           await preloadPickImages(brandName, index);
           const applyOpen = () => {
+            prewarmedPicksIndexRef.current = index;
             setPicksDesignerName(brandName);
             setPicksIndex(index);
             setPicksZoomed(false);
