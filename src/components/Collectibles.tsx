@@ -326,7 +326,7 @@ export const collectibleDesigners: Array<{
     notableWorksLink: { text: "Orsay Coffee Table", galleryIndex: GALLERY.A_SOPHISTICATED_LIVING_ROOM },
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
     curatorPicks: [
-      { image: thierryLemaireOrsay, title: "Orsay Coffee Table", category: "Tables", subcategory: "Coffee Tables", materials: "Alabastrino Travertine & Ocean Onyx", dimensions: "L 170 × P 100 × H 40 cm", edition: "Edition of 12 signed" },
+      { image: thierryLemaireOrsay, title: "Orsay MDS Coffee Table", category: "Tables", subcategory: "Coffee Tables", materials: "Alabastrino Travertine & Ocean Onyx", dimensions: "L 170 × P 100 × H 40 cm", edition: "Edition of 12 signed" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
