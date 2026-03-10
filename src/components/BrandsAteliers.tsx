@@ -359,6 +359,21 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
+  "poltrona-frau": {
+    name: "Poltrona Frau",
+    curatorPicks: [
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773131166/cq5dam.thumbnail.1500.1500_ytilh7.jpg",
+        title: "Albero Bookcase",
+        subtitle: "designed by Gianfranco Frattini",
+        category: "Storage",
+        subcategory: "Bookcases & Credenzas",
+        tags: ["Storage", "Bookcase"],
+        materials: "Solid walnut structure\nShelves in walnut veneer",
+        dimensions: "Various configurations available",
+      },
+    ],
+  },
 };
 
 // Gallery image index mapping (based on flattened gallery items order)
@@ -1580,6 +1595,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Marta Sala Éditions": "marta-sala-editions",
   "Ozone": "ozone-light",
   "Victoria Magniant": "victoria-magniant",
+  "Poltrona Frau": "poltrona-frau",
 };
 
 // Reverse map: designer ID → brand name (for deep-link resolution)
