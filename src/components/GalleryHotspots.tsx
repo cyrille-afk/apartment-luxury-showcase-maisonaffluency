@@ -289,7 +289,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox }: GalleryH
                                 onCloseLightbox?.();
                                 setTimeout(() => { window.location.href = url; }, 300);
                               }
-                            }
+                            }}
                           >
                             View details →
                           </button>
