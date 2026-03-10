@@ -2845,7 +2845,7 @@ const BrandsAteliers = () => {
               ) : (
                 <div className="relative flex items-center justify-center w-full h-full">
                   <button
-                    onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
+                    onClick={requestClosePicks}
                     className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
                     aria-label="Close lightbox"
                   >
