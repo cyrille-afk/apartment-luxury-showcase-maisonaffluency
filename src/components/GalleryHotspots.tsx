@@ -174,7 +174,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
       {hotspots.map((hotspot) => (
         <div
           key={hotspot.id}
-          className="absolute pointer-events-auto"
+          className={`absolute pointer-events-auto transition-opacity duration-200 ${activeId && activeId !== hotspot.id ? "opacity-0 pointer-events-none" : "opacity-100"}`}
           style={{
             left: `${hotspot.x_percent}%`,
             top: `${hotspot.y_percent}%`,
