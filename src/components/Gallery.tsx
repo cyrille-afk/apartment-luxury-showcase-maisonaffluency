@@ -614,8 +614,8 @@ const Gallery = () => {
                             <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
                               {/* Pulsing dot */}
                               <div className="relative">
-                                <span className="absolute -inset-3 rounded-full bg-white/25 animate-ping" />
-                                <span className="relative block w-3 h-3 rounded-full bg-white/90 shadow-lg" />
+                                <span className="absolute -inset-3 rounded-full bg-primary/30 animate-ping" />
+                                <span className="relative block w-3 h-3 rounded-full bg-black/70 border-2 border-primary/70 shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />
                               </div>
                               {/* Label */}
                               <span

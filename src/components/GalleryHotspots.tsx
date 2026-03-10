@@ -208,7 +208,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox }: GalleryH
                 setActiveId(activeId === hotspot.id ? null : hotspot.id);
               }
             }}
-            className={`relative w-5 h-5 rounded-full bg-white/90 backdrop-blur-sm border border-black/10 flex items-center justify-center text-black hover:bg-white hover:scale-110 transition-all duration-200 shadow-lg ${editMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
+            className={`relative w-5 h-5 rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 flex items-center justify-center text-white hover:bg-black/80 hover:border-primary hover:scale-110 transition-all duration-200 shadow-[0_0_8px_hsl(var(--primary)/0.4)] ${editMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
             aria-label={`View details for ${hotspot.product_name}`}
           >
             <AnimatePresence mode="wait">
