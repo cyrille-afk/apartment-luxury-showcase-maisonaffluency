@@ -2920,16 +2920,6 @@ const FeaturedDesigners = () => {
                         </div>
                       )}
 
-                      {/* Mobile logo — positioned at bottom-right, separate from other elements */}
-                      {(designer as any).logoUrl && (
-                        <div className="flex justify-end mt-3 md:hidden">
-                          <img
-                            src={(designer as any).logoUrl}
-                            alt={`${(designer as any).displayName || designer.name} logo`}
-                            className="h-16 w-auto object-contain"
-                          />
-                        </div>
-                      )}
 
                     </div>
                   </div>
