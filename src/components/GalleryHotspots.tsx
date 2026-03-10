@@ -128,10 +128,16 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
 
   const handleDragMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!draggingId || !editMode) return;
-    didDragRef.current = true;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
+    // Only mark as drag if mouse moved beyond threshold
+    if (!didDragRef.current && dragStartRef.current) {
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      if (Math.sqrt(dx * dx + dy * dy) < DRAG_THRESHOLD) return;
+      didDragRef.current = true;
+    }
     setHotspots(prev => prev.map(h => h.id === draggingId ? { ...h, x_percent: Math.round(x * 10) / 10, y_percent: Math.round(y * 10) / 10 } : h));
   }, [draggingId, editMode]);
 
