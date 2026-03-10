@@ -466,6 +466,17 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Koi_Carps.pdf",
         pdfFilename: "Alexander_Lamont-Koi_Carps_Wall_Art.pdf"
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773133217/ddoc-14391-ff12f77d4b9ef5869726ddd2fa95a3fa-reef-vessels-01-alexander-lamont_jjc8yv.jpg",
+        title: "Reef Vessels",
+        subtitle: "",
+        category: "Decorative",
+        tags: ["Decorative", "Vessels", "Bronze"],
+        materials: "A group of bronze vessels that play on a sculptural idea of 'bondage' whereby knots and overlaps create an open structure full of tension",
+        dimensions: "FG000174 - Small: Ø 23 × H 18.5 cm – App. 5.5 kg\nFG000175 - Medium: Ø 26 × H 20 cm – App. 7 kg\nFG000176 - Large: Ø 34 × H 25.5 cm – App. 13 kg",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Reef_Vessels.pdf",
+        pdfFilename: "Alexander_Lamont-Reef_Vessels.pdf"
+      },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
