@@ -13,6 +13,21 @@ const ExitIntentBanner = () => {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [pastGallery, setPastGallery] = useState(false);
+
+  // Track whether user has scrolled past the gallery section
+  useEffect(() => {
+    const check = () => {
+      const el = document.getElementById("gallery");
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        setPastGallery(rect.bottom < window.innerHeight * 0.5);
+      }
+    };
+    window.addEventListener("scroll", check, { passive: true });
+    check();
+    return () => window.removeEventListener("scroll", check);
+  }, []);
 
   // Hide when any Radix Dialog overlay is open (lightboxes)
   // Debounced to avoid forced reflows on every DOM mutation
@@ -65,7 +80,7 @@ const ExitIntentBanner = () => {
 
   return (
     <AnimatePresence>
-      {visible && !dialogOpen && (
+      {visible && !dialogOpen && pastGallery && (
         <div className="fixed bottom-[5.5rem] md:bottom-6 right-4 z-[60] flex items-end gap-0.5">
           {/* Mobile dismiss — small, to the left of the pill */}
           <button
