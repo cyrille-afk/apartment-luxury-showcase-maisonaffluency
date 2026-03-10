@@ -2597,19 +2597,33 @@ const BrandsAteliers = () => {
                                 </div>
                               </div>
                             )}
-                            <PinchZoomImage
-                              key={picksIndex}
-                              src={picksDesigner.curatorPicks[picksIndex]?.image}
-                              alt={picksDesigner.curatorPicks[picksIndex]?.title}
-                              className={`object-contain select-none transition-all duration-300 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'}`}
-                              draggable={false}
-                              decoding="sync"
-                              loading="eager"
-                              fetchPriority="high"
-                              onLoad={() => setPicksImageLoaded(true)}
-                              onZoomChange={(z) => { imageZoomedRef.current = z; }}
-                            />
-                            {/* Desktop hover overlay — click to enlarge/minimize */}
+                            {isMobile ? (
+                              <img
+                                key={picksIndex}
+                                src={picksDesigner.curatorPicks[picksIndex]?.image}
+                                alt={picksDesigner.curatorPicks[picksIndex]?.title}
+                                className={`object-contain select-none transition-all duration-300 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh]'}`}
+                                draggable={false}
+                                decoding="sync"
+                                loading="eager"
+                                fetchPriority="high"
+                                onLoad={() => setPicksImageLoaded(true)}
+                                style={{ userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'pan-y' }}
+                              />
+                            ) : (
+                              <PinchZoomImage
+                                key={picksIndex}
+                                src={picksDesigner.curatorPicks[picksIndex]?.image}
+                                alt={picksDesigner.curatorPicks[picksIndex]?.title}
+                                className={`object-contain select-none transition-all duration-300 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-[70vw] max-h-[60vh]'}`}
+                                draggable={false}
+                                decoding="sync"
+                                loading="eager"
+                                fetchPriority="high"
+                                onLoad={() => setPicksImageLoaded(true)}
+                                onZoomChange={(z) => { imageZoomedRef.current = z; }}
+                              />
+                            )}
                             <div
                               className={`hidden md:flex absolute inset-0 items-center justify-center transition-all duration-500 ease-out z-[5] group ${picksZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}
                               onClick={() => setPicksZoomed(!picksZoomed)}
