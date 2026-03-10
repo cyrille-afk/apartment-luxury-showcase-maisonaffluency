@@ -255,9 +255,23 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
                           <p className="text-xs text-muted-foreground font-body mt-0.5">{hotspot.designer_name}</p>
                         )}
                         {hotspot.link_url && (
-                          <a href={hotspot.link_url} className="inline-block mt-2 text-xs text-primary underline underline-offset-2 font-body hover:text-primary/80 transition-colors" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className="inline-block mt-2 text-xs text-primary underline underline-offset-2 font-body hover:text-primary/80 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const url = hotspot.link_url!;
+                              if (url.startsWith('#') || url.startsWith('/#')) {
+                                const hash = url.startsWith('/#') ? url.slice(1) : url;
+                                // Force hashchange even if same hash
+                                window.location.hash = '';
+                                setTimeout(() => { window.location.hash = hash; }, 50);
+                              } else {
+                                window.location.href = url;
+                              }
+                            }}
+                          >
                             View details →
-                          </a>
+                          </button>
                         )}
                         {editMode && (
                           <div className="mt-2 flex items-center gap-3">
