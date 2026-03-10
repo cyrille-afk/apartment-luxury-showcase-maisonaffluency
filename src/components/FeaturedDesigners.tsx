@@ -2884,10 +2884,10 @@ const FeaturedDesigners = () => {
                                     setCuratorPickIndex(0);
                                   }
                                 }}
-                                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-body bg-accent/10 hover:bg-accent/20 text-accent-foreground rounded-full transition-all duration-300 cursor-pointer border border-accent/30 md:ml-auto"
+                                className="inline-flex items-center gap-1.5 md:px-4 md:py-2 text-sm font-body md:bg-accent/10 md:hover:bg-accent/20 text-accent-foreground md:rounded-full transition-all duration-300 cursor-pointer md:border md:border-accent/30 md:ml-auto"
                               >
                                 <Gem size={14} className="fill-accent text-accent" />
-                                <span className="font-medium">{link.type}</span>
+                                <span className="font-medium underline underline-offset-2 decoration-accent/40 md:no-underline">{link.type}</span>
                               </button>
                               <WhatsAppShareButton
                                    onClick={(e) => {
