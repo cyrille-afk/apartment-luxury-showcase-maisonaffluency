@@ -2094,6 +2094,10 @@ const BrandsAteliers = () => {
 
   // Reset image loaded state when switching picks
   useEffect(() => {
+    if (prewarmedPicksIndexRef.current === picksIndex) {
+      prewarmedPicksIndexRef.current = null;
+      return;
+    }
     setPicksImageLoaded(false);
   }, [picksIndex]);
 
