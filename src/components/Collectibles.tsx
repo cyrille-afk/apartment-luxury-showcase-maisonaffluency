@@ -1167,10 +1167,17 @@ const Collectibles = () => {
                                 )}
                               </div>
                               </Fragment>
+                            ) : (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-primary/10 text-primary rounded-md border border-primary/20"
+                              >
+                                {link.type}
+                              </span>
+                            )
+                          ))}
+                        </div>
                       )}
-
-
-                    </div>
                   </AccordionContent>
               </AccordionItem>
                 </Fragment>
