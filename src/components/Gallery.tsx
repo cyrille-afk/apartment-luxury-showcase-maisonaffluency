@@ -794,10 +794,10 @@ const Gallery = () => {
                        imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
                        visible={!imageZoomed}
                      />
-                      {/* Close button — desktop: outside image bottom-right */}
+                      {/* Close button — desktop: near image */}
                       <button
                         onClick={closeLightbox}
-                        className={`hidden md:flex absolute bottom-2 -right-12 lg:-right-14 z-50 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20 ${isExpanded ? '!hidden' : ''}`}
+                        className={`hidden md:flex absolute z-50 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}
                         aria-label="Close lightbox"
                       >
                         <X className="h-5 w-5" />
