@@ -1,0 +1,1 @@
+UPDATE gallery_hotspots SET y_percent = 65.0 WHERE id = '43c134b5-ddc9-4d52-b901-b54bfd4d7e32';
