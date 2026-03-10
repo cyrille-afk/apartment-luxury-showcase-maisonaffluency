@@ -313,8 +313,8 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
             transform: "translate(-50%, -50%)",
           }}
         >
-          <div className="w-7 h-7 rounded-full bg-amber-400 border-2 border-amber-600 flex items-center justify-center shadow-lg">
-            <Plus className="w-3.5 h-3.5 text-amber-900" />
+          <div className="w-5 h-5 rounded-full bg-amber-400 border-2 border-amber-600 flex items-center justify-center shadow-lg">
+            <Plus className="w-2.5 h-2.5 text-amber-900" />
           </div>
           {/* Form */}
           <div
