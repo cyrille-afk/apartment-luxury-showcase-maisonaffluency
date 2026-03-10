@@ -31,6 +31,8 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
   const [formData, setFormData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
   const [saving, setSaving] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editData, setEditData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
 
   useEffect(() => {
     if (!imageIdentifier) return;
