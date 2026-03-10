@@ -175,19 +175,19 @@ const galleryExperiences = [{
   items: [{
     image: detailsSectionImage,
     title: "Curated Vignette",
-    description: "Console: Alexandre Lamont's Corteza Console, Table Lamp: Thierry Lemaire's Kedis Lamp, Small Vase: Milan Pekař's small Crystalline Vase, Blue Vessel: Marcantonio Brandolini D'Adda's Vase 'Unknown N.83', Side Table: Jaime Hayon's Time Piece Ceramic for Sé Collections, Lounge Chair: Jindrich Halabala's Lounge Chair in Dedar's UKIYO MONOGATARI 003, Bookcase: Gianfranco Frattini's Albero Bookcase for Poltrona Frau, Vessel: Maarten Vrolijk's Sakura TRP 22001 Vessel"
+    description: ""
   }, {
     image: detailsConsoleImage,
     title: "The Details Make The Design",
-    description: "Console Details: Alexandre Lamont's Corteza Console featuring shagreen leather with curved bullnose edge, Blue Vessel: Marcantonio Brandolini D'Adda's Cotissi Vessel 'Unknown N.83', Small Vase: Milan Pekař's small Crystalline Vase"
+    description: ""
   }, {
     image: detailsLampImage,
     title: "Light & Texture",
-    description: "Noe Duchaufour Lawrance's Amber Folia Portable Lamp for Cristallerie Saint-Louis"
+    description: ""
   }, {
     image: detailsConsole4Image,
     title: "Craftsmanship At Every Corner",
-    description: "Shagreen Panels: Robicara's Sira Credenza details, Matthieu Gicquel's Texture Glass with Gold Leaf rim Géode details"
+    description: ""
   }]
 }];
 /** Scrollable container for expanded lightbox images — shows a bounce arrow when content overflows */
