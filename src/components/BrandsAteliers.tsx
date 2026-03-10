@@ -2569,7 +2569,7 @@ const BrandsAteliers = () => {
                           }
                           // Has LED section — keep dimension lines with breaks, bold dims
                           const before = mat.slice(0, ledIdx);
-                          const after = mat.slice(ledIdx + 2).replace(/\n/g, ' ');
+                          const after = mat.slice(ledIdx + 2);
                           const lines = before.split('\n');
                           return (
                             <>
@@ -2589,7 +2589,7 @@ const BrandsAteliers = () => {
                                   );
                                 })}
                               </p>
-                              <p className="text-xs text-white/50 font-body mt-3 text-justify">
+                              <p className="text-xs text-white/50 font-body mt-3 text-justify whitespace-pre-line">
                                 {after}
                               </p>
                             </>
