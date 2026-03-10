@@ -808,9 +808,10 @@ const Gallery = () => {
                    <div className="relative inline-block shrink-0">
                      <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[95vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
                      <GalleryHotspots
-                       imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
-                       visible={!imageZoomed}
-                     />
+                        imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
+                        visible={!imageZoomed}
+                        onCloseLightbox={closeLightbox}
+                      />
                       {/* Close button — desktop: near image */}
                       <button
                         onClick={closeLightbox}
