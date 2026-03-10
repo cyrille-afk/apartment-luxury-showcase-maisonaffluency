@@ -2035,26 +2035,21 @@ const BrandsAteliers = () => {
     const openFromHash = async (hashStr?: string) => {
       const hash = hashStr || window.location.hash;
       const match = hash.match(/#\/?curators\/([^/]+)(?:\/(\d+))?$/);
-      if (match) {
-        const designerId = match[1];
-        const index = match[2] ? parseInt(match[2], 10) : 0;
-        const brandName = designerIdToBrandMap[designerId];
-        if (brandName) {
-          await preloadPickImages(brandName, index);
-          const applyOpen = () => {
-            prewarmedPicksIndexRef.current = index;
-            setPicksDesignerName(brandName);
-            setPicksIndex(index);
-            setPicksZoomed(false);
-            setPicksImageLoaded(true);
-          };
-
-          if (hashStr) {
-            applyOpen();
-          } else {
-            setTimeout(applyOpen, 300);
-          }
-        }
+      if (!match) return;
+      // Don't reopen if we're in the middle of closing
+      if (isClosingPicksRef.current) return;
+      const designerId = match[1];
+      const index = match[2] ? parseInt(match[2], 10) : 0;
+      const brandName = designerIdToBrandMap[designerId];
+      if (brandName) {
+        await preloadPickImages(brandName, index);
+        // Re-check after async — might have been closed during preload
+        if (isClosingPicksRef.current) return;
+        prewarmedPicksIndexRef.current = index;
+        setPicksDesignerName(brandName);
+        setPicksIndex(index);
+        setPicksZoomed(false);
+        setPicksImageLoaded(true);
       }
     };
 
@@ -2063,6 +2058,8 @@ const BrandsAteliers = () => {
     };
 
     const handleHashChange = () => {
+      // Only open from hash if dialog is not already open
+      // (avoids reopen loop when closing clears the hash)
       void openFromHash();
     };
 
