@@ -52,15 +52,15 @@ const galleryExperiences = [{
   }, {
     image: livingRoomImage,
     title: "A Sophisticated Living Room",
-    description: "Coffee Table: Thierry Lemaire Orsay Coffee Table (edition of 12), Garnier & Linker's Lost-Wax Crystal Cast Centerpiece for Théorème Editions, Shagreen Credenza: Robicara's Sira Credenza, Atop the Credenza: Matthieu Gicquel's Texture Glass with Gold Leaf rim Géode, Jean-Michel Frank & Adolphe Chanaux' Stool 1934, Wall Mounted Picture: Stéphane CG's Orsay Abstract Diasec, Olivia Cognet's Blue glazed Vallauris Floor Lamp, Leo Sentou's AB Armchair, Jean-Michel Frank's Soleil Coffee Table 1930, Iksel's Japanese Cranes Wallcover"
+    description: ""
   }, {
     image: diningImage,
     title: "Panoramic Cityscape Views",
-    description: "Dining Table: Alinea Design Objects' Custom Angelo M Table, Dining Chairs: 2 x Eric Schmitt Studio's Chairie and 1 x Cazes&Conquet's Augusta Dining Chairs, Alabaster Pendant: Emanuelle Levet Stenne's Pendant Light, Sculptured Book Cover: Emmanuel Babled's Limited Edition of 8 + 4 AP from the Osmosi Series, Sofa: Thierry Lemaire's Niko 420 custom, Bookcase: Gianfranco Frattini's Albero Bookcase for Poltrona Frau, Vessel behind the sofa: Maarten Vrolijk's Sakura TRP 22001 Vessel (unique piece)"
+    description: ""
   }, {
     image: "/gallery/sociable-4.jpeg",
     title: "A Sun Lit Reading Corner",
-    description: "Floor Lamp: Olivia Cognet's Blue glazed Vallauris Floor Lamp, Armchair: Leo Sentou's AB Chair, Coffee Table: Jean-Michel Frank's Soleil Table (Straw) 1930, Iksel's Japanese Cranes Wallcover, Haas Brothers' Monster Gold-Tone Incense Burner for L'Objet, Textured Bronze Globes: Alexander Lamont's Hammered Bowls"
+    description: ""
   }]
 }, {
   experience: "An Intimate Setting",
