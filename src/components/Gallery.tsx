@@ -91,19 +91,19 @@ const galleryExperiences = [{
   items: [{
     image: boudoirImage,
     title: "A Sophisticated Boudoir",
-    description: "Sofa/Loveseat: Nika Zupanc's Stardust Loveseat for Sé Collections, Desk: BdM's Lyric Desk, Chair: Hamrei's Pépé Chair, Table Lamp: Made in Kira's Toshiro Lamp, Chandelier: Nathalie Ziegler's Custom Saint-Just Glass Chandelier, Vessel: Nathalie Ziegler's Gold Leaves+Glass Snake Vessel (Unique Piece)"
+    description: ""
   }, {
     image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,e_brightness:-15/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg",
     title: "A Jewelry Box Like Setting",
-    description: "Desk Close-Up: BdM's Lyric Desk, Chair: Hamrei's Pépé Chair, Lamp: Félix Agostini's Etrier Lamp - Charles Paris, Sofa/Loveseat: Nika Zupanc's Stardust Loveseat for Sé Collections"
+    description: ""
   }, {
     image: bedroomSecondImage,
     title: "A Serene Decor",
-    description: "Sofa/Loveseat: Nika Zupanc's Stardust Loveseat for Sé Collections, Floor Lamp: Apparatus' Metronome Reading Floor Lamp"
+    description: ""
   }, {
     image: artMasterBronzeImage,
     title: "A Design Treasure Trove",
-    description: "Top Left Box: Alexander Lamont's Straw Marquetry Mantle Box, Painting: Pierre Bonnefille's Bronze Painting 204, Bookcase: Baleri Italia's Marble Carved and Solid Wood Plato Bookcase"
+    description: ""
   }]
 }, {
   experience: "A Calming and Dreamy Environment",
