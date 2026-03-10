@@ -327,7 +327,6 @@ export const collectibleDesigners: Array<{
     philosophy: "Each piece is a unique statement that transforms everyday furniture into collectible design objects.",
     curatorPicks: [
       { image: thierryLemaireOrsay, title: "Orsay Coffee Table", category: "Tables", subcategory: "Coffee Tables", materials: "Alabastrino Travertine & Ocean Onyx", dimensions: "L 170 × P 100 × H 40 cm", edition: "Edition of 12 signed" },
-      { image: thierryLemaireNiko300, title: "Niko Sofa 300", category: "Seating", subcategory: "Sofas", materials: "Sofa upholstered in fabric · Base in metal", dimensions: "L 300 cm x D 92 cm x H 78 cm - SH 40 cm" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
