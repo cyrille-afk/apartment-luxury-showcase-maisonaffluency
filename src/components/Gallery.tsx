@@ -677,7 +677,7 @@ const Gallery = () => {
                             e.stopPropagation();
                             openLightbox(originalSectionIndex, index);
                           }}
-                          className="absolute bottom-2 left-2 md:bottom-4 md:left-auto md:right-4 flex opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          className="absolute bottom-2 left-2 md:bottom-4 md:left-auto md:right-4 flex opacity-100 transition-opacity duration-300"
                           aria-label="View full image"
                         >
                           <span className={`bg-background/90 text-foreground rounded-full shadow-lg backdrop-blur-sm hover:bg-background transition-all duration-300 ${gridCols === 4 ? 'p-1.5 md:p-1.5' : 'p-1.5 md:p-2.5'}`}>
