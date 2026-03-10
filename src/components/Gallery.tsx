@@ -59,7 +59,7 @@ const galleryExperiences = [{
     title: "Panoramic Cityscape Views",
     description: ""
   }, {
-    image: "/gallery/sociable-4.jpeg",
+    image: sunLitReadingImage,
     title: "A Sun Lit Reading Corner",
     description: ""
   }]
