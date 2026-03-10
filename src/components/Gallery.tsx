@@ -242,7 +242,6 @@ const Gallery = () => {
   // Pulsing hotspot hint — show once per session on the first hotspot section image
   const [showHotspotHint, setShowHotspotHint] = useState(() => {
     if (typeof window === "undefined") return false;
-    if (!("ontouchstart" in window)) return false;
     return !sessionStorage.getItem("__hotspot_hint_seen");
   });
   const hotspotHintRef = useRef<HTMLDivElement>(null);
