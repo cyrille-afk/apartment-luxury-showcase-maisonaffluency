@@ -8,6 +8,7 @@ import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
+import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
