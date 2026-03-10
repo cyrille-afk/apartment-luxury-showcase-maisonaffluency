@@ -379,13 +379,12 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
     curatorPicks: [
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773134242/art-deco-model-h-269-lounge-chair-by-jindrich-halabala-for-up-zavody-1930s-1_zc1i1v.jpg",
-        title: "Art Deco 269 H Lounge Chair",
-        subtitle: "c.1970",
+        title: "Art Deco 269 H Lounge Chair (C.1930)",
         category: "Seating",
         subcategory: "Armchairs",
         tags: ["Seating", "Armchairs"],
         materials: "Bentwood beech frame\nOriginal upholstery",
-        dimensions: "Vintage piece — dimensions vary",
+        dimensions: "W 71 × D 91 × H 79 cm — SH 44 cm",
       },
     ],
   },
