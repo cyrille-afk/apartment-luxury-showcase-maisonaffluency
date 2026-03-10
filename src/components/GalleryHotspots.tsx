@@ -54,7 +54,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
               e.stopPropagation();
               setActiveId(activeId === hotspot.id ? null : hotspot.id);
             }}
-            className="relative w-9 h-9 rounded-full bg-black/80 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/90 hover:scale-110 transition-all duration-200 shadow-lg cursor-pointer"
+            className="relative w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-black/10 flex items-center justify-center text-black hover:bg-white hover:scale-110 transition-all duration-200 shadow-lg cursor-pointer"
             aria-label={`View details for ${hotspot.product_name}`}
           >
             <AnimatePresence mode="wait">
@@ -82,7 +82,7 @@ const GalleryHotspots = ({ imageIdentifier, visible }: GalleryHotspotsProps) => 
             </AnimatePresence>
             {/* Pulse ring */}
             {activeId !== hotspot.id && (
-              <span className="absolute inset-0 rounded-full border border-white/30 animate-ping" style={{ animationDuration: "2s" }} />
+              <span className="absolute inset-0 rounded-full border border-black/20 animate-ping" style={{ animationDuration: "2s" }} />
             )}
           </button>
 
