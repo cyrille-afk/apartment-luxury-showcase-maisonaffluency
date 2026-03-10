@@ -310,7 +310,7 @@ export const collectibleDesigners: Array<{
       { image: rowinNoneIiLamp, title: "None II Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Cippolino Verde Marble, Silver-Plated brass", dimensions: "39 cm × 22.5 cm × H 58 cm", edition: "Unique Piece" },
     ],
     links: [
-      { type: "Instagram", url: "https://instagram.com/rowinatelier" },
+      { type: "Instagram", url: "https://www.instagram.com/rowin_atelier/" },
       { type: "Curators' Picks" },
     ],
   },
