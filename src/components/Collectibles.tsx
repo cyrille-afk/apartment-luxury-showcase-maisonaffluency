@@ -7,6 +7,7 @@ import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
+import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import { scrollToSection } from "@/lib/scrollToSection";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { cloudinaryUrl } from "@/lib/cloudinary";

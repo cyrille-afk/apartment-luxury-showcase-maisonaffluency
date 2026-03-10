@@ -4,6 +4,15 @@ export type CuratorPickWithImage = {
 
 type ImagePriority = "high" | "auto" | "low";
 
+declare global {
+  interface Window {
+    requestIdleCallback?: (
+      callback: () => void,
+      options?: { timeout?: number }
+    ) => number;
+  }
+}
+
 const preloadCache = new Map<string, Promise<void>>();
 
 function createPreloadPromise(src: string, priority: ImagePriority): Promise<void> {
