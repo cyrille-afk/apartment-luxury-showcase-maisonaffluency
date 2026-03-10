@@ -1578,7 +1578,7 @@ const brandToDesignerMap: Record<string, string> = {
   "De La Espada": "de-la-espada",
   "Stéphane CG": "stephane-cg",
   "Marta Sala Éditions": "marta-sala-editions",
-  "Ozone Light": "ozone-light",
+  "Ozone": "ozone-light",
   "Victoria Magniant": "victoria-magniant",
 };
 
