@@ -388,7 +388,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
-  "iksel-brunelleschi": {
+  "iksel": {
     name: "Iksel",
     curatorPicks: [
       {
@@ -772,7 +772,7 @@ const partnerBrands = [
     galleryIndex: GALLERY.CURATED_VIGNETTE,
   },
   {
-    id: "iksel-brunelleschi",
+    id: "iksel",
     name: "Iksel",
     category: "Decorative Object",
     subcategory: "Wallcoverings",
@@ -1626,7 +1626,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Victoria Magniant": "victoria-magniant",
   "Poltrona Frau": "poltrona-frau",
   "Jindrich Halabala": "jindrich-halabala",
-  "Iksel": "iksel-brunelleschi",
+  "Iksel": "iksel",
 };
 
 // Reverse map: designer ID → brand name (for deep-link resolution)
