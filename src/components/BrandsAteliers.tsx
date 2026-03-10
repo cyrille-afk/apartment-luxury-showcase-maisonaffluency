@@ -2589,7 +2589,7 @@ const BrandsAteliers = () => {
                                   );
                                 })}
                               </p>
-                              <p className="text-xs text-white/50 font-body mt-3 text-justify">
+                              <p className="text-xs text-white/50 font-body mt-3 text-justify whitespace-pre-line">
                                 {after}
                               </p>
                             </>
