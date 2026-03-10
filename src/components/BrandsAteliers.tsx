@@ -1975,36 +1975,46 @@ const BrandsAteliers = () => {
   const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
   const closedViaPopstateRef = useRef(false);
+  const isClosingPicksRef = useRef(false);
 
-  // History state: push when lightbox opens so browser back button closes it
-  const prevHashRef = useRef<string>('');
+  const resetPicksState = useCallback(() => {
+    setPicksDesignerName(null);
+    setPicksIndex(0);
+    setPicksZoomed(false);
+    setPicksImageLoaded(false);
+  }, []);
+
+  const requestClosePicks = useCallback(() => {
+    if (isClosingPicksRef.current) return;
+    isClosingPicksRef.current = true;
+
+    if (window.location.hash.startsWith('#curators/')) {
+      window.history.back();
+      return;
+    }
+
+    resetPicksState();
+    isClosingPicksRef.current = false;
+  }, [resetPicksState]);
 
   useEffect(() => {
     if (!picksDesignerName) return;
 
     closedViaPopstateRef.current = false;
-    // Save current hash before overriding
-    prevHashRef.current = window.location.hash;
+    isClosingPicksRef.current = false;
     window.history.pushState({ picksLightbox: true }, '');
 
     const handlePopState = () => {
       closedViaPopstateRef.current = true;
-      setPicksDesignerName(null);
-      setPicksIndex(0);
-      setPicksZoomed(false);
-      // Restore previous hash
-      if (prevHashRef.current) {
-        window.history.replaceState(null, '', prevHashRef.current);
-      } else {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
+      isClosingPicksRef.current = false;
+      resetPicksState();
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [picksDesignerName]);
+  }, [picksDesignerName, resetPicksState]);
 
   // Update hash when picks lightbox is open or index changes
   useEffect(() => {
@@ -2495,17 +2505,7 @@ const BrandsAteliers = () => {
           open={!!picksDesignerName}
           onOpenChange={(open) => {
             if (!open) {
-              setPicksDesignerName(null);
-              setPicksIndex(0);
-              setPicksZoomed(false);
-              if (!closedViaPopstateRef.current) {
-                // Restore previous hash before going back
-                window.history.back();
-              }
-              // Clear curators hash
-              if (window.location.hash.startsWith('#curators/')) {
-                window.history.replaceState(null, '', prevHashRef.current || window.location.pathname);
-              }
+              requestClosePicks();
             }
           }}
         >
@@ -2630,7 +2630,7 @@ const BrandsAteliers = () => {
                         )}
                         {/* Desktop close button — bottom-right (outside) */}
                         <button
-                          onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
+                          onClick={requestClosePicks}
                           className="hidden md:flex absolute bottom-2 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
                           aria-label="Close lightbox"
                         >
@@ -2697,7 +2697,7 @@ const BrandsAteliers = () => {
                       <div className="md:hidden flex justify-between items-center w-full mt-2">
                         <div>
                           <button
-                            onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
+                            onClick={requestClosePicks}
                             className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
                             aria-label="Close"
                           >
@@ -2845,7 +2845,7 @@ const BrandsAteliers = () => {
               ) : (
                 <div className="relative flex items-center justify-center w-full h-full">
                   <button
-                    onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
+                    onClick={requestClosePicks}
                     className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
                     aria-label="Close lightbox"
                   >
@@ -2862,7 +2862,7 @@ const BrandsAteliers = () => {
             ) : (
               <div className="relative flex items-center justify-center w-full h-full">
                 <button
-                  onClick={() => { setPicksDesignerName(null); setPicksIndex(0); setPicksZoomed(false); if (!closedViaPopstateRef.current) window.history.back(); }}
+                  onClick={requestClosePicks}
                   className="absolute top-4 left-4 md:left-auto md:right-4 z-50 p-1.5 bg-background/20 hover:bg-background/40 rounded-full backdrop-blur-sm transition-colors"
                   aria-label="Close lightbox"
                 >
