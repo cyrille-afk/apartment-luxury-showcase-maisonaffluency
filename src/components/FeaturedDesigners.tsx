@@ -1795,7 +1795,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { image: milanPekarMetallicVase, title: "Volume Metallic Vase", category: "Decorative Object", tags: ["Decorative Object", "Vessel"], materials: "Metallic glaze with triangle spinel crystal — based on ancient Chinese Tenmoku glaze from the 12th century", description: "This metallic glaze with triangle crystal is based on the ancient Chinese glaze Tenmoku from the 12th century. The most interesting aspect of this process is the crystallisation of metal oxides in triangle shapes (spinel crystal), a most unusual formation in ceramic glazes." },
     ],
     links: [
-      { type: "Instagram", url: "https://instagram.com/milanpekar_glass" },
+      { type: "Instagram", url: "https://www.instagram.com/pekarmilan/" },
       { type: "Curators' Picks" },
     ],
   },
