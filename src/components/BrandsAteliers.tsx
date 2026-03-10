@@ -1937,24 +1937,29 @@ const BrandsAteliers = () => {
     }
   }, [picksDesignerName, picksIndex]);
 
-  // Deep-link: parse #curators/{designerId}/{index} on mount
+  // Deep-link: parse #curators/{designerId}/{index} on mount and hash changes
   useEffect(() => {
-    const hash = window.location.hash;
-    const match = hash.match(/^#curators\/([^/]+)(?:\/(\d+))?$/);
-    if (match) {
-      const designerId = match[1];
-      const index = match[2] ? parseInt(match[2], 10) : 0;
-      const brandName = designerIdToBrandMap[designerId];
-      if (brandName) {
-        // Small delay to ensure component is mounted
-        setTimeout(() => {
-          setPicksDesignerName(brandName);
-          setPicksIndex(index);
-          setPicksZoomed(false);
-          setPicksImageLoaded(false);
-        }, 300);
+    const openFromHash = () => {
+      const hash = window.location.hash;
+      const match = hash.match(/^#curators\/([^/]+)(?:\/(\d+))?$/);
+      if (match) {
+        const designerId = match[1];
+        const index = match[2] ? parseInt(match[2], 10) : 0;
+        const brandName = designerIdToBrandMap[designerId];
+        if (brandName) {
+          setTimeout(() => {
+            setPicksDesignerName(brandName);
+            setPicksIndex(index);
+            setPicksZoomed(false);
+            setPicksImageLoaded(false);
+          }, 300);
+        }
       }
-    }
+    };
+
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+    return () => window.removeEventListener('hashchange', openFromHash);
   }, []);
 
   // Brands that should use FeaturedDesigners data instead of Collectibles
