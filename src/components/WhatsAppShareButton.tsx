@@ -44,6 +44,9 @@ const variantClasses = {
     "bg-white hover:bg-white/90 border border-border/30 text-muted-foreground",
   glass:
     "bg-white/20 hover:bg-white/35 border border-white/20 text-white backdrop-blur-sm",
+  /** Green-branded variant — stands out on mobile inside accordion content */
+  branded:
+    "bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/30 text-[#25D366] md:bg-white md:hover:bg-white/90 md:border-border/30 md:text-muted-foreground",
 } as const;
 
 const WhatsAppShareButton = memo(function WhatsAppShareButton({
