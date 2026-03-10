@@ -2889,15 +2889,24 @@ const FeaturedDesigners = () => {
                                 <Gem size={14} className="fill-accent text-accent" />
                                 <span className="font-medium">{link.type}</span>
                               </button>
-                              <WhatsAppShareButton
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
-                                  trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
-                                }}
-                                label={`Share ${designer.name} on WhatsApp`}
-                                hideOn="desktop"
-                              />
+                              <div className="inline-flex items-center gap-3 md:hidden">
+                                <WhatsAppShareButton
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
+                                    trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
+                                  }}
+                                  label={`Share ${designer.name} on WhatsApp`}
+                                  hideOn="desktop"
+                                />
+                                {(designer as any).logoUrl && (
+                                  <img
+                                    src={(designer as any).logoUrl}
+                                    alt={`${(designer as any).displayName || designer.name} logo`}
+                                    className="h-10 w-auto object-contain opacity-60"
+                                  />
+                                )}
+                              </div>
                               </React.Fragment>
                             ) : (
                               <span
