@@ -388,7 +388,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
-  "iksel-brunelleschi": {
+  "iksel": {
     name: "Iksel",
     curatorPicks: [
       {
