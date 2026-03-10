@@ -712,8 +712,8 @@ const Gallery = () => {
                           className="absolute bottom-2 left-2 md:bottom-4 md:left-auto md:right-4 flex opacity-100 transition-opacity duration-300"
                           aria-label="View full image"
                         >
-                          <span className={`bg-background/90 text-foreground rounded-full shadow-lg backdrop-blur-sm hover:bg-background transition-all duration-300 ${gridCols === 4 ? 'p-1.5 md:p-1.5' : 'p-1.5 md:p-2.5'}`}>
-                            <Maximize2 className={`w-3 h-3 ${gridCols === 4 ? 'md:w-3 md:h-3' : 'md:w-4 md:h-4'}`} />
+                          <span className={`bg-black/60 text-white rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300 ${gridCols === 4 ? 'p-1.5' : 'p-1.5 md:p-2'}`}>
+                            <Maximize2 className={`w-3 h-3 ${gridCols === 4 ? '' : 'md:w-3.5 md:h-3.5'}`} />
                           </span>
                         </button>
                       </div>
