@@ -8,6 +8,7 @@ import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -1969,6 +1970,7 @@ const BrandsAteliers = () => {
   const [picksZoomed, setPicksZoomed] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [picksImageLoaded, setPicksImageLoaded] = useState(false);
+  const prewarmedPicksIndexRef = useRef<number | null>(null);
   const [picksTouchStart, setPicksTouchStart] = useState<number | null>(null);
   const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
@@ -2013,9 +2015,8 @@ const BrandsAteliers = () => {
     }
   }, [picksDesignerName, picksIndex]);
 
-  // Deep-link: parse #curators/{designerId}/{index} on mount, hash changes, and custom events
   useEffect(() => {
-    const openFromHash = (hashStr?: string) => {
+    const openFromHash = async (hashStr?: string) => {
       const hash = hashStr || window.location.hash;
       const match = hash.match(/#\/?curators\/([^/]+)(?:\/(\d+))?$/);
       if (match) {
@@ -2023,12 +2024,13 @@ const BrandsAteliers = () => {
         const index = match[2] ? parseInt(match[2], 10) : 0;
         const brandName = designerIdToBrandMap[designerId];
         if (brandName) {
-          preloadPickImages(brandName, index);
+          await preloadPickImages(brandName, index);
           const applyOpen = () => {
+            prewarmedPicksIndexRef.current = index;
             setPicksDesignerName(brandName);
             setPicksIndex(index);
             setPicksZoomed(false);
-            setPicksImageLoaded(false);
+            setPicksImageLoaded(true);
           };
 
           if (hashStr) {
@@ -2041,22 +2043,35 @@ const BrandsAteliers = () => {
     };
 
     const handleCustomEvent = (e: Event) => {
-      openFromHash((e as CustomEvent).detail);
+      void openFromHash((e as CustomEvent).detail);
     };
 
-    const handleHashChange = () => openFromHash();
+    const handleHashChange = () => {
+      void openFromHash();
+    };
 
-    openFromHash();
+    void openFromHash();
     window.addEventListener('hashchange', handleHashChange);
     window.addEventListener('open-curators-pick', handleCustomEvent);
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
       window.removeEventListener('open-curators-pick', handleCustomEvent);
     };
-  }, []);
+  }, [preloadPickImages]);
 
   // Brands that should use FeaturedDesigners data instead of Collectibles
   const preferFeatured = new Set(["Pierre Bonnefille", "Thierry Lemaire"]);
+
+  function preloadPickImages(brandName: string, index: number) {
+    const designerId = brandToDesignerMap[brandName];
+    if (!designerId) return Promise.resolve();
+    const designer =
+      atelierOnlyPicks[designerId] as any ||
+      (!preferFeatured.has(brandName) && collectibleDesigners.find(d => d.id === designerId || d.name === brandName)) ||
+      featuredDesigners.find(d => d.id === designerId);
+    if (!designer?.curatorPicks?.length) return Promise.resolve();
+    return warmCuratorPickSet(designer.curatorPicks, index);
+  }
 
   const picksDesigner = useMemo(() => {
     if (!picksDesignerName) return null;
@@ -2072,27 +2087,6 @@ const BrandsAteliers = () => {
     return featuredDesigners.find(d => d.id === designerId) || null;
   }, [picksDesignerName]);
 
-  // Eagerly preload curator pick images for a designer to avoid slow first load
-  const preloadPickImages = useCallback((brandName: string, index: number) => {
-    const designerId = brandToDesignerMap[brandName];
-    if (!designerId) return;
-    const designer =
-      atelierOnlyPicks[designerId] as any ||
-      (!preferFeatured.has(brandName) && collectibleDesigners.find(d => d.id === designerId || d.name === brandName)) ||
-      featuredDesigners.find(d => d.id === designerId);
-    if (!designer?.curatorPicks?.length) return;
-    // Preload current + adjacent
-    const indices = [index];
-    if (designer.curatorPicks.length > 1) {
-      indices.push((index + 1) % designer.curatorPicks.length);
-      indices.push((index - 1 + designer.curatorPicks.length) % designer.curatorPicks.length);
-    }
-    indices.forEach(i => {
-      const src = designer.curatorPicks[i]?.image;
-      if (src) { const img = new Image(); img.src = src; }
-    });
-  }, []);
-
   const openPicks = useCallback((brandName: string, index?: number) => {
     const idx = index ?? 0;
     preloadPickImages(brandName, idx);
@@ -2104,6 +2098,10 @@ const BrandsAteliers = () => {
 
   // Reset image loaded state when switching picks
   useEffect(() => {
+    if (prewarmedPicksIndexRef.current === picksIndex) {
+      prewarmedPicksIndexRef.current = null;
+      return;
+    }
     setPicksImageLoaded(false);
   }, [picksIndex]);
 

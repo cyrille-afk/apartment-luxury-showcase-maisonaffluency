@@ -7,6 +7,7 @@ import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
+import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import { scrollToSection } from "@/lib/scrollToSection";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -372,9 +373,8 @@ const Collectibles = () => {
     return () => window.removeEventListener("deeplink-open-profile", handler);
   }, []);
 
-  // Handle open-curators-pick events for collectible designers
   useEffect(() => {
-    const handleCuratorsPick = (e: Event) => {
+    const handleCuratorsPick = async (e: Event) => {
       const hash = (e as CustomEvent).detail as string;
       const match = hash.match(/#\/?curators\/([^/]+)(?:\/(\d+))?$/);
       if (!match) return;
@@ -382,9 +382,7 @@ const Collectibles = () => {
       const index = match[2] ? parseInt(match[2], 10) : 0;
       const designer = collectibleDesigners.find(d => d.id === designerId);
       if (designer && designer.curatorPicks?.length) {
-        // Preload current + adjacent images immediately
-        [index, (index + 1) % designer.curatorPicks.length, (index - 1 + designer.curatorPicks.length) % designer.curatorPicks.length]
-          .forEach(i => { const src = designer.curatorPicks[i]?.image; if (src) { const img = new Image(); img.src = src; } });
+        await warmCuratorPickSet(designer.curatorPicks, index);
         setCuratorPicksDesigner(designer);
         setCuratorPickIndex(index);
         setIsZoomed(false);
