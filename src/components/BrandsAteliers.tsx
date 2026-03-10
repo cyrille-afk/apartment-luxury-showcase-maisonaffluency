@@ -1941,7 +1941,7 @@ const BrandsAteliers = () => {
   useEffect(() => {
     const openFromHash = (hashStr?: string) => {
       const hash = hashStr || window.location.hash;
-      const match = hash.match(/#curators\/([^/]+)(?:\/(\d+))?$/);
+      const match = hash.match(/#\/?curators\/([^/]+)(?:\/(\d+))?$/);
       if (match) {
         const designerId = match[1];
         const index = match[2] ? parseInt(match[2], 10) : 0;
