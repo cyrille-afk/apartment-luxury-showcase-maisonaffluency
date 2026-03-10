@@ -1982,14 +1982,20 @@ const BrandsAteliers = () => {
     setPicksIndex(0);
     setPicksZoomed(false);
     setPicksImageLoaded(false);
+    // Clear curators hash so hashchange listener doesn't reopen the dialog
+    if (window.location.hash.startsWith('#curators/')) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
   }, []);
 
   const requestClosePicks = useCallback(() => {
     if (isClosingPicksRef.current) return;
     isClosingPicksRef.current = true;
 
-    if (window.location.hash.startsWith('#curators/')) {
+    // Always go through history.back() if we pushed a state
+    if (!closedViaPopstateRef.current) {
       window.history.back();
+      // popstate handler will call resetPicksState
       return;
     }
 
@@ -2006,8 +2012,8 @@ const BrandsAteliers = () => {
 
     const handlePopState = () => {
       closedViaPopstateRef.current = true;
-      isClosingPicksRef.current = false;
       resetPicksState();
+      isClosingPicksRef.current = false;
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -2029,26 +2035,21 @@ const BrandsAteliers = () => {
     const openFromHash = async (hashStr?: string) => {
       const hash = hashStr || window.location.hash;
       const match = hash.match(/#\/?curators\/([^/]+)(?:\/(\d+))?$/);
-      if (match) {
-        const designerId = match[1];
-        const index = match[2] ? parseInt(match[2], 10) : 0;
-        const brandName = designerIdToBrandMap[designerId];
-        if (brandName) {
-          await preloadPickImages(brandName, index);
-          const applyOpen = () => {
-            prewarmedPicksIndexRef.current = index;
-            setPicksDesignerName(brandName);
-            setPicksIndex(index);
-            setPicksZoomed(false);
-            setPicksImageLoaded(true);
-          };
-
-          if (hashStr) {
-            applyOpen();
-          } else {
-            setTimeout(applyOpen, 300);
-          }
-        }
+      if (!match) return;
+      // Don't reopen if we're in the middle of closing
+      if (isClosingPicksRef.current) return;
+      const designerId = match[1];
+      const index = match[2] ? parseInt(match[2], 10) : 0;
+      const brandName = designerIdToBrandMap[designerId];
+      if (brandName) {
+        await preloadPickImages(brandName, index);
+        // Re-check after async — might have been closed during preload
+        if (isClosingPicksRef.current) return;
+        prewarmedPicksIndexRef.current = index;
+        setPicksDesignerName(brandName);
+        setPicksIndex(index);
+        setPicksZoomed(false);
+        setPicksImageLoaded(true);
       }
     };
 
@@ -2057,6 +2058,8 @@ const BrandsAteliers = () => {
     };
 
     const handleHashChange = () => {
+      // Only open from hash if dialog is not already open
+      // (avoids reopen loop when closing clears the hash)
       void openFromHash();
     };
 
