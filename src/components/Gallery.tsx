@@ -724,6 +724,18 @@ const Gallery = () => {
                       >
                         <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 4 ? "(max-width: 1024px) 50vw, 25vw" : "(max-width: 1024px) 50vw, 33vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                        {/* Pulsing hotspot hint — desktop: first image of first hotspot section */}
+                        {!section.items.some(i => i.description) && index === 0 && originalSectionIndex === firstHotspotSectionIdx && showHotspotHint && (
+                          <div ref={hotspotHintRef} className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+                            <div className="relative">
+                              <span className="absolute -inset-3 rounded-full bg-primary/30 animate-ping" />
+                              <span className="relative block w-3 h-3 rounded-full bg-black/70 border-2 border-primary/70 shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />
+                            </div>
+                            <span className="absolute bottom-16 left-1/2 -translate-x-1/2 text-white/90 text-xs font-body tracking-wide bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full whitespace-nowrap animate-fade-in">
+                              Click to explore products
+                            </span>
+                          </div>
+                        )}
                         {/* Expand icon - opens lightbox directly */}
                         <button
                           onClick={(e) => {
