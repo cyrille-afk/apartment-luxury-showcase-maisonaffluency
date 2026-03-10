@@ -2853,6 +2853,14 @@ const FeaturedDesigners = () => {
                               </a>
                             ) : link.type === "Curators' Picks" ? (
                               <React.Fragment key={idx}>
+                              {/* Mobile logo — inline left of Curators' Picks */}
+                              {(designer as any).logoUrl && (
+                                <img
+                                  src={(designer as any).logoUrl}
+                                  alt={`${(designer as any).displayName || designer.name} logo`}
+                                  className="h-10 w-auto object-contain md:hidden"
+                                />
+                              )}
                               <button
                                 onClick={() => {
                                   setCuratorPicksDesigner(designer);
