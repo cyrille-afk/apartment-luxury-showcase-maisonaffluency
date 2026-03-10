@@ -1972,6 +1972,7 @@ const BrandsAteliers = () => {
   const [picksImageLoaded, setPicksImageLoaded] = useState(false);
   const prewarmedPicksIndexRef = useRef<number | null>(null);
   const [picksTouchStart, setPicksTouchStart] = useState<number | null>(null);
+  const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
   const closedViaPopstateRef = useRef(false);
 
