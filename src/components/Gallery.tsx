@@ -543,7 +543,9 @@ const Gallery = () => {
             </h2>
           </motion.div>
 
-          {filteredExperiences.map((section, sectionIndex) => {
+          {(() => {
+            const firstHotspotSectionIdx = galleryExperiences.findIndex(s => !s.items.some(i => i.description));
+            return filteredExperiences.map((section, sectionIndex) => {
             // Find original index for proper lightbox mapping
             const originalSectionIndex = galleryExperiences.indexOf(section);
             return <div key={section.experience} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-6 md:pt-0' : ''}`}>
