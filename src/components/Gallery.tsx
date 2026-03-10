@@ -593,13 +593,6 @@ const Gallery = () => {
                           {!isHotspotSection && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                           )}
-                          {/* Hotspots overlay on mobile for hotspot sections */}
-                          {isHotspotSection && (
-                            <GalleryHotspots
-                              imageIdentifier={item.title}
-                              visible={true}
-                            />
-                          )}
                           {/* Expand icon - bottom left */}
                           <button
                             onClick={(e) => {
