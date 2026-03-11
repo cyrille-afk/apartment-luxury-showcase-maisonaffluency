@@ -1021,15 +1021,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "Ø56 × H165 cm"
       },
       {
-        image: emmanuelLevetStennePick1,
-        title: "Bolchoï",
-        subtitle: "Console Black",
-        category: "Tables",
-        tags: ["Tables", "Console"],
-        materials: "Lassa marble top • Lacquered aluminium & Lassa marble legs",
-        dimensions: "L145 × W40 × H75 cm"
-      },
-      {
         image: emmanuelLevetStennePick2,
         title: "Jelly",
         subtitle: "Side Table",
@@ -1048,15 +1039,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "Ø50 cm / Ø36 cm"
       },
       {
-        image: emmanuelLevetStennePick4,
-        title: "Dress Up",
-        subtitle: "Rectangular Dining Table (Wood)",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Oak or Walnut top and base",
-        dimensions: "L 280 × l 120 × H 74 cm"
-      },
-      {
         image: emmanuelLevetStennePick6,
         title: "Night Cup",
         subtitle: "Lamp",
@@ -1064,15 +1046,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Lighting", "Table Light"],
         materials: "Patinated or Polished Brass and Alabaster",
         dimensions: "L 29 × l 22 × H 33 cm"
-      },
-      {
-        image: emmanuelLevetStennePick7,
-        title: "Dress Up",
-        subtitle: "Console",
-        category: "Tables",
-        tags: ["Tables", "Console", "Edition of 50"],
-        materials: "Grafite / Marquina marble top, patinated bronze base",
-        dimensions: "L 150 × l 45 × H 80 cm"
       },
     ],
     links: [
