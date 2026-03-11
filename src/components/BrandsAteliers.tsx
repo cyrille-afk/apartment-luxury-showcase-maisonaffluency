@@ -1554,7 +1554,7 @@ const partnerBrands = [
     category: "Furniture",
     subcategory: "Piano",
     origin: "France",
-    description: "Alpange is a French design studio reimagining the piano as a sculptural object, blending exceptional craftsmanship with contemporary aesthetics through natural materials and refined finishes.",
+    description: "Born in the French Alps, Alpange is the unprecedented result of a singular dream shared by two impassioned music lovers and entrepreneurs. Designed to deliver both a pure, organic sound and a memorable, multi-sensory experience, this ground-breaking, tech-enabled piano is more than an instrument. Alpange is uncharted common ground, where we can all create, connect, and share the soundtrack of our lives.",
   },
 ];
 
