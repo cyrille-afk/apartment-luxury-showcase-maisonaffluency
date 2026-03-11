@@ -532,6 +532,15 @@ const partnerBrands = [
     galleryIndex: GALLERY.A_RELAXED_SETTING,
   },
   {
+    id: "alpange",
+    name: "Alpange",
+    category: "Design",
+    subcategory: "Design",
+    origin: "France",
+    description: "French design studio creating distinctive contemporary pieces with a refined sensibility.",
+    instagram: "https://www.instagram.com/alpange/?hl=en",
+  },
+  {
     id: "atelier-demichelis",
     name: "Atelier DeMichelis",
     category: "Lighting",
