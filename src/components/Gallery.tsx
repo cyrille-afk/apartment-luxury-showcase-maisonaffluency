@@ -729,9 +729,6 @@ const Gallery = () => {
                               <span className="absolute w-8 h-8 rounded-full border border-primary/25 animate-ping" style={{ animationDuration: "2.2s", animationDelay: "1.1s" }} />
                               <span className="relative block w-3 h-3 rounded-full bg-primary/30 shadow-[0_0_8px_hsl(var(--primary)/0.2)]" />
                             </div>
-                            <span className="absolute bottom-16 left-1/2 -translate-x-1/2 text-white text-sm font-body font-medium tracking-wide bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full whitespace-nowrap animate-fade-in shadow-lg">
-                              Click to explore products
-                            </span>
                           </div>
                         )}
                         {/* Expand icon - opens lightbox directly */}
