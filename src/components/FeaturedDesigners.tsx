@@ -1021,15 +1021,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "Ø56 × H165 cm"
       },
       {
-        image: emmanuelLevetStennePick1,
-        title: "Bolchoï",
-        subtitle: "Console Black",
-        category: "Tables",
-        tags: ["Tables", "Console"],
-        materials: "Lassa marble top • Lacquered aluminium & Lassa marble legs",
-        dimensions: "L145 × W40 × H75 cm"
-      },
-      {
         image: emmanuelLevetStennePick2,
         title: "Jelly",
         subtitle: "Side Table",
