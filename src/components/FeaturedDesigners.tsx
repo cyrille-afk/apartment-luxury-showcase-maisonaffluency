@@ -1039,15 +1039,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "Ø50 cm / Ø36 cm"
       },
       {
-        image: emmanuelLevetStennePick4,
-        title: "Dress Up",
-        subtitle: "Rectangular Dining Table (Wood)",
-        category: "Tables",
-        tags: ["Tables", "Dining Table"],
-        materials: "Oak or Walnut top and base",
-        dimensions: "L 280 × l 120 × H 74 cm"
-      },
-      {
         image: emmanuelLevetStennePick6,
         title: "Night Cup",
         subtitle: "Lamp",
