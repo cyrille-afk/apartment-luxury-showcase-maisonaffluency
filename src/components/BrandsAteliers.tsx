@@ -1040,8 +1040,8 @@ const partnerBrands = [
     galleryIndex: GALLERY.A_RELAXED_SETTING,
   },
   {
-    id: "cristallerie-saint-louis",
-    name: "Cristallerie Saint-Louis",
+    id: "saint-louis",
+    name: "Saint-Louis",
     category: "Lighting",
     subcategory: "Table Lamps",
     origin: "France",
