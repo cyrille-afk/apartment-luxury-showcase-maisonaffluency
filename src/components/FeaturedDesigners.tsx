@@ -88,6 +88,7 @@ const adamCourtsReposeSofa = "https://res.cloudinary.com/dif1oamtj/image/upload/
 const adamCourtsReverbSofa = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772159581/Screen_Shot_2026-02-18_at_10.42.38_AM_qvcay0.png";
 const adamCourtsSideboard = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772111095/Screen_Shot_2026-02-18_at_10.43.37_AM_ynqngy.png";
 const adamCourtsGeometerBench = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772159511/Screen_Shot_2026-02-18_at_10.44.15_AM_n5y58h.png";
+const adamCourtsVillaNightstand = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773197599/f_31645112_1670507553396_bg_processed_k8yxrd.jpg";
 
 // Curators' Picks images
 const alexanderLamontPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160682/Ondas-Sconce-Clear_07_alexander-lamont_1_t6ygbc.jpg";
@@ -367,6 +368,17 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "",
         dimensions: "179.3W × 38D × 41H cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/OKHA_OtherSeating_BenchBed_1.pdf",
+        description: ""
+      },
+      {
+        image: adamCourtsVillaNightstand,
+        title: "Villa Pedestal Nightstand",
+        subtitle: "Ash Frame & Marble Top",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Frame options include Ash (timber), paired with marble top options such as Crema Rosa, Nero Marquina, Verde Guatemala, Rosso Levante, Carrara, Arabescato, Vagli, and Calacatta",
+        dimensions: "75.5W × 46.5D × 55H cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/OKHA_SideTables_Villa.pdf",
         description: ""
       },
     ],
