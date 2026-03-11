@@ -23,6 +23,7 @@ import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesign
 import { collectibleDesigners } from "@/components/Collectibles";
 const alexanderLamontBg = cloudinaryUrl("alexander-lamont-bg_prdpsy", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsBg = cloudinaryUrl("leo-aerts-alinea-bg_x89hrq", { width: 1200, quality: "auto:good", crop: "fill" });
+const alpangeBg = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773210317/alpange_thumbnail-27ed91f311_hbnhro.jpg";
 const apparatusBg = cloudinaryUrl("apparatus-studio-bg_wzakjr", { width: 1200, quality: "auto:good", crop: "fill" });
 const atelierFevrierBg = cloudinaryUrl("atelier-fevrier-bg_tmsgw9", { width: 1200, quality: "auto:good", crop: "fill" });
 const atelierDemichelisBg = cloudinaryUrl("atelier-demichelis-bg_w8b8f7", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -529,6 +530,15 @@ const partnerBrands = [
     featured: "Angelo M/SR 55 Side Table",
     instagram: "https://instagram.com/alinea_design_objects",
     galleryIndex: GALLERY.A_RELAXED_SETTING,
+  },
+  {
+    id: "alpange",
+    name: "Alpange",
+    category: "Design",
+    subcategory: "Design",
+    origin: "France",
+    description: "French design studio creating distinctive contemporary pieces with a refined sensibility.",
+    instagram: "https://www.instagram.com/alpange/?hl=en",
   },
   {
     id: "atelier-demichelis",
@@ -1539,6 +1549,7 @@ const partnerBrands = [
 const brandBgMap: Record<string, string> = {
   "Alexander Lamont": alexanderLamontBg,
   "Alinea Design Objects": leoAertsBg,
+  "Alpange": alpangeBg,
   "Apparatus Studio": apparatusBg,
   "Atelier DeMichelis": atelierDemichelisBg,
   "Atelier Février": atelierFevrierBg,
@@ -1638,6 +1649,7 @@ const brandBgMap: Record<string, string> = {
 const brandToDesignerMap: Record<string, string> = {
   "Alexander Lamont": "alexander-lamont",
   "Alinea Design Objects": "leo-aerts-alinea",
+  "Alpange": "alpange",
   "Apparatus Studio": "apparatus-studio",
   "Atelier Février": "atelier-fevrier",
   "Atelier Pendhapa": "atelier-pendhapa",
