@@ -1000,13 +1000,13 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
   },
   {
-    id: "emanuelle-levet-stenne",
-    name: "Emanuelle Levet Stenne",
+    id: "emmanuel-levet-stenne",
+    name: "Emmanuel Levet Stenne",
     specialty: "Alabaster Lighting & Sculptural Fixtures",
     image: emanuelleLevetStenneImg,
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/ELS-LOGO_ilayvb.png",
     biography:
-      "Emanuelle Levet Stenne is a French lighting designer renowned for creating ethereal alabaster pendant lights and sculptural fixtures that transform spaces with their warm, natural glow. Her work celebrates the inherent beauty of natural stone, allowing light to pass through alabaster to create an atmosphere of timeless elegance.",
+      "Emmanuel Levet Stenne is a French lighting designer renowned for creating ethereal alabaster pendant lights and sculptural fixtures that transform spaces with their warm, natural glow. Her work celebrates the inherent beauty of natural stone, allowing light to pass through alabaster to create an atmosphere of timeless elegance.",
     notableWorks: "Alabaster Pendant Light, Sculptural Lighting Collection",
     notableWorksLink: { text: "Alabaster Pendant Light", galleryIndex: GALLERY.PANORAMIC_CITYSCAPE_VIEWS },
     philosophy: "Light should not merely illuminate—it should transform space into poetry.",
