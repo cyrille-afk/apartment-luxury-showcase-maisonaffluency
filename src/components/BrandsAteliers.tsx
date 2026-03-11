@@ -461,6 +461,20 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
+  "alpange": {
+    name: "Alpange",
+    curatorPicks: [
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773210638/Screen_Shot_2026-03-11_at_2.30.01_PM_tdkif9.png",
+        title: "The Alpange Natural Walnut Wood",
+        category: "Furniture",
+        tags: ["Furniture", "Piano"],
+        materials: "Plywood structure · Wood veneer or paint · Matt varnish",
+        dimensions: "170 × 60 × 80 cm\nPiano: 115 kg / Bench: 25 kg / Pedals: 12 kg",
+        description: "A sculptural piano crafted in natural walnut wood, featuring a plywood structure with wood veneer finish and matt varnish. The set comprises a piano, bench and pedals unit.",
+      },
+    ],
+  },
 };
 
 // Gallery image index mapping (based on flattened gallery items order)
