@@ -1529,7 +1529,7 @@ const brandBgMap: Record<string, string> = {
   "Dagmar London": berntPetersenBg,
   "Kerstens": erstensBg,
   "CC-Tapis": ccTapisBg,
-  "Cristallerie Saint-Louis": cristallerieSaintLouisBg,
+  "Saint-Louis": cristallerieSaintLouisBg,
   "Delcourt Collection": delcourtBg,
   "Ecart Paris": ecartParisBg,
   "Entrelacs Création": entrelacsBg,
