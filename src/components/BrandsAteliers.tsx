@@ -469,7 +469,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         title: "The Alpange Natural Walnut Wood",
         category: "Furniture",
         tags: ["Furniture", "Piano"],
-        materials: "Plywood structure · Wood veneer or paint · Matt varnish",
+        materials: "Plywood structure · Wood veneer or paint · Matt varnish\n",
         dimensions: "170 × 60 × 80 cm\nPiano: 115 kg / Bench: 25 kg / Pedals: 12 kg",
         description: "A sculptural piano crafted in natural walnut wood, featuring a plywood structure with wood veneer finish and matt varnish. The set comprises a piano, bench and pedals unit.",
       },
