@@ -23,6 +23,7 @@ import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesign
 import { collectibleDesigners } from "@/components/Collectibles";
 const alexanderLamontBg = cloudinaryUrl("alexander-lamont-bg_prdpsy", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsBg = cloudinaryUrl("leo-aerts-alinea-bg_x89hrq", { width: 1200, quality: "auto:good", crop: "fill" });
+const alpangeBg = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773210317/alpange_thumbnail-27ed91f311_hbnhro.jpg";
 const apparatusBg = cloudinaryUrl("apparatus-studio-bg_wzakjr", { width: 1200, quality: "auto:good", crop: "fill" });
 const atelierFevrierBg = cloudinaryUrl("atelier-fevrier-bg_tmsgw9", { width: 1200, quality: "auto:good", crop: "fill" });
 const atelierDemichelisBg = cloudinaryUrl("atelier-demichelis-bg_w8b8f7", { width: 1200, quality: "auto:good", crop: "fill" });
