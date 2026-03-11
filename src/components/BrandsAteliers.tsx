@@ -1554,7 +1554,7 @@ const partnerBrands = [
     category: "Furniture",
     subcategory: "Piano",
     origin: "France",
-    description: "Born in the French Alps, Alpange is the unprecedented result of a singular dream shared by two impassioned music lovers and entrepreneurs. Designed to deliver both a pure, organic sound and a memorable, multi-sensory experience, this ground-breaking, tech-enabled piano is more than an instrument. Alpange is uncharted common ground, where we can all create, connect, and share the soundtrack of our lives.",
+    description: "Born in the French Alps, Alpange is the unprecedented result of a singular dream shared by two impassioned music lovers and entrepreneurs, Raphaël Soudre and Franck Bacquet. Designed to deliver both a pure, organic sound and a memorable, multi-sensory experience, this ground-breaking, tech-enabled piano is more than an instrument. Alpange is uncharted common ground, where we can all create, connect, and share the soundtrack of our lives.",
   },
 ];
 
