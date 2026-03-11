@@ -1548,6 +1548,14 @@ const partnerBrands = [
     description: "Marta Sala Éditions is a Milan-based publishing house of collectible furniture founded by Marta Sala Noseda, championing the intersection of art, architecture and design. Each limited-edition piece is conceived with leading architects and designers, crafted by master Italian artisans using noble materials — from hand-patinated metals to richly upholstered volumes — resulting in furnishings of sculptural presence and enduring elegance.",
     instagram: "https://www.instagram.com/martasalaeditions/?hl=en",
   },
+  {
+    id: "alpange",
+    name: "Alpange",
+    category: "Furniture",
+    subcategory: "Piano",
+    origin: "France",
+    description: "Alpange is a French design studio reimagining the piano as a sculptural object, blending exceptional craftsmanship with contemporary aesthetics through natural materials and refined finishes.",
+  },
 ];
 
 // Background image map
