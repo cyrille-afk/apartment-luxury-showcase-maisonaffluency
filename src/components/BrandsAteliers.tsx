@@ -1649,6 +1649,7 @@ const brandBgMap: Record<string, string> = {
 const brandToDesignerMap: Record<string, string> = {
   "Alexander Lamont": "alexander-lamont",
   "Alinea Design Objects": "leo-aerts-alinea",
+  "Alpange": "alpange",
   "Apparatus Studio": "apparatus-studio",
   "Atelier Février": "atelier-fevrier",
   "Atelier Pendhapa": "atelier-pendhapa",
