@@ -3056,7 +3056,7 @@ const FeaturedDesigners = () => {
                             src={currentPick?.image}
                             alt={currentPick?.title || "Curator's pick"}
                             sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
-                            className={`rounded-lg shadow-2xl cursor-zoom-in transition-all duration-300 object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40' : ''}`}
+                            className={`rounded-lg shadow-2xl cursor-zoom-in object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40 transition-[filter,opacity] duration-300' : ''}`}
                             decoding="sync"
                             loading="eager"
                             fetchPriority="high"
