@@ -1800,6 +1800,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { image: manOfPartsBondStreetStool, title: "Bond Street Stool", subtitle: "Yabu Pushelberg", category: "Stool", materials: "Full upholstery in fabric or leather with a Powdercoat Bronze swivel base", dimensions: "W 62.5 × D 46 × H 63.5 cm — SH 49.3 cm" },
       { image: manOfPartsSandyCoveSofa, title: "Sandy Cove Sofa", subtitle: "Sebastian Herkner", category: "Sofa", materials: "Full upholstered in fabric or leather", dimensions: "W 190 × D 108 × H 70 cm — SH 40 cm" },
       { image: manOfPartsCocktailTable, title: "Madison Avenue Cocktail Table", subtitle: "Yabu Pushelberg", category: "Side Table", materials: "Marble top with aged brass base", dimensions: "Ø 40.5 × H 47 cm" },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1773188757/Screen_Shot_2026-03-11_at_8.25.19_AM_v6lbyx.png", title: "Park Place Bar/Counter Stool", subtitle: "Yabu Pushelberg", category: "Stool", materials: "Metal Frame, Leather or Fabric seat and backrest", dimensions: "W 44 × D 48 × H 105 cm — SH 75 cm / W 44 × D 48 × H 92.5 cm — SH 65 cm" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/manofparts/" },
