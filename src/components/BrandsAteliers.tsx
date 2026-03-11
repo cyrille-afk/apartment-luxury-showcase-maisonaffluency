@@ -1864,7 +1864,7 @@ function AlphaStrip({
                   </div>
                 </div>
 
-                <p className={`text-xs md:text-sm font-body leading-relaxed mb-3 transition-colors duration-300 pl-8 md:pl-0 ${expandedCard === brand.name ? "" : "line-clamp-3"} ${hasBg ? "text-white/90" : "text-muted-foreground"}`}>
+                <p className={`text-xs md:text-sm font-body leading-relaxed mb-3 transition-colors duration-300 pl-8 md:pl-0 whitespace-pre-line ${expandedCard === brand.name ? "pb-10" : "line-clamp-3"} ${hasBg ? "text-white/90" : "text-muted-foreground"}`}>
                   {brand.description}
                 </p>
 
