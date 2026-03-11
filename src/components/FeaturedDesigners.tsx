@@ -1793,7 +1793,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     philosophy: "We believe in furniture made with integrity — pieces conceived by great designers and realized by the best craftspeople in the world.",
     curatorPicks: [
-      { image: manOfPartsCoffeeTable, title: "Praia da Granja Coffee Table", subtitle: "Sebastian Herkner", category: "Tables", materials: "A mixed textured stone top with a solid walnut or oak base", dimensions: "W 125 × D 40 × H 34 cm" },
+      { image: manOfPartsCoffeeTable, title: "Praia da Granja Coffee Table", subtitle: "Sebastian Herkner", category: "Tables", materials: "Black Ruivina marble top · Solid walnut base · FSC Wood · Made to Order", dimensions: "W 128 × D 83 × H 34 cm", description: "Origin: Portugal. Customization available." },
       { image: manOfPartsLoungeChair, title: "Frenchmen Street Lounge Chair", subtitle: "Sebastian Herkner", category: "Armchair", materials: "Solid oak frame, Fully upholstered in fabric or leather", dimensions: "W 82 × D 77 × H 73 cm — SH 40 cm" },
       { image: manOfPartsFloorLamp, title: "Cinnamon Gardens Floor Lamp", subtitle: "Yabu Pushelberg", category: "Lighting", materials: "Solid Ash Wood, Esprit Nuvola — 100% Linen Shade", dimensions: "D 55 × H 156 cm" },
       { image: manOfPartsRuaLeblon, title: "Rua Leblon", subtitle: "Yabu Pushelberg", category: "Armchair", materials: "Upholstered in fabric or leather with return swivel. Powder coated black steel with walnut or anthracite base", dimensions: "W 90 × D 92 × H 76 cm — SH 44 cm" },
