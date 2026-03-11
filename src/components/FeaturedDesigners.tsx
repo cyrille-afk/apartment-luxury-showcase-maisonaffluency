@@ -1031,8 +1031,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       {
         image: emmanuelLevetStennePick3,
-        title: "Full Moon",
-        subtitle: "Pendant",
+        title: "Alabaster Pendant",
+        subtitle: "",
         category: "Lighting",
         tags: ["Lighting", "Pendant"],
         materials: "Alabaster and plaster",
