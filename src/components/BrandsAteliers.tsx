@@ -1040,8 +1040,8 @@ const partnerBrands = [
     galleryIndex: GALLERY.A_RELAXED_SETTING,
   },
   {
-    id: "cristallerie-saint-louis",
-    name: "Cristallerie Saint-Louis",
+    id: "saint-louis",
+    name: "Saint-Louis",
     category: "Lighting",
     subcategory: "Table Lamps",
     origin: "France",
@@ -1529,7 +1529,7 @@ const brandBgMap: Record<string, string> = {
   "Dagmar London": berntPetersenBg,
   "Kerstens": erstensBg,
   "CC-Tapis": ccTapisBg,
-  "Cristallerie Saint-Louis": cristallerieSaintLouisBg,
+  "Saint-Louis": cristallerieSaintLouisBg,
   "Delcourt Collection": delcourtBg,
   "Ecart Paris": ecartParisBg,
   "Entrelacs Création": entrelacsBg,
@@ -1635,7 +1635,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Reda Amalou Design": "reda-amalou",
   "Thierry Lemaire": "thierry-lemaire",
   "Théorème Editions": "theoreme-editions",
-  "Cristallerie Saint-Louis": "noe-duchaufour-lawrance",
+  
   "NDL Editions": "noe-duchaufour-lawrance",
   "Delcourt Collection": "forest-giaconia",
   "Entrelacs Création": "entrelacs-creation",
