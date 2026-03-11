@@ -446,6 +446,20 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
+  "peter-reed": {
+    name: "Peter Reed 1861",
+    curatorPicks: [
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,c_fill,f_auto/v1773192967/Screen_Shot_2026-03-11_at_9.34.30_AM_oxuftv.png",
+        title: "Riyad Double Faced Throw",
+        category: "Linens",
+        tags: ["Linens", "Throws"],
+        materials: "55% Polyester · 45% Cotton\nDouble-faced weave · Self-piping detail",
+        dimensions: "290 × 225 cm",
+        description: "Durable blend of 55% polyester and 45% cotton. The cushion features elegant self-piping, while the throw is double-faced.",
+      },
+    ],
+  },
 };
 
 // Gallery image index mapping (based on flattened gallery items order)
