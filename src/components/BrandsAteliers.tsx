@@ -23,7 +23,6 @@ import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesign
 import { collectibleDesigners } from "@/components/Collectibles";
 const alexanderLamontBg = cloudinaryUrl("alexander-lamont-bg_prdpsy", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsBg = cloudinaryUrl("leo-aerts-alinea-bg_x89hrq", { width: 1200, quality: "auto:good", crop: "fill" });
-const alpangeBg = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773210317/alpange_thumbnail-27ed91f311_hbnhro.jpg";
 const apparatusBg = cloudinaryUrl("apparatus-studio-bg_wzakjr", { width: 1200, quality: "auto:good", crop: "fill" });
 const atelierFevrierBg = cloudinaryUrl("atelier-fevrier-bg_tmsgw9", { width: 1200, quality: "auto:good", crop: "fill" });
 const atelierDemichelisBg = cloudinaryUrl("atelier-demichelis-bg_w8b8f7", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -530,15 +529,6 @@ const partnerBrands = [
     featured: "Angelo M/SR 55 Side Table",
     instagram: "https://instagram.com/alinea_design_objects",
     galleryIndex: GALLERY.A_RELAXED_SETTING,
-  },
-  {
-    id: "alpange",
-    name: "Alpange",
-    category: "Design",
-    subcategory: "Design",
-    origin: "France",
-    description: "Born in the French Alps, Alpange is the unprecedented result of a singular dream shared by two impassioned music lovers and entrepreneurs, Raphaël Soudre and Franck Bacquet.\n\nDesigned to deliver both a pure, organic sound and a memorable, multi-\nsensory experience, this ground-breaking, tech-enabled piano is more than an instrument. Alpange is uncharted common ground, where we can all create, connect, and share the soundtrack of our lives.",
-    instagram: "https://www.instagram.com/alpange/?hl=en",
   },
   {
     id: "atelier-demichelis",
@@ -1549,7 +1539,6 @@ const partnerBrands = [
 const brandBgMap: Record<string, string> = {
   "Alexander Lamont": alexanderLamontBg,
   "Alinea Design Objects": leoAertsBg,
-  "Alpange": alpangeBg,
   "Apparatus Studio": apparatusBg,
   "Atelier DeMichelis": atelierDemichelisBg,
   "Atelier Février": atelierFevrierBg,
@@ -1649,7 +1638,6 @@ const brandBgMap: Record<string, string> = {
 const brandToDesignerMap: Record<string, string> = {
   "Alexander Lamont": "alexander-lamont",
   "Alinea Design Objects": "leo-aerts-alinea",
-  "Alpange": "alpange",
   "Apparatus Studio": "apparatus-studio",
   "Atelier Février": "atelier-fevrier",
   "Atelier Pendhapa": "atelier-pendhapa",
@@ -1825,7 +1813,7 @@ function AlphaStrip({
                   Photo: {brand.photoCredit}
                 </p>
               )}
-              <div className={`relative z-10 ${expandedCard === brand.name ? "pb-12" : ""}`}>
+              <div className="relative z-10">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2">
                     {brand.instagram && (
@@ -1864,7 +1852,7 @@ function AlphaStrip({
                   </div>
                 </div>
 
-                <p className={`text-xs md:text-sm font-body leading-relaxed mb-3 transition-colors duration-300 pl-8 md:pl-0 whitespace-pre-line ${expandedCard === brand.name ? "" : "line-clamp-3"} ${hasBg ? "text-white/90" : "text-muted-foreground"}`}>
+                <p className={`text-xs md:text-sm font-body leading-relaxed mb-3 transition-colors duration-300 pl-8 md:pl-0 ${expandedCard === brand.name ? "" : "line-clamp-3"} ${hasBg ? "text-white/90" : "text-muted-foreground"}`}>
                   {brand.description}
                 </p>
 
