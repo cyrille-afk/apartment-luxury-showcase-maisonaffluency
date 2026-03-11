@@ -1549,6 +1549,7 @@ const partnerBrands = [
 const brandBgMap: Record<string, string> = {
   "Alexander Lamont": alexanderLamontBg,
   "Alinea Design Objects": leoAertsBg,
+  "Alpange": alpangeBg,
   "Apparatus Studio": apparatusBg,
   "Atelier DeMichelis": atelierDemichelisBg,
   "Atelier Février": atelierFevrierBg,
