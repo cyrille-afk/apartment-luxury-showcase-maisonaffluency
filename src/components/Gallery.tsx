@@ -635,10 +635,10 @@ const Gallery = () => {
                             <div ref={index === 0 ? hotspotHintRef : undefined} className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
                               {/* Ripple rings — white on mobile */}
                               <div className="relative flex items-center justify-center">
-                                <span className="absolute w-16 h-16 rounded-full border border-white/20 animate-ping" style={{ animationDuration: "2s", animationDelay: "0s" }} />
-                                <span className="absolute w-12 h-12 rounded-full border border-white/25 animate-ping" style={{ animationDuration: "2s", animationDelay: "0.5s" }} />
-                                <span className="absolute w-8 h-8 rounded-full border border-white/30 animate-ping" style={{ animationDuration: "2s", animationDelay: "1s" }} />
-                                <span className="relative block w-3 h-3 rounded-full bg-white/35 shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
+                                <span className="absolute w-16 h-16 rounded-full border border-white/35 animate-ping" style={{ animationDuration: "2s", animationDelay: "0s" }} />
+                                <span className="absolute w-12 h-12 rounded-full border border-white/40 animate-ping" style={{ animationDuration: "2s", animationDelay: "0.5s" }} />
+                                <span className="absolute w-8 h-8 rounded-full border border-white/50 animate-ping" style={{ animationDuration: "2s", animationDelay: "1s" }} />
+                                <span className="relative block w-3 h-3 rounded-full bg-white/55 shadow-[0_0_10px_rgba(255,255,255,0.35)]" />
                               </div>
                             </div>
                           )}
