@@ -1330,6 +1330,35 @@ const Collectibles = () => {
                         <ZoomIn size={16} className="text-white" />
                       )}
                     </button>
+                    {/* PDF download button */}
+                    {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.pdfUrl && !isZoomed && (
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
+                          try {
+                            const res = await fetch(pick.pdfUrl!);
+                            const blob = await res.blob();
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = pick.pdfFilename || `${pick.title?.replace(/\s+/g, '_') || 'specification'}.pdf`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                          } catch {
+                            window.open(pick.pdfUrl!, '_blank');
+                          }
+                        }}
+                        className="absolute bottom-2 right-2 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300 z-10"
+                        aria-label="Download PDF specification"
+                      >
+                        <FileDown size={14} className="md:hidden" />
+                        <FileDown size={16} className="hidden md:block" />
+                        <span className="text-[10px] md:text-xs font-medium leading-none">PDF</span>
+                      </button>
+                    )}
                     {/* Desktop Quote — stacked under PDF, anchored to image */}
                     {!isZoomed && (
                       <button
