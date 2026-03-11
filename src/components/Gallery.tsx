@@ -635,9 +635,9 @@ const Gallery = () => {
                             <div ref={hotspotHintRef} className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
                               {/* Pulsing dot + rings — white on mobile */}
                               <div className="relative flex items-center justify-center">
-                                <span className="absolute w-14 h-14 rounded-full bg-white/20 animate-ping" style={{ animationDuration: "3s" }} />
-                                <span className="absolute w-10 h-10 rounded-full bg-white/25 animate-pulse" style={{ animationDuration: "2.5s" }} />
-                                <span className="relative block w-5 h-5 rounded-full bg-white/80 border-[2.5px] border-white shadow-[0_0_10px_rgba(255,255,255,0.4)]" />
+                                <span className="absolute w-14 h-14 rounded-full bg-white/10 animate-ping" style={{ animationDuration: "3s" }} />
+                                <span className="absolute w-10 h-10 rounded-full bg-white/12 animate-pulse" style={{ animationDuration: "2.5s" }} />
+                                <span className="relative block w-5 h-5 rounded-full bg-white/40 border-[2.5px] border-white/50 shadow-[0_0_10px_rgba(255,255,255,0.15)]" />
                               </div>
                             </div>
                           )}
@@ -723,9 +723,9 @@ const Gallery = () => {
                         {!section.items.some(i => i.description) && index === 0 && showHotspotHint && (
                           <div ref={hotspotHintRef} className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
                             <div className="relative flex items-center justify-center">
-                              <span className="absolute w-14 h-14 rounded-full bg-primary/20 animate-ping" />
-                              <span className="absolute w-10 h-10 rounded-full bg-primary/25 animate-pulse" />
-                              <span className="relative block w-5 h-5 rounded-full bg-black/70 border-[2.5px] border-primary shadow-[0_0_12px_hsl(var(--primary)/0.5)]" />
+                              <span className="absolute w-14 h-14 rounded-full bg-primary/10 animate-ping" />
+                              <span className="absolute w-10 h-10 rounded-full bg-primary/12 animate-pulse" />
+                              <span className="relative block w-5 h-5 rounded-full bg-black/40 border-[2.5px] border-primary/50 shadow-[0_0_12px_hsl(var(--primary)/0.25)]" />
                             </div>
                             <span className="absolute bottom-16 left-1/2 -translate-x-1/2 text-white text-sm font-body font-medium tracking-wide bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full whitespace-nowrap animate-fade-in shadow-lg">
                               Click to explore products
