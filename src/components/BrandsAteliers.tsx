@@ -1655,6 +1655,7 @@ const brandBgMap: Record<string, string> = {
   "Tacchini": tacchiniBg,
   "Refractory Studio": refractoryStudioBg,
   "Marta Sala Éditions": martaSalaEditionsBg,
+  "Alpange": alpangeBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
