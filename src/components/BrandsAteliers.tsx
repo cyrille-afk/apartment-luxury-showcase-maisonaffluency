@@ -116,6 +116,7 @@ const laChanceParisBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.18.38_AM_nkx1
 const tacchiniBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_9.06.23_PM_ixc2yu", { width: 1200, quality: "auto:good", crop: "fill" });
 const refractoryStudioBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_9.09.20_PM_jm34g1", { width: 1200, quality: "auto:good", crop: "fill" });
 const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_xqirha", { width: 1200, quality: "auto:good", crop: "fill" });
+const alpangeBg = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,c_fill,f_auto/v1773210638/Screen_Shot_2026-03-11_at_2.30.01_PM_tdkif9.png";
 
 // Stéphane CG Curators' Picks images
 const stephaneCgOrsay = cloudinaryUrl("PHOTO-2023-09-14-13-51-05_1_iyi99i", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -457,6 +458,20 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         materials: "55% Polyester · 45% Cotton\nDouble-faced weave · Self-piping detail",
         dimensions: "290 × 225 cm",
         description: "Durable blend of 55% polyester and 45% cotton. The cushion features elegant self-piping, while the throw is double-faced.",
+      },
+    ],
+  },
+  "alpange": {
+    name: "Alpange",
+    curatorPicks: [
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773210638/Screen_Shot_2026-03-11_at_2.30.01_PM_tdkif9.png",
+        title: "The Alpange Natural Walnut Wood",
+        category: "Furniture",
+        tags: ["Furniture", "Piano"],
+        materials: "Plywood structure · Wood veneer or paint · Matt varnish",
+        dimensions: "170 × 60 × 80 cm\nPiano: 115 kg / Bench: 25 kg / Pedals: 12 kg",
+        description: "A sculptural piano crafted in natural walnut wood, featuring a plywood structure with wood veneer finish and matt varnish. The set comprises a piano, bench and pedals unit.",
       },
     ],
   },
@@ -1533,6 +1548,14 @@ const partnerBrands = [
     description: "Marta Sala Éditions is a Milan-based publishing house of collectible furniture founded by Marta Sala Noseda, championing the intersection of art, architecture and design. Each limited-edition piece is conceived with leading architects and designers, crafted by master Italian artisans using noble materials — from hand-patinated metals to richly upholstered volumes — resulting in furnishings of sculptural presence and enduring elegance.",
     instagram: "https://www.instagram.com/martasalaeditions/?hl=en",
   },
+  {
+    id: "alpange",
+    name: "Alpange",
+    category: "Furniture",
+    subcategory: "Piano",
+    origin: "France",
+    description: "Alpange is a French design studio reimagining the piano as a sculptural object, blending exceptional craftsmanship with contemporary aesthetics through natural materials and refined finishes.",
+  },
 ];
 
 // Background image map
@@ -1632,6 +1655,7 @@ const brandBgMap: Record<string, string> = {
   "Tacchini": tacchiniBg,
   "Refractory Studio": refractoryStudioBg,
   "Marta Sala Éditions": martaSalaEditionsBg,
+  "Alpange": alpangeBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
@@ -1687,6 +1711,7 @@ const brandToDesignerMap: Record<string, string> = {
   "L'Objet": "lobjet",
   "Saint-Louis": "saint-louis",
   "Peter Reed 1861": "peter-reed",
+  "Alpange": "alpange",
 };
 
 // Reverse map: designer ID → brand name (for deep-link resolution)
