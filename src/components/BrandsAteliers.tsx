@@ -1635,7 +1635,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Reda Amalou Design": "reda-amalou",
   "Thierry Lemaire": "thierry-lemaire",
   "Théorème Editions": "theoreme-editions",
-  "Cristallerie Saint-Louis": "noe-duchaufour-lawrance",
+  
   "NDL Editions": "noe-duchaufour-lawrance",
   "Delcourt Collection": "forest-giaconia",
   "Entrelacs Création": "entrelacs-creation",
