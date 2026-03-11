@@ -1047,15 +1047,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Patinated or Polished Brass and Alabaster",
         dimensions: "L 29 × l 22 × H 33 cm"
       },
-      {
-        image: emmanuelLevetStennePick7,
-        title: "Dress Up",
-        subtitle: "Console",
-        category: "Tables",
-        tags: ["Tables", "Console", "Edition of 50"],
-        materials: "Grafite / Marquina marble top, patinated bronze base",
-        dimensions: "L 150 × l 45 × H 80 cm"
-      },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/emanuellelevetstenne" },
