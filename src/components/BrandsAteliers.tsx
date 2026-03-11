@@ -1694,7 +1694,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Sé Collections": "se-collections",
   "Reda Amalou": "reda-amalou",
   "Bina Baitel": "bina-baitel",
-  "Emanuelle Levet Stenne": "emanuelle-levet-stenne",
+  "Emmanuel Levet Stenne": "emmanuel-levet-stenne",
   "Milan Pekař": "milan-pekar",
   "Matthieu Gicquel": "matthieu-gicquel",
   "CC-Tapis": "cc-tapis",
