@@ -433,6 +433,19 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
+  "saint-louis": {
+    name: "Saint-Louis",
+    curatorPicks: [
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773187899/Screen_Shot_2026-03-11_at_8.07.08_AM_byjomp.png",
+        title: "Folia Dark Wood Amber Portable Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Table Lamps"],
+        materials: "Blown and Cut Crystal",
+        dimensions: "H 29 × Ø 15.4 cm / 3 kg\n2 light temperatures: Light warm white (2700K) · Extra warm white (2200K), for a more intimate, candlelight atmosphere",
+      },
+    ],
+  },
 };
 
 // Gallery image index mapping (based on flattened gallery items order)
