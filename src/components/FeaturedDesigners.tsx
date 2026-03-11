@@ -370,6 +370,17 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/OKHA_OtherSeating_BenchBed_1.pdf",
         description: ""
       },
+      {
+        image: adamCourtsVillaNightstand,
+        title: "Villa Pedestal Nightstand",
+        subtitle: "Ash Frame & Marble Top",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Frame options include Ash (timber), paired with marble top options such as Crema Rosa, Nero Marquina, Verde Guatemala, Rosso Levante, Carrara, Arabescato, Vagli, and Calacatta",
+        dimensions: "75.5W × 46.5D × 55H cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/OKHA_SideTables_Villa.pdf",
+        description: ""
+      },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/__okha/" },
