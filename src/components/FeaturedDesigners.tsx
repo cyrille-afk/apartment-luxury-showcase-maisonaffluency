@@ -1013,8 +1013,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     curatorPicks: [
       {
         image: emmanuelLevetStennePick5,
-        title: "Alabaster",
-        subtitle: "Pendant",
+        title: "New Alabaster Pendant",
+        subtitle: "",
         category: "Lighting",
         tags: ["Lighting", "Pendant"],
         materials: "Alabaster and slate",
