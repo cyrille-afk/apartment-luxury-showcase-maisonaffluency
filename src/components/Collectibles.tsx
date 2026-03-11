@@ -94,6 +94,8 @@ export const collectibleDesigners: Array<{
     edition?: string;
     tags?: string[];
     description?: string;
+    pdfUrl?: string;
+    pdfFilename?: string;
   }>;
   links: Array<{ type: string; url?: string }>;
 }> = [
