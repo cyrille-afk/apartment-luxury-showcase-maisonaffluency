@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { GALLERY } from "@/constants/galleryIndex";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
-import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote } from "lucide-react";
+import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote, FileDown } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
@@ -94,6 +94,8 @@ export const collectibleDesigners: Array<{
     edition?: string;
     tags?: string[];
     description?: string;
+    pdfUrl?: string;
+    pdfFilename?: string;
   }>;
   links: Array<{ type: string; url?: string }>;
 }> = [
@@ -185,6 +187,7 @@ export const collectibleDesigners: Array<{
       { image: herveBubblingLamp, title: "Bubbling Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze with a golden brown patina, diffuses a soft light which is surreptitiously captured by the crystal spheres adorning its base.\nAlso available in bronze with a black or silver patina – possibility to change lampshade colour", dimensions: "Ø 32 x H 51.5 cm - 4 kg" },
       { image: herveFacettedPendant, title: "Facetted Pendant", category: "Lighting", subcategory: "Pendants", materials: "Golden brown patinated Bronze\nAlso available in large size, with patinated or lacquered bronze", dimensions: "Ø 40cm x H 155 cm - 15kg" },
       { image: herveTourbillonPendant, title: "Tourbillon Pendant", category: "Lighting", subcategory: "Pendants", materials: "Golden-brown patinated bronze", dimensions: "Ø 40 x H 129.3 cm" },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,c_fill,f_auto/v1773196208/Screen_Shot_2026-03-11_at_10.29.03_AM_givmmu.png", title: "MicMac Chandelier", category: "Lighting", subcategory: "Chandeliers", materials: "Cage of bronze with a golden brown patina", dimensions: "70 × 70 × 55 cm / 40 kg", edition: "Edition of 40", description: "At once organic with a hint of botanical aspect, this chandelier is fashioned into a cage of bronze with a golden brown patina to diffuse a soft, warm light, creating an infinite shadow show.\n1 LED bulb 17.5 W", pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/specs%2Fmicmac-chandelier-472.pdf", pdfFilename: "MicMac-Chandelier-472-Spec.pdf" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/hervevanderstraetengalerie" },
@@ -1327,6 +1330,35 @@ const Collectibles = () => {
                         <ZoomIn size={16} className="text-white" />
                       )}
                     </button>
+                    {/* PDF download button */}
+                    {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.pdfUrl && !isZoomed && (
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
+                          try {
+                            const res = await fetch(pick.pdfUrl!);
+                            const blob = await res.blob();
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = pick.pdfFilename || `${pick.title?.replace(/\s+/g, '_') || 'specification'}.pdf`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                          } catch {
+                            window.open(pick.pdfUrl!, '_blank');
+                          }
+                        }}
+                        className="absolute bottom-2 right-2 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300 z-10"
+                        aria-label="Download PDF specification"
+                      >
+                        <FileDown size={14} className="md:hidden" />
+                        <FileDown size={16} className="hidden md:block" />
+                        <span className="text-[10px] md:text-xs font-medium leading-none">PDF</span>
+                      </button>
+                    )}
                     {/* Desktop Quote — stacked under PDF, anchored to image */}
                     {!isZoomed && (
                       <button
