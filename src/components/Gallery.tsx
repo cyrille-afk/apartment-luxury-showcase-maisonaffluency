@@ -630,14 +630,14 @@ const Gallery = () => {
                           {!isHotspotSection && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                           )}
-                          {/* Pulsing hotspot hint — first image of first hotspot section only */}
-                          {isHotspotSection && index === 0 && originalSectionIndex === firstHotspotSectionIdx && showHotspotHint && (
+                          {/* Pulsing hotspot hint — first image of each hotspot section */}
+                          {isHotspotSection && index === 0 && showHotspotHint && (
                             <div ref={hotspotHintRef} className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-                              {/* Pulsing dot + rings */}
+                              {/* Pulsing dot + rings — white on mobile */}
                               <div className="relative flex items-center justify-center">
-                                <span className="absolute w-14 h-14 rounded-full bg-primary/10 animate-ping" style={{ animationDuration: "3s" }} />
-                                <span className="absolute w-10 h-10 rounded-full bg-primary/15 animate-pulse" style={{ animationDuration: "2.5s" }} />
-                                <span className="relative block w-5 h-5 rounded-full bg-black/50 border-[2.5px] border-primary/60 shadow-[0_0_10px_hsl(var(--primary)/0.3)]" />
+                                <span className="absolute w-14 h-14 rounded-full bg-white/20 animate-ping" style={{ animationDuration: "3s" }} />
+                                <span className="absolute w-10 h-10 rounded-full bg-white/25 animate-pulse" style={{ animationDuration: "2.5s" }} />
+                                <span className="relative block w-5 h-5 rounded-full bg-white/80 border-[2.5px] border-white shadow-[0_0_10px_rgba(255,255,255,0.4)]" />
                               </div>
                             </div>
                           )}
@@ -719,8 +719,8 @@ const Gallery = () => {
                       >
                         <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 4 ? "(max-width: 1024px) 50vw, 25vw" : "(max-width: 1024px) 50vw, 33vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                        {/* Pulsing hotspot hint — desktop: first image of first hotspot section */}
-                        {!section.items.some(i => i.description) && index === 0 && originalSectionIndex === firstHotspotSectionIdx && showHotspotHint && (
+                        {/* Pulsing hotspot hint — desktop: first image of each hotspot section */}
+                        {!section.items.some(i => i.description) && index === 0 && showHotspotHint && (
                           <div ref={hotspotHintRef} className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
                             <div className="relative flex items-center justify-center">
                               <span className="absolute w-14 h-14 rounded-full bg-primary/20 animate-ping" />
