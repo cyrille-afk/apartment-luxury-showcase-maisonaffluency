@@ -1825,7 +1825,7 @@ function AlphaStrip({
                   Photo: {brand.photoCredit}
                 </p>
               )}
-              <div className="relative z-10">
+              <div className={`relative z-10 ${expandedCard === brand.name ? "pb-12" : ""}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2">
                     {brand.instagram && (
