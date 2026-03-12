@@ -502,6 +502,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
     curatorPicks: [
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773292459/Screen_Shot_2026-03-12_at_12.50.53_PM_wp4tbm.png",
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773315073/Screen_Shot_2026-03-12_at_7.30.39_PM_ee2fty.png",
         title: "Firefly Chandelier",
         subtitle: "Damien Langlois-Meurinne by Pouenat",
         category: "Lighting",
