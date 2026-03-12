@@ -281,7 +281,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773294062/ozone_gelule_gelulealabaster-4_qbcymf.jpg",
         title: "Gélule Albâtre Wall Light",
-        subtitle: "Joseph Dirand",
+        subtitle: "Joseph Dirand by Ozone",
         category: "Lighting",
         subcategory: "Wall Lights",
         tags: ["Lighting", "Wall Lights"],
