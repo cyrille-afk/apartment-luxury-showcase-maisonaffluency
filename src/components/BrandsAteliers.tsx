@@ -281,8 +281,8 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         pdfFilename: "Maison_Affluency-Classique_V.pdf",
       },
       {
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773294062/ozone_gelule_gelulealabaster-4_qbcymf.jpg",
-        title: "Gélule Albâtre Wall Light",
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773309530/Screen_Shot_2026-03-12_at_5.57.50_PM_r0sxqx.png",
+        title: "Gélule Alabaster Wall Light",
         subtitle: "Joseph Dirand by Ozone",
         category: "Lighting",
         subcategory: "Wall Lights",
