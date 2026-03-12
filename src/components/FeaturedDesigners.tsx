@@ -2818,8 +2818,8 @@ const FeaturedDesigners = () => {
                                         <img src={thumb} alt={link.text} className="w-full h-full object-cover blur-[0.5px] group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
                                       )}
                                     </button>
-                                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 flex items-center gap-1 text-[10px] md:text-xs font-body text-muted-foreground whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
-                                      <ExternalLink className="w-3 h-3" /> {link.text}
+                                    <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 flex items-center gap-1 text-[10px] md:text-xs font-body text-muted-foreground whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                                      <ExternalLink className="w-2.5 h-2.5" /> {link.text}
                                     </span>
                                   </div>
                                 );
