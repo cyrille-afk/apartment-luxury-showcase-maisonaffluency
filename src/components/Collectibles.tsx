@@ -1269,7 +1269,7 @@ const Collectibles = () => {
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}>
                 <div 
-                  className={`relative overflow-auto transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}
+                  className={`relative overflow-visible transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}
                   onClick={handleDoubleTap}
                 >
                   {!isZoomed && (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition) && (
