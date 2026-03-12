@@ -76,6 +76,8 @@ export interface CatalogueProduct {
   designer_name: string | null;
   product_image_url: string | null;
   link_url: string | null;
+  materials: string | null;
+  dimensions: string | null;
   room: string;
 }
 
