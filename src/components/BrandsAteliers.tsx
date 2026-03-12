@@ -2063,6 +2063,7 @@ const BrandsAteliers = () => {
   const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const hasAutoScrolledSearchRef = useRef(false);
 
   useEffect(() => {
     const trimmed = searchQuery.trim();
@@ -2071,6 +2072,26 @@ const BrandsAteliers = () => {
         detail: { query: trimmed || null, source: 'brands' },
       })
     );
+
+    // Ensure Product Grid scope is set to Ateliers during text search
+    if (trimmed) {
+      window.dispatchEvent(
+        new CustomEvent('syncCategoryFilter', {
+          detail: { category: null, subcategory: null, source: 'brands' },
+        })
+      );
+
+      // Grid sits above this section; auto-scroll once when search starts
+      if (!hasAutoScrolledSearchRef.current) {
+        hasAutoScrolledSearchRef.current = true;
+        setTimeout(() => {
+          document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
+      }
+      return;
+    }
+
+    hasAutoScrolledSearchRef.current = false;
   }, [searchQuery]);
 
   const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
