@@ -2842,7 +2842,7 @@ const FeaturedDesigners = () => {
                                     aria-label={`View ${designer.notableWorksLink.text} in gallery`}
                                   >
                                     {thumb && (
-                                      <img src={thumb} alt={designer.notableWorksLink.text} className="w-full h-full object-cover blur-[2px] group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
+                                      <img src={thumb} alt={designer.notableWorksLink.text} className="w-full h-full object-cover blur-[0.5px] group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
                                     )}
                                   </button>
                                   <span className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-2 py-0.5 rounded bg-popover border border-border text-[10px] md:text-xs font-body text-popover-foreground shadow-md whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
