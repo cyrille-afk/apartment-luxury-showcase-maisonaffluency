@@ -2855,6 +2855,7 @@ const FeaturedDesigners = () => {
                             })()}
                           </div>
                       </div>
+                      </>
                     )}
                     <div className="flex justify-start md:hidden">
                       <ChevronDown className="h-6 w-6 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
