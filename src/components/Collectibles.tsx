@@ -1110,7 +1110,7 @@ const Collectibles = () => {
                                   <img src={thumb} alt={designer.notableWorksLink!.text} className="w-full h-full object-cover blur-0 md:blur-[0.5px] md:group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
                                 )}
                               </button>
-                              <span className="absolute right-0 md:right-auto md:left-0 top-full mt-1 flex items-center gap-0.5 text-[9px] md:text-xs font-body text-foreground md:text-muted-foreground whitespace-nowrap opacity-100 md:opacity-0 md:group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                              <span className="absolute left-0 md:left-0 top-full mt-1 flex items-center gap-0.5 text-[9px] md:text-xs font-body text-foreground md:text-muted-foreground whitespace-nowrap opacity-100 md:opacity-0 md:group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
                                 <CornerDownRight className="w-3 h-3" /> {designer.notableWorksLink!.text}
                               </span>
                             </div>
