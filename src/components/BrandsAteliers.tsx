@@ -1923,7 +1923,7 @@ function AlphaStrip({
                   Photo: {brand.photoCredit}
                 </p>
               )}
-              <div className="relative z-10">
+              <div className="relative z-10 pb-12">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2">
                     {brand.instagram && (
@@ -1971,7 +1971,7 @@ function AlphaStrip({
                   {brand.description}
                 </p>
 
-                {brand.featuredItems.some(item => item.featured) && (
+                {expandedCard === brand.name && brand.featuredItems.some(item => item.featured) && (
                 <div className="space-y-1 mb-3 pl-8 md:pl-0">
                   <span className={`text-[10px] md:text-xs uppercase tracking-wider block transition-colors duration-300 ${hasBg ? "text-white/70" : "text-[hsl(var(--gold))]"}`}><em>On View</em></span>
                   <ul className="space-y-0.5">
