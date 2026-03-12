@@ -2770,70 +2770,83 @@ const FeaturedDesigners = () => {
                           <span className="text-primary/40 text-xs tracking-[0.3em] mt-1">• • •</span>
                           <div className="flex items-center gap-1.5">
                             <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
-                            <div className="flex -space-x-2">
-                              {designer.notableWorksLinks ? (
-                                designer.notableWorksLinks.map((link, linkIdx) => {
-                                  const thumb = GALLERY_THUMBNAILS[link.galleryIndex];
+                            <TooltipProvider delayDuration={200}>
+                              <div className="flex -space-x-2">
+                                {designer.notableWorksLinks ? (
+                                  designer.notableWorksLinks.map((link, linkIdx) => {
+                                    const thumb = GALLERY_THUMBNAILS[link.galleryIndex];
+                                    return (
+                                      <Tooltip key={linkIdx}>
+                                        <TooltipTrigger asChild>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              scrollToSection('gallery');
+                                              setTimeout(() => {
+                                                window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                                                  detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` }
+                                                }));
+                                              }, 500);
+                                            }}
+                                            onPointerDown={(e) => e.stopPropagation()}
+                                            onTouchEnd={(e) => e.stopPropagation()}
+                                            className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
+                                            aria-label={`View ${link.text} in gallery`}
+                                          >
+                                            {thumb && (
+                                              <img
+                                                src={thumb}
+                                                alt={link.text}
+                                                className="w-full h-full object-cover"
+                                                loading="lazy"
+                                              />
+                                            )}
+                                          </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="bottom" className="text-xs font-body">
+                                          {link.text}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    );
+                                  })
+                                ) : designer.notableWorksLink && (() => {
+                                  const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
                                   return (
-                                    <button
-                                      key={linkIdx}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        scrollToSection('gallery');
-                                        setTimeout(() => {
-                                          window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                            detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` }
-                                          }));
-                                        }, 500);
-                                      }}
-                                      onPointerDown={(e) => e.stopPropagation()}
-                                      onTouchEnd={(e) => e.stopPropagation()}
-                                      className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
-                                      title={link.text}
-                                      aria-label={`View ${link.text} in gallery`}
-                                    >
-                                      {thumb && (
-                                        <img
-                                          src={thumb}
-                                          alt={link.text}
-                                          className="w-full h-full object-cover"
-                                          loading="lazy"
-                                        />
-                                      )}
-                                    </button>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            scrollToSection('gallery');
+                                            setTimeout(() => {
+                                              window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                                                detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` }
+                                              }));
+                                            }, 500);
+                                          }}
+                                          onPointerDown={(e) => e.stopPropagation()}
+                                          onTouchEnd={(e) => e.stopPropagation()}
+                                          className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
+                                          aria-label={`View ${designer.notableWorksLink.text} in gallery`}
+                                        >
+                                          {thumb && (
+                                            <img
+                                              src={thumb}
+                                              alt={designer.notableWorksLink.text}
+                                              className="w-full h-full object-cover"
+                                              loading="lazy"
+                                            />
+                                          )}
+                                        </button>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="bottom" className="text-xs font-body">
+                                        {designer.notableWorksLink.text}
+                                      </TooltipContent>
+                                    </Tooltip>
                                   );
-                                })
-                              ) : designer.notableWorksLink && (() => {
-                                const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
-                                return (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      scrollToSection('gallery');
-                                      setTimeout(() => {
-                                        window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                          detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` }
-                                        }));
-                                      }, 500);
-                                    }}
-                                    onPointerDown={(e) => e.stopPropagation()}
-                                    onTouchEnd={(e) => e.stopPropagation()}
-                                    className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
-                                    title={designer.notableWorksLink.text}
-                                    aria-label={`View ${designer.notableWorksLink.text} in gallery`}
-                                  >
-                                    {thumb && (
-                                      <img
-                                        src={thumb}
-                                        alt={designer.notableWorksLink.text}
-                                        className="w-full h-full object-cover"
-                                        loading="lazy"
-                                      />
-                                    )}
-                                  </button>
-                                );
-                              })()}
-                            </div>
+                                })()}
+                              </div>
+                            </TooltipProvider>
                           </div>
                         </>
                       )}
