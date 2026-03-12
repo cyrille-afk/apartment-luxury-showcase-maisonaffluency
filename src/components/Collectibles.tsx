@@ -608,6 +608,7 @@ const Collectibles = () => {
         prev === curatorPicksDesigner.curatorPicks!.length - 1 ? 0 : prev + 1
       );
       setIsZoomed(false);
+      setPicksHovered(false);
     }
   };
 
