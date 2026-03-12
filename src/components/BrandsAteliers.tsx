@@ -335,7 +335,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773308828/Screen_Shot_2026-03-12_at_5.46.52_PM_dizgxb.png",
         title: "BRASILIA LP",
         subtitle: "Michel Boyer",
-        tags: ["Lighting", "Table Lamp"],
+        tags: ["Lighting", "Table Lamp", "Floor Lamp"],
         materials: "Brass, aluminium and steel structure · Gloss black or polished stainless steel base\nWhite lacquered shade and white paper diffuser",
         dimensions: "280 × 280 × H 710 mm",
         description: "Warm white 2200K or 2700K LED · Optional Dim to Warm (1900K–2500K) · Integrated 24V converters & drivers, CE Class I",
