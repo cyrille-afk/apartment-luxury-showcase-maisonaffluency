@@ -1047,6 +1047,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       {
         image: cloudinaryUrl("Screen_Shot_2026-03-12_at_8.41.37_PM_hcecor", { width: 1200, quality: "auto:good", crop: "fill" }),
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773319387/Screen_Shot_2026-03-12_at_8.41.23_PM_asm46d.png",
         title: "Full Moon Pendant",
         subtitle: "",
         category: "Lighting",
