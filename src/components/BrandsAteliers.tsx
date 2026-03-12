@@ -460,6 +460,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
     curatorPicks: [
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773187899/Screen_Shot_2026-03-11_at_8.07.08_AM_byjomp.png",
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772085733/details-lamp_clzcrk.jpg",
         title: "Folia Dark Wood Amber Portable Lamp",
         category: "Lighting",
         tags: ["Lighting", "Table Lamps"],
