@@ -86,6 +86,7 @@ export const collectibleDesigners: Array<{
   philosophy: string;
   curatorPicks: Array<{
     image: string;
+    hoverImage?: string;
     title: string;
     category: string;
     subcategory?: string;
