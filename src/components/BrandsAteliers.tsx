@@ -285,7 +285,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         tags: ["Lighting", "Chandelier"],
         materials: "White lacquered aluminium structure and stem · White paper diffusing material",
         dimensions: "700 × 700 × H 800 mm – 22 kg\nSilhouette: 1750 mm",
-        description: "Warm white 2700K LED, 144W, 6600 Lumens · Also available in 2200K or 2700K · Optional Dim to Warm (1900K–2500K) · Integrated 24V converters & drivers, CE Class I",
+        description: "Warm white 2700K LED, 144W, 6600 Lumens · Also available in 2200K or 2700K · Optional Dim to Warm (1900K–2500K)\nIntegrated 24V converters & drivers, CE Class I",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Brasilia_PL.pdf",
         pdfFilename: "Maison_Affluency-Brasilia_PL.pdf",
       },
