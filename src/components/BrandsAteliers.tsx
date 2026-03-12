@@ -1919,9 +1919,14 @@ function AlphaStrip({
                       </a>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className={`font-serif text-lg md:text-xl transition-colors duration-300 mb-1 ${hasBg ? "text-white" : "text-foreground group-hover:text-primary"}`}>
+                      <h3 className={`font-serif text-lg md:text-xl transition-colors duration-300 mb-0.5 ${hasBg ? "text-white" : "text-foreground group-hover:text-primary"}`}>
                         {brand.name}
                       </h3>
+                      {brandDesignerNames[brand.name] && (
+                        <p className={`text-[9px] md:text-[10px] font-body italic tracking-wide mb-0.5 transition-colors duration-300 ${hasBg ? "text-white/60" : "text-muted-foreground/70"}`}>
+                          {brandDesignerNames[brand.name].join(" · ")}
+                        </p>
+                      )}
                       <span className={`text-[10px] md:text-xs uppercase tracking-wider transition-colors duration-300 ${hasBg ? "text-white/80" : "text-muted-foreground"}`}>
                         {brand.origin}
                       </span>
