@@ -139,7 +139,7 @@ const martaSalaMurena = cloudinaryUrl("Screen_Shot_2026-03-05_at_6.44.00_PM_xkgg
 // Ozone Light Curators' Picks image
 import ozoneClassiqueV from "@/assets/curators-picks/ozone-classique-v.jpg";
 import ozoneBrasiliaPl from "@/assets/curators-picks/ozone-brasilia-pl.jpg";
-import ozoneGeluleHover from "@/assets/curators-picks/ozone-gelule-hover.png";
+
 
 // Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
 export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
