@@ -676,6 +676,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       { 
         image: apparatusPick4, 
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773317289/tassel-57_ce6vl7.jpg",
         title: "Tassel 57",
         subtitle: "Pendant",
         category: "Lighting",
