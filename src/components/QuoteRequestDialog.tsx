@@ -147,12 +147,12 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-8 md:px-12 pb-10 md:pb-12 -mt-4">
+        <form onSubmit={handleSubmit} className="px-5 md:px-12 pb-8 md:pb-12 -mt-6 md:-mt-4">
           {/* Header */}
-          <h2 className="font-display text-2xl md:text-3xl text-foreground text-center">
+          <h2 className="font-display text-xl md:text-3xl text-foreground text-center">
             Request A Quote Or Customisation
           </h2>
-          <p className="font-body text-sm text-muted-foreground text-center mt-2 mb-10">
+          <p className="font-body text-xs md:text-sm text-muted-foreground text-center mt-1.5 md:mt-2 mb-6 md:mb-10">
             Our team will get back to you within a day
           </p>
 
