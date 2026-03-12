@@ -305,7 +305,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772452356/Screen_Shot_2026-03-02_at_7.26.56_PM_iyecho.png",
-        hoverImage: ozoneGeluleHover,
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773307742/Screen_Shot_2026-03-12_at_5.17.27_PM_uwuhui.png",
         title: "GÉLULE",
         subtitle: "Joseph Dirand by Ozone",
         tags: ["Lighting", "Wall Lamp"],
