@@ -3287,7 +3287,7 @@ const FeaturedDesigners = () => {
                         <ChevronLeft size={32} />
                       </button>
                       <button
-                        onClick={() => setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1)}
+                        onClick={() => { setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1); setPicksHovered(false); }}
                         className="hidden md:flex absolute right-2 md:right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
                         aria-label="Next"
                       >
