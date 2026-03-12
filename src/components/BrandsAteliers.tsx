@@ -2420,11 +2420,9 @@ const BrandsAteliers = () => {
   const totalBrands = alphaGroups.reduce((sum, [, brands]) => sum + brands.length, 0);
 
   const scrollToGallery = (galleryIndex: number, brandName: string) => {
-    scrollToSection('gallery');
-    setTimeout(() => {
-      sessionStorage.setItem('openGalleryIndex', galleryIndex.toString());
-      sessionStorage.setItem('gallerySourceId', `brand-${brandName.replace(/\s+/g, '-').toLowerCase()}`);
-    }, 600);
+    window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+      detail: { index: galleryIndex, sourceId: `brand-${brandName.replace(/\s+/g, '-').toLowerCase()}` }
+    }));
   };
 
   return (
