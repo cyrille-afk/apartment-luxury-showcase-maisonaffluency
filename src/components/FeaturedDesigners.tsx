@@ -1037,6 +1037,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       {
         image: emmanuelLevetStennePick3,
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773318828/Screen_Shot_2026-03-12_at_8.32.15_PM_kywhqr.png",
         title: "Alabaster Pendant",
         subtitle: "",
         category: "Lighting",
