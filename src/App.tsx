@@ -55,6 +55,7 @@ const App = () => {
       ) : (
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/catalogue" element={<Suspense fallback={null}><Catalogue /></Suspense>} />
           <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
         </Routes>
       )}
