@@ -343,6 +343,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772453509/Screen_Shot_2026-03-02_at_8.10.25_PM_rcj8c8.png",
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773310080/Screen_Shot_2026-03-12_at_6.07.38_PM_q0wqhe.png",
         title: "LINE C",
         subtitle: "Gounot & Jähnke",
         tags: ["Lighting", "Chandelier"],
