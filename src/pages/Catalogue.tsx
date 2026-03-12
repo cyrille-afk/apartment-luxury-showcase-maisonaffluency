@@ -189,6 +189,27 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
         <Text style={s.coverDate}>{dateStr}</Text>
       </Page>
 
+      {/* Table of Contents */}
+      <Page size="A4" style={s.page}>
+        <View style={s.sectionHeader}>
+          <Text style={s.roomTitle}>Contents</Text>
+        </View>
+        {groups.map((group, gi) => (
+          <View key={gi} style={{ flexDirection: "row" as const, justifyContent: "space-between" as const, alignItems: "baseline" as const, paddingVertical: 6, borderBottomWidth: 0.5, borderBottomColor: colors.borderLight }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: "Lora", fontSize: 10, fontWeight: 500, color: colors.foreground }}>{group.room}</Text>
+              <Text style={{ fontFamily: "Lora", fontSize: 7, color: colors.mutedLight, marginTop: 1, textTransform: "uppercase" as const, letterSpacing: 2 }}>{group.experience}</Text>
+            </View>
+            <Text style={{ fontFamily: "Lora", fontSize: 8, color: colors.muted }}>{group.products.length} {group.products.length === 1 ? "piece" : "pieces"}</Text>
+          </View>
+        ))}
+        <View style={s.footerRule} fixed />
+        <View style={s.footer} fixed>
+          <Text style={s.footerBrand}>Maison Affluency</Text>
+          <Text style={s.footerPage} render={({ pageNumber }) => `${pageNumber}`} />
+        </View>
+      </Page>
+
       {/* Product Pages — one page per gallery room */}
       {groups.map((group, gi) => (
         <Page key={gi} size="A4" style={s.page} wrap>
