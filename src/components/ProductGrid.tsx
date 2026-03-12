@@ -57,11 +57,20 @@ function buildProductList(atelierPicks: Record<string, { name: string; curatorPi
     }
   }
 
-  // Atelier-only picks
+  // Atelier-only picks — extract designer name from subtitle when available
   for (const [id, data] of Object.entries(atelierPicks)) {
     for (const pick of data.curatorPicks) {
       if (pick.image) {
-        items.push({ pick, designerName: data.name, designerId: id, section: "ateliers" });
+        // If subtitle contains "Designer by Brand", use the designer name
+        let displayName = data.name;
+        const sub = (pick as any).subtitle as string | undefined;
+        if (sub) {
+          const byMatch = sub.match(/^(.+?)\s+by\s+/i);
+          if (byMatch) {
+            displayName = byMatch[1].trim();
+          }
+        }
+        items.push({ pick, designerName: displayName, designerId: id, section: "ateliers" });
       }
     }
   }
