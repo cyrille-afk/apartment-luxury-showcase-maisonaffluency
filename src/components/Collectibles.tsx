@@ -1089,20 +1089,17 @@ const Collectibles = () => {
                       const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
                       return (
                         <>
-                        <div className="w-16 md:w-24 h-px bg-[hsl(var(--gold)/0.4)] mt-0.5 ml-[7rem] md:ml-[11.5rem]" />
-                        <div className="flex items-center gap-2 w-full md:pl-[25%] -mt-0.5">
+                        <div className="w-16 md:w-24 h-px bg-[hsl(var(--gold)/0.4)] mt-0.5 ml-auto md:ml-[11.5rem] mr-4 md:mr-0" />
+                        <div className="flex items-center gap-2 w-full justify-end md:justify-start md:pl-[25%] -mt-0.5 pr-4 md:pr-0">
                           <span className="text-[10px] md:text-xs text-foreground uppercase tracking-wider mr-2"><em>On View</em></span>
                           <div className="flex gap-4">
                             <div className="relative group/avatar">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  scrollToSection('gallery');
-                                  setTimeout(() => {
-                                    window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                      detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` }
-                                    }));
-                                  }, 500);
+                                  window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                                    detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` }
+                                  }));
                                 }}
                                 onPointerDown={(e) => e.stopPropagation()}
                                 onTouchEnd={(e) => e.stopPropagation()}
