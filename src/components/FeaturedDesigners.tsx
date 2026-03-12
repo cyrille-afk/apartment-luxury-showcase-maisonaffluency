@@ -2799,7 +2799,7 @@ const FeaturedDesigners = () => {
                                 const thumb = GALLERY_THUMBNAILS[link.galleryIndex];
                                 const mobileTooltipOffset = `${linkIdx * 0.85}rem`;
                                 return (
-                                  <div key={linkIdx} className="relative group/avatar pb-8 md:pb-0">
+                                  <div key={linkIdx} className="relative group/avatar md:pb-0">
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
