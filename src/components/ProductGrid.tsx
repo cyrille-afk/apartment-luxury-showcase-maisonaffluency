@@ -177,6 +177,7 @@ const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectib
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [navigatedToProfile, setNavigatedToProfile] = useState(false);
   const [isLightboxImageLoaded, setIsLightboxImageLoaded] = useState(false);
+  const [lightboxHovered, setLightboxHovered] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [quoteProduct, setQuoteProduct] = useState<{ name?: string; designer?: string }>({});
   const gridRef = useRef<HTMLElement>(null);
