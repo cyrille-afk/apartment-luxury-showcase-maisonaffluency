@@ -2659,8 +2659,8 @@ const FeaturedDesigners = () => {
                           <img
                             src={designer.image}
                             alt={designer.name}
-                            sizes="(max-width: 767px) 96px, 128px"
-                            className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
+                            sizes="(max-width: 767px) 112px, 160px"
+                            className="w-28 h-28 md:w-40 md:h-40 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
                             style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined}
                             loading="lazy"
                           />
