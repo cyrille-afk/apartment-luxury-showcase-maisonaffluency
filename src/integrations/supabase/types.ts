@@ -18,9 +18,11 @@ export type Database = {
         Row: {
           created_at: string
           designer_name: string | null
+          dimensions: string | null
           id: string
           image_identifier: string
           link_url: string | null
+          materials: string | null
           product_image_url: string | null
           product_name: string
           x_percent: number
@@ -29,9 +31,11 @@ export type Database = {
         Insert: {
           created_at?: string
           designer_name?: string | null
+          dimensions?: string | null
           id?: string
           image_identifier: string
           link_url?: string | null
+          materials?: string | null
           product_image_url?: string | null
           product_name: string
           x_percent: number
@@ -40,9 +44,11 @@ export type Database = {
         Update: {
           created_at?: string
           designer_name?: string | null
+          dimensions?: string | null
           id?: string
           image_identifier?: string
           link_url?: string | null
+          materials?: string | null
           product_image_url?: string | null
           product_name?: string
           x_percent?: number
