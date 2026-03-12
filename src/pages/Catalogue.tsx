@@ -44,14 +44,12 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
 
   const doc = (
     <Document>
-      {/* Cover Page */}
       <Page size="A4" style={s.coverPage}>
         <Text style={s.coverTitle}>Maison Affluency</Text>
         <Text style={s.coverSubtitle}>Curated Collection Catalogue</Text>
         <Text style={s.coverDate}>{dateStr}</Text>
       </Page>
 
-      {/* Product Pages */}
       {groups.map((group, gi) => (
         <Page key={gi} size="A4" style={s.page} wrap>
           <View style={s.sectionHeader}>
@@ -178,6 +176,68 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   );
 }
 
+/* ─── Product Row (editorial layout) ─── */
+function ProductRow({ product }: { product: CatalogueProduct }) {
+  return (
+    <div className="flex gap-6 py-6 border-b border-[#e8e2db]">
+      {/* Thumbnail */}
+      {product.image ? (
+        <div className="w-36 h-36 md:w-44 md:h-44 flex-shrink-0 bg-[#f5f0eb] flex items-center justify-center">
+          <img
+            src={product.image}
+            alt={product.title}
+            className="max-w-full max-h-full object-contain"
+            loading="lazy"
+          />
+        </div>
+      ) : (
+        <div className="w-36 h-36 md:w-44 md:h-44 flex-shrink-0 bg-[#f0ebe5] flex items-center justify-center">
+          <span className="text-xs text-muted-foreground">No image</span>
+        </div>
+      )}
+
+      {/* Details */}
+      <div className="flex flex-col justify-start min-w-0 pt-1">
+        <h4 className="text-[15px] md:text-base font-medium text-foreground leading-snug">
+          {product.title}
+          {product.subtitle && (
+            <span className="text-muted-foreground font-normal"> — {product.subtitle}</span>
+          )}
+        </h4>
+        <p className="text-xs text-muted-foreground mt-0.5 italic">{product.designerName}</p>
+
+        {/* Description / Materials block */}
+        <div className="mt-3 space-y-1">
+          {product.materials && (
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              {product.materials.replace(/\n/g, ", ")}
+            </p>
+          )}
+          {product.category && (
+            <p className="text-[11px] text-muted-foreground">
+              {product.category}{product.subcategory ? ` / ${product.subcategory}` : ""}
+            </p>
+          )}
+        </div>
+
+        {/* Dimensions */}
+        {product.dimensions && (
+          <p className="text-[11px] text-foreground/70 mt-3">
+            {product.dimensions.replace(/\n/g, " · ")}
+          </p>
+        )}
+
+        {/* Edition */}
+        {product.edition && (
+          <p className="text-[11px] text-foreground/70 mt-1.5">
+            <span className="font-medium text-foreground">Edition:</span> {product.edition}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ─── Catalogue View ─── */
 function CatalogueView() {
   const navigate = useNavigate();
@@ -198,96 +258,73 @@ function CatalogueView() {
   }, [groups]);
 
   return (
-    <div className="min-h-screen bg-[#f5f0eb]">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#f5f0eb]/95 backdrop-blur-sm border-b border-border/30">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-[#faf7f4]">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-10 bg-[#faf7f4]/95 backdrop-blur-sm border-b border-[#e8e2db]">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            <ArrowLeft className="w-3.5 h-3.5" /> Back
           </button>
-          <div className="text-center">
-            <h1 className="text-lg font-serif tracking-wider uppercase">Product Catalogue</h1>
-            <p className="text-xs text-muted-foreground">{totalProducts} products across {groups.length} gallery rooms</p>
-          </div>
           <button
             onClick={handleDownload}
             disabled={generating}
-            className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-md text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 border border-foreground/20 text-foreground text-xs uppercase tracking-widest hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
           >
-            {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+            {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
             {generating ? "Generating…" : "Download PDF"}
           </button>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Cover / Title Section */}
+      <div className="max-w-5xl mx-auto px-6 py-16 md:py-24 text-center">
+        <h1 className="text-3xl md:text-4xl font-serif tracking-[0.15em] uppercase text-foreground">
+          Maison Affluency
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground italic mt-2">
+          Curated Collection Catalogue
+        </p>
+        <div className="w-12 h-px bg-[#c9bfb3] mx-auto mt-6" />
+        <p className="text-xs text-muted-foreground mt-4">
+          {totalProducts} pieces across {groups.length} gallery rooms
+        </p>
+      </div>
+
+      {/* Gallery Room Sections */}
+      <div className="max-w-5xl mx-auto px-6 pb-20">
         {groups.map((group, gi) => (
-          <div key={gi} className="mb-12">
-            <div className="mb-6 border-b border-border/40 pb-3">
-              <h2 className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{group.experience}</h2>
-              <h3 className="text-xl font-serif italic text-foreground">{group.room}</h3>
+          <section key={gi} className="mb-16">
+            {/* Section header */}
+            <div className="mb-2 pb-4 border-b border-[#d4ccc3]">
+              <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
+                {group.experience}
+              </p>
+              <h2 className="text-xl md:text-2xl font-serif italic text-foreground">
+                {group.room}
+              </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            {/* Product rows */}
+            <div>
               {group.products.map((product, pi) => (
-                <ProductCard key={pi} product={product} />
+                <ProductRow key={pi} product={product} />
               ))}
             </div>
-          </div>
+          </section>
         ))}
       </div>
-    </div>
-  );
-}
 
-function ProductCard({ product }: { product: CatalogueProduct }) {
-  return (
-    <div className="bg-background rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      {product.image ? (
-        <div className="aspect-square bg-[#f5f0eb] flex items-center justify-center p-4">
-          <img
-            src={product.image}
-            alt={product.title}
-            className="max-w-full max-h-full object-contain"
-            loading="lazy"
-          />
-        </div>
-      ) : (
-        <div className="aspect-square bg-[#f0ebe5] flex items-center justify-center">
-          <span className="text-xs text-muted-foreground">No image</span>
-        </div>
-      )}
-      <div className="p-4 space-y-1.5">
-        <h4 className="text-sm font-medium text-foreground leading-tight">
-          {product.title}
-          {product.subtitle ? <span className="text-muted-foreground"> — {product.subtitle}</span> : null}
-        </h4>
-        <p className="text-xs italic text-muted-foreground">{product.designerName}</p>
-        {product.category && (
-          <p className="text-xs text-muted-foreground">
-            {product.category}{product.subcategory ? ` / ${product.subcategory}` : ""}
-          </p>
-        )}
-        {product.materials && (
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
-            <span className="font-medium text-foreground">Materials:</span>{" "}
-            {product.materials.replace(/\n/g, ", ")}
-          </p>
-        )}
-        {product.dimensions && (
-          <p className="text-[11px] text-muted-foreground">
-            <span className="font-medium text-foreground">Dimensions:</span>{" "}
-            {product.dimensions.replace(/\n/g, " ")}
-          </p>
-        )}
-        {product.edition && (
-          <p className="text-[11px] text-muted-foreground">
-            <span className="font-medium text-foreground">Edition:</span> {product.edition}
-          </p>
-        )}
+      {/* Footer */}
+      <div className="border-t border-[#e8e2db] py-8 text-center">
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          Maison Affluency
+        </p>
+        <p className="text-[10px] text-muted-foreground mt-1">
+          www.maisonaffluency.com
+        </p>
       </div>
     </div>
   );
