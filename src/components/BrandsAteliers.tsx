@@ -139,6 +139,7 @@ const martaSalaMurena = cloudinaryUrl("Screen_Shot_2026-03-05_at_6.44.00_PM_xkgg
 // Ozone Light Curators' Picks image
 import ozoneClassiqueV from "@/assets/curators-picks/ozone-classique-v.jpg";
 import ozoneBrasiliaPl from "@/assets/curators-picks/ozone-brasilia-pl.jpg";
+import ozoneGeluleHover from "@/assets/curators-picks/ozone-gelule-hover.png";
 
 // Atelier-only Curators' Picks data (for brands not in FeaturedDesigners or Collectibles)
 export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: CuratorPick[] }> = {
@@ -304,6 +305,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772452356/Screen_Shot_2026-03-02_at_7.26.56_PM_iyecho.png",
+        hoverImage: ozoneGeluleHover,
         title: "GÉLULE",
         subtitle: "Joseph Dirand by Ozone",
         tags: ["Lighting", "Wall Lamp"],
@@ -2136,6 +2138,7 @@ const BrandsAteliers = () => {
   const [picksZoomed, setPicksZoomed] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [picksImageLoaded, setPicksImageLoaded] = useState(false);
+  const [picksHovered, setPicksHovered] = useState(false);
   const prewarmedPicksIndexRef = useRef<number | null>(null);
   const [picksTouchStart, setPicksTouchStart] = useState<number | null>(null);
   const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
@@ -2148,6 +2151,7 @@ const BrandsAteliers = () => {
     setPicksIndex(0);
     setPicksZoomed(false);
     setPicksImageLoaded(false);
+    setPicksHovered(false);
     // Clear curators hash so hashchange listener doesn't reopen the dialog
     if (window.location.hash.startsWith('#curators/')) {
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -2775,7 +2779,10 @@ const BrandsAteliers = () => {
                           </div>
                         ) : null;
                       })()}
-                      <div className="relative inline-block">
+                      <div className="relative inline-block"
+                        onMouseEnter={() => { if (picksDesigner.curatorPicks[picksIndex]?.hoverImage) setPicksHovered(true); }}
+                        onMouseLeave={() => setPicksHovered(false)}
+                      >
                         {picksDesigner.curatorPicks[picksIndex]?.image ? (
                           <>
                             {!picksImageLoaded && (
@@ -2799,18 +2806,28 @@ const BrandsAteliers = () => {
                                 style={{ userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'pan-y' }}
                               />
                             ) : (
-                              <PinchZoomImage
-                                key={picksIndex}
-                                src={picksDesigner.curatorPicks[picksIndex]?.image}
-                                alt={picksDesigner.curatorPicks[picksIndex]?.title}
-                                className={`object-contain select-none transition-all duration-300 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-[70vw] max-h-[60vh]'}`}
-                                draggable={false}
-                                decoding="sync"
-                                loading="eager"
-                                fetchPriority="high"
-                                onLoad={() => setPicksImageLoaded(true)}
-                                onZoomChange={(z) => { imageZoomedRef.current = z; }}
-                              />
+                              <>
+                                <PinchZoomImage
+                                  key={picksIndex}
+                                  src={picksDesigner.curatorPicks[picksIndex]?.image}
+                                  alt={picksDesigner.curatorPicks[picksIndex]?.title}
+                                  className={`object-contain select-none transition-opacity duration-500 ${picksImageLoaded ? '' : 'absolute opacity-0 pointer-events-none'} ${picksHovered && picksDesigner.curatorPicks[picksIndex]?.hoverImage ? 'opacity-0' : 'opacity-100'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-[70vw] max-h-[60vh]'}`}
+                                  draggable={false}
+                                  decoding="sync"
+                                  loading="eager"
+                                  fetchPriority="high"
+                                  onLoad={() => setPicksImageLoaded(true)}
+                                  onZoomChange={(z) => { imageZoomedRef.current = z; }}
+                                />
+                                {picksDesigner.curatorPicks[picksIndex]?.hoverImage && (
+                                  <img
+                                    src={picksDesigner.curatorPicks[picksIndex].hoverImage}
+                                    alt={`${picksDesigner.curatorPicks[picksIndex]?.title} - alternate view`}
+                                    className={`absolute inset-0 w-full h-full object-contain select-none transition-opacity duration-500 pointer-events-none ${picksHovered ? 'opacity-100' : 'opacity-0'} ${picksZoomed ? 'max-h-[88vh] max-w-[90vw]' : 'max-w-[70vw] max-h-[60vh]'}`}
+                                    draggable={false}
+                                  />
+                                )}
+                              </>
                             )}
                             <div
                               className={`hidden md:flex absolute inset-0 items-center justify-center transition-all duration-500 ease-out z-[5] group ${picksZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}
