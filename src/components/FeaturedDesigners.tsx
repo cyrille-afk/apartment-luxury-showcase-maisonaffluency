@@ -2817,7 +2817,7 @@ const FeaturedDesigners = () => {
                                       )}
                                     </button>
                                     <span
-                                      className={`absolute ${designer.notableWorksLinks && designer.notableWorksLinks.length <= 2 ? 'left-0' : 'right-0'} md:right-auto md:left-0 top-full mt-1 flex items-center gap-0.5 text-[9px] md:text-xs font-body text-foreground md:text-muted-foreground whitespace-nowrap opacity-100 md:opacity-0 md:group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50 translate-y-[var(--tooltip-mobile-offset)] md:translate-y-0`}
+                                      className={`absolute ${designer.notableWorksLinks && designer.notableWorksLinks.length >= 3 && linkIdx === designer.notableWorksLinks.length - 1 ? 'right-0' : 'left-0'} md:right-auto md:left-0 top-full mt-1 flex items-center gap-0.5 text-[9px] md:text-xs font-body text-foreground md:text-muted-foreground whitespace-nowrap opacity-100 md:opacity-0 md:group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50 translate-y-[var(--tooltip-mobile-offset)] md:translate-y-0`}
                                       style={{ "--tooltip-mobile-offset": mobileTooltipOffset } as React.CSSProperties}
                                     >
                                       <CornerDownRight className="w-3 h-3" /> {link.text}
