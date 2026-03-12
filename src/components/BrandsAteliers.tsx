@@ -78,7 +78,7 @@ const biekeCasteleynBg = cloudinaryUrl("bieke-casteleyn-bg_wuhwso", { width: 120
 const galerieMcdeBg = cloudinaryUrl("galerie-mcde-bg_fxxdp6", { width: 1200, quality: "auto:good", crop: "fill" });
 const gillesBoissierBg = cloudinaryUrl("gilles-boissier-bg", { width: 1200, quality: "auto:good", crop: "fill" });
 const jacobHashimotoBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_9.21.31_AM_ifnvmk", { width: 1200, quality: "auto:good", crop: "fill" });
-const paulCocksedgeBg = cloudinaryUrl("paul-cocksedge-bg_bfw68x", { width: 1200, quality: "auto:good", crop: "fill" });
+const paulCocksedgeBg = cloudinaryUrl("4f1411eb0731397ecc000e70_kskbly", { width: 1200, quality: "auto:good", crop: "fill" });
 const leBerreVevaudBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_9.40.24_AM_nfyg7z", { width: 1200, quality: "auto:good", crop: "fill" });
 const binaBaitelBg = cloudinaryUrl("bina-baitel-bg_u0rbnn", { width: 1200, quality: "auto:good", crop: "fill" });
 const charlesParisBg = cloudinaryUrl("Screen_Shot_2026-02-23_at_10.02.17_AM_tnml24", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -1681,7 +1681,7 @@ const brandBgMap: Record<string, string> = {
   "Galerie MCDE": galerieMcdeBg,
   "Gilles & Boissier": gillesBoissierBg,
   "Jacob Hashimoto Studio": jacobHashimotoBg,
-  
+  "Paul Cocksedge Studio": paulCocksedgeBg,
   "Le Berre Vevaud": leBerreVevaudBg,
   "Charles Paris": charlesParisBg,
   "Victoria Magniant": victoriaMagniantBg,
