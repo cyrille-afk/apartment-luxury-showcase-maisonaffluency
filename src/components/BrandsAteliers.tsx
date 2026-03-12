@@ -318,7 +318,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         tags: ["Lighting", "Table Lamp"],
         materials: "Brass, aluminium and steel structure · Gloss black or polished stainless steel base\nWhite lacquered shade and white paper diffuser",
         dimensions: "280 × 280 × H 710 mm",
-        description: "Warm white 2200K or 2700K LED · Optional Dim to Warm (1900K–2500K)\nIntegrated 24V converters & drivers, CE Class I",
+        description: "Warm white 2200K or 2700K LED · Optional Dim to Warm (1900K–2500K) · Integrated 24V converters & drivers, CE Class I",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Brasilia-LP.pdf",
         pdfFilename: "Maison_Affluency-Brasilia-LP.pdf",
       },
@@ -2856,7 +2856,7 @@ const BrandsAteliers = () => {
                           </p>
                         )}
                         {(picksDesigner.curatorPicks[picksIndex] as any)?.description && (
-                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed text-justify md:text-center whitespace-pre-line">
+                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed text-justify md:text-center whitespace-normal md:whitespace-pre-line">
                             {(picksDesigner.curatorPicks[picksIndex] as any).description}
                           </p>
                         )}
