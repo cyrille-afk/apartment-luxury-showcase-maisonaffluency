@@ -337,7 +337,7 @@ function singularizeSub(s: string): string {
 
   if (!isActive) return null;
 
-  const filterLabel = subcategory || category || "";
+  const filterLabel = subcategory || category || (textQuery ? `Search: “${textQuery}”` : "");
 
   return (
     <>
