@@ -2792,7 +2792,7 @@ const FeaturedDesigners = () => {
                       <>
                       <div className="w-10 h-px bg-[hsl(var(--gold)/0.4)] md:ml-[25%] mt-1" />
                       <div className="flex items-center gap-2 w-full md:pl-[25%] -mt-1">
-                        <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
+                        <span className="text-[10px] md:text-xs text-foreground uppercase tracking-wider mr-2"><em>On View</em></span>
                           <div className="flex gap-4">
                             {designer.notableWorksLinks ? (
                               designer.notableWorksLinks.map((link, linkIdx) => {
