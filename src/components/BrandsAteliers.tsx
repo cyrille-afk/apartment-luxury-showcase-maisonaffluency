@@ -2138,6 +2138,7 @@ const BrandsAteliers = () => {
   const [picksZoomed, setPicksZoomed] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [picksImageLoaded, setPicksImageLoaded] = useState(false);
+  const [picksHovered, setPicksHovered] = useState(false);
   const prewarmedPicksIndexRef = useRef<number | null>(null);
   const [picksTouchStart, setPicksTouchStart] = useState<number | null>(null);
   const [picksTouchEnd, setPicksTouchEnd] = useState<number | null>(null);
