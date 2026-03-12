@@ -676,7 +676,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       { 
         image: apparatusPick4, 
-        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773317289/tassel-57_ce6vl7.jpg",
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773317300/est-living-criteria-apparatus-tassel-57-pendant-02-750x540_ihet1v.jpg",
         title: "Tassel 57",
         subtitle: "Pendant",
         category: "Lighting",
