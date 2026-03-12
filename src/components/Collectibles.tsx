@@ -1287,7 +1287,7 @@ const Collectibles = () => {
                     {!isZoomed && (selectedCategory || selectedSubcategory) && (
                       <button
                         onClick={() => { setSelectedCategory(null); setSelectedSubcategoryRaw(null); broadcastFilter(null, null); }}
-                        className="absolute top-2 left-2 md:top-auto md:bottom-2 z-20 flex items-center gap-1.5 px-2.5 py-1 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-white/20 backdrop-blur-sm hover:bg-black/70 transition-all duration-200 cursor-pointer"
+                        className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2.5 py-1 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-white/20 backdrop-blur-sm hover:bg-black/70 transition-all duration-200 cursor-pointer"
                         aria-label="Clear filter"
                       >
                         <SlidersHorizontal className="w-3 h-3" />
