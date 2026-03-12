@@ -2909,7 +2909,7 @@ const FeaturedDesigners = () => {
                                         )}
                                       </button>
                                     </TooltipTrigger>
-                                    <TooltipContent side="bottom" className="text-xs font-body">
+                                    <TooltipContent side="bottom" sideOffset={4} align="center" avoidCollisions={false} className="text-xs font-body">
                                       {link.text}
                                     </TooltipContent>
                                   </Tooltip>
