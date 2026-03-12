@@ -436,6 +436,23 @@ function CatalogueView() {
     }
   }, [groups]);
 
+  const handleSync = useCallback(async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const result = await syncHotspotMaterials();
+      setSyncResult(`Updated ${result.updated} products. Skipped ${result.skipped}. ${result.noMatch.length} unmatched.`);
+      // Refresh data
+      const data = await fetchCatalogueData();
+      setGroups(data);
+    } catch (err) {
+      console.error("Sync failed:", err);
+      setSyncResult("Sync failed — check console.");
+    } finally {
+      setSyncing(false);
+    }
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#faf7f4] flex items-center justify-center">
@@ -455,15 +472,30 @@ function CatalogueView() {
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back
           </button>
-          <button
-            onClick={handleDownload}
-            disabled={generating || groups.length === 0}
-            className="flex items-center gap-2 px-4 py-2 border border-foreground/20 text-foreground text-xs uppercase tracking-widest hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
-          >
-            {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
-            {generating ? "Generating…" : "Download PDF"}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSync}
+              disabled={syncing}
+              className="flex items-center gap-2 px-3 py-2 border border-foreground/10 text-muted-foreground text-xs uppercase tracking-widest hover:text-foreground hover:border-foreground/20 transition-all disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
+              {syncing ? "Syncing…" : "Sync Data"}
+            </button>
+            <button
+              onClick={handleDownload}
+              disabled={generating || groups.length === 0}
+              className="flex items-center gap-2 px-4 py-2 border border-foreground/20 text-foreground text-xs uppercase tracking-widest hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
+            >
+              {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
+              {generating ? "Generating…" : "Download PDF"}
+            </button>
+          </div>
         </div>
+        {syncResult && (
+          <div className="max-w-5xl mx-auto px-6 pb-3">
+            <p className="text-xs text-muted-foreground">{syncResult}</p>
+          </div>
+        )}
       </div>
 
       {/* Cover / Title Section */}
