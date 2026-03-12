@@ -2151,6 +2151,7 @@ const BrandsAteliers = () => {
     setPicksIndex(0);
     setPicksZoomed(false);
     setPicksImageLoaded(false);
+    setPicksHovered(false);
     // Clear curators hash so hashchange listener doesn't reopen the dialog
     if (window.location.hash.startsWith('#curators/')) {
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
