@@ -1127,8 +1127,8 @@ const Collectibles = () => {
                     </div>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="pt-2 pb-6">
-                    <div className="space-y-4 text-muted-foreground font-body">
+                  <AccordionContent className="pt-1 pb-3">
+                    <div className="space-y-2 text-muted-foreground font-body">
                       <p className="text-sm md:text-base leading-relaxed text-justify">
                         {designer.biography}
                       </p>
