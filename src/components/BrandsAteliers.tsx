@@ -330,6 +330,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772452984/Screen_Shot_2026-03-02_at_8.01.21_PM_m95xmw.png",
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773308828/Screen_Shot_2026-03-12_at_5.46.52_PM_dizgxb.png",
         title: "BRASILIA LP",
         subtitle: "Michel Boyer",
         tags: ["Lighting", "Table Lamp"],
