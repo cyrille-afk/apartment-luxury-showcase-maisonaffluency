@@ -2819,7 +2819,7 @@ const FeaturedDesigners = () => {
                                       )}
                                     </button>
                                     <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 flex items-center gap-1 text-[10px] md:text-xs font-body text-muted-foreground whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
-                                      <ExternalLink className="w-2.5 h-2.5" /> {link.text}
+                                      <CornerDownRight className="w-3 h-3 -scale-x-100" /> {link.text}
                                     </span>
                                   </div>
                                 );
