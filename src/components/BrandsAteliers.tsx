@@ -320,6 +320,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772452374/Screen_Shot_2026-03-02_at_7.52.16_PM_ljyj4g.png",
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773310725/Screen_Shot_2026-03-12_at_6.18.11_PM_lbu0ou.png",
         title: "TENNESSEE S4",
         subtitle: "Glenn Sestig",
         tags: ["Lighting", "Suspension"],
