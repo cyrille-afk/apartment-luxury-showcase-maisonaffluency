@@ -349,6 +349,7 @@ const Collectibles = () => {
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof collectibleDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
+  const [picksHovered, setPicksHovered] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
