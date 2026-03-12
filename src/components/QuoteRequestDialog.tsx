@@ -157,7 +157,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
           </p>
 
           {/* Row 1: Email, First Name, Last Name, Phone */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
             <div>
               <label className="font-body text-sm text-foreground">
                 Email address<span className="text-destructive">*</span>
