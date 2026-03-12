@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback } from "react";
-import { getCatalogueData, type GalleryRoomGroup, type CatalogueProduct } from "@/lib/catalogueData";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { fetchCatalogueData, type GalleryRoomGroup, type CatalogueProduct } from "@/lib/catalogueData";
 import { Lock, FileDown, Loader2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -28,14 +28,13 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
     experience: { fontSize: 16, fontWeight: 500, color: "#1a1a1a", marginBottom: 2, textTransform: "uppercase" as const, letterSpacing: 2 },
     room: { fontSize: 11, color: "#8a7e72", fontStyle: "italic" },
     productRow: { flexDirection: "row" as const, marginBottom: 14, borderBottomWidth: 0.5, borderBottomColor: "#eee", paddingBottom: 10 },
-    productImage: { width: 120, height: 120, objectFit: "contain" as const, marginRight: 16, backgroundColor: "#f5f0eb" },
+    productImage: { width: 100, height: 100, objectFit: "contain" as const, marginRight: 16, backgroundColor: "#f5f0eb" },
     productInfo: { flex: 1, justifyContent: "flex-start" as const },
     productTitle: { fontSize: 11, fontWeight: 500, marginBottom: 2, color: "#1a1a1a" },
     productDesigner: { fontSize: 9, color: "#8a7e72", marginBottom: 4, fontStyle: "italic" },
     productDetail: { fontSize: 8, color: "#555", marginBottom: 1.5 },
-    label: { fontWeight: 500, color: "#1a1a1a" },
     footer: { position: "absolute" as const, bottom: 20, left: 40, right: 40, flexDirection: "row" as const, justifyContent: "space-between" as const, fontSize: 7, color: "#bbb" },
-    noImage: { width: 120, height: 120, backgroundColor: "#f0ebe5", justifyContent: "center" as const, alignItems: "center" as const, marginRight: 16 },
+    noImage: { width: 100, height: 100, backgroundColor: "#f0ebe5", justifyContent: "center" as const, alignItems: "center" as const, marginRight: 16 },
     noImageText: { fontSize: 8, color: "#ccc" },
   });
 
@@ -46,7 +45,7 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
     <Document>
       <Page size="A4" style={s.coverPage}>
         <Text style={s.coverTitle}>Maison Affluency</Text>
-        <Text style={s.coverSubtitle}>Curated Collection Catalogue</Text>
+        <Text style={s.coverSubtitle}>Gallery Collection Catalogue</Text>
         <Text style={s.coverDate}>{dateStr}</Text>
       </Page>
 
@@ -57,57 +56,26 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
             <Text style={s.room}>{group.room}</Text>
           </View>
 
-          {group.products.map((product, pi) => (
-            <View key={pi} style={s.productRow} wrap={false}>
-              {product.image ? (
-                <Image style={s.productImage} src={product.image} />
+          {group.products.map((product) => (
+            <View key={product.id} style={s.productRow} wrap={false}>
+              {product.product_image_url ? (
+                <Image style={s.productImage} src={product.product_image_url} />
               ) : (
                 <View style={s.noImage}>
                   <Text style={s.noImageText}>No image</Text>
                 </View>
               )}
               <View style={s.productInfo}>
-                <Text style={s.productTitle}>
-                  {product.title}
-                  {product.subtitle ? ` — ${product.subtitle}` : ""}
-                </Text>
-                <Text style={s.productDesigner}>{product.designerName}</Text>
-                {product.category && (
-                  <Text style={s.productDetail}>
-                    <Text style={s.label}>Category: </Text>
-                    {product.category}
-                    {product.subcategory ? ` / ${product.subcategory}` : ""}
-                  </Text>
-                )}
-                {product.materials && (
-                  <Text style={s.productDetail}>
-                    <Text style={s.label}>Materials: </Text>
-                    {product.materials.replace(/\n/g, " ")}
-                  </Text>
-                )}
-                {product.dimensions && (
-                  <Text style={s.productDetail}>
-                    <Text style={s.label}>Dimensions: </Text>
-                    {product.dimensions.replace(/\n/g, " ")}
-                  </Text>
-                )}
-                {product.edition && (
-                  <Text style={s.productDetail}>
-                    <Text style={s.label}>Edition: </Text>
-                    {product.edition}
-                  </Text>
-                )}
-                {product.description && (
-                  <Text style={s.productDetail}>
-                    {product.description.replace(/\n/g, " ").substring(0, 200)}
-                  </Text>
+                <Text style={s.productTitle}>{product.product_name}</Text>
+                {product.designer_name && (
+                  <Text style={s.productDesigner}>{product.designer_name}</Text>
                 )}
               </View>
             </View>
           ))}
 
           <View style={s.footer} fixed>
-            <Text>Maison Affluency — Curated Collection</Text>
+            <Text>Maison Affluency — Gallery Collection</Text>
             <Text render={({ pageNumber }) => `${pageNumber}`} />
           </View>
         </Page>
@@ -119,7 +87,7 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `Maison_Affluency_Catalogue_${now.toISOString().slice(0, 10)}.pdf`;
+  a.download = `Maison_Affluency_Gallery_Catalogue_${now.toISOString().slice(0, 10)}.pdf`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -151,8 +119,8 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Lock className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
-          <h1 className="text-2xl font-serif tracking-wider uppercase text-foreground">Catalogue Access</h1>
-          <p className="text-sm text-muted-foreground mt-2">Enter the password to access the product catalogue</p>
+          <h1 className="text-2xl font-serif tracking-wider uppercase text-foreground">Gallery Catalogue</h1>
+          <p className="text-sm text-muted-foreground mt-2">Enter the password to access the gallery catalogue</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -179,58 +147,31 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
 /* ─── Product Row (editorial layout) ─── */
 function ProductRow({ product }: { product: CatalogueProduct }) {
   return (
-    <div className="flex gap-6 py-6 border-b border-[#e8e2db]">
+    <div className="flex gap-5 py-5 border-b border-[#e8e2db] last:border-b-0">
       {/* Thumbnail */}
-      {product.image ? (
-        <div className="w-36 h-36 md:w-44 md:h-44 flex-shrink-0 bg-[#f5f0eb] flex items-center justify-center">
+      {product.product_image_url ? (
+        <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 bg-[#f5f0eb] flex items-center justify-center overflow-hidden">
           <img
-            src={product.image}
-            alt={product.title}
+            src={product.product_image_url}
+            alt={product.product_name}
             className="max-w-full max-h-full object-contain"
             loading="lazy"
           />
         </div>
       ) : (
-        <div className="w-36 h-36 md:w-44 md:h-44 flex-shrink-0 bg-[#f0ebe5] flex items-center justify-center">
-          <span className="text-xs text-muted-foreground">No image</span>
+        <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 bg-[#f0ebe5] flex items-center justify-center">
+          <span className="text-[10px] text-muted-foreground">No image</span>
         </div>
       )}
 
       {/* Details */}
-      <div className="flex flex-col justify-start min-w-0 pt-1">
-        <h4 className="text-[15px] md:text-base font-medium text-foreground leading-snug">
-          {product.title}
-          {product.subtitle && (
-            <span className="text-muted-foreground font-normal"> — {product.subtitle}</span>
-          )}
+      <div className="flex flex-col justify-center min-w-0">
+        <h4 className="text-sm md:text-[15px] font-medium text-foreground leading-snug">
+          {product.product_name}
         </h4>
-        <p className="text-xs text-muted-foreground mt-0.5 italic">{product.designerName}</p>
-
-        {/* Description / Materials block */}
-        <div className="mt-3 space-y-1">
-          {product.materials && (
-            <p className="text-[11px] leading-relaxed text-muted-foreground">
-              {product.materials.replace(/\n/g, ", ")}
-            </p>
-          )}
-          {product.category && (
-            <p className="text-[11px] text-muted-foreground">
-              {product.category}{product.subcategory ? ` / ${product.subcategory}` : ""}
-            </p>
-          )}
-        </div>
-
-        {/* Dimensions */}
-        {product.dimensions && (
-          <p className="text-[11px] text-foreground/70 mt-3">
-            {product.dimensions.replace(/\n/g, " · ")}
-          </p>
-        )}
-
-        {/* Edition */}
-        {product.edition && (
-          <p className="text-[11px] text-foreground/70 mt-1.5">
-            <span className="font-medium text-foreground">Edition:</span> {product.edition}
+        {product.designer_name && (
+          <p className="text-xs text-muted-foreground mt-0.5 italic">
+            {product.designer_name}
           </p>
         )}
       </div>
@@ -241,8 +182,16 @@ function ProductRow({ product }: { product: CatalogueProduct }) {
 /* ─── Catalogue View ─── */
 function CatalogueView() {
   const navigate = useNavigate();
-  const groups = useMemo(() => getCatalogueData(), []);
+  const [groups, setGroups] = useState<GalleryRoomGroup[]>([]);
+  const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    fetchCatalogueData().then((data) => {
+      setGroups(data);
+      setLoading(false);
+    });
+  }, []);
 
   const totalProducts = useMemo(() => groups.reduce((sum, g) => sum + g.products.length, 0), [groups]);
 
@@ -257,6 +206,14 @@ function CatalogueView() {
     }
   }, [groups]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#faf7f4] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#faf7f4]">
       {/* Sticky header */}
@@ -270,7 +227,7 @@ function CatalogueView() {
           </button>
           <button
             onClick={handleDownload}
-            disabled={generating}
+            disabled={generating || groups.length === 0}
             className="flex items-center gap-2 px-4 py-2 border border-foreground/20 text-foreground text-xs uppercase tracking-widest hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
           >
             {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
@@ -285,7 +242,7 @@ function CatalogueView() {
           Maison Affluency
         </h1>
         <p className="text-sm md:text-base text-muted-foreground italic mt-2">
-          Curated Collection Catalogue
+          Gallery Collection Catalogue
         </p>
         <div className="w-12 h-px bg-[#c9bfb3] mx-auto mt-6" />
         <p className="text-xs text-muted-foreground mt-4">
@@ -309,8 +266,8 @@ function CatalogueView() {
 
             {/* Product rows */}
             <div>
-              {group.products.map((product, pi) => (
-                <ProductRow key={pi} product={product} />
+              {group.products.map((product) => (
+                <ProductRow key={product.id} product={product} />
               ))}
             </div>
           </section>
