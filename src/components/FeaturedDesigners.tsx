@@ -2989,8 +2989,10 @@ const FeaturedDesigners = () => {
                       const distance = touchStart - touchEnd;
                       if (distance > minSwipeDistance) {
                         setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+                        setPicksHovered(false);
                       } else if (distance < -minSwipeDistance) {
                         setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
+                        setPicksHovered(false);
                       }
                     }
                     setTouchStart(null);
