@@ -2798,7 +2798,7 @@ const FeaturedDesigners = () => {
                               designer.notableWorksLinks.map((link, linkIdx) => {
                                 const thumb = GALLERY_THUMBNAILS[link.galleryIndex];
                                 return (
-                                  <div key={linkIdx} className="relative group/avatar">
+                                  <div key={linkIdx} className="relative group/avatar pb-4 md:pb-0">
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
