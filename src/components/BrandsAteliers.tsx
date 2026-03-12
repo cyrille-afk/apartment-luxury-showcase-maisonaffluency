@@ -1973,7 +1973,7 @@ function AlphaStrip({
 
                 {expandedCard === brand.name && brand.featuredItems.some(item => item.featured) && (
                 <div className="space-y-1 mb-3 pl-8 md:pl-0">
-                  <span className={`text-[10px] md:text-xs uppercase tracking-wider block transition-colors duration-300 ${hasBg ? "text-white/70" : "text-[hsl(var(--gold))]"}`}><em>On View</em></span>
+                  <span className="text-[10px] md:text-xs uppercase tracking-wider block transition-colors duration-300 text-[hsl(var(--gold))]"><em>On View</em></span>
                   <ul className="space-y-0.5">
                     {brand.featuredItems.map((item, itemIndex) => (
                       <li key={itemIndex}>
