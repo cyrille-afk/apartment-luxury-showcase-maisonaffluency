@@ -2815,7 +2815,7 @@ const BrandsAteliers = () => {
                           if (ledIdx === -1) {
                             // No LED section — join all lines with · for a flowing sentence
                             return (
-                              <p className="text-[10px] md:text-xs font-body mt-1 text-center text-white/50 whitespace-pre-line">
+                              <p className="text-[10px] md:text-xs font-body mt-1 text-justify md:text-center text-white/50 whitespace-normal md:whitespace-pre-line">
                                 {mat}
                               </p>
                             );
