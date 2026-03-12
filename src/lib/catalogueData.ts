@@ -76,6 +76,8 @@ export interface CatalogueProduct {
   designer_name: string | null;
   product_image_url: string | null;
   link_url: string | null;
+  materials: string | null;
+  dimensions: string | null;
   room: string;
 }
 
@@ -88,7 +90,7 @@ export interface GalleryRoomGroup {
 export async function fetchCatalogueData(): Promise<GalleryRoomGroup[]> {
   const { data, error } = await supabase
     .from("gallery_hotspots")
-    .select("id, image_identifier, product_name, designer_name, product_image_url, link_url")
+    .select("id, image_identifier, product_name, designer_name, product_image_url, link_url, materials, dimensions")
     .order("product_name");
 
   if (error || !data) {
@@ -107,6 +109,8 @@ export async function fetchCatalogueData(): Promise<GalleryRoomGroup[]> {
       designer_name: row.designer_name,
       product_image_url: row.product_image_url,
       link_url: row.link_url,
+      materials: row.materials,
+      dimensions: row.dimensions,
       room,
     });
   }
