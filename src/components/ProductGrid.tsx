@@ -158,10 +158,18 @@ const SOURCE_TO_SCOPE: Record<string, string> = {
   brands: "ateliers",
 };
 
+const normalizeSearchText = (value?: string) =>
+  (value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
 const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
+  const [textQuery, setTextQuery] = useState<string | null>(null);
   const allProducts = useMemo(() => buildProductList(atelierOnlyPicks), []);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -193,30 +201,70 @@ function singularizeSub(s: string): string {
       setCategory(cat || null);
       setSubcategory(sub || null);
       setFilterSource('designers');
+      setTextQuery(null);
     };
     window.addEventListener('setDesignerCategory', handleSetCategory as EventListener);
+
     // Listen for sync events from all sources
     const handleSync = (e: CustomEvent) => {
       const { category: cat, subcategory: sub, source } = e.detail || {};
       setCategory(cat || null);
       setSubcategory(sub || null);
       setFilterSource(source || 'designers');
+      setTextQuery(null);
     };
     window.addEventListener('syncCategoryFilter', handleSync as EventListener);
+
+    const handleSearchSync = (e: CustomEvent) => {
+      const { query, source } = e.detail || {};
+      const normalizedQuery = typeof query === 'string' ? query.trim() : '';
+
+      if (normalizedQuery) {
+        setCategory(null);
+        setSubcategory(null);
+        if (source) setFilterSource(source);
+        setTextQuery(normalizedQuery);
+        return;
+      }
+
+      setTextQuery(null);
+    };
+    window.addEventListener('syncProductSearch', handleSearchSync as EventListener);
+
     return () => {
       window.removeEventListener('setDesignerCategory', handleSetCategory as EventListener);
       window.removeEventListener('syncCategoryFilter', handleSync as EventListener);
+      window.removeEventListener('syncProductSearch', handleSearchSync as EventListener);
     };
   }, []);
 
   const filtered = useMemo(() => {
-    if (!category && !subcategory) return [];
+    if (!category && !subcategory && !textQuery) return [];
+
     // Scope results based on which section triggered the filter
     const sectionFilter = filterSource === 'collectibles' ? 'collectibles'
       : filterSource === 'brands' ? 'ateliers'
       : null; // 'designers' or mega-menu → show all
-    let pool = sectionFilter ? allProducts.filter(item => item.section === sectionFilter) : allProducts;
-    const matched = pool.filter(item => pickMatchesFilter(item.pick, category, subcategory));
+
+    const pool = sectionFilter ? allProducts.filter(item => item.section === sectionFilter) : allProducts;
+    const normalizedQuery = normalizeSearchText(textQuery || undefined);
+
+    const matched = pool.filter(item => {
+      if (!pickMatchesFilter(item.pick, category, subcategory)) return false;
+      if (!normalizedQuery) return true;
+
+      const haystack = [
+        item.designerName,
+        item.pick.title,
+        item.pick.subtitle,
+        item.pick.category,
+        item.pick.subcategory,
+        ...(item.pick.tags || []),
+      ].map(value => normalizeSearchText(String(value || "")));
+
+      return haystack.some(value => value.includes(normalizedQuery));
+    });
+
     // Deduplicate: keep only the first image per product title per designer
     const seen = new Set<string>();
     return matched.filter(item => {
@@ -225,9 +273,9 @@ function singularizeSub(s: string): string {
       seen.add(key);
       return true;
     });
-  }, [allProducts, category, subcategory, filterSource]);
+  }, [allProducts, category, subcategory, filterSource, textQuery]);
 
-  const isActive = (category || subcategory) && filtered.length > 0;
+  const isActive = (category || subcategory || textQuery) && filtered.length > 0;
 
   // Reset image-loaded state on lightbox slide changes
   useEffect(() => {
@@ -278,8 +326,10 @@ function singularizeSub(s: string): string {
   const handleClearFilter = useCallback(() => {
     setCategory(null);
     setSubcategory(null);
+    setTextQuery(null);
     window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
-  }, []);
+    window.dispatchEvent(new CustomEvent('syncProductSearch', { detail: { query: null, source: filterSource } }));
+  }, [filterSource]);
 
   const navigateLightbox = useCallback((dir: 1 | -1) => {
     const newIdx = lightboxIndex + dir;
@@ -296,7 +346,7 @@ function singularizeSub(s: string): string {
 
   if (!isActive) return null;
 
-  const filterLabel = subcategory || category || "";
+  const filterLabel = subcategory || category || (textQuery ? `Search: “${textQuery}”` : "");
 
   return (
     <>
