@@ -274,7 +274,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         tags: ["Lighting", "Chandelier"],
         materials: "Aluminium and brass structure in medal bronze, mirror nickel or gun metal finish · White paper diffuser",
         dimensions: "1200 × 1200 × H 120 mm – 48 kg\nSilhouette: 1750 mm",
-        description: "Warm white 2700K LED, 230W, 11000 Lumens · Also available in 2200K or 2700K · Optional Dim to Warm (1900K–2500K) · Integrated 24V converters & drivers, CE Class I",
+        description: "Warm white 2700K LED, 230W, 11000 Lumens · Also available in 2200K or 2700K · Optional Dim to Warm (1900K–2500K)\nIntegrated 24V converters & drivers, CE Class I",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Classique_V.pdf",
         pdfFilename: "Maison_Affluency-Classique_V.pdf",
       },
