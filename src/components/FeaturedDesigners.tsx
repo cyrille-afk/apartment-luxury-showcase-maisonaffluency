@@ -1200,7 +1200,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   {
     id: "robicara",
     name: "Robicara - Francesco Caracciolo di Marano",
-    mobileNameLines: ["Robicara", "Francesco Caracciolo di Marano"],
+    mobileNameLines: ["Robicara", "F.C. di Marano"],
     specialty: "Italian-crafted Luxury Furniture",
     image: robicaraImg,
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/robicara_ehwubx.jpg",
