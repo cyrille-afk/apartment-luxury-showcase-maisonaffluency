@@ -3,7 +3,7 @@ import { GALLERY } from "@/constants/galleryIndex";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
-import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote, FileDown } from "lucide-react";
+import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote, FileDown, CornerDownRight } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
@@ -1114,7 +1114,7 @@ const Collectibles = () => {
                                 )}
                               </button>
                               <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 flex items-center gap-1 text-[10px] md:text-xs font-body text-muted-foreground whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
-                                <ExternalLink className="w-2.5 h-2.5" /> {designer.notableWorksLink!.text}
+                                <CornerDownRight className="w-3 h-3 -scale-x-100" /> {designer.notableWorksLink!.text}
                               </span>
                             </div>
                           </div>
