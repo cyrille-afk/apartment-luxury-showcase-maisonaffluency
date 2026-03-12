@@ -2793,11 +2793,11 @@ const FeaturedDesigners = () => {
                       <div className="w-16 md:w-24 h-px bg-[hsl(var(--gold)/0.4)] mt-0.5 ml-[7.5rem] md:ml-[11.5rem]" />
                       <div className="flex items-start md:items-center gap-2 w-full ml-[7.5rem] md:ml-0 md:justify-start md:pl-[25%] -mt-0.5 pr-4 md:pr-0">
                         <span className="text-[10px] md:text-xs text-foreground uppercase tracking-wider mr-2 mt-3.5 md:mt-0"><em>On View</em></span>
-                          <div className={`flex gap-5 md:gap-6 ${designer.notableWorksLinks && designer.notableWorksLinks.length > 1 ? 'pb-6 md:pb-0' : ''}`}>
+                          <div className={`flex gap-5 md:gap-6 ${designer.notableWorksLinks && designer.notableWorksLinks.length > 2 ? 'pb-10 md:pb-0' : designer.notableWorksLinks && designer.notableWorksLinks.length > 1 ? 'pb-7 md:pb-0' : ''}`}>
                             {designer.notableWorksLinks ? (
                               designer.notableWorksLinks.map((link, linkIdx) => {
                                 const thumb = GALLERY_THUMBNAILS[link.galleryIndex];
-                                const mobileTooltipOffset = `${linkIdx * 0.95}rem`;
+                                const mobileTooltipOffset = `${linkIdx * 0.85}rem`;
                                 return (
                                   <div key={linkIdx} className="relative group/avatar pb-8 md:pb-0">
                                     <button
