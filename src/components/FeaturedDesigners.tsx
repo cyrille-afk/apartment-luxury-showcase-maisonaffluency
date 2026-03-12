@@ -1046,6 +1046,15 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "Ø50 cm / Ø36 cm"
       },
       {
+        image: cloudinaryUrl("Screen_Shot_2026-03-12_at_8.41.37_PM_hcecor", { width: 1200, quality: "auto:good", crop: "fill" }),
+        title: "Full Moon Pendant",
+        subtitle: "",
+        category: "Lighting",
+        tags: ["Lighting", "Pendant"],
+        materials: "Alabaster and plaster",
+        dimensions: "Ø 50 cm / Ø 36 cm"
+      },
+      {
         image: emmanuelLevetStennePick6,
         hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772106192/Screen_Shot_2026-02-22_at_3.23.51_PM_gyeqne.png",
         title: "Night Cup",
