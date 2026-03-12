@@ -217,8 +217,17 @@ function singularizeSub(s: string): string {
 
     const handleSearchSync = (e: CustomEvent) => {
       const { query, source } = e.detail || {};
-      if (source) setFilterSource(source);
-      setTextQuery(typeof query === 'string' && query.trim() ? query.trim() : null);
+      const normalizedQuery = typeof query === 'string' ? query.trim() : '';
+
+      if (normalizedQuery) {
+        setCategory(null);
+        setSubcategory(null);
+        if (source) setFilterSource(source);
+        setTextQuery(normalizedQuery);
+        return;
+      }
+
+      setTextQuery(null);
     };
     window.addEventListener('syncProductSearch', handleSearchSync as EventListener);
 
