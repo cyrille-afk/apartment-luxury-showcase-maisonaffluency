@@ -3280,7 +3280,7 @@ const FeaturedDesigners = () => {
                   {curatorPicksDesigner.curatorPicks.length > 1 && !isZoomed && (
                     <>
                       <button
-                        onClick={() => setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1)}
+                        onClick={() => { setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1); setPicksHovered(false); }}
                         className="hidden md:flex absolute left-2 md:left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
                         aria-label="Previous"
                       >
