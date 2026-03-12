@@ -131,33 +131,33 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         hideClose
-        className="max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 border border-border bg-background"
+        className="max-w-3xl w-[95vw] max-h-[85vh] md:max-h-[90vh] overflow-y-auto p-0 border border-border bg-background rounded-xl"
         aria-describedby={undefined}
       >
         <VisuallyHidden><DialogTitle>Request a Quote</DialogTitle></VisuallyHidden>
 
         {/* Close button — sticky so it stays visible when scrolling */}
-        <div className="sticky top-0 z-20 flex justify-end pt-3 pr-3">
+        <div className="sticky top-0 z-20 flex justify-end pt-2 pr-2 md:pt-3 md:pr-3">
           <button
             onClick={() => onOpenChange(false)}
-            className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-background/80 backdrop-blur-sm rounded-full"
+            className="p-3 md:p-2 text-muted-foreground hover:text-foreground transition-colors bg-background/90 backdrop-blur-sm rounded-full shadow-sm border border-border/50"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-8 md:px-12 pb-10 md:pb-12 -mt-4">
+        <form onSubmit={handleSubmit} className="px-5 md:px-12 pb-8 md:pb-12 -mt-6 md:-mt-4">
           {/* Header */}
-          <h2 className="font-display text-2xl md:text-3xl text-foreground text-center">
+          <h2 className="font-display text-xl md:text-3xl text-foreground text-center">
             Request A Quote Or Customisation
           </h2>
-          <p className="font-body text-sm text-muted-foreground text-center mt-2 mb-10">
+          <p className="font-body text-xs md:text-sm text-muted-foreground text-center mt-1.5 md:mt-2 mb-6 md:mb-10">
             Our team will get back to you within a day
           </p>
 
           {/* Row 1: Email, First Name, Last Name, Phone */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
             <div>
               <label className="font-body text-sm text-foreground">
                 Email address<span className="text-destructive">*</span>
@@ -209,7 +209,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
           </div>
 
           {/* Row 2: Country, City */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
             <div>
               <label className="font-body text-sm text-foreground">Country</label>
               <select
@@ -234,7 +234,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
           </div>
 
           {/* Shipping */}
-          <div className="mb-8">
+          <div className="mb-6 md:mb-8">
             <p className="font-body text-sm text-foreground mb-3">
               Would you like a quote for shipping?
             </p>
@@ -265,7 +265,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
           </div>
 
           {/* Message */}
-          <div className="mb-8">
+          <div className="mb-6 md:mb-8">
             <p className="font-body text-sm text-foreground mb-1">
               Anything to add regarding your request?
             </p>
