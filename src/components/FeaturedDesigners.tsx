@@ -2791,8 +2791,8 @@ const FeaturedDesigners = () => {
                     {(designer.notableWorksLink || designer.notableWorksLinks) && (
                       <div className="flex items-center gap-2 w-full md:pl-[15%]">
                         <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
-                        <TooltipProvider delayDuration={200}>
-                          <div className="flex -space-x-2">
+                        <TooltipProvider delayDuration={0}>
+                          <div className="flex gap-1">
                             {designer.notableWorksLinks ? (
                               designer.notableWorksLinks.map((link, linkIdx) => {
                                 const thumb = GALLERY_THUMBNAILS[link.galleryIndex];

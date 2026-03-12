@@ -1089,7 +1089,7 @@ const Collectibles = () => {
                       return (
                         <div className="flex items-center justify-center gap-2 w-full">
                           <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
-                          <TooltipProvider delayDuration={200}>
+                          <TooltipProvider delayDuration={0}>
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <button
