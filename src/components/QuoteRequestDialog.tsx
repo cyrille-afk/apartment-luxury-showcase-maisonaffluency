@@ -265,7 +265,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
           </div>
 
           {/* Message */}
-          <div className="mb-8">
+          <div className="mb-6 md:mb-8">
             <p className="font-body text-sm text-foreground mb-1">
               Anything to add regarding your request?
             </p>
