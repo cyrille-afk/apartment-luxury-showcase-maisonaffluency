@@ -2958,9 +2958,11 @@ const FeaturedDesigners = () => {
               if (!curatorPicksDesigner?.curatorPicks?.length) return;
               if (e.key === "ArrowLeft") {
                 setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
+                setPicksHovered(false);
               }
               if (e.key === "ArrowRight") {
                 setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+                setPicksHovered(false);
               }
             }}
           >
