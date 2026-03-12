@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { fetchCatalogueData, type GalleryRoomGroup, type CatalogueProduct } from "@/lib/catalogueData";
-import { Lock, FileDown, Loader2, ArrowLeft } from "lucide-react";
+import { syncHotspotMaterials } from "@/lib/syncHotspotMaterials";
+import { Lock, FileDown, Loader2, ArrowLeft, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const CATALOGUE_PASSWORD = "maison-affluency";
