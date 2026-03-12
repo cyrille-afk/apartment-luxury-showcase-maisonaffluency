@@ -2790,7 +2790,7 @@ const FeaturedDesigners = () => {
                     </div>
                     {(designer.notableWorksLink || designer.notableWorksLinks) && (
                       <>
-                      <div className="w-16 md:w-24 h-px bg-[hsl(var(--gold)/0.4)] mt-0.5 ml-4 md:ml-[11.5rem]" />
+                      <div className="w-16 md:w-24 h-px bg-[hsl(var(--gold)/0.4)] mt-0.5 ml-[7.5rem] md:ml-[11.5rem]" />
                       <div className="flex items-center gap-2 w-full justify-end md:justify-start md:pl-[25%] -mt-0.5 pr-4 md:pr-0">
                         <span className="text-[10px] md:text-xs text-foreground uppercase tracking-wider mr-2"><em>On View</em></span>
                           <div className="flex gap-4">
