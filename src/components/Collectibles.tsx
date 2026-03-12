@@ -112,7 +112,7 @@ export const collectibleDesigners: Array<{
     notableWorksLink: { text: "Bud Table Lamp", galleryIndex: GALLERY.UNIQUE_BY_DESIGN_VIGNETTE },
     philosophy: "We create lighting that elevates everyday moments into experiences of beauty and contemplation.",
     curatorPicks: [
-      { image: demichelisPick1, title: "Babel Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze • Brass • Ash wood • White fabric shade", dimensions: "Ø45 × H60.9 cm", edition: "Numbered edition of 20" },
+      { image: demichelisPick1, hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773313356/IMG_2556_1_uuj7c3.jpg", title: "Babel Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze • Brass • Ash wood • White fabric shade", dimensions: "Ø45 × H60.9 cm", edition: "Numbered edition of 20" },
       { image: demichelisPick4, title: "Echo Floor Lamp", category: "Lighting", subcategory: "Floor Lamps", materials: "Patinated and varnished brass", dimensions: "Ø38 × H166 cm", edition: "Numbered edition of 20" },
       { image: demichelisPick2, hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772085686/bedroom-alt_yk0j0d.jpg", title: "Bud Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze • White oak • Hand-made fabric shade", dimensions: "Ø40 × H71 cm", edition: "Numbered edition of 20" },
       { image: demichelisPick3, title: "Table d'appoint RHINO", category: "Tables", subcategory: "Side Tables", materials: "Patinated bronze • Raw brass • Brown cowhide leather top", dimensions: "H43.5 × L35 cm", edition: "Numbered edition of 8 + 2 APs" },
