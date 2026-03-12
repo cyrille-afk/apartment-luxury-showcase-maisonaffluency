@@ -307,7 +307,7 @@ export const collectibleDesigners: Array<{
   },
   {
     id: "rowin-atelier",
-    name: "Rochette Frederic & Winkler Hervé - RoWin' Atelier",
+    name: "RoWin' Atelier — Rochette Frederic & Winkler Hervé",
     specialty: "Artisan Ceramics & Sculptural Objects",
     image: rowinAtelierImg,
     biography:
@@ -317,6 +317,7 @@ export const collectibleDesigners: Array<{
     philosophy: "Every piece of clay holds the potential for extraordinary beauty when shaped by skilled hands.",
     curatorPicks: [
       { image: rowinNoneIiLamp, title: "None II Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Cippolino Verde Marble, Silver-Plated brass", dimensions: "39 cm × 22.5 cm × H 58 cm", edition: "Unique Piece" },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773324219/Screen_Shot_2026-03-12_at_9.59.04_PM_jysfm3.png", title: "New Work", category: "Ceramics", materials: "", dimensions: "" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/rowin_atelier/" },
