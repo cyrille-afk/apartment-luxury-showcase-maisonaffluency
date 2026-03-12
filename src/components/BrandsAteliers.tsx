@@ -1792,12 +1792,12 @@ const brandDesignerNames: Record<string, string[]> = (() => {
     if (!designer?.curatorPicks?.length) return;
     const names = new Set<string>();
     designer.curatorPicks.forEach((pick: CuratorPick) => {
-      if (pick.subtitle) {
-        // Extract designer name: strip " by BrandName" suffix if present
-        const byIdx = pick.subtitle.toLowerCase().lastIndexOf(" by ");
-        const name = byIdx > 0 ? pick.subtitle.slice(0, byIdx) : pick.subtitle;
-        names.add(name);
-      }
+      if (!pick.subtitle) return;
+      // Only use explicit "Name by Brand" subtitles to avoid showing product legends.
+      const byIdx = pick.subtitle.toLowerCase().lastIndexOf(" by ");
+      if (byIdx <= 0) return;
+      const name = pick.subtitle.slice(0, byIdx).trim();
+      if (name) names.add(name);
     });
     if (names.size > 0) result[brandName] = Array.from(names);
   });
