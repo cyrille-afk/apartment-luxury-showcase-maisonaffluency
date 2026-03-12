@@ -514,6 +514,16 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         edition: "Edition of 12",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs%2Fpouenat-dolly-wall-light.pdf",
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773292460/Screen_Shot_2026-03-12_at_12.50.40_PM_bgpojp.png",
+        title: "Sensible Coffee Table",
+        subtitle: "Stéphane Parmentier by Pouenat",
+        category: "Tables",
+        tags: ["Tables", "Coffee Tables"],
+        materials: "Rubbed patinated brass + satin varnish · Top in grey tinted spruce + matt varnish | Mirror polished brass + shiny varnish · Top in grey tinted spruce + matt varnish | Lightly sanded brass + satin varnish · Top in grey tinted spruce + matt varnish",
+        dimensions: "W 158 × D 158 × H 37 cm — 130 kg",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs%2Fpouenat-sensible-coffee-table.pdf",
+      },
     ],
   },
 };
