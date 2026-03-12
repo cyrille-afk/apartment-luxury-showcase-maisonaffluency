@@ -90,7 +90,7 @@ export interface GalleryRoomGroup {
 export async function fetchCatalogueData(): Promise<GalleryRoomGroup[]> {
   const { data, error } = await supabase
     .from("gallery_hotspots")
-    .select("id, image_identifier, product_name, designer_name, product_image_url, link_url")
+    .select("id, image_identifier, product_name, designer_name, product_image_url, link_url, materials, dimensions")
     .order("product_name");
 
   if (error || !data) {
