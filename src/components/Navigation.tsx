@@ -231,7 +231,7 @@ const Navigation = () => {
                   <span className="h-px w-6 bg-foreground" />
                 </div>
               </div>
-              <div className="flex flex-col gap-0 pb-8">
+              <div className="flex flex-col gap-0 pb-40">
                 {leftNavItems.map((item, index) => (
                   <Fragment key={item.href}>
                     <button 
