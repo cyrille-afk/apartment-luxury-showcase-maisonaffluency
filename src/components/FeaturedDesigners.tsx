@@ -2173,6 +2173,7 @@ const FeaturedDesigners = () => {
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [picksHovered, setPicksHovered] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
