@@ -2699,7 +2699,7 @@ const FeaturedDesigners = () => {
                       </DialogContent>
                     </Dialog>
                     ) : (
-                    <div className="flex-shrink-0 w-24 h-24 md:w-32 md:h-32 rounded-full bg-muted ring-2 ring-border/40 flex items-center justify-center">
+                    <div className="flex-shrink-0 w-28 h-28 md:w-40 md:h-40 rounded-full bg-muted ring-2 ring-border/40 flex items-center justify-center">
                       <span className="text-2xl font-serif text-muted-foreground">{designer.name.charAt(0)}</span>
                     </div>
                     )}
