@@ -234,7 +234,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
           </div>
 
           {/* Shipping */}
-          <div className="mb-8">
+          <div className="mb-6 md:mb-8">
             <p className="font-body text-sm text-foreground mb-3">
               Would you like a quote for shipping?
             </p>
