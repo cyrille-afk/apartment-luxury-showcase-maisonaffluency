@@ -2767,73 +2767,37 @@ const FeaturedDesigners = () => {
                       </p>
                     </div>
                     {/* WhatsApp share + Logo */}
-                    <div className="hidden md:flex flex-col items-end gap-3 flex-shrink-0 mr-8">
-                      <div className="flex items-center gap-6">
-                        <WhatsAppShareButton
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
-                                trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
-                              }}
-                              label={`Share ${designer.name} on WhatsApp`}
-                            />
-                        {(designer as any).logoUrl && (
-                          <div className="flex items-center justify-center w-16 h-16">
-                            <img
-                              src={(designer as any).logoUrl}
-                              alt={`${(designer as any).displayName || designer.name} logo`}
-                              sizes="64px"
-                              className="max-w-full max-h-full object-contain opacity-60"
-                            />
-                          </div>
-                        )}
-                      </div>
-                      {(designer.notableWorksLink || designer.notableWorksLinks) && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
-                          <TooltipProvider delayDuration={200}>
-                            <div className="flex -space-x-2">
-                              {designer.notableWorksLinks ? (
-                                designer.notableWorksLinks.map((link, linkIdx) => {
-                                  const thumb = GALLERY_THUMBNAILS[link.galleryIndex];
-                                  return (
-                                    <Tooltip key={linkIdx}>
-                                      <TooltipTrigger asChild>
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            scrollToSection('gallery');
-                                            setTimeout(() => {
-                                              window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                                detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` }
-                                              }));
-                                            }, 500);
-                                          }}
-                                          onPointerDown={(e) => e.stopPropagation()}
-                                          onTouchEnd={(e) => e.stopPropagation()}
-                                          className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
-                                          aria-label={`View ${link.text} in gallery`}
-                                        >
-                                          {thumb && (
-                                            <img
-                                              src={thumb}
-                                              alt={link.text}
-                                              className="w-full h-full object-cover"
-                                              loading="lazy"
-                                            />
-                                          )}
-                                        </button>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="bottom" sideOffset={4} align="center" avoidCollisions={false} className="text-xs font-body">
-                                        {link.text}
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  );
-                                })
-                              ) : designer.notableWorksLink && (() => {
-                                const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
+                    <div className="hidden md:flex items-center gap-6 flex-shrink-0 mr-8">
+                      <WhatsAppShareButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
+                              trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
+                            }}
+                            label={`Share ${designer.name} on WhatsApp`}
+                          />
+                      {(designer as any).logoUrl && (
+                        <div className="flex items-center justify-center w-16 h-16">
+                          <img
+                            src={(designer as any).logoUrl}
+                            alt={`${(designer as any).displayName || designer.name} logo`}
+                            sizes="64px"
+                            className="max-w-full max-h-full object-contain opacity-60"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    </div>
+                    {(designer.notableWorksLink || designer.notableWorksLinks) && (
+                      <div className="flex items-center justify-center gap-2 w-full">
+                        <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
+                        <TooltipProvider delayDuration={200}>
+                          <div className="flex -space-x-2">
+                            {designer.notableWorksLinks ? (
+                              designer.notableWorksLinks.map((link, linkIdx) => {
+                                const thumb = GALLERY_THUMBNAILS[link.galleryIndex];
                                 return (
-                                  <Tooltip>
+                                  <Tooltip key={linkIdx}>
                                     <TooltipTrigger asChild>
                                       <button
                                         onClick={(e) => {
@@ -2841,19 +2805,19 @@ const FeaturedDesigners = () => {
                                           scrollToSection('gallery');
                                           setTimeout(() => {
                                             window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                              detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` }
+                                              detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` }
                                             }));
                                           }, 500);
                                         }}
                                         onPointerDown={(e) => e.stopPropagation()}
                                         onTouchEnd={(e) => e.stopPropagation()}
                                         className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
-                                        aria-label={`View ${designer.notableWorksLink.text} in gallery`}
+                                        aria-label={`View ${link.text} in gallery`}
                                       >
                                         {thumb && (
                                           <img
                                             src={thumb}
-                                            alt={designer.notableWorksLink.text}
+                                            alt={link.text}
                                             className="w-full h-full object-cover"
                                             loading="lazy"
                                           />
@@ -2861,17 +2825,51 @@ const FeaturedDesigners = () => {
                                       </button>
                                     </TooltipTrigger>
                                     <TooltipContent side="bottom" sideOffset={4} align="center" avoidCollisions={false} className="text-xs font-body">
-                                      {designer.notableWorksLink.text}
+                                      {link.text}
                                     </TooltipContent>
                                   </Tooltip>
                                 );
-                              })()}
-                            </div>
-                          </TooltipProvider>
-                        </div>
-                      )}
-                    </div>
-                    </div>
+                              })
+                            ) : designer.notableWorksLink && (() => {
+                              const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
+                              return (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        scrollToSection('gallery');
+                                        setTimeout(() => {
+                                          window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                                            detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` }
+                                          }));
+                                        }, 500);
+                                      }}
+                                      onPointerDown={(e) => e.stopPropagation()}
+                                      onTouchEnd={(e) => e.stopPropagation()}
+                                      className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
+                                      aria-label={`View ${designer.notableWorksLink.text} in gallery`}
+                                    >
+                                      {thumb && (
+                                        <img
+                                          src={thumb}
+                                          alt={designer.notableWorksLink.text}
+                                          className="w-full h-full object-cover"
+                                          loading="lazy"
+                                        />
+                                      )}
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="bottom" sideOffset={4} align="center" avoidCollisions={false} className="text-xs font-body">
+                                    {designer.notableWorksLink.text}
+                                  </TooltipContent>
+                                </Tooltip>
+                              );
+                            })()}
+                          </div>
+                        </TooltipProvider>
+                      </div>
+                    )}
                     <div className="flex justify-start md:hidden">
                       <ChevronDown className="h-6 w-6 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
                     </div>
