@@ -1923,7 +1923,7 @@ function AlphaStrip({
                   Photo: {brand.photoCredit}
                 </p>
               )}
-              <div className="relative z-10 pb-12">
+              <div className="relative z-10" style={{ maxHeight: expandedCard === brand.name ? 'none' : 'calc(100% - 48px)', overflow: 'hidden', maskImage: expandedCard === brand.name ? 'none' : 'linear-gradient(to bottom, black 70%, transparent 100%)', WebkitMaskImage: expandedCard === brand.name ? 'none' : 'linear-gradient(to bottom, black 70%, transparent 100%)' }}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2">
                     {brand.instagram && (
@@ -2004,6 +2004,7 @@ function AlphaStrip({
 
 
                {/* Bottom bar: Expand (left on mobile, right on desktop) | Curators' Picks (center) | Share (right on mobile, left of expand on desktop) */}
+              <div className={`absolute bottom-0 left-0 right-0 h-14 z-[5] pointer-events-none ${hasBg ? 'bg-gradient-to-t from-black/60 to-transparent' : 'bg-gradient-to-t from-card/80 to-transparent'}`} />
               <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
                 {/* Expand/collapse — left on mobile, right on desktop */}
                 <div className={`md:order-3 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
