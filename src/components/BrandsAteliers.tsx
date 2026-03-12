@@ -2296,20 +2296,44 @@ const BrandsAteliers = () => {
 
   const filteredBrands = useMemo(() => {
     let brands = partnerBrands;
-    
-    const normalizeSearch = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    
+
+    const normalizeSearch = (s: string) =>
+      s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
     if (searchQuery.trim()) {
       const query = normalizeSearch(searchQuery);
-      brands = brands.filter(
-        (brand) =>
+      brands = brands.filter((brand) => {
+        const baseMatch =
           normalizeSearch(brand.name).includes(query) ||
           normalizeSearch(brand.category).includes(query) ||
-          normalizeSearch(brand.origin).includes(query)
-      );
+          normalizeSearch(brand.origin).includes(query);
+
+        if (baseMatch) return true;
+
+        const attributedDesigners = brandDesignerNames[brand.name] || [];
+        if (attributedDesigners.some((name) => normalizeSearch(name).includes(query))) {
+          return true;
+        }
+
+        const designerId = brandToDesignerMap[brand.name];
+        const picks = designerId ? atelierOnlyPicks[designerId]?.curatorPicks || [] : [];
+
+        return picks.some((pick) => {
+          const fields = [
+            pick.title,
+            pick.subtitle,
+            pick.category,
+            pick.subcategory,
+            ...(pick.tags || []),
+          ]
+            .filter(Boolean)
+            .map((value) => normalizeSearch(String(value)));
+
+          return fields.some((value) => value.includes(query));
+        });
+      });
     }
-    
-    
+
     return brands;
   }, [searchQuery, selectedCategory, selectedSubcategory]);
 
