@@ -493,7 +493,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773292505/Screen_Shot_2026-03-12_at_12.50.12_PM_izz0qk.png",
         title: "Dolly Wall Light",
-        subtitle: "Humbert & Poyet",
+        subtitle: "Humbert & Poyet by Pouenat",
         category: "Lighting",
         tags: ["Lighting", "Wall Lights"],
         materials: "Brass engraving \"Lignes\" dark and light patina | 1001 · Alabaster",
