@@ -3013,7 +3013,10 @@ const FeaturedDesigners = () => {
                       setTimeout(checkScroll, 500);
                     }}
                     className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
-                    <div className="relative inline-flex flex-col items-center">
+                    <div className="relative inline-flex flex-col items-center"
+                      onMouseEnter={() => { if (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.hoverImage) setPicksHovered(true); }}
+                      onMouseLeave={() => setPicksHovered(false)}
+                    >
                       {!isZoomed && (() => {
                         const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
                         const tags: string[] = pick?.tags?.length > 0 ? pick.tags : pick?.category ? [pick.category] : [];
@@ -3038,16 +3041,26 @@ const FeaturedDesigners = () => {
                         const currentPick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
                         const isFiltered = !pickMatchesFilter(currentPick);
                         return (
-                          <img
-                            src={currentPick?.image}
-                            alt={currentPick?.title || "Curator's pick"}
-                            sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
-                            className={`rounded-lg shadow-2xl cursor-zoom-in object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40 transition-[filter,opacity] duration-300' : ''}`}
-                            decoding="sync"
-                            loading="eager"
-                            fetchPriority="high"
-                            onClick={() => setIsZoomed(!isZoomed)}
-                          />
+                          <>
+                            <img
+                              src={currentPick?.image}
+                              alt={currentPick?.title || "Curator's pick"}
+                              sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
+                              className={`rounded-lg shadow-2xl cursor-zoom-in object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40 transition-[filter,opacity] duration-300' : ''} ${picksHovered && currentPick?.hoverImage ? 'opacity-0 transition-opacity duration-500' : 'opacity-100 transition-opacity duration-500'}`}
+                              decoding="sync"
+                              loading="eager"
+                              fetchPriority="high"
+                              onClick={() => setIsZoomed(!isZoomed)}
+                            />
+                            {currentPick?.hoverImage && (
+                              <img
+                                src={currentPick.hoverImage}
+                                alt={`${currentPick?.title} - alternate view`}
+                                className={`absolute inset-0 w-full h-full object-contain rounded-lg select-none pointer-events-none transition-opacity duration-500 ${picksHovered ? 'opacity-100' : 'opacity-0'} ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'}`}
+                                draggable={false}
+                              />
+                            )}
+                          </>
                         );
                       })()}
                       {/* Desktop hover overlay — click to enlarge hint */}
