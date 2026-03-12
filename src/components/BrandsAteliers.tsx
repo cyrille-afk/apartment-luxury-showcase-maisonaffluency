@@ -2064,6 +2064,15 @@ const BrandsAteliers = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    window.dispatchEvent(
+      new CustomEvent('syncProductSearch', {
+        detail: { query: trimmed || null, source: 'brands' },
+      })
+    );
+  }, [searchQuery]);
+
   const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
     window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'brands' } }));
   }, []);
