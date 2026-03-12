@@ -481,7 +481,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773292459/Screen_Shot_2026-03-12_at_12.50.53_PM_wp4tbm.png",
         title: "Firefly Chandelier",
-        subtitle: "Damien Langlois-Meurinne",
+        subtitle: "Damien Langlois-Meurinne by Pouenat",
         category: "Lighting",
         tags: ["Lighting", "Chandeliers"],
         materials: "Light bronze patinated brass · Mouth-blown balls in tinted glass, white, amber yellow, turquoise blue, steel blue, bristol glass, smoky grey, smoky bronze or coral",
