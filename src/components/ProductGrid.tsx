@@ -177,6 +177,7 @@ const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectib
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [navigatedToProfile, setNavigatedToProfile] = useState(false);
   const [isLightboxImageLoaded, setIsLightboxImageLoaded] = useState(false);
+  const [lightboxHovered, setLightboxHovered] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [quoteProduct, setQuoteProduct] = useState<{ name?: string; designer?: string }>({});
   const gridRef = useRef<HTMLElement>(null);
@@ -337,6 +338,7 @@ function singularizeSub(s: string): string {
       setLightboxIndex(newIdx);
       setIsLightboxImageLoaded(false);
       setIsZoomed(false);
+      setLightboxHovered(false);
     }
   }, [lightboxIndex, filtered]);
 
@@ -445,10 +447,19 @@ function singularizeSub(s: string): string {
                 <img
                   src={item.pick.image}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
-                  className="max-w-[90%] max-h-[90%] object-contain transition-transform duration-500 group-hover:scale-105"
+                  className={`max-w-[90%] max-h-[90%] object-contain transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
                   loading="lazy"
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
+                {item.pick.hoverImage && (
+                  <img
+                    src={item.pick.hoverImage}
+                    alt={`${item.pick.title} by ${item.designerName} — alternate view`}
+                    className="absolute inset-0 w-full h-full max-w-[90%] max-h-[90%] object-contain m-auto opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    loading="lazy"
+                    style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+                  />
+                )}
               </div>
               <div className="text-center mt-1">
                 <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-foreground/80 font-semibold">
@@ -514,17 +525,21 @@ function singularizeSub(s: string): string {
                     ) : null;
                   })()}
 
-                  <div className="relative inline-block">
+                  <div className="relative inline-block"
+                    onMouseEnter={() => { if (currentItem.pick.hoverImage) setLightboxHovered(true); }}
+                    onMouseLeave={() => setLightboxHovered(false)}
+                  >
                     <PinchZoomImage
                       key={currentItem.pick.image || `${currentItem.designerId}-${lightboxIndex}`}
                       src={currentItem.pick.image || ""}
                       alt={currentItem.pick.title}
                       className={cn(
-                        "object-contain select-none transition-all duration-300",
+                        "object-contain select-none transition-opacity duration-500",
                         isZoomed
                           ? "max-h-[88vh] max-w-[90vw]"
                           : "max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]",
-                        isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
+                        isZoomed ? "cursor-zoom-out" : "cursor-zoom-in",
+                        lightboxHovered && currentItem.pick.hoverImage ? "opacity-0" : "opacity-100"
                       )}
                       draggable={false}
                       decoding="sync"
@@ -533,6 +548,18 @@ function singularizeSub(s: string): string {
                       onLoad={() => setIsLightboxImageLoaded(true)}
                       onZoomChange={setIsZoomed}
                     />
+                    {currentItem.pick.hoverImage && (
+                      <img
+                        src={currentItem.pick.hoverImage}
+                        alt={`${currentItem.pick.title} - alternate view`}
+                        className={cn(
+                          "absolute inset-0 w-full h-full object-contain select-none transition-opacity duration-500 pointer-events-none",
+                          isZoomed ? "max-h-[88vh] max-w-[90vw]" : "max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]",
+                          lightboxHovered ? "opacity-100" : "opacity-0"
+                        )}
+                        draggable={false}
+                      />
+                    )}
 
                     {/* Desktop hover overlay — click to enlarge/minimize */}
                     <div
