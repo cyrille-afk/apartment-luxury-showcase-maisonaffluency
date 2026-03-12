@@ -666,7 +666,7 @@ const partnerBrands = [
     category: "Tables",
     subcategory: "Tables",
     origin: "Belgium",
-    description: "Belgian designer of refined interiors and sculptural furniture, handcrafted in Belgium. Trained at Sint-Lucas School of Arts in Ghent and Domus Academy in Milan, her collections bring high-end serenity through innovative materials and harmonious forms.",
+    description: "Belgian designer of refined interiors and sculptural furniture, handcrafted in Belgium. Trained at Saint-Lucas School of Arts in Ghent and Domus Academy in Milan, her collections bring high-end serenity through innovative materials and harmonious forms.",
     instagram: "https://www.instagram.com/biekecasteleyn/",
   },
   {
