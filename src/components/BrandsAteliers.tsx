@@ -329,7 +329,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         tags: ["Lighting", "Chandelier"],
         materials: "White lacquered aluminium structure · White paper diffusing material",
         dimensions: "LINE C — 1450 × 1450 × H 150 mm\nLINE C110 — 1100 × 1100 × H 160 mm\nLINE C90 — 900 × 900 × H 120 mm",
-        description: "Warm white 2200K or 2700K LED · Optional Dim to Warm (1900K–2500K) · Converter 24V non-integrated, to be placed in a distant box, CE Class III",
+        description: "Warm white 2200K or 2700K LED · Optional Dim to Warm (1900K–2500K)\nConverter 24V non-integrated, to be placed in a distant box, CE Class III",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Line-C.pdf",
         pdfFilename: "Maison_Affluency-Line-C.pdf",
       },
