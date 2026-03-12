@@ -640,6 +640,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       { 
         image: apparatusPick2, 
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773316984/Screen_Shot_2026-03-12_at_7.58.51_PM_kuasmc.png",
         title: "Lariat",
         subtitle: "Pendant",
         category: "Lighting",
