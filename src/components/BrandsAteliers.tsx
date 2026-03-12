@@ -1923,7 +1923,7 @@ function AlphaStrip({
                   Photo: {brand.photoCredit}
                 </p>
               )}
-              <div className="relative z-10 pb-12">
+              <div className="relative z-10" style={{ maxHeight: expandedCard === brand.name ? 'none' : 'calc(100% - 48px)', overflow: 'hidden', maskImage: expandedCard === brand.name ? 'none' : 'linear-gradient(to bottom, black 70%, transparent 100%)', WebkitMaskImage: expandedCard === brand.name ? 'none' : 'linear-gradient(to bottom, black 70%, transparent 100%)' }}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2">
                     {brand.instagram && (
