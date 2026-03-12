@@ -360,8 +360,12 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   );
 }
 
-/* ─── Product Row (editorial layout) ─── */
+/* ─── Product Row (editorial layout matching Invisible Collection) ─── */
 function ProductRow({ product }: { product: CatalogueProduct }) {
+  const heading = product.designer_name
+    ? `${product.product_name} by ${product.designer_name}`
+    : product.product_name;
+
   return (
     <div className="flex gap-5 py-5 border-b border-[#e8e2db] last:border-b-0">
       {/* Thumbnail */}
@@ -382,13 +386,19 @@ function ProductRow({ product }: { product: CatalogueProduct }) {
 
       {/* Details */}
       <div className="flex flex-col justify-center min-w-0">
-        <h4 className="text-sm md:text-[15px] font-medium text-foreground leading-snug">
-          {product.product_name}
+        <h4 className="text-sm md:text-[15px] font-serif italic text-foreground leading-snug">
+          {heading}
         </h4>
-        {product.designer_name && (
-          <p className="text-xs text-muted-foreground mt-0.5 italic">
-            {product.designer_name}
+        {product.materials && (
+          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+            {product.materials}
           </p>
+        )}
+        {product.dimensions && (
+          <div className="mt-2">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Dimensions</p>
+            <p className="text-xs text-foreground">{product.dimensions}</p>
+          </div>
         )}
       </div>
     </div>
