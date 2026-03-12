@@ -338,6 +338,7 @@ function singularizeSub(s: string): string {
       setLightboxIndex(newIdx);
       setIsLightboxImageLoaded(false);
       setIsZoomed(false);
+      setLightboxHovered(false);
     }
   }, [lightboxIndex, filtered]);
 
