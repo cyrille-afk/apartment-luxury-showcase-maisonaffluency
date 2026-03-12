@@ -700,6 +700,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       { 
         image: apparatusPick8, 
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773129337/APPARATUS_LDN_MYFR-0623_4_0.jpg_e658el.webp",
         title: "Median 3",
         subtitle: "Surface",
         category: "Furniture",
