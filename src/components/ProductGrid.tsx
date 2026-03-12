@@ -317,8 +317,10 @@ function singularizeSub(s: string): string {
   const handleClearFilter = useCallback(() => {
     setCategory(null);
     setSubcategory(null);
+    setTextQuery(null);
     window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
-  }, []);
+    window.dispatchEvent(new CustomEvent('syncProductSearch', { detail: { query: null, source: filterSource } }));
+  }, [filterSource]);
 
   const navigateLightbox = useCallback((dir: 1 | -1) => {
     const newIdx = lightboxIndex + dir;
