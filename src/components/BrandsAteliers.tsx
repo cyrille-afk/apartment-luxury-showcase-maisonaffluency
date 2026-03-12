@@ -296,7 +296,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         tags: ["Lighting", "Wall Lamp"],
         materials: "Aluminium structure in pale gold or mirror nickel finish",
         dimensions: "400 × 100 × H 130 mm – 4 kg",
-        description: "Warm white 2200K or 2700K LED, 12W, 550 Lumens · Optional Dim to Warm (1900K–2500K) · Integrated 24V converters & drivers, CE Class I",
+        description: "Warm white 2200K or 2700K LED, 12W, 550 Lumens · Optional Dim to Warm (1900K–2500K)\nIntegrated 24V converters & drivers, CE Class I",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Gelule.pdf",
         pdfFilename: "Maison_Affluency-Gelule.pdf",
       },
