@@ -1748,6 +1748,29 @@ const designerIdToBrandMap: Record<string, string> = Object.fromEntries(
   Object.entries(brandToDesignerMap).map(([brand, id]) => [id, brand])
 );
 
+// Build a map of brand name → unique designer names from curator picks subtitles
+const brandDesignerNames: Record<string, string[]> = (() => {
+  const result: Record<string, string[]> = {};
+  Object.entries(brandToDesignerMap).forEach(([brandName, designerId]) => {
+    const designer =
+      (atelierOnlyPicks[designerId] as any) ||
+      collectibleDesigners.find(d => d.id === designerId || d.name === brandName) ||
+      featuredDesigners.find(d => d.id === designerId);
+    if (!designer?.curatorPicks?.length) return;
+    const names = new Set<string>();
+    designer.curatorPicks.forEach((pick: CuratorPick) => {
+      if (pick.subtitle) {
+        // Extract designer name: strip " by BrandName" suffix if present
+        const byIdx = pick.subtitle.toLowerCase().lastIndexOf(" by ");
+        const name = byIdx > 0 ? pick.subtitle.slice(0, byIdx) : pick.subtitle;
+        names.add(name);
+      }
+    });
+    if (names.size > 0) result[brandName] = Array.from(names);
+  });
+  return result;
+})();
+
 // ─── Horizontal scroll strip for one letter group ───────────────────────────
 type ConsolidatedBrand = {
   id: string;
