@@ -2789,7 +2789,9 @@ const FeaturedDesigners = () => {
                     </div>
                     </div>
                     {(designer.notableWorksLink || designer.notableWorksLinks) && (
-                      <div className="flex items-center gap-2 w-full md:pl-[25%] -mt-2">
+                      <>
+                      <div className="w-10 h-px bg-[hsl(var(--gold)/0.4)] md:ml-[25%] mt-1" />
+                      <div className="flex items-center gap-2 w-full md:pl-[25%] -mt-1">
                         <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
                           <div className="flex gap-4">
                             {designer.notableWorksLinks ? (
@@ -2853,6 +2855,7 @@ const FeaturedDesigners = () => {
                             })()}
                           </div>
                       </div>
+                      </>
                     )}
                     <div className="flex justify-start md:hidden">
                       <ChevronDown className="h-6 w-6 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
