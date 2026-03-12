@@ -307,7 +307,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         tags: ["Lighting", "Suspension"],
         materials: "Aluminium and brass structure in brushed bronze finish · White paper diffusing material",
         dimensions: "S4 48 — H 482 × 366 × 366 mm\nS4 96 — H 962 × 366 × 366 mm\n+ height of hanging structure",
-        description: "Warm white 2200K or 2700K LED · Optional Dim to Warm (1900K–2500K) · Converter 24V non-integrated, to be placed in a distant box, CE Class III",
+        description: "Warm white 2200K or 2700K LED · Optional Dim to Warm (1900K–2500K)\nConverter 24V non-integrated, to be placed in a distant box, CE Class III",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Maison_Affluency-Tennessee-S2.pdf",
         pdfFilename: "Maison_Affluency-Tennessee-S2.pdf",
       },
