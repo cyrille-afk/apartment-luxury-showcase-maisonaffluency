@@ -1061,50 +1061,6 @@ const Collectibles = () => {
                           </h3>
                         </div>
                         <p className="text-sm md:text-base text-primary font-body">{designer.specialty}</p>
-                        {designer.notableWorksLink && (() => {
-                          const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
-                          return (
-                            <>
-                              <span className="text-primary/40 text-xs tracking-[0.3em] mt-1">• • •</span>
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
-                                <TooltipProvider delayDuration={200}>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          scrollToSection('gallery');
-                                          setTimeout(() => {
-                                            window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                              detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` }
-                                            }));
-                                          }, 500);
-                                        }}
-                                        onPointerDown={(e) => e.stopPropagation()}
-                                        onTouchEnd={(e) => e.stopPropagation()}
-                                        className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
-                                        aria-label={`View ${designer.notableWorksLink!.text} in gallery`}
-                                      >
-                                        {thumb && (
-                                          <img
-                                            src={thumb}
-                                            alt={designer.notableWorksLink!.text}
-                                            className="w-full h-full object-cover"
-                                            loading="lazy"
-                                          />
-                                        )}
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="bottom" className="text-xs font-body">
-                                      {designer.notableWorksLink!.text}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </div>
-                            </>
-                          );
-                        })()}
                       </div>
                     {/* WhatsApp share + Logo — matches Designers & Makers layout */}
                     <div className="hidden md:flex items-center gap-6 flex-shrink-0 mr-8">
@@ -1128,6 +1084,47 @@ const Collectibles = () => {
                       </div>
                     </div>
                     </div>
+                    {designer.notableWorksLink && (() => {
+                      const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
+                      return (
+                        <div className="flex items-center justify-center gap-2 w-full">
+                          <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
+                          <TooltipProvider delayDuration={200}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    scrollToSection('gallery');
+                                    setTimeout(() => {
+                                      window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                                        detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` }
+                                      }));
+                                    }, 500);
+                                  }}
+                                  onPointerDown={(e) => e.stopPropagation()}
+                                  onTouchEnd={(e) => e.stopPropagation()}
+                                  className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
+                                  aria-label={`View ${designer.notableWorksLink!.text} in gallery`}
+                                >
+                                  {thumb && (
+                                    <img
+                                      src={thumb}
+                                      alt={designer.notableWorksLink!.text}
+                                      className="w-full h-full object-cover"
+                                      loading="lazy"
+                                    />
+                                  )}
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" className="text-xs font-body">
+                                {designer.notableWorksLink!.text}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      );
+                    })()}
                     <div className="flex justify-start md:hidden">
                       <ChevronDown className="h-6 w-6 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
                     </div>
