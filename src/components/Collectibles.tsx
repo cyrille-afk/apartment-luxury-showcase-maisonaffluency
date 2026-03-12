@@ -316,7 +316,7 @@ export const collectibleDesigners: Array<{
     notableWorksLink: { text: "None II Table Lamp", galleryIndex: GALLERY.REFINED_DETAILS },
     philosophy: "Every piece of clay holds the potential for extraordinary beauty when shaped by skilled hands.",
     curatorPicks: [
-      { image: cloudinaryUrl("Screen_Shot_2026-03-12_at_9.59.04_PM_jysfm3", { width: 800, quality: "auto", crop: "fill" }), title: "None II Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Cippolino Verde Marble, Silver-Plated brass", dimensions: "39 cm × 22.5 cm × H 58 cm", edition: "Unique Piece" },
+      { image: cloudinaryUrl("Screen_Shot_2026-03-12_at_9.59.04_PM_jysfm3", { width: 800, quality: "auto", crop: "fill" }), hoverImage: cloudinaryUrl("IMG_2744_pgfojp", { width: 800, quality: "auto", crop: "fill" }), title: "None II Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Cippolino Verde Marble, Silver-Plated brass", dimensions: "39 cm × 22.5 cm × H 58 cm", edition: "Unique Piece" },
       
     ],
     links: [
