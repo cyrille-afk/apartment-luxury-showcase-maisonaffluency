@@ -2862,12 +2862,12 @@ const FeaturedDesigners = () => {
                     </div>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="pt-2 pb-6">
-                  <div className="space-y-4 text-muted-foreground font-body">
+                <AccordionContent className="pt-1 pb-3">
+                  <div className="space-y-2 text-muted-foreground font-body">
                     <p className="text-sm md:text-base leading-relaxed text-justify">{designer.biography}</p>
 
-                    <div className="pt-2 border-t border-border/30 mt-4">
-                      <p className="text-sm md:text-base italic leading-relaxed text-foreground/80 mb-4 text-justify">
+                    <div className="pt-1 border-t border-border/30 mt-2">
+                      <p className="text-sm md:text-base italic leading-relaxed text-foreground/80 mb-2 text-justify">
                         "{designer.philosophy}"
                       </p>
 
