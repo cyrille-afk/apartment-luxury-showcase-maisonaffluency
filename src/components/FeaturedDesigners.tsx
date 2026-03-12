@@ -617,6 +617,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     curatorPicks: [
       { 
         image: apparatusPick1, 
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772085919/small-room-personality_wvxz6y.png",
         title: "Lantern",
         subtitle: "Table Lamp",
         category: "Lighting",
