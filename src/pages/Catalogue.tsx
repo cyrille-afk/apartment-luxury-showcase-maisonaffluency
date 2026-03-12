@@ -9,33 +9,171 @@ const CATALOGUE_PASSWORD = "maison-affluency";
 async function generatePDF(groups: GalleryRoomGroup[]) {
   const { pdf, Document, Page, Text, View, Image, StyleSheet, Font } = await import("@react-pdf/renderer");
 
+  // Register Cinzel for brand, Playfair Display for headings, Lora for body
   Font.register({
-    family: "Helvetica",
+    family: "Cinzel",
     fonts: [
-      { src: "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf", fontWeight: 400 },
-      { src: "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf", fontWeight: 500 },
-      { src: "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf", fontStyle: "italic" },
+      { src: "https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-tbnfY3lCA.ttf", fontWeight: 400 },
+      { src: "https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-n7gfY3lCA.ttf", fontWeight: 700 },
+    ],
+  });
+  Font.register({
+    family: "PlayfairDisplay",
+    fonts: [
+      { src: "https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtM.ttf", fontWeight: 400 },
+      { src: "https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKd1tnDXbtM.ttf", fontWeight: 400, fontStyle: "italic" },
+    ],
+  });
+  Font.register({
+    family: "Lora",
+    fonts: [
+      { src: "https://fonts.gstatic.com/s/lora/v35/0QI6MX1D_JOuGQbT0gvTJPa787weuxJBkq0.ttf", fontWeight: 400 },
+      { src: "https://fonts.gstatic.com/s/lora/v35/0QI6MX1D_JOuGQbT0gvTJPa787z5vBJBkq0.ttf", fontWeight: 500 },
+      { src: "https://fonts.gstatic.com/s/lora/v35/0QI8MX1D_JOuMw_hLdO6T2wV9KnW-MoFoq92nA.ttf", fontWeight: 400, fontStyle: "italic" },
     ],
   });
 
+  // Brand palette
+  const colors = {
+    foreground: "#1a2220",       // dark jade-tinted foreground
+    muted: "#8a7e72",
+    mutedLight: "#b5a99a",
+    accent: "#b8965a",           // champagne gold
+    border: "#e0d8cf",
+    borderLight: "#ece7e0",
+    bg: "#faf7f4",
+    bgWarm: "#f5f0eb",
+  };
+
   const s = StyleSheet.create({
-    page: { padding: 40, fontFamily: "Helvetica", fontSize: 9, color: "#1a1a1a" },
-    coverPage: { padding: 0, fontFamily: "Helvetica", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f0eb" },
-    coverTitle: { fontSize: 32, fontWeight: 500, letterSpacing: 4, color: "#1a1a1a", marginBottom: 8, textTransform: "uppercase" as const },
-    coverSubtitle: { fontSize: 14, color: "#6b6b6b", fontStyle: "italic", marginBottom: 4 },
-    coverDate: { fontSize: 10, color: "#999", marginTop: 20 },
-    sectionHeader: { marginBottom: 16, marginTop: 8, borderBottomWidth: 1, borderBottomColor: "#e0d8cf", paddingBottom: 8 },
-    experience: { fontSize: 16, fontWeight: 500, color: "#1a1a1a", marginBottom: 2, textTransform: "uppercase" as const, letterSpacing: 2 },
-    room: { fontSize: 11, color: "#8a7e72", fontStyle: "italic" },
-    productRow: { flexDirection: "row" as const, marginBottom: 14, borderBottomWidth: 0.5, borderBottomColor: "#eee", paddingBottom: 10 },
-    productImage: { width: 100, height: 100, objectFit: "contain" as const, marginRight: 16, backgroundColor: "#f5f0eb" },
-    productInfo: { flex: 1, justifyContent: "flex-start" as const },
-    productTitle: { fontSize: 11, fontWeight: 500, marginBottom: 2, color: "#1a1a1a" },
-    productDesigner: { fontSize: 9, color: "#8a7e72", marginBottom: 4, fontStyle: "italic" },
-    productDetail: { fontSize: 8, color: "#555", marginBottom: 1.5 },
-    footer: { position: "absolute" as const, bottom: 20, left: 40, right: 40, flexDirection: "row" as const, justifyContent: "space-between" as const, fontSize: 7, color: "#bbb" },
-    noImage: { width: 100, height: 100, backgroundColor: "#f0ebe5", justifyContent: "center" as const, alignItems: "center" as const, marginRight: 16 },
-    noImageText: { fontSize: 8, color: "#ccc" },
+    // ── Cover ──
+    coverPage: {
+      padding: 60,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.bgWarm,
+    },
+    coverRule: { width: 40, height: 1, backgroundColor: colors.accent, marginBottom: 24 },
+    coverTitle: {
+      fontFamily: "Cinzel",
+      fontSize: 28,
+      fontWeight: 700,
+      letterSpacing: 6,
+      color: colors.foreground,
+      textTransform: "uppercase" as const,
+      marginBottom: 6,
+    },
+    coverSubtitle: {
+      fontFamily: "PlayfairDisplay",
+      fontSize: 13,
+      fontStyle: "italic",
+      color: colors.muted,
+      marginBottom: 4,
+    },
+    coverDate: { fontFamily: "Lora", fontSize: 9, color: colors.mutedLight, marginTop: 28 },
+
+    // ── Content pages ──
+    page: {
+      padding: 48,
+      paddingBottom: 60,
+      fontFamily: "Lora",
+      fontSize: 9,
+      color: colors.foreground,
+      backgroundColor: "#ffffff",
+    },
+
+    // ── Section header ──
+    sectionHeader: {
+      marginBottom: 20,
+      paddingBottom: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    experienceLabel: {
+      fontFamily: "Lora",
+      fontSize: 7,
+      fontWeight: 500,
+      textTransform: "uppercase" as const,
+      letterSpacing: 3,
+      color: colors.mutedLight,
+      marginBottom: 4,
+    },
+    roomTitle: {
+      fontFamily: "PlayfairDisplay",
+      fontSize: 18,
+      fontStyle: "italic",
+      color: colors.foreground,
+    },
+
+    // ── Product row ──
+    productRow: {
+      flexDirection: "row" as const,
+      alignItems: "flex-start" as const,
+      paddingVertical: 12,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.borderLight,
+    },
+    productImage: {
+      width: 90,
+      height: 90,
+      objectFit: "contain" as const,
+      marginRight: 18,
+      backgroundColor: colors.bgWarm,
+    },
+    noImage: {
+      width: 90,
+      height: 90,
+      backgroundColor: colors.bgWarm,
+      justifyContent: "center" as const,
+      alignItems: "center" as const,
+      marginRight: 18,
+    },
+    noImageText: { fontFamily: "Lora", fontSize: 7, color: colors.mutedLight },
+    productInfo: { flex: 1, justifyContent: "center" as const, paddingTop: 4 },
+    productTitle: {
+      fontFamily: "Lora",
+      fontSize: 10,
+      fontWeight: 500,
+      color: colors.foreground,
+      marginBottom: 2,
+    },
+    productDesigner: {
+      fontFamily: "Lora",
+      fontSize: 8,
+      fontStyle: "italic",
+      color: colors.muted,
+    },
+
+    // ── Footer ──
+    footer: {
+      position: "absolute" as const,
+      bottom: 24,
+      left: 48,
+      right: 48,
+      flexDirection: "row" as const,
+      justifyContent: "space-between" as const,
+      alignItems: "center" as const,
+    },
+    footerBrand: {
+      fontFamily: "Cinzel",
+      fontSize: 6,
+      letterSpacing: 2,
+      color: colors.mutedLight,
+      textTransform: "uppercase" as const,
+    },
+    footerPage: {
+      fontFamily: "Lora",
+      fontSize: 7,
+      color: colors.mutedLight,
+    },
+    footerRule: {
+      position: "absolute" as const,
+      bottom: 44,
+      left: 48,
+      right: 48,
+      height: 0.5,
+      backgroundColor: colors.borderLight,
+    },
   });
 
   const now = new Date();
@@ -43,17 +181,20 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
 
   const doc = (
     <Document>
+      {/* Cover Page */}
       <Page size="A4" style={s.coverPage}>
+        <View style={s.coverRule} />
         <Text style={s.coverTitle}>Maison Affluency</Text>
         <Text style={s.coverSubtitle}>Gallery Collection Catalogue</Text>
         <Text style={s.coverDate}>{dateStr}</Text>
       </Page>
 
+      {/* Product Pages — one page per gallery room */}
       {groups.map((group, gi) => (
         <Page key={gi} size="A4" style={s.page} wrap>
           <View style={s.sectionHeader}>
-            <Text style={s.experience}>{group.experience}</Text>
-            <Text style={s.room}>{group.room}</Text>
+            <Text style={s.experienceLabel}>{group.experience}</Text>
+            <Text style={s.roomTitle}>{group.room}</Text>
           </View>
 
           {group.products.map((product) => (
@@ -74,9 +215,11 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
             </View>
           ))}
 
+          {/* Footer rule + text */}
+          <View style={s.footerRule} fixed />
           <View style={s.footer} fixed>
-            <Text>Maison Affluency — Gallery Collection</Text>
-            <Text render={({ pageNumber }) => `${pageNumber}`} />
+            <Text style={s.footerBrand}>Maison Affluency</Text>
+            <Text style={s.footerPage} render={({ pageNumber }) => `${pageNumber}`} />
           </View>
         </Page>
       ))}
