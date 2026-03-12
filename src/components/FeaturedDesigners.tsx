@@ -2173,6 +2173,7 @@ const FeaturedDesigners = () => {
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [picksHovered, setPicksHovered] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -2957,9 +2958,11 @@ const FeaturedDesigners = () => {
               if (!curatorPicksDesigner?.curatorPicks?.length) return;
               if (e.key === "ArrowLeft") {
                 setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
+                setPicksHovered(false);
               }
               if (e.key === "ArrowRight") {
                 setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+                setPicksHovered(false);
               }
             }}
           >
@@ -2986,8 +2989,10 @@ const FeaturedDesigners = () => {
                       const distance = touchStart - touchEnd;
                       if (distance > minSwipeDistance) {
                         setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+                        setPicksHovered(false);
                       } else if (distance < -minSwipeDistance) {
                         setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
+                        setPicksHovered(false);
                       }
                     }
                     setTouchStart(null);
@@ -3012,7 +3017,10 @@ const FeaturedDesigners = () => {
                       setTimeout(checkScroll, 500);
                     }}
                     className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
-                    <div className="relative inline-flex flex-col items-center">
+                    <div className="relative inline-flex flex-col items-center"
+                      onMouseEnter={() => { if (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.hoverImage) setPicksHovered(true); }}
+                      onMouseLeave={() => setPicksHovered(false)}
+                    >
                       {!isZoomed && (() => {
                         const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
                         const tags: string[] = pick?.tags?.length > 0 ? pick.tags : pick?.category ? [pick.category] : [];
@@ -3037,16 +3045,26 @@ const FeaturedDesigners = () => {
                         const currentPick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
                         const isFiltered = !pickMatchesFilter(currentPick);
                         return (
-                          <img
-                            src={currentPick?.image}
-                            alt={currentPick?.title || "Curator's pick"}
-                            sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
-                            className={`rounded-lg shadow-2xl cursor-zoom-in object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40 transition-[filter,opacity] duration-300' : ''}`}
-                            decoding="sync"
-                            loading="eager"
-                            fetchPriority="high"
-                            onClick={() => setIsZoomed(!isZoomed)}
-                          />
+                          <>
+                            <img
+                              src={currentPick?.image}
+                              alt={currentPick?.title || "Curator's pick"}
+                              sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
+                              className={`rounded-lg shadow-2xl cursor-zoom-in object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40 transition-[filter,opacity] duration-300' : ''} ${picksHovered && currentPick?.hoverImage ? 'opacity-0 transition-opacity duration-500' : 'opacity-100 transition-opacity duration-500'}`}
+                              decoding="sync"
+                              loading="eager"
+                              fetchPriority="high"
+                              onClick={() => setIsZoomed(!isZoomed)}
+                            />
+                            {currentPick?.hoverImage && (
+                              <img
+                                src={currentPick.hoverImage}
+                                alt={`${currentPick?.title} - alternate view`}
+                                className={`absolute inset-0 w-full h-full object-contain rounded-lg select-none pointer-events-none transition-opacity duration-500 ${picksHovered ? 'opacity-100' : 'opacity-0'} ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'}`}
+                                draggable={false}
+                              />
+                            )}
+                          </>
                         );
                       })()}
                       {/* Desktop hover overlay — click to enlarge hint */}
@@ -3262,14 +3280,14 @@ const FeaturedDesigners = () => {
                   {curatorPicksDesigner.curatorPicks.length > 1 && !isZoomed && (
                     <>
                       <button
-                        onClick={() => setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1)}
+                        onClick={() => { setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1); setPicksHovered(false); }}
                         className="hidden md:flex absolute left-2 md:left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
                         aria-label="Previous"
                       >
                         <ChevronLeft size={32} />
                       </button>
                       <button
-                        onClick={() => setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1)}
+                        onClick={() => { setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1); setPicksHovered(false); }}
                         className="hidden md:flex absolute right-2 md:right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
                         aria-label="Next"
                       >
