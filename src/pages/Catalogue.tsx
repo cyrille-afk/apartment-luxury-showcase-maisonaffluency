@@ -9,7 +9,6 @@ const CATALOGUE_PASSWORD = "maison-affluency";
 async function generatePDF(groups: GalleryRoomGroup[]) {
   const { pdf, Document, Page, Text, View, Image, StyleSheet, Font } = await import("@react-pdf/renderer");
 
-  // Register Cinzel for brand, Playfair Display for headings, Lora for body
   Font.register({
     family: "Cinzel",
     fonts: [
@@ -33,20 +32,18 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
     ],
   });
 
-  // Brand palette
   const colors = {
-    foreground: "#1a2220",       // dark jade-tinted foreground
-    muted: "#8a7e72",
-    mutedLight: "#b5a99a",
-    accent: "#b8965a",           // champagne gold
-    border: "#e0d8cf",
-    borderLight: "#ece7e0",
-    bg: "#faf7f4",
+    foreground: "#1a1a1a",
+    muted: "#6b6b6b",
+    mutedLight: "#999999",
+    accent: "#b8965a",
+    border: "#e0e0e0",
+    borderLight: "#eeeeee",
+    bg: "#ffffff",
     bgWarm: "#f5f0eb",
   };
 
   const s = StyleSheet.create({
-    // ── Cover ──
     coverPage: {
       padding: 60,
       justifyContent: "center",
@@ -72,21 +69,21 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
     },
     coverDate: { fontFamily: "Lora", fontSize: 9, color: colors.mutedLight, marginTop: 28 },
 
-    // ── Content pages ──
     page: {
-      padding: 48,
-      paddingBottom: 60,
+      paddingTop: 40,
+      paddingBottom: 56,
+      paddingHorizontal: 48,
       fontFamily: "Lora",
       fontSize: 9,
       color: colors.foreground,
-      backgroundColor: "#ffffff",
+      backgroundColor: colors.bg,
     },
 
-    // ── Section header ──
+    /* Section header — experience + room */
     sectionHeader: {
-      marginBottom: 20,
-      paddingBottom: 10,
-      borderBottomWidth: 1,
+      marginBottom: 16,
+      paddingBottom: 8,
+      borderBottomWidth: 0.5,
       borderBottomColor: colors.border,
     },
     experienceLabel: {
@@ -96,88 +93,138 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
       textTransform: "uppercase" as const,
       letterSpacing: 3,
       color: colors.mutedLight,
-      marginBottom: 4,
+      marginBottom: 3,
     },
     roomTitle: {
       fontFamily: "PlayfairDisplay",
-      fontSize: 18,
+      fontSize: 16,
       fontStyle: "italic",
       color: colors.foreground,
     },
 
-    // ── Product row ──
-    productRow: {
+    /* Product card — image left, text right (like Invisible Collection) */
+    productCard: {
       flexDirection: "row" as const,
-      alignItems: "flex-start" as const,
-      paddingVertical: 12,
+      marginBottom: 20,
+      paddingBottom: 16,
       borderBottomWidth: 0.5,
       borderBottomColor: colors.borderLight,
     },
     productImage: {
-      width: 90,
-      height: 90,
+      width: 110,
+      height: 110,
       objectFit: "contain" as const,
-      marginRight: 18,
       backgroundColor: colors.bgWarm,
+      marginRight: 20,
     },
     noImage: {
-      width: 90,
-      height: 90,
+      width: 110,
+      height: 110,
       backgroundColor: colors.bgWarm,
       justifyContent: "center" as const,
       alignItems: "center" as const,
-      marginRight: 18,
+      marginRight: 20,
     },
     noImageText: { fontFamily: "Lora", fontSize: 7, color: colors.mutedLight },
-    productInfo: { flex: 1, justifyContent: "center" as const, paddingTop: 4 },
-    productTitle: {
+    productInfo: { flex: 1, paddingTop: 2 },
+    productHeading: {
+      fontFamily: "PlayfairDisplay",
+      fontSize: 11,
+      color: colors.foreground,
+      marginBottom: 4,
+    },
+    productMaterials: {
+      fontFamily: "Lora",
+      fontSize: 8,
+      color: colors.muted,
+      lineHeight: 1.5,
+      marginBottom: 6,
+    },
+    productDimensions: {
+      fontFamily: "Lora",
+      fontSize: 8,
+      color: colors.foreground,
+      marginBottom: 2,
+    },
+    productDimensionsLabel: {
+      fontFamily: "Lora",
+      fontSize: 7,
+      fontWeight: 500,
+      color: colors.mutedLight,
+      textTransform: "uppercase" as const,
+      letterSpacing: 1.5,
+      marginTop: 6,
+      marginBottom: 2,
+    },
+
+    /* Footer */
+    footer: {
+      position: "absolute" as const,
+      bottom: 20,
+      left: 48,
+      right: 48,
+      alignItems: "center" as const,
+    },
+    footerRule: {
+      width: "100%" as const,
+      height: 0.5,
+      backgroundColor: colors.borderLight,
+      marginBottom: 8,
+    },
+    footerBrand: {
+      fontFamily: "Cinzel",
+      fontSize: 7,
+      letterSpacing: 3,
+      color: colors.mutedLight,
+      textTransform: "uppercase" as const,
+    },
+    footerUrl: {
+      fontFamily: "Lora",
+      fontSize: 6,
+      color: colors.mutedLight,
+      marginTop: 2,
+    },
+
+    /* TOC */
+    tocRow: {
+      flexDirection: "row" as const,
+      justifyContent: "space-between" as const,
+      alignItems: "baseline" as const,
+      paddingVertical: 6,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.borderLight,
+    },
+    tocRoom: {
       fontFamily: "Lora",
       fontSize: 10,
       fontWeight: 500,
       color: colors.foreground,
-      marginBottom: 2,
     },
-    productDesigner: {
-      fontFamily: "Lora",
-      fontSize: 8,
-      fontStyle: "italic",
-      color: colors.muted,
-    },
-
-    // ── Footer ──
-    footer: {
-      position: "absolute" as const,
-      bottom: 24,
-      left: 48,
-      right: 48,
-      flexDirection: "row" as const,
-      justifyContent: "space-between" as const,
-      alignItems: "center" as const,
-    },
-    footerBrand: {
-      fontFamily: "Cinzel",
-      fontSize: 6,
-      letterSpacing: 2,
-      color: colors.mutedLight,
-      textTransform: "uppercase" as const,
-    },
-    footerPage: {
+    tocExperience: {
       fontFamily: "Lora",
       fontSize: 7,
       color: colors.mutedLight,
+      marginTop: 1,
+      textTransform: "uppercase" as const,
+      letterSpacing: 2,
     },
-    footerRule: {
-      position: "absolute" as const,
-      bottom: 44,
-      left: 48,
-      right: 48,
-      height: 0.5,
-      backgroundColor: colors.borderLight,
+    tocCount: {
+      fontFamily: "Lora",
+      fontSize: 8,
+      color: colors.muted,
     },
   });
 
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  const FooterBlock = () => (
+    <View style={s.footer} fixed>
+      <View style={s.footerRule} />
+      <Text style={s.footerBrand}>Maison Affluency</Text>
+      <Text style={s.footerUrl}>www.maisonaffluency.com</Text>
+    </View>
+  );
 
   const doc = (
     <Document>
@@ -195,19 +242,17 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
           <Text style={s.roomTitle}>Contents</Text>
         </View>
         {groups.map((group, gi) => (
-          <View key={gi} style={{ flexDirection: "row" as const, justifyContent: "space-between" as const, alignItems: "baseline" as const, paddingVertical: 6, borderBottomWidth: 0.5, borderBottomColor: colors.borderLight }}>
+          <View key={gi} style={s.tocRow}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: "Lora", fontSize: 10, fontWeight: 500, color: colors.foreground }}>{group.room}</Text>
-              <Text style={{ fontFamily: "Lora", fontSize: 7, color: colors.mutedLight, marginTop: 1, textTransform: "uppercase" as const, letterSpacing: 2 }}>{group.experience}</Text>
+              <Text style={s.tocRoom}>{group.room}</Text>
+              <Text style={s.tocExperience}>{group.experience}</Text>
             </View>
-            <Text style={{ fontFamily: "Lora", fontSize: 8, color: colors.muted }}>{group.products.length} {group.products.length === 1 ? "piece" : "pieces"}</Text>
+            <Text style={s.tocCount}>
+              {group.products.length} {group.products.length === 1 ? "piece" : "pieces"}
+            </Text>
           </View>
         ))}
-        <View style={s.footerRule} fixed />
-        <View style={s.footer} fixed>
-          <Text style={s.footerBrand}>Maison Affluency</Text>
-          <Text style={s.footerPage} render={({ pageNumber }) => `${pageNumber}`} />
-        </View>
+        <FooterBlock />
       </Page>
 
       {/* Product Pages — one page per gallery room */}
@@ -218,30 +263,37 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
             <Text style={s.roomTitle}>{group.room}</Text>
           </View>
 
-          {group.products.map((product) => (
-            <View key={product.id} style={s.productRow} wrap={false}>
-              {product.product_image_url ? (
-                <Image style={s.productImage} src={product.product_image_url} />
-              ) : (
-                <View style={s.noImage}>
-                  <Text style={s.noImageText}>No image</Text>
-                </View>
-              )}
-              <View style={s.productInfo}>
-                <Text style={s.productTitle}>{product.product_name}</Text>
-                {product.designer_name && (
-                  <Text style={s.productDesigner}>{product.designer_name}</Text>
-                )}
-              </View>
-            </View>
-          ))}
+          {group.products.map((product) => {
+            const heading = product.designer_name
+              ? `${product.product_name} by ${product.designer_name}`
+              : product.product_name;
 
-          {/* Footer rule + text */}
-          <View style={s.footerRule} fixed />
-          <View style={s.footer} fixed>
-            <Text style={s.footerBrand}>Maison Affluency</Text>
-            <Text style={s.footerPage} render={({ pageNumber }) => `${pageNumber}`} />
-          </View>
+            return (
+              <View key={product.id} style={s.productCard} wrap={false}>
+                {product.product_image_url ? (
+                  <Image style={s.productImage} src={product.product_image_url} />
+                ) : (
+                  <View style={s.noImage}>
+                    <Text style={s.noImageText}>No image</Text>
+                  </View>
+                )}
+                <View style={s.productInfo}>
+                  <Text style={s.productHeading}>{heading}</Text>
+                  {product.materials && (
+                    <Text style={s.productMaterials}>{product.materials}</Text>
+                  )}
+                  {product.dimensions && (
+                    <>
+                      <Text style={s.productDimensionsLabel}>Dimensions</Text>
+                      <Text style={s.productDimensions}>{product.dimensions}</Text>
+                    </>
+                  )}
+                </View>
+              </View>
+            );
+          })}
+
+          <FooterBlock />
         </Page>
       ))}
     </Document>
