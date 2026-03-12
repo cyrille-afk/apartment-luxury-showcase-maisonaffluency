@@ -413,6 +413,9 @@ function CatalogueView() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
 
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<string | null>(null);
+
   useEffect(() => {
     fetchCatalogueData().then((data) => {
       setGroups(data);
