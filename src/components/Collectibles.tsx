@@ -86,6 +86,7 @@ export const collectibleDesigners: Array<{
   philosophy: string;
   curatorPicks: Array<{
     image: string;
+    hoverImage?: string;
     title: string;
     category: string;
     subcategory?: string;
@@ -113,7 +114,7 @@ export const collectibleDesigners: Array<{
     curatorPicks: [
       { image: demichelisPick1, title: "Babel Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze • Brass • Ash wood • White fabric shade", dimensions: "Ø45 × H60.9 cm", edition: "Numbered edition of 20" },
       { image: demichelisPick4, title: "Echo Floor Lamp", category: "Lighting", subcategory: "Floor Lamps", materials: "Patinated and varnished brass", dimensions: "Ø38 × H166 cm", edition: "Numbered edition of 20" },
-      { image: demichelisPick2, title: "Bud Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze • White oak • Hand-made fabric shade", dimensions: "Ø40 × H71 cm", edition: "Numbered edition of 20" },
+      { image: demichelisPick2, hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772085686/bedroom-alt_yk0j0d.jpg", title: "Bud Table Lamp", category: "Lighting", subcategory: "Table Lamps", materials: "Bronze • White oak • Hand-made fabric shade", dimensions: "Ø40 × H71 cm", edition: "Numbered edition of 20" },
       { image: demichelisPick3, title: "Table d'appoint RHINO", category: "Tables", subcategory: "Side Tables", materials: "Patinated bronze • Raw brass • Brown cowhide leather top", dimensions: "H43.5 × L35 cm", edition: "Numbered edition of 8 + 2 APs" },
     ],
     links: [
@@ -348,6 +349,7 @@ const Collectibles = () => {
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof collectibleDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
+  const [picksHovered, setPicksHovered] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -596,6 +598,7 @@ const Collectibles = () => {
         prev === 0 ? curatorPicksDesigner.curatorPicks!.length - 1 : prev - 1
       );
       setIsZoomed(false);
+      setPicksHovered(false);
     }
   };
 
@@ -605,6 +608,7 @@ const Collectibles = () => {
         prev === curatorPicksDesigner.curatorPicks!.length - 1 ? 0 : prev + 1
       );
       setIsZoomed(false);
+      setPicksHovered(false);
     }
   };
 
@@ -1282,19 +1286,32 @@ const Collectibles = () => {
                       )}
                     </div>
                   )}
-                  <div className="relative inline-block">
+                  <div className="relative inline-block"
+                    onMouseEnter={() => { if (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.hoverImage) setPicksHovered(true); }}
+                    onMouseLeave={() => setPicksHovered(false)}
+                  >
                     {(() => {
                       const currentPick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
                       const isFiltered = !pickMatchesFilter(currentPick);
                       return (
-                        <PinchZoomImage 
-                          key={curatorPickIndex}
-                          src={currentPick?.image} 
-                          alt={currentPick?.title} 
-                          className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40' : ''}`}
-                          draggable={false}
-                          onZoomChange={(z) => { imageZoomedRef.current = z; }}
-                        />
+                        <>
+                          <PinchZoomImage 
+                            key={curatorPickIndex}
+                            src={currentPick?.image} 
+                            alt={currentPick?.title} 
+                            className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40' : ''} ${picksHovered && currentPick?.hoverImage ? 'opacity-0' : 'opacity-100'}`}
+                            draggable={false}
+                            onZoomChange={(z) => { imageZoomedRef.current = z; }}
+                          />
+                          {currentPick?.hoverImage && (
+                            <img
+                              src={currentPick.hoverImage}
+                              alt={`${currentPick?.title} - alternate view`}
+                              className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 select-none pointer-events-none ${picksHovered ? 'opacity-100' : 'opacity-0'} ${isZoomed ? 'max-w-none' : ''}`}
+                              draggable={false}
+                            />
+                          )}
+                        </>
                       );
                     })()}
                     {/* Desktop hover overlay — click to enlarge hint */}
