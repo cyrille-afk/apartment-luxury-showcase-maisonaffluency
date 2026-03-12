@@ -445,10 +445,19 @@ function singularizeSub(s: string): string {
                 <img
                   src={item.pick.image}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
-                  className="max-w-[90%] max-h-[90%] object-contain transition-transform duration-500 group-hover:scale-105"
+                  className={`max-w-[90%] max-h-[90%] object-contain transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
                   loading="lazy"
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
+                {item.pick.hoverImage && (
+                  <img
+                    src={item.pick.hoverImage}
+                    alt={`${item.pick.title} by ${item.designerName} — alternate view`}
+                    className="absolute inset-0 w-full h-full max-w-[90%] max-h-[90%] object-contain m-auto opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    loading="lazy"
+                    style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+                  />
+                )}
               </div>
               <div className="text-center mt-1">
                 <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-foreground/80 font-semibold">
