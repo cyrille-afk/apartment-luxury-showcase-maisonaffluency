@@ -2813,7 +2813,7 @@ const FeaturedDesigners = () => {
                                       aria-label={`View ${link.text} in gallery`}
                                     >
                                       {thumb && (
-                                        <img src={thumb} alt={link.text} className="w-full h-full object-cover blur-[0.5px] group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
+                                        <img src={thumb} alt={link.text} className="w-full h-full object-cover blur-0 md:blur-[0.5px] md:group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
                                       )}
                                     </button>
                                     <span
