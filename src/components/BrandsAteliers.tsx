@@ -2856,7 +2856,7 @@ const BrandsAteliers = () => {
                           </p>
                         )}
                         {(picksDesigner.curatorPicks[picksIndex] as any)?.description && (
-                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed text-justify md:text-center">
+                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed text-justify md:text-center whitespace-pre-line">
                             {(picksDesigner.curatorPicks[picksIndex] as any).description}
                           </p>
                         )}
