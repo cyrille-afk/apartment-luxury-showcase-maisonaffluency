@@ -2789,7 +2789,7 @@ const FeaturedDesigners = () => {
                     </div>
                     </div>
                     {(designer.notableWorksLink || designer.notableWorksLinks) && (
-                      <div className="flex items-center gap-2 w-full md:pl-[25%]">
+                      <div className="flex items-center gap-2 w-full md:pl-[25%] -mt-2">
                         <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
                           <div className="flex gap-4">
                             {designer.notableWorksLinks ? (
