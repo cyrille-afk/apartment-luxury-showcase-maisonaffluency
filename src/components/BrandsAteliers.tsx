@@ -520,7 +520,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         subtitle: "Stéphane Parmentier by Pouenat",
         category: "Tables",
         tags: ["Tables", "Coffee Tables"],
-        materials: "Rubbed patinated brass + satin varnish · Top in grey tinted spruce + matt varnish | Mirror polished brass + shiny varnish · Top in grey tinted spruce + matt varnish | Lightly sanded brass + satin varnish · Top in grey tinted spruce + matt varnish",
+        materials: "Rubbed patinated brass + satin varnish · Top in grey tinted spruce + matt varnish | Mirror polished brass + shiny varnish\nTop in grey tinted spruce + matt varnish | Lightly sanded brass + satin varnish · Top in grey tinted spruce + matt varnish",
         dimensions: "W 158 × D 158 × H 37 cm — 130 kg",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs%2Fpouenat-sensible-coffee-table.pdf",
       },
