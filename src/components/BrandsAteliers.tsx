@@ -305,7 +305,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772452356/Screen_Shot_2026-03-02_at_7.26.56_PM_iyecho.png",
         title: "GÉLULE",
-        subtitle: "Joseph Dirand",
+        subtitle: "Joseph Dirand by Ozone",
         tags: ["Lighting", "Wall Lamp"],
         materials: "Aluminium structure in pale gold or mirror nickel finish",
         dimensions: "400 × 100 × H 130 mm – 4 kg",
