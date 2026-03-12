@@ -1284,19 +1284,32 @@ const Collectibles = () => {
                       )}
                     </div>
                   )}
-                  <div className="relative inline-block">
+                  <div className="relative inline-block"
+                    onMouseEnter={() => { if (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.hoverImage) setPicksHovered(true); }}
+                    onMouseLeave={() => setPicksHovered(false)}
+                  >
                     {(() => {
                       const currentPick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
                       const isFiltered = !pickMatchesFilter(currentPick);
                       return (
-                        <PinchZoomImage 
-                          key={curatorPickIndex}
-                          src={currentPick?.image} 
-                          alt={currentPick?.title} 
-                          className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40' : ''}`}
-                          draggable={false}
-                          onZoomChange={(z) => { imageZoomedRef.current = z; }}
-                        />
+                        <>
+                          <PinchZoomImage 
+                            key={curatorPickIndex}
+                            src={currentPick?.image} 
+                            alt={currentPick?.title} 
+                            className={`object-contain transition-all duration-300 select-none ${isZoomed ? 'max-w-none w-[150vw] md:w-auto md:max-w-full md:max-h-[80vh]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40' : ''} ${picksHovered && currentPick?.hoverImage ? 'opacity-0' : 'opacity-100'}`}
+                            draggable={false}
+                            onZoomChange={(z) => { imageZoomedRef.current = z; }}
+                          />
+                          {currentPick?.hoverImage && (
+                            <img
+                              src={currentPick.hoverImage}
+                              alt={`${currentPick?.title} - alternate view`}
+                              className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 select-none pointer-events-none ${picksHovered ? 'opacity-100' : 'opacity-0'} ${isZoomed ? 'max-w-none' : ''}`}
+                              draggable={false}
+                            />
+                          )}
+                        </>
                       );
                     })()}
                     {/* Desktop hover overlay — click to enlarge hint */}
