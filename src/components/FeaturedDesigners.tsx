@@ -663,6 +663,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       { 
         image: apparatusPick3, 
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773316985/Screen_Shot_2026-03-12_at_7.57.39_PM_xybmsw.png",
         title: "Signal Y",
         subtitle: "Table Lamp",
         category: "Lighting",
