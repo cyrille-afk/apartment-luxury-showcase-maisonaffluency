@@ -2815,7 +2815,7 @@ const FeaturedDesigners = () => {
                                         <img src={thumb} alt={link.text} className="w-full h-full object-cover blur-[0.5px] group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
                                       )}
                                     </button>
-                                    <span className="absolute left-0 top-full mt-1.5 flex items-center gap-1 text-[10px] md:text-xs font-body text-muted-foreground whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                                    <span className="absolute right-0 md:right-auto md:left-0 top-full mt-1.5 flex items-center gap-1 text-[10px] md:text-xs font-body text-muted-foreground whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
                                       <CornerDownRight className="w-3 h-3" /> {link.text}
                                     </span>
                                   </div>
