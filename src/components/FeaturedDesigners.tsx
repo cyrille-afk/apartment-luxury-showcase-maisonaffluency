@@ -2789,7 +2789,7 @@ const FeaturedDesigners = () => {
                     </div>
                     </div>
                     {(designer.notableWorksLink || designer.notableWorksLinks) && (
-                      <div className="flex items-center justify-center gap-2 w-full">
+                      <div className="flex items-center gap-2 w-full md:pl-[15%]">
                         <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
                         <TooltipProvider delayDuration={200}>
                           <div className="flex -space-x-2">
