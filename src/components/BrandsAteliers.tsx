@@ -3033,6 +3033,15 @@ const BrandsAteliers = () => {
                           </div>
                         )}
 
+                        {picksDesignerName === "Ozone" && (
+                          <p className="text-[10px] md:text-xs text-white/40 font-body mt-6 text-center italic">
+                            If you wish to receive more information on any other Ozone products, please contact us{" "}
+                            <a href="mailto:concierge@myaffluenc.com" className="text-white/60 hover:text-white underline underline-offset-2 transition-colors">
+                              concierge@myaffluenc.com
+                            </a>
+                          </p>
+                        )}
+
                       </div>
                     )}
                   </div>
