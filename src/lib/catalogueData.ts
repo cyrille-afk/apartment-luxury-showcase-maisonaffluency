@@ -109,6 +109,8 @@ export async function fetchCatalogueData(): Promise<GalleryRoomGroup[]> {
       designer_name: row.designer_name,
       product_image_url: row.product_image_url,
       link_url: row.link_url,
+      materials: row.materials,
+      dimensions: row.dimensions,
       room,
     });
   }
