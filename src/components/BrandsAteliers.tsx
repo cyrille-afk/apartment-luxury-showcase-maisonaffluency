@@ -270,6 +270,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
     curatorPicks: [
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1772453277/Screen_Shot_2026-03-02_at_8.07.31_PM_yi3hfp.png",
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773307742/Screen_Shot_2026-03-12_at_5.21.45_PM_cmrnei.png",
         title: "CLASSIQUE V",
         subtitle: "Gounot & Jähnke",
         tags: ["Lighting", "Chandelier"],
