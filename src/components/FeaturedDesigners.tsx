@@ -2791,83 +2791,67 @@ const FeaturedDesigners = () => {
                     {(designer.notableWorksLink || designer.notableWorksLinks) && (
                       <div className="flex items-center gap-2 w-full md:pl-[15%]">
                         <span className="text-[10px] md:text-xs text-[hsl(var(--gold))] uppercase tracking-wider"><em>On View</em></span>
-                        <TooltipProvider delayDuration={0}>
                           <div className="flex gap-1">
                             {designer.notableWorksLinks ? (
                               designer.notableWorksLinks.map((link, linkIdx) => {
                                 const thumb = GALLERY_THUMBNAILS[link.galleryIndex];
                                 return (
-                                  <Tooltip key={linkIdx}>
-                                    <TooltipTrigger asChild>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          scrollToSection('gallery');
-                                          setTimeout(() => {
-                                            window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                              detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` }
-                                            }));
-                                          }, 500);
-                                        }}
-                                        onPointerDown={(e) => e.stopPropagation()}
-                                        onTouchEnd={(e) => e.stopPropagation()}
-                                        className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
-                                        aria-label={`View ${link.text} in gallery`}
-                                      >
-                                        {thumb && (
-                                          <img
-                                            src={thumb}
-                                            alt={link.text}
-                                            className="w-full h-full object-cover"
-                                            loading="lazy"
-                                          />
-                                        )}
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="bottom" sideOffset={4} align="center" avoidCollisions={false} className="text-xs font-body">
-                                      {link.text}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                );
-                              })
-                            ) : designer.notableWorksLink && (() => {
-                              const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
-                              return (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
+                                  <div key={linkIdx} className="relative group/avatar">
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         scrollToSection('gallery');
                                         setTimeout(() => {
                                           window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                            detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` }
+                                            detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` }
                                           }));
                                         }, 500);
                                       }}
                                       onPointerDown={(e) => e.stopPropagation()}
                                       onTouchEnd={(e) => e.stopPropagation()}
                                       className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
-                                      aria-label={`View ${designer.notableWorksLink.text} in gallery`}
+                                      aria-label={`View ${link.text} in gallery`}
                                     >
                                       {thumb && (
-                                        <img
-                                          src={thumb}
-                                          alt={designer.notableWorksLink.text}
-                                          className="w-full h-full object-cover"
-                                          loading="lazy"
-                                        />
+                                        <img src={thumb} alt={link.text} className="w-full h-full object-cover" loading="lazy" />
                                       )}
                                     </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="bottom" sideOffset={4} align="center" avoidCollisions={false} className="text-xs font-body">
+                                    <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 px-2 py-0.5 rounded bg-popover border border-border text-[10px] md:text-xs font-body text-popover-foreground shadow-md whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                                      {link.text}
+                                    </span>
+                                  </div>
+                                );
+                              })
+                            ) : designer.notableWorksLink && (() => {
+                              const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
+                              return (
+                                <div className="relative group/avatar">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      scrollToSection('gallery');
+                                      setTimeout(() => {
+                                        window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                                          detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` }
+                                        }));
+                                      }, 500);
+                                    }}
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    onTouchEnd={(e) => e.stopPropagation()}
+                                    className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-110 hover:z-10 transition-all duration-300 touch-manipulation"
+                                    aria-label={`View ${designer.notableWorksLink.text} in gallery`}
+                                  >
+                                    {thumb && (
+                                      <img src={thumb} alt={designer.notableWorksLink.text} className="w-full h-full object-cover" loading="lazy" />
+                                    )}
+                                  </button>
+                                  <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 px-2 py-0.5 rounded bg-popover border border-border text-[10px] md:text-xs font-body text-popover-foreground shadow-md whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
                                     {designer.notableWorksLink.text}
-                                  </TooltipContent>
-                                </Tooltip>
+                                  </span>
+                                </div>
                               );
                             })()}
                           </div>
-                        </TooltipProvider>
                       </div>
                     )}
                     <div className="flex justify-start md:hidden">
