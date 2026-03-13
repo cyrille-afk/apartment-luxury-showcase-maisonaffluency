@@ -1113,7 +1113,7 @@ const Collectibles = () => {
                               }}
                               onPointerDown={(e) => e.stopPropagation()}
                               onTouchEnd={(e) => e.stopPropagation()}
-                              className="relative w-11 h-11 md:w-12 md:h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-125 hover:z-10 transition-all duration-300 touch-manipulation"
+                              className="relative w-11 h-11 md:w-14 md:h-14 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-125 hover:z-10 transition-all duration-300 touch-manipulation"
                               aria-label={`View ${designer.notableWorksLink!.text} in gallery`}
                             >
                               {thumb && (
