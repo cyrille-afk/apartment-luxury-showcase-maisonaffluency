@@ -388,7 +388,7 @@ const Index = () => {
                 imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773372909/Screen_Shot_2026-03-13_at_11.34.42_AM_icbzuz.png"
                 quote="Collectible design exists at the intersection of art and function — where rarity becomes a conversation and craftsmanship becomes legacy"
                 attribution="On Collectible Design"
-                overlayOpacity={0.15}
+                overlayOpacity={0}
                 reverse
               />
             </Suspense>
