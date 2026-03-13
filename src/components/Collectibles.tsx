@@ -1259,7 +1259,7 @@ const Collectibles = () => {
                   observer.observe(el, { childList: true, subtree: true });
                   setTimeout(checkScroll, 500);
                 }}
-                className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto select-none touch-pan-y ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}
+                className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none touch-pan-y ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}
                 style={{ WebkitUserSelect: 'none' }}
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
