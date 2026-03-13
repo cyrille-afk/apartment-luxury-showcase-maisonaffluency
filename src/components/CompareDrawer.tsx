@@ -50,7 +50,7 @@ const CompareDrawer = () => {
 
             {/* Comparison Grid */}
             <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
-              <div className={`grid ${colClass} gap-6 md:gap-8 mx-auto`}>
+              <div className={`grid ${colClass} gap-6 md:gap-8 mx-auto auto-rows-[1fr]`}>
                 {items.map((item, idx) => (
                   <motion.div
                     key={`${item.designerId}-${item.pick.title}`}
