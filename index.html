@@ -182,15 +182,9 @@
       @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/PlayfairDisplay-600.woff2') format('woff2'); }
       @font-face { font-family: 'Cinzel'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/Cinzel-Bold.woff2') format('woff2'); }
     </style>
-    <!-- Fallback: ensure css-ready is added even if onload races or in dev mode -->
+    <!-- Fallback: ensure css-ready is added even if JS fails to load -->
     <script>
-      if (document.documentElement.className.indexOf('css-ready') === -1) {
-        if (location.port || location.hostname === 'localhost' || location.hostname.includes('lovable')) {
-          document.documentElement.classList.add('css-ready');
-        } else {
-          setTimeout(function(){ document.documentElement.classList.add('css-ready'); }, 2000);
-        }
-      }
+      setTimeout(function(){ document.documentElement.classList.add('css-ready'); }, 3000);
     </script>
 
     <!-- Google Analytics - deferred to not block LCP -->
