@@ -1733,7 +1733,7 @@ const brandBgMap: Record<string, string> = {
   "La Chance Paris": laChanceParisBg,
   "Osanna Visconti": osannaViscontiBg,
   "Pierre Augustin Rose": pierreAugustinRoseBg,
-  "Tacchini": tacchiniBg,
+  
   "Refractory Studio": refractoryStudioBg,
   "Marta Sala Éditions": martaSalaEditionsBg,
   "Alpange": alpangeBg,
