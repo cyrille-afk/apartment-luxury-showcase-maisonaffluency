@@ -1612,15 +1612,6 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/pierre_augustin_rose/",
   },
   {
-    id: "tacchini",
-    name: "Tacchini",
-    category: "Furniture",
-    subcategory: "Seating & Sofas",
-    origin: "Italy",
-    description: "Tacchini Italia is a Milan-based furniture house renowned for its sculptural upholstered seating that balances Italian craft tradition with contemporary design vision. Collaborating with leading international designers, Tacchini creates iconic sofas, armchairs and lounge pieces defined by generous volumes, refined tailoring and an enduring sense of comfort.",
-    instagram: "https://www.instagram.com/tacchini_italia/?hl=en",
-  },
-  {
     id: "refractory-studio",
     name: "Refractory Studio",
     category: "Lighting",
