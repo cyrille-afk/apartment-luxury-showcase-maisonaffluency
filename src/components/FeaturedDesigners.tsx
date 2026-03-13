@@ -788,7 +788,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Rugs", "Textile"],
         materials: "90% wool, 10% silk — 125 knots/sq.inch",
         dimensions: "Custom dimensions available",
-        description: "Ricky is inspired by Japanese engraving. Symbolizing a cloud and its lining, the details are focused around the edges with various layers and levels of cutting."
+        description: "Ricky is inspired by Japanese engraving.\nSymbolizing a cloud and its lining, the details are focused around the edges with various layers and levels of cutting."
       },
       { 
         image: atelierFevrierPick7, 
