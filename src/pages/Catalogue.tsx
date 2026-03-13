@@ -388,37 +388,38 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   );
 }
 
-/* ─── Gallery Room Card (mirrors DesignerCard layout) ─── */
+/* ─── Gallery Room Card (mirrors DesignerCard layout, with full-size room image) ─── */
 function RoomCard({ group }: { group: GalleryRoomGroup }) {
   const [showAll, setShowAll] = useState(false);
   const visibleProducts = showAll ? group.products : group.products.slice(0, 4);
-  const roomThumb = getRoomThumbnail(group.room);
+  const roomImage = ROOM_IMAGES[group.room];
 
   return (
-    <div className="mb-10 pb-8 border-b border-border/40 last:border-b-0">
-      {/* Room header — image + title/experience */}
-      <div className="flex gap-5 md:gap-8 mb-5">
-        {roomThumb && (
-          <div className="w-24 h-24 md:w-32 md:h-32 flex-shrink-0 overflow-hidden bg-muted/20 rounded-sm">
-            <img
-              src={roomThumb}
-              alt={group.room}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        )}
-        <div className="flex flex-col justify-center min-w-0">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
-            {group.experience}
-          </p>
-          <h3 className="text-base md:text-lg font-serif italic text-foreground leading-snug">
-            {group.room}
-          </h3>
-          <p className="text-xs text-muted-foreground mt-2">
-            {group.products.length} {group.products.length === 1 ? "piece" : "pieces"}
-          </p>
+    <div className="mb-14 pb-8 border-b border-border/40 last:border-b-0">
+      {/* Full-width room image — matching expanded gallery style */}
+      {roomImage && (
+        <div className="w-full aspect-[4/5] md:aspect-[16/9] overflow-hidden bg-muted/10 mb-5 rounded-sm">
+          <img
+            src={roomImage}
+            alt={group.room}
+            className="w-full h-full object-cover"
+            style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+            loading="lazy"
+          />
         </div>
+      )}
+
+      {/* Room title + experience */}
+      <div className="mb-5">
+        <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
+          {group.experience}
+        </p>
+        <h3 className="text-lg md:text-xl font-serif italic text-foreground leading-snug">
+          {group.room}
+        </h3>
+        <p className="text-xs text-muted-foreground mt-1">
+          {group.products.length} {group.products.length === 1 ? "piece" : "pieces"}
+        </p>
       </div>
 
       {/* Products grid */}
