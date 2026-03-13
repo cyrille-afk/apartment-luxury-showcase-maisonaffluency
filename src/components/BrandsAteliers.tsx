@@ -2975,11 +2975,11 @@ const BrandsAteliers = () => {
                                   e.stopPropagation();
                                   setQuoteOpen(true);
                                 }}
-                                className="flex items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
+                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-white/60 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer"
                                 aria-label="Request a Quote"
                               >
-                                <MessageSquareQuote size={16} />
-                                <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
+                                <MessageSquareQuote size={14} />
+                                <span className="text-[10px] font-display uppercase tracking-[0.08em] leading-none">Request a Quote</span>
                               </button>
                               <button
                                 onClick={(e) => {
