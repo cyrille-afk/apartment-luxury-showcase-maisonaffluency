@@ -15,7 +15,7 @@ const CompareFab = () => {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.9 }}
         transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
-        className="fixed bottom-24 md:bottom-8 right-4 md:right-8 z-[9999] flex items-center gap-2"
+        className="fixed bottom-[45vh] md:bottom-8 right-4 md:right-8 z-[9999] flex items-center gap-2"
       >
         {/* Clear button */}
         <motion.button
