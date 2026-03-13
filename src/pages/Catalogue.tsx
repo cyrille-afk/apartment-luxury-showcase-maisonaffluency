@@ -391,33 +391,90 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   );
 }
 
-/* ─── Gallery Room Product Row ─── */
-function ProductRow({ product }: { product: CatalogueProduct }) {
-  const heading = product.designer_name
-    ? `${product.product_name} by ${product.designer_name}`
-    : product.product_name;
+/* ─── Gallery Room Card (mirrors DesignerCard layout) ─── */
+function RoomCard({ group }: { group: GalleryRoomGroup }) {
+  const [showAll, setShowAll] = useState(false);
+  const visibleProducts = showAll ? group.products : group.products.slice(0, 4);
+  const roomThumb = getRoomThumbnail(group.room);
 
   return (
-    <div className="flex gap-5 py-5 border-b border-border/50 last:border-b-0">
-      {product.product_image_url ? (
-        <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 bg-muted/30 flex items-center justify-center overflow-hidden">
-          <img src={product.product_image_url} alt={product.product_name} className="max-w-full max-h-full object-contain" loading="lazy" />
-        </div>
-      ) : (
-        <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 bg-muted/20 flex items-center justify-center">
-          <span className="text-[10px] text-muted-foreground">No image</span>
-        </div>
-      )}
-      <div className="flex flex-col justify-center min-w-0">
-        <h4 className="text-sm md:text-[15px] font-serif italic text-foreground leading-snug">{heading}</h4>
-        {product.materials && <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{product.materials}</p>}
-        {product.dimensions && (
-          <div className="mt-2">
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Dimensions</p>
-            <p className="text-xs text-foreground">{product.dimensions}</p>
+    <div className="mb-10 pb-8 border-b border-border/40 last:border-b-0">
+      {/* Room header — image + title/experience */}
+      <div className="flex gap-5 md:gap-8 mb-5">
+        {roomThumb && (
+          <div className="w-24 h-24 md:w-32 md:h-32 flex-shrink-0 overflow-hidden bg-muted/20 rounded-sm">
+            <img
+              src={roomThumb}
+              alt={group.room}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
           </div>
         )}
+        <div className="flex flex-col justify-center min-w-0">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
+            {group.experience}
+          </p>
+          <h3 className="text-base md:text-lg font-serif italic text-foreground leading-snug">
+            {group.room}
+          </h3>
+          <p className="text-xs text-muted-foreground mt-2">
+            {group.products.length} {group.products.length === 1 ? "piece" : "pieces"}
+          </p>
+        </div>
       </div>
+
+      {/* Products grid */}
+      {group.products.length > 0 && (
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-3">
+            Products in this room
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {visibleProducts.map((product) => {
+              const heading = product.designer_name
+                ? `${product.product_name} by ${product.designer_name}`
+                : product.product_name;
+              return (
+                <div key={product.id} className="group">
+                  {product.product_image_url ? (
+                    <div className="aspect-square bg-muted/20 overflow-hidden mb-2">
+                      <img
+                        src={product.product_image_url}
+                        alt={product.product_name}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-square bg-muted/20 flex items-center justify-center mb-2">
+                      <span className="text-[10px] text-muted-foreground">No image</span>
+                    </div>
+                  )}
+                  <p className="text-xs font-serif text-foreground leading-tight">{heading}</p>
+                  {product.materials && (
+                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{product.materials}</p>
+                  )}
+                  {product.dimensions && (
+                    <p className="text-[10px] text-foreground mt-0.5">{product.dimensions}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {group.products.length > 4 && !showAll && (
+            <button
+              onClick={() => setShowAll(true)}
+              className="mt-3 text-xs text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
+            >
+              Show all {group.products.length} pieces →
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
     </div>
   );
 }
