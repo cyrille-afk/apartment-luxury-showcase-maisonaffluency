@@ -8,14 +8,14 @@ const CompareFab = () => {
 
   if (items.length === 0) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.9 }}
         transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
-        className="fixed bottom-24 md:bottom-8 right-4 md:right-8 z-[90] flex items-center gap-2"
+        className="fixed bottom-24 md:bottom-8 right-4 md:right-8 z-[9999] flex items-center gap-2"
       >
         {/* Clear button */}
         <motion.button
@@ -23,7 +23,7 @@ const CompareFab = () => {
           animate={{ opacity: 1, scale: 1 }}
           onClick={clearAll}
           className="p-2 rounded-full bg-foreground/80 text-background hover:bg-foreground transition-all shadow-lg backdrop-blur-sm"
-          aria-label="Clear comparison"
+          aria-label="Clear selection"
         >
           <X size={16} />
         </motion.button>
@@ -59,7 +59,8 @@ const CompareFab = () => {
           ))}
         </div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 
