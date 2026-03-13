@@ -3001,6 +3001,7 @@ const FeaturedDesigners = () => {
 
         {/* Curators' Picks Lightbox Dialog */}
         <Dialog
+          modal={false}
           open={!!curatorPicksDesigner}
           onOpenChange={(open) => {
             if (!open) {

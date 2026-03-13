@@ -2729,6 +2729,7 @@ const BrandsAteliers = () => {
 
         {/* Curators' Picks Lightbox */}
         <Dialog
+          modal={false}
           open={!!picksDesignerName}
           onOpenChange={(open) => {
             if (!open) {
