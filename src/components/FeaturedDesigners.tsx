@@ -1422,6 +1422,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   {
     id: "jean-michel-frank",
     name: "JEAN-MICHEL FRANK",
+    displayName: "Jean-Michel Frank - Ecart Paris",
     specialty: "Minimalist Luxury & Art Deco Pioneer",
     image: jeanMichelFrankImg,
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/v1772270649/Screen_Shot_2026-02-28_at_5.23.19_PM_widtwe.png",
