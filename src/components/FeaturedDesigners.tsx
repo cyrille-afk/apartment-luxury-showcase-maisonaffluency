@@ -141,6 +141,7 @@ import hamreiPick3 from "@/assets/curators-picks/hamrei-3.jpg";
 import hamreiPick4 from "@/assets/curators-picks/hamrei-4.jpg";
 import hamreiPick5 from "@/assets/curators-picks/hamrei-5.jpg";
 import hamreiPick6 from "@/assets/curators-picks/hamrei-6.jpg";
+const hamreiPick7 = cloudinaryUrl("Screen_Shot_2026-03-11_at_9.07.00_AM_rjjwg3", { width: 1200, quality: "auto:good", crop: "fill" });
 import jmwPick1 from "@/assets/curators-picks/jmw-1.webp";
 import jmwPick2 from "@/assets/curators-picks/jmw-2.png";
 import jmwPick3 from "@/assets/curators-picks/jmw-3.png";
@@ -1403,6 +1404,14 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Tables", "Dining Table"],
         materials: "Hand-chiseled stone top, textured earthenware ceramic base",
         dimensions: "Ø120 × H75 cm (customisable)"
+      },
+      {
+        image: hamreiPick7,
+        title: "PéPé S Icewood x FJ Hakimian Dining Chair",
+        category: "Seating",
+        tags: ["Seating", "Dining Chair"],
+        description: "Antique brass finished frame, hand-upholstered backrest in FJ Hakimian repurposed woven leather, seamless thick \"piping\" and seat upholstered in FJ Hakimian handwoven Japanese icewood",
+        dimensions: "W 51 × D 59 × H 86 cm — SH 46 cm"
       },
     ],
     links: [
