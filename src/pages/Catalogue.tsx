@@ -475,9 +475,7 @@ function RoomCard({ group }: { group: GalleryRoomGroup }) {
     </div>
   );
 }
-    </div>
-  );
-}
+
 
 /* ─── Brand Designer Card ─── */
 function DesignerCard({ designer }: { designer: BrandCatalogueDesigner }) {
