@@ -26,6 +26,7 @@ const ExitIntentBanner = lazy(() => import("@/components/ExitIntentBanner"));
 const StickyBottomNav = lazy(() => import("@/components/StickyBottomNav"));
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
+const ParallaxInterlude = lazy(() => import("@/components/ParallaxInterlude"));
 
 /**
  * Parse deep-link hash: #designer/<id>, #collectible/<id>, #atelier/<slug>
