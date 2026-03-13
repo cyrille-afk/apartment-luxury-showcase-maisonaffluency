@@ -46,7 +46,7 @@ const variantClasses = {
     "bg-white/20 hover:bg-white/35 border border-white/20 text-white backdrop-blur-sm",
   /** Green-branded variant — stands out on mobile inside accordion content */
   branded:
-    "bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/30 text-[#25D366] md:bg-white md:hover:bg-white/90 md:border-border/30 md:text-muted-foreground",
+    "bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] md:bg-[#25D366]/10 md:hover:bg-[#25D366]/20 md:border-[#25D366]/30 md:text-[#1da851] md:font-semibold",
   /** Prominent white variant with stronger contrast for mobile */
   prominent:
     "bg-white hover:bg-white/90 border border-foreground/20 text-foreground shadow-sm md:border-border/30 md:text-muted-foreground md:shadow-none",
