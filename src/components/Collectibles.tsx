@@ -1396,10 +1396,10 @@ const Collectibles = () => {
                               e.stopPropagation();
                               setQuoteOpen(true);
                             }}
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-white/60 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer"
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-white/60 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer whitespace-nowrap"
                             aria-label="Request a Quote"
                           >
-                            <MessageSquareQuote size={14} />
+                            <MessageSquareQuote size={14} className="shrink-0" />
                             <span className="text-[10px] font-display uppercase tracking-[0.08em] leading-none">Request a Quote</span>
                           </button>
                           <button
@@ -1408,7 +1408,7 @@ const Collectibles = () => {
                               togglePin({ pick: currentPick, designerName, designerId, section: "collectibles" });
                             }}
                             className={cn(
-                              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-all duration-300 cursor-pointer",
+                              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-all duration-300 cursor-pointer whitespace-nowrap",
                               isPinned(currentPick.title, designerId)
                                 ? "bg-[hsl(var(--gold)/0.2)] border-[hsl(var(--gold)/0.4)] text-white/80"
                                 : "bg-white/5 border-white/15 text-white/60 hover:text-white hover:bg-white/10",
@@ -1416,7 +1416,7 @@ const Collectibles = () => {
                             )}
                             aria-label={isPinned(currentPick.title, designerId) ? "Remove from selection" : "Pin your selection of 3"}
                           >
-                            <Scale size={14} />
+                            <Scale size={14} className="shrink-0" />
                             <span className="text-[10px] font-display uppercase tracking-[0.08em] leading-none">
                               {isPinned(currentPick.title, designerId) ? "Pinned" : "Pin your selection of 3"}
                             </span>
