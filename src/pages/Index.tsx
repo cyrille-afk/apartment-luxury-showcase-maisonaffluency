@@ -370,6 +370,7 @@ const Index = () => {
                 attribution="The Maison Affluency Curation Philosophy"
                 overlayOpacity={0.15}
                 objectPosition="left center"
+              />
             </Suspense>
 
             <Suspense fallback={null}>
