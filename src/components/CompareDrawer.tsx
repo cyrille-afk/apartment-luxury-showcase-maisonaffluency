@@ -57,7 +57,7 @@ const CompareDrawer = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: idx * 0.1 }}
-                    className="flex flex-col"
+                    className="flex flex-col h-full"
                   >
                     {/* Image */}
                     <div className="relative aspect-[4/5] bg-[#f0eeeb] rounded-sm overflow-hidden flex items-center justify-center mb-4">
