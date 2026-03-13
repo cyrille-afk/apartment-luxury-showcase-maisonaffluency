@@ -28,8 +28,8 @@ const ParallaxInterlude = ({
   overlayOpacity = 0.5,
   reverse = false,
   objectPosition = "center",
+}: ParallaxInterludeProps) => {
   const srcSet = useMemo(() => imageUrl.includes("w_") ? buildSrcSet(imageUrl) : undefined, [imageUrl]);
-
   const ref = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
