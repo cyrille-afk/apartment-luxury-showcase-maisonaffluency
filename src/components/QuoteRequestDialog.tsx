@@ -4,6 +4,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { X, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEngagement } from "@/lib/analytics";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -104,6 +105,9 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
         ].filter(Boolean).join('\n')
       );
       window.location.href = `mailto:concierge@myaffluency.com?subject=${subject}&body=${mailBody}`;
+
+      // Track quote request in GA4
+      trackEngagement.quoteRequest(productName || "Unknown", designerName || "Unknown");
 
       toast({
         title: "Quote Request Sent",

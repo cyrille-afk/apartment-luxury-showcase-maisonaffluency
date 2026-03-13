@@ -102,6 +102,14 @@ const Hero = () => {
           Trade Program
         </button>
       </div>
+
+      {/* Scroll indicator — subtle animated chevron */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 hidden md:flex flex-col items-center gap-1 hero-fade-in-delayed-4" style={{ animationDelay: "1.8s" }}>
+        <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 font-body">Scroll</span>
+        <div className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center pt-1.5">
+          <div className="w-1 h-2 rounded-full bg-white/50 animate-bounce" style={{ animationDuration: "2s" }} />
+        </div>
+      </div>
     </section>
   );
 };

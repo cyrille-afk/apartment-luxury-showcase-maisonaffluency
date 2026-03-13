@@ -43,3 +43,76 @@ export const trackCTA = {
       event_label: source,
     }),
 };
+
+/** Scroll depth tracking — fires once per milestone */
+const firedMilestones = new Set<number>();
+const MILESTONES = [25, 50, 75, 90, 100];
+
+export const initScrollDepthTracking = () => {
+  if (typeof window === "undefined") return;
+
+  const handler = () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight <= 0) return;
+    const pct = Math.round((scrollTop / docHeight) * 100);
+
+    for (const milestone of MILESTONES) {
+      if (pct >= milestone && !firedMilestones.has(milestone)) {
+        firedMilestones.add(milestone);
+        trackEvent("scroll_depth", {
+          event_category: "Engagement",
+          percent_scrolled: milestone,
+        });
+      }
+    }
+  };
+
+  let ticking = false;
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(() => {
+        handler();
+        ticking = false;
+      });
+    }
+  }, { passive: true });
+};
+
+/** Engagement event helpers */
+export const trackEngagement = {
+  lightboxOpen: (productName: string, section: string) =>
+    trackEvent("lightbox_open", {
+      event_category: "Engagement",
+      event_label: productName,
+      section,
+    }),
+
+  pdfDownload: (productName: string, designer: string) =>
+    trackEvent("pdf_download", {
+      event_category: "Engagement",
+      event_label: productName,
+      designer,
+    }),
+
+  quoteRequest: (productName: string, designer: string) =>
+    trackEvent("quote_request", {
+      event_category: "Conversion",
+      event_label: productName,
+      designer,
+    }),
+
+  pinItem: (productName: string, section: string) =>
+    trackEvent("pin_item", {
+      event_category: "Engagement",
+      event_label: productName,
+      section,
+    }),
+
+  sectionView: (sectionName: string) =>
+    trackEvent("section_view", {
+      event_category: "Navigation",
+      event_label: sectionName,
+    }),
+};
