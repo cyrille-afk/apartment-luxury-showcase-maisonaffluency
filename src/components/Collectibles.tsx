@@ -1070,7 +1070,15 @@ const Collectibles = () => {
                             </a>
                           )}
                           <h3 className="font-serif text-xl md:text-2xl text-foreground group-hover:text-primary transition-colors duration-300">
-                            {designer.name}
+                            {(() => {
+                              const fmt = formatDesignerName(designer.name);
+                              return fmt.brand ? (
+                                <>
+                                  {fmt.brand}
+                                  <span className="text-lg text-foreground/70"> — {fmt.person}</span>
+                                </>
+                              ) : fmt.person;
+                            })()}
                           </h3>
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
