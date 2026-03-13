@@ -1319,6 +1319,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         edition: "Edition of 10",
         description: "Coffee.03 by Forest & Giaconia for Archimobilier is a geometric coffee table combining wood and lacquer in a modular, grid-inspired design."
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773191627/Screen_Shot_2026-03-11_at_9.13.19_AM_xvpcuj.png",
+        title: "BOB Armchair",
+        subtitle: "for Delcourt Collection",
+        category: "Seating",
+        tags: ["Seating", "Armchairs"],
+        materials: "Wooden frame (choice of brushed oak tints) upholstered in a choice of fabrics",
+        dimensions: "W 120 x D 89 x H 70 cm",
+        description: "The BOB Armchair by Forest & Giaconia for Delcourt Collection is a generously proportioned lounge chair combining a refined wooden frame in brushed oak with sumptuous upholstery, offering both sculptural presence and deep comfort."
+      },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/forest.giaconia/" },
