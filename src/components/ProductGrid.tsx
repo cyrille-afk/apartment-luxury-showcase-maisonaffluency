@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, FileDown, ChevronLeft, ChevronRight, ArrowUp, Maximize2, Minimize2, MessageSquareQuote, Search } from "lucide-react";
+import { X, FileDown, ChevronLeft, ChevronRight, ArrowUp, Maximize2, Minimize2, MessageSquareQuote, Search, Scale } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
@@ -9,6 +9,7 @@ import QuoteRequestDialog from "./QuoteRequestDialog";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
+import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
