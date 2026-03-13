@@ -1796,6 +1796,7 @@ const brandToDesignerMap: Record<string, string> = {
   "Peter Reed 1861": "peter-reed",
   "Alpange": "alpange",
   "Pouenat": "pouenat",
+  "Pierre Frey": "pierre-frey",
 };
 
 // Reverse map: designer ID → brand name (for deep-link resolution)
