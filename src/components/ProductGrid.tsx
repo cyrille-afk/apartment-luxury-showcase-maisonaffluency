@@ -166,13 +166,16 @@ const normalizeSearchText = (value?: string) =>
     .toLowerCase()
     .trim();
 
+// Build once at module level — inputs are static, no need for per-instance useMemo
+const _sharedProductList = buildProductList(atelierOnlyPicks);
+
 const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
   const [textQuery, setTextQuery] = useState<string | null>(null);
-  const allProducts = useMemo(() => buildProductList(atelierOnlyPicks), []);
+  const allProducts = _sharedProductList;
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
