@@ -365,7 +365,7 @@ const Index = () => {
             {/* Interlude 1: After Curating Team → Before Designers */}
             <Suspense fallback={null}>
               <ParallaxInterlude
-                imageUrl="https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=1920&q=80&auto=format&fit=crop"
+                imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773373444/Screen_Shot_2026-03-13_at_11.43.34_AM_xzayo8.png"
                 quote="Every piece of furniture tells a story — of the hands that shaped it, the material that gave it life, and the space it was destined to inhabit"
                 attribution="The Maison Affluency Curation Philosophy"
                 overlayOpacity={0.55}
