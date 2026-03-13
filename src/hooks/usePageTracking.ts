@@ -1,12 +1,19 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { initScrollDepthTracking } from "@/lib/analytics";
 
 /**
  * Tracks page views in GA4. Waits for gtag to be available
  * (it loads after a 3s delay for LCP optimization).
+ * Also initializes scroll depth tracking on mount.
  */
 const usePageTracking = () => {
   const location = useLocation();
+
+  // Initialize scroll depth tracking once
+  useEffect(() => {
+    initScrollDepthTracking();
+  }, []);
 
   useEffect(() => {
     const sendPageView = () => {
