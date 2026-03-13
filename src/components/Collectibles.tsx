@@ -1390,7 +1390,7 @@ const Collectibles = () => {
                       const designerId = curatorPicksDesigner.id ?? curatorPicksDesigner.name;
                       const designerName = curatorPicksDesigner.name;
                       return (
-                        <div className="hidden md:flex absolute top-full -right-14 mt-2 flex-col items-end gap-2 z-20">
+                        <div className="hidden md:flex absolute top-full right-0 mt-2 flex-col items-end gap-2 z-20">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
