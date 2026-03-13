@@ -349,6 +349,7 @@ export const collectibleDesigners: Array<{
 const Collectibles = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { isPinned, togglePin, items: compareItems } = useCompare();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof collectibleDesigners[0] | null>(null);

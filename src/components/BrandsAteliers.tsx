@@ -2093,6 +2093,7 @@ function AlphaStrip({
 const BrandsAteliers = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { isPinned, togglePin, items: compareItems } = useCompare();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);

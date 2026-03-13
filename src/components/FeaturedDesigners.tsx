@@ -2189,6 +2189,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
 const FeaturedDesigners = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { isPinned, togglePin, items: compareItems } = useCompare();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
