@@ -6,7 +6,7 @@ import { CompareProvider } from "@/contexts/CompareContext";
 // Lazy-load non-landing pages and non-critical UI
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
-const Catalogue = lazy(() => import("./pages/Catalogue"));
+
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
