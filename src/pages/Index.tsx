@@ -369,7 +369,7 @@ const Index = () => {
                 quote="Every piece of furniture tells a story — of the hands that shaped it, the material that gave it life, and the space it was destined to inhabit"
                 attribution="The Maison Affluency Curation Philosophy"
                 overlayOpacity={0.15}
-              />
+                objectPosition="left center"
             </Suspense>
 
             <Suspense fallback={null}>
