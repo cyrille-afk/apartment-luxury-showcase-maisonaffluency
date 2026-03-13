@@ -484,11 +484,11 @@ function DesignerCard({ designer }: { designer: BrandCatalogueDesigner }) {
     <div className="mb-10 pb-8 border-b border-border/40 last:border-b-0">
       {/* Profile header — designer image prominent */}
       {designer.profileImage && (
-        <div className="w-full aspect-[16/9] md:aspect-[2/1] overflow-hidden bg-muted/10 mb-5 rounded-sm">
+        <div className="w-full max-w-2xl mx-auto overflow-hidden bg-muted/10 mb-6 rounded-sm">
           <img
             src={designer.profileImage}
             alt={designer.name}
-            className="w-full h-full object-cover"
+            className="w-full h-auto object-contain"
             loading="lazy"
           />
         </div>
