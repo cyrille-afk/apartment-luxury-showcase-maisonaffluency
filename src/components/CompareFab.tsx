@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Scale, X } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
+import { createPortal } from "react-dom";
 
 const CompareFab = () => {
   const { items, setIsComparing, clearAll } = useCompare();
