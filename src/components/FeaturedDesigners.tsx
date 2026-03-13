@@ -3008,11 +3008,15 @@ const FeaturedDesigners = () => {
           open={!!curatorPicksDesigner}
           onOpenChange={(open) => {
             if (!open) {
+              const shouldRestore = !!sessionStorage.getItem('__gallery_hotspot_restore');
               setCuratorPicksDesigner(null);
               setCuratorPickIndex(0);
               setIsZoomed(false);
               if (!closedViaPopstateRef.current) {
                 window.history.back();
+              }
+              if (shouldRestore) {
+                setTimeout(() => window.dispatchEvent(new Event('gallery-hotspot-return')), 200);
               }
             }
           }}

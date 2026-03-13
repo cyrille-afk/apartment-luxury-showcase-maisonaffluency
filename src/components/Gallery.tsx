@@ -421,6 +421,27 @@ const Gallery = () => {
     window.addEventListener('openGalleryLightbox', handleOpenLightbox as EventListener);
     return () => window.removeEventListener('openGalleryLightbox', handleOpenLightbox as EventListener);
   }, [allItems.length]);
+
+  // Restore gallery lightbox after returning from curators' picks (opened via hotspot "View details")
+  useEffect(() => {
+    const handleRestore = () => {
+      const raw = sessionStorage.getItem('__gallery_hotspot_restore');
+      if (!raw) return;
+      sessionStorage.removeItem('__gallery_hotspot_restore');
+      try {
+        const { imageIdentifier } = JSON.parse(raw);
+        for (let si = 0; si < galleryExperiences.length; si++) {
+          const ii = galleryExperiences[si].items.findIndex(item => item.title === imageIdentifier);
+          if (ii >= 0) {
+            openLightbox(si, ii);
+            return;
+          }
+        }
+      } catch {}
+    };
+    window.addEventListener('gallery-hotspot-return', handleRestore);
+    return () => window.removeEventListener('gallery-hotspot-return', handleRestore);
+  }, []);
   const openLightbox = (sectionIndex: number, itemIndex: number) => {
     setCurrentSectionIndex(sectionIndex);
     setCurrentItemIndex(itemIndex);
