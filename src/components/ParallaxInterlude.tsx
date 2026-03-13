@@ -9,6 +9,8 @@ interface ParallaxInterludeProps {
   overlayOpacity?: number;
   /** Reverse parallax direction */
   reverse?: boolean;
+  /** CSS object-position for the image, default "center" */
+  objectPosition?: string;
 }
 
 const ParallaxInterlude = ({
