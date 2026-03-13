@@ -3286,7 +3286,7 @@ const FeaturedDesigners = () => {
                               )}
                               aria-label={isPinned(currentPick.title, designerId) ? "Remove from selection" : "Pin your selection of 3"}
                             >
-                              <Scale size={14} />
+                              <Scale size={14} className="shrink-0" />
                               <span className="text-[10px] font-display uppercase tracking-[0.08em] leading-none">
                                 {isPinned(currentPick.title, designerId) ? "Pinned" : "Pin your selection of 3"}
                               </span>

@@ -670,7 +670,7 @@ function singularizeSub(s: string): string {
                           )}
                           aria-label={isPinned(currentItem.pick.title, currentItem.designerId) ? "Remove from selection" : "Pin your selection of 3"}
                         >
-                          <Scale size={14} />
+                          <Scale size={14} className="shrink-0" />
                           <span className="text-[10px] font-display uppercase tracking-[0.08em] leading-none">
                             {isPinned(currentItem.pick.title, currentItem.designerId) ? "Pinned" : "Pin your selection of 3"}
                           </span>
