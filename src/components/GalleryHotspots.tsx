@@ -284,7 +284,12 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox }: GalleryH
                                 if (url.startsWith('/#')) hash = url.slice(1);
                                 if (hash.startsWith('#/curators/')) hash = '#curators/' + hash.slice('#/curators/'.length);
                                 setActiveId(null);
-                                window.dispatchEvent(new CustomEvent('open-curators-pick', { detail: hash }));
+                                // Save restore context so gallery lightbox re-opens after curators' picks closes
+                                sessionStorage.setItem('__gallery_hotspot_restore', JSON.stringify({ imageIdentifier }));
+                                onCloseLightbox?.();
+                                setTimeout(() => {
+                                  window.dispatchEvent(new CustomEvent('open-curators-pick', { detail: hash }));
+                                }, 150);
                               } else {
                                 onCloseLightbox?.();
                                 setTimeout(() => { window.location.href = url; }, 300);

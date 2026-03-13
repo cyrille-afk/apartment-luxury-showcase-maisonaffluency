@@ -2182,6 +2182,7 @@ const BrandsAteliers = () => {
   const isClosingPicksRef = useRef(false);
 
   const resetPicksState = useCallback(() => {
+    const shouldRestore = !!sessionStorage.getItem('__gallery_hotspot_restore');
     setPicksDesignerName(null);
     setPicksIndex(0);
     setPicksZoomed(false);
@@ -2190,6 +2191,9 @@ const BrandsAteliers = () => {
     // Clear curators hash so hashchange listener doesn't reopen the dialog
     if (window.location.hash.startsWith('#curators/')) {
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    if (shouldRestore) {
+      setTimeout(() => window.dispatchEvent(new Event('gallery-hotspot-return')), 200);
     }
   }, []);
 
