@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { fetchCatalogueData, type GalleryRoomGroup, type CatalogueProduct } from "@/lib/catalogueData";
 import { getBrandCatalogueData, type BrandCatalogueCategory, type BrandCatalogueDesigner } from "@/lib/brandCatalogueData";
 import { syncHotspotMaterials } from "@/lib/syncHotspotMaterials";
