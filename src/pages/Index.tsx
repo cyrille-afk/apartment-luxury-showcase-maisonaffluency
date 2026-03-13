@@ -404,7 +404,7 @@ const Index = () => {
             {/* Interlude 3: After Collectibles → Before Ateliers */}
             <Suspense fallback={null}>
               <ParallaxInterlude
-                imageUrl="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1920&q=80&auto=format&fit=crop"
+                imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773374192/Screen_Shot_2026-03-13_at_11.55.51_AM_vbstnu.png"
                 quote="An atelier is more than a workshop — it is a sanctuary where tradition meets innovation, and every detail is an act of devotion"
                 attribution="The Atelier Experience"
                 overlayOpacity={0.5}
