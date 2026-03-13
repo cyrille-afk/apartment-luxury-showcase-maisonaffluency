@@ -57,11 +57,12 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
     }
 
     // Settled — now back up and smooth-scroll in so the user sees nearby content.
-    // Only apply lead-in when the scroll distance is large enough to warrant it;
-    // for nearby sections (like overview right below hero) just smooth-scroll directly.
+    // Only skip lead-in for very short scrolls (e.g. overview right below hero).
+    // A parallax interlude is ~50-70vh tall, so even adjacent sections are far enough.
     if (behavior === "smooth") {
       const scrollDistance = Math.abs(nextTop - window.scrollY);
-      if (scrollDistance > LEAD_IN_DISTANCE * 1.5) {
+      const MIN_DISTANCE_FOR_LEADIN = 800;
+      if (scrollDistance > MIN_DISTANCE_FOR_LEADIN) {
         const leadInY = Math.max(0, nextTop - LEAD_IN_DISTANCE);
         window.scrollTo({ top: leadInY, behavior: instant });
         // Small delay so the instant jump completes before smooth scroll begins
