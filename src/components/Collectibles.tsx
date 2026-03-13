@@ -1074,16 +1074,16 @@ const Collectibles = () => {
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-sm md:text-base text-primary font-body">{designer.specialty}</p>
-                          <div className="hidden md:block">
-                            <WhatsAppShareButton
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                shareProfileOnWhatsApp("collectible", designer.id ?? designer.name, designer.name, designer.specialty);
-                                trackCTA.whatsapp(`Collectibles_Share_${designer.name}`);
-                              }}
-                              label={`Share ${designer.name} on WhatsApp`}
-                            />
-                          </div>
+                        </div>
+                        <div className="hidden md:flex mt-1.5">
+                          <WhatsAppShareButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              shareProfileOnWhatsApp("collectible", designer.id ?? designer.name, designer.name, designer.specialty);
+                              trackCTA.whatsapp(`Collectibles_Share_${designer.name}`);
+                            }}
+                            label={`Share ${designer.name} on WhatsApp`}
+                          />
                         </div>
                       </div>
                     {/* On View thumbnails — right side */}
