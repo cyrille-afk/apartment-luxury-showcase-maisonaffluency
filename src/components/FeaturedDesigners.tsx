@@ -24,6 +24,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
+import { formatDesignerName } from "@/lib/nameFormat";
 
 // Designer profile images — served via Cloudinary CDN
 const dImg = (name: string) =>
@@ -2773,33 +2774,37 @@ const FeaturedDesigners = () => {
                           </a>
                         )}
                         <h3 className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 group-hover:text-primary">
-                          <span className="hidden md:inline">
-                            {((designer as any).displayName || designer.name).includes(' - ') ? (
+                          {(() => {
+                            const fmt = formatDesignerName(designer.name, (designer as any).displayName);
+                            const mobileLines = (designer as any).mobileNameLines;
+                            return (
                               <>
-                                {((designer as any).displayName || designer.name).split(' - ')[0]}
-                                <span className="text-lg text-foreground/70"> - {((designer as any).displayName || designer.name).split(' - ').slice(1).join(' - ')}</span>
+                                <span className="hidden md:inline">
+                                  {fmt.brand ? (
+                                    <>
+                                      {fmt.brand}
+                                      <span className="text-lg text-foreground/70"> — {fmt.person}</span>
+                                    </>
+                                  ) : fmt.person}
+                                </span>
+                                <span className="md:hidden">
+                                  {mobileLines ? (
+                                    <>
+                                      {mobileLines[0]}
+                                      <br />
+                                      <span className="text-lg">{mobileLines[1]}</span>
+                                    </>
+                                  ) : fmt.brand ? (
+                                    <>
+                                      {fmt.brand}
+                                      <br />
+                                      <span className="text-lg">{fmt.person}</span>
+                                    </>
+                                  ) : fmt.person}
+                                </span>
                               </>
-                            ) : (
-                              (designer as any).displayName || designer.name
-                            )}
-                          </span>
-                          <span className="md:hidden">
-                            {(designer as any).mobileNameLines ? (
-                              <>
-                                {(designer as any).mobileNameLines[0]}
-                                <br />
-                                <span className="text-lg">{(designer as any).mobileNameLines[1]}</span>
-                              </>
-                            ) : ((designer as any).displayName || designer.name).includes(' - ') ? (
-                              <>
-                                {((designer as any).displayName || designer.name).split(' - ')[0]}
-                                <br />
-                                <span className="text-lg">{((designer as any).displayName || designer.name).split(' - ').slice(1).join(' - ')}</span>
-                              </>
-                            ) : (
-                              (designer as any).displayName || designer.name
-                            )}
-                          </span>
+                            );
+                          })()}
                         </h3>
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
