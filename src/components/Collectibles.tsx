@@ -1072,54 +1072,81 @@ const Collectibles = () => {
                             {designer.name}
                           </h3>
                         </div>
-                        <p className="text-sm md:text-base text-primary font-body">{designer.specialty}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-sm md:text-base text-primary font-body">{designer.specialty}</p>
+                          <div className="hidden md:block">
+                            <WhatsAppShareButton
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                shareProfileOnWhatsApp("collectible", designer.id ?? designer.name, designer.name, designer.specialty);
+                                trackCTA.whatsapp(`Collectibles_Share_${designer.name}`);
+                              }}
+                              label={`Share ${designer.name} on WhatsApp`}
+                            />
+                          </div>
+                        </div>
                       </div>
-                    {/* WhatsApp share + Logo — matches Designers & Makers layout */}
-                    <div className="hidden md:flex items-center gap-6 flex-shrink-0 mr-8">
-                      <WhatsAppShareButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              shareProfileOnWhatsApp("collectible", designer.id ?? designer.name, designer.name, designer.specialty);
-                              trackCTA.whatsapp(`Collectibles_Share_${designer.name}`);
-                            }}
-                            label={`Share ${designer.name} on WhatsApp`}
-                          />
-                      <div className="flex items-center justify-center w-12 h-12 rounded-full border border-[hsl(var(--gold)/0.3)] bg-[hsl(var(--gold)/0.06)]">
-                        <span className="font-serif text-lg text-[hsl(var(--gold))] select-none leading-none">
-                          {designer.name.charAt(0)}
-                        </span>
-                      </div>
+                    {/* On View thumbnails — right side */}
+                    {designer.notableWorksLink && (() => {
+                      const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
+                      return (
+                        <div className="hidden md:flex items-center gap-3 flex-shrink-0 mr-8">
+                          <span className="text-xs text-muted-foreground uppercase tracking-wider"><em>On View</em></span>
+                          <div className="relative group/avatar">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                                  detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` }
+                                }));
+                              }}
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onTouchEnd={(e) => e.stopPropagation()}
+                              className="relative w-11 h-11 md:w-12 md:h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-125 hover:z-10 transition-all duration-300 touch-manipulation"
+                              aria-label={`View ${designer.notableWorksLink!.text} in gallery`}
+                            >
+                              {thumb && (
+                                <img src={thumb} alt={designer.notableWorksLink!.text} className="w-full h-full object-cover blur-[0.5px] group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
+                              )}
+                            </button>
+                            <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1 flex items-center gap-0.5 text-xs font-body text-muted-foreground whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                              <CornerDownRight className="w-3 h-3" /> {designer.notableWorksLink!.text}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                     </div>
-                    </div>
+                    {/* Mobile: On View below header */}
                     {designer.notableWorksLink && (() => {
                       const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
                       return (
                         <>
-                        <div className="w-16 md:w-24 h-px bg-[hsl(var(--gold)/0.4)] mt-0.5 ml-[7.5rem] md:ml-[11.5rem]" />
-                        <div className="flex items-start md:items-center gap-2 w-full ml-[7.5rem] md:ml-0 md:justify-start md:pl-[25%] -mt-0.5 pr-4 md:pr-0">
-                          <span className="text-[10px] md:text-xs text-foreground uppercase tracking-wider mr-2 mt-3.5 md:mt-0"><em>On View</em></span>
-                          <div className="flex gap-5 md:gap-6">
-                            <div className="relative group/avatar pb-4 md:pb-0">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                    detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` }
-                                  }));
-                                }}
-                                onPointerDown={(e) => e.stopPropagation()}
-                                onTouchEnd={(e) => e.stopPropagation()}
-                                className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-125 hover:z-10 transition-all duration-300 touch-manipulation"
-                                aria-label={`View ${designer.notableWorksLink!.text} in gallery`}
-                              >
-                                {thumb && (
-                                  <img src={thumb} alt={designer.notableWorksLink!.text} className="w-full h-full object-cover blur-0 md:blur-[0.5px] md:group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
-                                )}
-                              </button>
-                              <span className="absolute left-0 md:left-0 top-full mt-1 flex items-center gap-0.5 text-[9px] md:text-xs font-body text-foreground md:text-muted-foreground whitespace-nowrap opacity-100 md:opacity-0 md:group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
-                                <CornerDownRight className="w-3 h-3" /> {designer.notableWorksLink!.text}
-                              </span>
-                            </div>
+                        <div className="flex md:hidden items-start gap-2 w-full ml-[7.5rem] -mt-0.5 pr-4">
+                          <div className="w-16 h-px bg-[hsl(var(--gold)/0.4)] mt-0.5 mb-1" />
+                        </div>
+                        <div className="flex md:hidden items-start gap-2 w-full ml-[7.5rem] -mt-0.5 pr-4">
+                          <span className="text-[10px] text-foreground uppercase tracking-wider mr-2 mt-3.5"><em>On View</em></span>
+                          <div className="relative group/avatar pb-4">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                                  detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` }
+                                }));
+                              }}
+                              onPointerDown={(e) => e.stopPropagation()}
+                              onTouchEnd={(e) => e.stopPropagation()}
+                              className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-125 hover:z-10 transition-all duration-300 touch-manipulation"
+                              aria-label={`View ${designer.notableWorksLink!.text} in gallery`}
+                            >
+                              {thumb && (
+                                <img src={thumb} alt={designer.notableWorksLink!.text} className="w-full h-full object-cover" loading="lazy" />
+                              )}
+                            </button>
+                            <span className="absolute left-0 top-full mt-1 flex items-center gap-0.5 text-[9px] font-body text-foreground whitespace-nowrap pointer-events-none z-50">
+                              <CornerDownRight className="w-3 h-3" /> {designer.notableWorksLink!.text}
+                            </span>
                           </div>
                         </div>
                         </>
