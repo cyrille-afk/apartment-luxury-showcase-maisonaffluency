@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState, useRef } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import { CompareProvider } from "@/contexts/CompareContext";
 
 // Lazy-load non-landing pages and non-critical UI
 const NotFound = lazy(() => import("./pages/NotFound"));
