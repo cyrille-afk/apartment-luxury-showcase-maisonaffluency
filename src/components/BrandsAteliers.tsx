@@ -536,6 +536,19 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
+  "pierre-frey": {
+    name: "Pierre Frey",
+    curatorPicks: [
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773364782/Voyage-en-toscane-la-mer-behang-Pierre-Frey-Selected-Wallpapers_s9vnrx.jpg",
+        title: "Voyage en Toscane",
+        category: "Decorative Object",
+        subcategory: "Wallcoverings",
+        tags: ["Decorative Object", "Wallcoverings"],
+        description: "The panoramic VOYAGE EN TOSCANE was created as a Myriorama*.\nThe panels can be displayed in any order. The landscape follows on and is always connected, regardless of the chosen order of display.\nEach reference joins with itself and/or with the additional references (FP611, FP612 and FP613).\n\nA Myriorama is an image, a scene with interchangeable views.",
+      },
+    ],
+  },
 };
 
 // Gallery image index mapping (based on flattened gallery items order)
