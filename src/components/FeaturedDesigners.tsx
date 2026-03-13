@@ -1410,7 +1410,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         title: "PéPé S Icewood x FJ Hakimian Dining Chair",
         category: "Seating",
         tags: ["Seating", "Dining Chair"],
-        description: "Antique brass finished frame, hand-upholstered backrest in FJ Hakimian repurposed woven leather, seamless thick \"piping\" and seat upholstered in FJ Hakimian handwoven Japanese icewood",
+        description: "Antique brass finished frame, hand-upholstered backrest in FJ Hakimian repurposed woven leather,\nseamless thick \"piping\" and seat upholstered in FJ Hakimian handwoven Japanese icewood",
         dimensions: "W 51 × D 59 × H 86 cm — SH 46 cm"
       },
     ],
