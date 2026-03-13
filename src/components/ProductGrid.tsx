@@ -472,7 +472,7 @@ function singularizeSub(s: string): string {
                     "absolute bottom-2 left-2 z-10 p-1.5 rounded-full transition-all duration-300 backdrop-blur-sm",
                     isPinned(item.pick.title, item.designerId)
                       ? "bg-[hsl(var(--gold))] text-foreground shadow-md"
-                      : "bg-black/40 text-white/70 opacity-0 group-hover:opacity-100 hover:bg-black/60",
+                      : "bg-black/40 text-white/70 md:opacity-0 md:group-hover:opacity-100 hover:bg-black/60",
                     compareItems.length >= 3 && !isPinned(item.pick.title, item.designerId) && "pointer-events-none"
                   )}
                   aria-label={isPinned(item.pick.title, item.designerId) ? "Remove from comparison" : "Add to comparison"}
