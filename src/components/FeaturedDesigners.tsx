@@ -1606,6 +1606,15 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Blown glass spheres • Lacquered wood top",
         dimensions: "L150 × W60 × H30 cm"
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto,f_auto/v1773366840/Screen_Shot_2026-03-13_at_9.53.25_AM_mvgrm7.png",
+        title: "Cloud Filigrane",
+        subtitle: "One-off",
+        category: "Lighting",
+        tags: ["Lighting", "Pendant"],
+        materials: "Freehand blown glass • Filigrane technique",
+        dimensions: "H 46 × D 37 × H 43 cm\nRode height to order\nLED 24 V – 8 W – 2700K"
+      },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/jmw_studio" },
