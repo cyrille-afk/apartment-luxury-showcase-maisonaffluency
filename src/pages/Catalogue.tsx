@@ -482,29 +482,27 @@ function DesignerCard({ designer }: { designer: BrandCatalogueDesigner }) {
 
   return (
     <div className="mb-10 pb-8 border-b border-border/40 last:border-b-0">
-      {/* Profile header */}
-      <div className="flex gap-5 md:gap-8 mb-5">
-        {designer.profileImage && (
-          <div className="w-24 h-24 md:w-32 md:h-32 flex-shrink-0 overflow-hidden bg-muted/20">
-            <img
-              src={designer.profileImage}
-              alt={designer.name}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        )}
-        <div className="flex flex-col justify-center min-w-0">
-          <h3 className="text-base md:text-lg font-serif uppercase tracking-wider text-foreground leading-snug">
-            {designer.name}
-          </h3>
-          <p className="text-xs md:text-sm text-muted-foreground mt-2 leading-relaxed line-clamp-3">
-            {designer.description}
-          </p>
-          {designer.website && (
-            <p className="text-xs text-primary mt-2">{designer.website}</p>
-          )}
+      {/* Profile header — designer image prominent */}
+      {designer.profileImage && (
+        <div className="w-full aspect-[16/9] md:aspect-[2/1] overflow-hidden bg-muted/10 mb-5 rounded-sm">
+          <img
+            src={designer.profileImage}
+            alt={designer.name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
         </div>
+      )}
+      <div className="mb-5">
+        <h3 className="text-lg md:text-xl font-serif uppercase tracking-wider text-foreground leading-snug">
+          {designer.name}
+        </h3>
+        <p className="text-xs md:text-sm text-muted-foreground mt-2 leading-relaxed">
+          {designer.description}
+        </p>
+        {designer.website && (
+          <p className="text-xs text-primary mt-2">{designer.website}</p>
+        )}
       </div>
 
       {/* Curator picks grid */}
