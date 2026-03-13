@@ -558,12 +558,81 @@ function RoomCard({ group }: { group: GalleryRoomGroup }) {
 function DesignerCard({ designer }: { designer: BrandCatalogueDesigner }) {
   const [showAllPicks, setShowAllPicks] = useState(false);
   const visiblePicks = showAllPicks ? designer.curatorPicks : designer.curatorPicks.slice(0, 4);
+  const isPortrait = useImageOrientation(designer.profileImage ?? undefined);
 
+  const pickItems = visiblePicks.map((pick, i) => (
+    <div key={i} className="group">
+      {pick.image && (
+        <div className="aspect-square bg-muted/20 overflow-hidden mb-2">
+          <img
+            src={pick.image}
+            alt={pick.title}
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+          />
+        </div>
+      )}
+      <p className="text-xs font-serif text-foreground leading-tight">{pick.title}</p>
+      {pick.materials && (
+        <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{pick.materials}</p>
+      )}
+      {pick.dimensions && (
+        <p className="text-[10px] text-foreground mt-0.5">{pick.dimensions}</p>
+      )}
+    </div>
+  ));
+
+  const infoBlock = (
+    <div className="mb-5">
+      <h3 className="text-lg md:text-xl font-serif uppercase tracking-wider text-foreground leading-snug">
+        {designer.name}
+      </h3>
+      <p className="text-xs md:text-sm text-muted-foreground mt-2 leading-relaxed">
+        {designer.description}
+      </p>
+      {designer.website && (
+        <p className="text-xs text-primary mt-2">{designer.website}</p>
+      )}
+    </div>
+  );
+
+  /* Portrait on desktop → side-by-side */
+  if (isPortrait && designer.profileImage) {
+    return (
+      <div className="mb-10 pb-8 border-b border-border/40 last:border-b-0">
+        <div className="flex flex-col md:flex-row md:gap-8">
+          <div className="md:w-[45%] flex-shrink-0">
+            <div className="overflow-hidden bg-muted/10 mb-4 md:mb-0 rounded-sm">
+              <img
+                src={designer.profileImage}
+                alt={designer.name}
+                className="w-full h-auto object-contain"
+                loading="lazy"
+              />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            {infoBlock}
+            {designer.curatorPicks.length > 0 && (
+              <ProductGrid
+                items={pickItems}
+                showAll={showAllPicks}
+                total={designer.curatorPicks.length}
+                onShowAll={() => setShowAllPicks(true)}
+                label={`Curators' Picks · ${designer.curatorPicks.length} ${designer.curatorPicks.length === 1 ? "piece" : "pieces"}`}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* Landscape / square → stacked */
   return (
     <div className="mb-10 pb-8 border-b border-border/40 last:border-b-0">
-      {/* Profile header — designer image prominent */}
       {designer.profileImage && (
-        <div className="w-full max-w-2xl mx-auto overflow-hidden bg-muted/10 mb-6 rounded-sm">
+        <div className="w-full max-w-3xl mx-auto overflow-hidden bg-muted/10 mb-6 rounded-sm">
           <img
             src={designer.profileImage}
             alt={designer.name}
@@ -572,56 +641,15 @@ function DesignerCard({ designer }: { designer: BrandCatalogueDesigner }) {
           />
         </div>
       )}
-      <div className="mb-5">
-        <h3 className="text-lg md:text-xl font-serif uppercase tracking-wider text-foreground leading-snug">
-          {designer.name}
-        </h3>
-        <p className="text-xs md:text-sm text-muted-foreground mt-2 leading-relaxed">
-          {designer.description}
-        </p>
-        {designer.website && (
-          <p className="text-xs text-primary mt-2">{designer.website}</p>
-        )}
-      </div>
-
-      {/* Curator picks grid */}
+      {infoBlock}
       {designer.curatorPicks.length > 0 && (
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-3">
-            Curators' Picks · {designer.curatorPicks.length} {designer.curatorPicks.length === 1 ? "piece" : "pieces"}
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            {visiblePicks.map((pick, i) => (
-              <div key={i} className="group">
-                {pick.image && (
-                  <div className="aspect-square bg-muted/20 overflow-hidden mb-2">
-                    <img
-                      src={pick.image}
-                      alt={pick.title}
-                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-                <p className="text-xs font-serif text-foreground leading-tight">{pick.title}</p>
-                {pick.materials && (
-                  <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{pick.materials}</p>
-                )}
-                {pick.dimensions && (
-                  <p className="text-[10px] text-foreground mt-0.5">{pick.dimensions}</p>
-                )}
-              </div>
-            ))}
-          </div>
-          {designer.curatorPicks.length > 4 && !showAllPicks && (
-            <button
-              onClick={() => setShowAllPicks(true)}
-              className="mt-3 text-xs text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
-            >
-              Show all {designer.curatorPicks.length} pieces →
-            </button>
-          )}
-        </div>
+        <ProductGrid
+          items={pickItems}
+          showAll={showAllPicks}
+          total={designer.curatorPicks.length}
+          onShowAll={() => setShowAllPicks(true)}
+          label={`Curators' Picks · ${designer.curatorPicks.length} ${designer.curatorPicks.length === 1 ? "piece" : "pieces"}`}
+        />
       )}
     </div>
   );
