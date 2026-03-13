@@ -24,6 +24,8 @@ const ProductGrid = lazy(() => import("@/components/ProductGrid"));
 // competing for bandwidth with LCP-critical resources on mobile.
 const ExitIntentBanner = lazy(() => import("@/components/ExitIntentBanner"));
 const StickyBottomNav = lazy(() => import("@/components/StickyBottomNav"));
+const CompareFab = lazy(() => import("@/components/CompareFab"));
+const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
 
 /**
  * Parse deep-link hash: #designer/<id>, #collectible/<id>, #atelier/<slug>
