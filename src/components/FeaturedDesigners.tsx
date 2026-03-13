@@ -3278,16 +3278,16 @@ const FeaturedDesigners = () => {
                                 togglePin({ pick: currentPick, designerName, designerId, section: "designers" });
                               }}
                               className={cn(
-                                "flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-sm border transition-all duration-300 cursor-pointer",
+                                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-all duration-300 cursor-pointer",
                                 isPinned(currentPick.title, designerId)
-                                  ? "bg-[hsl(var(--gold)/0.3)] border-[hsl(var(--gold)/0.6)] text-white"
-                                  : "bg-white/15 border-white/30 text-white hover:bg-white/25",
+                                  ? "bg-[hsl(var(--gold)/0.2)] border-[hsl(var(--gold)/0.4)] text-white/80"
+                                  : "bg-white/5 border-white/15 text-white/60 hover:text-white hover:bg-white/10",
                                 compareItems.length >= 3 && !isPinned(currentPick.title, designerId) && "opacity-40 pointer-events-none"
                               )}
                               aria-label={isPinned(currentPick.title, designerId) ? "Remove from selection" : "Pin your selection of 3"}
                             >
-                              <Scale size={16} />
-                              <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">
+                              <Scale size={14} />
+                              <span className="text-[10px] font-display uppercase tracking-[0.08em] leading-none">
                                 {isPinned(currentPick.title, designerId) ? "Pinned" : "Pin your selection of 3"}
                               </span>
                             </button>
