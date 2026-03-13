@@ -361,6 +361,17 @@ const Index = () => {
                 <CuratingTeam />
               </Suspense>
             </section>
+
+            {/* Interlude 1: After Curating Team → Before Designers */}
+            <Suspense fallback={null}>
+              <ParallaxInterlude
+                imageUrl="https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=1920&q=80&auto=format&fit=crop"
+                quote="Every piece of furniture tells a story — of the hands that shaped it, the material that gave it life, and the space it was destined to inhabit"
+                attribution="The Maison Affluency Curation Philosophy"
+                overlayOpacity={0.55}
+              />
+            </Suspense>
+
             <Suspense fallback={null}>
               <ProductGrid sectionScope="designers" />
             </Suspense>
