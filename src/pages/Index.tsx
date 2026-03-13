@@ -418,6 +418,13 @@ const Index = () => {
           <ExitIntentBanner />
         </Suspense>
       )}
+
+      {showBelowFoldSections && (
+        <Suspense fallback={null}>
+          <CompareFab />
+          <CompareDrawer />
+        </Suspense>
+      )}
     </>
   );
 };
