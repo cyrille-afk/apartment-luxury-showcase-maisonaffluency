@@ -662,7 +662,7 @@ function singularizeSub(s: string): string {
                             togglePin({ pick: currentItem.pick, designerName: currentItem.designerName, designerId: currentItem.designerId, section: currentItem.section });
                           }}
                           className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-all duration-300 cursor-pointer",
+                            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-all duration-300 cursor-pointer whitespace-nowrap",
                             isPinned(currentItem.pick.title, currentItem.designerId)
                               ? "bg-[hsl(var(--gold)/0.2)] border-[hsl(var(--gold)/0.4)] text-white/80"
                               : "bg-white/5 border-white/15 text-white/60 hover:text-white hover:bg-white/10",
