@@ -1,5 +1,13 @@
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+
+/** Build a responsive srcSet from a Cloudinary URL that contains w_1600 */
+function buildSrcSet(url: string): string {
+  const widths = [640, 960, 1280, 1600];
+  return widths
+    .map(w => `${url.replace(/w_\d+/, `w_${w}`)} ${w}w`)
+    .join(", ");
+}
 
 interface ParallaxInterludeProps {
   imageUrl: string;
@@ -21,6 +29,7 @@ const ParallaxInterlude = ({
   reverse = false,
   objectPosition = "center",
 }: ParallaxInterludeProps) => {
+  const srcSet = useMemo(() => imageUrl.includes("w_") ? buildSrcSet(imageUrl) : undefined, [imageUrl]);
   const ref = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
@@ -55,8 +64,14 @@ const ParallaxInterlude = ({
       >
         <img
           src={imageUrl}
+          srcSet={srcSet}
           alt=""
           loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+          sizes="100vw"
+          width={1600}
+          height={900}
           className="w-full h-full object-cover"
           style={{ objectPosition }}
         />
