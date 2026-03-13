@@ -1084,7 +1084,7 @@ const Collectibles = () => {
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-sm md:text-base text-primary font-body">{designer.specialty}</p>
                         </div>
-                        <div className="hidden md:flex mt-3">
+                        <div className="hidden md:flex mt-auto pt-4">
                           <WhatsAppShareButton
                             onClick={(e) => {
                               e.stopPropagation();
@@ -1093,6 +1093,7 @@ const Collectibles = () => {
                             }}
                             label={`Share ${designer.name} on WhatsApp`}
                             variant="branded"
+                            className="md:!text-sm md:!px-4 md:!py-2"
                           />
                         </div>
                       </div>
