@@ -1053,6 +1053,15 @@ const partnerBrands = [
     galleryIndex: GALLERY.A_DESIGN_TREASURE_TROVE,
   },
   {
+    id: "pierre-frey",
+    name: "Pierre Frey",
+    category: "Decorative Object",
+    subcategory: "Wallcoverings",
+    origin: "France",
+    description: "Founded in 1935, Pierre Frey is a family-owned French maison creating exceptional fabrics, wallcoverings and carpets. Combining heritage savoir-faire with bold artistic vision, the house draws from a unique archive of over 100,000 documents spanning five centuries.",
+    instagram: "https://instagram.com/pierrefrey",
+  },
+  {
     id: "pinton-1867",
     name: "Pinton 1867",
     category: "Rugs",
