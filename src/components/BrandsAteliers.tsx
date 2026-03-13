@@ -121,6 +121,14 @@ const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_
 const alpangeBg = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,c_fill,f_auto/v1773210638/Screen_Shot_2026-03-11_at_2.30.01_PM_tdkif9.png";
 const pierreFreyBg = cloudinaryUrl("90_vfmkkj", { width: 1200, quality: "auto:good", crop: "fill" });
 
+// De La Espada Curators' Picks images
+const delaEspadaElliotChair = cloudinaryUrl("Screen_Shot_2026-02-23_at_11.58.15_AM_bvscfc", { width: 1200, quality: "auto:good", crop: "fill" });
+const delaEspadaVegaBChair = cloudinaryUrl("Screen_Shot_2026-02-23_at_12.01.50_PM_ixfdvj", { width: 1200, quality: "auto:good", crop: "fill" });
+const delaEspadaAzoresSofa = cloudinaryUrl("Screen_Shot_2026-02-23_at_12.05.22_PM_rde6gr", { width: 1200, quality: "auto:good", crop: "fill" });
+const delaEspadaOrionTable = cloudinaryUrl("Screen_Shot_2026-02-23_at_12.10.28_PM_phhpip", { width: 1200, quality: "auto:good", crop: "fill" });
+const delaEspadaElliottTable = cloudinaryUrl("Screen_Shot_2026-02-23_at_12.13.34_PM_kcok7r", { width: 1200, quality: "auto:good", crop: "fill" });
+const delaEspadaTaiDanConsole = cloudinaryUrl("Screen_Shot_2026-02-23_at_12.17.23_PM_wpmpjx", { width: 1200, quality: "auto:good", crop: "fill" });
+
 // Stéphane CG Curators' Picks images
 const stephaneCgOrsay = cloudinaryUrl("PHOTO-2023-09-14-13-51-05_1_iyi99i", { width: 1200, quality: "auto:good", crop: "fill" });
 const stephaneCgLouvre = cloudinaryUrl("PHOTO-2023-09-14-13-51-02_egaxpk", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -555,6 +563,61 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
           { label: "FP612", url: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs%2Fpierre-frey-voyage-en-toscane-la-campagne-FP612.pdf", filename: "Pierre-Frey-Voyage-en-Toscane-La-Campagne-FP612.pdf" },
           { label: "FP613", url: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs%2Fpierre-frey-voyage-en-toscane-la-montagne-FP613.pdf", filename: "Pierre-Frey-Voyage-en-Toscane-La-Montagne-FP613.pdf" },
         ],
+      },
+    ],
+  },
+  "de-la-espada": {
+    name: "De La Espada",
+    curatorPicks: [
+      {
+        image: delaEspadaElliotChair,
+        title: "Elliot Dining Chair",
+        category: "Seating",
+        tags: ["Seating", "Dining Chairs"],
+        materials: "Solid wood frame, upholstered seat",
+        dimensions: "Bespoke Dimensions and Colours upon request",
+      },
+      {
+        image: delaEspadaVegaBChair,
+        title: "Vega B Chair",
+        subtitle: "by Anthony Guerrée",
+        category: "Seating",
+        tags: ["Seating", "Chairs"],
+        materials: "Solid wood frame, upholstered seat and back",
+        dimensions: "Bespoke Dimensions and Colours upon request",
+      },
+      {
+        image: delaEspadaAzoresSofa,
+        title: "Azores Sofa",
+        subtitle: "by Luca Nichetto",
+        category: "Seating",
+        tags: ["Seating", "Sofas"],
+        materials: "Solid wood frame, upholstered cushions",
+        dimensions: "Bespoke Dimensions and Colours upon request",
+      },
+      {
+        image: delaEspadaOrionTable,
+        title: "Orion Dining Table",
+        category: "Tables",
+        tags: ["Tables", "Dining Tables"],
+        materials: "Solid wood",
+        dimensions: "Bespoke Dimensions and Colours upon request",
+      },
+      {
+        image: delaEspadaElliottTable,
+        title: "Elliott Rectangular Dining Table",
+        category: "Tables",
+        tags: ["Tables", "Dining Tables"],
+        materials: "Solid wood",
+        dimensions: "Bespoke Dimensions and Colours upon request",
+      },
+      {
+        image: delaEspadaTaiDanConsole,
+        title: "Tai Dan 2 Console Cabinet",
+        category: "Storage",
+        tags: ["Storage", "Console"],
+        materials: "Solid wood, integrated storage",
+        dimensions: "Bespoke Dimensions and Colours upon request",
       },
     ],
   },
