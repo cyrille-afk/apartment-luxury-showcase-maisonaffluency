@@ -525,7 +525,7 @@ function singularizeSub(s: string): string {
                   touchStartRef.current = null;
                   touchEndRef.current = null;
                 }}
-                className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto select-none touch-pan-y ${isZoomed ? 'max-h-[95vh] pb-4 pt-2' : 'max-h-[85vh] pb-4 pt-6 md:pt-4'}`}
+                className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none touch-pan-y ${isZoomed ? 'max-h-[95vh] pb-4 pt-2' : 'max-h-[85vh] pb-4 pt-6 md:pt-4'}`}
                 style={{ WebkitUserSelect: 'none' }}
               >
                 <div className="relative inline-flex flex-col items-center">
@@ -643,7 +643,7 @@ function singularizeSub(s: string): string {
 
                     {/* Desktop Quote + Pin — stacked vertically under PDF, anchored to image right */}
                     {!isZoomed && (
-                      <div className="hidden md:flex absolute top-full right-0 mt-2 flex-col items-end gap-2 z-20">
+                      <div className="hidden md:flex absolute top-full -right-20 mt-2 flex-col items-end gap-2 z-20">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();

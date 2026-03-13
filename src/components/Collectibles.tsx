@@ -1259,7 +1259,7 @@ const Collectibles = () => {
                   observer.observe(el, { childList: true, subtree: true });
                   setTimeout(checkScroll, 500);
                 }}
-                className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto select-none touch-pan-y ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}
+                className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none touch-pan-y ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}
                 style={{ WebkitUserSelect: 'none' }}
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
@@ -1390,7 +1390,7 @@ const Collectibles = () => {
                       const designerId = curatorPicksDesigner.id ?? curatorPicksDesigner.name;
                       const designerName = curatorPicksDesigner.name;
                       return (
-                        <div className="hidden md:flex absolute top-full right-0 mt-2 flex-col items-end gap-2 z-20">
+                        <div className="hidden md:flex absolute top-full -right-20 mt-2 flex-col items-end gap-2 z-20">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
