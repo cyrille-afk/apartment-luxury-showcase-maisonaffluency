@@ -3213,14 +3213,16 @@ const BrandsAteliers = () => {
                           </div>
                         )}
 
-                        {picksDesignerName === "Ozone" && (
-                          <p className="text-xs md:text-sm text-white font-body font-medium mt-6 text-center">
-                            If you wish to receive more information on any other Ozone products, please contact{" "}
-                            <a href="mailto:concierge@myaffluency.com" className="text-white hover:text-white/80 underline underline-offset-2 transition-colors">
-                              concierge@myaffluency.com
-                            </a>
-                          </p>
-                        )}
+                        <p className="text-[11px] md:text-xs text-white/40 font-body mt-6 text-center leading-relaxed max-w-lg mx-auto">
+                          We carry all products by this brand. If you are not able to find your dream product in our gallery or would like an individual quotation, please{" "}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setQuoteOpen(true); }}
+                            className="text-white/60 hover:text-white underline underline-offset-2 transition-colors cursor-pointer"
+                          >
+                            send us an inquiry
+                          </button>
+                          .
+                        </p>
 
                       </div>
                     )}
