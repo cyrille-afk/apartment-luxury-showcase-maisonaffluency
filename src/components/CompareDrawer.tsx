@@ -27,7 +27,7 @@ const CompareDrawer = () => {
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <div>
-                <h2 className="font-display text-xl md:text-2xl text-white">Compare Pieces</h2>
+                <h2 className="font-display text-xl md:text-2xl text-white">Selection</h2>
                 <p className="font-body text-xs text-white/50 mt-0.5">{items.length} of 3 items selected</p>
               </div>
               <div className="flex items-center gap-3">

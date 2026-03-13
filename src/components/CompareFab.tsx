@@ -33,7 +33,7 @@ const CompareFab = () => {
           className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-foreground text-background shadow-[var(--shadow-elegant)] hover:shadow-xl font-body text-xs uppercase tracking-[0.12em] transition-all duration-300 hover:scale-105 border border-[hsl(var(--gold)/0.3)]"
         >
           <Scale size={16} />
-          <span>Compare</span>
+          <span>Selection</span>
           <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[hsl(var(--gold))] text-foreground text-[10px] font-bold">
             {items.length}
           </span>
