@@ -384,7 +384,7 @@ const Index = () => {
             {/* Interlude 2: After Designers → Before Collectibles */}
             <Suspense fallback={null}>
               <ParallaxInterlude
-                imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773372176/PAD-STAND-AVANT-SCENE-22-750x750_ktz8n2.jpg"
+                imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773372909/Screen_Shot_2026-03-13_at_11.34.42_AM_icbzuz.png"
                 quote="Collectible design exists at the intersection of art and function — where rarity becomes a conversation and craftsmanship becomes legacy"
                 attribution="On Collectible Design"
                 overlayOpacity={0.5}
