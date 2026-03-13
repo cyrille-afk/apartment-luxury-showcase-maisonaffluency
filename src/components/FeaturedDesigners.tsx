@@ -24,6 +24,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
+import { formatDesignerName } from "@/lib/nameFormat";
 
 // Designer profile images — served via Cloudinary CDN
 const dImg = (name: string) =>
