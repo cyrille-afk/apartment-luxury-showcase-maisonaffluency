@@ -718,21 +718,7 @@ function CatalogueView() {
           /* ─── Gallery Room View ─── */
           <>
             {groups.map((group, gi) => (
-              <section key={gi} className="mb-16">
-                <div className="mb-2 pb-4 border-b border-border/50">
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
-                    {group.experience}
-                  </p>
-                  <h2 className="text-xl md:text-2xl font-serif italic text-foreground">
-                    {group.room}
-                  </h2>
-                </div>
-                <div>
-                  {group.products.map((product) => (
-                    <ProductRow key={product.id} product={product} />
-                  ))}
-                </div>
-              </section>
+              <RoomCard key={gi} group={group} />
             ))}
           </>
         )}
