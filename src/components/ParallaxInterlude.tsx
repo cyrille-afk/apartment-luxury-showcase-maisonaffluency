@@ -9,6 +9,8 @@ interface ParallaxInterludeProps {
   overlayOpacity?: number;
   /** Reverse parallax direction */
   reverse?: boolean;
+  /** CSS object-position for the image, default "center" */
+  objectPosition?: string;
 }
 
 const ParallaxInterlude = ({
@@ -17,6 +19,7 @@ const ParallaxInterlude = ({
   attribution,
   overlayOpacity = 0.5,
   reverse = false,
+  objectPosition = "center",
 }: ParallaxInterludeProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -55,6 +58,7 @@ const ParallaxInterlude = ({
           alt=""
           loading="lazy"
           className="w-full h-full object-cover"
+          style={{ objectPosition }}
         />
       </motion.div>
 
