@@ -641,9 +641,9 @@ function singularizeSub(s: string): string {
                       {isZoomed ? <Minimize2 size={16} className="text-white" /> : <Maximize2 size={16} className="text-white" />}
                     </button>
 
-                    {/* Desktop Quote + Compare — stacked under PDF, anchored to image */}
+                    {/* Desktop Quote + Pin — horizontal row under PDF, anchored to image */}
                     {!isZoomed && (
-                      <div className="hidden md:flex absolute top-full right-2 mt-2 flex-col gap-2 z-20">
+                      <div className="hidden md:flex absolute top-full right-2 mt-2 items-center gap-2 z-20">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -668,11 +668,11 @@ function singularizeSub(s: string): string {
                               : "bg-white/15 border-white/30 text-white hover:bg-white/25",
                             compareItems.length >= 3 && !isPinned(currentItem.pick.title, currentItem.designerId) && "opacity-40 pointer-events-none"
                           )}
-                          aria-label={isPinned(currentItem.pick.title, currentItem.designerId) ? "Remove from comparison" : "Add to comparison"}
+                          aria-label={isPinned(currentItem.pick.title, currentItem.designerId) ? "Remove from selection" : "Pin your selection of 3"}
                         >
                           <Scale size={16} />
                           <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">
-                            {isPinned(currentItem.pick.title, currentItem.designerId) ? "Pinned" : "Compare"}
+                            {isPinned(currentItem.pick.title, currentItem.designerId) ? "Pinned" : "Pin your selection of 3"}
                           </span>
                         </button>
                       </div>
