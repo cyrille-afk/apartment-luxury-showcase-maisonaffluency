@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, FileDown, ChevronLeft, ChevronRight, ArrowUp, Maximize2, Minimize2, MessageSquareQuote, Search } from "lucide-react";
+import { X, FileDown, ChevronLeft, ChevronRight, ArrowUp, Maximize2, Minimize2, MessageSquareQuote, Search, Scale } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
@@ -9,6 +9,7 @@ import QuoteRequestDialog from "./QuoteRequestDialog";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
+import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
@@ -166,6 +167,7 @@ const normalizeSearchText = (value?: string) =>
     .trim();
 
 const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
+  const { isPinned, togglePin, items: compareItems } = useCompare();
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
@@ -460,6 +462,23 @@ function singularizeSub(s: string): string {
                     style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                   />
                 )}
+                {/* Compare pin button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePin({ pick: item.pick, designerName: item.designerName, designerId: item.designerId, section: item.section });
+                  }}
+                  className={cn(
+                    "absolute bottom-2 left-2 z-10 p-1.5 rounded-full transition-all duration-300 backdrop-blur-sm",
+                    isPinned(item.pick.title, item.designerId)
+                      ? "bg-[hsl(var(--gold))] text-foreground shadow-md"
+                      : "bg-black/40 text-white/70 opacity-0 group-hover:opacity-100 hover:bg-black/60",
+                    compareItems.length >= 3 && !isPinned(item.pick.title, item.designerId) && "pointer-events-none"
+                  )}
+                  aria-label={isPinned(item.pick.title, item.designerId) ? "Remove from comparison" : "Add to comparison"}
+                >
+                  <Scale size={14} />
+                </button>
               </div>
               <div className="text-center mt-1">
                 <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-foreground/80 font-semibold">
@@ -622,20 +641,41 @@ function singularizeSub(s: string): string {
                       {isZoomed ? <Minimize2 size={16} className="text-white" /> : <Maximize2 size={16} className="text-white" />}
                     </button>
 
-                    {/* Desktop Quote — stacked under PDF, anchored to image */}
+                    {/* Desktop Quote + Compare — stacked under PDF, anchored to image */}
                     {!isZoomed && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setQuoteProduct({ name: currentItem.pick.title, designer: currentItem.designerName });
-                          setQuoteOpen(true);
-                        }}
-                        className="hidden md:flex absolute top-full right-2 mt-2 items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer z-20"
-                        aria-label="Request a Quote"
-                      >
-                        <MessageSquareQuote size={16} />
-                        <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
-                      </button>
+                      <div className="hidden md:flex absolute top-full right-2 mt-2 flex-col gap-2 z-20">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuoteProduct({ name: currentItem.pick.title, designer: currentItem.designerName });
+                            setQuoteOpen(true);
+                          }}
+                          className="flex items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
+                          aria-label="Request a Quote"
+                        >
+                          <MessageSquareQuote size={16} />
+                          <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            togglePin({ pick: currentItem.pick, designerName: currentItem.designerName, designerId: currentItem.designerId, section: currentItem.section });
+                          }}
+                          className={cn(
+                            "flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-sm border transition-all duration-300 cursor-pointer",
+                            isPinned(currentItem.pick.title, currentItem.designerId)
+                              ? "bg-[hsl(var(--gold)/0.3)] border-[hsl(var(--gold)/0.6)] text-white"
+                              : "bg-white/15 border-white/30 text-white hover:bg-white/25",
+                            compareItems.length >= 3 && !isPinned(currentItem.pick.title, currentItem.designerId) && "opacity-40 pointer-events-none"
+                          )}
+                          aria-label={isPinned(currentItem.pick.title, currentItem.designerId) ? "Remove from comparison" : "Add to comparison"}
+                        >
+                          <Scale size={16} />
+                          <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">
+                            {isPinned(currentItem.pick.title, currentItem.designerId) ? "Pinned" : "Compare"}
+                          </span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -653,18 +693,36 @@ function singularizeSub(s: string): string {
                         <X size={16} />
                       </button>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setQuoteProduct({ name: currentItem.pick.title, designer: currentItem.designerName });
-                        setQuoteOpen(true);
-                      }}
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto"
-                      aria-label="Request a Quote"
-                    >
-                      <MessageSquareQuote size={14} />
-                      <span className="text-[10px] font-display font-bold uppercase tracking-[0.08em] leading-none">Quote</span>
-                    </button>
+                    <div className="flex items-center gap-2 ml-auto">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePin({ pick: currentItem.pick, designerName: currentItem.designerName, designerId: currentItem.designerId, section: currentItem.section });
+                        }}
+                        className={cn(
+                          "p-1.5 rounded-full backdrop-blur-sm border transition-all duration-300",
+                          isPinned(currentItem.pick.title, currentItem.designerId)
+                            ? "bg-[hsl(var(--gold)/0.3)] border-[hsl(var(--gold)/0.6)] text-white"
+                            : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20",
+                          compareItems.length >= 3 && !isPinned(currentItem.pick.title, currentItem.designerId) && "opacity-40 pointer-events-none"
+                        )}
+                        aria-label="Compare"
+                      >
+                        <Scale size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setQuoteProduct({ name: currentItem.pick.title, designer: currentItem.designerName });
+                          setQuoteOpen(true);
+                        }}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
+                        aria-label="Request a Quote"
+                      >
+                        <MessageSquareQuote size={14} />
+                        <span className="text-[10px] font-display font-bold uppercase tracking-[0.08em] leading-none">Quote</span>
+                      </button>
+                    </div>
                   </div>
                 )}
 
