@@ -1740,6 +1740,7 @@ const brandBgMap: Record<string, string> = {
   "Refractory Studio": refractoryStudioBg,
   "Marta Sala Éditions": martaSalaEditionsBg,
   "Alpange": alpangeBg,
+  "Pierre Frey": pierreFreyBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
