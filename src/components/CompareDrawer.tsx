@@ -57,8 +57,7 @@ const CompareDrawer = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: idx * 0.1 }}
-                    className="flex flex-col"
-                    style={{ minHeight: '100%' }}
+                    className="flex h-full flex-col"
                   >
                     {/* Image */}
                     <div className="relative aspect-[4/5] bg-[#f0eeeb] rounded-sm overflow-hidden flex items-center justify-center mb-4">
@@ -78,7 +77,7 @@ const CompareDrawer = () => {
                     </div>
 
                     {/* Info */}
-                    <div className="space-y-3 flex flex-col flex-1">
+                    <div className="flex flex-1 flex-col gap-3">
                       <div>
                         <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))]">
                           {item.designerName}
