@@ -388,17 +388,148 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   );
 }
 
-/* ─── Gallery Room Card (mirrors DesignerCard layout, with full-size room image) ─── */
+/* ─── Shared product grid renderer ─── */
+function ProductGrid({
+  items,
+  showAll,
+  total,
+  onShowAll,
+  renderItem,
+  label,
+}: {
+  items: React.ReactNode[];
+  showAll: boolean;
+  total: number;
+  onShowAll: () => void;
+  renderItem?: undefined;
+  label: string;
+}) {
+  return (
+    <div>
+      <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-3">{label}</p>
+      <div className="grid grid-cols-2 gap-3">{items}</div>
+      {total > 4 && !showAll && (
+        <button
+          onClick={onShowAll}
+          className="mt-3 text-xs text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
+        >
+          Show all {total} pieces →
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ─── Hook to detect image orientation ─── */
+function useImageOrientation(src: string | undefined) {
+  const [isPortrait, setIsPortrait] = useState(false);
+  const checked = useRef(false);
+
+  useEffect(() => {
+    if (!src || checked.current) return;
+    const img = new Image();
+    img.onload = () => {
+      setIsPortrait(img.naturalHeight > img.naturalWidth);
+      checked.current = true;
+    };
+    img.src = src;
+  }, [src]);
+
+  return isPortrait;
+}
+
+/* ─── Gallery Room Card ─── */
 function RoomCard({ group }: { group: GalleryRoomGroup }) {
   const [showAll, setShowAll] = useState(false);
   const visibleProducts = showAll ? group.products : group.products.slice(0, 4);
   const roomImage = ROOM_IMAGES[group.room];
+  const isPortrait = useImageOrientation(roomImage);
 
+  const productItems = visibleProducts.map((product) => {
+    const heading = product.designer_name
+      ? `${product.product_name} by ${product.designer_name}`
+      : product.product_name;
+    return (
+      <div key={product.id} className="group">
+        {product.product_image_url ? (
+          <div className="aspect-square bg-muted/20 overflow-hidden mb-2">
+            <img
+              src={product.product_image_url}
+              alt={product.product_name}
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+          </div>
+        ) : (
+          <div className="aspect-square bg-muted/20 flex items-center justify-center mb-2">
+            <span className="text-[10px] text-muted-foreground">No image</span>
+          </div>
+        )}
+        <p className="text-xs font-serif text-foreground leading-tight">{heading}</p>
+        {product.materials && (
+          <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{product.materials}</p>
+        )}
+        {product.dimensions && (
+          <p className="text-[10px] text-foreground mt-0.5">{product.dimensions}</p>
+        )}
+      </div>
+    );
+  });
+
+  const titleBlock = (
+    <div className="mb-4">
+      <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
+        {group.experience}
+      </p>
+      <h3 className="text-lg md:text-xl font-serif italic text-foreground leading-snug">
+        {group.room}
+      </h3>
+      <p className="text-xs text-muted-foreground mt-1">
+        {group.products.length} {group.products.length === 1 ? "piece" : "pieces"}
+      </p>
+    </div>
+  );
+
+  /* Portrait on desktop → side-by-side layout */
+  if (isPortrait && roomImage) {
+    return (
+      <div className="mb-14 pb-8 border-b border-border/40 last:border-b-0">
+        <div className="flex flex-col md:flex-row md:gap-8">
+          {/* Left: image + title */}
+          <div className="md:w-[45%] flex-shrink-0">
+            <div className="overflow-hidden bg-muted/10 mb-4 md:mb-0 rounded-sm">
+              <img
+                src={roomImage}
+                alt={group.room}
+                className="w-full h-auto object-contain"
+                style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+                loading="lazy"
+              />
+            </div>
+          </div>
+          {/* Right: title + products */}
+          <div className="flex-1 min-w-0">
+            {titleBlock}
+            {group.products.length > 0 && (
+              <ProductGrid
+                items={productItems}
+                showAll={showAll}
+                total={group.products.length}
+                onShowAll={() => setShowAll(true)}
+                label="Products in this room"
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* Landscape / square → stacked layout */
   return (
     <div className="mb-14 pb-8 border-b border-border/40 last:border-b-0">
-      {/* Full-width room image — matching expanded gallery style */}
       {roomImage && (
-        <div className="w-full max-w-2xl mx-auto overflow-hidden bg-muted/10 mb-6 rounded-sm">
+        <div className="w-full max-w-3xl mx-auto overflow-hidden bg-muted/10 mb-6 rounded-sm">
           <img
             src={roomImage}
             alt={group.room}
@@ -408,67 +539,15 @@ function RoomCard({ group }: { group: GalleryRoomGroup }) {
           />
         </div>
       )}
-
-      {/* Room title + experience */}
-      <div className="mb-5">
-        <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
-          {group.experience}
-        </p>
-        <h3 className="text-lg md:text-xl font-serif italic text-foreground leading-snug">
-          {group.room}
-        </h3>
-        <p className="text-xs text-muted-foreground mt-1">
-          {group.products.length} {group.products.length === 1 ? "piece" : "pieces"}
-        </p>
-      </div>
-
-      {/* Products grid */}
+      {titleBlock}
       {group.products.length > 0 && (
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-3">
-            Products in this room
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            {visibleProducts.map((product) => {
-              const heading = product.designer_name
-                ? `${product.product_name} by ${product.designer_name}`
-                : product.product_name;
-              return (
-                <div key={product.id} className="group">
-                  {product.product_image_url ? (
-                    <div className="aspect-square bg-muted/20 overflow-hidden mb-2">
-                      <img
-                        src={product.product_image_url}
-                        alt={product.product_name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                    </div>
-                  ) : (
-                    <div className="aspect-square bg-muted/20 flex items-center justify-center mb-2">
-                      <span className="text-[10px] text-muted-foreground">No image</span>
-                    </div>
-                  )}
-                  <p className="text-xs font-serif text-foreground leading-tight">{heading}</p>
-                  {product.materials && (
-                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{product.materials}</p>
-                  )}
-                  {product.dimensions && (
-                    <p className="text-[10px] text-foreground mt-0.5">{product.dimensions}</p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          {group.products.length > 4 && !showAll && (
-            <button
-              onClick={() => setShowAll(true)}
-              className="mt-3 text-xs text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
-            >
-              Show all {group.products.length} pieces →
-            </button>
-          )}
-        </div>
+        <ProductGrid
+          items={productItems}
+          showAll={showAll}
+          total={group.products.length}
+          onShowAll={() => setShowAll(true)}
+          label="Products in this room"
+        />
       )}
     </div>
   );
