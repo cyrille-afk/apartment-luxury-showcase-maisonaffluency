@@ -50,14 +50,15 @@ const CompareDrawer = () => {
 
             {/* Comparison Grid */}
             <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
-              <div className={`grid ${colClass} gap-6 md:gap-8 mx-auto auto-rows-[1fr]`}>
+              <div className={`grid ${colClass} gap-6 md:gap-8 mx-auto items-stretch`}>
                 {items.map((item, idx) => (
                   <motion.div
                     key={`${item.designerId}-${item.pick.title}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: idx * 0.1 }}
-                    className="flex flex-col h-full"
+                    className="flex flex-col"
+                    style={{ minHeight: '100%' }}
                   >
                     {/* Image */}
                     <div className="relative aspect-[4/5] bg-[#f0eeeb] rounded-sm overflow-hidden flex items-center justify-center mb-4">
