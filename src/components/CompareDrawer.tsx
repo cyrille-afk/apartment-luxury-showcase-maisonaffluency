@@ -77,7 +77,7 @@ const CompareDrawer = () => {
                     </div>
 
                     {/* Info */}
-                    <div className="space-y-3">
+                    <div className="space-y-3 flex flex-col flex-1">
                       <div>
                         <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))]">
                           {item.designerName}
