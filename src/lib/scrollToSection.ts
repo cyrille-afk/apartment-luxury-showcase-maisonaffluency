@@ -4,6 +4,9 @@
  *
  * content-visibility: auto sections above the target may change height as they
  * render; we use delayed passes (not just rAF) to let the browser finish layout.
+ *
+ * After settling, we back up slightly and smooth-scroll to the target so users
+ * glimpse parallax interludes and other content along the way.
  */
 export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth") {
   const navHeight = 96;
@@ -13,6 +16,10 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
     "sociable-environment": isMobile ? 16 : 40,
   };
   const instant = "instant" as ScrollBehavior;
+
+  // How far above the target we back up before smooth-scrolling in (px).
+  // This lets users see nearby content (parallax interludes, etc.)
+  const LEAD_IN_DISTANCE = isMobile ? 400 : 600;
 
   const getTargetTop = () => {
     const el = document.getElementById(id);
@@ -49,8 +56,17 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
       return;
     }
 
-    // Final pass uses requested behavior for better UX.
-    window.scrollTo({ top: nextTop, behavior });
+    // Settled — now back up and smooth-scroll in so the user sees nearby content.
+    if (behavior === "smooth") {
+      const leadInY = Math.max(0, nextTop - LEAD_IN_DISTANCE);
+      window.scrollTo({ top: leadInY, behavior: instant });
+      // Small delay so the instant jump completes before smooth scroll begins
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: nextTop, behavior: "smooth" });
+      });
+    } else {
+      window.scrollTo({ top: nextTop, behavior });
+    }
   };
 
   // Double-rAF to let the initial jump trigger content-visibility rendering,
