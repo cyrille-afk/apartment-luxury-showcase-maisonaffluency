@@ -3178,6 +3178,38 @@ const FeaturedDesigners = () => {
                           <span className="text-[10px] md:text-xs font-medium leading-none">PDF</span>
                         </button>
                       )}
+                      {/* Multiple PDF download buttons */}
+                      {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrls && !isZoomed && (
+                        <div className="absolute bottom-2 right-2 flex gap-1.5 z-10">
+                          {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).pdfUrls as { label: string; url: string; filename?: string }[]).map((pdf) => (
+                            <button
+                              key={pdf.label}
+                              onClick={async () => {
+                                try {
+                                  const res = await fetch(pdf.url);
+                                  const blob = await res.blob();
+                                  const blobUrl = URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = blobUrl;
+                                  a.download = pdf.filename || `${pdf.label}.pdf`;
+                                  document.body.appendChild(a);
+                                  a.click();
+                                  document.body.removeChild(a);
+                                  URL.revokeObjectURL(blobUrl);
+                                } catch {
+                                  window.open(pdf.url, '_blank');
+                                }
+                              }}
+                              className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300"
+                              aria-label={`Download PDF ${pdf.label}`}
+                            >
+                              <FileDown size={14} className="md:hidden" />
+                              <FileDown size={16} className="hidden md:block" />
+                              <span className="text-[10px] md:text-xs font-medium leading-none">{pdf.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                       {/* Mobile Maximize / Minimize button — bottom-left */}
                       {!isZoomed ? (
                         <button
