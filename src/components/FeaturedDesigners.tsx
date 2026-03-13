@@ -2820,9 +2820,9 @@ const FeaturedDesigners = () => {
                     </div>
                     {/* On View thumbnails — right side */}
                     {(designer.notableWorksLink || designer.notableWorksLinks) && (
-                      <div className="hidden md:flex items-center gap-3 flex-shrink-0 mr-8">
+                      <div className="hidden md:flex items-center gap-4 flex-shrink-0 mr-8">
                         <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider"><em>On View</em></span>
-                        <div className="flex gap-3">
+                        <div className="flex gap-5 pb-6">
                           {designer.notableWorksLinks ? (
                             designer.notableWorksLinks.map((link, linkIdx) => {
                               const thumb = GALLERY_THUMBNAILS[link.galleryIndex];
