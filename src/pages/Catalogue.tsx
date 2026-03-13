@@ -1,13 +1,14 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { fetchCatalogueData, type GalleryRoomGroup, type CatalogueProduct } from "@/lib/catalogueData";
+import { getBrandCatalogueData, type BrandCatalogueCategory, type BrandCatalogueDesigner } from "@/lib/brandCatalogueData";
 import { syncHotspotMaterials } from "@/lib/syncHotspotMaterials";
-import { Lock, FileDown, Loader2, ArrowLeft, RefreshCw } from "lucide-react";
+import { Lock, FileDown, Loader2, ArrowLeft, RefreshCw, LayoutGrid, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const CATALOGUE_PASSWORD = "maison-affluency";
 
-/* ─── PDF generation (lazy-loaded) ─── */
-async function generatePDF(groups: GalleryRoomGroup[]) {
+/* ─── Gallery Room PDF generation (existing) ─── */
+async function generateGalleryPDF(groups: GalleryRoomGroup[]) {
   const { pdf, Document, Page, Text, View, Image, StyleSheet, Font } = await import("@react-pdf/renderer");
 
   Font.register({
@@ -34,186 +35,38 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
   });
 
   const colors = {
-    foreground: "#1a1a1a",
-    muted: "#6b6b6b",
-    mutedLight: "#999999",
-    accent: "#b8965a",
-    border: "#e0e0e0",
-    borderLight: "#eeeeee",
-    bg: "#ffffff",
-    bgWarm: "#f5f0eb",
+    foreground: "#1a1a1a", muted: "#6b6b6b", mutedLight: "#999999",
+    accent: "#b8965a", border: "#e0e0e0", borderLight: "#eeeeee",
+    bg: "#ffffff", bgWarm: "#f5f0eb",
   };
 
   const s = StyleSheet.create({
-    coverPage: {
-      padding: 60,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: colors.bgWarm,
-    },
+    coverPage: { padding: 60, justifyContent: "center", alignItems: "center", backgroundColor: colors.bgWarm },
     coverRule: { width: 40, height: 1, backgroundColor: colors.accent, marginBottom: 24 },
-    coverTitle: {
-      fontFamily: "Cinzel",
-      fontSize: 28,
-      fontWeight: 700,
-      letterSpacing: 6,
-      color: colors.foreground,
-      textTransform: "uppercase" as const,
-      marginBottom: 6,
-    },
-    coverSubtitle: {
-      fontFamily: "PlayfairDisplay",
-      fontSize: 13,
-      fontStyle: "italic",
-      color: colors.muted,
-      marginBottom: 4,
-    },
+    coverTitle: { fontFamily: "Cinzel", fontSize: 28, fontWeight: 700, letterSpacing: 6, color: colors.foreground, textTransform: "uppercase" as const, marginBottom: 6 },
+    coverSubtitle: { fontFamily: "PlayfairDisplay", fontSize: 13, fontStyle: "italic", color: colors.muted, marginBottom: 4 },
     coverDate: { fontFamily: "Lora", fontSize: 9, color: colors.mutedLight, marginTop: 28 },
-
-    page: {
-      paddingTop: 40,
-      paddingBottom: 56,
-      paddingHorizontal: 48,
-      fontFamily: "Lora",
-      fontSize: 9,
-      color: colors.foreground,
-      backgroundColor: colors.bg,
-    },
-
-    /* Section header — experience + room */
-    sectionHeader: {
-      marginBottom: 16,
-      paddingBottom: 8,
-      borderBottomWidth: 0.5,
-      borderBottomColor: colors.border,
-    },
-    experienceLabel: {
-      fontFamily: "Lora",
-      fontSize: 7,
-      fontWeight: 500,
-      textTransform: "uppercase" as const,
-      letterSpacing: 3,
-      color: colors.mutedLight,
-      marginBottom: 3,
-    },
-    roomTitle: {
-      fontFamily: "PlayfairDisplay",
-      fontSize: 16,
-      fontStyle: "italic",
-      color: colors.foreground,
-    },
-
-    /* Product card — image left, text right (like Invisible Collection) */
-    productCard: {
-      flexDirection: "row" as const,
-      marginBottom: 20,
-      paddingBottom: 16,
-      borderBottomWidth: 0.5,
-      borderBottomColor: colors.borderLight,
-    },
-    productImage: {
-      width: 110,
-      height: 110,
-      objectFit: "contain" as const,
-      backgroundColor: colors.bgWarm,
-      marginRight: 20,
-    },
-    noImage: {
-      width: 110,
-      height: 110,
-      backgroundColor: colors.bgWarm,
-      justifyContent: "center" as const,
-      alignItems: "center" as const,
-      marginRight: 20,
-    },
+    page: { paddingTop: 40, paddingBottom: 56, paddingHorizontal: 48, fontFamily: "Lora", fontSize: 9, color: colors.foreground, backgroundColor: colors.bg },
+    sectionHeader: { marginBottom: 16, paddingBottom: 8, borderBottomWidth: 0.5, borderBottomColor: colors.border },
+    experienceLabel: { fontFamily: "Lora", fontSize: 7, fontWeight: 500, textTransform: "uppercase" as const, letterSpacing: 3, color: colors.mutedLight, marginBottom: 3 },
+    roomTitle: { fontFamily: "PlayfairDisplay", fontSize: 16, fontStyle: "italic", color: colors.foreground },
+    productCard: { flexDirection: "row" as const, marginBottom: 20, paddingBottom: 16, borderBottomWidth: 0.5, borderBottomColor: colors.borderLight },
+    productImage: { width: 110, height: 110, objectFit: "contain" as const, backgroundColor: colors.bgWarm, marginRight: 20 },
+    noImage: { width: 110, height: 110, backgroundColor: colors.bgWarm, justifyContent: "center" as const, alignItems: "center" as const, marginRight: 20 },
     noImageText: { fontFamily: "Lora", fontSize: 7, color: colors.mutedLight },
     productInfo: { flex: 1, paddingTop: 2 },
-    productHeading: {
-      fontFamily: "PlayfairDisplay",
-      fontSize: 11,
-      color: colors.foreground,
-      marginBottom: 4,
-    },
-    productMaterials: {
-      fontFamily: "Lora",
-      fontSize: 8,
-      color: colors.muted,
-      lineHeight: 1.5,
-      marginBottom: 6,
-    },
-    productDimensions: {
-      fontFamily: "Lora",
-      fontSize: 8,
-      color: colors.foreground,
-      marginBottom: 2,
-    },
-    productDimensionsLabel: {
-      fontFamily: "Lora",
-      fontSize: 7,
-      fontWeight: 500,
-      color: colors.mutedLight,
-      textTransform: "uppercase" as const,
-      letterSpacing: 1.5,
-      marginTop: 6,
-      marginBottom: 2,
-    },
-
-    /* Footer */
-    footer: {
-      position: "absolute" as const,
-      bottom: 20,
-      left: 48,
-      right: 48,
-      alignItems: "center" as const,
-    },
-    footerRule: {
-      width: "100%" as const,
-      height: 0.5,
-      backgroundColor: colors.borderLight,
-      marginBottom: 8,
-    },
-    footerBrand: {
-      fontFamily: "Cinzel",
-      fontSize: 7,
-      letterSpacing: 3,
-      color: colors.mutedLight,
-      textTransform: "uppercase" as const,
-    },
-    footerUrl: {
-      fontFamily: "Lora",
-      fontSize: 6,
-      color: colors.mutedLight,
-      marginTop: 2,
-    },
-
-    /* TOC */
-    tocRow: {
-      flexDirection: "row" as const,
-      justifyContent: "space-between" as const,
-      alignItems: "baseline" as const,
-      paddingVertical: 6,
-      borderBottomWidth: 0.5,
-      borderBottomColor: colors.borderLight,
-    },
-    tocRoom: {
-      fontFamily: "Lora",
-      fontSize: 10,
-      fontWeight: 500,
-      color: colors.foreground,
-    },
-    tocExperience: {
-      fontFamily: "Lora",
-      fontSize: 7,
-      color: colors.mutedLight,
-      marginTop: 1,
-      textTransform: "uppercase" as const,
-      letterSpacing: 2,
-    },
-    tocCount: {
-      fontFamily: "Lora",
-      fontSize: 8,
-      color: colors.muted,
-    },
+    productHeading: { fontFamily: "PlayfairDisplay", fontSize: 11, color: colors.foreground, marginBottom: 4 },
+    productMaterials: { fontFamily: "Lora", fontSize: 8, color: colors.muted, lineHeight: 1.5, marginBottom: 6 },
+    productDimensions: { fontFamily: "Lora", fontSize: 8, color: colors.foreground, marginBottom: 2 },
+    productDimensionsLabel: { fontFamily: "Lora", fontSize: 7, fontWeight: 500, color: colors.mutedLight, textTransform: "uppercase" as const, letterSpacing: 1.5, marginTop: 6, marginBottom: 2 },
+    footer: { position: "absolute" as const, bottom: 20, left: 48, right: 48, alignItems: "center" as const },
+    footerRule: { width: "100%" as const, height: 0.5, backgroundColor: colors.borderLight, marginBottom: 8 },
+    footerBrand: { fontFamily: "Cinzel", fontSize: 7, letterSpacing: 3, color: colors.mutedLight, textTransform: "uppercase" as const },
+    footerUrl: { fontFamily: "Lora", fontSize: 6, color: colors.mutedLight, marginTop: 2 },
+    tocRow: { flexDirection: "row" as const, justifyContent: "space-between" as const, alignItems: "baseline" as const, paddingVertical: 6, borderBottomWidth: 0.5, borderBottomColor: colors.borderLight },
+    tocRoom: { fontFamily: "Lora", fontSize: 10, fontWeight: 500, color: colors.foreground },
+    tocExperience: { fontFamily: "Lora", fontSize: 7, color: colors.mutedLight, marginTop: 1, textTransform: "uppercase" as const, letterSpacing: 2 },
+    tocCount: { fontFamily: "Lora", fontSize: 8, color: colors.muted },
   });
 
   const now = new Date();
@@ -229,15 +82,12 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
 
   const doc = (
     <Document>
-      {/* Cover Page */}
       <Page size="A4" style={s.coverPage}>
         <View style={s.coverRule} />
         <Text style={s.coverTitle}>Maison Affluency</Text>
         <Text style={s.coverSubtitle}>Gallery Collection Catalogue</Text>
         <Text style={s.coverDate}>{dateStr}</Text>
       </Page>
-
-      {/* Table of Contents */}
       <Page size="A4" style={s.page}>
         <View style={s.sectionHeader}>
           <Text style={s.roomTitle}>Contents</Text>
@@ -255,34 +105,26 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
         ))}
         <FooterBlock />
       </Page>
-
-      {/* Product Pages — one page per gallery room */}
       {groups.map((group, gi) => (
         <Page key={gi} size="A4" style={s.page} wrap>
           <View style={s.sectionHeader}>
             <Text style={s.experienceLabel}>{group.experience}</Text>
             <Text style={s.roomTitle}>{group.room}</Text>
           </View>
-
           {group.products.map((product) => {
             const heading = product.designer_name
               ? `${product.product_name} by ${product.designer_name}`
               : product.product_name;
-
             return (
               <View key={product.id} style={s.productCard} wrap={false}>
                 {product.product_image_url ? (
                   <Image style={s.productImage} src={product.product_image_url} />
                 ) : (
-                  <View style={s.noImage}>
-                    <Text style={s.noImageText}>No image</Text>
-                  </View>
+                  <View style={s.noImage}><Text style={s.noImageText}>No image</Text></View>
                 )}
                 <View style={s.productInfo}>
                   <Text style={s.productHeading}>{heading}</Text>
-                  {product.materials && (
-                    <Text style={s.productMaterials}>{product.materials}</Text>
-                  )}
+                  {product.materials && <Text style={s.productMaterials}>{product.materials}</Text>}
                   {product.dimensions && (
                     <>
                       <Text style={s.productDimensionsLabel}>Dimensions</Text>
@@ -293,7 +135,6 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
               </View>
             );
           })}
-
           <FooterBlock />
         </Page>
       ))}
@@ -305,6 +146,155 @@ async function generatePDF(groups: GalleryRoomGroup[]) {
   const a = document.createElement("a");
   a.href = url;
   a.download = `Maison_Affluency_Gallery_Catalogue_${now.toISOString().slice(0, 10)}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ─── Brand Catalogue PDF generation ─── */
+async function generateBrandPDF(categories: BrandCatalogueCategory[]) {
+  const { pdf, Document, Page, Text, View, Image, StyleSheet, Font } = await import("@react-pdf/renderer");
+
+  Font.register({
+    family: "Cinzel",
+    fonts: [
+      { src: "https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-tbnfY3lCA.ttf", fontWeight: 400 },
+      { src: "https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-n7gfY3lCA.ttf", fontWeight: 700 },
+    ],
+  });
+  Font.register({
+    family: "PlayfairDisplay",
+    fonts: [
+      { src: "https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtM.ttf", fontWeight: 400 },
+      { src: "https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKd1tnDXbtM.ttf", fontWeight: 400, fontStyle: "italic" },
+    ],
+  });
+  Font.register({
+    family: "Lora",
+    fonts: [
+      { src: "https://fonts.gstatic.com/s/lora/v35/0QI6MX1D_JOuGQbT0gvTJPa787weuxJBkq0.ttf", fontWeight: 400 },
+      { src: "https://fonts.gstatic.com/s/lora/v35/0QI6MX1D_JOuGQbT0gvTJPa787z5vBJBkq0.ttf", fontWeight: 500 },
+    ],
+  });
+
+  const colors = {
+    foreground: "#1a1a1a", muted: "#6b6b6b", mutedLight: "#999999",
+    accent: "#b8965a", border: "#e0e0e0", borderLight: "#eeeeee",
+    bg: "#ffffff", bgWarm: "#f5f0eb",
+  };
+
+  const s = StyleSheet.create({
+    coverPage: { padding: 60, justifyContent: "center", alignItems: "center", backgroundColor: colors.bgWarm },
+    coverRule: { width: 40, height: 1, backgroundColor: colors.accent, marginBottom: 24 },
+    coverTitle: { fontFamily: "Cinzel", fontSize: 28, fontWeight: 700, letterSpacing: 6, color: colors.foreground, textTransform: "uppercase" as const, marginBottom: 6 },
+    coverSubtitle: { fontFamily: "PlayfairDisplay", fontSize: 13, fontStyle: "italic", color: colors.muted, marginBottom: 4 },
+    coverDate: { fontFamily: "Lora", fontSize: 9, color: colors.mutedLight, marginTop: 28 },
+    page: { paddingTop: 40, paddingBottom: 56, paddingHorizontal: 48, fontFamily: "Lora", fontSize: 9, color: colors.foreground, backgroundColor: colors.bg },
+    categoryTitle: { fontFamily: "Cinzel", fontSize: 18, fontWeight: 700, letterSpacing: 4, color: colors.foreground, textTransform: "uppercase" as const, marginBottom: 4, textAlign: "center" as const },
+    categorySubtitle: { fontFamily: "Lora", fontSize: 8, color: colors.mutedLight, textAlign: "center" as const, letterSpacing: 2, textTransform: "uppercase" as const, marginBottom: 20 },
+    designerBlock: { marginBottom: 24, paddingBottom: 16, borderBottomWidth: 0.5, borderBottomColor: colors.borderLight },
+    designerRow: { flexDirection: "row" as const, marginBottom: 12 },
+    designerImage: { width: 100, height: 100, objectFit: "cover" as const, marginRight: 16 },
+    designerInfo: { flex: 1 },
+    designerName: { fontFamily: "Cinzel", fontSize: 12, fontWeight: 700, letterSpacing: 2, color: colors.foreground, textTransform: "uppercase" as const, marginBottom: 6 },
+    designerDesc: { fontFamily: "Lora", fontSize: 8, color: colors.muted, lineHeight: 1.6 },
+    designerWebsite: { fontFamily: "Lora", fontSize: 7, color: colors.accent, marginTop: 6 },
+    picksRow: { flexDirection: "row" as const, flexWrap: "wrap" as const, gap: 8, marginTop: 8 },
+    pickImage: { width: 80, height: 80, objectFit: "contain" as const, backgroundColor: colors.bgWarm },
+    pickInfo: { marginTop: 2 },
+    pickTitle: { fontFamily: "Lora", fontSize: 7, color: colors.foreground },
+    pickMaterials: { fontFamily: "Lora", fontSize: 6, color: colors.mutedLight },
+    footer: { position: "absolute" as const, bottom: 20, left: 48, right: 48, alignItems: "center" as const },
+    footerRule: { width: "100%" as const, height: 0.5, backgroundColor: colors.borderLight, marginBottom: 8 },
+    footerBrand: { fontFamily: "Cinzel", fontSize: 7, letterSpacing: 3, color: colors.mutedLight, textTransform: "uppercase" as const },
+    footerUrl: { fontFamily: "Lora", fontSize: 6, color: colors.mutedLight, marginTop: 2 },
+    tocRow: { flexDirection: "row" as const, justifyContent: "space-between" as const, alignItems: "baseline" as const, paddingVertical: 6, borderBottomWidth: 0.5, borderBottomColor: colors.borderLight },
+    tocCategory: { fontFamily: "Cinzel", fontSize: 10, fontWeight: 700, letterSpacing: 2, color: colors.foreground, textTransform: "uppercase" as const },
+    tocCount: { fontFamily: "Lora", fontSize: 8, color: colors.muted },
+  });
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  const FooterBlock = () => (
+    <View style={s.footer} fixed>
+      <View style={s.footerRule} />
+      <Text style={s.footerBrand}>Maison Affluency</Text>
+      <Text style={s.footerUrl}>www.maisonaffluency.com</Text>
+    </View>
+  );
+
+  const doc = (
+    <Document>
+      {/* Cover */}
+      <Page size="A4" style={s.coverPage}>
+        <View style={s.coverRule} />
+        <Text style={s.coverTitle}>Maison Affluency</Text>
+        <Text style={s.coverSubtitle}>2026 Brand Catalogue</Text>
+        <Text style={s.coverDate}>{dateStr}</Text>
+      </Page>
+
+      {/* TOC */}
+      <Page size="A4" style={s.page}>
+        <Text style={{ ...s.categoryTitle, fontSize: 14, marginBottom: 16 }}>Contents</Text>
+        {categories.map((cat, ci) => (
+          <View key={ci} style={s.tocRow}>
+            <Text style={s.tocCategory}>{cat.title}</Text>
+            <Text style={s.tocCount}>
+              {cat.designers.length} {cat.designers.length === 1 ? "brand" : "brands"}
+            </Text>
+          </View>
+        ))}
+        <FooterBlock />
+      </Page>
+
+      {/* Category pages */}
+      {categories.map((cat, ci) => (
+        <Page key={ci} size="A4" style={s.page} wrap>
+          <Text style={s.categoryTitle}>{cat.title}</Text>
+          {cat.subtitle && <Text style={s.categorySubtitle}>{cat.subtitle}</Text>}
+
+          {cat.designers.map((designer) => (
+            <View key={designer.id} style={s.designerBlock} wrap={false}>
+              <View style={s.designerRow}>
+                {designer.profileImage && (
+                  <Image style={s.designerImage} src={designer.profileImage} />
+                )}
+                <View style={s.designerInfo}>
+                  <Text style={s.designerName}>{designer.name}</Text>
+                  <Text style={s.designerDesc}>{designer.description}</Text>
+                  {designer.website && (
+                    <Text style={s.designerWebsite}>{designer.website}</Text>
+                  )}
+                </View>
+              </View>
+
+              {/* Top 3 curator picks */}
+              {designer.curatorPicks.length > 0 && (
+                <View style={s.picksRow}>
+                  {designer.curatorPicks.slice(0, 3).map((pick, pi) => (
+                    <View key={pi} style={{ width: 100 }}>
+                      {pick.image && <Image style={s.pickImage} src={pick.image} />}
+                      <View style={s.pickInfo}>
+                        <Text style={s.pickTitle}>{pick.title}</Text>
+                        {pick.materials && <Text style={s.pickMaterials}>{pick.materials.substring(0, 60)}</Text>}
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          ))}
+          <FooterBlock />
+        </Page>
+      ))}
+    </Document>
+  );
+
+  const blob = await pdf(doc).toBlob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Maison_Affluency_Brand_Catalogue_${now.toISOString().slice(0, 10)}.pdf`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -326,7 +316,7 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f0eb] flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-muted/30 flex flex-col items-center justify-center px-4">
       <button
         onClick={() => navigate("/")}
         className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -336,8 +326,8 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Lock className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
-          <h1 className="text-2xl font-serif tracking-wider uppercase text-foreground">Gallery Catalogue</h1>
-          <p className="text-sm text-muted-foreground mt-2">Enter the password to access the gallery catalogue</p>
+          <h1 className="text-2xl font-serif tracking-wider uppercase text-foreground">Catalogue</h1>
+          <p className="text-sm text-muted-foreground mt-2">Enter the password to access the catalogue</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -345,10 +335,10 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
             value={pw}
             onChange={(e) => setPw(e.target.value)}
             placeholder="Password"
-            className={`w-full px-4 py-3 border ${error ? "border-red-400 shake" : "border-border"} rounded-md bg-background text-foreground text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all`}
+            className={`w-full px-4 py-3 border ${error ? "border-destructive" : "border-border"} rounded-md bg-background text-foreground text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all`}
             autoFocus
           />
-          {error && <p className="text-red-500 text-xs text-center">Incorrect password</p>}
+          {error && <p className="text-destructive text-xs text-center">Incorrect password</p>}
           <button
             type="submit"
             className="w-full py-3 bg-foreground text-background rounded-md text-sm uppercase tracking-wider hover:opacity-90 transition-opacity"
@@ -361,40 +351,26 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   );
 }
 
-/* ─── Product Row (editorial layout matching Invisible Collection) ─── */
+/* ─── Gallery Room Product Row ─── */
 function ProductRow({ product }: { product: CatalogueProduct }) {
   const heading = product.designer_name
     ? `${product.product_name} by ${product.designer_name}`
     : product.product_name;
 
   return (
-    <div className="flex gap-5 py-5 border-b border-[#e8e2db] last:border-b-0">
-      {/* Thumbnail */}
+    <div className="flex gap-5 py-5 border-b border-border/50 last:border-b-0">
       {product.product_image_url ? (
-        <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 bg-[#f5f0eb] flex items-center justify-center overflow-hidden">
-          <img
-            src={product.product_image_url}
-            alt={product.product_name}
-            className="max-w-full max-h-full object-contain"
-            loading="lazy"
-          />
+        <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 bg-muted/30 flex items-center justify-center overflow-hidden">
+          <img src={product.product_image_url} alt={product.product_name} className="max-w-full max-h-full object-contain" loading="lazy" />
         </div>
       ) : (
-        <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 bg-[#f0ebe5] flex items-center justify-center">
+        <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 bg-muted/20 flex items-center justify-center">
           <span className="text-[10px] text-muted-foreground">No image</span>
         </div>
       )}
-
-      {/* Details */}
       <div className="flex flex-col justify-center min-w-0">
-        <h4 className="text-sm md:text-[15px] font-serif italic text-foreground leading-snug">
-          {heading}
-        </h4>
-        {product.materials && (
-          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-            {product.materials}
-          </p>
-        )}
+        <h4 className="text-sm md:text-[15px] font-serif italic text-foreground leading-snug">{heading}</h4>
+        {product.materials && <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{product.materials}</p>}
         {product.dimensions && (
           <div className="mt-2">
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">Dimensions</p>
@@ -406,15 +382,94 @@ function ProductRow({ product }: { product: CatalogueProduct }) {
   );
 }
 
+/* ─── Brand Designer Card ─── */
+function DesignerCard({ designer }: { designer: BrandCatalogueDesigner }) {
+  const [showAllPicks, setShowAllPicks] = useState(false);
+  const visiblePicks = showAllPicks ? designer.curatorPicks : designer.curatorPicks.slice(0, 4);
+
+  return (
+    <div className="mb-10 pb-8 border-b border-border/40 last:border-b-0">
+      {/* Profile header */}
+      <div className="flex gap-5 md:gap-8 mb-5">
+        {designer.profileImage && (
+          <div className="w-24 h-24 md:w-32 md:h-32 flex-shrink-0 overflow-hidden bg-muted/20">
+            <img
+              src={designer.profileImage}
+              alt={designer.name}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        )}
+        <div className="flex flex-col justify-center min-w-0">
+          <h3 className="text-base md:text-lg font-serif uppercase tracking-wider text-foreground leading-snug">
+            {designer.name}
+          </h3>
+          <p className="text-xs md:text-sm text-muted-foreground mt-2 leading-relaxed line-clamp-3">
+            {designer.description}
+          </p>
+          {designer.website && (
+            <p className="text-xs text-primary mt-2">{designer.website}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Curator picks grid */}
+      {designer.curatorPicks.length > 0 && (
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-3">
+            Curators' Picks · {designer.curatorPicks.length} {designer.curatorPicks.length === 1 ? "piece" : "pieces"}
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {visiblePicks.map((pick, i) => (
+              <div key={i} className="group">
+                {pick.image && (
+                  <div className="aspect-square bg-muted/20 overflow-hidden mb-2">
+                    <img
+                      src={pick.image}
+                      alt={pick.title}
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+                <p className="text-xs font-serif text-foreground leading-tight">{pick.title}</p>
+                {pick.materials && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{pick.materials}</p>
+                )}
+                {pick.dimensions && (
+                  <p className="text-[10px] text-foreground mt-0.5">{pick.dimensions}</p>
+                )}
+              </div>
+            ))}
+          </div>
+          {designer.curatorPicks.length > 4 && !showAllPicks && (
+            <button
+              onClick={() => setShowAllPicks(true)}
+              className="mt-3 text-xs text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
+            >
+              Show all {designer.curatorPicks.length} pieces →
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Catalogue View ─── */
 function CatalogueView() {
   const navigate = useNavigate();
+  const [view, setView] = useState<"brands" | "gallery">("brands");
   const [groups, setGroups] = useState<GalleryRoomGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
+
+  const brandCategories = useMemo(() => getBrandCatalogueData(), []);
+  const totalBrands = useMemo(() => brandCategories.reduce((sum, c) => sum + c.designers.length, 0), [brandCategories]);
+  const totalPicks = useMemo(() => brandCategories.reduce((sum, c) => sum + c.designers.reduce((s, d) => s + d.curatorPicks.length, 0), 0), [brandCategories]);
 
   useEffect(() => {
     fetchCatalogueData().then((data) => {
@@ -428,13 +483,17 @@ function CatalogueView() {
   const handleDownload = useCallback(async () => {
     setGenerating(true);
     try {
-      await generatePDF(groups);
+      if (view === "brands") {
+        await generateBrandPDF(brandCategories);
+      } else {
+        await generateGalleryPDF(groups);
+      }
     } catch (err) {
       console.error("PDF generation failed:", err);
     } finally {
       setGenerating(false);
     }
-  }, [groups]);
+  }, [view, groups, brandCategories]);
 
   const handleSync = useCallback(async () => {
     setSyncing(true);
@@ -442,7 +501,6 @@ function CatalogueView() {
     try {
       const result = await syncHotspotMaterials();
       setSyncResult(`Updated ${result.updated} products. Skipped ${result.skipped}. ${result.noMatch.length} unmatched.`);
-      // Refresh data
       const data = await fetchCatalogueData();
       setGroups(data);
     } catch (err) {
@@ -455,39 +513,63 @@ function CatalogueView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#faf7f4] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#faf7f4]">
+    <div className="min-h-screen bg-background">
       {/* Sticky header */}
-      <div className="sticky top-0 z-10 bg-[#faf7f4]/95 backdrop-blur-sm border-b border-[#e8e2db]">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/50">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
           <button
             onClick={() => navigate("/")}
             className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back
           </button>
-          <div className="flex items-center gap-3">
+
+          {/* View toggle */}
+          <div className="flex items-center bg-muted/30 rounded-md p-0.5 border border-border/30">
             <button
-              onClick={handleSync}
-              disabled={syncing}
-              className="flex items-center gap-2 px-3 py-2 border border-foreground/10 text-muted-foreground text-xs uppercase tracking-widest hover:text-foreground hover:border-foreground/20 transition-all disabled:opacity-50"
+              onClick={() => setView("brands")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-widest rounded transition-all ${
+                view === "brands" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
-              {syncing ? "Syncing…" : "Sync Data"}
+              <Users className="w-3 h-3" /> Brands
             </button>
             <button
+              onClick={() => setView("gallery")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-widest rounded transition-all ${
+                view === "gallery" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <LayoutGrid className="w-3 h-3" /> Gallery
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 md:gap-3">
+            {view === "gallery" && (
+              <button
+                onClick={handleSync}
+                disabled={syncing}
+                className="hidden md:flex items-center gap-2 px-3 py-2 border border-foreground/10 text-muted-foreground text-xs uppercase tracking-widest hover:text-foreground hover:border-foreground/20 transition-all disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
+                {syncing ? "Syncing…" : "Sync"}
+              </button>
+            )}
+            <button
               onClick={handleDownload}
-              disabled={generating || groups.length === 0}
-              className="flex items-center gap-2 px-4 py-2 border border-foreground/20 text-foreground text-xs uppercase tracking-widest hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
+              disabled={generating}
+              className="flex items-center gap-2 px-3 md:px-4 py-2 border border-foreground/20 text-foreground text-xs uppercase tracking-widest hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
             >
               {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
-              {generating ? "Generating…" : "Download PDF"}
+              <span className="hidden md:inline">{generating ? "Generating…" : "Download PDF"}</span>
+              <span className="md:hidden">{generating ? "…" : "PDF"}</span>
             </button>
           </div>
         </div>
@@ -499,51 +581,72 @@ function CatalogueView() {
       </div>
 
       {/* Cover / Title Section */}
-      <div className="max-w-5xl mx-auto px-6 py-16 md:py-24 text-center">
+      <div className="max-w-5xl mx-auto px-6 py-12 md:py-20 text-center">
         <h1 className="text-3xl md:text-4xl font-serif tracking-[0.15em] uppercase text-foreground">
           Maison Affluency
         </h1>
         <p className="text-sm md:text-base text-muted-foreground italic mt-2">
-          Gallery Collection Catalogue
+          {view === "brands" ? "2026 Brand Catalogue" : "Gallery Collection Catalogue"}
         </p>
-        <div className="w-12 h-px bg-[#c9bfb3] mx-auto mt-6" />
+        <div className="w-12 h-px bg-primary/50 mx-auto mt-6" />
         <p className="text-xs text-muted-foreground mt-4">
-          {totalProducts} pieces across {groups.length} gallery rooms
+          {view === "brands"
+            ? `${totalBrands} brands & makers · ${totalPicks} curated pieces`
+            : `${totalProducts} pieces across ${groups.length} gallery rooms`}
         </p>
       </div>
 
-      {/* Gallery Room Sections */}
-      <div className="max-w-5xl mx-auto px-6 pb-20">
-        {groups.map((group, gi) => (
-          <section key={gi} className="mb-16">
-            {/* Section header */}
-            <div className="mb-2 pb-4 border-b border-[#d4ccc3]">
-              <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
-                {group.experience}
-              </p>
-              <h2 className="text-xl md:text-2xl font-serif italic text-foreground">
-                {group.room}
-              </h2>
-            </div>
-
-            {/* Product rows */}
-            <div>
-              {group.products.map((product) => (
-                <ProductRow key={product.id} product={product} />
-              ))}
-            </div>
-          </section>
-        ))}
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-4 md:px-6 pb-20">
+        {view === "brands" ? (
+          /* ─── Brand Catalogue View ─── */
+          <>
+            {brandCategories.map((cat, ci) => (
+              <section key={ci} className="mb-16">
+                <div className="mb-6 pb-4 border-b border-border/50 text-center">
+                  <h2 className="text-xl md:text-2xl font-serif uppercase tracking-[0.15em] text-foreground">
+                    {cat.title}
+                  </h2>
+                  {cat.subtitle && (
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-2">
+                      {cat.subtitle}
+                    </p>
+                  )}
+                </div>
+                {cat.designers.map((designer) => (
+                  <DesignerCard key={designer.id} designer={designer} />
+                ))}
+              </section>
+            ))}
+          </>
+        ) : (
+          /* ─── Gallery Room View ─── */
+          <>
+            {groups.map((group, gi) => (
+              <section key={gi} className="mb-16">
+                <div className="mb-2 pb-4 border-b border-border/50">
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
+                    {group.experience}
+                  </p>
+                  <h2 className="text-xl md:text-2xl font-serif italic text-foreground">
+                    {group.room}
+                  </h2>
+                </div>
+                <div>
+                  {group.products.map((product) => (
+                    <ProductRow key={product.id} product={product} />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </>
+        )}
       </div>
 
       {/* Footer */}
-      <div className="border-t border-[#e8e2db] py-8 text-center">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          Maison Affluency
-        </p>
-        <p className="text-[10px] text-muted-foreground mt-1">
-          www.maisonaffluency.com
-        </p>
+      <div className="border-t border-border/50 py-8 text-center">
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Maison Affluency</p>
+        <p className="text-[10px] text-muted-foreground mt-1">www.maisonaffluency.com</p>
       </div>
     </div>
   );
