@@ -39,10 +39,12 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
   const instant = "instant" as ScrollBehavior;
 
   // How far above the target we back up before scrolling in (px).
-  const LEAD_IN_DISTANCE = 1800;
+  // Should cover roughly one parallax interlude (~50-70vh) without
+  // reaching into the previous section's content.
+  const LEAD_IN_DISTANCE = 900;
 
   // Duration of the lead-in scroll animation in ms.
-  const SCROLL_DURATION = 2400;
+  const SCROLL_DURATION = 1800;
 
   // Capture where the user is BEFORE any jumps
   const originY = window.scrollY;
