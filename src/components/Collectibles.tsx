@@ -1084,15 +1084,10 @@ const Collectibles = () => {
                             }}
                             label={`Share ${designer.name} on WhatsApp`}
                           />
-                      <div className="flex items-center justify-center w-24 h-24 border border-border/40 rounded-sm">
-                        {(designer as any).logoUrl && (
-                          <img
-                            src={(designer as any).logoUrl}
-                            alt={`${designer.name} logo`}
-                            sizes="96px"
-                            className="max-w-full max-h-full object-contain aspect-square"
-                          />
-                        )}
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full border border-[hsl(var(--gold)/0.3)] bg-[hsl(var(--gold)/0.06)]">
+                        <span className="font-serif text-lg text-[hsl(var(--gold))] select-none leading-none">
+                          {designer.name.charAt(0)}
+                        </span>
                       </div>
                     </div>
                     </div>
