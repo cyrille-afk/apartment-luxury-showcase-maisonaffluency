@@ -398,11 +398,11 @@ function RoomCard({ group }: { group: GalleryRoomGroup }) {
     <div className="mb-14 pb-8 border-b border-border/40 last:border-b-0">
       {/* Full-width room image — matching expanded gallery style */}
       {roomImage && (
-        <div className="w-full aspect-[4/5] md:aspect-[16/9] overflow-hidden bg-muted/10 mb-5 rounded-sm">
+        <div className="w-full max-w-2xl mx-auto overflow-hidden bg-muted/10 mb-6 rounded-sm">
           <img
             src={roomImage}
             alt={group.room}
-            className="w-full h-full object-cover"
+            className="w-full h-auto object-contain"
             style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
             loading="lazy"
           />
