@@ -48,6 +48,7 @@ const App = () => {
   }, []);
 
   return (
+    <CompareProvider>
     <BrowserRouter>
       {MAINTENANCE_MODE ? (
         <Routes>
