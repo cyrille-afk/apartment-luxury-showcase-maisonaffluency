@@ -3008,31 +3008,54 @@ const BrandsAteliers = () => {
 
                     {!picksZoomed && <div className="hidden md:block h-12" aria-hidden="true" />}
 
-                    {/* Mobile: close (left) + quote (right) */}
-                    {!picksZoomed && (
-                      <div className="md:hidden flex justify-between items-center w-full mt-2">
-                        <div>
-                          <button
-                            onClick={requestClosePicks}
-                            className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
-                            aria-label="Close"
-                          >
-                            <X size={16} />
-                          </button>
+                    {/* Mobile: close (left) + pin + quote (right) */}
+                    {!picksZoomed && (() => {
+                      const currentPick = picksDesigner.curatorPicks[picksIndex];
+                      const designerId = picksDesigner.id ?? picksDesigner.name;
+                      const designerName = picksDesigner.name;
+                      return (
+                        <div className="md:hidden flex justify-between items-center w-full mt-2">
+                          <div>
+                            <button
+                              onClick={requestClosePicks}
+                              className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                              aria-label="Close"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-2 ml-auto">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                togglePin({ pick: currentPick, designerName, designerId, section: "ateliers" });
+                              }}
+                              className={cn(
+                                "p-1.5 rounded-full backdrop-blur-sm border transition-all duration-300",
+                                isPinned(currentPick.title, designerId)
+                                  ? "bg-[hsl(var(--gold)/0.3)] border-[hsl(var(--gold)/0.6)] text-white"
+                                  : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20",
+                                compareItems.length >= 3 && !isPinned(currentPick.title, designerId) && "opacity-40 pointer-events-none"
+                              )}
+                              aria-label={isPinned(currentPick.title, designerId) ? "Remove from selection" : "Pin"}
+                            >
+                              <Scale size={14} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setQuoteOpen(true);
+                              }}
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
+                              aria-label="Request a Quote"
+                            >
+                              <MessageSquareQuote size={14} />
+                              <span className="text-[10px] font-display font-bold uppercase tracking-[0.08em] leading-none">Quote</span>
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setQuoteOpen(true);
-                          }}
-                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto"
-                          aria-label="Request a Quote"
-                        >
-                          <MessageSquareQuote size={14} />
-                          <span className="text-[10px] font-display font-bold uppercase tracking-[0.08em] leading-none">Quote</span>
-                        </button>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {picksDesigner.curatorPicks.length > 1 && !picksZoomed && (
                       <div className="flex items-center gap-2 mt-3">
