@@ -75,6 +75,7 @@ const App = () => {
         </Suspense>
       )}
     </BrowserRouter>
+    </CompareProvider>
   );
 };
 
