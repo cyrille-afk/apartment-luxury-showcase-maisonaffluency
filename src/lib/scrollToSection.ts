@@ -42,8 +42,10 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
   const LEAD_IN_DISTANCE = 1800;
 
   // Duration of the lead-in scroll animation in ms.
-  // Longer = slower, giving users more time to absorb parallax content.
   const SCROLL_DURATION = 2400;
+
+  // Capture where the user is BEFORE any jumps
+  const originY = window.scrollY;
 
   const getTargetTop = () => {
     const el = document.getElementById(id);
@@ -79,11 +81,12 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
     }
 
     // Settled — back up and scroll in so the user sees nearby content.
-    // Skip lead-in for very short scrolls (e.g. overview right below hero).
+    // Use the ORIGINAL scroll position to decide if lead-in is warranted,
+    // since the settle loop has already jumped us to the target.
     if (behavior === "smooth") {
-      const scrollDistance = Math.abs(nextTop - window.scrollY);
+      const totalDistance = Math.abs(nextTop - originY);
       const MIN_DISTANCE_FOR_LEADIN = 800;
-      if (scrollDistance > MIN_DISTANCE_FOR_LEADIN) {
+      if (totalDistance > MIN_DISTANCE_FOR_LEADIN) {
         const leadInY = Math.max(0, nextTop - LEAD_IN_DISTANCE);
         window.scrollTo({ top: leadInY, behavior: instant });
         requestAnimationFrame(() => {
@@ -91,7 +94,7 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
         });
       } else {
         // Short distance — proportionally shorter animation
-        animateScroll(window.scrollY, nextTop, 800);
+        animateScroll(originY, nextTop, 800);
       }
     } else {
       window.scrollTo({ top: nextTop, behavior });
