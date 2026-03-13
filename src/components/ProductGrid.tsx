@@ -643,7 +643,7 @@ function singularizeSub(s: string): string {
 
                     {/* Desktop Quote + Pin — stacked vertically under PDF, anchored to image right */}
                     {!isZoomed && (
-                      <div className="hidden md:flex absolute top-full -right-20 mt-2 flex-col items-end gap-2 z-20">
+                      <div className="hidden md:flex absolute top-full -right-14 mt-2 flex-col items-end gap-2 z-20">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
