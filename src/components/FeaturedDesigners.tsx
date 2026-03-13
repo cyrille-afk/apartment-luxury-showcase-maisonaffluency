@@ -22,6 +22,8 @@ import CategorySidebar from "@/components/CategorySidebar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { useCompare } from "@/contexts/CompareContext";
+import { cn } from "@/lib/utils";
 
 // Designer profile images — served via Cloudinary CDN
 const dImg = (name: string) =>
