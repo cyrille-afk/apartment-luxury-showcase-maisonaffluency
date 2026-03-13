@@ -58,6 +58,7 @@ const ParallaxInterlude = ({
           alt=""
           loading="lazy"
           className="w-full h-full object-cover"
+          style={{ objectPosition }}
         />
       </motion.div>
 
