@@ -2274,9 +2274,13 @@ const FeaturedDesigners = () => {
 
     const handlePopState = () => {
       closedViaPopstateRef.current = true;
+      const shouldRestore = !!sessionStorage.getItem('__gallery_hotspot_restore');
       setCuratorPicksDesigner(null);
       setCuratorPickIndex(0);
       setIsZoomed(false);
+      if (shouldRestore) {
+        setTimeout(() => window.dispatchEvent(new Event('gallery-hotspot-return')), 200);
+      }
     };
 
     window.addEventListener('popstate', handlePopState);
