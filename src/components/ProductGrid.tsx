@@ -167,6 +167,7 @@ const normalizeSearchText = (value?: string) =>
     .trim();
 
 const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
+  const { isPinned, togglePin, items: compareItems } = useCompare();
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
