@@ -368,7 +368,7 @@ const Index = () => {
                 imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773373912/Screen_Shot_2026-03-13_at_11.51.17_AM_egvsuz.png"
                 quote="Every piece of furniture tells a story — of the hands that shaped it, the material that gave it life, and the space it was destined to inhabit"
                 attribution="The Maison Affluency Curation Philosophy"
-                overlayOpacity={0.15}
+                overlayOpacity={0}
                 objectPosition="left center"
               />
             </Suspense>
