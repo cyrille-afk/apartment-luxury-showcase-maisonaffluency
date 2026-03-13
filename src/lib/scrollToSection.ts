@@ -19,7 +19,7 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
 
   // How far above the target we back up before smooth-scrolling in (px).
   // This lets users see nearby content (parallax interludes, etc.)
-  const LEAD_IN_DISTANCE = isMobile ? 400 : 600;
+  const LEAD_IN_DISTANCE = isMobile ? 800 : 1200;
 
   const getTargetTop = () => {
     const el = document.getElementById(id);
