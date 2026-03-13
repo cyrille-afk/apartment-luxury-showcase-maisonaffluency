@@ -1384,50 +1384,44 @@ const Collectibles = () => {
                         <span className="text-[10px] md:text-xs font-medium leading-none">PDF</span>
                       </button>
                     )}
-                    {/* Desktop Quote — under PDF, anchored to image right */}
-                    {!isZoomed && (() => {
-                      const currentPick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
-                      const designerId = curatorPicksDesigner.id ?? curatorPicksDesigner.name;
-                      return (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setQuoteOpen(true);
-                          }}
-                          className="hidden md:flex absolute top-full right-2 mt-2 items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer z-20"
-                          aria-label="Request a Quote"
-                        >
-                          <MessageSquareQuote size={16} />
-                          <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
-                        </button>
-                      );
-                    })()}
-
-                    {/* Desktop Pin — under X close button */}
+                    {/* Desktop Quote + Pin — stacked vertically under PDF */}
                     {!isZoomed && (() => {
                       const currentPick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
                       const designerId = curatorPicksDesigner.id ?? curatorPicksDesigner.name;
                       const designerName = curatorPicksDesigner.name;
                       return (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            togglePin({ pick: currentPick, designerName, designerId, section: "collectibles" });
-                          }}
-                          className={cn(
-                            "hidden md:flex absolute top-full -right-12 lg:-right-14 mt-2 items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-sm border transition-all duration-300 cursor-pointer z-20",
-                            isPinned(currentPick.title, designerId)
-                              ? "bg-[hsl(var(--gold)/0.3)] border-[hsl(var(--gold)/0.6)] text-white"
-                              : "bg-white/15 border-white/30 text-white hover:bg-white/25",
-                            compareItems.length >= 3 && !isPinned(currentPick.title, designerId) && "opacity-40 pointer-events-none"
-                          )}
-                          aria-label={isPinned(currentPick.title, designerId) ? "Remove from selection" : "Pin your selection of 3"}
-                        >
-                          <Scale size={16} />
-                          <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">
-                            {isPinned(currentPick.title, designerId) ? "Pinned" : "Pin your selection of 3"}
-                          </span>
-                        </button>
+                        <div className="hidden md:flex absolute top-full right-2 mt-2 flex-col gap-2 z-20">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setQuoteOpen(true);
+                            }}
+                            className="flex items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
+                            aria-label="Request a Quote"
+                          >
+                            <MessageSquareQuote size={16} />
+                            <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              togglePin({ pick: currentPick, designerName, designerId, section: "collectibles" });
+                            }}
+                            className={cn(
+                              "flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-sm border transition-all duration-300 cursor-pointer",
+                              isPinned(currentPick.title, designerId)
+                                ? "bg-[hsl(var(--gold)/0.3)] border-[hsl(var(--gold)/0.6)] text-white"
+                                : "bg-white/15 border-white/30 text-white hover:bg-white/25",
+                              compareItems.length >= 3 && !isPinned(currentPick.title, designerId) && "opacity-40 pointer-events-none"
+                            )}
+                            aria-label={isPinned(currentPick.title, designerId) ? "Remove from selection" : "Pin your selection of 3"}
+                          >
+                            <Scale size={16} />
+                            <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">
+                              {isPinned(currentPick.title, designerId) ? "Pinned" : "Pin your selection of 3"}
+                            </span>
+                          </button>
+                        </div>
                       );
                     })()}
                   </div>
