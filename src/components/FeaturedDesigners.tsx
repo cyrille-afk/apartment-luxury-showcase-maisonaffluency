@@ -2807,7 +2807,7 @@ const FeaturedDesigners = () => {
                           {designer.specialty}
                         </p>
                       </div>
-                      <div className="hidden md:flex mt-1.5">
+                      <div className="hidden md:flex mt-3">
                         <WhatsAppShareButton
                           onClick={(e) => {
                             e.stopPropagation();
@@ -2815,6 +2815,7 @@ const FeaturedDesigners = () => {
                             trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
                           }}
                           label={`Share ${designer.name} on WhatsApp`}
+                          variant="branded"
                         />
                       </div>
                     </div>

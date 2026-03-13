@@ -30,11 +30,11 @@ type WhatsAppShareButtonProps = {
 
 const sizeClasses = {
   default: {
-    button: "gap-2 px-4 py-2 md:px-2.5 md:py-1 text-sm md:text-[11px] min-h-[44px] md:min-h-0",
-    icon: "w-4 h-4 md:w-3 md:h-3",
+    button: "gap-2 px-4 py-2 md:px-3 md:py-1.5 text-sm md:text-xs min-h-[44px] md:min-h-0",
+    icon: "w-4 h-4 md:w-3.5 md:h-3.5",
   },
   sm: {
-    button: "gap-1.5 px-3 py-1.5 md:px-2 md:py-1 text-xs md:text-[10px] min-h-[44px] md:min-h-0",
+    button: "gap-1.5 px-3 py-1.5 md:px-2 md:py-1 text-xs md:text-[11px] min-h-[44px] md:min-h-0",
     icon: "w-3.5 h-3.5 md:w-3 md:h-3",
   },
 } as const;
