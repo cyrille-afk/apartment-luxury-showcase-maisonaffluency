@@ -546,7 +546,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         category: "Decorative Object",
         subcategory: "Wallcoverings",
         tags: ["Decorative Object", "Wallcoverings"],
-        description: "The panoramic VOYAGE EN TOSCANE was created as a Myriorama*.\nThe panels can be displayed in any order. The landscape follows on and is always connected, regardless of the chosen order of display.\nEach reference joins with itself and/or with the additional references (FP611, FP612 and FP613).\n\nA Myriorama is an image, a scene with interchangeable views.",
+        description: "The panoramic VOYAGE EN TOSCANE was created as a Myriorama*.\nThe panels can be displayed in any order. The landscape follows on and is always connected, regardless of the chosen order of display.\nEach reference joins with itself and/or with the additional references (FP611 — La Mer, FP612 — La Campagne and FP613 — La Montagne).\n\nA Myriorama is an image, a scene with interchangeable views.",
         dimensions: "Full panoramic 137 × 300 cm (2 lengths 68 × 300 cm)",
         pdfUrls: [
           { label: "FP611", url: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs%2Fpierre-frey-voyage-en-toscane-la-mer-FP611.pdf", filename: "Pierre-Frey-Voyage-en-Toscane-La-Mer-FP611.pdf" },
