@@ -446,117 +446,124 @@ function useImageOrientation(src: string | undefined) {
   return isPortrait;
 }
 
-/* ─── Gallery Room Card ─── */
+/* ─── Gallery Room Card — Invisible Collection catalogue layout ─── */
 function RoomCard({ group }: { group: GalleryRoomGroup }) {
   const [showAll, setShowAll] = useState(false);
   const visibleProducts = showAll ? group.products : group.products.slice(0, 4);
   const roomImage = ROOM_IMAGES[group.room];
-  const isPortrait = useImageOrientation(roomImage);
 
-  const productItems = visibleProducts.map((product) => {
+  /* Product listing items — vertical stack with small image + details inline */
+  const productListItems = visibleProducts.map((product) => {
     const heading = product.designer_name
       ? `${product.product_name} by ${product.designer_name}`
       : product.product_name;
     return (
-      <div key={product.id} className="group">
+      <div key={product.id} className="flex gap-4 pb-5 mb-5 border-b border-border/20 last:border-b-0 last:pb-0 last:mb-0">
+        {/* Small padded product image */}
         {product.product_image_url ? (
-          <div className="aspect-square bg-white overflow-hidden mb-2">
+          <div className="w-24 h-24 md:w-28 md:h-28 flex-shrink-0 bg-white overflow-hidden">
             <img
-              src={group.room === "An Inviting Lounge Area" ? padProductImage(product.product_image_url) : product.product_image_url}
+              src={padProductImage(product.product_image_url)}
               alt={product.product_name}
-              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-contain"
               loading="lazy"
             />
           </div>
         ) : (
-          <div className="aspect-square bg-muted/20 flex items-center justify-center mb-2">
+          <div className="w-24 h-24 md:w-28 md:h-28 flex-shrink-0 bg-muted/10 flex items-center justify-center">
             <span className="text-[10px] text-muted-foreground">No image</span>
           </div>
         )}
-        <p className="text-xs font-serif text-foreground leading-tight">{heading}</p>
-        {product.materials && (
-          <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{product.materials}</p>
-        )}
-        {product.dimensions && (
-          <p className="text-[10px] text-foreground mt-0.5">{product.dimensions}</p>
-        )}
+        {/* Product details */}
+        <div className="flex-1 min-w-0 pt-0.5">
+          <p className="text-xs md:text-sm font-serif text-foreground leading-snug">{heading}</p>
+          {product.materials && (
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1.5 leading-relaxed">{product.materials}</p>
+          )}
+          {product.dimensions && (
+            <p className="text-[10px] md:text-xs text-foreground mt-1">{product.dimensions}</p>
+          )}
+        </div>
       </div>
     );
   });
 
-  const titleBlock = (
-    <div className="mb-4">
-      <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
-        {group.experience}
-      </p>
-      <h3 className="text-lg md:text-xl font-serif italic text-foreground leading-snug">
-        {group.room}
-      </h3>
-      <p className="text-xs text-muted-foreground mt-1">
-        {group.products.length} {group.products.length === 1 ? "piece" : "pieces"}
-      </p>
-    </div>
-  );
-
-  /* Portrait on desktop → side-by-side layout */
-  if (isPortrait && roomImage) {
-    return (
-      <div className="mb-14 pb-8 border-b border-border/40 last:border-b-0">
-        <div className="flex flex-col md:flex-row md:gap-8">
-          {/* Left: image + title */}
-          <div className="md:w-[45%] flex-shrink-0">
-            <div className="overflow-hidden bg-muted/10 mb-4 md:mb-0 rounded-sm">
-              <img
-                src={roomImage}
-                alt={group.room}
-                className="w-full h-auto object-contain"
-                style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
-                loading="lazy"
-              />
-            </div>
-          </div>
-          {/* Right: title + products */}
-          <div className="flex-1 min-w-0">
-            {titleBlock}
-            {group.products.length > 0 && (
-              <ProductGrid
-                items={productItems}
-                showAll={showAll}
-                total={group.products.length}
-                onShowAll={() => setShowAll(true)}
-                label="Products in this room"
-              />
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* Landscape / square → stacked layout */
   return (
-    <div className="mb-14 pb-8 border-b border-border/40 last:border-b-0">
-      {roomImage && (
-        <div className="w-full max-w-3xl mx-auto overflow-hidden bg-muted/10 mb-6 rounded-sm">
-          <img
-            src={roomImage}
-            alt={group.room}
-            className="w-full h-auto object-contain"
-            style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
-            loading="lazy"
-          />
+    <div className="mb-16 pb-10 border-b border-border/40 last:border-b-0">
+      {/* Mobile: stacked (image on top, products below) */}
+      <div className="md:hidden">
+        {roomImage && (
+          <div className="w-full overflow-hidden bg-muted/10 mb-5 rounded-sm">
+            <img
+              src={roomImage}
+              alt={group.room}
+              className="w-full h-auto object-contain"
+              style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+              loading="lazy"
+            />
+          </div>
+        )}
+        <div className="mb-5">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
+            {group.experience}
+          </p>
+          <h3 className="text-lg font-serif italic text-foreground leading-snug">
+            {group.room}
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            {group.products.length} {group.products.length === 1 ? "piece" : "pieces"}
+          </p>
         </div>
-      )}
-      {titleBlock}
-      {group.products.length > 0 && (
-        <ProductGrid
-          items={productItems}
-          showAll={showAll}
-          total={group.products.length}
-          onShowAll={() => setShowAll(true)}
-          label="Products in this room"
-        />
-      )}
+        <div>{productListItems}</div>
+        {group.products.length > 4 && !showAll && (
+          <button
+            onClick={() => setShowAll(true)}
+            className="mt-3 text-xs text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
+          >
+            Show all {group.products.length} pieces →
+          </button>
+        )}
+      </div>
+
+      {/* Desktop: PDF-style — products left, room image right */}
+      <div className="hidden md:flex md:gap-0 min-h-[500px]">
+        {/* Left: title + product listings */}
+        <div className="w-[48%] flex-shrink-0 pr-8 flex flex-col">
+          <div className="mb-6">
+            <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
+              {group.experience}
+            </p>
+            <h3 className="text-xl font-serif italic text-foreground leading-snug">
+              {group.room}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              {group.products.length} {group.products.length === 1 ? "piece" : "pieces"}
+            </p>
+          </div>
+          <div className="flex-1">{productListItems}</div>
+          {group.products.length > 4 && !showAll && (
+            <button
+              onClick={() => setShowAll(true)}
+              className="mt-4 text-xs text-primary hover:text-primary/80 transition-colors uppercase tracking-wider self-start"
+            >
+              Show all {group.products.length} pieces →
+            </button>
+          )}
+        </div>
+
+        {/* Right: full-height room image */}
+        {roomImage && (
+          <div className="w-[52%] overflow-hidden rounded-sm">
+            <img
+              src={roomImage}
+              alt={group.room}
+              className="w-full h-full object-cover"
+              style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+              loading="lazy"
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
