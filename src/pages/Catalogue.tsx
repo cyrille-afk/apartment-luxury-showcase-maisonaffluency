@@ -42,6 +42,14 @@ const ROOM_IMAGES: Record<string, string> = {
   "Craftsmanship At Every Corner": g("AffluencySG_204_1_qbbpqb"),
 };
 
+/**
+ * Apply c_pad,b_white,w_500,h_500 to a Cloudinary product image URL.
+ * Inserts the transformation after /upload/.
+ */
+function padProductImage(url: string): string {
+  return url.replace("/image/upload/", "/image/upload/c_pad,b_white,w_500,h_500/");
+}
+
 const CATALOGUE_PASSWORD = "maison-affluency";
 
 /* ─── Gallery Room PDF generation (existing) ─── */
