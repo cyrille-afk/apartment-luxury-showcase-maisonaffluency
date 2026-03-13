@@ -2928,6 +2928,38 @@ const BrandsAteliers = () => {
                             <span className="text-[10px] md:text-xs font-medium leading-none text-white">PDF</span>
                           </button>
                         )}
+                        {(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrls && (
+                          <div className="absolute bottom-2 right-2 z-10 flex gap-1.5">
+                            {((picksDesigner.curatorPicks[picksIndex] as any).pdfUrls as { label: string; url: string; filename?: string }[]).map((pdf) => (
+                              <button
+                                key={pdf.label}
+                                className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
+                                aria-label={`Download PDF ${pdf.label}`}
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    const res = await fetch(pdf.url);
+                                    const blob = await res.blob();
+                                    const blobUrl = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = blobUrl;
+                                    a.download = pdf.filename || `${pdf.label}.pdf`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    a.remove();
+                                    URL.revokeObjectURL(blobUrl);
+                                  } catch {
+                                    window.open(pdf.url, '_blank');
+                                  }
+                                }}
+                              >
+                                <FileDown size={14} className="md:hidden text-white" />
+                                <FileDown size={16} className="hidden md:block text-white" />
+                                <span className="text-[10px] md:text-xs font-medium leading-none text-white">{pdf.label}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                         <button
                           onClick={() => setPicksZoomed(!picksZoomed)}
                           className="md:hidden absolute bottom-2 left-2 z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
