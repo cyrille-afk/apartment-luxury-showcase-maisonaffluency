@@ -130,7 +130,7 @@ const atelierFevrierPick6 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.46.17_AM
 const atelierFevrierPick7 = cloudinaryUrl("Screen_Shot_2026-02-27_at_11.46.48_AM_saicfe", { width: 1200, quality: "auto:good", crop: "fill" });
 const emmanuelLevetStennePick1 = cloudinaryUrl("Screen_Shot_2026-03-02_at_10.01.00_AM_dml7fd", { width: 1200, quality: "auto:good", crop: "fill" });
 const emmanuelLevetStennePick2 = cloudinaryUrl("Screen_Shot_2026-03-02_at_10.01.37_AM_xawh16", { width: 1200, quality: "auto:good", crop: "fill" });
-const emmanuelLevetStennePick3 = cloudinaryUrl("Screen_Shot_2026-03-12_at_8.37.08_PM_dtsfw9", { width: 1200, quality: "auto:good", crop: "fill", gravity: "auto" });
+const emmanuelLevetStennePick3 = cloudinaryUrl("Screen_Shot_2026-03-13_at_8.49.41_AM_rjzf9d", { width: 1200, quality: "auto:good", crop: "fill" });
 const emmanuelLevetStennePick4 = cloudinaryUrl("Screen_Shot_2026-03-02_at_10.05.16_AM_rzrgtj", { width: 1200, quality: "auto:good", crop: "fill" });
 const emmanuelLevetStennePick5 = cloudinaryUrl("Screen_Shot_2026-03-12_at_8.29.22_PM_cff1vy", { width: 1200, quality: "auto:good", crop: "fill" });
 const emmanuelLevetStennePick6 = cloudinaryUrl("Screen_Shot_2026-03-12_at_8.35.20_PM_ryh6fo", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -1038,7 +1038,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
       {
         image: emmanuelLevetStennePick3,
-        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773318828/Screen_Shot_2026-03-12_at_8.32.15_PM_kywhqr.png",
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773363061/Screen_Shot_2026-03-13_at_8.50.05_AM_ayhfuy.png",
         title: "Alabaster Pendant",
         subtitle: "",
         category: "Lighting",
