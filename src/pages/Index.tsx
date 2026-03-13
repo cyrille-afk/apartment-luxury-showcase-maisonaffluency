@@ -26,6 +26,7 @@ const ExitIntentBanner = lazy(() => import("@/components/ExitIntentBanner"));
 const StickyBottomNav = lazy(() => import("@/components/StickyBottomNav"));
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
+const ParallaxInterlude = lazy(() => import("@/components/ParallaxInterlude"));
 
 /**
  * Parse deep-link hash: #designer/<id>, #collectible/<id>, #atelier/<slug>
@@ -360,6 +361,17 @@ const Index = () => {
                 <CuratingTeam />
               </Suspense>
             </section>
+
+            {/* Interlude 1: After Curating Team → Before Designers */}
+            <Suspense fallback={null}>
+              <ParallaxInterlude
+                imageUrl="https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=1920&q=80&auto=format&fit=crop"
+                quote="Every piece of furniture tells a story — of the hands that shaped it, the material that gave it life, and the space it was destined to inhabit"
+                attribution="The Maison Affluency Curation Philosophy"
+                overlayOpacity={0.55}
+              />
+            </Suspense>
+
             <Suspense fallback={null}>
               <ProductGrid sectionScope="designers" />
             </Suspense>
@@ -368,6 +380,18 @@ const Index = () => {
                 <FeaturedDesigners />
               </Suspense>
             </section>
+
+            {/* Interlude 2: After Designers → Before Collectibles */}
+            <Suspense fallback={null}>
+              <ParallaxInterlude
+                imageUrl="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1920&q=80&auto=format&fit=crop"
+                quote="Collectible design exists at the intersection of art and function — where rarity becomes a conversation and craftsmanship becomes legacy"
+                attribution="On Collectible Design"
+                overlayOpacity={0.5}
+                reverse
+              />
+            </Suspense>
+
             <Suspense fallback={null}>
               <ProductGrid sectionScope="collectibles" />
             </Suspense>
@@ -376,6 +400,17 @@ const Index = () => {
                 <Collectibles />
               </Suspense>
             </section>
+
+            {/* Interlude 3: After Collectibles → Before Ateliers */}
+            <Suspense fallback={null}>
+              <ParallaxInterlude
+                imageUrl="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1920&q=80&auto=format&fit=crop"
+                quote="An atelier is more than a workshop — it is a sanctuary where tradition meets innovation, and every detail is an act of devotion"
+                attribution="The Atelier Experience"
+                overlayOpacity={0.5}
+              />
+            </Suspense>
+
             <Suspense fallback={null}>
               <ProductGrid sectionScope="ateliers" />
             </Suspense>
