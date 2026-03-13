@@ -57,13 +57,20 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
     }
 
     // Settled — now back up and smooth-scroll in so the user sees nearby content.
+    // Only apply lead-in when the scroll distance is large enough to warrant it;
+    // for nearby sections (like overview right below hero) just smooth-scroll directly.
     if (behavior === "smooth") {
-      const leadInY = Math.max(0, nextTop - LEAD_IN_DISTANCE);
-      window.scrollTo({ top: leadInY, behavior: instant });
-      // Small delay so the instant jump completes before smooth scroll begins
-      requestAnimationFrame(() => {
+      const scrollDistance = Math.abs(nextTop - window.scrollY);
+      if (scrollDistance > LEAD_IN_DISTANCE * 1.5) {
+        const leadInY = Math.max(0, nextTop - LEAD_IN_DISTANCE);
+        window.scrollTo({ top: leadInY, behavior: instant });
+        // Small delay so the instant jump completes before smooth scroll begins
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: nextTop, behavior: "smooth" });
+        });
+      } else {
         window.scrollTo({ top: nextTop, behavior: "smooth" });
-      });
+      }
     } else {
       window.scrollTo({ top: nextTop, behavior });
     }
