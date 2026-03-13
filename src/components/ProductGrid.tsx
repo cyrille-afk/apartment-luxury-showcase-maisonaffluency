@@ -229,6 +229,7 @@ function singularizeSub(s: string): string {
         setSubcategory(null);
         if (source) setFilterSource(source);
         setTextQuery(normalizedQuery);
+        setGridCols(3);
         return;
       }
 
