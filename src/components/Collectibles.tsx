@@ -1207,7 +1207,7 @@ const Collectibles = () => {
       </section>
 
       {/* Curators' Picks Dialog - Full screen dark modal like FeaturedDesigners */}
-      <Dialog open={!!curatorPicksDesigner} onOpenChange={(open) => !open && closeCuratorPicks()}>
+      <Dialog modal={false} open={!!curatorPicksDesigner} onOpenChange={(open) => !open && closeCuratorPicks()}>
         <DialogContent 
           className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-none [&>button.absolute]:hidden" 
           onKeyDown={handleKeyDown}

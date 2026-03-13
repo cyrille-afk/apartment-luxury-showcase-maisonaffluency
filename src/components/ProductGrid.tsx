@@ -496,7 +496,7 @@ function singularizeSub(s: string): string {
       </div>
 
       {/* ─── Lightbox ─────────────────────────────────────────────────── */}
-      <Dialog open={lightboxOpen} onOpenChange={() => { setLightboxOpen(false); setIsZoomed(false); setIsLightboxImageLoaded(false); }}>
+      <Dialog modal={false} open={lightboxOpen} onOpenChange={() => { setLightboxOpen(false); setIsZoomed(false); setIsLightboxImageLoaded(false); }}>
         <DialogContent
           hideClose
           className="max-w-[100vw] max-h-[100dvh] w-screen h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-center justify-center [&>button]:hidden"
