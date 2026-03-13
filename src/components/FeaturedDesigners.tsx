@@ -141,6 +141,7 @@ import hamreiPick3 from "@/assets/curators-picks/hamrei-3.jpg";
 import hamreiPick4 from "@/assets/curators-picks/hamrei-4.jpg";
 import hamreiPick5 from "@/assets/curators-picks/hamrei-5.jpg";
 import hamreiPick6 from "@/assets/curators-picks/hamrei-6.jpg";
+const hamreiPick7 = cloudinaryUrl("Screen_Shot_2026-03-11_at_9.07.00_AM_rjjwg3", { width: 1200, quality: "auto:good", crop: "fill" });
 import jmwPick1 from "@/assets/curators-picks/jmw-1.webp";
 import jmwPick2 from "@/assets/curators-picks/jmw-2.png";
 import jmwPick3 from "@/assets/curators-picks/jmw-3.png";
