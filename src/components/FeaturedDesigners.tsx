@@ -3275,7 +3275,7 @@ const FeaturedDesigners = () => {
                           </p>
                         )}
                         {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.description && (
-                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed text-justify md:text-center">
+                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed text-justify md:text-center whitespace-pre-line">
                             {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).description}
                           </p>
                         )}
