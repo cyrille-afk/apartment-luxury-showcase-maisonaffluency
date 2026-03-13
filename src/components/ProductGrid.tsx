@@ -462,6 +462,23 @@ function singularizeSub(s: string): string {
                     style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                   />
                 )}
+                {/* Compare pin button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePin({ pick: item.pick, designerName: item.designerName, designerId: item.designerId, section: item.section });
+                  }}
+                  className={cn(
+                    "absolute bottom-2 left-2 z-10 p-1.5 rounded-full transition-all duration-300 backdrop-blur-sm",
+                    isPinned(item.pick.title, item.designerId)
+                      ? "bg-[hsl(var(--gold))] text-foreground shadow-md"
+                      : "bg-black/40 text-white/70 opacity-0 group-hover:opacity-100 hover:bg-black/60",
+                    compareItems.length >= 3 && !isPinned(item.pick.title, item.designerId) && "pointer-events-none"
+                  )}
+                  aria-label={isPinned(item.pick.title, item.designerId) ? "Remove from comparison" : "Add to comparison"}
+                >
+                  <Scale size={14} />
+                </button>
               </div>
               <div className="text-center mt-1">
                 <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-foreground/80 font-semibold">
