@@ -205,6 +205,7 @@ function singularizeSub(s: string): string {
       setSubcategory(sub || null);
       setFilterSource('designers');
       setTextQuery(null);
+      if (sub) setGridCols(3);
     };
     window.addEventListener('setDesignerCategory', handleSetCategory as EventListener);
 
