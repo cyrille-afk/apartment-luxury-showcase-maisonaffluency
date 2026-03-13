@@ -57,6 +57,9 @@ const ParallaxInterlude = ({
           src={imageUrl}
           alt=""
           loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+          sizes="100vw"
           className="w-full h-full object-cover"
           style={{ objectPosition }}
         />
