@@ -1405,6 +1405,14 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Hand-chiseled stone top, textured earthenware ceramic base",
         dimensions: "Ø120 × H75 cm (customisable)"
       },
+      {
+        image: hamreiPick7,
+        title: "PéPé S Icewood x FJ Hakimian Dining Chair",
+        category: "Seating",
+        tags: ["Seating", "Dining Chair"],
+        description: "Antique brass finished frame, hand-upholstered backrest in FJ Hakimian repurposed woven leather, seamless thick \"piping\" and seat upholstered in FJ Hakimian handwoven Japanese icewood",
+        dimensions: "W 51 × D 59 × H 86 cm — SH 46 cm"
+      },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/hamrei" },
