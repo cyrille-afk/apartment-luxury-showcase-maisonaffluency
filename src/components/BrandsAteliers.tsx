@@ -117,6 +117,7 @@ const tacchiniBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_9.06.23_PM_ixc2yu", 
 const refractoryStudioBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_9.09.20_PM_jm34g1", { width: 1200, quality: "auto:good", crop: "fill" });
 const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_xqirha", { width: 1200, quality: "auto:good", crop: "fill" });
 const alpangeBg = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,c_fill,f_auto/v1773210638/Screen_Shot_2026-03-11_at_2.30.01_PM_tdkif9.png";
+const pierreFreyBg = cloudinaryUrl("90_vfmkkj", { width: 1200, quality: "auto:good", crop: "fill" });
 
 // Stéphane CG Curators' Picks images
 const stephaneCgOrsay = cloudinaryUrl("PHOTO-2023-09-14-13-51-05_1_iyi99i", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -1739,6 +1740,7 @@ const brandBgMap: Record<string, string> = {
   "Refractory Studio": refractoryStudioBg,
   "Marta Sala Éditions": martaSalaEditionsBg,
   "Alpange": alpangeBg,
+  "Pierre Frey": pierreFreyBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
