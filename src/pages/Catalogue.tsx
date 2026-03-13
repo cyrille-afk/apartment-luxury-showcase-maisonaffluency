@@ -460,9 +460,9 @@ function RoomCard({ group }: { group: GalleryRoomGroup }) {
     return (
       <div key={product.id} className="group">
         {product.product_image_url ? (
-          <div className="aspect-square bg-muted/20 overflow-hidden mb-2">
+          <div className="aspect-square bg-white overflow-hidden mb-2">
             <img
-              src={product.product_image_url}
+              src={group.room === "An Inviting Lounge Area" ? padProductImage(product.product_image_url) : product.product_image_url}
               alt={product.product_name}
               className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
               loading="lazy"
