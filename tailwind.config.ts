@@ -58,6 +58,11 @@ export default {
         },
         gold: "hsl(var(--gold))",
         cream: "hsl(var(--cream))",
+        whatsapp: "hsl(var(--whatsapp))",
+        "pdf-red": "hsl(var(--pdf-red))",
+        success: "hsl(var(--success))",
+        info: "hsl(var(--info))",
+        warning: "hsl(var(--warning))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
