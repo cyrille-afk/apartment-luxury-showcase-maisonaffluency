@@ -113,7 +113,7 @@ const mmairoBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.10.53_AM_cuc62s", { 
 const lobjetBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.14.39_AM_jodm2a", { width: 1200, quality: "auto:good", crop: "fill" });
 const osannaViscontiBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.25.23_AM_psgxsu", { width: 1200, quality: "auto:good", crop: "fill" });
 const laChanceParisBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_3.18.38_AM_nkx1t6", { width: 1200, quality: "auto:good", crop: "fill" });
-const tacchiniBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_9.06.23_PM_ixc2yu", { width: 1200, quality: "auto:good", crop: "fill" });
+
 const refractoryStudioBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_9.09.20_PM_jm34g1", { width: 1200, quality: "auto:good", crop: "fill" });
 const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_xqirha", { width: 1200, quality: "auto:good", crop: "fill" });
 const alpangeBg = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,c_fill,f_auto/v1773210638/Screen_Shot_2026-03-11_at_2.30.01_PM_tdkif9.png";
@@ -1612,15 +1612,6 @@ const partnerBrands = [
     instagram: "https://www.instagram.com/pierre_augustin_rose/",
   },
   {
-    id: "tacchini",
-    name: "Tacchini",
-    category: "Furniture",
-    subcategory: "Seating & Sofas",
-    origin: "Italy",
-    description: "Tacchini Italia is a Milan-based furniture house renowned for its sculptural upholstered seating that balances Italian craft tradition with contemporary design vision. Collaborating with leading international designers, Tacchini creates iconic sofas, armchairs and lounge pieces defined by generous volumes, refined tailoring and an enduring sense of comfort.",
-    instagram: "https://www.instagram.com/tacchini_italia/?hl=en",
-  },
-  {
     id: "refractory-studio",
     name: "Refractory Studio",
     category: "Lighting",
@@ -1742,7 +1733,7 @@ const brandBgMap: Record<string, string> = {
   "La Chance Paris": laChanceParisBg,
   "Osanna Visconti": osannaViscontiBg,
   "Pierre Augustin Rose": pierreAugustinRoseBg,
-  "Tacchini": tacchiniBg,
+  
   "Refractory Studio": refractoryStudioBg,
   "Marta Sala Éditions": martaSalaEditionsBg,
   "Alpange": alpangeBg,
