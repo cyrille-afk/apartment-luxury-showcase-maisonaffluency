@@ -1091,7 +1091,7 @@ const Collectibles = () => {
                     {designer.notableWorksLink && (() => {
                       const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
                       return (
-                        <div className="hidden md:flex items-center gap-4 flex-shrink-0 mr-8">
+                        <div className="hidden md:flex items-center gap-5 flex-shrink-0 mr-8">
                           <span className="text-xs text-muted-foreground uppercase tracking-wider"><em>On View</em></span>
                           <div className="relative group/avatar pb-6">
                             <button
