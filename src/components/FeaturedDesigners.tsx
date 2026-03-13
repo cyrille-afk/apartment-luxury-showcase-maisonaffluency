@@ -3,7 +3,7 @@ import { GALLERY } from "@/constants/galleryIndex";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { useInView } from "framer-motion";
 import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";
-import { Instagram, Search, X, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Gem, Maximize2, Minimize2, SlidersHorizontal, FileDown, MessageSquareQuote, CornerDownRight } from "lucide-react";
+import { Instagram, Search, X, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Gem, Maximize2, Minimize2, SlidersHorizontal, FileDown, MessageSquareQuote, CornerDownRight, Scale } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
@@ -22,6 +22,8 @@ import CategorySidebar from "@/components/CategorySidebar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { useCompare } from "@/contexts/CompareContext";
+import { cn } from "@/lib/utils";
 
 // Designer profile images — served via Cloudinary CDN
 const dImg = (name: string) =>
@@ -2187,6 +2189,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
 const FeaturedDesigners = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { isPinned, togglePin, items: compareItems } = useCompare();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
@@ -3251,53 +3254,102 @@ const FeaturedDesigners = () => {
                         </button>
                       )}
 
-                      {/* Desktop Quote — stacked under PDF, anchored to image */}
-                      {!isZoomed && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setQuoteOpen(true);
-                          }}
-                          className="hidden md:flex absolute top-full right-2 mt-2 items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer z-20"
-                          aria-label="Request a Quote"
-                        >
-                          <MessageSquareQuote size={16} />
-                          <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
-                        </button>
-                      )}
+                      {/* Desktop Quote + Pin — horizontal row under PDF, anchored to image */}
+                      {!isZoomed && (() => {
+                        const currentPick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
+                        const designerId = curatorPicksDesigner.id ?? curatorPicksDesigner.name;
+                        const designerName = curatorPicksDesigner.name;
+                        return (
+                          <div className="hidden md:flex absolute top-full right-2 mt-2 items-center gap-2 z-20">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setQuoteOpen(true);
+                              }}
+                              className="flex items-center gap-1 px-3 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
+                              aria-label="Request a Quote"
+                            >
+                              <MessageSquareQuote size={16} />
+                              <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">Request a Quote</span>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                togglePin({ pick: currentPick, designerName, designerId, section: "designers" });
+                              }}
+                              className={cn(
+                                "flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-sm border transition-all duration-300 cursor-pointer",
+                                isPinned(currentPick.title, designerId)
+                                  ? "bg-[hsl(var(--gold)/0.3)] border-[hsl(var(--gold)/0.6)] text-white"
+                                  : "bg-white/15 border-white/30 text-white hover:bg-white/25",
+                                compareItems.length >= 3 && !isPinned(currentPick.title, designerId) && "opacity-40 pointer-events-none"
+                              )}
+                              aria-label={isPinned(currentPick.title, designerId) ? "Remove from selection" : "Pin your selection of 3"}
+                            >
+                              <Scale size={16} />
+                              <span className="text-xs font-display font-bold uppercase tracking-[0.08em] leading-none">
+                                {isPinned(currentPick.title, designerId) ? "Pinned" : "Pin your selection of 3"}
+                              </span>
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </div>
                     {!isZoomed && <div className="hidden md:block h-12" aria-hidden="true" />}
 
                     {/* Outside image: mobile controls row */}
-                    {!isZoomed && (
-                      <div className="md:hidden flex justify-between items-start w-full mt-2">
-                        <div>
-                          <button
-                            onClick={() => {
-                              setCuratorPicksDesigner(null);
-                              setCuratorPickIndex(0);
-                              setIsZoomed(false);
-                              if (!closedViaPopstateRef.current) window.history.back();
-                            }}
-                            className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
-                            aria-label="Close"
-                          >
-                            <X size={16} />
-                          </button>
+                    {!isZoomed && (() => {
+                      const currentPick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
+                      const designerId = curatorPicksDesigner.id ?? curatorPicksDesigner.name;
+                      const designerName = curatorPicksDesigner.name;
+                      return (
+                        <div className="md:hidden flex justify-between items-start w-full mt-2">
+                          <div>
+                            <button
+                              onClick={() => {
+                                setCuratorPicksDesigner(null);
+                                setCuratorPickIndex(0);
+                                setIsZoomed(false);
+                                if (!closedViaPopstateRef.current) window.history.back();
+                              }}
+                              className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                              aria-label="Close"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-2 ml-auto">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                togglePin({ pick: currentPick, designerName, designerId, section: "designers" });
+                              }}
+                              className={cn(
+                                "p-1.5 rounded-full backdrop-blur-sm border transition-all duration-300",
+                                isPinned(currentPick.title, designerId)
+                                  ? "bg-[hsl(var(--gold)/0.3)] border-[hsl(var(--gold)/0.6)] text-white"
+                                  : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20",
+                                compareItems.length >= 3 && !isPinned(currentPick.title, designerId) && "opacity-40 pointer-events-none"
+                              )}
+                              aria-label={isPinned(currentPick.title, designerId) ? "Remove from selection" : "Pin"}
+                            >
+                              <Scale size={14} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setQuoteOpen(true);
+                              }}
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
+                              aria-label="Request a Quote"
+                            >
+                              <MessageSquareQuote size={14} />
+                              <span className="text-[10px] font-display font-bold uppercase tracking-[0.08em] leading-none">Quote</span>
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setQuoteOpen(true);
-                          }}
-                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer ml-auto"
-                          aria-label="Request a Quote"
-                        >
-                          <MessageSquareQuote size={14} />
-                          <span className="text-[10px] font-display font-bold uppercase tracking-[0.08em] leading-none">Quote</span>
-                        </button>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {/* Scroll dots — directly under the image */}
                     {curatorPicksDesigner.curatorPicks.length > 1 && !isZoomed && (
