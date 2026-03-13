@@ -2,48 +2,45 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { fetchCatalogueData, type GalleryRoomGroup, type CatalogueProduct } from "@/lib/catalogueData";
 import { getBrandCatalogueData, type BrandCatalogueCategory, type BrandCatalogueDesigner } from "@/lib/brandCatalogueData";
 import { syncHotspotMaterials } from "@/lib/syncHotspotMaterials";
-import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
+import { cloudinaryUrl } from "@/lib/cloudinary";
 import { Lock, FileDown, Loader2, ArrowLeft, RefreshCw, LayoutGrid, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 /**
- * Maps room names to gallery thumbnail indices (matching galleryIndex.ts order).
+ * Full-size gallery room images (matching Gallery.tsx Cloudinary IDs).
  */
-const ROOM_THUMBNAIL_INDEX: Record<string, number> = {
-  "An Inviting Lounge Area": 0,
-  "A Sophisticated Living Room": 1,
-  "Panoramic Cityscape Views": 2,
-  "A Sun Lit Reading Corner": 3,
-  "A Dreamy Tuscan Landscape": 4,
-  "A Highly Customised Dining Room": 5,
-  "A Relaxed Setting": 6,
-  "A Colourful Nook": 7,
-  "A Sophisticated Boudoir": 8,
-  "A Jewelry Box Like Setting": 9,
-  "A Serene Decor": 10,
-  "A Design Treasure Trove": 11,
-  "A Masterful Suite": 12,
-  "Design Tableau": 13,
-  "A Venitian Cocoon": 14,
-  "Unique By Design Vignette": 15,
-  "An Artistic Statement": 16,
-  "Compact Elegance": 17,
-  "Yellow Crystalline": 18,
-  "Golden Hour": 19,
-  "A Workspace of Distinction": 20,
-  "Refined Details": 21,
-  "Light & Focus": 22,
-  "Design & Fine Art Books Corner": 23,
-  "Curated Vignette": 24,
-  "The Details Make The Design": 25,
-  "Light & Texture": 26,
-  "Craftsmanship At Every Corner": 27,
-};
+const g = (id: string) => cloudinaryUrl(id, { width: 1200, quality: "auto:good", crop: "fill" });
 
-function getRoomThumbnail(room: string): string | undefined {
-  const idx = ROOM_THUMBNAIL_INDEX[room];
-  return idx !== undefined ? GALLERY_THUMBNAILS[idx] : undefined;
-}
-import { useNavigate } from "react-router-dom";
+const ROOM_IMAGES: Record<string, string> = {
+  "An Inviting Lounge Area": g("bespoke-sofa_gxidtx"),
+  "A Sophisticated Living Room": g("living-room-hero_zxfcxl"),
+  "Panoramic Cityscape Views": g("dining-room_ey0bu5"),
+  "A Sun Lit Reading Corner": g("IMG_2402_y3atdm"),
+  "A Dreamy Tuscan Landscape": g("intimate-dining_ux4pee"),
+  "A Highly Customised Dining Room": g("intimate-table-detail_aqxvvm"),
+  "A Relaxed Setting": g("intimate-lounge_tf4sm1"),
+  "A Colourful Nook": g("IMG_2133_wtxd62"),
+  "A Sophisticated Boudoir": g("boudoir_ll5spn"),
+  "A Jewelry Box Like Setting": g("70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq"),
+  "A Serene Decor": g("bedroom-second_cyfmdj"),
+  "A Design Treasure Trove": g("art-master-bronze_hf6bad"),
+  "A Masterful Suite": g("master-suite_y6jaix"),
+  "Design Tableau": g("bedroom-third_ol56sx"),
+  "A Venitian Cocoon": g("calming-2"),
+  "Unique By Design Vignette": g("bedroom-alt_yk0j0d"),
+  "An Artistic Statement": g("small-room-bedroom_mp8mdd"),
+  "Compact Elegance": g("small-room-personality_wvxz6y"),
+  "Yellow Crystalline": g("small-room-vase_s3nz5o"),
+  "Golden Hour": g("small-room-chair_aobzyb"),
+  "A Workspace of Distinction": g("home-office-desk_g0ywv2"),
+  "Refined Details": g("home-office-desk-2_gb1nlb"),
+  "Light & Focus": g("home-office-3_t39msw"),
+  "Design & Fine Art Books Corner": g("AffluencySG_143_1_f9iihg"),
+  "Curated Vignette": g("details-section_u6rwbu"),
+  "The Details Make The Design": g("details-console_hk6uxt"),
+  "Light & Texture": g("details-lamp_clzcrk"),
+  "Craftsmanship At Every Corner": g("AffluencySG_204_1_qbbpqb"),
+};
 
 const CATALOGUE_PASSWORD = "maison-affluency";
 
@@ -391,37 +388,38 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   );
 }
 
-/* ─── Gallery Room Card (mirrors DesignerCard layout) ─── */
+/* ─── Gallery Room Card (mirrors DesignerCard layout, with full-size room image) ─── */
 function RoomCard({ group }: { group: GalleryRoomGroup }) {
   const [showAll, setShowAll] = useState(false);
   const visibleProducts = showAll ? group.products : group.products.slice(0, 4);
-  const roomThumb = getRoomThumbnail(group.room);
+  const roomImage = ROOM_IMAGES[group.room];
 
   return (
-    <div className="mb-10 pb-8 border-b border-border/40 last:border-b-0">
-      {/* Room header — image + title/experience */}
-      <div className="flex gap-5 md:gap-8 mb-5">
-        {roomThumb && (
-          <div className="w-24 h-24 md:w-32 md:h-32 flex-shrink-0 overflow-hidden bg-muted/20 rounded-sm">
-            <img
-              src={roomThumb}
-              alt={group.room}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        )}
-        <div className="flex flex-col justify-center min-w-0">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
-            {group.experience}
-          </p>
-          <h3 className="text-base md:text-lg font-serif italic text-foreground leading-snug">
-            {group.room}
-          </h3>
-          <p className="text-xs text-muted-foreground mt-2">
-            {group.products.length} {group.products.length === 1 ? "piece" : "pieces"}
-          </p>
+    <div className="mb-14 pb-8 border-b border-border/40 last:border-b-0">
+      {/* Full-width room image — matching expanded gallery style */}
+      {roomImage && (
+        <div className="w-full aspect-[4/5] md:aspect-[16/9] overflow-hidden bg-muted/10 mb-5 rounded-sm">
+          <img
+            src={roomImage}
+            alt={group.room}
+            className="w-full h-full object-cover"
+            style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+            loading="lazy"
+          />
         </div>
+      )}
+
+      {/* Room title + experience */}
+      <div className="mb-5">
+        <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
+          {group.experience}
+        </p>
+        <h3 className="text-lg md:text-xl font-serif italic text-foreground leading-snug">
+          {group.room}
+        </h3>
+        <p className="text-xs text-muted-foreground mt-1">
+          {group.products.length} {group.products.length === 1 ? "piece" : "pieces"}
+        </p>
       </div>
 
       {/* Products grid */}
