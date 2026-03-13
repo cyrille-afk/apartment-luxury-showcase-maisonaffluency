@@ -64,11 +64,14 @@ const ParallaxInterlude = ({
       >
         <img
           src={imageUrl}
+          srcSet={srcSet}
           alt=""
           loading="lazy"
           decoding="async"
           fetchPriority="low"
           sizes="100vw"
+          width={1600}
+          height={900}
           className="w-full h-full object-cover"
           style={{ objectPosition }}
         />
