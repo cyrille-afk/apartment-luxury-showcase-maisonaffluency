@@ -2,7 +2,47 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { fetchCatalogueData, type GalleryRoomGroup, type CatalogueProduct } from "@/lib/catalogueData";
 import { getBrandCatalogueData, type BrandCatalogueCategory, type BrandCatalogueDesigner } from "@/lib/brandCatalogueData";
 import { syncHotspotMaterials } from "@/lib/syncHotspotMaterials";
+import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { Lock, FileDown, Loader2, ArrowLeft, RefreshCw, LayoutGrid, Users } from "lucide-react";
+
+/**
+ * Maps room names to gallery thumbnail indices (matching galleryIndex.ts order).
+ */
+const ROOM_THUMBNAIL_INDEX: Record<string, number> = {
+  "An Inviting Lounge Area": 0,
+  "A Sophisticated Living Room": 1,
+  "Panoramic Cityscape Views": 2,
+  "A Sun Lit Reading Corner": 3,
+  "A Dreamy Tuscan Landscape": 4,
+  "A Highly Customised Dining Room": 5,
+  "A Relaxed Setting": 6,
+  "A Colourful Nook": 7,
+  "A Sophisticated Boudoir": 8,
+  "A Jewelry Box Like Setting": 9,
+  "A Serene Decor": 10,
+  "A Design Treasure Trove": 11,
+  "A Masterful Suite": 12,
+  "Design Tableau": 13,
+  "A Venitian Cocoon": 14,
+  "Unique By Design Vignette": 15,
+  "An Artistic Statement": 16,
+  "Compact Elegance": 17,
+  "Yellow Crystalline": 18,
+  "Golden Hour": 19,
+  "A Workspace of Distinction": 20,
+  "Refined Details": 21,
+  "Light & Focus": 22,
+  "Design & Fine Art Books Corner": 23,
+  "Curated Vignette": 24,
+  "The Details Make The Design": 25,
+  "Light & Texture": 26,
+  "Craftsmanship At Every Corner": 27,
+};
+
+function getRoomThumbnail(room: string): string | undefined {
+  const idx = ROOM_THUMBNAIL_INDEX[room];
+  return idx !== undefined ? GALLERY_THUMBNAILS[idx] : undefined;
+}
 import { useNavigate } from "react-router-dom";
 
 const CATALOGUE_PASSWORD = "maison-affluency";
