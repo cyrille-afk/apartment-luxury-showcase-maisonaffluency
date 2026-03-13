@@ -19,6 +19,7 @@ const ParallaxInterlude = ({
   attribution,
   overlayOpacity = 0.5,
   reverse = false,
+  objectPosition = "center",
 }: ParallaxInterludeProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
