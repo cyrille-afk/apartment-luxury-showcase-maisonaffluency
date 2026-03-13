@@ -105,6 +105,9 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
       );
       window.location.href = `mailto:concierge@myaffluency.com?subject=${subject}&body=${mailBody}`;
 
+      // Track quote request in GA4
+      trackEngagement.quoteRequest(productName || "Unknown", designerName || "Unknown");
+
       toast({
         title: "Quote Request Sent",
         description: "Our team will get back to you within a day.",
