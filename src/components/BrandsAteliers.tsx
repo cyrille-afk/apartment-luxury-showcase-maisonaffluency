@@ -542,7 +542,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
     curatorPicks: [
       {
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773364782/Voyage-en-toscane-la-mer-behang-Pierre-Frey-Selected-Wallpapers_s9vnrx.jpg",
-        title: "Voyage en Toscane",
+        title: "Voyage en Toscane Wallpaper",
         category: "Decorative Object",
         subcategory: "Wallcoverings",
         tags: ["Decorative Object", "Wallcoverings"],
