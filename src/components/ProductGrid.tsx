@@ -544,7 +544,7 @@ function singularizeSub(s: string): string {
                     ) : null;
                   })()}
 
-                  <div className="relative inline-block"
+                  <div className="relative inline-block overflow-visible"
                     onMouseEnter={() => { if (currentItem.pick.hoverImage) setLightboxHovered(true); }}
                     onMouseLeave={() => setLightboxHovered(false)}
                   >
