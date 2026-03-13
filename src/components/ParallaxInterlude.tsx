@@ -1,5 +1,13 @@
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+
+/** Build a responsive srcSet from a Cloudinary URL that contains w_1600 */
+function buildSrcSet(url: string): string {
+  const widths = [640, 960, 1280, 1600];
+  return widths
+    .map(w => `${url.replace(/w_\d+/, `w_${w}`)} ${w}w`)
+    .join(", ");
+}
 
 interface ParallaxInterludeProps {
   imageUrl: string;
