@@ -41,10 +41,11 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
   // How far above the target we back up before scrolling in (px).
   // Should cover roughly one parallax interlude (~50-70vh) without
   // reaching into the previous section's content.
-  const LEAD_IN_DISTANCE = 900;
+  // Mobile interludes are 50vh (~400px), desktop 70vh (~700px).
+  const LEAD_IN_DISTANCE = isMobile ? 450 : 900;
 
   // Duration of the lead-in scroll animation in ms.
-  const SCROLL_DURATION = 1800;
+  const SCROLL_DURATION = isMobile ? 1200 : 1800;
 
   // Capture where the user is BEFORE any jumps
   const originY = window.scrollY;
