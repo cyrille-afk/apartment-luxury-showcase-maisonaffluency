@@ -2812,7 +2812,7 @@ const FeaturedDesigners = () => {
                           {designer.specialty}
                         </p>
                       </div>
-                      <div className="hidden md:flex mt-3">
+                      <div className="hidden md:flex mt-auto pt-4">
                         <WhatsAppShareButton
                           onClick={(e) => {
                             e.stopPropagation();
@@ -2821,6 +2821,7 @@ const FeaturedDesigners = () => {
                           }}
                           label={`Share ${designer.name} on WhatsApp`}
                           variant="branded"
+                          className="md:!text-sm md:!px-4 md:!py-2"
                         />
                       </div>
                     </div>
