@@ -566,6 +566,61 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
       },
     ],
   },
+  "de-la-espada": {
+    name: "De La Espada",
+    curatorPicks: [
+      {
+        image: delaEspadaElliotChair,
+        title: "Elliot Dining Chair",
+        category: "Seating",
+        tags: ["Seating", "Dining Chairs"],
+        materials: "Solid wood frame, upholstered seat",
+        dimensions: "Bespoke Dimensions and Colours upon request",
+      },
+      {
+        image: delaEspadaVegaBChair,
+        title: "Vega B Chair",
+        subtitle: "by Anthony Guerrée",
+        category: "Seating",
+        tags: ["Seating", "Chairs"],
+        materials: "Solid wood frame, upholstered seat and back",
+        dimensions: "Bespoke Dimensions and Colours upon request",
+      },
+      {
+        image: delaEspadaAzoresSofa,
+        title: "Azores Sofa",
+        subtitle: "by Luca Nichetto",
+        category: "Seating",
+        tags: ["Seating", "Sofas"],
+        materials: "Solid wood frame, upholstered cushions",
+        dimensions: "Bespoke Dimensions and Colours upon request",
+      },
+      {
+        image: delaEspadaOrionTable,
+        title: "Orion Dining Table",
+        category: "Tables",
+        tags: ["Tables", "Dining Tables"],
+        materials: "Solid wood",
+        dimensions: "Bespoke Dimensions and Colours upon request",
+      },
+      {
+        image: delaEspadaElliottTable,
+        title: "Elliott Rectangular Dining Table",
+        category: "Tables",
+        tags: ["Tables", "Dining Tables"],
+        materials: "Solid wood",
+        dimensions: "Bespoke Dimensions and Colours upon request",
+      },
+      {
+        image: delaEspadaTaiDanConsole,
+        title: "Tai Dan 2 Console Cabinet",
+        category: "Storage",
+        tags: ["Storage", "Console"],
+        materials: "Solid wood, integrated storage",
+        dimensions: "Bespoke Dimensions and Colours upon request",
+      },
+    ],
+  },
 };
 
 // Gallery image index mapping (based on flattened gallery items order)
