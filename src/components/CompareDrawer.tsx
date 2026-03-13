@@ -124,17 +124,19 @@ const CompareDrawer = () => {
                         </div>
                       )}
 
-                      {/* Quote button */}
-                      <button
-                        onClick={() => {
-                          setQuoteProduct({ name: item.pick.title, designer: item.designerName });
-                          setQuoteOpen(true);
-                        }}
-                        className="flex items-center gap-1.5 px-4 py-2 mt-2 rounded-full border border-[hsl(var(--gold))] bg-white/5 text-white hover:bg-white/10 font-body text-[10px] uppercase tracking-[0.12em] transition-all w-full justify-center"
-                      >
-                        <MessageSquareQuote size={14} />
-                        Request a Quote
-                      </button>
+                      {/* Quote button - pinned to bottom */}
+                      <div className="mt-auto pt-3">
+                        <button
+                          onClick={() => {
+                            setQuoteProduct({ name: item.pick.title, designer: item.designerName });
+                            setQuoteOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-[hsl(var(--gold))] bg-white/5 text-white hover:bg-white/10 font-body text-[10px] uppercase tracking-[0.12em] transition-all w-full justify-center"
+                        >
+                          <MessageSquareQuote size={14} />
+                          Request a Quote
+                        </button>
+                      </div>
                     </div>
                   </motion.div>
                 ))}
