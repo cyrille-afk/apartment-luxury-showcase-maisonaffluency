@@ -278,7 +278,7 @@ import nathalieZieglerSnakeVessel from "@/assets/curators-picks/nathalie-ziegler
 import rowinNoneIILamp from "@/assets/curators-picks/rowin-none-ii-lamp.jpg";
 
 type DesignerLink = { type: string; url?: string };
-export type CuratorPick = { image?: string; hoverImage?: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string; pdfUrl?: string; pdfFilename?: string };
+export type CuratorPick = { image?: string; hoverImage?: string; title: string; subtitle?: string; category?: string; subcategory?: string; tags?: string[]; materials?: string; dimensions?: string; description?: string; photoCredit?: string; edition?: string; pdfUrl?: string; pdfFilename?: string; pdfUrls?: { label: string; url: string; filename?: string }[] };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPick[]; links?: DesignerLink[] })[] = [
@@ -3177,6 +3177,38 @@ const FeaturedDesigners = () => {
                           <FileDown size={16} className="hidden md:block" />
                           <span className="text-[10px] md:text-xs font-medium leading-none">PDF</span>
                         </button>
+                      )}
+                      {/* Multiple PDF download buttons */}
+                      {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrls && !isZoomed && (
+                        <div className="absolute bottom-2 right-2 flex gap-1.5 z-10">
+                          {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).pdfUrls as { label: string; url: string; filename?: string }[]).map((pdf) => (
+                            <button
+                              key={pdf.label}
+                              onClick={async () => {
+                                try {
+                                  const res = await fetch(pdf.url);
+                                  const blob = await res.blob();
+                                  const blobUrl = URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = blobUrl;
+                                  a.download = pdf.filename || `${pdf.label}.pdf`;
+                                  document.body.appendChild(a);
+                                  a.click();
+                                  document.body.removeChild(a);
+                                  URL.revokeObjectURL(blobUrl);
+                                } catch {
+                                  window.open(pdf.url, '_blank');
+                                }
+                              }}
+                              className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300"
+                              aria-label={`Download PDF ${pdf.label}`}
+                            >
+                              <FileDown size={14} className="md:hidden" />
+                              <FileDown size={16} className="hidden md:block" />
+                              <span className="text-[10px] md:text-xs font-medium leading-none">{pdf.label}</span>
+                            </button>
+                          ))}
+                        </div>
                       )}
                       {/* Mobile Maximize / Minimize button — bottom-left */}
                       {!isZoomed ? (

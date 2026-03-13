@@ -548,6 +548,11 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         tags: ["Decorative Object", "Wallcoverings"],
         description: "The panoramic VOYAGE EN TOSCANE was created as a Myriorama*.\nThe panels can be displayed in any order. The landscape follows on and is always connected, regardless of the chosen order of display.\nEach reference joins with itself and/or with the additional references (FP611, FP612 and FP613).\n\nA Myriorama is an image, a scene with interchangeable views.",
         dimensions: "Full panoramic 137 × 300 cm (2 lengths 68 × 300 cm)",
+        pdfUrls: [
+          { label: "FP611", url: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs%2Fpierre-frey-voyage-en-toscane-la-mer-FP611.pdf", filename: "Pierre-Frey-Voyage-en-Toscane-La-Mer-FP611.pdf" },
+          { label: "FP612", url: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs%2Fpierre-frey-voyage-en-toscane-la-campagne-FP612.pdf", filename: "Pierre-Frey-Voyage-en-Toscane-La-Campagne-FP612.pdf" },
+          { label: "FP613", url: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs%2Fpierre-frey-voyage-en-toscane-la-montagne-FP613.pdf", filename: "Pierre-Frey-Voyage-en-Toscane-La-Montagne-FP613.pdf" },
+        ],
       },
     ],
   },
@@ -2922,6 +2927,38 @@ const BrandsAteliers = () => {
                             <FileDown size={16} className="hidden md:block text-white" />
                             <span className="text-[10px] md:text-xs font-medium leading-none text-white">PDF</span>
                           </button>
+                        )}
+                        {(picksDesigner.curatorPicks[picksIndex] as any)?.pdfUrls && (
+                          <div className="absolute bottom-2 right-2 z-10 flex gap-1.5">
+                            {((picksDesigner.curatorPicks[picksIndex] as any).pdfUrls as { label: string; url: string; filename?: string }[]).map((pdf) => (
+                              <button
+                                key={pdf.label}
+                                className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
+                                aria-label={`Download PDF ${pdf.label}`}
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    const res = await fetch(pdf.url);
+                                    const blob = await res.blob();
+                                    const blobUrl = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = blobUrl;
+                                    a.download = pdf.filename || `${pdf.label}.pdf`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    a.remove();
+                                    URL.revokeObjectURL(blobUrl);
+                                  } catch {
+                                    window.open(pdf.url, '_blank');
+                                  }
+                                }}
+                              >
+                                <FileDown size={14} className="md:hidden text-white" />
+                                <FileDown size={16} className="hidden md:block text-white" />
+                                <span className="text-[10px] md:text-xs font-medium leading-none text-white">{pdf.label}</span>
+                              </button>
+                            ))}
+                          </div>
                         )}
                         <button
                           onClick={() => setPicksZoomed(!picksZoomed)}
