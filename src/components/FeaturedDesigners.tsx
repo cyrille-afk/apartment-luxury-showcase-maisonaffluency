@@ -2806,16 +2806,16 @@ const FeaturedDesigners = () => {
                         <p className="text-sm md:text-base text-primary font-body italic transition-opacity duration-300 group-hover:opacity-80">
                           {designer.specialty}
                         </p>
-                        <div className="hidden md:block">
-                          <WhatsAppShareButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
-                              trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
-                            }}
-                            label={`Share ${designer.name} on WhatsApp`}
-                          />
-                        </div>
+                      </div>
+                      <div className="hidden md:flex mt-1.5">
+                        <WhatsAppShareButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
+                            trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
+                          }}
+                          label={`Share ${designer.name} on WhatsApp`}
+                        />
                       </div>
                     </div>
                     {/* On View thumbnails — right side */}
