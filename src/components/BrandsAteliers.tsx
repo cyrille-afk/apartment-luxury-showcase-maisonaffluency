@@ -2813,7 +2813,7 @@ const BrandsAteliers = () => {
                           </div>
                         ) : null;
                       })()}
-                      <div className="relative inline-block"
+                      <div className="relative inline-block overflow-visible"
                         onMouseEnter={() => { if (picksDesigner.curatorPicks[picksIndex]?.hoverImage) setPicksHovered(true); }}
                         onMouseLeave={() => setPicksHovered(false)}
                       >

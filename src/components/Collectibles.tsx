@@ -1282,7 +1282,7 @@ const Collectibles = () => {
                       )}
                     </div>
                   )}
-                  <div className="relative inline-block"
+                  <div className="relative inline-block overflow-visible"
                     onMouseEnter={() => { if (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.hoverImage) setPicksHovered(true); }}
                     onMouseLeave={() => setPicksHovered(false)}
                   >
