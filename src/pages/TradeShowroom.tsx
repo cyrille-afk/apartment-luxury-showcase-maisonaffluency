@@ -428,7 +428,7 @@ const TradeShowroom = () => {
                   </p>
                 </div>
                 {product.trade_price_cents && product.currency && (
-                  <span className="font-body text-sm text-primary font-medium shrink-0">
+                  <span className="font-display text-base text-accent font-semibold shrink-0">
                     {formatPrice(product.trade_price_cents, product.currency)}
                   </span>
                 )}
