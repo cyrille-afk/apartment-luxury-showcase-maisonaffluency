@@ -309,6 +309,12 @@ const TradeShowroom = () => {
             <option key={d} value={d}>{d}</option>
           ))}
         </select>
+        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className={inputClass}>
+          <option value="all">All Categories ({categories.length})</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
         <select value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} className={inputClass}>
           <option value="all">All Rooms ({rooms.length})</option>
           {rooms.map((r) => (
