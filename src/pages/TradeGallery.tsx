@@ -12,6 +12,10 @@ interface DraftQuote {
   created_at: string;
 }
 
+function formatPrice(cents: number, currency: string): string {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(cents / 100);
+}
+
 const TradeGallery = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -30,6 +34,28 @@ const TradeGallery = () => {
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
+
+  // Price lookup from trade_products table
+  const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string }>>(new Map());
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      const { data } = await supabase
+        .from("trade_products")
+        .select("product_name, trade_price_cents, currency")
+        .not("trade_price_cents", "is", null);
+      if (data) {
+        const lookup = new Map<string, { cents: number; currency: string }>();
+        for (const p of data) {
+          if (p.trade_price_cents) {
+            lookup.set(p.product_name.trim().toLowerCase(), { cents: p.trade_price_cents, currency: p.currency });
+          }
+        }
+        setPriceLookup(lookup);
+      }
+    };
+    fetchPrices();
+  }, []);
 
   // Fetch user's draft quotes
   useEffect(() => {
