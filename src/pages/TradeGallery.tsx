@@ -12,6 +12,10 @@ interface DraftQuote {
   created_at: string;
 }
 
+function formatPrice(cents: number, currency: string): string {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(cents / 100);
+}
+
 const TradeGallery = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -30,6 +34,28 @@ const TradeGallery = () => {
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
+
+  // Price lookup from trade_products table
+  const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string }>>(new Map());
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      const { data } = await supabase
+        .from("trade_products")
+        .select("product_name, trade_price_cents, currency")
+        .not("trade_price_cents", "is", null);
+      if (data) {
+        const lookup = new Map<string, { cents: number; currency: string }>();
+        for (const p of data) {
+          if (p.trade_price_cents) {
+            lookup.set(p.product_name.trim().toLowerCase(), { cents: p.trade_price_cents, currency: p.currency });
+          }
+        }
+        setPriceLookup(lookup);
+      }
+    };
+    fetchPrices();
+  }, []);
 
   // Fetch user's draft quotes
   useEffect(() => {
@@ -104,6 +130,17 @@ const TradeGallery = () => {
     () => (selectedCategory !== "all" ? getSubcategories(allProducts, selectedCategory) : []),
     [allProducts, selectedCategory]
   );
+
+  /** Find price by exact name, then by name+subtitle combo */
+  const getProductPrice = (product: TradeProduct): { cents: number; currency: string } | null => {
+    const nameKey = product.product_name.trim().toLowerCase();
+    if (priceLookup.has(nameKey)) return priceLookup.get(nameKey)!;
+    if (product.subtitle) {
+      const comboKey = `${nameKey} ${product.subtitle.trim().toLowerCase()}`;
+      if (priceLookup.has(comboKey)) return priceLookup.get(comboKey)!;
+    }
+    return null;
+  };
 
   const filtered = useMemo(() => {
     return allProducts.filter((p) => {
@@ -227,6 +264,7 @@ const TradeGallery = () => {
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
+            const price = getProductPrice(product);
             return (
               <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
                 <div className="aspect-square bg-muted/30 relative overflow-hidden">
@@ -288,8 +326,13 @@ const TradeGallery = () => {
                   {product.dimensions && (
                     <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>
                   )}
-                  {product.materials && (
+                   {product.materials && (
                     <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>
+                  )}
+                  {price && (
+                    <p className="font-display text-sm text-accent font-semibold mt-1">
+                      {formatPrice(price.cents, price.currency)}
+                    </p>
                   )}
                 </div>
               </div>
@@ -301,6 +344,7 @@ const TradeGallery = () => {
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
+            const price = getProductPrice(product);
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
                 <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0">
@@ -319,6 +363,11 @@ const TradeGallery = () => {
                     {[product.dimensions, product.materials].filter(Boolean).join(" · ")}
                   </p>
                 </div>
+                {price && (
+                  <span className="font-display text-sm text-accent font-semibold shrink-0">
+                    {formatPrice(price.cents, price.currency)}
+                  </span>
+                )}
                 <button
                   onClick={() => handleAddToQuote(product)}
                   disabled={isAdding}
