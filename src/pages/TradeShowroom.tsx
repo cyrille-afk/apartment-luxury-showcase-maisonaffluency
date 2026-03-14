@@ -46,6 +46,15 @@ const TradeShowroom = () => {
         .order("designer_name", { ascending: true });
 
       if (data) {
+        // Build a PDF lookup from trade products (curators' picks data)
+        const tradeProducts = getAllTradeProducts();
+        const pdfLookup = new Map<string, string>();
+        for (const tp of tradeProducts) {
+          if (tp.pdf_url) {
+            pdfLookup.set(tp.product_name.trim().toLowerCase(), tp.pdf_url);
+          }
+        }
+
         // Deduplicate by product_name (case-insensitive), keep the entry with the most data
         const seen = new Map<string, ShowroomProduct>();
         for (const item of data as ShowroomProduct[]) {
@@ -57,7 +66,7 @@ const TradeShowroom = () => {
             (!existing.materials && item.materials) ||
             (!existing.dimensions && item.dimensions)
           ) {
-            seen.set(key, item);
+            seen.set(key, { ...item, pdf_url: pdfLookup.get(key) });
           }
         }
         setProducts([...seen.values()]);
