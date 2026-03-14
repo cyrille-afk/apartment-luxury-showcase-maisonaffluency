@@ -100,6 +100,7 @@ const TradeJournal = () => {
       content: editing.content,
       cover_image_url: editing.cover_image_url || null,
       gallery_images: editing.gallery_images || [],
+      pdf_url: editing.pdf_url || null,
       category: editing.category,
       author: editing.author,
       tags,
