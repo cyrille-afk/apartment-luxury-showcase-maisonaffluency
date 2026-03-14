@@ -4,7 +4,7 @@ import { TradeSidebar } from "@/components/trade/TradeSidebar";
 import { useAuth } from "@/hooks/useAuth";
 
 const TradeLayout = () => {
-  const { user, loading, applicationStatus } = useAuth();
+  const { user, loading, applicationStatus, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -18,8 +18,8 @@ const TradeLayout = () => {
     return <Navigate to="/trade/login" replace />;
   }
 
-  // If not approved, show pending/rejected state
-  if (applicationStatus === "pending") {
+  // Admins bypass application status checks
+  if (!isAdmin && applicationStatus === "pending") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center max-w-md">
@@ -38,7 +38,7 @@ const TradeLayout = () => {
     );
   }
 
-  if (applicationStatus === "rejected") {
+  if (!isAdmin && applicationStatus === "rejected") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center max-w-md">
