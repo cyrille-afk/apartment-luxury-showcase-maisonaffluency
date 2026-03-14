@@ -474,7 +474,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         </div>
 
         {/* Notes */}
-        <div className="border-t border-border p-6 md:p-8">
+        <div className="border-t border-border p-4 md:p-6 lg:p-8">
           <label className="font-body text-[10px] text-muted-foreground uppercase tracking-widest block mb-2">
             Notes / Special Instructions
           </label>
@@ -483,9 +483,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any special requirements, delivery instructions, or project details…"
+                placeholder="Add any special requirements…"
                 rows={3}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none transition-colors"
+                className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none transition-colors text-[16px] sm:text-sm"
               />
               <button onClick={handleSaveNotes} className="font-body text-[10px] text-muted-foreground hover:text-foreground uppercase tracking-wider transition-colors">
                 Save Notes
