@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, ExternalLink } from "lucide-react";
+import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, ExternalLink, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -13,6 +14,7 @@ interface ShowroomProduct {
   product_image_url: string | null;
   link_url: string | null;
   image_identifier: string;
+  pdf_url?: string;
 }
 
 interface DraftQuote {
@@ -44,6 +46,15 @@ const TradeShowroom = () => {
         .order("designer_name", { ascending: true });
 
       if (data) {
+        // Build a PDF lookup from trade products (curators' picks data)
+        const tradeProducts = getAllTradeProducts();
+        const pdfLookup = new Map<string, string>();
+        for (const tp of tradeProducts) {
+          if (tp.pdf_url) {
+            pdfLookup.set(tp.product_name.trim().toLowerCase(), tp.pdf_url);
+          }
+        }
+
         // Deduplicate by product_name (case-insensitive), keep the entry with the most data
         const seen = new Map<string, ShowroomProduct>();
         for (const item of data as ShowroomProduct[]) {
@@ -55,7 +66,7 @@ const TradeShowroom = () => {
             (!existing.materials && item.materials) ||
             (!existing.dimensions && item.dimensions)
           ) {
-            seen.set(key, item);
+            seen.set(key, { ...item, pdf_url: pdfLookup.get(key) });
           }
         }
         setProducts([...seen.values()]);
@@ -279,6 +290,17 @@ const TradeShowroom = () => {
                       )}
                       {isAdded ? "Added" : "Add to Quote"}
                     </button>
+                    {product.pdf_url && (
+                      <a
+                        href={product.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
+                        title="Download spec sheet"
+                      >
+                        <FileDown className="h-3.5 w-3.5" />
+                      </a>
+                    )}
                     {product.link_url && (
                       <a
                         href={`/${product.link_url}`}
@@ -354,6 +376,12 @@ const TradeShowroom = () => {
                   )}
                   {isAdded ? "Added" : "Add"}
                 </button>
+                {product.pdf_url && (
+                  <a href={product.pdf_url} target="_blank" rel="noopener noreferrer"
+                    className="p-2 text-[hsl(var(--pdf-red))] hover:text-[hsl(var(--pdf-red))]/80 transition-colors" title="Spec sheet">
+                    <FileDown className="h-4 w-4" />
+                  </a>
+                )}
                 {product.link_url && (
                   <a href={`/${product.link_url}`} target="_blank" rel="noopener noreferrer"
                     className="p-2 text-muted-foreground hover:text-foreground transition-colors" title="View in gallery">
