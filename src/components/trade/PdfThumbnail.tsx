@@ -7,18 +7,40 @@ interface PdfThumbnailProps {
   className?: string;
 }
 
+/** Simple hash for cache key */
+function hashUrl(url: string): string {
+  let hash = 0;
+  for (let i = 0; i < url.length; i++) {
+    hash = ((hash << 5) - hash + url.charCodeAt(i)) | 0;
+  }
+  return "pdft_" + Math.abs(hash).toString(36);
+}
+
 const PdfThumbnail = ({ url, alt = "PDF cover", className = "" }: PdfThumbnailProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
+  const [cachedDataUrl, setCachedDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    const cacheKey = hashUrl(url);
+
+    // Try localStorage cache first
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setCachedDataUrl(cached);
+        setLoaded(true);
+        return;
+      }
+    } catch {
+      // localStorage unavailable, continue with render
+    }
 
     const render = async () => {
       try {
         const pdfjsLib = await import("pdfjs-dist");
-        // Use the bundled worker
         pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
         const pdf = await pdfjsLib.getDocument({
@@ -33,7 +55,6 @@ const PdfThumbnail = ({ url, alt = "PDF cover", className = "" }: PdfThumbnailPr
         const canvas = canvasRef.current;
         if (!canvas || cancelled) return;
 
-        // Render at a reasonable thumbnail size
         const targetWidth = 400;
         const viewport = page.getViewport({ scale: 1 });
         const scale = targetWidth / viewport.width;
@@ -46,7 +67,17 @@ const PdfThumbnail = ({ url, alt = "PDF cover", className = "" }: PdfThumbnailPr
         if (!ctx) return;
 
         await page.render({ canvasContext: ctx, viewport: scaledViewport }).promise;
-        if (!cancelled) setLoaded(true);
+        if (cancelled) return;
+
+        setLoaded(true);
+
+        // Cache the rendered thumbnail
+        try {
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          localStorage.setItem(cacheKey, dataUrl);
+        } catch {
+          // Quota exceeded or canvas tainted, ignore
+        }
       } catch {
         if (!cancelled) setError(true);
       }
@@ -64,11 +95,28 @@ const PdfThumbnail = ({ url, alt = "PDF cover", className = "" }: PdfThumbnailPr
     );
   }
 
+  // Show cached image
+  if (cachedDataUrl) {
+    return (
+      <div className={`relative bg-muted/20 ${className}`}>
+        <img
+          src={cachedDataUrl}
+          alt={alt}
+          className="w-full h-full object-contain"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`relative bg-muted/20 ${className}`}>
       {!loaded && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+          {/* Skeleton shimmer */}
+          <div className="w-3/4 h-3 rounded bg-muted-foreground/10 animate-pulse" />
+          <div className="w-1/2 h-3 rounded bg-muted-foreground/10 animate-pulse" />
+          <div className="w-2/3 h-3 rounded bg-muted-foreground/10 animate-pulse" />
+          <div className="w-5 h-5 mt-2 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
         </div>
       )}
       <canvas
