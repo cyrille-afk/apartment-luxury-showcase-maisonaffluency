@@ -117,35 +117,48 @@ const TradeRegister = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-10">
+    <div className="min-h-screen bg-background px-4 py-6 md:py-12">
+      {/* Top bar: back link + sign in */}
+      <div className="w-full max-w-2xl mx-auto flex items-center justify-between mb-6">
+        <Link to="/" className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors">
+          ← Back to Maison Affluency
+        </Link>
+        <Link
+          to="/trade/login"
+          className="px-5 py-2 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:opacity-90 transition-opacity"
+        >
+          Sign In
+        </Link>
+      </div>
+
+      <div className="w-full max-w-2xl mx-auto">
+        <div className="text-center mb-6">
           <Link to="/" className="inline-block">
-            <h1 className="font-display text-2xl text-foreground tracking-wide">Maison Affluency</h1>
+            <h1 className="font-display text-xl md:text-2xl text-foreground tracking-wide">Maison Affluency</h1>
           </Link>
-          <p className="font-body text-sm text-muted-foreground mt-2">Trade Account Application</p>
+          <p className="font-body text-xs text-muted-foreground mt-1">Trade Account Application</p>
         </div>
 
         {/* Benefits summary */}
-        <div className="mb-10 grid grid-cols-2 gap-3">
+        <div className="mb-6 grid grid-cols-2 gap-2">
           {[
             { title: "Dedicated Advisor", desc: "Personalised guidance on every project" },
             { title: "Custom Requests", desc: "Access to specialist workshops worldwide" },
             { title: "Samples & Swatches", desc: "Comprehensive curated material library" },
             { title: "Insured Shipping", desc: "Consolidated freight with full coverage" },
           ].map((b) => (
-            <div key={b.title} className="border border-border rounded-sm px-4 py-3">
-              <p className="font-display text-sm text-foreground">{b.title}</p>
-              <p className="font-body text-xs text-muted-foreground mt-0.5">{b.desc}</p>
+            <div key={b.title} className="border border-border rounded-sm px-3 py-2">
+              <p className="font-display text-xs text-foreground">{b.title}</p>
+              <p className="font-body text-[11px] text-muted-foreground mt-0.5 leading-tight">{b.desc}</p>
             </div>
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Account Details */}
           <div>
-            <h2 className="font-display text-lg text-foreground mb-4">Account Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="font-display text-base text-foreground mb-3">Account Details</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="font-body text-sm text-foreground">Email<span className="text-destructive">*</span></label>
                 <input type="email" required value={form.email} onChange={(e) => update("email", e.target.value)}
@@ -166,8 +179,8 @@ const TradeRegister = () => {
 
           {/* Personal Info */}
           <div>
-            <h2 className="font-display text-lg text-foreground mb-4">Personal Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="font-display text-base text-foreground mb-3">Personal Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="font-body text-sm text-foreground">First Name<span className="text-destructive">*</span></label>
                 <input type="text" required value={form.firstName} onChange={(e) => update("firstName", e.target.value)}
@@ -188,8 +201,8 @@ const TradeRegister = () => {
 
           {/* Company Info */}
           <div>
-            <h2 className="font-display text-lg text-foreground mb-4">Company Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="font-display text-base text-foreground mb-3">Company Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="font-body text-sm text-foreground">Company Name<span className="text-destructive">*</span></label>
                 <input type="text" required value={form.companyName} onChange={(e) => update("companyName", e.target.value)}
@@ -249,15 +262,6 @@ const TradeRegister = () => {
           </button>
         </form>
 
-        <div className="text-center mt-8 space-y-3">
-          <p className="font-body text-xs text-muted-foreground">
-            Already have a trade account?{" "}
-            <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:opacity-70">Sign in</Link>
-          </p>
-          <p className="font-body text-xs text-muted-foreground">
-            <Link to="/" className="hover:text-foreground transition-colors">← Back to Maison Affluency</Link>
-          </p>
-        </div>
       </div>
     </div>
   );
