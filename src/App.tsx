@@ -76,6 +76,7 @@ const App = () => {
 
           {/* Trade Portal */}
           <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
+          <Route path="/trade/program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
           <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
           <Route path="/trade" element={<Suspense fallback={null}><TradeLayout /></Suspense>}>
             <Route index element={<TradeDashboard />} />
