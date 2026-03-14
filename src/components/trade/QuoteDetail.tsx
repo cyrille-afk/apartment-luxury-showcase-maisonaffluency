@@ -205,11 +205,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       {/* Quote document */}
       <div className="border border-border rounded-lg bg-background">
         {/* ===== HEADER — matches reference layout ===== */}
-        <div className="border-b border-border p-6 md:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-6 md:gap-10">
+        <div className="border-b border-border p-4 md:p-6 lg:p-8">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-4 md:gap-10">
             {/* Left: Title + Client Name */}
             <div>
-              <h1 className="font-display text-3xl md:text-4xl text-foreground tracking-wide uppercase mb-3">
+              <h1 className="font-display text-2xl md:text-3xl lg:text-4xl text-foreground tracking-wide uppercase mb-2 md:mb-3">
                 Quote
               </h1>
               {isDraft ? (
@@ -219,7 +219,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   onChange={(e) => setClientName(e.target.value)}
                   onBlur={() => supabase.from("trade_quotes").update({ client_name: clientName } as any).eq("id", quoteId)}
                   placeholder="Client / Project Name"
-                  className="font-display text-sm text-foreground uppercase tracking-wider bg-transparent border-b border-dashed border-border focus:border-foreground outline-none pb-1 w-full max-w-[300px] placeholder:text-muted-foreground/50 print:border-none"
+                  className="font-display text-sm text-foreground uppercase tracking-wider bg-transparent border-b border-dashed border-border focus:border-foreground outline-none pb-1 w-full max-w-[300px] placeholder:text-muted-foreground/50 print:border-none text-[16px] sm:text-sm"
                 />
               ) : (
                 clientName && (
@@ -231,7 +231,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             </div>
 
             {/* Middle: Date / Expiry / Number */}
-            <div className="space-y-2 text-sm font-body">
+            <div className="flex flex-wrap gap-x-6 gap-y-2 md:block md:space-y-2 text-sm font-body">
               <div>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Date</span>
                 <span className="text-foreground">{formatDate(createdDate)}</span>
@@ -253,9 +253,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </span>
             </div>
 
-            {/* Right: Logo + Company details (left-aligned) */}
-            <div className="flex items-start gap-4">
-              <img src={affluencyLogo} alt="Affluency" className="h-16 w-16 md:h-20 md:w-20 object-contain shrink-0" />
+            {/* Right: Logo + Company details */}
+            <div className="flex items-start gap-3 md:gap-4">
+              <img src={affluencyLogo} alt="Affluency" className="h-14 w-14 md:h-16 md:w-16 lg:h-20 lg:w-20 object-contain shrink-0" />
               <div className="text-left">
                 <p className="font-display text-xs text-foreground uppercase tracking-wider">
                   Affluency Etc Pte. Ltd.
