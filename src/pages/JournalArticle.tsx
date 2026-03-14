@@ -90,7 +90,7 @@ const JournalArticlePage = () => {
             <img
               src={article.cover_image_url}
               alt={article.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-bottom"
             />
           </div>
         )}
