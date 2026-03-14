@@ -36,12 +36,24 @@ const TradeAdmin = () => {
 
   const fetchApplications = async () => {
     setFetching(true);
-    let query = supabase.from("trade_applications").select("*, profiles!trade_applications_user_id_fkey(first_name, last_name, email)").order("created_at", { ascending: false });
+    let query = supabase.from("trade_applications").select("*").order("created_at", { ascending: false });
     if (filter !== "all") {
       query = query.eq("status", filter);
     }
     const { data } = await query;
-    setApplications((data as any[]) || []);
+    const apps = (data as any[]) || [];
+
+    // Fetch profiles for all applicant user_ids
+    const userIds = [...new Set(apps.map((a) => a.user_id))];
+    let profileMap: Record<string, { first_name: string; last_name: string; email: string }> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase.from("profiles").select("id, first_name, last_name, email").in("id", userIds);
+      if (profiles) {
+        profileMap = Object.fromEntries(profiles.map((p: any) => [p.id, p]));
+      }
+    }
+
+    setApplications(apps.map((a) => ({ ...a, profiles: profileMap[a.user_id] || null })));
     setFetching(false);
   };
 
