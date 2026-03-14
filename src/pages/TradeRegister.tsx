@@ -154,11 +154,11 @@ const TradeRegister = () => {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Account Details */}
           <div>
-            <h2 className="font-display text-lg text-foreground mb-4">Account Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="font-display text-base text-foreground mb-3">Account Details</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="font-body text-sm text-foreground">Email<span className="text-destructive">*</span></label>
                 <input type="email" required value={form.email} onChange={(e) => update("email", e.target.value)}
