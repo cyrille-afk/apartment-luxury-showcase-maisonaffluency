@@ -206,7 +206,10 @@ const TradeShowroom = () => {
 
   const designers = useMemo(() => [...new Set(products.map((p) => p.designer_name).filter(Boolean) as string[])].sort(), [products]);
   const categories = useMemo(() => [...new Set(products.map((p) => inferCategory(p.product_name)))].sort(), [products]);
-  const rooms = useMemo(() => [...new Set(products.map((p) => p.image_identifier))].sort(), [products]);
+  const sections = useMemo(() => {
+    const sectionSet = new Set(products.map((p) => getSection(p.image_identifier)));
+    return [...sectionSet].sort();
+  }, [products]);
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -218,10 +221,10 @@ const TradeShowroom = () => {
         p.materials?.toLowerCase().includes(q);
       const matchesDesigner = selectedDesigner === "all" || p.designer_name === selectedDesigner;
       const matchesCategory = selectedCategory === "all" || inferCategory(p.product_name) === selectedCategory;
-      const matchesRoom = selectedRoom === "all" || p.image_identifier === selectedRoom;
-      return matchesSearch && matchesDesigner && matchesCategory && matchesRoom;
+      const matchesSection = selectedSection === "all" || getSection(p.image_identifier) === selectedSection;
+      return matchesSearch && matchesDesigner && matchesCategory && matchesSection;
     });
-  }, [products, search, selectedDesigner, selectedCategory, selectedRoom]);
+  }, [products, search, selectedDesigner, selectedCategory, selectedSection]);
 
   const handleCreateQuoteAndAdd = async (product: ShowroomProduct) => {
     if (!user) return;
