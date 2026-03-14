@@ -262,15 +262,6 @@ const TradeRegister = () => {
           </button>
         </form>
 
-        <div className="text-center mt-8 space-y-3">
-          <p className="font-body text-xs text-muted-foreground">
-            Already have a trade account?{" "}
-            <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:opacity-70">Sign in</Link>
-          </p>
-          <p className="font-body text-xs text-muted-foreground">
-            <Link to="/" className="hover:text-foreground transition-colors">← Back to Maison Affluency</Link>
-          </p>
-        </div>
       </div>
     </div>
   );
