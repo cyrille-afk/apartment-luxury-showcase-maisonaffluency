@@ -328,7 +328,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <div className="divide-y divide-border">
                 {items.map((item) => {
                   const product = item.trade_products;
-                  const unitPrice = item.unit_price_cents ?? product?.trade_price_cents ?? null;
+                  const rawUnitPrice = item.unit_price_cents ?? product?.trade_price_cents ?? null;
+                  const prodCurrency = product?.currency || currency;
+                  const unitPrice = convertCents(rawUnitPrice, prodCurrency, currency);
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
 
                   return (
