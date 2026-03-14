@@ -97,7 +97,13 @@ const TradeShowroom = () => {
             (!existing.materials && item.materials) ||
             (!existing.dimensions && item.dimensions)
           ) {
-            seenByName.set(key, { ...item, pdf_url: pdfLookup.get(key) });
+            const price = priceLookup.get(key);
+            seenByName.set(key, {
+              ...item,
+              pdf_url: pdfLookup.get(key),
+              trade_price_cents: price?.cents ?? null,
+              currency: price?.currency,
+            });
             if (item.product_image_url) seenImageUrls.add(item.product_image_url);
           }
         }
