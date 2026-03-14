@@ -81,7 +81,7 @@ const App = () => {
           <Route path="/trade/program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
           <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
           <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
-          <Route path="/trade" element={<Suspense fallback={null}><TradeLayout /></Suspense>}>
+          <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
             <Route index element={<TradeDashboard />} />
             <Route path="admin" element={<TradeAdmin />} />
             <Route path="gallery" element={<TradeGallery />} />
