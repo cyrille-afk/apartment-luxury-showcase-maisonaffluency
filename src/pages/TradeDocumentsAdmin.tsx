@@ -18,6 +18,7 @@ interface TradeDocument {
   document_type: string;
   file_url: string;
   file_size_bytes: number | null;
+  cover_image_url: string | null;
   created_at: string;
 }
 
@@ -35,6 +36,7 @@ const emptyDoc = (): Omit<TradeDocument, "id" | "created_at"> => ({
   document_type: "catalogue",
   file_url: "",
   file_size_bytes: null,
+  cover_image_url: null,
 });
 
 const inputClass =
@@ -77,6 +79,7 @@ const TradeDocumentsAdmin = () => {
       document_type: editing.document_type,
       file_url: editing.file_url,
       file_size_bytes: editing.file_size_bytes,
+      cover_image_url: editing.cover_image_url || null,
     };
 
     let error;
@@ -155,6 +158,17 @@ const TradeDocumentsAdmin = () => {
                   ))}
                 </select>
               </div>
+            </div>
+
+            {/* Cover image URL */}
+            <div>
+              <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">Cover Image URL <span className="normal-case tracking-normal text-muted-foreground/50">(optional — for non-PDF links)</span></label>
+              <input
+                value={editing.cover_image_url || ""}
+                onChange={(e) => setEditing(prev => prev ? { ...prev, cover_image_url: e.target.value || null } : null)}
+                className={inputClass}
+                placeholder="https://… paste a cover image URL"
+              />
             </div>
 
             {/* File upload */}

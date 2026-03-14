@@ -15,6 +15,7 @@ interface TradeDocument {
   document_type: string;
   file_url: string;
   file_size_bytes: number | null;
+  cover_image_url: string | null;
   created_at: string;
 }
 
@@ -157,7 +158,9 @@ const TradeDocuments = () => {
                     >
                       {/* Cover thumbnail */}
                       <div className="aspect-[3/4] bg-muted/20 relative overflow-hidden">
-                        {isPdf ? (
+                        {doc.cover_image_url ? (
+                          <img src={doc.cover_image_url} alt={doc.title} className="w-full h-full object-cover" />
+                        ) : isPdf ? (
                           <Suspense
                             fallback={
                               <div className="w-full h-full flex items-center justify-center">
