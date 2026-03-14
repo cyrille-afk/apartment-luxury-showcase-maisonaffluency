@@ -170,7 +170,7 @@ const JournalArticlePage = () => {
                 prose-a:text-primary prose-a:underline prose-a:underline-offset-4
                 prose-img:rounded-sm prose-img:my-8
                 prose-blockquote:border-l-primary prose-blockquote:font-display prose-blockquote:italic prose-blockquote:text-foreground/70"
-              dangerouslySetInnerHTML={{ __html: article.content }}
+              dangerouslySetInnerHTML={{ __html: article.content.replace(/(\d+)\.\s/g, '<br /><br />$1. ') .replace(/^<br \/><br \/>/, '') }}
             />
           </motion.div>
         )}
