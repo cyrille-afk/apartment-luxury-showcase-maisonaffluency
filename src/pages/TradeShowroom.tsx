@@ -458,6 +458,13 @@ const TradeShowroom = () => {
           })}
         </div>
       )}
+
+      <QuoteDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        quoteId={activeQuoteId}
+        refreshKey={drawerRefreshKey}
+      />
     </div>
   );
 };
