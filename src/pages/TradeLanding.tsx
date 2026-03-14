@@ -203,6 +203,7 @@ const TradeLanding = () => {
                     className="w-full h-full object-cover"
                     loading="lazy"
                     decoding="async"
+                    data-pin-nopin="true"
                   />
                 </div>
                 <motion.div
