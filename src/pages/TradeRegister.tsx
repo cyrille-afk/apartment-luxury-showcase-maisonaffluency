@@ -140,16 +140,16 @@ const TradeRegister = () => {
         </div>
 
         {/* Benefits summary */}
-        <div className="mb-10 grid grid-cols-2 gap-3">
+        <div className="mb-6 grid grid-cols-2 gap-2">
           {[
             { title: "Dedicated Advisor", desc: "Personalised guidance on every project" },
             { title: "Custom Requests", desc: "Access to specialist workshops worldwide" },
             { title: "Samples & Swatches", desc: "Comprehensive curated material library" },
             { title: "Insured Shipping", desc: "Consolidated freight with full coverage" },
           ].map((b) => (
-            <div key={b.title} className="border border-border rounded-sm px-4 py-3">
-              <p className="font-display text-sm text-foreground">{b.title}</p>
-              <p className="font-body text-xs text-muted-foreground mt-0.5">{b.desc}</p>
+            <div key={b.title} className="border border-border rounded-sm px-3 py-2">
+              <p className="font-display text-xs text-foreground">{b.title}</p>
+              <p className="font-body text-[11px] text-muted-foreground mt-0.5 leading-tight">{b.desc}</p>
             </div>
           ))}
         </div>
