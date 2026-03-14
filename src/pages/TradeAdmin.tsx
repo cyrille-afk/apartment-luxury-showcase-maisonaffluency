@@ -19,6 +19,7 @@ interface Application {
   message: string | null;
   status: string;
   created_at: string;
+  profiles?: { first_name: string; last_name: string; email: string } | null;
 }
 
 const TradeAdmin = () => {
@@ -40,29 +41,59 @@ const TradeAdmin = () => {
       query = query.eq("status", filter);
     }
     const { data } = await query;
-    setApplications((data as Application[]) || []);
+    const apps = (data as any[]) || [];
+
+    // Fetch profiles for all applicant user_ids
+    const userIds = [...new Set(apps.map((a) => a.user_id))];
+    let profileMap: Record<string, { first_name: string; last_name: string; email: string }> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase.from("profiles").select("id, first_name, last_name, email").in("id", userIds);
+      if (profiles) {
+        profileMap = Object.fromEntries(profiles.map((p: any) => [p.id, p]));
+      }
+    }
+
+    setApplications(apps.map((a) => ({ ...a, profiles: profileMap[a.user_id] || null })));
     setFetching(false);
   };
 
-  const handleAction = async (appId: string, userId: string, action: "approved" | "rejected") => {
+  const handleAction = async (app: Application, action: "approved" | "rejected") => {
     // Update application status
     await supabase.from("trade_applications").update({
       status: action,
       reviewed_at: new Date().toISOString(),
       reviewed_by: user?.id,
-    }).eq("id", appId);
+    }).eq("id", app.id);
 
     // If approved, add trade_user role
     if (action === "approved") {
       await supabase.from("user_roles").upsert({
-        user_id: userId,
+        user_id: app.user_id,
         role: "trade_user" as any,
       }, { onConflict: "user_id,role" });
     }
 
     // If rejected, remove trade_user role if it exists
     if (action === "rejected") {
-      await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "trade_user" as any);
+      await supabase.from("user_roles").delete().eq("user_id", app.user_id).eq("role", "trade_user" as any);
+    }
+
+    // Send email notification to applicant
+    const applicantEmail = app.profiles?.email;
+    const applicantName = app.profiles ? `${app.profiles.first_name} ${app.profiles.last_name}`.trim() : "";
+    if (applicantEmail) {
+      try {
+        await supabase.functions.invoke("send-application-status", {
+          body: {
+            applicantEmail,
+            applicantName,
+            companyName: app.company_name,
+            status: action,
+          },
+        });
+      } catch (err) {
+        console.error("Failed to send status email:", err);
+      }
     }
 
     toast({ title: `Application ${action}` });
@@ -107,7 +138,7 @@ const TradeAdmin = () => {
             <div key={app.id} className="border border-border rounded-lg p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3 mb-1">
                     <h3 className="font-display text-base text-foreground">{app.company_name}</h3>
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
                       app.status === "pending" ? "bg-warning/10 text-warning" :
@@ -120,6 +151,11 @@ const TradeAdmin = () => {
                       {app.status}
                     </span>
                   </div>
+                  {app.profiles && (
+                    <p className="font-body text-xs text-muted-foreground mb-2">
+                      {app.profiles.first_name} {app.profiles.last_name} · <a href={`mailto:${app.profiles.email}`} className="text-foreground hover:underline">{app.profiles.email}</a>
+                    </p>
+                  )}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 font-body text-xs text-muted-foreground">
                     <span>Title: {app.job_title}</span>
                     <span>Location: {app.city ? `${app.city}, ` : ""}{app.country}</span>
@@ -145,14 +181,14 @@ const TradeAdmin = () => {
                 {app.status === "pending" && (
                   <div className="flex gap-2 shrink-0">
                     <button
-                      onClick={() => handleAction(app.id, app.user_id, "approved")}
+                      onClick={() => handleAction(app, "approved")}
                       className="p-2 rounded-full border border-success/30 text-success hover:bg-success/10 transition-colors"
                       title="Approve"
                     >
                       <Check className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleAction(app.id, app.user_id, "rejected")}
+                      onClick={() => handleAction(app, "rejected")}
                       className="p-2 rounded-full border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
                       title="Reject"
                     >
