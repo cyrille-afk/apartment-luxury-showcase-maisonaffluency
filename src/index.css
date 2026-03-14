@@ -226,3 +226,38 @@ All colors MUST be HSL.
     transform: none !important;
   }
 }
+
+/* Print styles for quote PDF export */
+@media print {
+  /* Hide all navigation, sidebar, and UI chrome */
+  nav, header, footer,
+  [data-trade-sidebar],
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  /* Remove layout constraints so the quote fills the page */
+  body, html {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Reset the trade layout wrapper */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Clean page margins */
+  @page {
+    margin: 1.5cm 2cm;
+    size: A4;
+  }
+
+  /* Prevent page breaks inside items */
+  .divide-y > div {
+    break-inside: avoid;
+  }
+}
