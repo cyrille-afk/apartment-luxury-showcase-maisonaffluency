@@ -61,6 +61,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [clientName, setClientName] = useState("");
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
+  const [tradeDiscount, setTradeDiscount] = useState(false);
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
@@ -271,32 +272,44 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {/* ===== Currency selector (draft only, hidden in print) ===== */}
         {isDraft && (
-          <div className="border-b border-border px-6 md:px-8 py-3 flex items-center gap-3 print:hidden">
-            <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">Currency</span>
-            <div className="relative">
-              <button
-                onClick={() => setCurrencyOpen(!currencyOpen)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors"
-              >
-                {currencySymbol(currency)} {currency}
-                <ChevronDown className="h-3 w-3 text-muted-foreground" />
-              </button>
-              {currencyOpen && (
-                <div className="absolute top-full left-0 mt-1 bg-background border border-border rounded-md shadow-lg z-10 min-w-[120px]">
-                  {CURRENCIES.map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => handleCurrencyChange(c)}
-                      className={`block w-full text-left px-3 py-2 font-body text-xs hover:bg-muted transition-colors ${
-                        c === currency ? "text-primary font-medium" : "text-foreground"
-                      }`}
-                    >
-                      {currencySymbol(c)} {c}
-                    </button>
-                  ))}
-                </div>
-              )}
+          <div className="border-b border-border px-6 md:px-8 py-3 flex items-center gap-6 print:hidden">
+            <div className="flex items-center gap-3">
+              <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">Currency</span>
+              <div className="relative">
+                <button
+                  onClick={() => setCurrencyOpen(!currencyOpen)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors"
+                >
+                  {currencySymbol(currency)} {currency}
+                  <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                </button>
+                {currencyOpen && (
+                  <div className="absolute top-full left-0 mt-1 bg-background border border-border rounded-md shadow-lg z-10 min-w-[120px]">
+                    {CURRENCIES.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => handleCurrencyChange(c)}
+                        className={`block w-full text-left px-3 py-2 font-body text-xs hover:bg-muted transition-colors ${
+                          c === currency ? "text-primary font-medium" : "text-foreground"
+                        }`}
+                      >
+                        {currencySymbol(c)} {c}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
+
+            <button
+              onClick={() => setTradeDiscount(!tradeDiscount)}
+              className="flex items-center gap-2"
+            >
+              <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
+                <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
+              </div>
+              <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">8% Trade Discount</span>
+            </button>
           </div>
         )}
 
@@ -397,24 +410,36 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       <span>Subtotal</span>
                       <span>{formatPriceRaw(subtotalCents, currency) || "TBD"}</span>
                     </div>
-                    {currency === "SGD" && subtotalCents > 0 && (
+                    {tradeDiscount && subtotalCents > 0 && (
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
-                        <span>GST (9%)</span>
-                        <span>{formatPriceRaw(Math.round(subtotalCents * 0.09), currency)}</span>
+                        <span>Trade Discount (8%)</span>
+                        <span>-{formatPriceRaw(Math.round(subtotalCents * 0.08), currency)}</span>
                       </div>
                     )}
-                    <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
-                      <span className="uppercase tracking-wider">Total {currency}</span>
-                      <span className="font-medium">
-                        {currencySymbol(currency)}{" "}
-                        {formatPriceRaw(
-                          currency === "SGD" && subtotalCents > 0
-                            ? subtotalCents + Math.round(subtotalCents * 0.09)
-                            : subtotalCents,
-                          currency
-                        ) || "TBD"}
-                      </span>
-                    </div>
+                    {currency === "SGD" && subtotalCents > 0 && (() => {
+                      const afterDiscount = tradeDiscount ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
+                      return (
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>GST (9%)</span>
+                          <span>{formatPriceRaw(Math.round(afterDiscount * 0.09), currency)}</span>
+                        </div>
+                      );
+                    })()}
+                    {(() => {
+                      const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
+                      const total = currency === "SGD" && afterDiscount > 0
+                        ? afterDiscount + Math.round(afterDiscount * 0.09)
+                        : afterDiscount;
+                      return (
+                        <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
+                          <span className="uppercase tracking-wider">Total {currency}</span>
+                          <span className="font-medium">
+                            {currencySymbol(currency)}{" "}
+                            {formatPriceRaw(total, currency) || "TBD"}
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
