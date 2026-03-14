@@ -6,6 +6,7 @@ import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, FileText, X } from "lucide-react";
 import CloudUpload from "@/components/trade/CloudUpload";
+import BrandCarousel from "@/components/trade/BrandCarousel";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -50,6 +51,7 @@ const TradeDocumentsAdmin = () => {
   const [editing, setEditing] = useState<Omit<TradeDocument, "id" | "created_at"> & { id?: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<TradeDocument | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState("all");
 
   useEffect(() => {
     if (isAdmin) fetchDocs();
@@ -234,6 +236,32 @@ const TradeDocumentsAdmin = () => {
           </button>
         </div>
 
+        {/* Brand carousel */}
+        {(() => {
+          const brandMap = new Map<string, { thumbnailUrl: string | null; docCount: number }>();
+          for (const doc of documents) {
+            const existing = brandMap.get(doc.brand_name);
+            if (!existing) {
+              brandMap.set(doc.brand_name, { thumbnailUrl: doc.cover_image_url || null, docCount: 1 });
+            } else {
+              existing.docCount++;
+              if (!existing.thumbnailUrl && doc.cover_image_url) existing.thumbnailUrl = doc.cover_image_url;
+            }
+          }
+          const brandEntries = [...brandMap.entries()]
+            .map(([name, info]) => ({ name, ...info }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+          if (brandEntries.length === 0) return null;
+          return (
+            <BrandCarousel
+              brands={brandEntries}
+              selectedBrand={selectedBrand}
+              onSelect={setSelectedBrand}
+            />
+          );
+        })()}
+
         {fetching ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -258,7 +286,9 @@ const TradeDocumentsAdmin = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {documents.map((doc) => (
+            {documents
+              .filter((doc) => selectedBrand === "all" || doc.brand_name === selectedBrand)
+              .map((doc) => (
               <div key={doc.id} className="border border-border rounded-lg p-5 flex items-center gap-4">
                 <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">

@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet } from "lucide-react";
 import SectionHero from "@/components/trade/SectionHero";
+import BrandCarousel from "@/components/trade/BrandCarousel";
 import { DocumentCardSkeleton } from "@/components/trade/skeletons";
 
 const PdfThumbnail = lazy(() => import("@/components/trade/PdfThumbnail"));
@@ -63,6 +64,28 @@ const TradeDocuments = () => {
   const brands = useMemo(() => [...new Set(documents.map((d) => d.brand_name))].sort(), [documents]);
   const types = useMemo(() => [...new Set(documents.map((d) => d.document_type))].sort(), [documents]);
 
+  // Build brand entries for carousel with thumbnail from first doc's cover or null
+  const brandEntries = useMemo(() => {
+    const map = new Map<string, { thumbnailUrl: string | null; docCount: number }>();
+    for (const doc of documents) {
+      const existing = map.get(doc.brand_name);
+      if (!existing) {
+        map.set(doc.brand_name, {
+          thumbnailUrl: doc.cover_image_url || null,
+          docCount: 1,
+        });
+      } else {
+        existing.docCount++;
+        if (!existing.thumbnailUrl && doc.cover_image_url) {
+          existing.thumbnailUrl = doc.cover_image_url;
+        }
+      }
+    }
+    return [...map.entries()]
+      .map(([name, info]) => ({ name, ...info }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [documents]);
+
   const filtered = useMemo(() => {
     return documents.filter((d) => {
       const matchesSearch = !search || d.title.toLowerCase().includes(search.toLowerCase()) || d.brand_name.toLowerCase().includes(search.toLowerCase());
@@ -94,6 +117,13 @@ const TradeDocuments = () => {
         section="documents"
         title="Document Library"
         subtitle="Access tearsheets, catalogues, and price lists organized by brand."
+      />
+
+      {/* Brand carousel */}
+      <BrandCarousel
+        brands={brandEntries}
+        selectedBrand={selectedBrand}
+        onSelect={setSelectedBrand}
       />
 
       {/* Filters */}
