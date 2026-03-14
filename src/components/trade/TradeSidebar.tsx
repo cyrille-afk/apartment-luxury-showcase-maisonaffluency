@@ -1,6 +1,6 @@
 import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Sidebar,
@@ -28,7 +28,13 @@ export function TradeSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const navigate = useNavigate();
   const { isAdmin, signOut, profile } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/trade/login");
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
@@ -95,8 +101,8 @@ export function TradeSidebar() {
           </p>
         )}
         <button
-          onClick={signOut}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-md font-body text-xs text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+          onClick={handleSignOut}
+          className="flex items-center gap-2 w-full px-3 py-2 rounded-md font-body text-xs text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors min-h-[44px]"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Sign Out</span>}
