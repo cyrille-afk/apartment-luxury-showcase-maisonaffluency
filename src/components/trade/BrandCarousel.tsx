@@ -130,24 +130,35 @@ const BrandTile = ({
         </span>
       </button>
 
-      {/* Admin upload overlay */}
+      {/* Admin upload/remove overlay */}
       {editable && !isUploading && (
-        <label
-          className="absolute top-1.5 right-1 p-1 rounded-full bg-background/80 border border-border shadow-sm cursor-pointer hover:bg-muted z-10"
-          title={`Upload thumbnail for ${brand.name}`}
-        >
-          <Camera className="w-3 h-3 text-muted-foreground" />
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) onUpload(file);
-              e.target.value = "";
-            }}
-          />
-        </label>
+        <div className="absolute top-1 right-0.5 flex flex-col gap-0.5 z-10">
+          <label
+            className="p-1 rounded-full bg-background/80 border border-border shadow-sm cursor-pointer hover:bg-muted"
+            title={`Upload thumbnail for ${brand.name}`}
+          >
+            <Camera className="w-3 h-3 text-muted-foreground" />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onUpload(file);
+                e.target.value = "";
+              }}
+            />
+          </label>
+          {brand.thumbnailUrl && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onRemove(); }}
+              className="p-1 rounded-full bg-background/80 border border-border shadow-sm hover:bg-destructive/10 hover:border-destructive/30"
+              title={`Remove thumbnail for ${brand.name}`}
+            >
+              <X className="w-3 h-3 text-muted-foreground hover:text-destructive" />
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
