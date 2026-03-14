@@ -55,21 +55,29 @@ const TradeShowroom = () => {
           }
         }
 
-        // Deduplicate by product_name (case-insensitive), keep the entry with the most data
-        const seen = new Map<string, ShowroomProduct>();
+        // Deduplicate by product_name (case-insensitive) AND by product_image_url
+        const seenByName = new Map<string, ShowroomProduct>();
+        const seenImageUrls = new Set<string>();
         for (const item of data as ShowroomProduct[]) {
           const key = item.product_name.trim().toLowerCase();
-          const existing = seen.get(key);
+          const existing = seenByName.get(key);
+
+          // Skip if we've already seen this exact image under a different name
+          if (item.product_image_url && seenImageUrls.has(item.product_image_url) && !existing) {
+            continue;
+          }
+
           if (
             !existing ||
             (!existing.product_image_url && item.product_image_url) ||
             (!existing.materials && item.materials) ||
             (!existing.dimensions && item.dimensions)
           ) {
-            seen.set(key, { ...item, pdf_url: pdfLookup.get(key) });
+            seenByName.set(key, { ...item, pdf_url: pdfLookup.get(key) });
+            if (item.product_image_url) seenImageUrls.add(item.product_image_url);
           }
         }
-        setProducts([...seen.values()]);
+        setProducts([...seenByName.values()]);
       }
       setLoading(false);
     };
