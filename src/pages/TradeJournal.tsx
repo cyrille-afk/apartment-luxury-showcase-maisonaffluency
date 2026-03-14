@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, Upload, X, ImageIcon, FileUp } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, X, ImageIcon, FileUp } from "lucide-react";
+import CloudUpload from "@/components/trade/CloudUpload";
 import { CATEGORY_LABELS, type JournalCategory } from "@/lib/journal";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
