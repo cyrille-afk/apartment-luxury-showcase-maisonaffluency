@@ -36,7 +36,9 @@ const TradeDocuments = () => {
   const [documents, setDocuments] = useState<TradeDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("all");
+  const [searchParams] = useSearchParams();
+  const initialBrand = searchParams.get("brand") || "all";
+  const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [selectedType, setSelectedType] = useState("all");
 
   useEffect(() => {
