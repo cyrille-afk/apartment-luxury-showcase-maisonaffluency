@@ -1,7 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet } from "lucide-react";
+
+const PdfThumbnail = lazy(() => import("@/components/trade/PdfThumbnail"));
 
 interface TradeDocument {
   id: string;
@@ -134,26 +136,49 @@ const TradeDocuments = () => {
                   {docs.length} {docs.length === 1 ? "file" : "files"}
                 </span>
               </h2>
-              <div className="space-y-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {docs.map((doc) => {
-                  const Icon = typeIcons[doc.document_type] || FileText;
+                  const isPdf = doc.file_url.toLowerCase().endsWith(".pdf");
                   return (
                     <a
                       key={doc.id}
                       href={doc.file_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 px-4 py-3 border border-border rounded-md hover:border-foreground/20 hover:bg-muted/30 transition-colors group"
+                      className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all"
                     >
-                      <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-body text-sm text-foreground truncate">{doc.title}</p>
-                        <p className="font-body text-[10px] text-muted-foreground">
+                      {/* Cover thumbnail */}
+                      <div className="aspect-[3/4] bg-muted/20 relative overflow-hidden">
+                        {isPdf ? (
+                          <Suspense
+                            fallback={
+                              <div className="w-full h-full flex items-center justify-center">
+                                <div className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                              </div>
+                            }
+                          >
+                            <PdfThumbnail url={doc.file_url} alt={doc.title} className="w-full h-full" />
+                          </Suspense>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <FileText className="h-10 w-10 text-muted-foreground/20" />
+                          </div>
+                        )}
+                        {/* Download overlay */}
+                        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity p-3 rounded-full bg-[hsl(var(--pdf-red))] text-white shadow-lg">
+                            <FileDown className="h-5 w-5" />
+                          </div>
+                        </div>
+                      </div>
+                      {/* Info */}
+                      <div className="p-3">
+                        <p className="font-body text-sm text-foreground truncate leading-tight">{doc.title}</p>
+                        <p className="font-body text-[10px] text-muted-foreground mt-0.5">
                           {typeLabels[doc.document_type] || doc.document_type}
                           {doc.file_size_bytes ? ` · ${formatFileSize(doc.file_size_bytes)}` : ""}
                         </p>
                       </div>
-                      <FileDown className="h-4 w-4 text-[hsl(var(--pdf-red))] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                     </a>
                   );
                 })}
