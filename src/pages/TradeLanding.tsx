@@ -72,6 +72,35 @@ const TradeLanding = () => {
           property="og:image"
           content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex"
         />
+        <link rel="canonical" href="https://maisonaffluency.com/trade/program" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Trade Program — Maison Affluency",
+          "url": "https://maisonaffluency.com/trade/program",
+          "description": "Exclusive trade program for architects and interior designers offering trade pricing, dedicated client advisors, custom requests, material libraries, and consolidated insured shipping.",
+          "publisher": { "@type": "Organization", "name": "Maison Affluency" },
+          "mainEntity": {
+            "@type": "Service",
+            "name": "Maison Affluency Trade Program",
+            "provider": {
+              "@type": "Organization",
+              "name": "Maison Affluency",
+              "url": "https://maisonaffluency.com"
+            },
+            "description": "B2B programme for interior designers, architects, and luxury hospitality professionals. Includes trade pricing, bespoke quotations, dedicated client advisors, custom sourcing, samples & swatches, and consolidated insured shipping.",
+            "areaServed": { "@type": "Place", "name": "Asia-Pacific" },
+            "audience": {
+              "@type": "BusinessAudience",
+              "audienceType": "Interior Designers, Architects, Decorators"
+            },
+            "offers": {
+              "@type": "Offer",
+              "description": "No minimum purchase required. Commission-based trade discounts.",
+              "priceCurrency": "SGD"
+            }
+          }
+        })}</script>
       </Helmet>
 
       <div className="min-h-screen bg-background">
