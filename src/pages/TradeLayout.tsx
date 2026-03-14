@@ -18,8 +18,8 @@ const TradeLayout = () => {
     return <Navigate to="/trade/login" replace />;
   }
 
-  // If not approved, show pending/rejected state
-  if (applicationStatus === "pending") {
+  // Admins bypass application status checks
+  if (!isAdmin && applicationStatus === "pending") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center max-w-md">
