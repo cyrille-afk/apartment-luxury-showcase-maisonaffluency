@@ -23,6 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import CategorySidebar from "@/components/CategorySidebar";
+import { ProvenanceBadge } from "@/components/ProvenanceBadge";
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
@@ -1537,6 +1538,10 @@ const Collectibles = () => {
                       )}
                     </div>
                   )}
+                  <ProvenanceBadge
+                    designerId={curatorPicksDesigner.id ?? curatorPicksDesigner.name}
+                    pieceTitle={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
+                  />
                   {/* Thumbnail strip — inline, above contact line */}
                   {curatorPicksDesigner.curatorPicks.length > 1 && (
                     <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">

@@ -143,6 +143,104 @@ export type Database = {
         }
         Relationships: []
       }
+      provenance_certificates: {
+        Row: {
+          appreciation_notes: string | null
+          authenticity_statement: string | null
+          certificate_number: string | null
+          comparable_references: string | null
+          created_at: string
+          created_by: string | null
+          designer_id: string
+          edition_number: string | null
+          edition_total: string | null
+          estimated_value_range: string | null
+          id: string
+          is_published: boolean
+          piece_title: string
+          updated_at: string
+          year_created: number | null
+        }
+        Insert: {
+          appreciation_notes?: string | null
+          authenticity_statement?: string | null
+          certificate_number?: string | null
+          comparable_references?: string | null
+          created_at?: string
+          created_by?: string | null
+          designer_id: string
+          edition_number?: string | null
+          edition_total?: string | null
+          estimated_value_range?: string | null
+          id?: string
+          is_published?: boolean
+          piece_title: string
+          updated_at?: string
+          year_created?: number | null
+        }
+        Update: {
+          appreciation_notes?: string | null
+          authenticity_statement?: string | null
+          certificate_number?: string | null
+          comparable_references?: string | null
+          created_at?: string
+          created_by?: string | null
+          designer_id?: string
+          edition_number?: string | null
+          edition_total?: string | null
+          estimated_value_range?: string | null
+          id?: string
+          is_published?: boolean
+          piece_title?: string
+          updated_at?: string
+          year_created?: number | null
+        }
+        Relationships: []
+      }
+      provenance_events: {
+        Row: {
+          certificate_id: string
+          created_at: string
+          description: string | null
+          event_date: string
+          event_type: string
+          id: string
+          location: string | null
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          certificate_id: string
+          created_at?: string
+          description?: string | null
+          event_date: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          certificate_id?: string
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provenance_events_certificate_id_fkey"
+            columns: ["certificate_id"]
+            isOneToOne: false
+            referencedRelation: "provenance_certificates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_applications: {
         Row: {
           certification_details: string | null

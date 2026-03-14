@@ -1,4 +1,4 @@
-import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper } from "lucide-react";
+import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -98,6 +98,18 @@ export function TradeSidebar() {
                       >
                         <Newspaper className="h-4 w-4 shrink-0" />
                         {!collapsed && <span>Journal</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to="/trade/provenance"
+                        className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                        activeClassName="bg-muted text-foreground font-medium"
+                      >
+                        <Award className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span>Provenance</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

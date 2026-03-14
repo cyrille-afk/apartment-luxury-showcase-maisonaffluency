@@ -5,6 +5,7 @@ const heroImages: Record<string, string> = {
   gallery: "living-room-hero_zxfcxl",
   quotes: "details-console_hk6uxt",
   documents: "home-office-desk_g0ywv2",
+  provenance: "details-console_hk6uxt",
 };
 
 interface SectionHeroProps {
