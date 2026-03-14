@@ -354,10 +354,10 @@ const TradeShowroom = () => {
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
-          <select value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
-            <option value="all">All Rooms ({rooms.length})</option>
-            {rooms.map((r) => (
-              <option key={r} value={r}>{r}</option>
+          <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
+            <option value="all">All Sections ({sections.length})</option>
+            {sections.map((s) => (
+              <option key={s} value={s}>{s}</option>
             ))}
           </select>
         </div>
