@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { cloudinaryUrl } from "@/lib/cloudinary";
 
 interface BrandFolder {
   brand_name: string;
@@ -21,11 +22,14 @@ interface ActivityItem {
   link?: string;
 }
 
+const thumb = (id: string) =>
+  cloudinaryUrl(id, { width: 600, height: 400, quality: "auto", crop: "fill", gravity: "auto" });
+
 const quickLinks = [
-  { title: "Browse Showroom", description: "Review items from the Maison Affluency gallery", icon: MapPin, to: "/trade/showroom" },
-  { title: "Browse Gallery", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery" },
-  { title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes" },
-  { title: "Documents", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents" },
+  { title: "Browse Showroom", description: "Review items from the Maison Affluency gallery", icon: MapPin, to: "/trade/showroom", image: thumb("bespoke-sofa_gxidtx") },
+  { title: "Browse Gallery", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery", image: thumb("living-room-hero_zxfcxl") },
+  { title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", image: thumb("details-console_hk6uxt") },
+  { title: "Documents", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", image: thumb("home-office-desk_g0ywv2") },
 ];
 
 const typeLabels: Record<string, string> = {
@@ -146,11 +150,21 @@ const TradeDashboard = () => {
           <Link
             key={link.to}
             to={link.to}
-            className="group border border-border rounded-lg p-6 hover:border-foreground/20 hover:shadow-sm transition-all"
+            className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all"
           >
-            <link.icon className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors mb-4" />
-            <h3 className="font-display text-base text-foreground mb-1">{link.title}</h3>
-            <p className="font-body text-xs text-muted-foreground">{link.description}</p>
+            <div className="relative aspect-[3/2] overflow-hidden">
+              <img
+                src={link.image}
+                alt={link.title}
+                loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
+            </div>
+            <div className="p-4">
+              <h3 className="font-display text-base text-foreground mb-1">{link.title}</h3>
+              <p className="font-body text-xs text-muted-foreground">{link.description}</p>
+            </div>
           </Link>
         ))}
       </div>
