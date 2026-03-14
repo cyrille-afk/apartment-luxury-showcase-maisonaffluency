@@ -21,6 +21,7 @@ const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
 const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings"));
 const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -78,6 +79,7 @@ const App = () => {
           <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
           <Route path="/trade/program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
           <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
+          <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
           <Route path="/trade" element={<Suspense fallback={null}><TradeLayout /></Suspense>}>
             <Route index element={<TradeDashboard />} />
             <Route path="admin" element={<TradeAdmin />} />
