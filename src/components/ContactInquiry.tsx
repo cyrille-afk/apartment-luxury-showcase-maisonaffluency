@@ -133,11 +133,11 @@ const ContactInquiry = () => {
               <Input
                 id="name"
                 placeholder="Your full name"
-                className="border-border bg-background font-body rounded-lg"
+                className={`border-border bg-background font-body rounded-lg ${errors.name ? "border-destructive" : ""}`}
                 value={formData.name}
                 onChange={handleInputChange}
-                required
               />
+              {errors.name && <p className="font-body text-[10px] text-destructive mt-1">{errors.name}</p>}
             </div>
             <div>
               <label htmlFor="firm" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
@@ -146,10 +146,11 @@ const ContactInquiry = () => {
               <Input
                 id="firm"
                 placeholder="Company name"
-                className="border-border bg-background font-body rounded-lg"
+                className={`border-border bg-background font-body rounded-lg ${errors.firm ? "border-destructive" : ""}`}
                 value={formData.firm}
                 onChange={handleInputChange}
               />
+              {errors.firm && <p className="font-body text-[10px] text-destructive mt-1">{errors.firm}</p>}
             </div>
           </div>
 
@@ -162,11 +163,11 @@ const ContactInquiry = () => {
                 id="email"
                 type="email"
                 placeholder="your@email.com"
-                className="border-border bg-background font-body rounded-lg"
+                className={`border-border bg-background font-body rounded-lg ${errors.email ? "border-destructive" : ""}`}
                 value={formData.email}
                 onChange={handleInputChange}
-                required
               />
+              {errors.email && <p className="font-body text-[10px] text-destructive mt-1">{errors.email}</p>}
             </div>
             <div>
               <label htmlFor="phone" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
@@ -176,10 +177,11 @@ const ContactInquiry = () => {
                 id="phone"
                 type="tel"
                 placeholder="+65 XXXX XXXX"
-                className="border-border bg-background font-body rounded-lg"
+                className={`border-border bg-background font-body rounded-lg ${errors.phone ? "border-destructive" : ""}`}
                 value={formData.phone}
                 onChange={handleInputChange}
               />
+              {errors.phone && <p className="font-body text-[10px] text-destructive mt-1">{errors.phone}</p>}
             </div>
           </div>
 
@@ -190,11 +192,11 @@ const ContactInquiry = () => {
             <Textarea
               id="message"
               placeholder="Please share details about your inquiry..."
-              className="min-h-[150px] border-border bg-background font-body rounded-lg"
+              className={`min-h-[150px] border-border bg-background font-body rounded-lg ${errors.message ? "border-destructive" : ""}`}
               value={formData.message}
               onChange={handleInputChange}
-              required
             />
+            {errors.message && <p className="font-body text-[10px] text-destructive mt-1">{errors.message}</p>}
           </div>
 
           <div className="flex justify-center pt-4">
