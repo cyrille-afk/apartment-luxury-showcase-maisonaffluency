@@ -91,7 +91,7 @@ const TradeLanding = () => {
           <img
             src={cloudinaryUrl("v1772085848/intimate-dining_ux4pee", { width: 1920, quality: "auto:good", crop: "fill" })}
             alt="Maison Affluency Trade Program"
-            className="w-full h-full object-cover object-bottom"
+            className="w-full h-full object-cover object-[center_70%]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent" />
           <motion.div
