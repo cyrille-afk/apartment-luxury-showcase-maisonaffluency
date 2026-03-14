@@ -1,19 +1,15 @@
-import { motion } from "framer-motion";
-import { Briefcase, ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
-/**
- * Benefits displayed as alternating image + text sections.
- * Replace placeholder images with your own Cloudinary URLs.
- */
 const benefits = [
   {
     title: "Trade Pricing & Bespoke Quotations",
     description:
       "View pricing instantly when you sign in with your trade account and save time with our bespoke quotations, a comprehensive multi-product document listing all prices at a glance.",
-    // TODO: Replace with your own image
     image: cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 1400, quality: "auto:good", crop: "fill" }),
   },
   {
@@ -43,6 +39,12 @@ const benefits = [
 ];
 
 const TradeLanding = () => {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const toggleAccordion = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
   return (
     <>
       <Helmet>
@@ -77,7 +79,7 @@ const TradeLanding = () => {
         </div>
 
         {/* ─── Full-width Hero ─── */}
-        <div className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden">
+        <div className="relative w-full h-[55vh] md:h-[85vh] overflow-hidden">
           <img
             src={cloudinaryUrl("v1772085848/intimate-dining_ux4pee", { width: 1920, height: 1080, quality: "auto:good", crop: "fill", gravity: "auto" })}
             alt="Maison Affluency Trade Program"
@@ -119,7 +121,7 @@ const TradeLanding = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.8 }}
-          className="max-w-3xl mx-auto px-6 py-20 md:py-28 text-center"
+          className="max-w-3xl mx-auto px-6 py-12 md:py-28 text-center"
         >
           <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6">
             Your Exclusive Benefits and Bespoke Services
@@ -131,43 +133,93 @@ const TradeLanding = () => {
           </p>
         </motion.div>
 
-        {/* ─── Alternating 50/50 split benefit sections ─── */}
-        {benefits.map((benefit, index) => {
-          const isEven = index % 2 === 0;
-          return (
-            <div
-              key={index}
-              className={`flex flex-col ${isEven ? "md:flex-row" : "md:flex-row-reverse"} min-h-[60vh] md:min-h-[70vh]`}
-            >
-              {/* Image half */}
-              <div className="w-full md:w-1/2 h-[50vh] md:h-auto overflow-hidden relative">
-                <img
-                  src={benefit.image}
-                  alt={benefit.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
+        {/* ─── Mobile: Accordion | Desktop: 50/50 split ─── */}
 
-              {/* Text half */}
-              <motion.div
-                initial={{ opacity: 0, x: isEven ? 40 : -40 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.8 }}
-                className="w-full md:w-1/2 flex flex-col justify-center items-center text-center px-8 py-14 md:px-14 lg:px-20 md:py-20"
+        {/* Mobile accordion */}
+        <div className="md:hidden px-5 pb-8">
+          <div className="border-t border-border">
+            {benefits.map((benefit, index) => (
+              <div key={index} className="border-b border-border">
+                <button
+                  onClick={() => toggleAccordion(index)}
+                  className="w-full flex items-center justify-between py-4 text-left"
+                >
+                  <h2 className="font-display text-base text-foreground pr-4">
+                    {benefit.title}
+                  </h2>
+                  <ChevronDown
+                    className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 ${
+                      openIndex === index ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                <AnimatePresence>
+                  {openIndex === index && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pb-5">
+                        <div className="w-full aspect-[4/3] rounded-sm overflow-hidden mb-4">
+                          <img
+                            src={benefit.image}
+                            alt={benefit.title}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+                        <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify">
+                          {benefit.description}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop: alternating 50/50 split */}
+        <div className="hidden md:block">
+          {benefits.map((benefit, index) => {
+            const isEven = index % 2 === 0;
+            return (
+              <div
+                key={index}
+                className={`flex ${isEven ? "flex-row" : "flex-row-reverse"} min-h-[70vh]`}
               >
-                <h2 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground mb-5">
-                  {benefit.title}
-                </h2>
-                <p className="font-body text-base md:text-lg leading-relaxed text-muted-foreground text-justify">
-                  {benefit.description}
-                </p>
-              </motion.div>
-            </div>
-          );
-        })}
+                <div className="w-1/2 overflow-hidden relative">
+                  <img
+                    src={benefit.image}
+                    alt={benefit.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <motion.div
+                  initial={{ opacity: 0, x: isEven ? 40 : -40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.8 }}
+                  className="w-1/2 flex flex-col justify-center items-center text-center px-14 lg:px-20 py-20"
+                >
+                  <h2 className="font-display text-2xl lg:text-3xl text-foreground mb-5">
+                    {benefit.title}
+                  </h2>
+                  <p className="font-body text-lg leading-relaxed text-muted-foreground text-justify">
+                    {benefit.description}
+                  </p>
+                </motion.div>
+              </div>
+            );
+          })}
+        </div>
 
         {/* ─── Final CTA ─── */}
         <div className="w-full bg-muted/30 border-t border-border">
@@ -176,7 +228,7 @@ const TradeLanding = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="max-w-3xl mx-auto px-6 py-20 md:py-28 text-center"
+            className="max-w-3xl mx-auto px-6 py-14 md:py-28 text-center"
           >
             <h2 className="font-display text-2xl md:text-3xl text-foreground mb-4">
               Join The Trade Program
