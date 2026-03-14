@@ -203,7 +203,7 @@ const TradeSettings = () => {
               type="password"
               value={passwords.newPassword}
               onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-              placeholder="Min. 6 characters"
+              placeholder="Min. 8 characters"
               className={inputClass}
             />
           </div>
