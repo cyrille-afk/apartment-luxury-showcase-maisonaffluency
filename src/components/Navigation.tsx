@@ -115,8 +115,8 @@ const Navigation = () => {
       designers: "#designers",
       collectibles: "#collectibles",
       brands: "#brands",
-      details: "#details",
-      contact: "#details",
+      details: "/trade/program",
+      contact: "/trade/program",
     };
 
     const visibleSections = new Set<string>();
