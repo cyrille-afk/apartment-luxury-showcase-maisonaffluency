@@ -295,6 +295,7 @@ export type Database = {
       trade_documents: {
         Row: {
           brand_name: string
+          cover_image_url: string | null
           created_at: string
           document_type: string
           file_size_bytes: number | null
@@ -304,6 +305,7 @@ export type Database = {
         }
         Insert: {
           brand_name: string
+          cover_image_url?: string | null
           created_at?: string
           document_type?: string
           file_size_bytes?: number | null
@@ -313,6 +315,7 @@ export type Database = {
         }
         Update: {
           brand_name?: string
+          cover_image_url?: string | null
           created_at?: string
           document_type?: string
           file_size_bytes?: number | null
