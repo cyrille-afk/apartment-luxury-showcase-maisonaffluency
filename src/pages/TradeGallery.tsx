@@ -134,44 +134,43 @@ const TradeGallery = () => {
         <button
           onClick={() => setDrawerOpen(true)}
           className="relative p-2 border border-background/30 rounded-md text-background/70 hover:text-background hover:border-background/50 transition-colors"
-            title="View active quote"
-          >
-            <ShoppingCart className="h-4 w-4" />
-            {addedProductIds.size > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-medium rounded-full flex items-center justify-center">
-                {addedProductIds.size}
-              </span>
-            )}
-          </button>
-          {draftQuotes.length > 0 && (
-            <select
-              value={activeQuoteId || ""}
-              onChange={(e) => setActiveQuoteId(e.target.value)}
-              className={`${inputClass} text-xs`}
-            >
-              {draftQuotes.map((q) => (
-                <option key={q.id} value={q.id}>
-                  QU-{q.id.slice(0, 6).toUpperCase()}
-                </option>
-              ))}
-            </select>
+          title="View active quote"
+        >
+          <ShoppingCart className="h-4 w-4" />
+          {addedProductIds.size > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-medium rounded-full flex items-center justify-center">
+              {addedProductIds.size}
+            </span>
           )}
-          <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded transition-colors ${viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground"}`}
-            >
-              <Grid3X3 className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground"}`}
-            >
-              <List className="h-4 w-4" />
-            </button>
-          </div>
+        </button>
+        {draftQuotes.length > 0 && (
+          <select
+            value={activeQuoteId || ""}
+            onChange={(e) => setActiveQuoteId(e.target.value)}
+            className="px-3 py-2 bg-background/10 border border-background/30 rounded-md font-body text-xs text-background focus:outline-none transition-colors"
+          >
+            {draftQuotes.map((q) => (
+              <option key={q.id} value={q.id} className="text-foreground bg-background">
+                QU-{q.id.slice(0, 6).toUpperCase()}
+              </option>
+            ))}
+          </select>
+        )}
+        <div className="flex items-center gap-1 border border-background/30 rounded-md p-0.5">
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`p-1.5 rounded transition-colors ${viewMode === "grid" ? "bg-background/20 text-background" : "text-background/50"}`}
+          >
+            <Grid3X3 className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`p-1.5 rounded transition-colors ${viewMode === "list" ? "bg-background/20 text-background" : "text-background/50"}`}
+          >
+            <List className="h-4 w-4" />
+          </button>
         </div>
-      </div>
+      </SectionHero>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
