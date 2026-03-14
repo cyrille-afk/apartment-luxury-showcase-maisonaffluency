@@ -135,6 +135,18 @@ const TradeGallery = () => {
         </div>
         <div className="flex items-center gap-3">
           {/* Active quote selector */}
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="relative p-2 border border-border rounded-md text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors"
+            title="View active quote"
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {addedProductIds.size > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-medium rounded-full flex items-center justify-center">
+                {addedProductIds.size}
+              </span>
+            )}
+          </button>
           {draftQuotes.length > 0 && (
             <select
               value={activeQuoteId || ""}
