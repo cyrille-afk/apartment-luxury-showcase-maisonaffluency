@@ -250,7 +250,23 @@ const TradeJournal = () => {
               )}
             </div>
 
-            {/* Gallery Images */}
+            {/* PDF URL */}
+            <div>
+              <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">
+                PDF Document URL <span className="text-muted-foreground/50">(embedded viewer + download)</span>
+              </label>
+              <input
+                value={editing.pdf_url || ""}
+                onChange={(e) => setEditing(prev => prev ? { ...prev, pdf_url: e.target.value } : null)}
+                className="w-full pb-2 border-b border-border bg-transparent font-body text-xs text-muted-foreground outline-none focus:border-foreground transition-colors font-mono"
+                placeholder="/pdfs/document.pdf or https://..."
+              />
+              {editing.pdf_url && (
+                <p className="mt-1 font-body text-[10px] text-primary">✓ PDF attached — will show embedded viewer on article page</p>
+              )}
+            </div>
+
+
             <div>
               <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">
                 Gallery Photos <span className="text-muted-foreground/50">(for photo-focused articles)</span>
