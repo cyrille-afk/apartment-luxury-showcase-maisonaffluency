@@ -4,12 +4,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { User, Lock, Building, Phone, Mail, Save } from "lucide-react";
+import { z } from "zod";
+
+const profileSchema = z.object({
+  first_name: z.string().trim().min(1, "First name is required").max(100, "Max 100 characters"),
+  last_name: z.string().trim().min(1, "Last name is required").max(100, "Max 100 characters"),
+  company: z.string().trim().max(200, "Max 200 characters"),
+  phone: z.string().trim().max(30, "Max 30 characters"),
+});
+
+const passwordSchema = z.object({
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+}).refine((d) => d.newPassword === d.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 const TradeSettings = () => {
   const { user, profile, refreshRoles } = useAuth();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
+  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState({
     first_name: "",
@@ -49,17 +67,20 @@ const TradeSettings = () => {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    setProfileErrors({});
+    const result = profileSchema.safeParse(form);
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      result.error.issues.forEach((i) => { errs[i.path[0] as string] = i.message; });
+      setProfileErrors(errs);
+      return;
+    }
     if (!user) return;
     setSaving(true);
 
     const { error } = await supabase
       .from("profiles")
-      .update({
-        first_name: form.first_name,
-        last_name: form.last_name,
-        company: form.company,
-        phone: form.phone,
-      })
+      .update(result.data)
       .eq("id", user.id);
 
     if (error) {
@@ -73,17 +94,17 @@ const TradeSettings = () => {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwords.newPassword !== passwords.confirmPassword) {
-      toast({ title: "Error", description: "Passwords do not match", variant: "destructive" });
-      return;
-    }
-    if (passwords.newPassword.length < 8) {
-      toast({ title: "Error", description: "Password must be at least 8 characters", variant: "destructive" });
+    setPasswordErrors({});
+    const result = passwordSchema.safeParse(passwords);
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      result.error.issues.forEach((i) => { errs[i.path[0] as string] = i.message; });
+      setPasswordErrors(errs);
       return;
     }
 
     setChangingPassword(true);
-    const { error } = await supabase.auth.updateUser({ password: passwords.newPassword });
+    const { error } = await supabase.auth.updateUser({ password: result.data.newPassword });
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -96,6 +117,11 @@ const TradeSettings = () => {
 
   const inputClass =
     "w-full px-4 py-3 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50 transition-colors";
+
+  const errorInputClass = "border-destructive focus:ring-destructive/30 focus:border-destructive/50";
+
+  const FieldError = ({ field, errors }: { field: string; errors: Record<string, string> }) =>
+    errors[field] ? <p className="font-body text-[10px] text-destructive mt-1">{errors[field]}</p> : null;
 
   return (
     <>
@@ -123,8 +149,9 @@ const TradeSettings = () => {
                 type="text"
                 value={form.first_name}
                 onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} ${profileErrors.first_name ? errorInputClass : ""}`}
               />
+              <FieldError field="first_name" errors={profileErrors} />
             </div>
             <div>
               <label className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">
@@ -134,8 +161,9 @@ const TradeSettings = () => {
                 type="text"
                 value={form.last_name}
                 onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} ${profileErrors.last_name ? errorInputClass : ""}`}
               />
+              <FieldError field="last_name" errors={profileErrors} />
             </div>
           </div>
 
@@ -147,8 +175,9 @@ const TradeSettings = () => {
               type="text"
               value={form.company}
               onChange={(e) => setForm({ ...form, company: e.target.value })}
-              className={inputClass}
+              className={`${inputClass} ${profileErrors.company ? errorInputClass : ""}`}
             />
+            <FieldError field="company" errors={profileErrors} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -171,8 +200,9 @@ const TradeSettings = () => {
                 type="tel"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} ${profileErrors.phone ? errorInputClass : ""}`}
               />
+              <FieldError field="phone" errors={profileErrors} />
             </div>
           </div>
         </div>
@@ -204,8 +234,9 @@ const TradeSettings = () => {
               value={passwords.newPassword}
               onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
               placeholder="Min. 8 characters"
-              className={inputClass}
+              className={`${inputClass} ${passwordErrors.newPassword ? errorInputClass : ""}`}
             />
+            <FieldError field="newPassword" errors={passwordErrors} />
           </div>
           <div>
             <label className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">
@@ -215,8 +246,9 @@ const TradeSettings = () => {
               type="password"
               value={passwords.confirmPassword}
               onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-              className={inputClass}
+              className={`${inputClass} ${passwordErrors.confirmPassword ? errorInputClass : ""}`}
             />
+            <FieldError field="confirmPassword" errors={passwordErrors} />
           </div>
         </div>
 

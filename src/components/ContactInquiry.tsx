@@ -7,6 +7,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCTA } from "@/lib/analytics";
+import { z } from "zod";
+
+const inquirySchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100, "Max 100 characters"),
+  firm: z.string().trim().max(200, "Max 200 characters"),
+  email: z.string().trim().email("Please enter a valid email").max(255, "Max 255 characters"),
+  phone: z.string().trim().max(30, "Max 30 characters"),
+  message: z.string().trim().min(1, "Message is required").max(2000, "Max 2000 characters"),
+});
 
 const ContactInquiry = () => {
   const ref = useRef(null);
@@ -16,6 +25,7 @@ const ContactInquiry = () => {
   });
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: "",
     firm: "",
@@ -27,17 +37,18 @@ const ContactInquiry = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
+    if (errors[id]) setErrors(prev => { const n = { ...prev }; delete n[id]; return n; });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.message) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in your name, email, and message.",
-        variant: "destructive"
-      });
+    setErrors({});
+
+    const result = inquirySchema.safeParse(formData);
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      result.error.issues.forEach((i) => { errs[i.path[0] as string] = i.message; });
+      setErrors(errs);
       return;
     }
 
@@ -45,7 +56,7 @@ const ContactInquiry = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("send-inquiry", {
-        body: formData
+        body: result.data
       });
 
       if (error) throw error;
@@ -122,11 +133,11 @@ const ContactInquiry = () => {
               <Input
                 id="name"
                 placeholder="Your full name"
-                className="border-border bg-background font-body rounded-lg"
+                className={`border-border bg-background font-body rounded-lg ${errors.name ? "border-destructive" : ""}`}
                 value={formData.name}
                 onChange={handleInputChange}
-                required
               />
+              {errors.name && <p className="font-body text-[10px] text-destructive mt-1">{errors.name}</p>}
             </div>
             <div>
               <label htmlFor="firm" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
@@ -135,10 +146,11 @@ const ContactInquiry = () => {
               <Input
                 id="firm"
                 placeholder="Company name"
-                className="border-border bg-background font-body rounded-lg"
+                className={`border-border bg-background font-body rounded-lg ${errors.firm ? "border-destructive" : ""}`}
                 value={formData.firm}
                 onChange={handleInputChange}
               />
+              {errors.firm && <p className="font-body text-[10px] text-destructive mt-1">{errors.firm}</p>}
             </div>
           </div>
 
@@ -151,11 +163,11 @@ const ContactInquiry = () => {
                 id="email"
                 type="email"
                 placeholder="your@email.com"
-                className="border-border bg-background font-body rounded-lg"
+                className={`border-border bg-background font-body rounded-lg ${errors.email ? "border-destructive" : ""}`}
                 value={formData.email}
                 onChange={handleInputChange}
-                required
               />
+              {errors.email && <p className="font-body text-[10px] text-destructive mt-1">{errors.email}</p>}
             </div>
             <div>
               <label htmlFor="phone" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
@@ -165,10 +177,11 @@ const ContactInquiry = () => {
                 id="phone"
                 type="tel"
                 placeholder="+65 XXXX XXXX"
-                className="border-border bg-background font-body rounded-lg"
+                className={`border-border bg-background font-body rounded-lg ${errors.phone ? "border-destructive" : ""}`}
                 value={formData.phone}
                 onChange={handleInputChange}
               />
+              {errors.phone && <p className="font-body text-[10px] text-destructive mt-1">{errors.phone}</p>}
             </div>
           </div>
 
@@ -179,11 +192,11 @@ const ContactInquiry = () => {
             <Textarea
               id="message"
               placeholder="Please share details about your inquiry..."
-              className="min-h-[150px] border-border bg-background font-body rounded-lg"
+              className={`min-h-[150px] border-border bg-background font-body rounded-lg ${errors.message ? "border-destructive" : ""}`}
               value={formData.message}
               onChange={handleInputChange}
-              required
             />
+            {errors.message && <p className="font-body text-[10px] text-destructive mt-1">{errors.message}</p>}
           </div>
 
           <div className="flex justify-center pt-4">
