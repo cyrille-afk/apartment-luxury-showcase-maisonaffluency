@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /trade/admin
+Disallow: /trade/media
 
 User-agent: ia_archiver
 Disallow: /
@@ -20,8 +22,9 @@ Disallow: /
 User-agent: ChatGPT-User
 Disallow: /
 
+# Allow Google AI (AI Overviews, Gemini)
 User-agent: Google-Extended
-Disallow: /
+Allow: /
 
 User-agent: anthropic-ai
 Disallow: /
@@ -33,3 +36,4 @@ User-agent: cohere-ai
 Disallow: /
 
 Sitemap: https://maisonaffluency.com/sitemap.xml
+Sitemap: https://dcrauiygaezoduwdjmsm.supabase.co/functions/v1/sitemap
