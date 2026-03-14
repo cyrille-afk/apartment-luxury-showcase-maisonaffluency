@@ -436,6 +436,33 @@ const TradeShowroom = () => {
                       <Package className="h-6 w-6 text-muted-foreground/30" />
                     </div>
                   )}
+                  {/* Admin upload button */}
+                  {isAdmin && (
+                    <label
+                      className={`absolute top-2 right-2 z-10 p-1.5 rounded-md cursor-pointer transition-all ${
+                        uploadingId === product.id
+                          ? "bg-background/90"
+                          : "bg-background/70 opacity-0 group-hover:opacity-100 hover:bg-background/90"
+                      }`}
+                      title="Upload product image"
+                    >
+                      {uploadingId === product.id ? (
+                        <Loader2 className="h-3.5 w-3.5 text-foreground animate-spin" />
+                      ) : (
+                        <Upload className="h-3.5 w-3.5 text-foreground" />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleImageUpload(product, f);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  )}
                   {/* Room badge */}
                   <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-background/80 backdrop-blur-sm font-body text-[9px] text-muted-foreground">
