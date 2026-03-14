@@ -331,6 +331,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_gallery_product_to_quote: {
+        Args: {
+          _brand_name: string
+          _category?: string
+          _dimensions?: string
+          _image_url?: string
+          _materials?: string
+          _product_name: string
+          _quantity?: number
+          _quote_id: string
+          _user_id: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
