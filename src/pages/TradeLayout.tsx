@@ -38,7 +38,7 @@ const TradeLayout = () => {
     );
   }
 
-  if (applicationStatus === "rejected") {
+  if (!isAdmin && applicationStatus === "rejected") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center max-w-md">
