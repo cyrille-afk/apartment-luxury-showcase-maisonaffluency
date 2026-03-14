@@ -363,6 +363,11 @@ const TradeGallery = () => {
                     {[product.dimensions, product.materials].filter(Boolean).join(" · ")}
                   </p>
                 </div>
+                {price && (
+                  <span className="font-display text-sm text-accent font-semibold shrink-0">
+                    {formatPrice(price.cents, price.currency)}
+                  </span>
+                )}
                 <button
                   onClick={() => handleAddToQuote(product)}
                   disabled={isAdding}
