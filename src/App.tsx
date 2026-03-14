@@ -61,6 +61,7 @@ const App = () => {
   }, []);
 
   return (
+    <HelmetProvider>
     <AuthProvider>
     <CompareProvider>
     <BrowserRouter>
