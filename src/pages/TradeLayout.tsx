@@ -4,7 +4,7 @@ import { TradeSidebar } from "@/components/trade/TradeSidebar";
 import { useAuth } from "@/hooks/useAuth";
 
 const TradeLayout = () => {
-  const { user, loading, applicationStatus } = useAuth();
+  const { user, loading, applicationStatus, isAdmin } = useAuth();
 
   if (loading) {
     return (
