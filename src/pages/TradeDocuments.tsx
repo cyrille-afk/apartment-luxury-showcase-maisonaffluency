@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet } from "lucide-react";
+import SectionHero from "@/components/trade/SectionHero";
 
 const PdfThumbnail = lazy(() => import("@/components/trade/PdfThumbnail"));
 
@@ -84,10 +85,11 @@ const TradeDocuments = () => {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="font-display text-2xl text-foreground mb-1">Document Library</h1>
-      <p className="font-body text-sm text-muted-foreground mb-6">
-        Access tearsheets, catalogues, and price lists organized by brand.
-      </p>
+      <SectionHero
+        section="documents"
+        title="Document Library"
+        subtitle="Access tearsheets, catalogues, and price lists organized by brand."
+      />
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
