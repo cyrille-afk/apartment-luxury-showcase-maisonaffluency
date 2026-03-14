@@ -344,6 +344,7 @@ const TradeGallery = () => {
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
+            const price = getProductPrice(product);
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
                 <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0">
