@@ -344,10 +344,20 @@ const Navigation = () => {
                     </button>
                   ))}
                 </div>
+
+                <button
+                  onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick("/journal"); }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick("/journal"); }}
+                  className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
+                  style={{ animationDelay: `${(leftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
+                >
+                  Journal
+                  <ChevronRight className="h-4 w-4" />
+                </button>
                 
                 <div 
                   className="animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(leftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
+                  style={{ animationDelay: `${(leftNavItems.length + 2) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   <button
                     onClick={() => setContactExpanded(!contactExpanded)}
