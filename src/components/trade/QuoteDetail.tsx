@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Trash2, Plus, Minus, Package } from "lucide-react";
+import { cloudinaryUrl } from "@/lib/cloudinary";
+
+const quoteLogo = cloudinaryUrl("affluency-footer-logo_gvpt4u", { width: 400, quality: "auto", crop: "fill" });
 
 interface QuoteItemWithProduct {
   id: string;
@@ -129,11 +132,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         <div className="border-b border-border p-6 md:p-8">
           <div className="flex items-start justify-between">
             <div>
+              <img src={quoteLogo} alt="Affluency" className="h-8 md:h-10 w-auto mb-3" />
               <h1 className="font-display text-xl md:text-2xl text-foreground tracking-wide uppercase mb-1">
                 Quote
               </h1>
               <p className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">
                 Affluency Etc Pte. Ltd.
+              </p>
+              <p className="font-body text-[10px] text-muted-foreground mt-1">
+                1 Grange Garden, Singapore 249631
               </p>
             </div>
             <div className="text-right">
