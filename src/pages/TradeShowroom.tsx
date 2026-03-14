@@ -401,6 +401,11 @@ const TradeShowroom = () => {
                     {product.materials ? ` · ${product.materials}` : ""}
                   </p>
                 </div>
+                {product.trade_price_cents && product.currency && (
+                  <span className="font-body text-sm text-primary font-medium shrink-0">
+                    {formatPrice(product.trade_price_cents, product.currency)}
+                  </span>
+                )}
                 <button
                   onClick={() => handleAddToQuote(product)}
                   disabled={isAdding}
