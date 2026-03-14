@@ -76,12 +76,12 @@ const Hero = () => {
         >
           Book a Viewing
         </button>
-        <button
-          onClick={() => scrollToSection("details")}
+        <a
+          href="/trade/program"
           className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-xs font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
         >
           Trade Program
-        </button>
+        </a>
       </div>
 
       {/* Desktop: bottom-right of hero, next to Chat widget */}
