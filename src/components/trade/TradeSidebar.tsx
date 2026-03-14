@@ -17,6 +17,7 @@ import {
 
 const mainItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard },
+  { title: "Showroom", url: "/trade/showroom", icon: MapPin },
   { title: "Gallery", url: "/trade/gallery", icon: Image },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
   { title: "Documents", url: "/trade/documents", icon: FolderOpen },

@@ -80,6 +80,7 @@ const App = () => {
             <Route path="gallery" element={<TradeGallery />} />
             <Route path="quotes" element={<TradeQuotes />} />
             <Route path="documents" element={<TradeDocuments />} />
+            <Route path="showroom" element={<TradeShowroom />} />
             <Route path="settings" element={<TradeSettings />} />
           </Route>
           
