@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Briefcase, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
@@ -28,7 +28,7 @@ const DesignDetails = () => {
             <img
               src={cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 1200, quality: "auto:good", crop: "limit" })}
               alt="Maison Affluency Trade Program — exclusive benefits for architects and interior designers"
-              className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-700"
+              className="w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-700"
               loading="lazy"
               decoding="async"
             />
@@ -41,9 +41,7 @@ const DesignDetails = () => {
                 Exclusive Benefits for Professionals
               </p>
               <span className="mt-6 sm:mt-8 inline-flex items-center gap-2 bg-white/15 group-hover:bg-white/25 backdrop-blur-sm border border-white/30 group-hover:border-white/50 text-white px-5 py-2.5 font-body text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
-                <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
                 Learn More
-                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </div>
           </Link>
