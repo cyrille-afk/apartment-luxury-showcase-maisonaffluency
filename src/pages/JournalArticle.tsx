@@ -86,11 +86,11 @@ const JournalArticlePage = () => {
 
         {/* Cover image */}
         {article.cover_image_url && (
-          <div className="w-full h-[50vh] md:h-[56vh] overflow-hidden">
+          <div className="w-full flex justify-center bg-muted/10">
             <img
               src={article.cover_image_url}
               alt={article.title}
-              className="w-full h-full object-cover object-bottom"
+              className="w-full max-h-[80vh] object-contain"
             />
           </div>
         )}
