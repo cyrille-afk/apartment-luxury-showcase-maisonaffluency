@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet } from "lucide-react";
 
@@ -35,7 +36,9 @@ const TradeDocuments = () => {
   const [documents, setDocuments] = useState<TradeDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("all");
+  const [searchParams] = useSearchParams();
+  const initialBrand = searchParams.get("brand") || "all";
+  const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [selectedType, setSelectedType] = useState("all");
 
   useEffect(() => {
@@ -150,7 +153,7 @@ const TradeDocuments = () => {
                           {doc.file_size_bytes ? ` · ${formatFileSize(doc.file_size_bytes)}` : ""}
                         </p>
                       </div>
-                      <FileDown className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                      <FileDown className="h-4 w-4 text-[hsl(var(--pdf-red))] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                     </a>
                   );
                 })}
