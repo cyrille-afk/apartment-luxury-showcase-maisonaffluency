@@ -422,6 +422,7 @@ const TradeProvenance = () => {
       <Helmet><title>Provenance & Certificates — Admin — Maison Affluency</title></Helmet>
       <div className="max-w-4xl">
         <SectionHero
+          section="provenance"
           title="Provenance & Certificates"
           subtitle="Manage certificates of authenticity and provenance timelines for collectible pieces."
         />
