@@ -54,6 +54,7 @@ const TradeJournal = () => {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Article | null>(null);
   const [tagsInput, setTagsInput] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (isAdmin) fetchArticles();
