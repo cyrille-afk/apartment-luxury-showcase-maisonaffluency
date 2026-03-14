@@ -1,0 +1,1 @@
+UPDATE trade_documents SET brand_name = 'Ecart' WHERE brand_name = 'Ecart Paris';
