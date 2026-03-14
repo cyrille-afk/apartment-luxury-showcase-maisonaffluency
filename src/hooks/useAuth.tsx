@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Set up auth listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -67,6 +67,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAdmin(false);
         setProfile(null);
         setApplicationStatus("none");
+
+        // Redirect to login on token expiry or sign out (only if on a trade route)
+        if ((event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") && !session) {
+          const path = window.location.pathname;
+          if (path.startsWith("/trade") && path !== "/trade/login" && path !== "/trade/register" && path !== "/trade/program") {
+            window.location.href = "/trade/login";
+          }
+        }
       }
       setLoading(false);
     });
