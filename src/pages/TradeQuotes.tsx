@@ -102,6 +102,8 @@ const TradeQuotes = () => {
   }
 
   return (
+    <>
+      <Helmet><title>Quotes — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-4xl">
       <SectionHero
         section="quotes"

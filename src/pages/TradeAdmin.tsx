@@ -73,6 +73,8 @@ const TradeAdmin = () => {
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
   return (
+    <>
+      <Helmet><title>Admin — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-5xl">
       <h1 className="font-display text-2xl text-foreground mb-6">Trade Applications</h1>
 
