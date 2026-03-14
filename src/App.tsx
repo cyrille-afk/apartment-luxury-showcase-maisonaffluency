@@ -3,14 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import { CompareProvider } from "@/contexts/CompareContext";
-
-// Lazy-load AuthProvider — keeps Supabase SDK out of the critical bundle for homepage LCP
-const AuthProvider = lazy(() =>
-  import("@/hooks/useAuth").then(m => ({ default: m.AuthProvider }))
-);
-
-// Fallback: renders children immediately while AuthProvider loads
-const AuthFallback = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+import { AuthProvider } from "@/hooks/useAuth";
 
 // Lazy-load non-landing pages and non-critical UI
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -78,7 +71,6 @@ const App = () => {
 
   return (
     <HelmetProvider>
-    <Suspense fallback={<AuthFallback><CompareProvider><BrowserRouter><Routes><Route path="/" element={<Index />} /><Route path="*" element={null} /></Routes></BrowserRouter></CompareProvider></AuthFallback>}>
     <AuthProvider>
     <CompareProvider>
     <BrowserRouter>
@@ -130,7 +122,6 @@ const App = () => {
     </BrowserRouter>
     </CompareProvider>
     </AuthProvider>
-    </Suspense>
     </HelmetProvider>
   );
 };
