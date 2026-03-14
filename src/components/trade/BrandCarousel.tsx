@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, FolderOpen, Camera, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, FolderOpen, Camera, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -83,6 +83,7 @@ const BrandTile = ({
   editable,
   isUploading,
   onUpload,
+  onRemove,
 }: {
   brand: BrandEntry;
   selected: boolean;
@@ -90,6 +91,7 @@ const BrandTile = ({
   editable: boolean;
   isUploading: boolean;
   onUpload: (file: File) => void;
+  onRemove: () => void;
 }) => {
   const pdfThumb = usePdfThumbnail(!brand.thumbnailUrl ? brand.pdfUrl : null);
   const thumb = brand.thumbnailUrl || pdfThumb;
@@ -129,24 +131,35 @@ const BrandTile = ({
         </span>
       </button>
 
-      {/* Admin upload overlay */}
+      {/* Admin upload/remove overlay */}
       {editable && !isUploading && (
-        <label
-          className="absolute top-1.5 right-1 p-1 rounded-full bg-background/80 border border-border shadow-sm cursor-pointer hover:bg-muted z-10"
-          title={`Upload thumbnail for ${brand.name}`}
-        >
-          <Camera className="w-3 h-3 text-muted-foreground" />
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) onUpload(file);
-              e.target.value = "";
-            }}
-          />
-        </label>
+        <div className="absolute top-1 right-0.5 flex flex-col gap-0.5 z-10">
+          <label
+            className="p-1 rounded-full bg-background/80 border border-border shadow-sm cursor-pointer hover:bg-muted"
+            title={`Upload thumbnail for ${brand.name}`}
+          >
+            <Camera className="w-3 h-3 text-muted-foreground" />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onUpload(file);
+                e.target.value = "";
+              }}
+            />
+          </label>
+          {brand.thumbnailUrl && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onRemove(); }}
+              className="p-1 rounded-full bg-background/80 border border-border shadow-sm hover:bg-destructive/10 hover:border-destructive/30"
+              title={`Remove thumbnail for ${brand.name}`}
+            >
+              <X className="w-3 h-3 text-muted-foreground hover:text-destructive" />
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
@@ -185,6 +198,23 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, onTh
       onThumbnailUpdated?.();
     } catch (err: any) {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingBrand(null);
+    }
+  };
+
+  const handleThumbnailRemove = async (brandName: string) => {
+    setUploadingBrand(brandName);
+    try {
+      const { error } = await supabase
+        .from("trade_documents")
+        .update({ cover_image_url: null })
+        .eq("brand_name", brandName);
+      if (error) throw error;
+      toast({ title: `Thumbnail removed for ${brandName}` });
+      onThumbnailUpdated?.();
+    } catch (err: any) {
+      toast({ title: "Remove failed", description: err.message, variant: "destructive" });
     } finally {
       setUploadingBrand(null);
     }
@@ -243,6 +273,7 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, onTh
               editable={editable}
               isUploading={uploadingBrand === brand.name}
               onUpload={(file) => handleThumbnailUpload(brand.name, file)}
+              onRemove={() => handleThumbnailRemove(brand.name)}
             />
           ))}
         </div>
