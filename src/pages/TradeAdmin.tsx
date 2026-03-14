@@ -45,25 +45,43 @@ const TradeAdmin = () => {
     setFetching(false);
   };
 
-  const handleAction = async (appId: string, userId: string, action: "approved" | "rejected") => {
+  const handleAction = async (app: Application, action: "approved" | "rejected") => {
     // Update application status
     await supabase.from("trade_applications").update({
       status: action,
       reviewed_at: new Date().toISOString(),
       reviewed_by: user?.id,
-    }).eq("id", appId);
+    }).eq("id", app.id);
 
     // If approved, add trade_user role
     if (action === "approved") {
       await supabase.from("user_roles").upsert({
-        user_id: userId,
+        user_id: app.user_id,
         role: "trade_user" as any,
       }, { onConflict: "user_id,role" });
     }
 
     // If rejected, remove trade_user role if it exists
     if (action === "rejected") {
-      await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "trade_user" as any);
+      await supabase.from("user_roles").delete().eq("user_id", app.user_id).eq("role", "trade_user" as any);
+    }
+
+    // Send email notification to applicant
+    const applicantEmail = app.profiles?.email;
+    const applicantName = app.profiles ? `${app.profiles.first_name} ${app.profiles.last_name}`.trim() : "";
+    if (applicantEmail) {
+      try {
+        await supabase.functions.invoke("send-application-status", {
+          body: {
+            applicantEmail,
+            applicantName,
+            companyName: app.company_name,
+            status: action,
+          },
+        });
+      } catch (err) {
+        console.error("Failed to send status email:", err);
+      }
     }
 
     toast({ title: `Application ${action}` });
