@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check } from "lucide-react";
 import { getAllTradeProducts, getAllBrands, getAllCategories, getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { supabase } from "@/integrations/supabase/client";
@@ -162,6 +163,8 @@ const TradeGallery = () => {
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
   return (
+    <>
+      <Helmet><title>Gallery — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-7xl">
       <SectionHero
         section="gallery"
@@ -405,6 +408,7 @@ const TradeGallery = () => {
         refreshKey={drawerRefreshKey}
       />
     </div>
+    </>
   );
 };
 

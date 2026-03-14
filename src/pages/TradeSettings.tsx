@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -97,6 +98,8 @@ const TradeSettings = () => {
     "w-full px-4 py-3 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50 transition-colors";
 
   return (
+    <>
+      <Helmet><title>Settings — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-2xl">
       <h1 className="font-display text-2xl text-foreground mb-2">Account Settings</h1>
       <p className="font-body text-sm text-muted-foreground mb-8">
@@ -227,6 +230,7 @@ const TradeSettings = () => {
         </button>
       </form>
     </div>
+    </>
   );
 };
 

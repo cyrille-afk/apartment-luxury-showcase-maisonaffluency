@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -101,6 +102,8 @@ const TradeQuotes = () => {
   }
 
   return (
+    <>
+      <Helmet><title>Quotes — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-4xl">
       <SectionHero
         section="quotes"
@@ -180,6 +183,7 @@ const TradeQuotes = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

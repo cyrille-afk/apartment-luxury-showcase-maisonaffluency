@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
@@ -72,6 +73,8 @@ const TradeAdmin = () => {
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
   return (
+    <>
+      <Helmet><title>Admin — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-5xl">
       <h1 className="font-display text-2xl text-foreground mb-6">Trade Applications</h1>
 
@@ -163,6 +166,7 @@ const TradeAdmin = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

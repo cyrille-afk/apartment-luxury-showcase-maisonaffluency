@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
@@ -134,6 +135,8 @@ const TradeDashboard = () => {
   }, []);
 
   return (
+    <>
+      <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-4xl">
       <div className="mb-6 md:mb-8">
         <h1 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground">
@@ -256,6 +259,7 @@ const TradeDashboard = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 
