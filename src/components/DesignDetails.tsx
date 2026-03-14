@@ -147,7 +147,7 @@ const DesignDetails = () => {
 
               {/* Principles accordion */}
               <div className="md:w-1/2 flex flex-col justify-center">
-                <h3 className="font-display text-lg text-foreground md:text-xl mb-6 underline underline-offset-4 decoration-1">Our Guiding Principles</h3>
+                <h3 className="font-display text-lg text-foreground md:text-xl mb-6 underline underline-offset-4 decoration-1 text-center">Our Guiding Principles</h3>
 
                 <Accordion type="single" collapsible className="space-y-3">
                   {philosophyPoints.map((item, index) => (
