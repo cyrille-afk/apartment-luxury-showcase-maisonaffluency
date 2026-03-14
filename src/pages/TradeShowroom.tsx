@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, ExternalLink } from "lucide-react";
+import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, ExternalLink, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
