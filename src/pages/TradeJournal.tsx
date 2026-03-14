@@ -37,6 +37,7 @@ const emptyArticle = (): Omit<Article, "id" | "created_at"> => ({
   content: "",
   cover_image_url: "",
   gallery_images: [],
+  pdf_url: null,
   category: "design_trend",
   author: "Maison Affluency",
   tags: [],
