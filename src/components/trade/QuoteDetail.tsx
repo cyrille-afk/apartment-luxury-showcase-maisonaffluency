@@ -204,10 +204,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </span>
             </div>
 
-            {/* Right: Logo + Company details */}
-            <div className="flex flex-col items-end gap-3">
-              <img src={affluencyLogo} alt="Affluency" className="h-16 w-16 md:h-20 md:w-20 object-contain" />
-              <div className="text-right">
+            {/* Right: Logo + Company details (left-aligned) */}
+            <div className="flex items-start gap-4">
+              <img src={affluencyLogo} alt="Affluency" className="h-16 w-16 md:h-20 md:w-20 object-contain shrink-0" />
+              <div className="text-left">
                 <p className="font-display text-xs text-foreground uppercase tracking-wider">
                   Affluency Etc Pte. Ltd.
                 </p>
