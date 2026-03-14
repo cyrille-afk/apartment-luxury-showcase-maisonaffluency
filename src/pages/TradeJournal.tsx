@@ -326,6 +326,8 @@ const TradeJournal = () => {
                   ))}
                 </div>
               )}
+            </div>
+
             {/* Excerpt */}
             <div>
               <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">Excerpt</label>
