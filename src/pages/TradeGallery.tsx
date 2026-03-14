@@ -173,44 +173,46 @@ const TradeGallery = () => {
       </SectionHero>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
+      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 mb-6">
+        <div className="relative flex-1 min-w-0 sm:min-w-[200px] sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search products, brands, materials…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className={`${inputClass} pl-9 w-full`}
+            className={`${inputClass} pl-9 w-full text-[16px] sm:text-sm`}
           />
         </div>
-        <select value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)} className={inputClass}>
-          <option value="all">All Brands ({brands.length})</option>
-          {brands.map((b) => (
-            <option key={b} value={b}>{b}</option>
-          ))}
-        </select>
-        <select
-          value={selectedCategory}
-          onChange={(e) => {
-            setSelectedCategory(e.target.value);
-            setSelectedSubcategory("all");
-          }}
-          className={inputClass}
-        >
-          <option value="all">All Categories</option>
-          {categories.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-        {subcategories.length > 0 && (
-          <select value={selectedSubcategory} onChange={(e) => setSelectedSubcategory(e.target.value)} className={inputClass}>
-            <option value="all">All Subcategories</option>
-            {subcategories.map((s) => (
-              <option key={s} value={s}>{s}</option>
+        <div className="flex gap-2 flex-wrap">
+          <select value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
+            <option value="all">All Brands ({brands.length})</option>
+            {brands.map((b) => (
+              <option key={b} value={b}>{b}</option>
             ))}
           </select>
-        )}
+          <select
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setSelectedSubcategory("all");
+            }}
+            className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}
+          >
+            <option value="all">All Categories</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          {subcategories.length > 0 && (
+            <select value={selectedSubcategory} onChange={(e) => setSelectedSubcategory(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
+              <option value="all">All Subcategories</option>
+              {subcategories.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          )}
+        </div>
       </div>
 
       {/* Content */}

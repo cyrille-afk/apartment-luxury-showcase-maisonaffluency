@@ -140,7 +140,7 @@ const TradeDocuments = () => {
                   {docs.length} {docs.length === 1 ? "file" : "files"}
                 </span>
               </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
                 {docs.map((doc) => {
                   const isPdf = doc.file_url.toLowerCase().endsWith(".pdf");
                   return (

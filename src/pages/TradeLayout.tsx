@@ -59,11 +59,11 @@ const TradeLayout = () => {
       <div className="min-h-screen flex w-full bg-background">
         <div data-trade-sidebar><TradeSidebar /></div>
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center border-b border-border px-4 bg-background sticky top-0 z-10 print:hidden">
-            <SidebarTrigger className="mr-4" />
-            <span className="font-body text-xs text-muted-foreground uppercase tracking-[0.15em]">Trade Portal</span>
+          <header className="h-12 md:h-14 flex items-center border-b border-border px-3 md:px-4 bg-background sticky top-0 z-10 print:hidden">
+            <SidebarTrigger className="mr-3 md:mr-4" />
+            <span className="font-body text-[10px] md:text-xs text-muted-foreground uppercase tracking-[0.15em]">Trade Portal</span>
           </header>
-          <main className="flex-1 p-6 md:p-8">
+          <main className="flex-1 p-4 md:p-6 lg:p-8">
             <Outlet />
           </main>
         </div>
