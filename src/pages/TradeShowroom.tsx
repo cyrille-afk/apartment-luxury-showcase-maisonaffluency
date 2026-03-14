@@ -88,7 +88,9 @@ const getSection = (imageIdentifier: string): string =>
   roomToSection[imageIdentifier] || "Other";
 
 const TradeShowroom = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const { toast } = useToast();
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const [products, setProducts] = useState<ShowroomProduct[]>([]);
