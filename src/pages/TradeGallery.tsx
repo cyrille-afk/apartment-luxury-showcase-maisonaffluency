@@ -128,7 +128,7 @@ const TradeGallery = () => {
     <div className="max-w-7xl">
       <SectionHero
         section="gallery"
-        title="Website Products"
+        title="Trade Gallery"
         subtitle={`${filtered.length} ${filtered.length === 1 ? "product" : "products"}${selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}`}
       >
         <button
