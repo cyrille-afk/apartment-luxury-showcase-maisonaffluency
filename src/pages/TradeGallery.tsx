@@ -131,6 +131,17 @@ const TradeGallery = () => {
     [allProducts, selectedCategory]
   );
 
+  /** Find price by exact name, then by name+subtitle combo */
+  const getProductPrice = (product: TradeProduct): { cents: number; currency: string } | null => {
+    const nameKey = product.product_name.trim().toLowerCase();
+    if (priceLookup.has(nameKey)) return priceLookup.get(nameKey)!;
+    if (product.subtitle) {
+      const comboKey = `${nameKey} ${product.subtitle.trim().toLowerCase()}`;
+      if (priceLookup.has(comboKey)) return priceLookup.get(comboKey)!;
+    }
+    return null;
+  };
+
   const filtered = useMemo(() => {
     return allProducts.filter((p) => {
       const q = search.toLowerCase();
