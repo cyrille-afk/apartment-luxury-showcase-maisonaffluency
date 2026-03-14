@@ -25,6 +25,7 @@ const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
 const TradeJournal = lazy(() => import("./pages/TradeJournal"));
 const TradeProvenance = lazy(() => import("./pages/TradeProvenance"));
 const TradeDocumentsAdmin = lazy(() => import("./pages/TradeDocumentsAdmin"));
+const TradeMediaLibrary = lazy(() => import("./pages/TradeMediaLibrary"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Journal = lazy(() => import("./pages/Journal"));
 const JournalArticle = lazy(() => import("./pages/JournalArticle"));
