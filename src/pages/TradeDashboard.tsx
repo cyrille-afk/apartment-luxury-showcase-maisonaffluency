@@ -22,6 +22,7 @@ interface ActivityItem {
 }
 
 const quickLinks = [
+  { title: "Browse Showroom", description: "Review items from the Maison Affluency gallery", icon: MapPin, to: "/trade/showroom" },
   { title: "Browse Gallery", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery" },
   { title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes" },
   { title: "Documents", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents" },
