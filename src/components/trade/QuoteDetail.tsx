@@ -410,24 +410,36 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       <span>Subtotal</span>
                       <span>{formatPriceRaw(subtotalCents, currency) || "TBD"}</span>
                     </div>
-                    {currency === "SGD" && subtotalCents > 0 && (
+                    {tradeDiscount && subtotalCents > 0 && (
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
-                        <span>GST (9%)</span>
-                        <span>{formatPriceRaw(Math.round(subtotalCents * 0.09), currency)}</span>
+                        <span>Trade Discount (8%)</span>
+                        <span>-{formatPriceRaw(Math.round(subtotalCents * 0.08), currency)}</span>
                       </div>
                     )}
-                    <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
-                      <span className="uppercase tracking-wider">Total {currency}</span>
-                      <span className="font-medium">
-                        {currencySymbol(currency)}{" "}
-                        {formatPriceRaw(
-                          currency === "SGD" && subtotalCents > 0
-                            ? subtotalCents + Math.round(subtotalCents * 0.09)
-                            : subtotalCents,
-                          currency
-                        ) || "TBD"}
-                      </span>
-                    </div>
+                    {currency === "SGD" && subtotalCents > 0 && (() => {
+                      const afterDiscount = tradeDiscount ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
+                      return (
+                        <div className="flex justify-between font-body text-xs text-muted-foreground">
+                          <span>GST (9%)</span>
+                          <span>{formatPriceRaw(Math.round(afterDiscount * 0.09), currency)}</span>
+                        </div>
+                      );
+                    })()}
+                    {(() => {
+                      const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
+                      const total = currency === "SGD" && afterDiscount > 0
+                        ? afterDiscount + Math.round(afterDiscount * 0.09)
+                        : afterDiscount;
+                      return (
+                        <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
+                          <span className="uppercase tracking-wider">Total {currency}</span>
+                          <span className="font-medium">
+                            {currencySymbol(currency)}{" "}
+                            {formatPriceRaw(total, currency) || "TBD"}
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
