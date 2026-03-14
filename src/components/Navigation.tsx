@@ -45,6 +45,10 @@ const leftNavItems = [{
 }];
 
 const rightNavItems = [{
+  label: "Journal",
+  href: "/journal",
+  icon: BookOpen,
+}, {
   label: "Trade Program",
   href: "/trade/program",
   icon: Briefcase,

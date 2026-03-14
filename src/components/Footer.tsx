@@ -40,6 +40,9 @@ const Footer = () => {
             <button onClick={() => scrollToSection("curating-team")} className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               About Us
             </button>
+            <a href="/journal" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
+              Journal
+            </a>
             <a href="https://www.instagram.com/myaffluency/?hl=en" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Maison Affluency on Instagram" onClick={() => trackCTA.instagram("Footer", "Maison Affluency")}>
               <Instagram size={20} />
             </a>
