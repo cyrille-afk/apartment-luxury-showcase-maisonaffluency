@@ -11,6 +11,7 @@ interface CloudUploadProps {
   /** Allow multiple files */
   multiple?: boolean;
   /** Max file size in MB (default 20) */
+  /** Max file size in MB (default 50) */
   maxSizeMB?: number;
   /** Label text */
   label?: string;
