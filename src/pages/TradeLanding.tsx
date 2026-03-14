@@ -64,6 +64,7 @@ const TradeLanding = () => {
           content="Join Maison Affluency's Trade Program for exclusive benefits — dedicated client advisors, custom requests, material libraries, and consolidated insured shipping for architects and interior designers."
         />
         <meta property="og:title" content="Trade Program — Maison Affluency" />
+        <meta property="og:type" content="website" />
         <meta
           property="og:description"
           content="Exclusive benefits for architects and interior designers. Apply now."
@@ -72,6 +73,11 @@ const TradeLanding = () => {
           property="og:image"
           content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex"
         />
+        <meta property="og:url" content="https://maisonaffluency.com/trade/program" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Trade Program — Maison Affluency" />
+        <meta name="twitter:description" content="Exclusive benefits for architects and interior designers. Apply now." />
+        <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex" />
         <link rel="canonical" href="https://maisonaffluency.com/trade/program" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
