@@ -1,4 +1,4 @@
-import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield } from "lucide-react";
+import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,6 +17,7 @@ import {
 
 const mainItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard },
+  { title: "Showroom", url: "/trade/showroom", icon: MapPin },
   { title: "Gallery", url: "/trade/gallery", icon: Image },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
   { title: "Documents", url: "/trade/documents", icon: FolderOpen },

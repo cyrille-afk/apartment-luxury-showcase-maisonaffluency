@@ -18,6 +18,7 @@ const TradeGallery = lazy(() => import("./pages/TradeGallery"));
 const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
 const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings"));
+const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -79,6 +80,7 @@ const App = () => {
             <Route path="gallery" element={<TradeGallery />} />
             <Route path="quotes" element={<TradeQuotes />} />
             <Route path="documents" element={<TradeDocuments />} />
+            <Route path="showroom" element={<TradeShowroom />} />
             <Route path="settings" element={<TradeSettings />} />
           </Route>
           
