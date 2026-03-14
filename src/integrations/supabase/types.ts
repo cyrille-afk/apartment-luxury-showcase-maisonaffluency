@@ -137,6 +137,177 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_documents: {
+        Row: {
+          brand_name: string
+          created_at: string
+          document_type: string
+          file_size_bytes: number | null
+          file_url: string
+          id: string
+          title: string
+        }
+        Insert: {
+          brand_name: string
+          created_at?: string
+          document_type?: string
+          file_size_bytes?: number | null
+          file_url: string
+          id?: string
+          title: string
+        }
+        Update: {
+          brand_name?: string
+          created_at?: string
+          document_type?: string
+          file_size_bytes?: number | null
+          file_url?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      trade_products: {
+        Row: {
+          brand_name: string
+          category: string
+          created_at: string
+          currency: string
+          description: string | null
+          dimensions: string | null
+          gallery_images: string[] | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          lead_time: string | null
+          materials: string | null
+          product_name: string
+          rrp_price_cents: number | null
+          sku: string | null
+          spec_sheet_url: string | null
+          subcategory: string | null
+          trade_price_cents: number | null
+          updated_at: string
+        }
+        Insert: {
+          brand_name: string
+          category?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          dimensions?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          lead_time?: string | null
+          materials?: string | null
+          product_name: string
+          rrp_price_cents?: number | null
+          sku?: string | null
+          spec_sheet_url?: string | null
+          subcategory?: string | null
+          trade_price_cents?: number | null
+          updated_at?: string
+        }
+        Update: {
+          brand_name?: string
+          category?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          dimensions?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          lead_time?: string | null
+          materials?: string | null
+          product_name?: string
+          rrp_price_cents?: number | null
+          sku?: string | null
+          spec_sheet_url?: string | null
+          subcategory?: string | null
+          trade_price_cents?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trade_quote_items: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string
+          quantity: number
+          quote_id: string
+          unit_price_cents: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          quantity?: number
+          quote_id: string
+          unit_price_cents?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          quantity?: number
+          quote_id?: string
+          unit_price_cents?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_quote_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_quote_items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trade_quotes: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

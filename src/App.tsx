@@ -14,7 +14,10 @@ const TradeRegister = lazy(() => import("./pages/TradeRegister"));
 const TradeLayout = lazy(() => import("./pages/TradeLayout"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard"));
 const TradeAdmin = lazy(() => import("./pages/TradeAdmin"));
-const TradePlaceholder = lazy(() => import("./pages/TradePlaceholder"));
+const TradeGallery = lazy(() => import("./pages/TradeGallery"));
+const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
+const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
+const TradeSettings = lazy(() => import("./pages/TradeSettings"));
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -73,10 +76,10 @@ const App = () => {
           <Route path="/trade" element={<Suspense fallback={null}><TradeLayout /></Suspense>}>
             <Route index element={<TradeDashboard />} />
             <Route path="admin" element={<TradeAdmin />} />
-            <Route path="gallery" element={<TradePlaceholder />} />
-            <Route path="quotes" element={<TradePlaceholder />} />
-            <Route path="documents" element={<TradePlaceholder />} />
-            <Route path="settings" element={<TradePlaceholder />} />
+            <Route path="gallery" element={<TradeGallery />} />
+            <Route path="quotes" element={<TradeQuotes />} />
+            <Route path="documents" element={<TradeDocuments />} />
+            <Route path="settings" element={<TradeSettings />} />
           </Route>
           
           <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
