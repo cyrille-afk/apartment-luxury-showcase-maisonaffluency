@@ -85,13 +85,13 @@ const TradeLogin = () => {
         </form>
 
         <div className="text-center mt-8 space-y-3">
-          <p className="font-body text-xs text-muted-foreground">
+          <p className="font-body text-sm md:text-xs text-muted-foreground">
             Don't have a trade account?{" "}
-            <Link to="/trade/register" className="text-foreground underline underline-offset-4 hover:opacity-70">
+            <Link to="/trade/register" className="text-foreground underline underline-offset-4 hover:opacity-70 font-medium">
               Apply here
             </Link>
           </p>
-          <p className="font-body text-xs text-muted-foreground">
+          <p className="font-body text-sm md:text-xs text-muted-foreground">
             <Link to="/" className="hover:text-foreground transition-colors">
               ← Back to Maison Affluency
             </Link>
