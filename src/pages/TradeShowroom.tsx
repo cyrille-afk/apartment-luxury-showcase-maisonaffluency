@@ -31,6 +31,25 @@ interface DraftQuote {
   created_at: string;
 }
 
+const categoryKeywords: [string, string[]][] = [
+  ["Lighting", ["lamp", "light", "pendant", "chandelier", "sconce"]],
+  ["Seating", ["chair", "armchair", "sofa", "loveseat", "stool", "bench", "ottoman", "lounge chair"]],
+  ["Tables", ["table", "desk", "coffee table", "side table", "console"]],
+  ["Storage", ["bookcase", "credenza", "cabinet"]],
+  ["Rugs & Textiles", ["rug", "fabric", "curtain", "throw", "cushion", "headboard"]],
+  ["Wall & Surfaces", ["wallcover", "wallpaper", "mirror", "wall lamp", "wall light", "diasec"]],
+  ["Decorative Objects", ["vase", "vessel", "bowl", "candle", "incense", "centerpiece", "box", "sculpture", "book cover"]],
+  ["Art", ["painting", "drawing", "bronze painting"]],
+];
+
+const inferCategory = (name: string): string => {
+  const lower = name.toLowerCase();
+  for (const [cat, keywords] of categoryKeywords) {
+    if (keywords.some((kw) => lower.includes(kw))) return cat;
+  }
+  return "Other";
+};
+
 const TradeShowroom = () => {
   const { user } = useAuth();
   const { toast } = useToast();
