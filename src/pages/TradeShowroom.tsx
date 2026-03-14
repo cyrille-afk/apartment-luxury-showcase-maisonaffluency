@@ -50,6 +50,41 @@ const inferCategory = (name: string): string => {
   return "Other";
 };
 
+// Map individual room titles to their parent gallery section
+const roomToSection: Record<string, string> = {
+  "An Inviting Lounge Area": "A Sociable Environment",
+  "A Sophisticated Living Room": "A Sociable Environment",
+  "Panoramic Cityscape Views": "A Sociable Environment",
+  "A Sun Lit Reading Corner": "A Sociable Environment",
+  "A Dreamy Tuscan Landscape": "An Intimate Setting",
+  "A Highly Customised Dining Room": "An Intimate Setting",
+  "A Relaxed Setting": "An Intimate Setting",
+  "A Colourful Nook": "An Intimate Setting",
+  "A Sophisticated Boudoir": "A Personal Sanctuary",
+  "A Jewelry Box Like Setting": "A Personal Sanctuary",
+  "A Serene Decor": "A Personal Sanctuary",
+  "A Design Treasure Trove": "A Personal Sanctuary",
+  "A Masterful Suite": "A Calming Environment",
+  "Design Tableau": "A Calming Environment",
+  "A Venitian Cocoon": "A Calming Environment",
+  "Unique By Design Vignette": "A Calming Environment",
+  "An Artistic Statement": "A Small Room with Personality",
+  "Compact Elegance": "A Small Room with Personality",
+  "Yellow Crystalline": "A Small Room with Personality",
+  "Golden Hour": "A Small Room with Personality",
+  "A Workspace of Distinction": "Home Office with a View",
+  "Refined Details": "Home Office with a View",
+  "Light & Focus": "Home Office with a View",
+  "Design & Fine Art Books Corner": "Home Office with a View",
+  "Curated Vignette": "The Details Make the Design",
+  "The Details Make The Design": "The Details Make the Design",
+  "Light & Texture": "The Details Make the Design",
+  "Craftsmanship At Every Corner": "The Details Make the Design",
+};
+
+const getSection = (imageIdentifier: string): string =>
+  roomToSection[imageIdentifier] || "Other";
+
 const TradeShowroom = () => {
   const { user } = useAuth();
   const { toast } = useToast();
