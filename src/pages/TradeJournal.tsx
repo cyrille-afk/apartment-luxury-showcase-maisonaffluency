@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, Upload, X, ImageIcon } from "lucide-react";
 import { CATEGORY_LABELS, type JournalCategory } from "@/lib/journal";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -18,6 +18,7 @@ interface Article {
   excerpt: string;
   content: string;
   cover_image_url: string | null;
+  gallery_images: string[];
   category: JournalCategory;
   author: string;
   tags: string[];
@@ -35,6 +36,7 @@ const emptyArticle = (): Omit<Article, "id" | "created_at"> => ({
   excerpt: "",
   content: "",
   cover_image_url: "",
+  gallery_images: [],
   category: "design_trend",
   author: "Maison Affluency",
   tags: [],
@@ -52,6 +54,7 @@ const TradeJournal = () => {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Article | null>(null);
   const [tagsInput, setTagsInput] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (isAdmin) fetchArticles();
@@ -95,6 +98,7 @@ const TradeJournal = () => {
       excerpt: editing.excerpt,
       content: editing.content,
       cover_image_url: editing.cover_image_url || null,
+      gallery_images: editing.gallery_images || [],
       category: editing.category,
       author: editing.author,
       tags,
@@ -240,6 +244,86 @@ const TradeJournal = () => {
               {editing.cover_image_url && (
                 <div className="mt-3 aspect-[16/9] max-w-sm overflow-hidden rounded-sm border border-border">
                   <img src={editing.cover_image_url} alt="Cover preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+            </div>
+
+            {/* Gallery Images */}
+            <div>
+              <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">
+                Gallery Photos <span className="text-muted-foreground/50">(for photo-focused articles)</span>
+              </label>
+              
+              {/* Upload button */}
+              <label className={`inline-flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-md cursor-pointer hover:border-foreground/30 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+                <Upload className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="font-body text-xs text-muted-foreground">
+                  {uploading ? "Uploading..." : "Upload photos"}
+                </span>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const files = e.target.files;
+                    if (!files || files.length === 0) return;
+                    setUploading(true);
+                    const newUrls: string[] = [];
+                    for (const file of Array.from(files)) {
+                      const ext = file.name.split(".").pop() || "jpg";
+                      const path = `journal/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+                      const { error } = await supabase.storage.from("assets").upload(path, file);
+                      if (!error) {
+                        const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+                        newUrls.push(urlData.publicUrl);
+                      }
+                    }
+                    setEditing(prev => prev ? { ...prev, gallery_images: [...(prev.gallery_images || []), ...newUrls] } : null);
+                    setUploading(false);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+
+              {/* URL input for external images */}
+              <div className="mt-2 flex gap-2">
+                <input
+                  id="gallery-url-input"
+                  placeholder="Or paste image URL and press Enter"
+                  className="flex-1 pb-2 border-b border-border bg-transparent font-body text-xs text-muted-foreground outline-none focus:border-foreground transition-colors font-mono"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const input = e.currentTarget;
+                      const url = input.value.trim();
+                      if (url) {
+                        setEditing(prev => prev ? { ...prev, gallery_images: [...(prev.gallery_images || []), url] } : null);
+                        input.value = "";
+                      }
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Gallery preview grid */}
+              {editing.gallery_images && editing.gallery_images.length > 0 && (
+                <div className="mt-4 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                  {editing.gallery_images.map((url, i) => (
+                    <div key={i} className="relative group aspect-square rounded-sm overflow-hidden border border-border">
+                      <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setEditing(prev => prev ? { ...prev, gallery_images: prev.gallery_images.filter((_, idx) => idx !== i) } : null)}
+                        className="absolute top-1 right-1 p-1 bg-black/60 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label="Remove image"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      <span className="absolute bottom-1 left-1 font-body text-[9px] text-white/70 bg-black/40 px-1 rounded">
+                        {i + 1}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

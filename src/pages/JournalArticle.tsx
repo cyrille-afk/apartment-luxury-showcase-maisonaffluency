@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowLeft, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 
 const JournalArticlePage = () => {
@@ -10,6 +10,7 @@ const JournalArticlePage = () => {
   const navigate = useNavigate();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -21,6 +22,8 @@ const JournalArticlePage = () => {
 
   const formatDate = (d: string | null) =>
     d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "";
+
+  const hasGallery = article?.gallery_images && article.gallery_images.length > 0;
 
   if (loading) {
     return (
@@ -122,23 +125,52 @@ const JournalArticlePage = () => {
           </div>
         </motion.div>
 
+        {/* Photo gallery (if gallery_images present) */}
+        {hasGallery && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.15 }}
+            className="max-w-6xl mx-auto px-4 md:px-8 py-10 md:py-14"
+          >
+            <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 md:gap-4">
+              {article.gallery_images.map((url, i) => (
+                <button
+                  key={i}
+                  onClick={() => setLightboxIndex(i)}
+                  className="block w-full mb-3 md:mb-4 break-inside-avoid group cursor-pointer"
+                >
+                  <img
+                    src={url}
+                    alt={`${article.title} — Photo ${i + 1}`}
+                    className="w-full rounded-sm object-cover transition-all duration-300 group-hover:shadow-lg group-hover:brightness-95"
+                    loading="lazy"
+                  />
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         {/* Article body */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="max-w-3xl mx-auto px-6 py-10 md:py-14"
-        >
-          <div
-            className="prose prose-lg max-w-none font-body text-foreground/90
-              prose-headings:font-display prose-headings:text-foreground prose-headings:tracking-wide
-              prose-p:leading-relaxed prose-p:text-foreground/80
-              prose-a:text-primary prose-a:underline prose-a:underline-offset-4
-              prose-img:rounded-sm prose-img:my-8
-              prose-blockquote:border-l-primary prose-blockquote:font-display prose-blockquote:italic prose-blockquote:text-foreground/70"
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
-        </motion.div>
+        {article.content && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="max-w-3xl mx-auto px-6 py-10 md:py-14"
+          >
+            <div
+              className="prose prose-lg max-w-none font-body text-foreground/90
+                prose-headings:font-display prose-headings:text-foreground prose-headings:tracking-wide
+                prose-p:leading-relaxed prose-p:text-foreground/80
+                prose-a:text-primary prose-a:underline prose-a:underline-offset-4
+                prose-img:rounded-sm prose-img:my-8
+                prose-blockquote:border-l-primary prose-blockquote:font-display prose-blockquote:italic prose-blockquote:text-foreground/70"
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            />
+          </motion.div>
+        )}
 
         {/* Tags */}
         {article.tags && article.tags.length > 0 && (
@@ -167,6 +199,62 @@ const JournalArticlePage = () => {
           </Link>
         </div>
       </div>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightboxIndex !== null && hasGallery && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+            onClick={() => setLightboxIndex(null)}
+          >
+            <button
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-4 right-4 p-2 text-white/70 hover:text-white transition-colors z-10"
+              aria-label="Close"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Prev / Next */}
+            {article.gallery_images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex - 1 + article.gallery_images.length) % article.gallery_images.length); }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/60 hover:text-white transition-colors text-2xl"
+                  aria-label="Previous"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex + 1) % article.gallery_images.length); }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/60 hover:text-white transition-colors text-2xl"
+                  aria-label="Next"
+                >
+                  ›
+                </button>
+              </>
+            )}
+
+            <motion.img
+              key={lightboxIndex}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              src={article.gallery_images[lightboxIndex]}
+              alt={`Photo ${lightboxIndex + 1}`}
+              className="max-w-[90vw] max-h-[85vh] object-contain rounded-sm"
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 font-body text-xs text-white/50">
+              {lightboxIndex + 1} / {article.gallery_images.length}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
