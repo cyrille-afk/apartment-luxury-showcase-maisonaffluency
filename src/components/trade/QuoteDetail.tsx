@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer } from "lucide-react";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
 const quoteLogo = cloudinaryUrl("affluency-footer-logo_gvpt4u", { width: 400, quality: "auto", crop: "fill" });
