@@ -274,7 +274,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {/* ===== Currency selector (draft only, hidden in print) ===== */}
         {isDraft && (
-          <div className="border-b border-border px-6 md:px-8 py-3 flex items-center gap-6 print:hidden">
+          <div className="border-b border-border px-4 md:px-6 lg:px-8 py-3 flex flex-wrap items-center gap-3 md:gap-6 print:hidden">
             <div className="flex items-center gap-3">
               <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">Currency</span>
               <div className="relative">
@@ -310,7 +310,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
                 <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
               </div>
-              <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">8% Trade Discount</span>
+              <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">8% Discount</span>
             </button>
           </div>
         )}
