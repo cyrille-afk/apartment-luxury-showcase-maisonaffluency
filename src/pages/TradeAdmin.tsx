@@ -164,7 +164,7 @@ const TradeAdmin = () => {
                 {app.status === "pending" && (
                   <div className="flex gap-2 shrink-0">
                     <button
-                      onClick={() => handleAction(app.id, app.user_id, "approved")}
+                      onClick={() => handleAction(app, "approved")}
                       className="p-2 rounded-full border border-success/30 text-success hover:bg-success/10 transition-colors"
                       title="Approve"
                     >
