@@ -36,6 +36,7 @@ const emptyDoc = (): Omit<TradeDocument, "id" | "created_at"> => ({
   document_type: "catalogue",
   file_url: "",
   file_size_bytes: null,
+  cover_image_url: null,
 });
 
 const inputClass =
