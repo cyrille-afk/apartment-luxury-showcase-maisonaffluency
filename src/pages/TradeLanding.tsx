@@ -116,7 +116,7 @@ const TradeLanding = () => {
               </Link>
               <Link
                 to="/trade/login"
-                className="bg-foreground/80 hover:bg-foreground text-background px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold"
+                className="bg-foreground/80 hover:bg-foreground text-background px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[140px] text-center"
               >
                 Log In
               </Link>
