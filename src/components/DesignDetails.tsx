@@ -41,9 +41,7 @@ const DesignDetails = () => {
                 Exclusive Benefits for Professionals
               </p>
               <span className="mt-6 sm:mt-8 inline-flex items-center gap-2 bg-white/15 group-hover:bg-white/25 backdrop-blur-sm border border-white/30 group-hover:border-white/50 text-white px-5 py-2.5 font-body text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
-                <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
                 Learn More
-                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </div>
           </Link>
