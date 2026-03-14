@@ -160,6 +160,17 @@ const TradeDocumentsAdmin = () => {
               </div>
             </div>
 
+            {/* Cover image URL */}
+            <div>
+              <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">Cover Image URL <span className="normal-case tracking-normal text-muted-foreground/50">(optional — for non-PDF links)</span></label>
+              <input
+                value={editing.cover_image_url || ""}
+                onChange={(e) => setEditing(prev => prev ? { ...prev, cover_image_url: e.target.value || null } : null)}
+                className={inputClass}
+                placeholder="https://… paste a cover image URL"
+              />
+            </div>
+
             {/* File upload */}
             <div>
               <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">Document File</label>
