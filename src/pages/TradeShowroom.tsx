@@ -170,6 +170,7 @@ const TradeShowroom = () => {
   }, [user]);
 
   const designers = useMemo(() => [...new Set(products.map((p) => p.designer_name).filter(Boolean) as string[])].sort(), [products]);
+  const categories = useMemo(() => [...new Set(products.map((p) => inferCategory(p.product_name)))].sort(), [products]);
   const rooms = useMemo(() => [...new Set(products.map((p) => p.image_identifier))].sort(), [products]);
 
   const filtered = useMemo(() => {
@@ -181,10 +182,11 @@ const TradeShowroom = () => {
         p.designer_name?.toLowerCase().includes(q) ||
         p.materials?.toLowerCase().includes(q);
       const matchesDesigner = selectedDesigner === "all" || p.designer_name === selectedDesigner;
+      const matchesCategory = selectedCategory === "all" || inferCategory(p.product_name) === selectedCategory;
       const matchesRoom = selectedRoom === "all" || p.image_identifier === selectedRoom;
-      return matchesSearch && matchesDesigner && matchesRoom;
+      return matchesSearch && matchesDesigner && matchesCategory && matchesRoom;
     });
-  }, [products, search, selectedDesigner, selectedRoom]);
+  }, [products, search, selectedDesigner, selectedCategory, selectedRoom]);
 
   const handleCreateQuoteAndAdd = async (product: ShowroomProduct) => {
     if (!user) return;
