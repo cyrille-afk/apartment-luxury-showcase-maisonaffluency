@@ -605,6 +605,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         tags: ["Tables", "Dining Tables"],
         materials: "Solid wood (ash, oak or walnut)",
         dimensions: "W 240 × D 124 × H 74.5 cm (177M)\nW 300 × D 124 × H 74.5 cm (177L)",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/spec-sheets%2Fde-la-espada%2F177_ORION_TABLE_By_Anthony_Guerree.pdf",
       },
       {
         image: delaEspadaElliottTable,
