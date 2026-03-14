@@ -58,6 +58,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [notes, setNotes] = useState(quoteNotes || "");
   const [currency, setCurrency] = useState<Currency>("SGD");
   const [clientCompany, setClientCompany] = useState("");
+  const [clientName, setClientName] = useState("");
   const [currencyOpen, setCurrencyOpen] = useState(false);
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
