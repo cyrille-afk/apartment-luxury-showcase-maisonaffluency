@@ -76,10 +76,10 @@ const App = () => {
           <Route path="/trade" element={<Suspense fallback={null}><TradeLayout /></Suspense>}>
             <Route index element={<TradeDashboard />} />
             <Route path="admin" element={<TradeAdmin />} />
-            <Route path="gallery" element={<TradePlaceholder />} />
-            <Route path="quotes" element={<TradePlaceholder />} />
-            <Route path="documents" element={<TradePlaceholder />} />
-            <Route path="settings" element={<TradePlaceholder />} />
+            <Route path="gallery" element={<TradeGallery />} />
+            <Route path="quotes" element={<TradeQuotes />} />
+            <Route path="documents" element={<TradeDocuments />} />
+            <Route path="settings" element={<TradeSettings />} />
           </Route>
           
           <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
