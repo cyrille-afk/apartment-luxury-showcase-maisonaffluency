@@ -85,6 +85,7 @@ const TradeLanding = () => {
             src={cloudinaryUrl("v1772085848/intimate-dining_ux4pee", { width: 1920, height: 1080, quality: "auto:good", crop: "fill", gravity: "auto" })}
             alt="Maison Affluency Trade Program"
             className="w-full h-full object-cover"
+            data-pin-nopin="true"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent" />
           <motion.div
