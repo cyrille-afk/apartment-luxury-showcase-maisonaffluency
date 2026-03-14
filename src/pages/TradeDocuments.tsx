@@ -66,21 +66,17 @@ const TradeDocuments = () => {
 
   // Build brand entries for carousel with thumbnail from first doc's cover or null
   const brandEntries = useMemo(() => {
-    const map = new Map<string, { thumbnailUrl: string | null; pdfUrl: string | null; docCount: number }>();
+    const map = new Map<string, { pdfUrl: string | null; docCount: number }>();
     for (const doc of documents) {
       const existing = map.get(doc.brand_name);
       if (!existing) {
         const isPdf = doc.file_url?.toLowerCase().endsWith(".pdf");
         map.set(doc.brand_name, {
-          thumbnailUrl: doc.cover_image_url || null,
           pdfUrl: isPdf ? doc.file_url : null,
           docCount: 1,
         });
       } else {
         existing.docCount++;
-        if (!existing.thumbnailUrl && doc.cover_image_url) {
-          existing.thumbnailUrl = doc.cover_image_url;
-        }
         if (!existing.pdfUrl && doc.file_url?.toLowerCase().endsWith(".pdf")) {
           existing.pdfUrl = doc.file_url;
         }
