@@ -138,7 +138,7 @@ const JournalArticlePage = () => {
                 <button
                   key={i}
                   onClick={() => setLightboxIndex(i)}
-                  className="block w-full mb-3 md:mb-4 break-inside-avoid group cursor-pointer"
+                  className="relative block w-full mb-3 md:mb-4 break-inside-avoid group cursor-pointer"
                 >
                   <img
                     src={url}
@@ -146,6 +146,9 @@ const JournalArticlePage = () => {
                     className="w-full rounded-sm object-cover transition-all duration-300 group-hover:shadow-lg group-hover:brightness-95"
                     loading="lazy"
                   />
+                  <span className="absolute bottom-2 left-2 bg-black/60 text-white font-body text-[10px] tracking-wider px-2 py-0.5 rounded-sm">
+                    {i + 1}
+                  </span>
                 </button>
               ))}
             </div>
@@ -161,7 +164,7 @@ const JournalArticlePage = () => {
             className="max-w-3xl mx-auto px-6 py-10 md:py-14"
           >
             <div
-              className="prose prose-lg max-w-none font-body text-foreground/90
+              className="prose prose-lg max-w-none font-body text-foreground/90 text-justify
                 prose-headings:font-display prose-headings:text-foreground prose-headings:tracking-wide
                 prose-p:leading-relaxed prose-p:text-foreground/80
                 prose-a:text-primary prose-a:underline prose-a:underline-offset-4
