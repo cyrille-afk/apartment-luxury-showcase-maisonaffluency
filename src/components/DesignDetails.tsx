@@ -117,7 +117,7 @@ const DesignDetails = () => {
         <div className="mx-auto max-w-5xl">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8, delay: 0.2 }}>
           {/* Side-by-side: Image left, Principles right */}
-            <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+            <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-stretch">
               {/* Image with overlaid text */}
               <div className="md:w-1/2 overflow-hidden rounded-sm relative flex-shrink-0">
                 <img
@@ -128,10 +128,10 @@ const DesignDetails = () => {
                   decoding="async"
                 />
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                  <h2 className="font-display text-[1.65rem] sm:text-[2.1rem] md:text-[2.2rem] text-white drop-shadow-lg tracking-wide">
+                  <h2 className="font-display text-[1.65rem] sm:text-[2.1rem] md:text-[2.2rem] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-wide">
                     Trade Program
                   </h2>
-                  <p className="font-display text-base sm:text-lg md:text-xl text-white/90 mt-2 sm:mt-3 drop-shadow tracking-widest font-light">
+                  <p className="font-display text-base sm:text-lg md:text-xl text-white mt-2 sm:mt-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light">
                     Join &amp; Enjoy Exclusive Benefits
                   </p>
                   <a
@@ -146,10 +146,10 @@ const DesignDetails = () => {
               </div>
 
               {/* Principles accordion */}
-              <div className="md:w-1/2 flex flex-col">
-                <h3 className="font-display text-lg text-foreground md:text-xl mb-4 underline underline-offset-4 decoration-1">Our Guiding Principles</h3>
+              <div className="md:w-1/2 flex flex-col justify-center">
+                <h3 className="font-display text-lg text-foreground md:text-xl mb-6 underline underline-offset-4 decoration-1">Our Guiding Principles</h3>
 
-                <Accordion type="single" collapsible className="space-y-2 flex-1">
+                <Accordion type="single" collapsible className="space-y-3">
                   {philosophyPoints.map((item, index) => (
                     <AccordionItem key={index} value={`philosophy-${index}`} className="border border-border bg-card px-5 py-1 transition-colors hover:bg-muted/30">
                       <AccordionTrigger className="text-left hover:no-underline flex-row-reverse md:flex-row justify-end md:justify-between gap-2 md:gap-0 py-3">
@@ -172,10 +172,10 @@ const DesignDetails = () => {
                 </Accordion>
 
                 {/* CTA below principles */}
-                <div className="mt-5 flex flex-col sm:flex-row items-center gap-3">
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                   <a
                     href="/trade/register"
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.2em] rounded-full hover:opacity-90 transition-opacity"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300"
                   >
                     <Briefcase className="w-3.5 h-3.5" />
                     Apply Now
