@@ -1,0 +1,1 @@
+UPDATE journal_articles SET pdf_url = 'https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/journal/pdfs/AD_COLLECTOR_Pouenat_Decembre_25_1-2.pdf' WHERE id = '3e245418-3de8-40b1-9aa9-0f6e33c2b4c2';
