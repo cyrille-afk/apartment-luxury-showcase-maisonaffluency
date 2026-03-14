@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -45,6 +45,15 @@ const TradeLanding = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
+  // Remove Pinterest save buttons injected by browser extension
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      document.querySelectorAll('[data-pin-log], [class*="PinIt"], [class*="pinterest"]').forEach(el => el.remove());
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -85,6 +94,7 @@ const TradeLanding = () => {
             src={cloudinaryUrl("v1772085848/intimate-dining_ux4pee", { width: 1920, height: 1080, quality: "auto:good", crop: "fill", gravity: "auto" })}
             alt="Maison Affluency Trade Program"
             className="w-full h-full object-cover"
+            data-pin-nopin="true"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent" />
           <motion.div
@@ -171,6 +181,7 @@ const TradeLanding = () => {
                             className="w-full h-full object-cover"
                             loading="lazy"
                             decoding="async"
+                            data-pin-nopin="true"
                           />
                         </div>
                         <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify">
@@ -201,6 +212,7 @@ const TradeLanding = () => {
                     className="w-full h-full object-cover"
                     loading="lazy"
                     decoding="async"
+                    data-pin-nopin="true"
                   />
                 </div>
                 <motion.div
