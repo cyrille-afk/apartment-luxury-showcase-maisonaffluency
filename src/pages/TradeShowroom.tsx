@@ -14,6 +14,7 @@ interface ShowroomProduct {
   product_image_url: string | null;
   link_url: string | null;
   image_identifier: string;
+  pdf_url?: string;
 }
 
 interface DraftQuote {
