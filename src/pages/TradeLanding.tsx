@@ -109,9 +109,8 @@ const TradeLanding = () => {
             <div className="flex items-center gap-4 mt-10 sm:mt-14">
               <Link
                 to="/trade/register"
-                className="flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
+                className="bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
               >
-                <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
                 Join Now
               </Link>
               <Link
