@@ -150,7 +150,7 @@ const TradeDocuments = () => {
                           {doc.file_size_bytes ? ` · ${formatFileSize(doc.file_size_bytes)}` : ""}
                         </p>
                       </div>
-                      <FileDown className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                      <FileDown className="h-4 w-4 text-[hsl(var(--pdf-red))] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                     </a>
                   );
                 })}
