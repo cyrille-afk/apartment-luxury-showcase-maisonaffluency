@@ -91,7 +91,6 @@ const TradeShowroom = () => {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
   const [uploadingId, setUploadingId] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const [products, setProducts] = useState<ShowroomProduct[]>([]);
   const [loading, setLoading] = useState(true);
