@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight } from "lucide-react";
 import QuoteDetail from "@/components/trade/QuoteDetail";
+import SectionHero from "@/components/trade/SectionHero";
 
 interface Quote {
   id: string;
