@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_thumbnails: {
+        Row: {
+          brand_name: string
+          created_at: string
+          id: string
+          thumbnail_url: string
+        }
+        Insert: {
+          brand_name: string
+          created_at?: string
+          id?: string
+          thumbnail_url: string
+        }
+        Update: {
+          brand_name?: string
+          created_at?: string
+          id?: string
+          thumbnail_url?: string
+        }
+        Relationships: []
+      }
       gallery_hotspots: {
         Row: {
           created_at: string

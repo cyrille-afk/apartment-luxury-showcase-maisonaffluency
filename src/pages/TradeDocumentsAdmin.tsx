@@ -238,15 +238,14 @@ const TradeDocumentsAdmin = () => {
 
         {/* Brand carousel */}
         {(() => {
-          const brandMap = new Map<string, { thumbnailUrl: string | null; pdfUrl: string | null; docCount: number }>();
+          const brandMap = new Map<string, { pdfUrl: string | null; docCount: number }>();
           for (const doc of documents) {
             const existing = brandMap.get(doc.brand_name);
             if (!existing) {
               const isPdf = doc.file_url?.toLowerCase().endsWith(".pdf");
-              brandMap.set(doc.brand_name, { thumbnailUrl: doc.cover_image_url || null, pdfUrl: isPdf ? doc.file_url : null, docCount: 1 });
+              brandMap.set(doc.brand_name, { pdfUrl: isPdf ? doc.file_url : null, docCount: 1 });
             } else {
               existing.docCount++;
-              if (!existing.thumbnailUrl && doc.cover_image_url) existing.thumbnailUrl = doc.cover_image_url;
               if (!existing.pdfUrl && doc.file_url?.toLowerCase().endsWith(".pdf")) existing.pdfUrl = doc.file_url;
             }
           }
@@ -261,7 +260,6 @@ const TradeDocumentsAdmin = () => {
               selectedBrand={selectedBrand}
               onSelect={setSelectedBrand}
               editable
-              onThumbnailUpdated={fetchDocs}
             />
           );
         })()}

@@ -5,8 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 
 interface BrandEntry {
   name: string;
-  /** Cover image, first PDF cover, or null */
-  thumbnailUrl: string | null;
   /** URL to the first PDF for this brand (used for auto-thumbnail) */
   pdfUrl?: string | null;
   docCount: number;
@@ -18,8 +16,6 @@ interface BrandCarouselProps {
   onSelect: (brand: string) => void;
   /** Enable thumbnail upload on each brand (admin mode) */
   editable?: boolean;
-  /** Called after a thumbnail is uploaded so parent can refetch */
-  onThumbnailUpdated?: () => void;
 }
 
 /** Simple hash for cache key */
@@ -54,7 +50,7 @@ function usePdfThumbnail(pdfUrl: string | null | undefined) {
         if (cancelled) return;
         const page = await pdf.getPage(1);
         const vp = page.getViewport({ scale: 1 });
-        const scale = 96 / vp.width; // small thumbnail
+        const scale = 96 / vp.width;
         const svp = page.getViewport({ scale });
         const canvas = document.createElement("canvas");
         canvas.width = svp.width;
@@ -82,6 +78,7 @@ const BrandTile = ({
   onSelect,
   editable,
   isUploading,
+  thumbnailUrl,
   onUpload,
   onRemove,
 }: {
@@ -90,11 +87,12 @@ const BrandTile = ({
   onSelect: () => void;
   editable: boolean;
   isUploading: boolean;
+  thumbnailUrl: string | null;
   onUpload: (file: File) => void;
   onRemove: () => void;
 }) => {
-  const pdfThumb = usePdfThumbnail(!brand.thumbnailUrl ? brand.pdfUrl : null);
-  const thumb = brand.thumbnailUrl || pdfThumb;
+  const pdfThumb = usePdfThumbnail(!thumbnailUrl ? brand.pdfUrl : null);
+  const thumb = thumbnailUrl || pdfThumb;
 
   return (
     <div className="shrink-0 relative group/brand">
@@ -150,7 +148,7 @@ const BrandTile = ({
               }}
             />
           </label>
-          {brand.thumbnailUrl && (
+          {thumbnailUrl && (
             <button
               onClick={(e) => { e.stopPropagation(); onRemove(); }}
               className="p-1 rounded-full bg-background/80 border border-border shadow-sm hover:bg-destructive/10 hover:border-destructive/30"
@@ -165,10 +163,23 @@ const BrandTile = ({
   );
 };
 
-const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, onThumbnailUpdated }: BrandCarouselProps) => {
+const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false }: BrandCarouselProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [uploadingBrand, setUploadingBrand] = useState<string | null>(null);
+  const [brandThumbnails, setBrandThumbnails] = useState<Record<string, string>>({});
+
+  // Fetch brand thumbnails from dedicated table
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("brand_thumbnails").select("brand_name, thumbnail_url");
+      if (data) {
+        const map: Record<string, string> = {};
+        for (const row of data) map[row.brand_name] = row.thumbnail_url;
+        setBrandThumbnails(map);
+      }
+    })();
+  }, []);
 
   const scroll = (dir: "left" | "right") => {
     scrollRef.current?.scrollBy({ left: dir === "left" ? -240 : 240, behavior: "smooth" });
@@ -187,15 +198,15 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, onTh
       const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
       const publicUrl = urlData.publicUrl;
 
-      const { error: updateError } = await supabase
-        .from("trade_documents")
-        .update({ cover_image_url: publicUrl })
-        .eq("brand_name", brandName);
+      // Upsert into brand_thumbnails table
+      const { error: upsertError } = await supabase
+        .from("brand_thumbnails")
+        .upsert({ brand_name: brandName, thumbnail_url: publicUrl }, { onConflict: "brand_name" });
 
-      if (updateError) throw updateError;
+      if (upsertError) throw upsertError;
 
+      setBrandThumbnails(prev => ({ ...prev, [brandName]: publicUrl }));
       toast({ title: `Thumbnail set for ${brandName}` });
-      onThumbnailUpdated?.();
     } catch (err: any) {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
     } finally {
@@ -207,12 +218,16 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, onTh
     setUploadingBrand(brandName);
     try {
       const { error } = await supabase
-        .from("trade_documents")
-        .update({ cover_image_url: null })
+        .from("brand_thumbnails")
+        .delete()
         .eq("brand_name", brandName);
       if (error) throw error;
+      setBrandThumbnails(prev => {
+        const next = { ...prev };
+        delete next[brandName];
+        return next;
+      });
       toast({ title: `Thumbnail removed for ${brandName}` });
-      onThumbnailUpdated?.();
     } catch (err: any) {
       toast({ title: "Remove failed", description: err.message, variant: "destructive" });
     } finally {
@@ -272,6 +287,7 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, onTh
               onSelect={() => onSelect(brand.name === selectedBrand ? "all" : brand.name)}
               editable={editable}
               isUploading={uploadingBrand === brand.name}
+              thumbnailUrl={brandThumbnails[brand.name] || null}
               onUpload={(file) => handleThumbnailUpload(brand.name, file)}
               onRemove={() => handleThumbnailRemove(brand.name)}
             />
