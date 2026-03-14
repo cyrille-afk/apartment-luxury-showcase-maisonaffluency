@@ -58,6 +58,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [notes, setNotes] = useState(quoteNotes || "");
   const [currency, setCurrency] = useState<Currency>("SGD");
   const [clientCompany, setClientCompany] = useState("");
+  const [clientName, setClientName] = useState("");
   const [currencyOpen, setCurrencyOpen] = useState(false);
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
@@ -80,11 +81,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, client_name").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       setItems((itemsRes.data as QuoteItemWithProduct[]) || []);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
+      if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
       if (profileRes?.data?.company) setClientCompany(profileRes.data.company);
       setLoading(false);
     };
@@ -156,15 +158,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         {/* ===== HEADER — matches reference layout ===== */}
         <div className="border-b border-border p-6 md:p-8">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-6 md:gap-10">
-            {/* Left: Title + Client */}
+            {/* Left: Title + Client Name */}
             <div>
               <h1 className="font-display text-3xl md:text-4xl text-foreground tracking-wide uppercase mb-3">
                 Quote
               </h1>
-              {clientCompany && (
-                <p className="font-display text-sm text-foreground uppercase tracking-wider">
-                  {clientCompany}
-                </p>
+              {isDraft ? (
+                <input
+                  type="text"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  onBlur={() => supabase.from("trade_quotes").update({ client_name: clientName } as any).eq("id", quoteId)}
+                  placeholder="Client / Project Name"
+                  className="font-display text-sm text-foreground uppercase tracking-wider bg-transparent border-b border-dashed border-border focus:border-foreground outline-none pb-1 w-full max-w-[300px] placeholder:text-muted-foreground/50 print:border-none"
+                />
+              ) : (
+                clientName && (
+                  <p className="font-display text-sm text-foreground uppercase tracking-wider">
+                    {clientName}
+                  </p>
+                )
               )}
             </div>
 
@@ -191,10 +204,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </span>
             </div>
 
-            {/* Right: Logo + Company details */}
-            <div className="flex flex-col items-end gap-3">
-              <img src={affluencyLogo} alt="Affluency" className="h-16 w-16 md:h-20 md:w-20 object-contain" />
-              <div className="text-right">
+            {/* Right: Logo + Company details (left-aligned) */}
+            <div className="flex items-start gap-4">
+              <img src={affluencyLogo} alt="Affluency" className="h-16 w-16 md:h-20 md:w-20 object-contain shrink-0" />
+              <div className="text-left">
                 <p className="font-display text-xs text-foreground uppercase tracking-wider">
                   Affluency Etc Pte. Ltd.
                 </p>

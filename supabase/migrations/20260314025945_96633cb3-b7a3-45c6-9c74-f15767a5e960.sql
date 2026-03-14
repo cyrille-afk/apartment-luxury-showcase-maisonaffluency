@@ -1,0 +1,1 @@
+ALTER TABLE public.trade_quotes ADD COLUMN client_name text DEFAULT '';

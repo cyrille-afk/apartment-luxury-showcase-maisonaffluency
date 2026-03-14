@@ -280,6 +280,7 @@ export type Database = {
       }
       trade_quotes: {
         Row: {
+          client_name: string | null
           created_at: string
           currency: string
           id: string
@@ -290,6 +291,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          client_name?: string | null
           created_at?: string
           currency?: string
           id?: string
@@ -300,6 +302,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          client_name?: string | null
           created_at?: string
           currency?: string
           id?: string
