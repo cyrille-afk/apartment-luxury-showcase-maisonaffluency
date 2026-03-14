@@ -184,6 +184,10 @@ const Navigation = () => {
 
   const handleNavClick = (href: string) => {
     setIsOpen(false);
+    if (href.startsWith("/")) {
+      window.location.href = href;
+      return;
+    }
     const id = href.replace(/^#/, "");
     // Delay scroll to allow Sheet close animation to complete
     setTimeout(() => scrollToSection(id), 350);
