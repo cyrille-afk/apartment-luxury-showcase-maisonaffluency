@@ -267,6 +267,7 @@ const TradeRegister = () => {
 
       </div>
     </div>
+    </>
   );
 };
 
