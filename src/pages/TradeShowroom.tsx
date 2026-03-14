@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, ExternalLink, FileDown } from "lucide-react";
+import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, ExternalLink, FileDown, Upload, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useAuth } from "@/hooks/useAuth";
@@ -88,8 +88,9 @@ const getSection = (imageIdentifier: string): string =>
   roomToSection[imageIdentifier] || "Other";
 
 const TradeShowroom = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { toast } = useToast();
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
 
   const [products, setProducts] = useState<ShowroomProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -280,6 +281,42 @@ const TradeShowroom = () => {
     }
   };
 
+  // Admin: upload product image and update all matching hotspots
+  const handleImageUpload = async (product: ShowroomProduct, file: File) => {
+    if (!isAdmin) return;
+    const maxBytes = 20 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      toast({ title: "File too large", description: "Max 20 MB", variant: "destructive" });
+      return;
+    }
+    setUploadingId(product.id);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: uploadErr } = await supabase.storage.from("assets").upload(path, file, { contentType: file.type });
+    if (uploadErr) {
+      toast({ title: "Upload failed", description: uploadErr.message, variant: "destructive" });
+      setUploadingId(null);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+    const publicUrl = urlData.publicUrl;
+
+    // Update all hotspots with this product name
+    const { error: updateErr } = await supabase
+      .from("gallery_hotspots")
+      .update({ product_image_url: publicUrl })
+      .eq("product_name", product.product_name);
+    if (updateErr) {
+      toast({ title: "Update failed", description: updateErr.message, variant: "destructive" });
+    } else {
+      setProducts((prev) =>
+        prev.map((p) => p.product_name === product.product_name ? { ...p, product_image_url: publicUrl } : p)
+      );
+      toast({ title: "Image updated", description: product.product_name });
+    }
+    setUploadingId(null);
+  };
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
@@ -399,6 +436,33 @@ const TradeShowroom = () => {
                       <Package className="h-6 w-6 text-muted-foreground/30" />
                     </div>
                   )}
+                  {/* Admin upload button */}
+                  {isAdmin && (
+                    <label
+                      className={`absolute top-2 right-2 z-10 p-1.5 rounded-md cursor-pointer transition-all ${
+                        uploadingId === product.id
+                          ? "bg-background/90"
+                          : "bg-background/70 opacity-0 group-hover:opacity-100 hover:bg-background/90"
+                      }`}
+                      title="Upload product image"
+                    >
+                      {uploadingId === product.id ? (
+                        <Loader2 className="h-3.5 w-3.5 text-foreground animate-spin" />
+                      ) : (
+                        <Upload className="h-3.5 w-3.5 text-foreground" />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleImageUpload(product, f);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  )}
                   {/* Room badge */}
                   <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-background/80 backdrop-blur-sm font-body text-[9px] text-muted-foreground">
@@ -481,8 +545,25 @@ const TradeShowroom = () => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             return (
-              <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
-                <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0">
+              <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors group">
+                <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0 relative">
+                  {isAdmin && (
+                    <label
+                      className={`absolute inset-0 z-10 flex items-center justify-center cursor-pointer transition-all ${
+                        uploadingId === product.id
+                          ? "bg-background/80"
+                          : "bg-background/60 opacity-0 group-hover:opacity-100"
+                      }`}
+                      title="Upload image"
+                    >
+                      {uploadingId === product.id ? (
+                        <Loader2 className="h-3.5 w-3.5 text-foreground animate-spin" />
+                      ) : (
+                        <Upload className="h-3.5 w-3.5 text-foreground" />
+                      )}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(product, f); e.target.value = ""; }} />
+                    </label>
+                  )}
                   {product.product_image_url ? (
                     <img src={product.product_image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
                   ) : (
