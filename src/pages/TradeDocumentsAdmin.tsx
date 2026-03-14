@@ -51,6 +51,7 @@ const TradeDocumentsAdmin = () => {
   const [editing, setEditing] = useState<Omit<TradeDocument, "id" | "created_at"> & { id?: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<TradeDocument | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState("all");
 
   useEffect(() => {
     if (isAdmin) fetchDocs();
