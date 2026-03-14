@@ -378,7 +378,31 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center justify-center gap-1 mt-3 md:mt-0">
+                      {/* Mobile: qty + prices in a row */}
+                      <div className="flex items-center justify-between mt-2 md:hidden">
+                        <div className="flex items-center gap-1">
+                          {isDraft ? (
+                            <>
+                              <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" disabled={item.quantity <= 1}>
+                                <Minus className="h-3 w-3" />
+                              </button>
+                              <span className="font-body text-xs text-foreground w-6 text-center">{item.quantity}</span>
+                              <button onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors">
+                                <Plus className="h-3 w-3" />
+                              </button>
+                            </>
+                          ) : (
+                            <span className="font-body text-xs text-muted-foreground">Qty: {item.quantity}</span>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <span className="font-body text-xs text-foreground font-medium">
+                            {currencySymbol(currency)} {formatPriceRaw(lineTotal, currency) || "TBD"}
+                          </span>
+                        </div>
+                      </div>
+                      {/* Desktop: standard columns */}
+                      <div className="hidden md:flex items-center justify-center gap-1">
                         {isDraft ? (
                           <>
                             <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" disabled={item.quantity <= 1}>
@@ -393,10 +417,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <span className="font-body text-sm text-foreground">{item.quantity}</span>
                         )}
                       </div>
-                      <div className="text-right mt-2 md:mt-0">
+                      <div className="hidden md:block text-right">
                         <span className="font-body text-sm text-foreground">{formatPriceRaw(unitPrice, currency) || "TBD"}</span>
                       </div>
-                      <div className="text-right mt-1 md:mt-0">
+                      <div className="hidden md:block text-right">
                         <span className="font-body text-sm text-foreground font-medium">{formatPriceRaw(lineTotal, currency) || "TBD"}</span>
                       </div>
                     </div>
