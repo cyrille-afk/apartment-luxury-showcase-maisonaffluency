@@ -40,8 +40,7 @@ const benefits = [
     title: "Consolidated Insured Shipping",
     description:
       "Let us help you navigate the many pitfalls of the freight world by recommending the most appropriate partners with full insurance coverage. Maximising time whilst minimising frictions.",
-    // TODO: Replace with your own image
-    image: cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 1400, quality: "auto:good", crop: "fill" }),
+    image: cloudinaryUrl("v1773473193/quality-control_dvxvmb", { width: 1400, quality: "auto:good", crop: "fill" }),
   },
 ];
 
