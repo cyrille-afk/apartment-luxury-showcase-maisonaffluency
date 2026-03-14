@@ -14,6 +14,7 @@ const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister"));
 const TradeLayout = lazy(() => import("./pages/TradeLayout"));
+const TradeErrorBoundary = lazy(() => import("./components/trade/TradeErrorBoundary"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard"));
 const TradeAdmin = lazy(() => import("./pages/TradeAdmin"));
 const TradeGallery = lazy(() => import("./pages/TradeGallery"));
@@ -80,7 +81,7 @@ const App = () => {
           <Route path="/trade/program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
           <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
           <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
-          <Route path="/trade" element={<Suspense fallback={null}><TradeLayout /></Suspense>}>
+          <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
             <Route index element={<TradeDashboard />} />
             <Route path="admin" element={<TradeAdmin />} />
             <Route path="gallery" element={<TradeGallery />} />
