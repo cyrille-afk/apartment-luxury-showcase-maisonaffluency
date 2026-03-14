@@ -18,6 +18,7 @@ interface Article {
   excerpt: string;
   content: string;
   cover_image_url: string | null;
+  gallery_images: string[];
   category: JournalCategory;
   author: string;
   tags: string[];
