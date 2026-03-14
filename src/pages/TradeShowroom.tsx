@@ -286,7 +286,7 @@ const TradeShowroom = () => {
       <SectionHero
         section="showroom"
         title="Showroom Collection"
-        subtitle={`${filtered.length} ${filtered.length === 1 ? "piece" : "pieces"} from our Singapore gallery${selectedDesigner !== "all" ? ` by ${selectedDesigner}` : ""}${selectedRoom !== "all" ? ` in "${selectedRoom}"` : ""}`}
+        subtitle={`${filtered.length} ${filtered.length === 1 ? "piece" : "pieces"} from our Singapore gallery${selectedDesigner !== "all" ? ` by ${selectedDesigner}` : ""}${selectedSection !== "all" ? ` in ${selectedSection}` : ""}`}
       >
         <button
           onClick={() => setDrawerOpen(true)}
