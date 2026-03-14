@@ -11,6 +11,7 @@ const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
+const TradeLanding = lazy(() => import("./pages/TradeLanding"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister"));
 const TradeLayout = lazy(() => import("./pages/TradeLayout"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard"));
@@ -75,6 +76,7 @@ const App = () => {
 
           {/* Trade Portal */}
           <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
+          <Route path="/trade/program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
           <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
           <Route path="/trade" element={<Suspense fallback={null}><TradeLayout /></Suspense>}>
             <Route index element={<TradeDashboard />} />
