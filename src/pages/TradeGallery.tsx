@@ -326,8 +326,13 @@ const TradeGallery = () => {
                   {product.dimensions && (
                     <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>
                   )}
-                  {product.materials && (
+                   {product.materials && (
                     <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>
+                  )}
+                  {price && (
+                    <p className="font-display text-sm text-accent font-semibold mt-1">
+                      {formatPrice(price.cents, price.currency)}
+                    </p>
                   )}
                 </div>
               </div>
