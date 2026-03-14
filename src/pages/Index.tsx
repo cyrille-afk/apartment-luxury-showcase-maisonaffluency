@@ -334,38 +334,11 @@ const Index = () => {
         <meta property="og:description" content="Curated investment-grade furniture from Europe's finest designers. Private showroom, Singapore District 9." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://maisonaffluency.com" />
-        <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1773468211/FHMPRJ-033_W26_SCENE_5.jpg_rfvh62.jpg" />
+        <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          "name": "Maison Affluency",
-          "url": "https://maisonaffluency.com",
-          "logo": "https://res.cloudinary.com/dif1oamtj/image/upload/v1772085523/affluency-logo-icon_mpchum.jpg",
-          "description": "Asia's premier destination for collectible, investment-grade luxury furniture from world-class European designers.",
-          "sameAs": ["https://www.instagram.com/maisonaffluency/"],
-          "contactPoint": { "@type": "ContactPoint", "email": "concierge@myaffluency.com", "contactType": "customer service" }
-        })}</script>
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FurnitureStore",
-          "name": "Maison Affluency",
-          "image": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1773468211/FHMPRJ-033_W26_SCENE_5.jpg_rfvh62.jpg",
-          "url": "https://maisonaffluency.com",
-          "email": "concierge@myaffluency.com",
-          "address": { "@type": "PostalAddress", "streetAddress": "1 Grange Garden, #16-05", "addressLocality": "Singapore", "postalCode": "249631", "addressCountry": "SG" },
-          "geo": { "@type": "GeoCoordinates", "latitude": 1.3048, "longitude": 103.8318 },
-          "description": "Private appointment-only showroom featuring museum-grade collectible furniture from Europe's finest designers.",
-          "priceRange": "$$$$",
-          "openingHoursSpecification": { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "10:00", "closes": "18:00" }
-        })}</script>
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          "name": "Maison Affluency",
-          "url": "https://maisonaffluency.com",
-          "description": "Asia's premier luxury collectible furniture destination."
-        })}</script>
+        <meta name="twitter:title" content="Maison Affluency — Collectible Luxury Furniture" />
+        <meta name="twitter:description" content="Curated investment-grade furniture from Europe's finest designers. Private showroom, Singapore District 9." />
+        <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg" />
       </Helmet>
       {showScrollProgress && (
         <Suspense fallback={null}>
