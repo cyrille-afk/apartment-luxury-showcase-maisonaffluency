@@ -188,6 +188,8 @@ const TradeShowroom = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       setAddedProductIds((prev) => new Set(prev).add(product.id));
+      setDrawerRefreshKey((k) => k + 1);
+      setDrawerOpen(true);
       toast({ title: "Added to quote", description: `${product.product_name} added to QU-${quoteId.slice(0, 6).toUpperCase()}` });
     }
     setAddingProductId(null);
