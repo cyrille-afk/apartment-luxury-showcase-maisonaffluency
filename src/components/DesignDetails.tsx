@@ -26,7 +26,7 @@ const DesignDetails = () => {
             className="group block overflow-hidden rounded-sm relative max-w-3xl mx-auto aspect-[16/7]"
           >
             <img
-              src={cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 1200, height: 525, quality: "auto:good", crop: "fill" })}
+              src={cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 1200, quality: "auto:good", crop: "limit" })}
               alt="Maison Affluency Trade Program — exclusive benefits for architects and interior designers"
               className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-700"
               loading="lazy"
