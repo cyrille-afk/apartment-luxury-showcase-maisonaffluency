@@ -88,6 +88,12 @@ const QuickJumpMenu = () => {
     if ('vibrate' in navigator) {
       navigator.vibrate(10);
     }
+    // Trade links to a separate page
+    if (sectionId === "details") {
+      window.location.href = "/trade/program";
+      setIsOpen(false);
+      return;
+    }
     scrollToSectionUtil(sectionId);
     setIsOpen(false);
   };
