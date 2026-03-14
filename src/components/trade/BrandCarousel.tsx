@@ -90,6 +90,7 @@ const BrandTile = ({
   editable: boolean;
   isUploading: boolean;
   onUpload: (file: File) => void;
+  onRemove: () => void;
 }) => {
   const pdfThumb = usePdfThumbnail(!brand.thumbnailUrl ? brand.pdfUrl : null);
   const thumb = brand.thumbnailUrl || pdfThumb;
