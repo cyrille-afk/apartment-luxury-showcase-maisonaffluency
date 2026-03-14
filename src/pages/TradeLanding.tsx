@@ -135,7 +135,7 @@ const TradeLanding = () => {
           <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6">
             Your Exclusive Benefits and Bespoke Services
           </h2>
-          <p className="font-body text-base md:text-lg leading-relaxed text-muted-foreground">
+          <p className="font-body text-base md:text-lg leading-relaxed text-muted-foreground text-justify">
             Our trade program is tailored for a community of professionals who value time, quality, and commitment. 
             In addition to special rates, we offer the full assistance of a dedicated team to swiftly and efficiently 
             manage custom requests. We oversee every aspect of design, sourcing, production, and delivery.
