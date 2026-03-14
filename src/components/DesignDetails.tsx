@@ -116,74 +116,78 @@ const DesignDetails = () => {
       <section ref={ref} className="pt-0 pb-12 px-4 md:pt-0 md:pb-24 md:px-12 lg:px-20 bg-background">
         <div className="mx-auto max-w-5xl">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8, delay: 0.2 }}>
-            {/* Professional imagery banner with overlaid CTA */}
-            <div className="mb-10 overflow-hidden rounded-sm relative max-w-3xl mx-auto max-h-[80vh] md:max-h-[85vh]">
-              <img
-                src={cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 1400, quality: "auto:good", crop: "limit" })}
-                alt="Luxury furniture styled in a professionally designed interior at Maison Affluency showroom"
-                className="w-full object-cover object-center"
-                loading="lazy"
-                decoding="async"
-              />
-              {/* Title & subtitle at top */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 -translate-y-[4.5rem] sm:-translate-y-[6.5rem]">
-                <h2 className="font-display text-[1.65rem] sm:text-[2.1rem] md:text-[2.6rem] text-white drop-shadow-lg tracking-wide">
-                  Trade Program
-                </h2>
-                <p className="font-display text-lg sm:text-xl md:text-2xl text-white/90 mt-3 sm:mt-4 drop-shadow tracking-widest font-light">
-                  Join &amp; Enjoy Exclusive Benefits
-                </p>
-                <a 
-                  href="/trade/register"
-                  className="mt-14 sm:mt-28 flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
-                >
-                  <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
-                  Apply Now
-                </a>
+          {/* Side-by-side: Image left, Principles right */}
+            <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+              {/* Image with overlaid text */}
+              <div className="md:w-1/2 overflow-hidden rounded-sm relative flex-shrink-0">
+                <img
+                  src={cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 800, quality: "auto:good", crop: "fill", aspect_ratio: "3:4" })}
+                  alt="Luxury furniture styled in a professionally designed interior at Maison Affluency showroom"
+                  className="w-full h-full object-cover object-center"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+                  <h2 className="font-display text-[1.65rem] sm:text-[2.1rem] md:text-[2.2rem] text-white drop-shadow-lg tracking-wide">
+                    Trade Program
+                  </h2>
+                  <p className="font-display text-base sm:text-lg md:text-xl text-white/90 mt-2 sm:mt-3 drop-shadow tracking-widest font-light">
+                    Join &amp; Enjoy Exclusive Benefits
+                  </p>
+                  <a
+                    href="/trade/register"
+                    className="mt-8 sm:mt-10 flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
+                  >
+                    <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
+                    Apply Now
+                  </a>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
               </div>
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
-            </div>
 
-            <div className="mb-10 mt-[-1rem] md:mt-0 flex items-center justify-center pl-8 pr-8">
-              <h3 className="font-display text-xl text-foreground md:text-2xl text-left underline underline-offset-4 decoration-1">Our Guiding Principles</h3>
-            </div>
-            
-            <Accordion type="single" collapsible className="space-y-4">
-              {philosophyPoints.map((item, index) => <AccordionItem key={index} value={`philosophy-${index}`} className="border border-border bg-card px-8 py-2 transition-colors hover:bg-muted/30">
-                  <AccordionTrigger className="text-left hover:no-underline flex-row-reverse md:flex-row justify-end md:justify-between gap-3 md:gap-0">
-                    <div>
-                      <div className="font-display text-xl text-foreground md:text-2xl">
-                        {item.title}
-                      </div>
-                      <div className="mt-1 font-body text-sm text-muted-foreground">
-                        {item.subtitle}
-                      </div>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-4 pb-2">
-                    <p className="font-body leading-relaxed text-muted-foreground">
-                      {item.content}
-                    </p>
-                  </AccordionContent>
-                </AccordionItem>)}
-            </Accordion>
+              {/* Principles accordion */}
+              <div className="md:w-1/2 flex flex-col">
+                <h3 className="font-display text-lg text-foreground md:text-xl mb-4 underline underline-offset-4 decoration-1">Our Guiding Principles</h3>
 
-            {/* CTA after principles */}
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a
-                href="/trade/register"
-                className="inline-flex items-center gap-2 px-8 py-3 bg-foreground text-background font-body text-sm uppercase tracking-[0.2em] rounded-full hover:opacity-90 transition-opacity"
-              >
-                <Briefcase className="w-4 h-4" />
-                Apply Now
-              </a>
-              <a
-                href="/trade/login"
-                className="font-body text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
-              >
-                Already a member? Sign in
-              </a>
+                <Accordion type="single" collapsible className="space-y-2 flex-1">
+                  {philosophyPoints.map((item, index) => (
+                    <AccordionItem key={index} value={`philosophy-${index}`} className="border border-border bg-card px-5 py-1 transition-colors hover:bg-muted/30">
+                      <AccordionTrigger className="text-left hover:no-underline flex-row-reverse md:flex-row justify-end md:justify-between gap-2 md:gap-0 py-3">
+                        <div>
+                          <div className="font-display text-base text-foreground md:text-lg">
+                            {item.title}
+                          </div>
+                          <div className="mt-0.5 font-body text-xs text-muted-foreground">
+                            {item.subtitle}
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-2 pb-2">
+                        <p className="font-body text-sm leading-relaxed text-muted-foreground">
+                          {item.content}
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+
+                {/* CTA below principles */}
+                <div className="mt-5 flex flex-col sm:flex-row items-center gap-3">
+                  <a
+                    href="/trade/register"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.2em] rounded-full hover:opacity-90 transition-opacity"
+                  >
+                    <Briefcase className="w-3.5 h-3.5" />
+                    Apply Now
+                  </a>
+                  <a
+                    href="/trade/login"
+                    className="font-body text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+                  >
+                    Already a member? Sign in
+                  </a>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
