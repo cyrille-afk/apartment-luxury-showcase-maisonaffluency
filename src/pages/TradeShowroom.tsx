@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import SectionHero from "@/components/trade/SectionHero";
+import { ProductCardSkeleton } from "@/components/trade/skeletons";
 
 interface ShowroomProduct {
   id: string;
