@@ -133,13 +133,13 @@ const DesignDetails = () => {
                 <p className="font-display text-lg sm:text-xl md:text-2xl text-white/90 mt-3 sm:mt-4 drop-shadow tracking-widest font-light">
                   Join &amp; Enjoy Exclusive Benefits
                 </p>
-                <button 
-                  onClick={() => setIsOpen(true)}
+                <a 
+                  href="/trade/register"
                   className="mt-14 sm:mt-28 flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-5 py-2.5 font-serif text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)] font-bold"
                 >
                   <Briefcase className="w-3.5 h-3.5 text-[hsl(var(--accent))]" />
-                  Join Now
-                </button>
+                  Apply Now
+                </a>
               </div>
               {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
