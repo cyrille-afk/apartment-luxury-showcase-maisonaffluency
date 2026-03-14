@@ -83,6 +83,7 @@ const BrandTile = ({
   editable,
   isUploading,
   onUpload,
+  onRemove,
 }: {
   brand: BrandEntry;
   selected: boolean;
