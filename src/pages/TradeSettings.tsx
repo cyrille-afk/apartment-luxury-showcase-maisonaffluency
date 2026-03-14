@@ -94,17 +94,17 @@ const TradeSettings = () => {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwords.newPassword !== passwords.confirmPassword) {
-      toast({ title: "Error", description: "Passwords do not match", variant: "destructive" });
-      return;
-    }
-    if (passwords.newPassword.length < 8) {
-      toast({ title: "Error", description: "Password must be at least 8 characters", variant: "destructive" });
+    setPasswordErrors({});
+    const result = passwordSchema.safeParse(passwords);
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      result.error.issues.forEach((i) => { errs[i.path[0] as string] = i.message; });
+      setPasswordErrors(errs);
       return;
     }
 
     setChangingPassword(true);
-    const { error } = await supabase.auth.updateUser({ password: passwords.newPassword });
+    const { error } = await supabase.auth.updateUser({ password: result.data.newPassword });
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
