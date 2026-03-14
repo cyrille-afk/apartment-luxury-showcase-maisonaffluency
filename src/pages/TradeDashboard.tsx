@@ -180,8 +180,8 @@ const TradeDashboard = () => {
           Recent Activity
         </h2>
         {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <div className="border border-border rounded-lg divide-y divide-border">
+            {Array.from({ length: 4 }).map((_, i) => <ActivityRowSkeleton key={i} />)}
           </div>
         ) : activity.length === 0 ? (
           <div className="border border-dashed border-border rounded-lg p-8 text-center">
