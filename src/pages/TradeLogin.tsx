@@ -27,9 +27,9 @@ const TradeLogin = () => {
     }
 
     // Signal the browser's password manager to save credentials
-    if (window.PasswordCredential) {
+    if ('PasswordCredential' in window) {
       try {
-        const cred = new PasswordCredential({ id: email, password });
+        const cred = new (window as any).PasswordCredential({ id: email, password });
         await navigator.credentials.store(cred);
       } catch {
         // Silently ignore if credential storage fails
