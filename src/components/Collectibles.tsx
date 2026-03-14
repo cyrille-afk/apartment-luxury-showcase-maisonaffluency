@@ -1538,6 +1538,10 @@ const Collectibles = () => {
                       )}
                     </div>
                   )}
+                  <ProvenanceBadge
+                    designerId={curatorPicksDesigner.id ?? curatorPicksDesigner.name}
+                    pieceTitle={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
+                  />
                   {/* Thumbnail strip — inline, above contact line */}
                   {curatorPicksDesigner.curatorPicks.length > 1 && (
                     <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
