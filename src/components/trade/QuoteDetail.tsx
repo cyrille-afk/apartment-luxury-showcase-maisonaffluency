@@ -60,6 +60,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [clientCompany, setClientCompany] = useState("");
   const [clientName, setClientName] = useState("");
   const [currencyOpen, setCurrencyOpen] = useState(false);
+  const [fxRates, setFxRates] = useState<Record<string, number>>({});
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
@@ -70,6 +71,49 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const formatDate = (d: Date) =>
     d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+
+  /** Convert cents from `fromCurrency` to `toCurrency` using live rates */
+  const convertCents = (cents: number | null, fromCurrency: string, toCurrency: string): number | null => {
+    if (!cents) return null;
+    if (fromCurrency === toCurrency) return cents;
+    // rate key e.g. "EUR_SGD"
+    const key = `${fromCurrency}_${toCurrency}`;
+    const rate = fxRates[key];
+    if (!rate) return cents; // fallback: show unconverted
+    return Math.round(cents * rate);
+  };
+
+  // Fetch exchange rates from frankfurter.app
+  useEffect(() => {
+    const fetchRates = async () => {
+      // Collect unique source currencies from items that differ from quote currency
+      const sourceCurrencies = new Set<string>();
+      items.forEach((item) => {
+        const prodCurrency = item.trade_products?.currency;
+        if (prodCurrency && prodCurrency !== currency) {
+          sourceCurrencies.add(prodCurrency);
+        }
+      });
+      if (sourceCurrencies.size === 0) { setFxRates({}); return; }
+
+      const newRates: Record<string, number> = {};
+      await Promise.all(
+        Array.from(sourceCurrencies).map(async (src) => {
+          try {
+            const res = await fetch(`https://api.frankfurter.app/latest?from=${src}&to=${currency}`);
+            const data = await res.json();
+            if (data.rates?.[currency]) {
+              newRates[`${src}_${currency}`] = data.rates[currency];
+            }
+          } catch {
+            // silently fail — will show unconverted price
+          }
+        })
+      );
+      setFxRates(newRates);
+    };
+    if (items.length > 0) fetchRates();
+  }, [items, currency]);
 
   // Fetch items, currency, and profile
   useEffect(() => {
