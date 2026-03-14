@@ -576,6 +576,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         tags: ["Seating", "Dining Chairs"],
         materials: "Solid wood frame (ash, oak or walnut)\nUpholstered seat in a range of fabric and leather options",
         dimensions: "W 56.5 × D 50.5 × H 70.5 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/spec-sheets%2Fde-la-espada%2F050_ELLIOT_DINING_CHAIR_By_Jason_Miller.pdf",
       },
       {
         image: delaEspadaVegaBChair,
