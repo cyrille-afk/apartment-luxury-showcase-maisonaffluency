@@ -31,6 +31,25 @@ interface DraftQuote {
   created_at: string;
 }
 
+const categoryKeywords: [string, string[]][] = [
+  ["Lighting", ["lamp", "light", "pendant", "chandelier", "sconce"]],
+  ["Seating", ["chair", "armchair", "sofa", "loveseat", "stool", "bench", "ottoman", "lounge chair"]],
+  ["Tables", ["table", "desk", "coffee table", "side table", "console"]],
+  ["Storage", ["bookcase", "credenza", "cabinet"]],
+  ["Rugs & Textiles", ["rug", "fabric", "curtain", "throw", "cushion", "headboard"]],
+  ["Wall & Surfaces", ["wallcover", "wallpaper", "mirror", "wall lamp", "wall light", "diasec"]],
+  ["Decorative Objects", ["vase", "vessel", "bowl", "candle", "incense", "centerpiece", "box", "sculpture", "book cover"]],
+  ["Art", ["painting", "drawing", "bronze painting"]],
+];
+
+const inferCategory = (name: string): string => {
+  const lower = name.toLowerCase();
+  for (const [cat, keywords] of categoryKeywords) {
+    if (keywords.some((kw) => lower.includes(kw))) return cat;
+  }
+  return "Other";
+};
+
 const TradeShowroom = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -39,6 +58,7 @@ const TradeShowroom = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedDesigner, setSelectedDesigner] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedRoom, setSelectedRoom] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
@@ -150,6 +170,7 @@ const TradeShowroom = () => {
   }, [user]);
 
   const designers = useMemo(() => [...new Set(products.map((p) => p.designer_name).filter(Boolean) as string[])].sort(), [products]);
+  const categories = useMemo(() => [...new Set(products.map((p) => inferCategory(p.product_name)))].sort(), [products]);
   const rooms = useMemo(() => [...new Set(products.map((p) => p.image_identifier))].sort(), [products]);
 
   const filtered = useMemo(() => {
@@ -161,10 +182,11 @@ const TradeShowroom = () => {
         p.designer_name?.toLowerCase().includes(q) ||
         p.materials?.toLowerCase().includes(q);
       const matchesDesigner = selectedDesigner === "all" || p.designer_name === selectedDesigner;
+      const matchesCategory = selectedCategory === "all" || inferCategory(p.product_name) === selectedCategory;
       const matchesRoom = selectedRoom === "all" || p.image_identifier === selectedRoom;
-      return matchesSearch && matchesDesigner && matchesRoom;
+      return matchesSearch && matchesDesigner && matchesCategory && matchesRoom;
     });
-  }, [products, search, selectedDesigner, selectedRoom]);
+  }, [products, search, selectedDesigner, selectedCategory, selectedRoom]);
 
   const handleCreateQuoteAndAdd = async (product: ShowroomProduct) => {
     if (!user) return;
@@ -285,6 +307,12 @@ const TradeShowroom = () => {
           <option value="all">All Designers ({designers.length})</option>
           {designers.map((d) => (
             <option key={d} value={d}>{d}</option>
+          ))}
+        </select>
+        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className={inputClass}>
+          <option value="all">All Categories ({categories.length})</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>{c}</option>
           ))}
         </select>
         <select value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} className={inputClass}>
