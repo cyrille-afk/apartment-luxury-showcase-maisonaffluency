@@ -1,8 +1,13 @@
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet-async";
 
 const ComingSoon = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 text-center">
+      <Helmet>
+        <title>Coming Soon — Maison Affluency</title>
+        <meta name="robots" content="noindex" />
+      </Helmet>
       {/* Decorative line */}
       <motion.div
         initial={{ scaleX: 0 }}

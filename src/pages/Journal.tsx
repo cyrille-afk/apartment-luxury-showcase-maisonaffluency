@@ -40,7 +40,13 @@ const Journal = () => {
         <link rel="canonical" href="https://maisonaffluency.com/journal" />
         <meta property="og:title" content="Journal — Maison Affluency" />
         <meta property="og:description" content="Design stories, designer interviews, and curatorial insights." />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://maisonaffluency.com/journal" />
+        <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Journal — Maison Affluency" />
+        <meta name="twitter:description" content="Design stories, designer interviews, and curatorial insights." />
+        <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Blog",
