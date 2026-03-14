@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
 
 const COUNTRIES = [
   "Singapore", "Australia", "Canada", "China", "France", "Germany", "Hong Kong",
@@ -11,10 +12,36 @@ const COUNTRIES = [
   "United Arab Emirates", "United Kingdom", "United States", "Vietnam", "Other"
 ];
 
+const tradeRegisterSchema = z.object({
+  email: z.string().trim().email("Please enter a valid email address").max(255, "Email is too long"),
+  password: z.string().min(8, "Password must be at least 8 characters").max(128, "Password is too long"),
+  confirmPassword: z.string(),
+  firstName: z.string().trim().min(1, "First name is required").max(100, "First name is too long"),
+  lastName: z.string().trim().min(1, "Last name is required").max(100, "Last name is too long"),
+  phone: z.string().trim().min(1, "Phone number is required").max(30, "Phone number is too long")
+    .regex(/^[+\d\s()-]+$/, "Please enter a valid phone number"),
+  companyName: z.string().trim().min(1, "Company name is required").max(200, "Company name is too long"),
+  companyWebsite: z.string().trim().max(500, "URL is too long")
+    .refine(v => !v || /^https?:\/\/.+/.test(v), "Please enter a valid URL starting with http:// or https://")
+    .optional().or(z.literal("")),
+  jobTitle: z.string().trim().min(1, "Job title is required").max(150, "Job title is too long"),
+  country: z.string().min(1),
+  city: z.string().trim().max(100, "City name is too long").optional().or(z.literal("")),
+  isCertified: z.boolean(),
+  certificationDetails: z.string().trim().max(300, "Certification details are too long").optional().or(z.literal("")),
+  message: z.string().trim().max(2000, "Message is too long").optional().or(z.literal("")),
+}).refine(d => d.password === d.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+type FieldErrors = Partial<Record<string, string>>;
+
 const TradeRegister = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -32,25 +59,30 @@ const TradeRegister = () => {
     message: "",
   });
 
-  const update = (field: string, value: string | boolean) =>
+  const update = (field: string, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (form.password !== form.confirmPassword) {
-      toast({ title: "Passwords don't match", variant: "destructive" });
-      return;
-    }
-    if (form.password.length < 6) {
-      toast({ title: "Password must be at least 6 characters", variant: "destructive" });
+    const result = tradeRegisterSchema.safeParse(form);
+    if (!result.success) {
+      const fieldErrors: FieldErrors = {};
+      result.error.errors.forEach((err) => {
+        const key = err.path[0] as string;
+        if (!fieldErrors[key]) fieldErrors[key] = err.message;
+      });
+      setErrors(fieldErrors);
+      toast({ title: "Please fix the errors below", variant: "destructive" });
       return;
     }
 
+    setErrors({});
     setLoading(true);
 
     try {
-      // 1. Sign up
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -60,7 +92,6 @@ const TradeRegister = () => {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Registration failed");
 
-      // 2. Update profile
       await supabase.from("profiles").update({
         first_name: form.firstName,
         last_name: form.lastName,
@@ -68,7 +99,6 @@ const TradeRegister = () => {
         phone: form.phone,
       }).eq("id", authData.user.id);
 
-      // 3. Submit trade application
       await supabase.from("trade_applications").insert({
         user_id: authData.user.id,
         company_name: form.companyName,
@@ -81,7 +111,6 @@ const TradeRegister = () => {
         message: form.message || null,
       });
 
-      // 4. Send email notification to concierge + confirmation to applicant
       const fullName = `${form.firstName} ${form.lastName}`.trim();
       const emailBody = [
         `Company: ${form.companyName}`,
@@ -117,11 +146,18 @@ const TradeRegister = () => {
     }
   };
 
+  const fieldClass = (field: string) =>
+    `w-full mt-1 pb-2 border-b bg-transparent font-body text-sm text-foreground outline-none transition-colors text-[16px] ${
+      errors[field] ? "border-destructive" : "border-border focus:border-foreground"
+    }`;
+
+  const FieldError = ({ field }: { field: string }) =>
+    errors[field] ? <p className="text-destructive text-xs font-body mt-1">{errors[field]}</p> : null;
+
   return (
     <>
       <Helmet><title>Apply — Trade Program — Maison Affluency</title></Helmet>
     <div className="min-h-screen bg-background px-4 py-6 md:py-12">
-      {/* Top bar: back link + sign in */}
       <div className="w-full max-w-2xl mx-auto flex items-center justify-between mb-6">
         <Link to="/" className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors">
           ← Back to Maison Affluency
@@ -142,7 +178,6 @@ const TradeRegister = () => {
           <p className="font-body text-xs text-muted-foreground mt-1">Trade Account Application</p>
         </div>
 
-        {/* Benefits summary */}
         <div className="mb-6 grid grid-cols-2 gap-2">
           {[
             { title: "Dedicated Advisor", desc: "Personalised guidance on every project" },
@@ -157,25 +192,28 @@ const TradeRegister = () => {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
           {/* Account Details */}
           <div>
             <h2 className="font-display text-base text-foreground mb-3">Account Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="font-body text-sm text-foreground">Email<span className="text-destructive">*</span></label>
-                <input type="email" required value={form.email} onChange={(e) => update("email", e.target.value)}
-                  className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                <input type="email" value={form.email} onChange={(e) => update("email", e.target.value)}
+                  className={fieldClass("email")} />
+                <FieldError field="email" />
               </div>
               <div>
                 <label className="font-body text-sm text-foreground">Password<span className="text-destructive">*</span></label>
-                <input type="password" required value={form.password} onChange={(e) => update("password", e.target.value)}
-                  className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                <input type="password" value={form.password} onChange={(e) => update("password", e.target.value)}
+                  className={fieldClass("password")} />
+                <FieldError field="password" />
               </div>
               <div>
                 <label className="font-body text-sm text-foreground">Confirm Password<span className="text-destructive">*</span></label>
-                <input type="password" required value={form.confirmPassword} onChange={(e) => update("confirmPassword", e.target.value)}
-                  className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                <input type="password" value={form.confirmPassword} onChange={(e) => update("confirmPassword", e.target.value)}
+                  className={fieldClass("confirmPassword")} />
+                <FieldError field="confirmPassword" />
               </div>
             </div>
           </div>
@@ -186,18 +224,21 @@ const TradeRegister = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="font-body text-sm text-foreground">First Name<span className="text-destructive">*</span></label>
-                <input type="text" required value={form.firstName} onChange={(e) => update("firstName", e.target.value)}
-                  className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                <input type="text" value={form.firstName} onChange={(e) => update("firstName", e.target.value)}
+                  className={fieldClass("firstName")} />
+                <FieldError field="firstName" />
               </div>
               <div>
                 <label className="font-body text-sm text-foreground">Last Name<span className="text-destructive">*</span></label>
-                <input type="text" required value={form.lastName} onChange={(e) => update("lastName", e.target.value)}
-                  className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                <input type="text" value={form.lastName} onChange={(e) => update("lastName", e.target.value)}
+                  className={fieldClass("lastName")} />
+                <FieldError field="lastName" />
               </div>
               <div>
                 <label className="font-body text-sm text-foreground">Phone<span className="text-destructive">*</span></label>
-                <input type="tel" required value={form.phone} onChange={(e) => update("phone", e.target.value)}
-                  className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                <input type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)}
+                  className={fieldClass("phone")} />
+                <FieldError field="phone" />
               </div>
             </div>
           </div>
@@ -208,30 +249,34 @@ const TradeRegister = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="font-body text-sm text-foreground">Company Name<span className="text-destructive">*</span></label>
-                <input type="text" required value={form.companyName} onChange={(e) => update("companyName", e.target.value)}
-                  className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                <input type="text" value={form.companyName} onChange={(e) => update("companyName", e.target.value)}
+                  className={fieldClass("companyName")} />
+                <FieldError field="companyName" />
               </div>
               <div>
                 <label className="font-body text-sm text-foreground">Company Website</label>
                 <input type="url" value={form.companyWebsite} onChange={(e) => update("companyWebsite", e.target.value)}
-                  className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                  className={fieldClass("companyWebsite")} />
+                <FieldError field="companyWebsite" />
               </div>
               <div>
                 <label className="font-body text-sm text-foreground">Job Title<span className="text-destructive">*</span></label>
-                <input type="text" required value={form.jobTitle} onChange={(e) => update("jobTitle", e.target.value)}
-                  className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                <input type="text" value={form.jobTitle} onChange={(e) => update("jobTitle", e.target.value)}
+                  className={fieldClass("jobTitle")} />
+                <FieldError field="jobTitle" />
               </div>
               <div>
                 <label className="font-body text-sm text-foreground">Country</label>
                 <select value={form.country} onChange={(e) => update("country", e.target.value)}
-                  className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors appearance-none text-[16px]">
+                  className={`${fieldClass("country")} appearance-none`}>
                   {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
                 <label className="font-body text-sm text-foreground">City</label>
                 <input type="text" value={form.city} onChange={(e) => update("city", e.target.value)}
-                  className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                  className={fieldClass("city")} />
+                <FieldError field="city" />
               </div>
             </div>
           </div>
@@ -246,9 +291,12 @@ const TradeRegister = () => {
               </span>
             </label>
             {form.isCertified && (
-              <input type="text" placeholder="Certification details (e.g. BCA, SIA, SIDS)"
-                value={form.certificationDetails} onChange={(e) => update("certificationDetails", e.target.value)}
-                className="w-full mt-3 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+              <>
+                <input type="text" placeholder="Certification details (e.g. BCA, SIA, SIDS)"
+                  value={form.certificationDetails} onChange={(e) => update("certificationDetails", e.target.value)}
+                  className={`${fieldClass("certificationDetails")} mt-3`} />
+                <FieldError field="certificationDetails" />
+              </>
             )}
           </div>
 
@@ -256,7 +304,8 @@ const TradeRegister = () => {
           <div>
             <label className="font-body text-sm text-foreground">Tell us about your practice or current project</label>
             <textarea value={form.message} onChange={(e) => update("message", e.target.value)} rows={3}
-              className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors resize-y text-[16px]" />
+              className={`${fieldClass("message")} resize-y`} />
+            <FieldError field="message" />
           </div>
 
           <button type="submit" disabled={loading}
