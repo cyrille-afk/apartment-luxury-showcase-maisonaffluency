@@ -86,6 +86,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       ]);
       setItems((itemsRes.data as QuoteItemWithProduct[]) || []);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
+      if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
       if (profileRes?.data?.company) setClientCompany(profileRes.data.company);
       setLoading(false);
     };
