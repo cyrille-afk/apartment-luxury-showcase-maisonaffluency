@@ -126,6 +126,21 @@ const TradeRegister = () => {
           <p className="font-body text-sm text-muted-foreground mt-2">Trade Account Application</p>
         </div>
 
+        {/* Benefits summary */}
+        <div className="mb-10 grid grid-cols-2 gap-3">
+          {[
+            { title: "Dedicated Advisor", desc: "Personalised guidance on every project" },
+            { title: "Custom Requests", desc: "Access to specialist workshops worldwide" },
+            { title: "Samples & Swatches", desc: "Comprehensive curated material library" },
+            { title: "Insured Shipping", desc: "Consolidated freight with full coverage" },
+          ].map((b) => (
+            <div key={b.title} className="border border-border rounded-sm px-4 py-3">
+              <p className="font-display text-sm text-foreground">{b.title}</p>
+              <p className="font-body text-xs text-muted-foreground mt-0.5">{b.desc}</p>
+            </div>
+          ))}
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Account Details */}
           <div>
