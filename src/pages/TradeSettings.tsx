@@ -4,12 +4,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { User, Lock, Building, Phone, Mail, Save } from "lucide-react";
+import { z } from "zod";
+
+const profileSchema = z.object({
+  first_name: z.string().trim().min(1, "First name is required").max(100, "Max 100 characters"),
+  last_name: z.string().trim().min(1, "Last name is required").max(100, "Max 100 characters"),
+  company: z.string().trim().max(200, "Max 200 characters"),
+  phone: z.string().trim().max(30, "Max 30 characters"),
+});
+
+const passwordSchema = z.object({
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+}).refine((d) => d.newPassword === d.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 const TradeSettings = () => {
   const { user, profile, refreshRoles } = useAuth();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
+  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState({
     first_name: "",
@@ -49,17 +67,20 @@ const TradeSettings = () => {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    setProfileErrors({});
+    const result = profileSchema.safeParse(form);
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      result.error.issues.forEach((i) => { errs[i.path[0] as string] = i.message; });
+      setProfileErrors(errs);
+      return;
+    }
     if (!user) return;
     setSaving(true);
 
     const { error } = await supabase
       .from("profiles")
-      .update({
-        first_name: form.first_name,
-        last_name: form.last_name,
-        company: form.company,
-        phone: form.phone,
-      })
+      .update(result.data)
       .eq("id", user.id);
 
     if (error) {
