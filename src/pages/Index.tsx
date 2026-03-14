@@ -24,6 +24,7 @@ const ProductGrid = lazy(() => import("@/components/ProductGrid"));
 // competing for bandwidth with LCP-critical resources on mobile.
 const ExitIntentBanner = lazy(() => import("@/components/ExitIntentBanner"));
 const StickyBottomNav = lazy(() => import("@/components/StickyBottomNav"));
+const JournalTeaser = lazy(() => import("@/components/JournalTeaser"));
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
 const ParallaxInterlude = lazy(() => import("@/components/ParallaxInterlude"));
