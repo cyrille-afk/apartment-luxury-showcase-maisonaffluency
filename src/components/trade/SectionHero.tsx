@@ -18,7 +18,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
   const imageId = heroImages[section];
   const imageUrl = cloudinaryUrl(imageId, {
     width: 1600,
-    height: 400,
+    height: 600,
     quality: "auto",
     crop: "fill",
     gravity: "auto",
@@ -30,12 +30,12 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
         <img
           src={imageUrl}
           alt={title}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover opacity-40"
           loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/50 to-foreground/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/30 to-foreground/10" />
       </div>
-      <div className="relative px-6 py-8 flex items-end justify-between gap-4">
+      <div className="relative px-6 py-12 md:py-16 flex items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl text-background mb-1">{title}</h1>
           {subtitle && (
