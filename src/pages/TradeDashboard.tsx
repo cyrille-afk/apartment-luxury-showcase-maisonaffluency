@@ -5,6 +5,7 @@ import {
   Image, FileText, FolderOpen, FolderClosed,
   Clock, FileSpreadsheet, BookOpen, FileDown, MapPin,
 } from "lucide-react";
+import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
