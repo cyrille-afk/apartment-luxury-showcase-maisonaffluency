@@ -105,6 +105,7 @@ const App = () => {
     </BrowserRouter>
     </CompareProvider>
     </AuthProvider>
+    </HelmetProvider>
   );
 };
 
