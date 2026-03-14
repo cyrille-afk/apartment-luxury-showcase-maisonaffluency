@@ -18,6 +18,7 @@ interface TradeDocument {
   document_type: string;
   file_url: string;
   file_size_bytes: number | null;
+  cover_image_url: string | null;
   created_at: string;
 }
 
