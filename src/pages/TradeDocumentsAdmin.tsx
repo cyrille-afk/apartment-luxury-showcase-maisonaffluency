@@ -79,6 +79,7 @@ const TradeDocumentsAdmin = () => {
       document_type: editing.document_type,
       file_url: editing.file_url,
       file_size_bytes: editing.file_size_bytes,
+      cover_image_url: editing.cover_image_url || null,
     };
 
     let error;
