@@ -164,7 +164,7 @@ const JournalArticlePage = () => {
             className="max-w-3xl mx-auto px-6 py-10 md:py-14"
           >
             <div
-              className="prose prose-lg max-w-none font-body text-foreground/90
+              className="prose prose-lg max-w-none font-body text-foreground/90 text-justify
                 prose-headings:font-display prose-headings:text-foreground prose-headings:tracking-wide
                 prose-p:leading-relaxed prose-p:text-foreground/80
                 prose-a:text-primary prose-a:underline prose-a:underline-offset-4
