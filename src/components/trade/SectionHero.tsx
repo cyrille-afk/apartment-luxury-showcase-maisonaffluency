@@ -30,7 +30,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
         <img
           src={imageUrl}
           alt={title}
-          className="w-full h-full object-cover opacity-40"
+          className="w-full h-full object-cover"
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/30 to-foreground/10" />
