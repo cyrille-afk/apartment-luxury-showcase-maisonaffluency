@@ -19,6 +19,7 @@ interface Article {
   content: string;
   cover_image_url: string | null;
   gallery_images: string[];
+  pdf_url: string | null;
   category: JournalCategory;
   author: string;
   tags: string[];
@@ -37,6 +38,7 @@ const emptyArticle = (): Omit<Article, "id" | "created_at"> => ({
   content: "",
   cover_image_url: "",
   gallery_images: [],
+  pdf_url: null,
   category: "design_trend",
   author: "Maison Affluency",
   tags: [],
@@ -99,6 +101,7 @@ const TradeJournal = () => {
       content: editing.content,
       cover_image_url: editing.cover_image_url || null,
       gallery_images: editing.gallery_images || [],
+      pdf_url: editing.pdf_url || null,
       category: editing.category,
       author: editing.author,
       tags,
@@ -248,7 +251,23 @@ const TradeJournal = () => {
               )}
             </div>
 
-            {/* Gallery Images */}
+            {/* PDF URL */}
+            <div>
+              <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">
+                PDF Document URL <span className="text-muted-foreground/50">(embedded viewer + download)</span>
+              </label>
+              <input
+                value={editing.pdf_url || ""}
+                onChange={(e) => setEditing(prev => prev ? { ...prev, pdf_url: e.target.value } : null)}
+                className="w-full pb-2 border-b border-border bg-transparent font-body text-xs text-muted-foreground outline-none focus:border-foreground transition-colors font-mono"
+                placeholder="/pdfs/document.pdf or https://..."
+              />
+              {editing.pdf_url && (
+                <p className="mt-1 font-body text-[10px] text-primary">✓ PDF attached — will show embedded viewer on article page</p>
+              )}
+            </div>
+
+
             <div>
               <label className="font-body text-xs text-muted-foreground uppercase tracking-wider block mb-1">
                 Gallery Photos <span className="text-muted-foreground/50">(for photo-focused articles)</span>
