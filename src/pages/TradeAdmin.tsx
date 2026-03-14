@@ -138,7 +138,7 @@ const TradeAdmin = () => {
             <div key={app.id} className="border border-border rounded-lg p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3 mb-1">
                     <h3 className="font-display text-base text-foreground">{app.company_name}</h3>
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
                       app.status === "pending" ? "bg-warning/10 text-warning" :
@@ -151,6 +151,11 @@ const TradeAdmin = () => {
                       {app.status}
                     </span>
                   </div>
+                  {app.profiles && (
+                    <p className="font-body text-xs text-muted-foreground mb-2">
+                      {app.profiles.first_name} {app.profiles.last_name} · <a href={`mailto:${app.profiles.email}`} className="text-foreground hover:underline">{app.profiles.email}</a>
+                    </p>
+                  )}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 font-body text-xs text-muted-foreground">
                     <span>Title: {app.job_title}</span>
                     <span>Location: {app.city ? `${app.city}, ` : ""}{app.country}</span>
