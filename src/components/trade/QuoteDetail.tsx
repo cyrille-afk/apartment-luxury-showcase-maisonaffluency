@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer } from "lucide-react";
-import { cloudinaryUrl } from "@/lib/cloudinary";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown } from "lucide-react";
+import affluencyLogo from "@/assets/affluency-logo-square.png";
 
-const quoteLogo = cloudinaryUrl("affluency-footer-logo_gvpt4u", { width: 400, quality: "auto", crop: "fill" });
+const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
+type Currency = (typeof CURRENCIES)[number];
 
 interface QuoteItemWithProduct {
   id: string;
@@ -36,17 +37,17 @@ interface QuoteDetailProps {
   onStatusChange: () => void;
 }
 
-const formatPrice = (cents: number | null, currency = "SGD") => {
-  if (!cents) return "Price on request";
-  return new Intl.NumberFormat("en-SG", { style: "currency", currency }).format(cents / 100);
-};
-
-const formatPriceRaw = (cents: number | null, currency = "SGD") => {
+const formatPriceRaw = (cents: number | null, currency: string = "SGD") => {
   if (!cents) return null;
   return new Intl.NumberFormat("en-SG", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(cents / 100);
+};
+
+const currencySymbol = (c: string) => {
+  const map: Record<string, string> = { SGD: "S$", USD: "US$", EUR: "€", GBP: "£" };
+  return map[c] || c;
 };
 
 const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack, onStatusChange }: QuoteDetailProps) => {
@@ -55,24 +56,46 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [items, setItems] = useState<QuoteItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState(quoteNotes || "");
+  const [currency, setCurrency] = useState<Currency>("SGD");
+  const [clientCompany, setClientCompany] = useState("");
+  const [currencyOpen, setCurrencyOpen] = useState(false);
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
 
-  const fetchItems = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from("trade_quote_items")
-      .select("*, trade_products(product_name, brand_name, trade_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
-      .eq("quote_id", quoteId)
-      .order("created_at", { ascending: true });
-    setItems((data as QuoteItemWithProduct[]) || []);
-    setLoading(false);
-  };
+  const createdDate = new Date(quoteCreatedAt);
+  const expiryDate = new Date(createdDate);
+  expiryDate.setDate(expiryDate.getDate() + 7);
 
+  const formatDate = (d: Date) =>
+    d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+
+  // Fetch items, currency, and profile
   useEffect(() => {
-    fetchItems();
-  }, [quoteId]);
+    const load = async () => {
+      setLoading(true);
+      const [itemsRes, quoteRes, profileRes] = await Promise.all([
+        supabase
+          .from("trade_quote_items")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
+          .eq("quote_id", quoteId)
+          .order("created_at", { ascending: true }),
+        supabase.from("trade_quotes").select("currency").eq("id", quoteId).single(),
+        user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
+      ]);
+      setItems((itemsRes.data as QuoteItemWithProduct[]) || []);
+      if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
+      if (profileRes?.data?.company) setClientCompany(profileRes.data.company);
+      setLoading(false);
+    };
+    load();
+  }, [quoteId, user]);
+
+  const handleCurrencyChange = async (c: Currency) => {
+    setCurrency(c);
+    setCurrencyOpen(false);
+    await supabase.from("trade_quotes").update({ currency: c }).eq("id", quoteId);
+  };
 
   const handleUpdateQuantity = async (itemId: string, newQty: number) => {
     if (newQty < 1) return;
@@ -87,7 +110,6 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const handleSubmit = async () => {
-    // Save notes first
     await supabase.from("trade_quotes").update({
       notes: notes || null,
       status: "submitted",
@@ -108,32 +130,22 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     onStatusChange();
   };
 
-  // Calculate totals
-  const currency = items[0]?.trade_products?.currency || "SGD";
   const subtotalCents = items.reduce((sum, item) => {
     const price = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? 0;
     return sum + price * item.quantity;
   }, 0);
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handlePrint = () => window.print();
 
   return (
     <div className="max-w-4xl">
-      {/* Back button — hidden in print */}
+      {/* Back + Print — hidden in print */}
       <div className="flex items-center justify-between mb-6 print:hidden">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
+        <button onClick={onBack} className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" />
           All Quotes
         </button>
-        <button
-          onClick={handlePrint}
-          className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors"
-        >
+        <button onClick={handlePrint} className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors">
           <Printer className="h-3.5 w-3.5" />
           Print / PDF
         </button>
@@ -141,27 +153,36 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
       {/* Quote document */}
       <div className="border border-border rounded-lg bg-background">
-        {/* Header */}
+        {/* ===== HEADER — matches reference layout ===== */}
         <div className="border-b border-border p-6 md:p-8">
-          <div className="flex items-start justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-6 md:gap-10">
+            {/* Left: Title + Client */}
             <div>
-              <img src={quoteLogo} alt="Affluency" className="h-8 md:h-10 w-auto mb-3" />
-              <h1 className="font-display text-xl md:text-2xl text-foreground tracking-wide uppercase mb-1">
+              <h1 className="font-display text-3xl md:text-4xl text-foreground tracking-wide uppercase mb-3">
                 Quote
               </h1>
-              <p className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">
-                Affluency Etc Pte. Ltd.
-              </p>
-              <p className="font-body text-[10px] text-muted-foreground mt-1">
-                1 Grange Garden, Singapore 249631
-              </p>
+              {clientCompany && (
+                <p className="font-display text-sm text-foreground uppercase tracking-wider">
+                  {clientCompany}
+                </p>
+              )}
             </div>
-            <div className="text-right">
-              <p className="font-body text-xs text-muted-foreground">
-                Date: {new Date(quoteCreatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-              </p>
-              <p className="font-display text-sm text-foreground mt-1">{quoteNumber}</p>
-              <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
+
+            {/* Middle: Date / Expiry / Number */}
+            <div className="space-y-2 text-sm font-body">
+              <div>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Date</span>
+                <span className="text-foreground">{formatDate(createdDate)}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Expiry</span>
+                <span className="text-foreground">{formatDate(expiryDate)}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Quote Number</span>
+                <span className="text-foreground">{quoteNumber}</span>
+              </div>
+              <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
                 quoteStatus === "submitted" ? "bg-primary/10 text-primary" :
                 quoteStatus === "reviewed" ? "bg-emerald-500/10 text-emerald-600" :
                 "bg-muted text-muted-foreground"
@@ -169,10 +190,58 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 {quoteStatus}
               </span>
             </div>
+
+            {/* Right: Logo + Company details */}
+            <div className="flex flex-col items-end gap-3">
+              <img src={affluencyLogo} alt="Affluency" className="h-16 w-16 md:h-20 md:w-20 object-contain" />
+              <div className="text-right">
+                <p className="font-display text-xs text-foreground uppercase tracking-wider">
+                  Affluency Etc Pte. Ltd.
+                </p>
+                <p className="font-body text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                  1 Grange Garden<br />
+                  #16-05<br />
+                  The Grange<br />
+                  249631<br />
+                  Singapore
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Line items */}
+        {/* ===== Currency selector (draft only, hidden in print) ===== */}
+        {isDraft && (
+          <div className="border-b border-border px-6 md:px-8 py-3 flex items-center gap-3 print:hidden">
+            <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">Currency</span>
+            <div className="relative">
+              <button
+                onClick={() => setCurrencyOpen(!currencyOpen)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors"
+              >
+                {currencySymbol(currency)} {currency}
+                <ChevronDown className="h-3 w-3 text-muted-foreground" />
+              </button>
+              {currencyOpen && (
+                <div className="absolute top-full left-0 mt-1 bg-background border border-border rounded-md shadow-lg z-10 min-w-[120px]">
+                  {CURRENCIES.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => handleCurrencyChange(c)}
+                      className={`block w-full text-left px-3 py-2 font-body text-xs hover:bg-muted transition-colors ${
+                        c === currency ? "text-primary font-medium" : "text-foreground"
+                      }`}
+                    >
+                      {currencySymbol(c)} {c}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ===== Line items ===== */}
         <div className="p-6 md:p-8">
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -205,16 +274,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
                   return (
                     <div key={item.id} className="py-4 md:grid md:grid-cols-[1fr_80px_100px_100px] md:gap-4 md:items-start">
-                      {/* Description + Image */}
                       <div className="flex gap-4">
                         <div className="w-20 h-20 rounded bg-muted/30 overflow-hidden shrink-0">
                           {product?.image_url ? (
-                            <img
-                              src={product.image_url}
-                              alt={product.product_name}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
+                            <img src={product.image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <Package className="h-5 w-5 text-muted-foreground/30" />
@@ -228,56 +291,25 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
                             {product?.brand_name}
                           </p>
-                          {product?.dimensions && (
-                            <p className="font-body text-[11px] text-muted-foreground mt-1">
-                              Dimensions: {product.dimensions}
-                            </p>
-                          )}
-                          {product?.materials && (
-                            <p className="font-body text-[11px] text-muted-foreground">
-                              Materials: {product.materials}
-                            </p>
-                          )}
-                          {product?.lead_time && (
-                            <p className="font-body text-[11px] text-muted-foreground">
-                              Lead time: {product.lead_time}
-                            </p>
-                          )}
-                          {item.notes && (
-                            <p className="font-body text-[11px] text-muted-foreground/70 italic mt-1">
-                              {item.notes}
-                            </p>
-                          )}
+                          {product?.dimensions && <p className="font-body text-[11px] text-muted-foreground mt-1">Dimensions: {product.dimensions}</p>}
+                          {product?.materials && <p className="font-body text-[11px] text-muted-foreground">Materials: {product.materials}</p>}
+                          {product?.lead_time && <p className="font-body text-[11px] text-muted-foreground">Lead time: {product.lead_time}</p>}
+                          {item.notes && <p className="font-body text-[11px] text-muted-foreground/70 italic mt-1">{item.notes}</p>}
                           {isDraft && (
-                            <button
-                              onClick={() => handleRemoveItem(item.id)}
-                              className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:text-destructive/80 mt-2 transition-colors"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                              Remove
+                            <button onClick={() => handleRemoveItem(item.id)} className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:text-destructive/80 mt-2 transition-colors">
+                              <Trash2 className="h-3 w-3" /> Remove
                             </button>
                           )}
                         </div>
                       </div>
-
-                      {/* Quantity */}
                       <div className="flex items-center justify-center gap-1 mt-3 md:mt-0">
                         {isDraft ? (
                           <>
-                            <button
-                              onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                              className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-                              disabled={item.quantity <= 1}
-                            >
+                            <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" disabled={item.quantity <= 1}>
                               <Minus className="h-3 w-3" />
                             </button>
-                            <span className="font-body text-sm text-foreground w-8 text-center">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                              className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-                            >
+                            <span className="font-body text-sm text-foreground w-8 text-center">{item.quantity}</span>
+                            <button onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors">
                               <Plus className="h-3 w-3" />
                             </button>
                           </>
@@ -285,19 +317,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <span className="font-body text-sm text-foreground">{item.quantity}</span>
                         )}
                       </div>
-
-                      {/* Unit price */}
                       <div className="text-right mt-2 md:mt-0">
-                        <span className="font-body text-sm text-foreground">
-                          {formatPriceRaw(unitPrice, currency) || "TBD"}
-                        </span>
+                        <span className="font-body text-sm text-foreground">{formatPriceRaw(unitPrice, currency) || "TBD"}</span>
                       </div>
-
-                      {/* Amount */}
                       <div className="text-right mt-1 md:mt-0">
-                        <span className="font-body text-sm text-foreground font-medium">
-                          {formatPriceRaw(lineTotal, currency) || "TBD"}
-                        </span>
+                        <span className="font-body text-sm text-foreground font-medium">{formatPriceRaw(lineTotal, currency) || "TBD"}</span>
                       </div>
                     </div>
                   );
@@ -314,7 +338,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     </div>
                     <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
                       <span className="uppercase tracking-wider">Total {currency}</span>
-                      <span className="font-medium">{formatPriceRaw(subtotalCents, currency) || "TBD"}</span>
+                      <span className="font-medium">{currencySymbol(currency)} {formatPriceRaw(subtotalCents, currency) || "TBD"}</span>
                     </div>
                   </div>
                 </div>
@@ -337,37 +361,23 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 rows={3}
                 className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none transition-colors"
               />
-              <button
-                onClick={handleSaveNotes}
-                className="font-body text-[10px] text-muted-foreground hover:text-foreground uppercase tracking-wider transition-colors"
-              >
+              <button onClick={handleSaveNotes} className="font-body text-[10px] text-muted-foreground hover:text-foreground uppercase tracking-wider transition-colors">
                 Save Notes
               </button>
             </div>
           ) : (
-            <p className="font-body text-sm text-muted-foreground italic">
-              {notes || "No notes"}
-            </p>
+            <p className="font-body text-sm text-muted-foreground italic">{notes || "No notes"}</p>
           )}
         </div>
 
         {/* Actions — hidden in print */}
         {isDraft && (
           <div className="border-t border-border p-6 md:p-8 flex items-center justify-between print:hidden">
-            <button
-              onClick={handleDelete}
-              className="inline-flex items-center gap-1.5 font-body text-[10px] text-destructive hover:text-destructive/80 uppercase tracking-wider transition-colors"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              Delete Quote
+            <button onClick={handleDelete} className="inline-flex items-center gap-1.5 font-body text-[10px] text-destructive hover:text-destructive/80 uppercase tracking-wider transition-colors">
+              <Trash2 className="h-3.5 w-3.5" /> Delete Quote
             </button>
-            <button
-              onClick={handleSubmit}
-              disabled={items.length === 0}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-40"
-            >
-              <Send className="h-3.5 w-3.5" />
-              Submit Quote
+            <button onClick={handleSubmit} disabled={items.length === 0} className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-40">
+              <Send className="h-3.5 w-3.5" /> Submit Quote
             </button>
           </div>
         )}
