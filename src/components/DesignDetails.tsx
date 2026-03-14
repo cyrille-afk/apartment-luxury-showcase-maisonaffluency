@@ -168,6 +168,23 @@ const DesignDetails = () => {
                   </AccordionContent>
                 </AccordionItem>)}
             </Accordion>
+
+            {/* CTA after principles */}
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a
+                href="/trade/register"
+                className="inline-flex items-center gap-2 px-8 py-3 bg-foreground text-background font-body text-sm uppercase tracking-[0.2em] rounded-full hover:opacity-90 transition-opacity"
+              >
+                <Briefcase className="w-4 h-4" />
+                Apply Now
+              </a>
+              <a
+                href="/trade/login"
+                className="font-body text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+              >
+                Already a member? Sign in
+              </a>
+            </div>
           </motion.div>
         </div>
       </section>

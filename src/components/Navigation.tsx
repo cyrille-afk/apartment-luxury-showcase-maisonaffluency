@@ -46,7 +46,7 @@ const leftNavItems = [{
 
 const rightNavItems = [{
   label: "Trade Program",
-  href: "/trade/login",
+  href: "#details",
   icon: Briefcase,
 }];
 
