@@ -14,7 +14,10 @@ const TradeRegister = lazy(() => import("./pages/TradeRegister"));
 const TradeLayout = lazy(() => import("./pages/TradeLayout"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard"));
 const TradeAdmin = lazy(() => import("./pages/TradeAdmin"));
-const TradePlaceholder = lazy(() => import("./pages/TradePlaceholder"));
+const TradeGallery = lazy(() => import("./pages/TradeGallery"));
+const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
+const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
+const TradeSettings = lazy(() => import("./pages/TradeSettings"));
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
