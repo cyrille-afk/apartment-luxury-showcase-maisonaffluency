@@ -171,7 +171,7 @@ const TradeAdmin = () => {
                       <Check className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleAction(app.id, app.user_id, "rejected")}
+                      onClick={() => handleAction(app, "rejected")}
                       className="p-2 rounded-full border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
                       title="Reject"
                     >
