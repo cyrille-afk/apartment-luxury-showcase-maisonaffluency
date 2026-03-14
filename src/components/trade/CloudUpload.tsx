@@ -25,7 +25,7 @@ const CloudUpload = ({
   folder,
   accept,
   multiple = false,
-  maxSizeMB = 20,
+  maxSizeMB = 50,
   label,
   onUpload,
   disabled = false,
