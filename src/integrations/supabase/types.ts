@@ -67,6 +67,7 @@ export type Database = {
           gallery_images: string[] | null
           id: string
           is_published: boolean
+          pdf_url: string | null
           published_at: string | null
           read_time_minutes: number | null
           slug: string
@@ -84,6 +85,7 @@ export type Database = {
           gallery_images?: string[] | null
           id?: string
           is_published?: boolean
+          pdf_url?: string | null
           published_at?: string | null
           read_time_minutes?: number | null
           slug: string
@@ -101,6 +103,7 @@ export type Database = {
           gallery_images?: string[] | null
           id?: string
           is_published?: boolean
+          pdf_url?: string | null
           published_at?: string | null
           read_time_minutes?: number | null
           slug?: string

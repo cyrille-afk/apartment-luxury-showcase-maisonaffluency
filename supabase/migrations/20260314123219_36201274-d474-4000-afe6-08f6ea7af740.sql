@@ -1,0 +1,1 @@
+ALTER TABLE public.journal_articles ADD COLUMN pdf_url text DEFAULT null;
