@@ -44,12 +44,17 @@ const TradeShowroom = () => {
         .order("designer_name", { ascending: true });
 
       if (data) {
-        // Deduplicate by product_name + designer_name, keep the richest entry
+        // Deduplicate by product_name (case-insensitive), keep the entry with the most data
         const seen = new Map<string, ShowroomProduct>();
         for (const item of data as ShowroomProduct[]) {
-          const key = `${item.product_name}::${item.designer_name || ""}`;
+          const key = item.product_name.trim().toLowerCase();
           const existing = seen.get(key);
-          if (!existing || (!existing.product_image_url && item.product_image_url) || (!existing.materials && item.materials)) {
+          if (
+            !existing ||
+            (!existing.product_image_url && item.product_image_url) ||
+            (!existing.materials && item.materials) ||
+            (!existing.dimensions && item.dimensions)
+          ) {
             seen.set(key, item);
           }
         }
