@@ -58,6 +58,7 @@ const TradeShowroom = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedDesigner, setSelectedDesigner] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedRoom, setSelectedRoom] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
