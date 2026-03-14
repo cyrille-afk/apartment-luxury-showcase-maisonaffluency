@@ -586,6 +586,7 @@ export const atelierOnlyPicks: Record<string, { name: string; curatorPicks: Cura
         tags: ["Seating", "Chairs"],
         materials: "Solid wood frame (ash, oak or walnut)\nUpholstered seat in a range of fabric and leather options",
         dimensions: "W 49 × D 53 × H 76.5 cm · SH 48 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/spec-sheets%2Fde-la-espada%2F171Y_Vega_B_Dining_Chair_By_Anthony_Guerree.pdf",
       },
       {
         image: delaEspadaAzoresSofa,
