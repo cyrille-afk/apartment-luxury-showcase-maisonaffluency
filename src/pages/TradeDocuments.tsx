@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet } from "lucide-react";
 
