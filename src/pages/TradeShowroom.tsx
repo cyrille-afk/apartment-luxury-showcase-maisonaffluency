@@ -281,6 +281,42 @@ const TradeShowroom = () => {
     }
   };
 
+  // Admin: upload product image and update all matching hotspots
+  const handleImageUpload = async (product: ShowroomProduct, file: File) => {
+    if (!isAdmin) return;
+    const maxBytes = 20 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      toast({ title: "File too large", description: "Max 20 MB", variant: "destructive" });
+      return;
+    }
+    setUploadingId(product.id);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: uploadErr } = await supabase.storage.from("assets").upload(path, file, { contentType: file.type });
+    if (uploadErr) {
+      toast({ title: "Upload failed", description: uploadErr.message, variant: "destructive" });
+      setUploadingId(null);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+    const publicUrl = urlData.publicUrl;
+
+    // Update all hotspots with this product name
+    const { error: updateErr } = await supabase
+      .from("gallery_hotspots")
+      .update({ product_image_url: publicUrl })
+      .eq("product_name", product.product_name);
+    if (updateErr) {
+      toast({ title: "Update failed", description: updateErr.message, variant: "destructive" });
+    } else {
+      setProducts((prev) =>
+        prev.map((p) => p.product_name === product.product_name ? { ...p, product_image_url: publicUrl } : p)
+      );
+      toast({ title: "Image updated", description: product.product_name });
+    }
+    setUploadingId(null);
+  };
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
