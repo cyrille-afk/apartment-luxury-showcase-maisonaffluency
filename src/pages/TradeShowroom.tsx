@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import QuoteDrawer from "@/components/trade/QuoteDrawer";
 
 interface ShowroomProduct {
   id: string;
@@ -43,6 +44,8 @@ const TradeShowroom = () => {
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
 
   // Fetch hotspot products (deduplicated by product_name + designer_name)
   useEffect(() => {
@@ -185,6 +188,8 @@ const TradeShowroom = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       setAddedProductIds((prev) => new Set(prev).add(product.id));
+      setDrawerRefreshKey((k) => k + 1);
+      setDrawerOpen(true);
       toast({ title: "Added to quote", description: `${product.product_name} added to QU-${quoteId.slice(0, 6).toUpperCase()}` });
     }
     setAddingProductId(null);
@@ -213,6 +218,18 @@ const TradeShowroom = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="relative p-2 border border-border rounded-md text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors"
+            title="View active quote"
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {addedProductIds.size > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-medium rounded-full flex items-center justify-center">
+                {addedProductIds.size}
+              </span>
+            )}
+          </button>
           {draftQuotes.length > 0 && (
             <select
               value={activeQuoteId || ""}
@@ -441,6 +458,13 @@ const TradeShowroom = () => {
           })}
         </div>
       )}
+
+      <QuoteDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        quoteId={activeQuoteId}
+        refreshKey={drawerRefreshKey}
+      />
     </div>
   );
 };
