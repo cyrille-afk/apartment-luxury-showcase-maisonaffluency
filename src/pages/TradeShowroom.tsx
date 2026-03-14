@@ -399,7 +399,7 @@ const TradeShowroom = () => {
                   <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-background/80 backdrop-blur-sm font-body text-[9px] text-muted-foreground">
                       <MapPin className="h-2.5 w-2.5" />
-                      {product.image_identifier}
+                      {getSection(product.image_identifier)}
                     </span>
                   </div>
                   {/* Overlay actions */}
