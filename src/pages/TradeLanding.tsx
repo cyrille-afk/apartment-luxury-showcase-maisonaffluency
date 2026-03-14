@@ -184,16 +184,16 @@ const TradeLanding = () => {
           </div>
         </div>
 
-        {/* Desktop: alternating 50/50 split */}
-        <div className="hidden md:block">
+        {/* Desktop: alternating 50/50 split — narrower container */}
+        <div className="hidden md:block max-w-6xl mx-auto px-8 lg:px-12 py-8">
           {benefits.map((benefit, index) => {
             const isEven = index % 2 === 0;
             return (
               <div
                 key={index}
-                className={`flex ${isEven ? "flex-row" : "flex-row-reverse"} min-h-[70vh]`}
+                className={`flex ${isEven ? "flex-row" : "flex-row-reverse"} mb-12 last:mb-0 rounded-sm overflow-hidden`}
               >
-                <div className="w-1/2 overflow-hidden relative">
+                <div className="w-1/2 aspect-[4/3] overflow-hidden relative">
                   <img
                     src={benefit.image}
                     alt={benefit.title}
@@ -207,12 +207,12 @@ const TradeLanding = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.8 }}
-                  className="w-1/2 flex flex-col justify-center items-center text-center px-14 lg:px-20 py-20"
+                  className="w-1/2 flex flex-col justify-center items-center text-center px-10 lg:px-16 py-12"
                 >
-                  <h2 className="font-display text-2xl lg:text-3xl text-foreground mb-5">
+                  <h2 className="font-display text-xl lg:text-2xl text-foreground mb-4">
                     {benefit.title}
                   </h2>
-                  <p className="font-body text-lg leading-relaxed text-muted-foreground text-justify">
+                  <p className="font-body text-base leading-relaxed text-muted-foreground text-justify">
                     {benefit.description}
                   </p>
                 </motion.div>
