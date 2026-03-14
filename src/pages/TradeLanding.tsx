@@ -89,9 +89,9 @@ const TradeLanding = () => {
         {/* ─── Full-width Hero ─── */}
         <div className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden">
           <img
-            src={cloudinaryUrl("v1772085848/intimate-dining_ux4pee", { width: 1920, quality: "auto:good", crop: "fill" })}
+            src={cloudinaryUrl("v1772085848/intimate-dining_ux4pee", { width: 1920, quality: "auto:good", crop: "fit" })}
             alt="Maison Affluency Trade Program"
-            className="w-full h-full object-cover object-[center_70%]"
+            className="w-full h-full object-contain bg-black"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent" />
           <motion.div
