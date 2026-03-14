@@ -189,14 +189,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   return (
     <div className="max-w-4xl">
       {/* Back + Print — hidden in print */}
-      <div className="flex items-center justify-between mb-6 print:hidden">
+      <div className="flex items-center justify-between mb-4 md:mb-6 print:hidden">
         <button onClick={onBack} className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" />
-          All Quotes
+          <span className="hidden sm:inline">All Quotes</span>
+          <span className="sm:hidden">Back</span>
         </button>
-        <button onClick={handlePrint} className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors">
+        <button onClick={handlePrint} className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors">
           <Printer className="h-3.5 w-3.5" />
-          Print / PDF
+          <span className="hidden sm:inline">Print / PDF</span>
+          <span className="sm:hidden">Print</span>
         </button>
       </div>
 
