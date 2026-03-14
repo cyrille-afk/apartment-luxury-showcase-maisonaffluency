@@ -85,13 +85,27 @@ const TradeShowroom = () => {
 
         // Deduplicate by product_name (case-insensitive) AND by product_image_url
         const seenByName = new Map<string, ShowroomProduct>();
-        const seenImageUrls = new Set<string>();
+        const seenImageUrls = new Map<string, string>(); // image_url → name key
         for (const item of data as ShowroomProduct[]) {
           const key = item.product_name.trim().toLowerCase();
           const existing = seenByName.get(key);
 
-          // Skip if we've already seen this exact image under a different name
+          // If we've already seen this exact image under a different name,
+          // merge price/pdf data into the existing entry rather than skipping
           if (item.product_image_url && seenImageUrls.has(item.product_image_url) && !existing) {
+            const existingKey = seenImageUrls.get(item.product_image_url)!;
+            const existingItem = seenByName.get(existingKey);
+            if (existingItem) {
+              const price = priceLookup.get(key);
+              const pdf = pdfLookup.get(key);
+              if (price && !existingItem.trade_price_cents) {
+                existingItem.trade_price_cents = price.cents;
+                existingItem.currency = price.currency;
+              }
+              if (pdf && !existingItem.pdf_url) {
+                existingItem.pdf_url = pdf;
+              }
+            }
             continue;
           }
 
@@ -108,7 +122,7 @@ const TradeShowroom = () => {
               trade_price_cents: price?.cents ?? null,
               currency: price?.currency,
             });
-            if (item.product_image_url) seenImageUrls.add(item.product_image_url);
+            if (item.product_image_url) seenImageUrls.set(item.product_image_url, key);
           }
         }
         setProducts([...seenByName.values()]);
