@@ -40,14 +40,7 @@ const CloudUpload = ({
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
-    const maxBytes = maxSizeMB * 1024 * 1024;
-    const validFiles = Array.from(files).filter((f) => {
-      if (f.size > maxBytes) {
-        toast({ title: "File too large", description: `${f.name} exceeds ${maxSizeMB} MB`, variant: "destructive" });
-        return false;
-      }
-      return true;
-    });
+    const validFiles = Array.from(files);
 
     if (validFiles.length === 0) return;
 
