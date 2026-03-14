@@ -497,10 +497,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         </div>
 
         {/* Payment Terms & Banking Details */}
-        <div className="border-t border-border p-6 md:p-8 space-y-6">
+        <div className="border-t border-border p-4 md:p-6 lg:p-8 space-y-5 md:space-y-6">
           <div>
             <h3 className="font-display text-xs uppercase tracking-[0.15em] text-foreground mb-3">Payment Terms</h3>
-            <ul className="font-body text-[11px] leading-relaxed text-muted-foreground space-y-1.5 list-disc list-inside">
+            <ul className="font-body text-[10px] md:text-[11px] leading-relaxed text-muted-foreground space-y-1.5 list-disc list-inside">
               <li>60% payment upon order confirmation unless indicated otherwise</li>
               <li>Payment by bank transfer</li>
               <li>Balance of Payment ex-work prior to shipping</li>
@@ -508,8 +508,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
 
           <div>
-            <p className="font-body text-[11px] text-muted-foreground mb-2">Payment by bank transfer to:</p>
-            <div className="font-body text-[11px] leading-relaxed text-foreground/80 space-y-0.5">
+            <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mb-2">Payment by bank transfer to:</p>
+            <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-foreground/80 space-y-0.5">
               <p className="font-medium text-foreground">AFFLUENCY ETC Pte. Ltd.</p>
               <p>Account Number: 713127249001</p>
               <p>Bank Name: OCBC Bank</p>
@@ -522,7 +522,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
           <div className="border-t border-border pt-4">
             <h3 className="font-display text-xs uppercase tracking-[0.15em] text-foreground mb-2">Terms &amp; Conditions</h3>
-            <p className="font-body text-[11px] text-muted-foreground leading-relaxed">
+            <p className="font-body text-[10px] md:text-[11px] text-muted-foreground leading-relaxed">
               The terms and conditions will be given separately and shall apply to the quotation given for the supply of any items detailed herein. Please read carefully.
             </p>
           </div>
