@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState, useRef } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import { CompareProvider } from "@/contexts/CompareContext";
 import { AuthProvider } from "@/hooks/useAuth";
