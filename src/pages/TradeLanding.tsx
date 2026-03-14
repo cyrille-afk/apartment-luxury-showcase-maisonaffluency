@@ -121,7 +121,7 @@ const TradeLanding = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.8 }}
-          className="max-w-3xl mx-auto px-6 py-12 md:py-28 text-center"
+          className="max-w-3xl mx-auto px-6 py-10 md:py-16 text-center"
         >
           <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6">
             Your Exclusive Benefits and Bespoke Services
