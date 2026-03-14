@@ -56,6 +56,57 @@ export type Database = {
         }
         Relationships: []
       }
+      journal_articles: {
+        Row: {
+          author: string
+          category: Database["public"]["Enums"]["journal_category"]
+          content: string
+          cover_image_url: string | null
+          created_at: string
+          excerpt: string
+          id: string
+          is_published: boolean
+          published_at: string | null
+          read_time_minutes: number | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string
+          category?: Database["public"]["Enums"]["journal_category"]
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          read_time_minutes?: number | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          category?: Database["public"]["Enums"]["journal_category"]
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          read_time_minutes?: number | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company: string
@@ -361,6 +412,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "trade_user"
+      journal_category:
+        | "designer_interview"
+        | "collection_story"
+        | "design_trend"
+        | "project_showcase"
+        | "international_editorial"
       trade_application_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -490,6 +547,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "trade_user"],
+      journal_category: [
+        "designer_interview",
+        "collection_story",
+        "design_trend",
+        "project_showcase",
+        "international_editorial",
+      ],
       trade_application_status: ["pending", "approved", "rejected"],
     },
   },
