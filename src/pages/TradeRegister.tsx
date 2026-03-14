@@ -117,13 +117,26 @@ const TradeRegister = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-10">
+    <div className="min-h-screen bg-background px-4 py-6 md:py-12">
+      {/* Top bar: back link + sign in */}
+      <div className="w-full max-w-2xl mx-auto flex items-center justify-between mb-6">
+        <Link to="/" className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors">
+          ← Back to Maison Affluency
+        </Link>
+        <Link
+          to="/trade/login"
+          className="px-5 py-2 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:opacity-90 transition-opacity"
+        >
+          Sign In
+        </Link>
+      </div>
+
+      <div className="w-full max-w-2xl mx-auto">
+        <div className="text-center mb-6">
           <Link to="/" className="inline-block">
-            <h1 className="font-display text-2xl text-foreground tracking-wide">Maison Affluency</h1>
+            <h1 className="font-display text-xl md:text-2xl text-foreground tracking-wide">Maison Affluency</h1>
           </Link>
-          <p className="font-body text-sm text-muted-foreground mt-2">Trade Account Application</p>
+          <p className="font-body text-xs text-muted-foreground mt-1">Trade Account Application</p>
         </div>
 
         {/* Benefits summary */}
