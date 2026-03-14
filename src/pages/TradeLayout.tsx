@@ -57,9 +57,9 @@ const TradeLayout = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <TradeSidebar />
+        <div data-trade-sidebar><TradeSidebar /></div>
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center border-b border-border px-4 bg-background sticky top-0 z-10">
+          <header className="h-14 flex items-center border-b border-border px-4 bg-background sticky top-0 z-10 print:hidden">
             <SidebarTrigger className="mr-4" />
             <span className="font-body text-xs text-muted-foreground uppercase tracking-[0.15em]">Trade Portal</span>
           </header>

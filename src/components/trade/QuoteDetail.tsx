@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer } from "lucide-react";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
 const quoteLogo = cloudinaryUrl("affluency-footer-logo_gvpt4u", { width: 400, quality: "auto", crop: "fill" });
@@ -115,16 +115,29 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     return sum + price * item.quantity;
   }, 0);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <div className="max-w-4xl">
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors mb-6"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        All Quotes
-      </button>
+      {/* Back button — hidden in print */}
+      <div className="flex items-center justify-between mb-6 print:hidden">
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          All Quotes
+        </button>
+        <button
+          onClick={handlePrint}
+          className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors"
+        >
+          <Printer className="h-3.5 w-3.5" />
+          Print / PDF
+        </button>
+      </div>
 
       {/* Quote document */}
       <div className="border border-border rounded-lg bg-background">
@@ -338,9 +351,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           )}
         </div>
 
-        {/* Actions */}
+        {/* Actions — hidden in print */}
         {isDraft && (
-          <div className="border-t border-border p-6 md:p-8 flex items-center justify-between">
+          <div className="border-t border-border p-6 md:p-8 flex items-center justify-between print:hidden">
             <button
               onClick={handleDelete}
               className="inline-flex items-center gap-1.5 font-body text-[10px] text-destructive hover:text-destructive/80 uppercase tracking-wider transition-colors"
