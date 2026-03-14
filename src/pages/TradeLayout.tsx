@@ -1,4 +1,5 @@
 import { Outlet, Navigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TradeSidebar } from "@/components/trade/TradeSidebar";
 import { useAuth } from "@/hooks/useAuth";
@@ -56,6 +57,9 @@ const TradeLayout = () => {
 
   return (
     <SidebarProvider>
+      <Helmet>
+        <meta name="pinterest" content="nopin" />
+      </Helmet>
       <div className="min-h-screen flex w-full bg-background">
         <div data-trade-sidebar><TradeSidebar /></div>
         <div className="flex-1 flex flex-col min-w-0">
