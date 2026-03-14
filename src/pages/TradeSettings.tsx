@@ -77,8 +77,8 @@ const TradeSettings = () => {
       toast({ title: "Error", description: "Passwords do not match", variant: "destructive" });
       return;
     }
-    if (passwords.newPassword.length < 6) {
-      toast({ title: "Error", description: "Password must be at least 6 characters", variant: "destructive" });
+    if (passwords.newPassword.length < 8) {
+      toast({ title: "Error", description: "Password must be at least 8 characters", variant: "destructive" });
       return;
     }
 
@@ -203,7 +203,7 @@ const TradeSettings = () => {
               type="password"
               value={passwords.newPassword}
               onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-              placeholder="Min. 6 characters"
+              placeholder="Min. 8 characters"
               className={inputClass}
             />
           </div>
