@@ -26,6 +26,16 @@ const TradeLogin = () => {
       return;
     }
 
+    // Signal the browser's password manager to save credentials
+    if (window.PasswordCredential) {
+      try {
+        const cred = new PasswordCredential({ id: email, password });
+        await navigator.credentials.store(cred);
+      } catch {
+        // Silently ignore if credential storage fails
+      }
+    }
+
     navigate("/trade");
     setLoading(false);
   };
