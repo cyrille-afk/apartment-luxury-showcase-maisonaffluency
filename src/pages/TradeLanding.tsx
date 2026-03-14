@@ -34,8 +34,7 @@ const benefits = [
     title: "Samples & Swatches",
     description:
       "Every material speaks to authenticity and craftsmanship. Access the most comprehensive material library featuring a vast, curated selection of items or request the ones you truly desire.",
-    // TODO: Replace with your own image
-    image: cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 1400, quality: "auto:good", crop: "fill" }),
+    image: cloudinaryUrl("v1773472728/elegant-interior-design-material-palette-featuring-marble-wood-and-concrete-samples-for-home-renovation-projects-photo_jtnzi3", { width: 1400, quality: "auto:good", crop: "fill" }),
   },
   {
     title: "Consolidated Insured Shipping",
