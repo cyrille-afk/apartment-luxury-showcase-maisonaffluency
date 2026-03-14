@@ -179,8 +179,8 @@ const TradeRegister = () => {
 
           {/* Personal Info */}
           <div>
-            <h2 className="font-display text-lg text-foreground mb-4">Personal Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="font-display text-base text-foreground mb-3">Personal Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="font-body text-sm text-foreground">First Name<span className="text-destructive">*</span></label>
                 <input type="text" required value={form.firstName} onChange={(e) => update("firstName", e.target.value)}
