@@ -172,7 +172,7 @@ const TradeLanding = () => {
                 <h2 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground mb-5">
                   {benefit.title}
                 </h2>
-                <p className="font-body text-base md:text-lg leading-relaxed text-muted-foreground">
+                <p className="font-body text-base md:text-lg leading-relaxed text-muted-foreground text-justify">
                   {benefit.description}
                 </p>
               </motion.div>
