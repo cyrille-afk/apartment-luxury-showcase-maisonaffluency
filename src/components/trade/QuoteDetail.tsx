@@ -349,9 +349,23 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       <span>Subtotal</span>
                       <span>{formatPriceRaw(subtotalCents, currency) || "TBD"}</span>
                     </div>
+                    {currency === "SGD" && subtotalCents > 0 && (
+                      <div className="flex justify-between font-body text-xs text-muted-foreground">
+                        <span>GST (9%)</span>
+                        <span>{formatPriceRaw(Math.round(subtotalCents * 0.09), currency)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
                       <span className="uppercase tracking-wider">Total {currency}</span>
-                      <span className="font-medium">{currencySymbol(currency)} {formatPriceRaw(subtotalCents, currency) || "TBD"}</span>
+                      <span className="font-medium">
+                        {currencySymbol(currency)}{" "}
+                        {formatPriceRaw(
+                          currency === "SGD" && subtotalCents > 0
+                            ? subtotalCents + Math.round(subtotalCents * 0.09)
+                            : subtotalCents,
+                          currency
+                        ) || "TBD"}
+                      </span>
                     </div>
                   </div>
                 </div>
