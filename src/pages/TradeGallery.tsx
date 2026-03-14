@@ -126,19 +126,14 @@ const TradeGallery = () => {
 
   return (
     <div className="max-w-7xl">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="font-display text-2xl text-foreground mb-1">Trade Gallery</h1>
-          <p className="font-body text-sm text-muted-foreground">
-            {filtered.length} {filtered.length === 1 ? "product" : "products"}
-            {selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Active quote selector */}
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="relative p-2 border border-border rounded-md text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors"
+      <SectionHero
+        section="gallery"
+        title="Trade Gallery"
+        subtitle={`${filtered.length} ${filtered.length === 1 ? "product" : "products"}${selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}`}
+      >
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className="relative p-2 border border-background/30 rounded-md text-background/70 hover:text-background hover:border-background/50 transition-colors"
             title="View active quote"
           >
             <ShoppingCart className="h-4 w-4" />
