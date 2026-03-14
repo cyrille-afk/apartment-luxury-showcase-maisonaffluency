@@ -24,6 +24,7 @@ const TradeSettings = lazy(() => import("./pages/TradeSettings"));
 const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
 const TradeJournal = lazy(() => import("./pages/TradeJournal"));
 const TradeProvenance = lazy(() => import("./pages/TradeProvenance"));
+const TradeDocumentsAdmin = lazy(() => import("./pages/TradeDocumentsAdmin"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Journal = lazy(() => import("./pages/Journal"));
 const JournalArticle = lazy(() => import("./pages/JournalArticle"));
@@ -96,6 +97,7 @@ const App = () => {
             <Route path="showroom" element={<TradeShowroom />} />
             <Route path="journal" element={<TradeJournal />} />
             <Route path="provenance" element={<TradeProvenance />} />
+            <Route path="documents-admin" element={<TradeDocumentsAdmin />} />
             <Route path="settings" element={<TradeSettings />} />
           </Route>
           
