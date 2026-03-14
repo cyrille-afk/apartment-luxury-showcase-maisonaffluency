@@ -272,6 +272,7 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, onTh
               editable={editable}
               isUploading={uploadingBrand === brand.name}
               onUpload={(file) => handleThumbnailUpload(brand.name, file)}
+              onRemove={() => handleThumbnailRemove(brand.name)}
             />
           ))}
         </div>
