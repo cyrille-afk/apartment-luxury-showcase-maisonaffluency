@@ -95,6 +95,7 @@ const App = () => {
             <Route path="documents" element={<TradeDocuments />} />
             <Route path="showroom" element={<TradeShowroom />} />
             <Route path="journal" element={<TradeJournal />} />
+            <Route path="provenance" element={<TradeProvenance />} />
             <Route path="settings" element={<TradeSettings />} />
           </Route>
           
