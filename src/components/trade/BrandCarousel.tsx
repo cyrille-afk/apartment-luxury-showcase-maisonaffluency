@@ -145,7 +145,7 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, onTh
 
                 {/* Admin upload overlay */}
                 {editable && !isUploading && (
-                  <label className="absolute top-1.5 right-1 p-1 rounded-full bg-background/80 border border-border shadow-sm opacity-0 group-hover/brand:opacity-100 transition-opacity cursor-pointer hover:bg-muted z-10"
+                  <label className="absolute top-1.5 right-1 p-1 rounded-full bg-background/80 border border-border shadow-sm cursor-pointer hover:bg-muted z-10"
                     title={`Upload thumbnail for ${brand.name}`}
                   >
                     <Camera className="w-3 h-3 text-muted-foreground" />
