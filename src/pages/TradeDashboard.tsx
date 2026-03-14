@@ -135,17 +135,17 @@ const TradeDashboard = () => {
 
   return (
     <div className="max-w-4xl">
-      <div className="mb-8">
-        <h1 className="font-display text-2xl md:text-3xl text-foreground">
+      <div className="mb-6 md:mb-8">
+        <h1 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground">
           Welcome back{profile?.first_name ? `, ${profile.first_name}` : ""}
         </h1>
-        <p className="font-body text-sm text-muted-foreground mt-2">
+        <p className="font-body text-xs md:text-sm text-muted-foreground mt-1.5">
           {profile?.company && <span>{profile.company} · </span>}
           Your trade dashboard
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {quickLinks.map((link) => (
           <Link
             key={link.to}
@@ -161,9 +161,9 @@ const TradeDashboard = () => {
               />
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
             </div>
-            <div className="p-4">
-              <h3 className="font-display text-base text-foreground mb-1">{link.title}</h3>
-              <p className="font-body text-xs text-muted-foreground">{link.description}</p>
+            <div className="p-3 md:p-4">
+              <h3 className="font-display text-sm md:text-base text-foreground mb-0.5 md:mb-1">{link.title}</h3>
+              <p className="font-body text-[10px] md:text-xs text-muted-foreground leading-tight">{link.description}</p>
             </div>
           </Link>
         ))}
