@@ -1,0 +1,1 @@
+UPDATE trade_documents SET brand_name = 'De La Espada' WHERE brand_name = 'De LA Espada';
