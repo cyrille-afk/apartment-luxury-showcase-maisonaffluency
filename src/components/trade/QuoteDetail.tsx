@@ -81,7 +81,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, client_name").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       setItems((itemsRes.data as QuoteItemWithProduct[]) || []);
