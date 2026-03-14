@@ -275,6 +275,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           <div className="border-b border-border px-6 md:px-8 py-3 flex items-center gap-3 print:hidden">
             <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">Currency</span>
             <div className="relative">
+            </div>
+            <div className="relative">
               <button
                 onClick={() => setCurrencyOpen(!currencyOpen)}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors"
