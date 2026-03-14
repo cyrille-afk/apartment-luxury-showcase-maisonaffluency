@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -28,6 +29,21 @@ const TradeLogin = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <Helmet>
+        <title>Trade Portal — Maison Affluency</title>
+        <meta name="description" content="Sign in to the Maison Affluency Trade Portal. Exclusive access for architects and interior designers to trade pricing, spec sheets, and curated collections." />
+        <meta property="og:title" content="Trade Portal — Maison Affluency" />
+        <meta property="og:description" content="Exclusive access for architects and interior designers to trade pricing, spec sheets, and curated collections." />
+        <meta property="og:image" content="https://maisonaffluency.com/images/og-trade-portal.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:url" content="https://maisonaffluency.com/trade/login" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Trade Portal — Maison Affluency" />
+        <meta name="twitter:description" content="Exclusive access for architects and interior designers to trade pricing, spec sheets, and curated collections." />
+        <meta name="twitter:image" content="https://maisonaffluency.com/images/og-trade-portal.jpg" />
+        <link rel="canonical" href="https://maisonaffluency.com/trade/login" />
+      </Helmet>
       <div className="w-full max-w-md">
         {/* Logo / Brand */}
         <div className="text-center mb-10">
