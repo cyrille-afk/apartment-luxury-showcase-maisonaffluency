@@ -186,14 +186,14 @@ const TradeAdmin = () => {
                 {app.status === "pending" && (
                   <div className="flex gap-2 shrink-0">
                     <button
-                      onClick={() => handleAction(app, "approved")}
+                      onClick={() => setConfirmDialog({ app, action: "approved" })}
                       className="p-2 rounded-full border border-success/30 text-success hover:bg-success/10 transition-colors"
                       title="Approve"
                     >
                       <Check className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleAction(app, "rejected")}
+                      onClick={() => setConfirmDialog({ app, action: "rejected" })}
                       className="p-2 rounded-full border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
                       title="Reject"
                     >
