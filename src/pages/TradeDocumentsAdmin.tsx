@@ -6,6 +6,7 @@ import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, FileText, X } from "lucide-react";
 import CloudUpload from "@/components/trade/CloudUpload";
+import BrandCarousel from "@/components/trade/BrandCarousel";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
