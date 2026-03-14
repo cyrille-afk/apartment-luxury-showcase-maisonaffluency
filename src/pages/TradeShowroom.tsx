@@ -361,6 +361,11 @@ const TradeShowroom = () => {
                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
                     {product.product_name}
                   </h3>
+                  {product.trade_price_cents && product.currency && (
+                    <p className="font-body text-xs text-primary font-medium mt-1">
+                      {formatPrice(product.trade_price_cents, product.currency)}
+                    </p>
+                  )}
                   {product.dimensions && (
                     <p className="font-body text-[10px] text-muted-foreground mt-1 line-clamp-2">{product.dimensions}</p>
                   )}
