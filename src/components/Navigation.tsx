@@ -375,7 +375,7 @@ const Navigation = () => {
         <div className="hidden md:flex flex-col items-center">
           {/* Top row: Trade Program | MAISON AFFLUENCY | Contact Us */}
           <div className="w-full grid grid-cols-[1fr_auto_1fr] items-center pt-5 pb-3">
-            <div className="flex justify-start">
+            <div className="flex justify-start gap-6 lg:gap-8">
               {rightNavItems.map((item) => (
                 <button 
                   key={item.href} 
