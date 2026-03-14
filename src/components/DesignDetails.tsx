@@ -121,7 +121,7 @@ const DesignDetails = () => {
               {/* Image with overlaid text */}
               <div className="md:w-1/2 overflow-hidden rounded-sm relative flex-shrink-0">
                 <img
-                  src={cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 800, quality: "auto:good", crop: "fill", aspect_ratio: "3:4" })}
+                  src={cloudinaryUrl("v1772600100/IMG_3387_1_p1mhex", { width: 800, height: 1067, quality: "auto:good", crop: "fill" })}
                   alt="Luxury furniture styled in a professionally designed interior at Maison Affluency showroom"
                   className="w-full h-full object-cover object-center"
                   loading="lazy"
