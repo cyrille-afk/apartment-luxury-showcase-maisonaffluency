@@ -166,6 +166,7 @@ const TradeAdmin = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

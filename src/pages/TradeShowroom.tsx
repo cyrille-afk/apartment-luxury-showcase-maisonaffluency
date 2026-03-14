@@ -546,6 +546,7 @@ const TradeShowroom = () => {
         refreshKey={drawerRefreshKey}
       />
     </div>
+    </>
   );
 };
 

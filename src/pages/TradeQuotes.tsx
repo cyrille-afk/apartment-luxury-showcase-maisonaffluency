@@ -183,6 +183,7 @@ const TradeQuotes = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

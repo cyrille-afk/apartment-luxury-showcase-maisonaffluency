@@ -195,6 +195,7 @@ const TradeDocuments = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

@@ -408,6 +408,7 @@ const TradeGallery = () => {
         refreshKey={drawerRefreshKey}
       />
     </div>
+    </>
   );
 };
 

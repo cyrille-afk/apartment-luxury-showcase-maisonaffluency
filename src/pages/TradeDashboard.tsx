@@ -259,6 +259,7 @@ const TradeDashboard = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 
