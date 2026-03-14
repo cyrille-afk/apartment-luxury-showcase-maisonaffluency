@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown } from "lucide-react";
+import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import affluencyLogo from "@/assets/affluency-logo-square.jpg";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
@@ -318,8 +319,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         {/* ===== Line items ===== */}
         <div className="p-4 md:p-6 lg:p-8">
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <div className="divide-y divide-border">
+              {Array.from({ length: 3 }).map((_, i) => <QuoteItemSkeleton key={i} />)}
             </div>
           ) : items.length === 0 ? (
             <div className="border border-dashed border-border rounded-lg p-12 text-center">

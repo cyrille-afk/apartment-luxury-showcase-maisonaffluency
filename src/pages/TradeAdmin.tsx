@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X, Clock, ExternalLink } from "lucide-react";
+import { ApplicationCardSkeleton } from "@/components/trade/skeletons";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -132,8 +133,8 @@ const TradeAdmin = () => {
       </div>
 
       {fetching ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => <ApplicationCardSkeleton key={i} />)}
         </div>
       ) : applications.length === 0 ? (
         <p className="font-body text-sm text-muted-foreground py-8 text-center">No {filter} applications.</p>

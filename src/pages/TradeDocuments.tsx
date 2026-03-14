@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet } from "lucide-react";
 import SectionHero from "@/components/trade/SectionHero";
+import { DocumentCardSkeleton } from "@/components/trade/skeletons";
 
 const PdfThumbnail = lazy(() => import("@/components/trade/PdfThumbnail"));
 
@@ -120,8 +121,8 @@ const TradeDocuments = () => {
 
       {/* Content */}
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
+          {Array.from({ length: 8 }).map((_, i) => <DocumentCardSkeleton key={i} />)}
         </div>
       ) : filtered.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-16 text-center">

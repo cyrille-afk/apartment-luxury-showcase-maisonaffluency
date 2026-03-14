@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Trash2, Package, ArrowRight } from "lucide-react";
+import { DrawerItemSkeleton } from "@/components/trade/skeletons";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -84,8 +85,8 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
 
         <div className="flex-1 overflow-y-auto mt-4 -mx-6 px-6 space-y-3">
           {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => <DrawerItemSkeleton key={i} />)}
             </div>
           ) : items.length === 0 ? (
             <div className="text-center py-12">
