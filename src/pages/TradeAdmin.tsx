@@ -207,6 +207,39 @@ const TradeAdmin = () => {
         </div>
       )}
     </div>
+
+      <AlertDialog open={!!confirmDialog} onOpenChange={(open) => !open && setConfirmDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">
+              {confirmDialog?.action === "approved" ? "Approve" : "Reject"} Application
+            </AlertDialogTitle>
+            <AlertDialogDescription className="font-body">
+              Are you sure you want to {confirmDialog?.action === "approved" ? "approve" : "reject"} the application from{" "}
+              <span className="font-medium text-foreground">{confirmDialog?.app.company_name}</span>?
+              {confirmDialog?.action === "approved"
+                ? " This will grant them trade portal access."
+                : " This will revoke their trade portal access if previously granted."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="font-body text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={`font-body text-xs ${
+                confirmDialog?.action === "rejected"
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : ""
+              }`}
+              onClick={() => {
+                if (confirmDialog) handleAction(confirmDialog.app, confirmDialog.action);
+                setConfirmDialog(null);
+              }}
+            >
+              {confirmDialog?.action === "approved" ? "Approve" : "Reject"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
