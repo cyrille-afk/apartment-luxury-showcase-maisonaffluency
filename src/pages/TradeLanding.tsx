@@ -48,6 +48,7 @@ const TradeLanding = () => {
   return (
     <>
       <Helmet>
+        <meta name="pinterest" content="nopin" />
         <title>Trade Program — Maison Affluency</title>
         <meta
           name="description"

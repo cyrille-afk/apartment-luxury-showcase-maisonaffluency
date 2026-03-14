@@ -1,4 +1,5 @@
 import { Outlet, Navigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TradeSidebar } from "@/components/trade/TradeSidebar";
 import { useAuth } from "@/hooks/useAuth";
