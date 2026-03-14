@@ -157,6 +157,27 @@ const JournalArticlePage = () => {
           </motion.div>
         )}
 
+        {/* Embedded PDF viewer */}
+        {article.pdf_url && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="max-w-5xl mx-auto px-4 md:px-8 py-10 md:py-14"
+          >
+            <h2 className="font-display text-lg md:text-xl text-foreground mb-6 text-center tracking-wide">
+              View the Full Feature
+            </h2>
+            <Suspense fallback={
+              <div className="flex justify-center py-12">
+                <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              </div>
+            }>
+              <PdfViewer url={article.pdf_url} title={article.title} />
+            </Suspense>
+          </motion.div>
+        )}
+
         {/* Article body */}
         {article.content && (
           <motion.div
