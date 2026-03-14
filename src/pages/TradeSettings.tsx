@@ -118,6 +118,11 @@ const TradeSettings = () => {
   const inputClass =
     "w-full px-4 py-3 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50 transition-colors";
 
+  const errorInputClass = "border-destructive focus:ring-destructive/30 focus:border-destructive/50";
+
+  const FieldError = ({ field, errors }: { field: string; errors: Record<string, string> }) =>
+    errors[field] ? <p className="font-body text-[10px] text-destructive mt-1">{errors[field]}</p> : null;
+
   return (
     <>
       <Helmet><title>Settings — Trade Portal — Maison Affluency</title></Helmet>
@@ -144,8 +149,9 @@ const TradeSettings = () => {
                 type="text"
                 value={form.first_name}
                 onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} ${profileErrors.first_name ? errorInputClass : ""}`}
               />
+              <FieldError field="first_name" errors={profileErrors} />
             </div>
             <div>
               <label className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">
@@ -155,8 +161,9 @@ const TradeSettings = () => {
                 type="text"
                 value={form.last_name}
                 onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} ${profileErrors.last_name ? errorInputClass : ""}`}
               />
+              <FieldError field="last_name" errors={profileErrors} />
             </div>
           </div>
 
@@ -168,8 +175,9 @@ const TradeSettings = () => {
               type="text"
               value={form.company}
               onChange={(e) => setForm({ ...form, company: e.target.value })}
-              className={inputClass}
+              className={`${inputClass} ${profileErrors.company ? errorInputClass : ""}`}
             />
+            <FieldError field="company" errors={profileErrors} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -192,8 +200,9 @@ const TradeSettings = () => {
                 type="tel"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} ${profileErrors.phone ? errorInputClass : ""}`}
               />
+              <FieldError field="phone" errors={profileErrors} />
             </div>
           </div>
         </div>
@@ -225,8 +234,9 @@ const TradeSettings = () => {
               value={passwords.newPassword}
               onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
               placeholder="Min. 8 characters"
-              className={inputClass}
+              className={`${inputClass} ${passwordErrors.newPassword ? errorInputClass : ""}`}
             />
+            <FieldError field="newPassword" errors={passwordErrors} />
           </div>
           <div>
             <label className="font-body text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">
@@ -236,8 +246,9 @@ const TradeSettings = () => {
               type="password"
               value={passwords.confirmPassword}
               onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-              className={inputClass}
+              className={`${inputClass} ${passwordErrors.confirmPassword ? errorInputClass : ""}`}
             />
+            <FieldError field="confirmPassword" errors={passwordErrors} />
           </div>
         </div>
 

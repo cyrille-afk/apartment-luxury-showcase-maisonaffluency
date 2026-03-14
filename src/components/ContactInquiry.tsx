@@ -7,6 +7,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCTA } from "@/lib/analytics";
+import { z } from "zod";
+
+const inquirySchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100, "Max 100 characters"),
+  firm: z.string().trim().max(200, "Max 200 characters"),
+  email: z.string().trim().email("Please enter a valid email").max(255, "Max 255 characters"),
+  phone: z.string().trim().max(30, "Max 30 characters"),
+  message: z.string().trim().min(1, "Message is required").max(2000, "Max 2000 characters"),
+});
 
 const ContactInquiry = () => {
   const ref = useRef(null);
@@ -16,6 +25,7 @@ const ContactInquiry = () => {
   });
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: "",
     firm: "",
@@ -27,17 +37,18 @@ const ContactInquiry = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
+    if (errors[id]) setErrors(prev => { const n = { ...prev }; delete n[id]; return n; });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.message) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in your name, email, and message.",
-        variant: "destructive"
-      });
+    setErrors({});
+
+    const result = inquirySchema.safeParse(formData);
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      result.error.issues.forEach((i) => { errs[i.path[0] as string] = i.message; });
+      setErrors(errs);
       return;
     }
 
@@ -45,7 +56,7 @@ const ContactInquiry = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("send-inquiry", {
-        body: formData
+        body: result.data
       });
 
       if (error) throw error;
