@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart } from "lucide-react";
+import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight } from "lucide-react";
+import QuoteDetail from "@/components/trade/QuoteDetail";
 
 interface Quote {
   id: string;
@@ -11,34 +12,13 @@ interface Quote {
   submitted_at: string | null;
   created_at: string;
   updated_at: string;
-  items?: QuoteItem[];
-}
-
-interface QuoteItem {
-  id: string;
-  quote_id: string;
-  product_id: string;
-  quantity: number;
-  unit_price_cents: number | null;
-  notes: string | null;
-  product?: {
-    product_name: string;
-    brand_name: string;
-    trade_price_cents: number | null;
-    currency: string;
-    image_url: string | null;
-  };
+  item_count: number;
 }
 
 const statusConfig: Record<string, { label: string; icon: typeof Clock; className: string }> = {
   draft: { label: "Draft", icon: FileText, className: "bg-muted text-muted-foreground" },
   submitted: { label: "Submitted", icon: Send, className: "bg-primary/10 text-primary" },
-  reviewed: { label: "Reviewed", icon: CheckCircle, className: "bg-success/10 text-success" },
-};
-
-const formatPrice = (cents: number | null, currency = "SGD") => {
-  if (!cents) return "—";
-  return new Intl.NumberFormat("en-SG", { style: "currency", currency }).format(cents / 100);
+  reviewed: { label: "Reviewed", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
 };
 
 const TradeQuotes = () => {
@@ -47,16 +27,33 @@ const TradeQuotes = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
 
   const fetchQuotes = async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase
+    const { data: quotesData } = await supabase
       .from("trade_quotes")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
-    setQuotes((data as Quote[]) || []);
+
+    // Get item counts
+    const quoteIds = (quotesData || []).map((q: any) => q.id);
+    let itemCounts: Record<string, number> = {};
+    if (quoteIds.length > 0) {
+      const { data: itemsData } = await supabase
+        .from("trade_quote_items")
+        .select("quote_id")
+        .in("quote_id", quoteIds);
+      (itemsData || []).forEach((item: any) => {
+        itemCounts[item.quote_id] = (itemCounts[item.quote_id] || 0) + 1;
+      });
+    }
+
+    setQuotes(
+      (quotesData || []).map((q: any) => ({ ...q, item_count: itemCounts[q.id] || 0 }))
+    );
     setLoading(false);
   };
 
@@ -75,36 +72,32 @@ const TradeQuotes = () => {
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "New quote created" });
-      fetchQuotes();
+    } else if (data) {
+      setSelectedQuoteId(data.id);
     }
     setCreating(false);
   };
 
-  const handleSubmitQuote = async (quoteId: string) => {
-    const { error } = await supabase
-      .from("trade_quotes")
-      .update({ status: "submitted", submitted_at: new Date().toISOString() })
-      .eq("id", quoteId);
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Quote submitted", description: "Our team will review and respond within 1-2 business days." });
-      fetchQuotes();
-    }
-  };
-
-  const handleDeleteQuote = async (quoteId: string) => {
-    const { error } = await supabase.from("trade_quotes").delete().eq("id", quoteId);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Quote deleted" });
-      fetchQuotes();
-    }
-  };
+  // Show detail view
+  if (selectedQuoteId) {
+    const quote = quotes.find((q) => q.id === selectedQuoteId);
+    return (
+      <QuoteDetail
+        quoteId={selectedQuoteId}
+        quoteStatus={quote?.status || "draft"}
+        quoteCreatedAt={quote?.created_at || new Date().toISOString()}
+        quoteNotes={quote?.notes || null}
+        onBack={() => {
+          setSelectedQuoteId(null);
+          fetchQuotes();
+        }}
+        onStatusChange={() => {
+          setSelectedQuoteId(null);
+          fetchQuotes();
+        }}
+      />
+    );
+  }
 
   return (
     <div className="max-w-4xl">
@@ -151,49 +144,38 @@ const TradeQuotes = () => {
             const StatusIcon = config.icon;
 
             return (
-              <div key={quote.id} className="border border-border rounded-lg p-4 hover:border-foreground/20 transition-colors">
+              <button
+                key={quote.id}
+                onClick={() => setSelectedQuoteId(quote.id)}
+                className="w-full text-left border border-border rounded-lg p-4 hover:border-foreground/20 transition-colors group"
+              >
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
                       <h3 className="font-display text-sm text-foreground">
-                        Quote #{quote.id.slice(0, 8).toUpperCase()}
+                        QU-{quote.id.slice(0, 6).toUpperCase()}
                       </h3>
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${config.className}`}>
                         <StatusIcon className="h-3 w-3" />
                         {config.label}
                       </span>
+                      {quote.item_count > 0 && (
+                        <span className="font-body text-[10px] text-muted-foreground">
+                          {quote.item_count} {quote.item_count === 1 ? "item" : "items"}
+                        </span>
+                      )}
                     </div>
                     <p className="font-body text-[10px] text-muted-foreground">
-                      Created {new Date(quote.created_at).toLocaleDateString()}
-                      {quote.submitted_at && ` · Submitted ${new Date(quote.submitted_at).toLocaleDateString()}`}
+                      Created {new Date(quote.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                      {quote.submitted_at && ` · Submitted ${new Date(quote.submitted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
                     </p>
                     {quote.notes && (
-                      <p className="font-body text-xs text-muted-foreground mt-1 italic">"{quote.notes}"</p>
+                      <p className="font-body text-xs text-muted-foreground mt-1 italic truncate">"{quote.notes}"</p>
                     )}
                   </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    {quote.status === "draft" && (
-                      <>
-                        <button
-                          onClick={() => handleSubmitQuote(quote.id)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-foreground text-foreground font-body text-[10px] uppercase tracking-wider rounded-md hover:bg-foreground hover:text-background transition-colors"
-                        >
-                          <Send className="h-3 w-3" />
-                          Submit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteQuote(quote.id)}
-                          className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
-                          title="Delete quote"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
-                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
