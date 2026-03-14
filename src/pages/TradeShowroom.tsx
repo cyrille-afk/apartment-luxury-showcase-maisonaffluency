@@ -545,8 +545,25 @@ const TradeShowroom = () => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             return (
-              <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
-                <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0">
+              <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors group">
+                <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0 relative">
+                  {isAdmin && (
+                    <label
+                      className={`absolute inset-0 z-10 flex items-center justify-center cursor-pointer transition-all ${
+                        uploadingId === product.id
+                          ? "bg-background/80"
+                          : "bg-background/60 opacity-0 group-hover:opacity-100"
+                      }`}
+                      title="Upload image"
+                    >
+                      {uploadingId === product.id ? (
+                        <Loader2 className="h-3.5 w-3.5 text-foreground animate-spin" />
+                      ) : (
+                        <Upload className="h-3.5 w-3.5 text-foreground" />
+                      )}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(product, f); e.target.value = ""; }} />
+                    </label>
+                  )}
                   {product.product_image_url ? (
                     <img src={product.product_image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
                   ) : (
