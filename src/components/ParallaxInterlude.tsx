@@ -92,26 +92,26 @@ const ParallaxInterlude = ({
       >
         {/* Decorative line above */}
         <motion.div
-          className="w-12 h-px bg-[hsl(var(--gold))] mb-6 md:mb-8 origin-center"
-          style={{ scaleX: lineScale }}
+          className="w-12 h-px mb-6 md:mb-8 origin-center"
+          style={{ scaleX: lineScale, backgroundColor: "hsl(36 55% 70%)", boxShadow: "0 0 8px hsl(36 55% 70% / 0.5)" }}
         />
 
         <blockquote className="max-w-3xl">
-          <p className="font-display text-lg md:text-2xl lg:text-3xl text-white/95 leading-relaxed md:leading-relaxed tracking-wide italic">
+          <p className="font-display text-lg md:text-2xl lg:text-3xl text-white leading-relaxed md:leading-relaxed tracking-wide italic" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.6), 0 0 4px rgba(0,0,0,0.3)" }}>
             "{quote}"
           </p>
         </blockquote>
 
         {attribution && (
-          <p className="mt-4 md:mt-6 font-body text-xs md:text-sm uppercase tracking-[0.2em] text-[hsl(var(--gold))]">
+          <p className="mt-4 md:mt-6 font-body text-xs md:text-sm uppercase tracking-[0.2em]" style={{ color: "hsl(36 55% 75%)", textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}>
             {attribution}
           </p>
         )}
 
         {/* Decorative line below */}
         <motion.div
-          className="w-12 h-px bg-[hsl(var(--gold))] mt-6 md:mt-8 origin-center"
-          style={{ scaleX: lineScale }}
+          className="w-12 h-px mt-6 md:mt-8 origin-center"
+          style={{ scaleX: lineScale, backgroundColor: "hsl(36 55% 70%)", boxShadow: "0 0 8px hsl(36 55% 70% / 0.5)" }}
         />
       </motion.div>
     </div>
