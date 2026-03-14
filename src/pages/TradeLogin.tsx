@@ -58,6 +58,8 @@ const TradeLogin = () => {
             <label className="font-body text-sm text-foreground">Email</label>
             <input
               type="email"
+              name="email"
+              autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
