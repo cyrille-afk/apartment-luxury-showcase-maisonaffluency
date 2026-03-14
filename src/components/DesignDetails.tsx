@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Briefcase, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
