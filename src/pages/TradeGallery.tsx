@@ -1,8 +1,18 @@
-import { useState, useMemo } from "react";
-import { Search, Grid3X3, List, FileDown, Package } from "lucide-react";
-import { getAllTradeProducts, getAllBrands, getAllCategories, getSubcategories } from "@/lib/tradeProducts";
+import { useState, useMemo, useEffect } from "react";
+import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check } from "lucide-react";
+import { getAllTradeProducts, getAllBrands, getAllCategories, getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+
+interface DraftQuote {
+  id: string;
+  created_at: string;
+}
 
 const TradeGallery = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const allProducts = useMemo(() => getAllTradeProducts(), []);
   const brands = useMemo(() => getAllBrands(allProducts), [allProducts]);
   const categories = useMemo(() => getAllCategories(allProducts), [allProducts]);
@@ -12,6 +22,77 @@ const TradeGallery = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
+  const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
+  const [addingProductId, setAddingProductId] = useState<string | null>(null);
+  const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
+
+  // Fetch user's draft quotes
+  useEffect(() => {
+    if (!user) return;
+    const fetchDrafts = async () => {
+      const { data } = await supabase
+        .from("trade_quotes")
+        .select("id, created_at")
+        .eq("user_id", user.id)
+        .eq("status", "draft")
+        .order("created_at", { ascending: false });
+      const drafts = (data as DraftQuote[]) || [];
+      setDraftQuotes(drafts);
+      if (drafts.length > 0) setActiveQuoteId(drafts[0].id);
+    };
+    fetchDrafts();
+  }, [user]);
+
+  const handleCreateQuoteAndAdd = async (product: TradeProduct) => {
+    if (!user) return;
+    setAddingProductId(product.id);
+    const { data, error } = await supabase
+      .from("trade_quotes")
+      .insert({ user_id: user.id, status: "draft" })
+      .select("id, created_at")
+      .single();
+    if (error || !data) {
+      toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
+      setAddingProductId(null);
+      return;
+    }
+    const newQuote = data as DraftQuote;
+    setDraftQuotes((prev) => [newQuote, ...prev]);
+    setActiveQuoteId(newQuote.id);
+    await addProductToQuote(product, newQuote.id);
+  };
+
+  const addProductToQuote = async (product: TradeProduct, quoteId: string) => {
+    if (!user) return;
+    setAddingProductId(product.id);
+    const { error } = await supabase.rpc("add_gallery_product_to_quote", {
+      _user_id: user.id,
+      _quote_id: quoteId,
+      _product_name: product.product_name,
+      _brand_name: product.brand_name,
+      _category: product.category || "",
+      _image_url: product.image_url || null,
+      _dimensions: product.dimensions || null,
+      _materials: product.materials || null,
+      _quantity: 1,
+    });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      setAddedProductIds((prev) => new Set(prev).add(product.id));
+      toast({ title: "Added to quote", description: `${product.product_name} added to QU-${quoteId.slice(0, 6).toUpperCase()}` });
+    }
+    setAddingProductId(null);
+  };
+
+  const handleAddToQuote = (product: TradeProduct) => {
+    if (activeQuoteId) {
+      addProductToQuote(product, activeQuoteId);
+    } else {
+      handleCreateQuoteAndAdd(product);
+    }
+  };
 
   const subcategories = useMemo(
     () => (selectedCategory !== "all" ? getSubcategories(allProducts, selectedCategory) : []),
@@ -47,19 +128,35 @@ const TradeGallery = () => {
             {selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}
           </p>
         </div>
-        <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`p-1.5 rounded transition-colors ${viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground"}`}
-          >
-            <Grid3X3 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={`p-1.5 rounded transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground"}`}
-          >
-            <List className="h-4 w-4" />
-          </button>
+        <div className="flex items-center gap-3">
+          {/* Active quote selector */}
+          {draftQuotes.length > 0 && (
+            <select
+              value={activeQuoteId || ""}
+              onChange={(e) => setActiveQuoteId(e.target.value)}
+              className={`${inputClass} text-xs`}
+            >
+              {draftQuotes.map((q) => (
+                <option key={q.id} value={q.id}>
+                  QU-{q.id.slice(0, 6).toUpperCase()}
+                </option>
+              ))}
+            </select>
+          )}
+          <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-1.5 rounded transition-colors ${viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground"}`}
+            >
+              <Grid3X3 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-1.5 rounded transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground"}`}
+            >
+              <List className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -113,86 +210,128 @@ const TradeGallery = () => {
         </div>
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filtered.map((product) => (
-            <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
-              <div className="aspect-square bg-muted/30 relative overflow-hidden">
-                {product.image_url ? (
-                  <img
-                    src={product.image_url}
-                    alt={product.product_name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Package className="h-6 w-6 text-muted-foreground/30" />
+          {filtered.map((product) => {
+            const isAdding = addingProductId === product.id;
+            const isAdded = addedProductIds.has(product.id);
+            return (
+              <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
+                <div className="aspect-square bg-muted/30 relative overflow-hidden">
+                  {product.image_url ? (
+                    <img
+                      src={product.image_url}
+                      alt={product.product_name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package className="h-6 w-6 text-muted-foreground/30" />
+                    </div>
+                  )}
+                  {/* Overlay actions */}
+                  <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => handleAddToQuote(product)}
+                      disabled={isAdding}
+                      className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-body text-[10px] uppercase tracking-wider transition-colors ${
+                        isAdded
+                          ? "bg-emerald-600 text-white"
+                          : "bg-foreground text-background hover:bg-foreground/90"
+                      } disabled:opacity-60`}
+                    >
+                      {isAdding ? (
+                        <div className="w-3 h-3 border border-background/30 border-t-background rounded-full animate-spin" />
+                      ) : isAdded ? (
+                        <Check className="h-3 w-3" />
+                      ) : (
+                        <ShoppingCart className="h-3 w-3" />
+                      )}
+                      {isAdded ? "Added" : "Add to Quote"}
+                    </button>
+                    {product.pdf_url && (
+                      <a
+                        href={product.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 bg-background/90 rounded-md text-foreground hover:bg-background transition-colors"
+                        title="Download spec sheet"
+                      >
+                        <FileDown className="h-3.5 w-3.5" />
+                      </a>
+                    )}
                   </div>
-                )}
-                {product.pdf_url && (
-                  <a
-                    href={product.pdf_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute top-2 right-2 p-1.5 bg-background/90 rounded-full text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Download spec sheet"
-                  >
-                    <FileDown className="h-3.5 w-3.5" />
-                  </a>
-                )}
+                </div>
+                <div className="p-3">
+                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
+                    {product.brand_name}
+                  </p>
+                  <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
+                    {product.product_name}
+                  </h3>
+                  {product.subtitle && (
+                    <p className="font-body text-[11px] text-muted-foreground truncate">{product.subtitle}</p>
+                  )}
+                  {product.dimensions && (
+                    <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>
+                  )}
+                  {product.materials && (
+                    <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>
+                  )}
+                </div>
               </div>
-              <div className="p-3">
-                <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
-                  {product.brand_name}
-                </p>
-                <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
-                  {product.product_name}
-                </h3>
-                {product.subtitle && (
-                  <p className="font-body text-[11px] text-muted-foreground truncate">{product.subtitle}</p>
-                )}
-                {product.dimensions && (
-                  <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>
-                )}
-                {product.materials && (
-                  <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((product) => (
-            <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
-              <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0">
-                {product.image_url ? (
-                  <img src={product.image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Package className="h-4 w-4 text-muted-foreground/30" />
-                  </div>
+          {filtered.map((product) => {
+            const isAdding = addingProductId === product.id;
+            const isAdded = addedProductIds.has(product.id);
+            return (
+              <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
+                <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0">
+                  {product.image_url ? (
+                    <img src={product.image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package className="h-4 w-4 text-muted-foreground/30" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product.brand_name}</p>
+                  <h3 className="font-display text-sm text-foreground truncate">{product.product_name}</h3>
+                  <p className="font-body text-[10px] text-muted-foreground truncate">
+                    {[product.dimensions, product.materials].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleAddToQuote(product)}
+                  disabled={isAdding}
+                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md font-body text-[10px] uppercase tracking-wider transition-colors shrink-0 ${
+                    isAdded
+                      ? "bg-emerald-600 text-white"
+                      : "border border-foreground text-foreground hover:bg-foreground hover:text-background"
+                  } disabled:opacity-60`}
+                >
+                  {isAdding ? (
+                    <div className="w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin" />
+                  ) : isAdded ? (
+                    <Check className="h-3 w-3" />
+                  ) : (
+                    <ShoppingCart className="h-3 w-3" />
+                  )}
+                  {isAdded ? "Added" : "Add"}
+                </button>
+                {product.pdf_url && (
+                  <a href={product.pdf_url} target="_blank" rel="noopener noreferrer"
+                    className="p-2 text-muted-foreground hover:text-foreground transition-colors" title="Spec sheet">
+                    <FileDown className="h-4 w-4" />
+                  </a>
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product.brand_name}</p>
-                <h3 className="font-display text-sm text-foreground truncate">{product.product_name}</h3>
-                <p className="font-body text-[10px] text-muted-foreground truncate">
-                  {[product.dimensions, product.materials].filter(Boolean).join(" · ")}
-                </p>
-              </div>
-              <div className="text-right shrink-0">
-                <span className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
-                  {product.category}
-                </span>
-              </div>
-              {product.pdf_url && (
-                <a href={product.pdf_url} target="_blank" rel="noopener noreferrer"
-                  className="p-2 text-muted-foreground hover:text-foreground transition-colors" title="Spec sheet">
-                  <FileDown className="h-4 w-4" />
-                </a>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
