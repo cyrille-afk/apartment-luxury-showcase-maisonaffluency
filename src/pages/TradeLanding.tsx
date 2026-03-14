@@ -167,7 +167,7 @@ const TradeLanding = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.8 }}
-                className="w-full md:w-1/2 flex flex-col justify-center px-8 py-14 md:px-14 lg:px-20 md:py-20"
+                className="w-full md:w-1/2 flex flex-col justify-center items-center text-center px-8 py-14 md:px-14 lg:px-20 md:py-20"
               >
                 <h2 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground mb-5">
                   {benefit.title}
