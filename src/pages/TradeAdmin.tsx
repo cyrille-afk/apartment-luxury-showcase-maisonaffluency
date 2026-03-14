@@ -5,6 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X, Clock, ExternalLink } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Application {
   id: string;
@@ -28,6 +32,7 @@ const TradeAdmin = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [fetching, setFetching] = useState(true);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
+  const [confirmDialog, setConfirmDialog] = useState<{ app: Application; action: "approved" | "rejected" } | null>(null);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -181,14 +186,14 @@ const TradeAdmin = () => {
                 {app.status === "pending" && (
                   <div className="flex gap-2 shrink-0">
                     <button
-                      onClick={() => handleAction(app, "approved")}
+                      onClick={() => setConfirmDialog({ app, action: "approved" })}
                       className="p-2 rounded-full border border-success/30 text-success hover:bg-success/10 transition-colors"
                       title="Approve"
                     >
                       <Check className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleAction(app, "rejected")}
+                      onClick={() => setConfirmDialog({ app, action: "rejected" })}
                       className="p-2 rounded-full border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
                       title="Reject"
                     >
@@ -202,6 +207,39 @@ const TradeAdmin = () => {
         </div>
       )}
     </div>
+
+      <AlertDialog open={!!confirmDialog} onOpenChange={(open) => !open && setConfirmDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">
+              {confirmDialog?.action === "approved" ? "Approve" : "Reject"} Application
+            </AlertDialogTitle>
+            <AlertDialogDescription className="font-body">
+              Are you sure you want to {confirmDialog?.action === "approved" ? "approve" : "reject"} the application from{" "}
+              <span className="font-medium text-foreground">{confirmDialog?.app.company_name}</span>?
+              {confirmDialog?.action === "approved"
+                ? " This will grant them trade portal access."
+                : " This will revoke their trade portal access if previously granted."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="font-body text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={`font-body text-xs ${
+                confirmDialog?.action === "rejected"
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : ""
+              }`}
+              onClick={() => {
+                if (confirmDialog) handleAction(confirmDialog.app, confirmDialog.action);
+                setConfirmDialog(null);
+              }}
+            >
+              {confirmDialog?.action === "approved" ? "Approve" : "Reject"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
