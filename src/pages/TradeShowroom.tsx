@@ -15,7 +15,14 @@ interface ShowroomProduct {
   link_url: string | null;
   image_identifier: string;
   pdf_url?: string;
+  trade_price_cents?: number | null;
+  currency?: string;
 }
+
+const formatPrice = (cents: number, currency: string) => {
+  const amount = cents / 100;
+  return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+};
 
 interface DraftQuote {
   id: string;
@@ -55,6 +62,23 @@ const TradeShowroom = () => {
           }
         }
 
+        // Build a price lookup from trade_products table
+        const { data: pricedProducts } = await supabase
+          .from("trade_products")
+          .select("product_name, trade_price_cents, currency")
+          .not("trade_price_cents", "is", null);
+        const priceLookup = new Map<string, { cents: number; currency: string }>();
+        if (pricedProducts) {
+          for (const pp of pricedProducts) {
+            if (pp.trade_price_cents) {
+              priceLookup.set(pp.product_name.trim().toLowerCase(), {
+                cents: pp.trade_price_cents,
+                currency: pp.currency,
+              });
+            }
+          }
+        }
+
         // Deduplicate by product_name (case-insensitive) AND by product_image_url
         const seenByName = new Map<string, ShowroomProduct>();
         const seenImageUrls = new Set<string>();
@@ -73,7 +97,13 @@ const TradeShowroom = () => {
             (!existing.materials && item.materials) ||
             (!existing.dimensions && item.dimensions)
           ) {
-            seenByName.set(key, { ...item, pdf_url: pdfLookup.get(key) });
+            const price = priceLookup.get(key);
+            seenByName.set(key, {
+              ...item,
+              pdf_url: pdfLookup.get(key),
+              trade_price_cents: price?.cents ?? null,
+              currency: price?.currency,
+            });
             if (item.product_image_url) seenImageUrls.add(item.product_image_url);
           }
         }
@@ -331,6 +361,11 @@ const TradeShowroom = () => {
                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
                     {product.product_name}
                   </h3>
+                  {product.trade_price_cents && product.currency && (
+                    <p className="font-body text-xs text-primary font-medium mt-1">
+                      {formatPrice(product.trade_price_cents, product.currency)}
+                    </p>
+                  )}
                   {product.dimensions && (
                     <p className="font-body text-[10px] text-muted-foreground mt-1 line-clamp-2">{product.dimensions}</p>
                   )}
@@ -366,6 +401,11 @@ const TradeShowroom = () => {
                     {product.materials ? ` · ${product.materials}` : ""}
                   </p>
                 </div>
+                {product.trade_price_cents && product.currency && (
+                  <span className="font-body text-sm text-primary font-medium shrink-0">
+                    {formatPrice(product.trade_price_cents, product.currency)}
+                  </span>
+                )}
                 <button
                   onClick={() => handleAddToQuote(product)}
                   disabled={isAdding}
