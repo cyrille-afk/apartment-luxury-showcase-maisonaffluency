@@ -432,6 +432,9 @@ const Index = () => {
               </Suspense>
             </section>
             <Suspense fallback={null}>
+              <JournalTeaser />
+            </Suspense>
+            <Suspense fallback={null}>
               <Footer />
             </Suspense>
           </>
