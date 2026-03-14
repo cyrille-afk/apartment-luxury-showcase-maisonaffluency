@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Trash2, Package, ArrowRight } from "lucide-react";
+import { DrawerItemSkeleton } from "@/components/trade/skeletons";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 
