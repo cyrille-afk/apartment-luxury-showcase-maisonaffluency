@@ -142,13 +142,16 @@ const TradeLanding = () => {
           </p>
         </motion.div>
 
-        {/* ─── Alternating benefit sections ─── */}
+        {/* ─── Alternating 50/50 split benefit sections ─── */}
         {benefits.map((benefit, index) => {
           const isEven = index % 2 === 0;
           return (
-            <div key={index}>
-              {/* Full-width image */}
-              <div className="w-full h-[50vh] md:h-[70vh] overflow-hidden relative">
+            <div
+              key={index}
+              className={`flex flex-col ${isEven ? "md:flex-row" : "md:flex-row-reverse"} min-h-[60vh] md:min-h-[70vh]`}
+            >
+              {/* Image half */}
+              <div className="w-full md:w-1/2 h-[50vh] md:h-auto overflow-hidden relative">
                 <img
                   src={benefit.image}
                   alt={benefit.title}
@@ -156,16 +159,15 @@ const TradeLanding = () => {
                   loading="lazy"
                   decoding="async"
                 />
-                <div className="absolute inset-0 bg-black/10" />
               </div>
 
-              {/* Text block */}
+              {/* Text half */}
               <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: isEven ? 40 : -40 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.8 }}
-                className={`max-w-3xl mx-auto px-6 py-16 md:py-24 ${isEven ? "text-center" : "text-center"}`}
+                className="w-full md:w-1/2 flex flex-col justify-center px-8 py-14 md:px-14 lg:px-20 md:py-20"
               >
                 <h2 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground mb-5">
                   {benefit.title}
