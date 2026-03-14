@@ -177,8 +177,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const subtotalCents = items.reduce((sum, item) => {
-    const price = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? 0;
-    return sum + price * item.quantity;
+    const rawPrice = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? 0;
+    const prodCurrency = item.trade_products?.currency || currency;
+    const converted = convertCents(rawPrice, prodCurrency, currency) ?? 0;
+    return sum + converted * item.quantity;
   }, 0);
 
   const handlePrint = () => window.print();
