@@ -79,7 +79,7 @@ const TradeLanding = () => {
         </div>
 
         {/* ─── Full-width Hero ─── */}
-        <div className="relative w-full h-[55vh] md:h-[85vh] overflow-hidden">
+        <div className="relative w-full h-[45vh] md:h-[65vh] overflow-hidden">
           <img
             src={cloudinaryUrl("v1772085848/intimate-dining_ux4pee", { width: 1920, height: 1080, quality: "auto:good", crop: "fill", gravity: "auto" })}
             alt="Maison Affluency Trade Program"
@@ -121,7 +121,7 @@ const TradeLanding = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.8 }}
-          className="max-w-3xl mx-auto px-6 py-12 md:py-28 text-center"
+          className="max-w-3xl mx-auto px-6 py-10 md:py-16 text-center"
         >
           <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6">
             Your Exclusive Benefits and Bespoke Services
