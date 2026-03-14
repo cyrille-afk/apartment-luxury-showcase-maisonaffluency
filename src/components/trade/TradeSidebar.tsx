@@ -28,7 +28,13 @@ export function TradeSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const navigate = useNavigate();
   const { isAdmin, signOut, profile } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/trade/login");
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
