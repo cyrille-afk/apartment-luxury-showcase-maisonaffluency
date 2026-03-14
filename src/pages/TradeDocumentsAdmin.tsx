@@ -258,6 +258,8 @@ const TradeDocumentsAdmin = () => {
               brands={brandEntries}
               selectedBrand={selectedBrand}
               onSelect={setSelectedBrand}
+              editable
+              onThumbnailUpdated={fetchDocs}
             />
           );
         })()}
