@@ -19,6 +19,7 @@ interface Application {
   message: string | null;
   status: string;
   created_at: string;
+  profiles?: { first_name: string; last_name: string; email: string } | null;
 }
 
 const TradeAdmin = () => {
