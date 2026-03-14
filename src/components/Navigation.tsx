@@ -45,10 +45,6 @@ const leftNavItems = [{
 }];
 
 const rightNavItems = [{
-  label: "Journal",
-  href: "/journal",
-  icon: BookOpen,
-}, {
   label: "Trade Program",
   href: "/trade/program",
   icon: Briefcase,
@@ -399,7 +395,14 @@ const Navigation = () => {
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
               </div>
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-end items-center gap-6 lg:gap-8">
+              <button
+                onClick={() => handleNavClick("/journal")}
+                className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap relative group text-foreground flex items-center gap-1.5"
+              >
+                Journal
+                <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
+              </button>
               <DropdownMenu>
                 <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none relative group">
                   Contact Us
