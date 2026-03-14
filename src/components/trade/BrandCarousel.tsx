@@ -202,6 +202,23 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, onTh
     }
   };
 
+  const handleThumbnailRemove = async (brandName: string) => {
+    setUploadingBrand(brandName);
+    try {
+      const { error } = await supabase
+        .from("trade_documents")
+        .update({ cover_image_url: null })
+        .eq("brand_name", brandName);
+      if (error) throw error;
+      toast({ title: `Thumbnail removed for ${brandName}` });
+      onThumbnailUpdated?.();
+    } catch (err: any) {
+      toast({ title: "Remove failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingBrand(null);
+    }
+  };
+
   if (brands.length === 0) return null;
 
   return (
