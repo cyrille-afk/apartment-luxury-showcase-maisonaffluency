@@ -158,15 +158,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         {/* ===== HEADER — matches reference layout ===== */}
         <div className="border-b border-border p-6 md:p-8">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-6 md:gap-10">
-            {/* Left: Title + Client */}
+            {/* Left: Title + Client Name */}
             <div>
               <h1 className="font-display text-3xl md:text-4xl text-foreground tracking-wide uppercase mb-3">
                 Quote
               </h1>
-              {clientCompany && (
-                <p className="font-display text-sm text-foreground uppercase tracking-wider">
-                  {clientCompany}
-                </p>
+              {isDraft ? (
+                <input
+                  type="text"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  onBlur={() => supabase.from("trade_quotes").update({ client_name: clientName } as any).eq("id", quoteId)}
+                  placeholder="Client / Project Name"
+                  className="font-display text-sm text-foreground uppercase tracking-wider bg-transparent border-b border-dashed border-border focus:border-foreground outline-none pb-1 w-full max-w-[300px] placeholder:text-muted-foreground/50 print:border-none"
+                />
+              ) : (
+                clientName && (
+                  <p className="font-display text-sm text-foreground uppercase tracking-wider">
+                    {clientName}
+                  </p>
+                )
               )}
             </div>
 
