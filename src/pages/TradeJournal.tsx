@@ -274,37 +274,12 @@ const TradeJournal = () => {
                 PDF Document <span className="text-muted-foreground/50">(embedded viewer + download)</span>
               </label>
               <div className="flex items-center gap-3">
-                <label className={`inline-flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-md cursor-pointer hover:border-foreground/30 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
-                  <FileUp className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="font-body text-xs text-muted-foreground">
-                    {uploading ? "Uploading…" : "Upload PDF"}
-                  </span>
-                  <input
-                    type="file"
-                    accept="application/pdf"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (file.size > 20 * 1024 * 1024) {
-                        toast({ title: "File too large", description: "Max 20 MB", variant: "destructive" });
-                        return;
-                      }
-                      setUploading(true);
-                      const path = `journal/pdfs/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.pdf`;
-                      const { error } = await supabase.storage.from("assets").upload(path, file, { contentType: "application/pdf" });
-                      if (error) {
-                        toast({ title: "Upload failed", description: error.message, variant: "destructive" });
-                      } else {
-                        const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
-                        setEditing(prev => prev ? { ...prev, pdf_url: urlData.publicUrl } : null);
-                        toast({ title: "PDF uploaded" });
-                      }
-                      setUploading(false);
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
+                <CloudUpload
+                  folder="journal/pdfs"
+                  accept="application/pdf,.pdf"
+                  label="Upload PDF"
+                  onUpload={(urls) => setEditing(prev => prev ? { ...prev, pdf_url: urls[0] } : null)}
+                />
                 {editing.pdf_url && (
                   <button
                     onClick={() => setEditing(prev => prev ? { ...prev, pdf_url: null } : null)}
@@ -335,36 +310,13 @@ const TradeJournal = () => {
               </label>
               
               {/* Upload button */}
-              <label className={`inline-flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-md cursor-pointer hover:border-foreground/30 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
-                <Upload className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="font-body text-xs text-muted-foreground">
-                  {uploading ? "Uploading..." : "Upload photos"}
-                </span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  onChange={async (e) => {
-                    const files = e.target.files;
-                    if (!files || files.length === 0) return;
-                    setUploading(true);
-                    const newUrls: string[] = [];
-                    for (const file of Array.from(files)) {
-                      const ext = file.name.split(".").pop() || "jpg";
-                      const path = `journal/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-                      const { error } = await supabase.storage.from("assets").upload(path, file);
-                      if (!error) {
-                        const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
-                        newUrls.push(urlData.publicUrl);
-                      }
-                    }
-                    setEditing(prev => prev ? { ...prev, gallery_images: [...(prev.gallery_images || []), ...newUrls] } : null);
-                    setUploading(false);
-                    e.target.value = "";
-                  }}
-                />
-              </label>
+              <CloudUpload
+                folder="journal/gallery"
+                accept="image/*"
+                multiple
+                label="Upload photos"
+                onUpload={(urls) => setEditing(prev => prev ? { ...prev, gallery_images: [...(prev.gallery_images || []), ...urls] } : null)}
+              />
 
               {/* URL input for external images */}
               <div className="mt-2 flex gap-2">
