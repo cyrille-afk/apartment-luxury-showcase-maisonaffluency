@@ -290,6 +290,17 @@ const TradeShowroom = () => {
                       )}
                       {isAdded ? "Added" : "Add to Quote"}
                     </button>
+                    {product.pdf_url && (
+                      <a
+                        href={product.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
+                        title="Download spec sheet"
+                      >
+                        <FileDown className="h-3.5 w-3.5" />
+                      </a>
+                    )}
                     {product.link_url && (
                       <a
                         href={`/${product.link_url}`}
