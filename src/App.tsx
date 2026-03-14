@@ -2,11 +2,19 @@ import { lazy, Suspense, useEffect, useState, useRef } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import { CompareProvider } from "@/contexts/CompareContext";
+import { AuthProvider } from "@/hooks/useAuth";
 
 // Lazy-load non-landing pages and non-critical UI
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 
+// Trade portal pages
+const TradeLogin = lazy(() => import("./pages/TradeLogin"));
+const TradeRegister = lazy(() => import("./pages/TradeRegister"));
+const TradeLayout = lazy(() => import("./pages/TradeLayout"));
+const TradeDashboard = lazy(() => import("./pages/TradeDashboard"));
+const TradeAdmin = lazy(() => import("./pages/TradeAdmin"));
+const TradePlaceholder = lazy(() => import("./pages/TradePlaceholder"));
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -48,6 +56,7 @@ const App = () => {
   }, []);
 
   return (
+    <AuthProvider>
     <CompareProvider>
     <BrowserRouter>
       {MAINTENANCE_MODE ? (
@@ -57,6 +66,18 @@ const App = () => {
       ) : (
         <Routes>
           <Route path="/" element={<Index />} />
+
+          {/* Trade Portal */}
+          <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
+          <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
+          <Route path="/trade" element={<Suspense fallback={null}><TradeLayout /></Suspense>}>
+            <Route index element={<TradeDashboard />} />
+            <Route path="admin" element={<TradeAdmin />} />
+            <Route path="gallery" element={<TradePlaceholder />} />
+            <Route path="quotes" element={<TradePlaceholder />} />
+            <Route path="documents" element={<TradePlaceholder />} />
+            <Route path="settings" element={<TradePlaceholder />} />
+          </Route>
           
           <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
         </Routes>
@@ -76,6 +97,7 @@ const App = () => {
       )}
     </BrowserRouter>
     </CompareProvider>
+    </AuthProvider>
   );
 };
 

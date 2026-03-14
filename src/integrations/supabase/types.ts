@@ -56,15 +56,121 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          company: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          phone: string
+        }
+        Insert: {
+          company?: string
+          created_at?: string
+          email: string
+          first_name?: string
+          id: string
+          last_name?: string
+          phone?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      trade_applications: {
+        Row: {
+          certification_details: string | null
+          city: string
+          company_name: string
+          company_website: string | null
+          country: string
+          created_at: string
+          id: string
+          is_certified_professional: boolean
+          job_title: string
+          message: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["trade_application_status"]
+          user_id: string
+        }
+        Insert: {
+          certification_details?: string | null
+          city?: string
+          company_name: string
+          company_website?: string | null
+          country?: string
+          created_at?: string
+          id?: string
+          is_certified_professional?: boolean
+          job_title?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["trade_application_status"]
+          user_id: string
+        }
+        Update: {
+          certification_details?: string | null
+          city?: string
+          company_name?: string
+          company_website?: string | null
+          country?: string
+          created_at?: string
+          id?: string
+          is_certified_professional?: boolean
+          job_title?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["trade_application_status"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "trade_user"
+      trade_application_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -191,6 +297,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "trade_user"],
+      trade_application_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
