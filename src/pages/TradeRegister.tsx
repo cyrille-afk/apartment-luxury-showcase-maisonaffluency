@@ -118,6 +118,8 @@ const TradeRegister = () => {
   };
 
   return (
+    <>
+      <Helmet><title>Apply — Trade Program — Maison Affluency</title></Helmet>
     <div className="min-h-screen bg-background px-4 py-6 md:py-12">
       {/* Top bar: back link + sign in */}
       <div className="w-full max-w-2xl mx-auto flex items-center justify-between mb-6">
