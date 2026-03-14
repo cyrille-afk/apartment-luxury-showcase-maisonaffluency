@@ -122,8 +122,8 @@ const TradeQuotes = () => {
       </SectionHero>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => <QuoteCardSkeleton key={i} />)}
         </div>
       ) : quotes.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-16 text-center">
