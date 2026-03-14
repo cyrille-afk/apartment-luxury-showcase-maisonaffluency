@@ -1,6 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Image, FileText, FolderOpen, FolderClosed, FileSpreadsheet, BookOpen } from "lucide-react";
+import {
+  Image, FileText, FolderOpen, FolderClosed,
+  Clock, FileSpreadsheet, BookOpen, FileDown,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -9,44 +12,120 @@ interface BrandFolder {
   doc_count: number;
 }
 
+interface ActivityItem {
+  id: string;
+  type: "document" | "quote";
+  title: string;
+  subtitle: string;
+  date: string;
+  link?: string;
+}
+
 const quickLinks = [
   { title: "Browse Gallery", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery" },
   { title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes" },
   { title: "Documents", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents" },
 ];
 
+const typeLabels: Record<string, string> = {
+  tearsheet: "Tearsheet",
+  catalogue: "Catalogue",
+  pricelist: "Price List",
+  specification: "Specification",
+};
+
+const formatRelativeDate = (dateStr: string) => {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+};
+
 const TradeDashboard = () => {
   const { profile } = useAuth();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
+  const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchBrands = async () => {
-      const { data } = await supabase
+    const fetchData = async () => {
+      // Fetch brands
+      const { data: docs } = await supabase
         .from("trade_documents")
         .select("brand_name");
-      if (data) {
-        const countMap = new Map<string, number>();
-        for (const row of data) {
+      const countMap = new Map<string, number>();
+      if (docs) {
+        for (const row of docs) {
           countMap.set(row.brand_name, (countMap.get(row.brand_name) || 0) + 1);
         }
-        // Get unique brand names from trade_products too (may have no documents)
-        const { data: products } = await supabase
-          .from("trade_products")
-          .select("brand_name");
-        if (products) {
-          for (const p of products) {
-            if (!countMap.has(p.brand_name)) countMap.set(p.brand_name, 0);
-          }
-        }
-        const sorted = [...countMap.entries()]
-          .map(([brand_name, doc_count]) => ({ brand_name, doc_count }))
-          .sort((a, b) => a.brand_name.localeCompare(b.brand_name));
-        setBrands(sorted);
       }
+      const { data: products } = await supabase
+        .from("trade_products")
+        .select("brand_name");
+      if (products) {
+        for (const p of products) {
+          if (!countMap.has(p.brand_name)) countMap.set(p.brand_name, 0);
+        }
+      }
+      setBrands(
+        [...countMap.entries()]
+          .map(([brand_name, doc_count]) => ({ brand_name, doc_count }))
+          .sort((a, b) => a.brand_name.localeCompare(b.brand_name))
+      );
+
+      // Fetch recent activity: latest documents + user's quotes
+      const items: ActivityItem[] = [];
+
+      const { data: recentDocs } = await supabase
+        .from("trade_documents")
+        .select("id, title, brand_name, document_type, created_at")
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (recentDocs) {
+        for (const d of recentDocs) {
+          items.push({
+            id: `doc-${d.id}`,
+            type: "document",
+            title: d.title,
+            subtitle: `${d.brand_name} · ${typeLabels[d.document_type] || d.document_type}`,
+            date: d.created_at,
+            link: `/trade/documents?brand=${encodeURIComponent(d.brand_name)}`,
+          });
+        }
+      }
+
+      const { data: recentQuotes } = await supabase
+        .from("trade_quotes")
+        .select("id, client_name, status, updated_at, currency")
+        .order("updated_at", { ascending: false })
+        .limit(5);
+      if (recentQuotes) {
+        for (const q of recentQuotes) {
+          items.push({
+            id: `quote-${q.id}`,
+            type: "quote",
+            title: q.client_name || "Untitled Quote",
+            subtitle: `${q.status.charAt(0).toUpperCase() + q.status.slice(1)} · ${q.currency}`,
+            date: q.updated_at,
+            link: `/trade/quotes`,
+          });
+        }
+      }
+
+      // Sort all activity by date descending, take top 8
+      items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setActivity(items.slice(0, 8));
+
       setLoading(false);
     };
-    fetchBrands();
+    fetchData();
   }, []);
 
   return (
@@ -73,6 +152,48 @@ const TradeDashboard = () => {
             <p className="font-body text-xs text-muted-foreground">{link.description}</p>
           </Link>
         ))}
+      </div>
+
+      {/* Recent Activity */}
+      <div className="mt-10">
+        <h2 className="font-display text-lg text-foreground mb-4 flex items-center gap-2">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          Recent Activity
+        </h2>
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          </div>
+        ) : activity.length === 0 ? (
+          <div className="border border-dashed border-border rounded-lg p-8 text-center">
+            <p className="font-body text-sm text-muted-foreground">
+              No recent activity yet. Start by browsing the gallery or uploading documents.
+            </p>
+          </div>
+        ) : (
+          <div className="border border-border rounded-lg divide-y divide-border">
+            {activity.map((item) => (
+              <Link
+                key={item.id}
+                to={item.link || "#"}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors group"
+              >
+                {item.type === "document" ? (
+                  <FileDown className="h-4 w-4 text-[hsl(var(--pdf-red))] shrink-0" />
+                ) : (
+                  <FileText className="h-4 w-4 text-primary shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-body text-sm text-foreground truncate">{item.title}</p>
+                  <p className="font-body text-[10px] text-muted-foreground">{item.subtitle}</p>
+                </div>
+                <span className="font-body text-[10px] text-muted-foreground shrink-0">
+                  {formatRelativeDate(item.date)}
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Brand Folders */}
