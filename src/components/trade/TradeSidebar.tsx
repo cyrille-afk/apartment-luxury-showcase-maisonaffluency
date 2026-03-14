@@ -113,6 +113,18 @@ export function TradeSidebar() {
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to="/trade/documents-admin"
+                        className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                        activeClassName="bg-muted text-foreground font-medium"
+                      >
+                        <Upload className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span>Documents</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </>
               )}
             </SidebarMenu>
