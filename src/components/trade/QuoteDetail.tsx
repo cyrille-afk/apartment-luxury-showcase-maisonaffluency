@@ -351,9 +351,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           )}
         </div>
 
-        {/* Actions */}
+        {/* Actions — hidden in print */}
         {isDraft && (
-          <div className="border-t border-border p-6 md:p-8 flex items-center justify-between">
+          <div className="border-t border-border p-6 md:p-8 flex items-center justify-between print:hidden">
             <button
               onClick={handleDelete}
               className="inline-flex items-center gap-1.5 font-body text-[10px] text-destructive hover:text-destructive/80 uppercase tracking-wider transition-colors"
