@@ -70,9 +70,9 @@ const TradeLanding = () => {
           <div className="max-w-7xl mx-auto px-4 md:px-12 py-3 flex items-center justify-between">
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1.5 font-body text-xs font-semibold text-foreground hover:text-primary transition-colors uppercase tracking-[0.1em]"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <ArrowLeft className="w-4 h-4" />
               Back to Maison Affluency
             </Link>
           </div>
