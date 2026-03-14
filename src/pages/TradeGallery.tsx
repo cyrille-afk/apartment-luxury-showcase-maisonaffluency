@@ -351,6 +351,13 @@ const TradeGallery = () => {
           })}
         </div>
       )}
+
+      <QuoteDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        quoteId={activeQuoteId}
+        refreshKey={drawerRefreshKey}
+      />
     </div>
   );
 };
