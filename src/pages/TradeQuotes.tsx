@@ -102,22 +102,20 @@ const TradeQuotes = () => {
 
   return (
     <div className="max-w-4xl">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="font-display text-2xl text-foreground mb-1">Quote Builder</h1>
-          <p className="font-body text-sm text-muted-foreground">
-            Create and manage product quotes for your projects.
-          </p>
-        </div>
+      <SectionHero
+        section="quotes"
+        title="Quote Builder"
+        subtitle="Create and manage product quotes for your projects."
+      >
         <button
           onClick={handleCreateQuote}
           disabled={creating}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-background text-foreground font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-background/90 transition-colors disabled:opacity-50"
         >
           <Plus className="h-3.5 w-3.5" />
           New Quote
         </button>
-      </div>
+      </SectionHero>
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
