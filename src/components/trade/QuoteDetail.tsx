@@ -189,25 +189,27 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   return (
     <div className="max-w-4xl">
       {/* Back + Print — hidden in print */}
-      <div className="flex items-center justify-between mb-6 print:hidden">
+      <div className="flex items-center justify-between mb-4 md:mb-6 print:hidden">
         <button onClick={onBack} className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" />
-          All Quotes
+          <span className="hidden sm:inline">All Quotes</span>
+          <span className="sm:hidden">Back</span>
         </button>
-        <button onClick={handlePrint} className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors">
+        <button onClick={handlePrint} className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 border border-border rounded-md font-body text-xs text-foreground hover:bg-muted transition-colors">
           <Printer className="h-3.5 w-3.5" />
-          Print / PDF
+          <span className="hidden sm:inline">Print / PDF</span>
+          <span className="sm:hidden">Print</span>
         </button>
       </div>
 
       {/* Quote document */}
       <div className="border border-border rounded-lg bg-background">
         {/* ===== HEADER — matches reference layout ===== */}
-        <div className="border-b border-border p-6 md:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-6 md:gap-10">
+        <div className="border-b border-border p-4 md:p-6 lg:p-8">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-4 md:gap-10">
             {/* Left: Title + Client Name */}
             <div>
-              <h1 className="font-display text-3xl md:text-4xl text-foreground tracking-wide uppercase mb-3">
+              <h1 className="font-display text-2xl md:text-3xl lg:text-4xl text-foreground tracking-wide uppercase mb-2 md:mb-3">
                 Quote
               </h1>
               {isDraft ? (
@@ -217,7 +219,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   onChange={(e) => setClientName(e.target.value)}
                   onBlur={() => supabase.from("trade_quotes").update({ client_name: clientName } as any).eq("id", quoteId)}
                   placeholder="Client / Project Name"
-                  className="font-display text-sm text-foreground uppercase tracking-wider bg-transparent border-b border-dashed border-border focus:border-foreground outline-none pb-1 w-full max-w-[300px] placeholder:text-muted-foreground/50 print:border-none"
+                  className="font-display text-sm text-foreground uppercase tracking-wider bg-transparent border-b border-dashed border-border focus:border-foreground outline-none pb-1 w-full max-w-[300px] placeholder:text-muted-foreground/50 print:border-none text-[16px] sm:text-sm"
                 />
               ) : (
                 clientName && (
@@ -229,7 +231,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             </div>
 
             {/* Middle: Date / Expiry / Number */}
-            <div className="space-y-2 text-sm font-body">
+            <div className="flex flex-wrap gap-x-6 gap-y-2 md:block md:space-y-2 text-sm font-body">
               <div>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Date</span>
                 <span className="text-foreground">{formatDate(createdDate)}</span>
@@ -251,9 +253,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </span>
             </div>
 
-            {/* Right: Logo + Company details (left-aligned) */}
-            <div className="flex items-start gap-4">
-              <img src={affluencyLogo} alt="Affluency" className="h-16 w-16 md:h-20 md:w-20 object-contain shrink-0" />
+            {/* Right: Logo + Company details */}
+            <div className="flex items-start gap-3 md:gap-4">
+              <img src={affluencyLogo} alt="Affluency" className="h-14 w-14 md:h-16 md:w-16 lg:h-20 lg:w-20 object-contain shrink-0" />
               <div className="text-left">
                 <p className="font-display text-xs text-foreground uppercase tracking-wider">
                   Affluency Etc Pte. Ltd.
@@ -272,7 +274,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {/* ===== Currency selector (draft only, hidden in print) ===== */}
         {isDraft && (
-          <div className="border-b border-border px-6 md:px-8 py-3 flex items-center gap-6 print:hidden">
+          <div className="border-b border-border px-4 md:px-6 lg:px-8 py-3 flex flex-wrap items-center gap-3 md:gap-6 print:hidden">
             <div className="flex items-center gap-3">
               <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">Currency</span>
               <div className="relative">
@@ -308,13 +310,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
                 <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
               </div>
-              <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">8% Trade Discount</span>
+              <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">8% Discount</span>
             </button>
           </div>
         )}
 
         {/* ===== Line items ===== */}
-        <div className="p-6 md:p-8">
+        <div className="p-4 md:p-6 lg:p-8">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -330,7 +332,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           ) : (
             <>
               {/* Table header */}
-              <div className="hidden md:grid grid-cols-[1fr_80px_100px_100px] gap-4 pb-3 border-b border-border mb-0">
+              <div className="hidden md:grid grid-cols-[1fr_80px_100px_100px] gap-4 pb-3 border-b border-border">
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">Description</span>
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest text-center">Qty</span>
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest text-right">Unit Price</span>
@@ -347,36 +349,60 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
 
                   return (
-                    <div key={item.id} className="py-4 md:grid md:grid-cols-[1fr_80px_100px_100px] md:gap-4 md:items-start">
-                      <div className="flex gap-4">
-                        <div className="w-20 h-20 rounded bg-muted/30 overflow-hidden shrink-0">
+                    <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[1fr_80px_100px_100px] md:gap-4 md:items-start">
+                      <div className="flex gap-3 md:gap-4">
+                        <div className="w-14 h-14 md:w-20 md:h-20 rounded bg-muted/30 overflow-hidden shrink-0">
                           {product?.image_url ? (
                             <img src={product.image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <Package className="h-5 w-5 text-muted-foreground/30" />
+                              <Package className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground/30" />
                             </div>
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-display text-sm text-foreground leading-tight">
+                          <h4 className="font-display text-xs md:text-sm text-foreground leading-tight">
                             {product?.product_name || "Unknown Product"}
                           </h4>
                           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
                             {product?.brand_name}
                           </p>
-                          {product?.dimensions && <p className="font-body text-[11px] text-muted-foreground mt-1">Dimensions: {product.dimensions}</p>}
-                          {product?.materials && <p className="font-body text-[11px] text-muted-foreground">Materials: {product.materials}</p>}
-                          {product?.lead_time && <p className="font-body text-[11px] text-muted-foreground">Lead time: {product.lead_time}</p>}
-                          {item.notes && <p className="font-body text-[11px] text-muted-foreground/70 italic mt-1">{item.notes}</p>}
+                          {product?.dimensions && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>}
+                          {product?.materials && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground truncate">{product.materials}</p>}
+                          {product?.lead_time && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground">{product.lead_time}</p>}
+                          {item.notes && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground/70 italic mt-1">{item.notes}</p>}
                           {isDraft && (
-                            <button onClick={() => handleRemoveItem(item.id)} className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:text-destructive/80 mt-2 transition-colors">
+                            <button onClick={() => handleRemoveItem(item.id)} className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:text-destructive/80 mt-1.5 md:mt-2 transition-colors">
                               <Trash2 className="h-3 w-3" /> Remove
                             </button>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center justify-center gap-1 mt-3 md:mt-0">
+                      {/* Mobile: qty + prices in a row */}
+                      <div className="flex items-center justify-between mt-2 md:hidden">
+                        <div className="flex items-center gap-1">
+                          {isDraft ? (
+                            <>
+                              <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" disabled={item.quantity <= 1}>
+                                <Minus className="h-3 w-3" />
+                              </button>
+                              <span className="font-body text-xs text-foreground w-6 text-center">{item.quantity}</span>
+                              <button onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors">
+                                <Plus className="h-3 w-3" />
+                              </button>
+                            </>
+                          ) : (
+                            <span className="font-body text-xs text-muted-foreground">Qty: {item.quantity}</span>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <span className="font-body text-xs text-foreground font-medium">
+                            {currencySymbol(currency)} {formatPriceRaw(lineTotal, currency) || "TBD"}
+                          </span>
+                        </div>
+                      </div>
+                      {/* Desktop: standard columns */}
+                      <div className="hidden md:flex items-center justify-center gap-1">
                         {isDraft ? (
                           <>
                             <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} className="p-1 text-muted-foreground hover:text-foreground transition-colors" disabled={item.quantity <= 1}>
@@ -391,10 +417,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <span className="font-body text-sm text-foreground">{item.quantity}</span>
                         )}
                       </div>
-                      <div className="text-right mt-2 md:mt-0">
+                      <div className="hidden md:block text-right">
                         <span className="font-body text-sm text-foreground">{formatPriceRaw(unitPrice, currency) || "TBD"}</span>
                       </div>
-                      <div className="text-right mt-1 md:mt-0">
+                      <div className="hidden md:block text-right">
                         <span className="font-body text-sm text-foreground font-medium">{formatPriceRaw(lineTotal, currency) || "TBD"}</span>
                       </div>
                     </div>
@@ -448,7 +474,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         </div>
 
         {/* Notes */}
-        <div className="border-t border-border p-6 md:p-8">
+        <div className="border-t border-border p-4 md:p-6 lg:p-8">
           <label className="font-body text-[10px] text-muted-foreground uppercase tracking-widest block mb-2">
             Notes / Special Instructions
           </label>
@@ -457,9 +483,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any special requirements, delivery instructions, or project details…"
+                placeholder="Add any special requirements…"
                 rows={3}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none transition-colors"
+                className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none transition-colors text-[16px] sm:text-sm"
               />
               <button onClick={handleSaveNotes} className="font-body text-[10px] text-muted-foreground hover:text-foreground uppercase tracking-wider transition-colors">
                 Save Notes
@@ -471,10 +497,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         </div>
 
         {/* Payment Terms & Banking Details */}
-        <div className="border-t border-border p-6 md:p-8 space-y-6">
+        <div className="border-t border-border p-4 md:p-6 lg:p-8 space-y-5 md:space-y-6">
           <div>
             <h3 className="font-display text-xs uppercase tracking-[0.15em] text-foreground mb-3">Payment Terms</h3>
-            <ul className="font-body text-[11px] leading-relaxed text-muted-foreground space-y-1.5 list-disc list-inside">
+            <ul className="font-body text-[10px] md:text-[11px] leading-relaxed text-muted-foreground space-y-1.5 list-disc list-inside">
               <li>60% payment upon order confirmation unless indicated otherwise</li>
               <li>Payment by bank transfer</li>
               <li>Balance of Payment ex-work prior to shipping</li>
@@ -482,8 +508,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
 
           <div>
-            <p className="font-body text-[11px] text-muted-foreground mb-2">Payment by bank transfer to:</p>
-            <div className="font-body text-[11px] leading-relaxed text-foreground/80 space-y-0.5">
+            <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mb-2">Payment by bank transfer to:</p>
+            <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-foreground/80 space-y-0.5">
               <p className="font-medium text-foreground">AFFLUENCY ETC Pte. Ltd.</p>
               <p>Account Number: 713127249001</p>
               <p>Bank Name: OCBC Bank</p>
@@ -496,7 +522,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
           <div className="border-t border-border pt-4">
             <h3 className="font-display text-xs uppercase tracking-[0.15em] text-foreground mb-2">Terms &amp; Conditions</h3>
-            <p className="font-body text-[11px] text-muted-foreground leading-relaxed">
+            <p className="font-body text-[10px] md:text-[11px] text-muted-foreground leading-relaxed">
               The terms and conditions will be given separately and shall apply to the quotation given for the supply of any items detailed herein. Please read carefully.
             </p>
           </div>
@@ -504,12 +530,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {/* Actions — hidden in print */}
         {isDraft && (
-          <div className="border-t border-border p-6 md:p-8 flex items-center justify-between print:hidden">
+          <div className="border-t border-border p-4 md:p-6 lg:p-8 flex items-center justify-between print:hidden">
             <button onClick={handleDelete} className="inline-flex items-center gap-1.5 font-body text-[10px] text-destructive hover:text-destructive/80 uppercase tracking-wider transition-colors">
-              <Trash2 className="h-3.5 w-3.5" /> Delete Quote
+              <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Delete Quote</span><span className="sm:hidden">Delete</span>
             </button>
-            <button onClick={handleSubmit} disabled={items.length === 0} className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-40">
-              <Send className="h-3.5 w-3.5" /> Submit Quote
+            <button onClick={handleSubmit} disabled={items.length === 0} className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-40">
+              <Send className="h-3.5 w-3.5" /> Submit
             </button>
           </div>
         )}

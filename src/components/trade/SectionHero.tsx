@@ -35,14 +35,14 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/30 to-foreground/10" />
       </div>
-      <div className="relative px-6 py-12 md:py-16 flex items-end justify-between gap-4">
+      <div className="relative px-4 py-8 md:px-6 md:py-12 lg:py-16 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl text-background mb-1">{title}</h1>
+          <h1 className="font-display text-xl md:text-2xl text-background mb-1">{title}</h1>
           {subtitle && (
-            <p className="font-body text-sm text-background/70">{subtitle}</p>
+            <p className="font-body text-xs md:text-sm text-background/70">{subtitle}</p>
           )}
         </div>
-        {children && <div className="flex items-center gap-3">{children}</div>}
+        {children && <div className="flex items-center gap-2 md:gap-3 flex-wrap">{children}</div>}
       </div>
     </div>
   );
