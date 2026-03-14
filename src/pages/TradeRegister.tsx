@@ -80,6 +80,29 @@ const TradeRegister = () => {
         message: form.message || null,
       });
 
+      // 4. Send email notification to concierge + confirmation to applicant
+      const fullName = `${form.firstName} ${form.lastName}`.trim();
+      const emailBody = [
+        `Company: ${form.companyName}`,
+        form.companyWebsite ? `Website: ${form.companyWebsite}` : null,
+        `Role: ${form.jobTitle}`,
+        `Location: ${form.city ? `${form.city}, ` : ""}${form.country}`,
+        `Certified Professional: ${form.isCertified ? "Yes" : "No"}`,
+        form.certificationDetails ? `Certification: ${form.certificationDetails}` : null,
+        form.message ? `\nMessage:\n${form.message}` : null,
+      ].filter(Boolean).join("\n");
+
+      supabase.functions.invoke("send-inquiry", {
+        body: {
+          name: fullName,
+          firm: form.companyName,
+          email: form.email,
+          phone: form.phone,
+          message: emailBody,
+          subject: `New Trade Application: ${fullName} — ${form.companyName}`,
+        },
+      }).catch((err) => console.error("Email notification failed:", err));
+
       toast({
         title: "Application Submitted",
         description: "Please check your email to verify your account. We'll review your application within 1-2 business days.",
