@@ -862,7 +862,7 @@ const Gallery = () => {
              /* ── Desktop: existing layout ── */
              <div
                ref={swipeContainerRef}
-               className="relative w-full h-full flex items-center justify-center"
+               className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain touch-pan-y"
              >
 
                 {/* Pill indicator */}
