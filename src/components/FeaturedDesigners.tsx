@@ -507,6 +507,17 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Hammered_Bowls.pdf",
         pdfFilename: "Alexander_Lamont-Hammered_Bowls.pdf"
       },
+      {
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773558440/Screen_Shot_2026-03-15_at_3.06.50_PM_cmbb2t.jpg",
+        title: "Mantle Boxes",
+        subtitle: "",
+        category: "Decorative",
+        tags: ["Decorative", "Boxes", "Straw"],
+        materials: "Burnished Woven Straw, Silvered Brass Feet, Walnut",
+        dimensions: "Small W 12 × H 12.5 cm\nMedium W 15 × H 16 cm\nW 18 × H 17.5 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Mantle_Boxes.pdf",
+        pdfFilename: "Alexander_Lamont-Mantle_Boxes.pdf"
+      },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/alexanderlamont" },
