@@ -2845,7 +2845,8 @@ const BrandsAteliers = () => {
             {picksDesigner ? (
               picksDesigner.curatorPicks && picksDesigner.curatorPicks.length > 0 ? (
                 <div
-                  className="relative w-full h-full flex items-center justify-center touch-pan-y select-none overflow-x-hidden overscroll-contain"
+                  ref={picksSwipeRef}
+                  className="relative w-full h-full flex items-center justify-center select-none overflow-x-hidden overscroll-contain"
                   style={{ WebkitUserSelect: 'none' }}
                 >
                   {/* Close button moved inside image container below */}
@@ -2866,20 +2867,7 @@ const BrandsAteliers = () => {
                       observer.observe(el, { childList: true, subtree: true });
                       setTimeout(checkScroll, 500);
                     }}
-                    onTouchStart={(e) => { if (imageZoomedRef.current) return; setPicksTouchEnd(null); setPicksTouchStart(e.targetTouches[0].clientX); }}
-                    onTouchMove={(e) => { if (imageZoomedRef.current) return; setPicksTouchEnd(e.targetTouches[0].clientX); }}
-                    onTouchEnd={() => {
-                      if (imageZoomedRef.current) return;
-                      if (!picksTouchStart || !picksDesigner.curatorPicks?.length) return;
-                      if (picksTouchEnd !== null) {
-                        const distance = picksTouchStart - picksTouchEnd;
-                        if (distance > 50) setPicksIndex(prev => prev === picksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
-                        else if (distance < -50) setPicksIndex(prev => prev === 0 ? picksDesigner.curatorPicks.length - 1 : prev - 1);
-                      }
-                      setPicksTouchStart(null);
-                      setPicksTouchEnd(null);
-                    }}
-                    className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none touch-pan-y ${picksZoomed ? 'max-h-[95vh] pb-4 pt-2' : 'max-h-[85vh] pb-4 pt-6 md:pt-4'}`}
+                    className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none ${picksZoomed ? 'max-h-[95vh] pb-4 pt-2' : 'max-h-[85vh] pb-4 pt-6 md:pt-4'}`}
                     style={{ WebkitUserSelect: 'none' }}>
                     <div className="relative inline-flex flex-col items-center">
                       {(() => {
