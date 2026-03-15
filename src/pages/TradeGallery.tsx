@@ -321,11 +321,8 @@ const TradeGallery = () => {
                     {product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
                   </p>
                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
-                    {product.product_name}
+                    {product.subtitle ? `${product.product_name} ${product.subtitle}` : product.product_name}
                   </h3>
-                  {product.subtitle && (
-                    <p className="font-body text-[11px] text-muted-foreground truncate">{product.subtitle}</p>
-                  )}
                   {product.dimensions && (
                     <p className="font-body text-[10px] text-muted-foreground mt-1 truncate">{product.dimensions}</p>
                   )}
