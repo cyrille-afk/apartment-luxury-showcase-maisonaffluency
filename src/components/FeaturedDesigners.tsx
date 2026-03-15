@@ -442,7 +442,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "Alexander_Lamont-Dais_Lounge_Chair.pdf"
       },
       { 
-        image: alexanderLamontPick2, 
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773578050/Screen_Shot_2026-03-15_at_8.32.08_PM_leki9q.png", 
         title: "Galea Lantern",
         subtitle: "Rock Crystal",
         category: "Lighting",
