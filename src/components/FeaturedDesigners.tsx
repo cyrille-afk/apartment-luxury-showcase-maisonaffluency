@@ -455,7 +455,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { 
         image: alexanderLamontPick5, 
         title: "Corteza Console Table",
-        subtitle: "Natural Distress",
+        subtitle: "",
         category: "Tables",
         tags: ["Couture Collection", "Tables", "Console"],
         materials: "Natural distressed wood • Bronze detailing",
