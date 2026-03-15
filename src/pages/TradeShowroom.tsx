@@ -523,16 +523,16 @@ const TradeShowroom = () => {
                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
                     {product.product_name}
                   </h3>
-                  {product.trade_price_cents && product.currency && (
-                    <p className="font-display text-base text-accent font-semibold mt-1.5">
-                      {formatPrice(product.trade_price_cents, product.currency)}
-                    </p>
-                  )}
                   {product.dimensions && (
                     <p className="font-body text-[10px] text-muted-foreground mt-1 line-clamp-2">{product.dimensions}</p>
                   )}
                   {product.materials && (
                     <p className="font-body text-[10px] text-muted-foreground line-clamp-2">{product.materials}</p>
+                  )}
+                  {product.trade_price_cents && product.currency && (
+                    <p className="font-display text-sm text-accent font-semibold mt-1">
+                      {formatPrice(product.trade_price_cents, product.currency)}
+                    </p>
                   )}
                 </div>
               </div>
