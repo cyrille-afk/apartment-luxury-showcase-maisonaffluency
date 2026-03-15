@@ -5,6 +5,8 @@ interface CuratorPicksLegendProps {
   pick: CuratorPick;
   /** Designer/brand ID for provenance lookup */
   designerId?: string;
+  /** Designer/brand display name for attribution */
+  designerName?: string;
   /** Show "send us an inquiry" CTA */
   onInquiry?: () => void;
   className?: string;
@@ -12,31 +14,36 @@ interface CuratorPicksLegendProps {
 
 /**
  * Unified legend (caption) for Curators' Picks across all sections.
- * Typography and spacing mirror the ProductGrid lightbox legend for consistency.
+ * Layout mirrors the ProductGrid lightbox legend exactly.
  */
-const CuratorPicksLegend = ({ pick, designerId, onInquiry, className = "" }: CuratorPicksLegendProps) => {
+const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, className = "" }: CuratorPicksLegendProps) => {
   const p = pick as any; // access optional extended fields
 
   return (
     <div className={`text-center w-full px-4 md:px-12 mt-4 ${className}`}>
-      {/* Title — merge subtitle into title for consistency with ProductGrid */}
+      {/* Title — same as ProductGrid: merge year subtitles, show others separately */}
       <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
-        {p.subtitle ? `${pick.title} ${p.subtitle}` : pick.title}
+        {p.subtitle && /^\d{4}/.test(p.subtitle.trim())
+          ? `${pick.title} ${p.subtitle}`
+          : pick.title}
       </h3>
+
+      {/* Subtitle — separate line, matching ProductGrid */}
+      {p.subtitle && !/^\d{4}/.test(p.subtitle.trim()) && (
+        <p className="font-body text-sm text-white/60 mt-0.5">{p.subtitle}</p>
+      )}
 
       {/* Materials */}
       {pick.materials && (
-        <p className="font-body text-xs text-white/50 mt-2 leading-relaxed text-center whitespace-pre-line">
+        <p className="font-body text-xs text-white/50 mt-2 leading-relaxed">
           {pick.materials.replace(/\n/g, " · ")}
         </p>
       )}
 
-      {/* Dimensions & weight */}
-      {(p.dimensions || p.weight) && (
-        <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 whitespace-pre-line leading-relaxed">
-          {p.dimensions ? p.dimensions.replace(/\n/g, " · ") : ""}
-          {p.dimensions && p.weight && " — "}
-          {p.weight}
+      {/* Dimensions */}
+      {p.dimensions && (
+        <p className="font-body text-sm md:text-base text-white font-medium mt-1.5">
+          {p.dimensions.replace(/\n/g, " · ")}
         </p>
       )}
 
@@ -47,18 +54,18 @@ const CuratorPicksLegend = ({ pick, designerId, onInquiry, className = "" }: Cur
         </p>
       )}
 
-      {/* Description */}
-      {p.description && (
-        <p className="font-body text-xs text-white/45 mt-3 leading-relaxed text-center whitespace-pre-line max-w-xl mx-auto">
-          {p.description}
-        </p>
-      )}
-
       {/* Photo credit */}
       {pick.photoCredit && (
         <p className="text-[10px] text-white/30 font-body mt-2 italic">
           Photo: {pick.photoCredit}
         </p>
+      )}
+
+      {/* Designer attribution — matching ProductGrid style */}
+      {designerName && (
+        <span className="block mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/30">
+          {designerName}
+        </span>
       )}
 
       {/* Provenance badge — renders only when certificate data exists */}
