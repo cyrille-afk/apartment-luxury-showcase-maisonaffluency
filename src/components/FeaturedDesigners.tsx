@@ -730,6 +730,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_2026_MEDIAN_3_SURFACE.pdf",
         pdfFilename: "Apparatus_Studio-Median_3_Surface.pdf"
       },
+      { 
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773618571/MOvn_ZoM_ktepz8.jpg",
+        hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773618660/75d8ef6651f11a258d072887135b826e_aatu0z.jpg",
+        title: "Metronome",
+        subtitle: "Reading Floor Lamp",
+        category: "Lighting",
+        tags: ["Lighting", "Floor Lamp"],
+        materials: "Waxed Aged Brass & Bronze Suede",
+        dimensions: "H 112–152 cm · Rotating Arm L 97 cm",
+      },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/apparatusstudio" },
