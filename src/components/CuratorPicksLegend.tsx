@@ -1,6 +1,10 @@
 import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
 
+/** Prevent orphans by joining the last two words of each line with a non-breaking space */
+const preventOrphans = (text: string): string =>
+  text.replace(/(\S+)\s+(\S+)$/gm, "$1\u00A0$2");
+
 interface CuratorPicksLegendProps {
   pick: CuratorPick;
   /** Designer/brand ID for provenance lookup */
