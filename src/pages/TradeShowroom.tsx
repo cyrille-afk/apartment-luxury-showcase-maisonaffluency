@@ -115,13 +115,19 @@ const TradeShowroom = () => {
         .order("designer_name", { ascending: true });
 
       if (data) {
-        // Build a PDF lookup from trade products (curators' picks data)
+        // Build lookups from curators' picks (code-level source of truth)
         const tradeProducts = getAllTradeProducts();
         const pdfLookup = new Map<string, string>();
+        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string }>();
         for (const tp of tradeProducts) {
-          if (tp.pdf_url) {
-            pdfLookup.set(tp.product_name.trim().toLowerCase(), tp.pdf_url);
-          }
+          const tpKey = tp.product_name.trim().toLowerCase();
+          if (tp.pdf_url) pdfLookup.set(tpKey, tp.pdf_url);
+          // Store canonical metadata from curators' picks so showroom stays in sync
+          metadataLookup.set(tpKey, {
+            materials: tp.materials,
+            dimensions: tp.dimensions,
+            brand: tp.brand_name,
+          });
         }
 
         // Build a price lookup from trade_products table
