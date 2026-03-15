@@ -2829,7 +2829,7 @@ const BrandsAteliers = () => {
             {picksDesigner ? (
               picksDesigner.curatorPicks && picksDesigner.curatorPicks.length > 0 ? (
                 <div
-                  className="relative w-full h-full flex items-center justify-center touch-pan-y select-none"
+                  className="relative w-full h-full flex items-center justify-center touch-pan-y select-none overflow-x-hidden overscroll-contain"
                   style={{ WebkitUserSelect: 'none' }}
                 >
                   {/* Close button moved inside image container below */}
