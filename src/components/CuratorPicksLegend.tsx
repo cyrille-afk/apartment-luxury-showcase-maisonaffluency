@@ -34,7 +34,7 @@ const CuratorPicksLegend = ({ pick, designerId, onInquiry, className = "" }: Cur
 
       {/* Materials */}
       {pick.materials && (
-        <p className="text-[11px] md:text-xs text-white/50 font-body mt-2 leading-relaxed text-justify md:text-center whitespace-pre-line">
+        <p className="text-[11px] md:text-xs text-white/50 font-body mt-2 leading-relaxed text-center whitespace-pre-line">
           {pick.materials}
         </p>
       )}
