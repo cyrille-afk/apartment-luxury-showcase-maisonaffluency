@@ -772,6 +772,10 @@ function singularizeSub(s: string): string {
                         {currentItem.pick.dimensions.replace(/\n/g, " · ")}
                       </p>
                     )}
+                    {/* Mobile: non-clickable attribution; Desktop: clickable profile link */}
+                    <span className="block md:hidden mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/30">
+                      {currentItem.designerName}
+                    </span>
                     <button
                       onClick={() => {
                         setLightboxOpen(false);
