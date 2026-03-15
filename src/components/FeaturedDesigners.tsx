@@ -3319,24 +3319,30 @@ const FeaturedDesigners = () => {
                           ))}
                         </div>
                       )}
-                      {/* Mobile Maximize / Minimize button — bottom-left */}
-                      {!isZoomed ? (
-                        <button
-                          onClick={() => setIsZoomed(true)}
-                          className="md:hidden absolute bottom-2 left-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
-                          aria-label="Expand image"
-                        >
-                          <Maximize2 size={16} />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => setIsZoomed(false)}
-                          className="md:hidden absolute bottom-2 left-2 p-2 rounded-full bg-black/40 text-white/70 hover:text-white hover:bg-black/60 backdrop-blur-sm transition-all duration-300 z-10"
-                          aria-label="Minimize image"
-                        >
-                          <Minimize2 size={16} />
-                        </button>
-                      )}
+                      {/* Mobile Pin button — bottom-left (replaces expand icon) */}
+                      {!isZoomed && (() => {
+                        const cp = curatorPicksDesigner.curatorPicks[curatorPickIndex];
+                        const did = curatorPicksDesigner.id ?? curatorPicksDesigner.name;
+                        const dn = curatorPicksDesigner.name;
+                        return (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              togglePin({ pick: cp, designerName: dn, designerId: did, section: "designers" });
+                            }}
+                            className={cn(
+                              "md:hidden absolute bottom-2 left-2 z-10 p-2 rounded-full backdrop-blur-sm transition-all duration-300",
+                              isPinned(cp.title, did)
+                                ? "bg-[hsl(var(--gold)/0.3)] border border-[hsl(var(--gold)/0.6)] text-white"
+                                : "bg-black/40 text-white/70 hover:text-white hover:bg-black/60",
+                              compareItems.length >= 3 && !isPinned(cp.title, did) && "opacity-40 pointer-events-none"
+                            )}
+                            aria-label={isPinned(cp.title, did) ? "Remove from selection" : "Pin"}
+                          >
+                            <Scale size={14} />
+                          </button>
+                        );
+                      })()}
 
                       {/* Desktop Quote + Pin — stacked vertically under PDF */}
                       {!isZoomed && (() => {
