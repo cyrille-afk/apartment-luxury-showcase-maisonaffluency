@@ -486,7 +486,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "Alexander_Lamont-Koi_Carps_Wall_Art.pdf"
       },
       {
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773133217/ddoc-14391-ff12f77d4b9ef5869726ddd2fa95a3fa-reef-vessels-01-alexander-lamont_jjc8yv.jpg",
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773578041/Screen_Shot_2026-03-15_at_8.33.25_PM_tfgwwm.png",
         title: "Reef Vessels",
         subtitle: "",
         category: "Decorative",
