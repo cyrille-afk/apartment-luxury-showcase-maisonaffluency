@@ -12,37 +12,36 @@ interface CuratorPicksLegendProps {
 
 /**
  * Unified legend (caption) for Curators' Picks across all sections.
- * Renders title, subtitle, materials, dimensions/weight, description,
- * ProvenanceBadge, and an optional inquiry CTA — all with consistent styling.
+ * Typography and spacing mirror the ProductGrid lightbox legend for consistency.
  */
 const CuratorPicksLegend = ({ pick, designerId, onInquiry, className = "" }: CuratorPicksLegendProps) => {
   const p = pick as any; // access optional extended fields
 
   return (
-    <div className={`text-center w-full px-5 md:px-12 ${className}`}>
+    <div className={`text-center w-full px-4 md:px-12 mt-4 ${className}`}>
       {/* Title */}
-      <h3 className="font-serif text-[15px] md:text-lg text-white tracking-wide leading-snug">
+      <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
         {pick.title}
       </h3>
 
-      {/* Subtitle — e.g. "Ondas Sconce by Alexander Lamont" */}
+      {/* Subtitle */}
       {p.subtitle && (
-        <p className="text-[11px] md:text-xs text-white/45 font-body mt-1 italic">
+        <p className="font-body text-sm text-white/60 mt-0.5">
           {p.subtitle}
         </p>
       )}
 
       {/* Materials */}
       {pick.materials && (
-        <p className="text-[11px] md:text-xs text-white/50 font-body mt-2 leading-relaxed text-center whitespace-pre-line">
-          {pick.materials}
+        <p className="font-body text-xs text-white/50 mt-2 leading-relaxed text-center whitespace-pre-line">
+          {pick.materials.replace(/\n/g, " · ")}
         </p>
       )}
 
       {/* Dimensions & weight */}
       {(p.dimensions || p.weight) && (
-        <p className="text-[11px] md:text-xs text-white font-body font-medium mt-1 whitespace-pre-line leading-relaxed">
-          {p.dimensions}
+        <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 whitespace-pre-line leading-relaxed">
+          {p.dimensions ? p.dimensions.replace(/\n/g, " · ") : ""}
           {p.dimensions && p.weight && " — "}
           {p.weight}
         </p>
@@ -57,7 +56,7 @@ const CuratorPicksLegend = ({ pick, designerId, onInquiry, className = "" }: Cur
 
       {/* Description */}
       {p.description && (
-        <p className="text-[11px] md:text-xs text-white/45 font-body mt-3 leading-relaxed text-center whitespace-pre-line max-w-xl mx-auto">
+        <p className="font-body text-xs text-white/45 mt-3 leading-relaxed text-center whitespace-pre-line max-w-xl mx-auto">
           {p.description}
         </p>
       )}
