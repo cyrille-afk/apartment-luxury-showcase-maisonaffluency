@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import CuratorPicksLegend from "./CuratorPicksLegend";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { GALLERY } from "@/constants/galleryIndex";
 import { useInView, AnimatePresence } from "framer-motion";
