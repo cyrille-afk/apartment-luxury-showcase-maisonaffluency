@@ -1488,7 +1488,7 @@ const Collectibles = () => {
                   const designerId = curatorPicksDesigner.id ?? curatorPicksDesigner.name;
                   const designerName = curatorPicksDesigner.name;
                   return (
-                    <div className="md:hidden flex justify-between items-center w-full mt-2">
+                    <div className="md:hidden flex justify-between items-center w-full mt-2 pl-2">
                       <div>
                         <button
                           onClick={closeCuratorPicks}
