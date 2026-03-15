@@ -1525,6 +1525,7 @@ const Collectibles = () => {
                   <CuratorPicksLegend
                     pick={curatorPicksDesigner.curatorPicks[curatorPickIndex]}
                     designerId={curatorPicksDesigner.id ?? curatorPicksDesigner.name}
+                    designerName={curatorPicksDesigner.name}
                   />
 
                   {/* Thumbnail strip */}
