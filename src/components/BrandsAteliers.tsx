@@ -3063,7 +3063,7 @@ const BrandsAteliers = () => {
                           const designerId = picksDesigner.id ?? picksDesigner.name;
                           const designerName = picksDesigner.name;
                           return (
-                            <div className="hidden md:flex absolute top-full -right-20 mt-2 flex-col items-end gap-2 z-20">
+                            <div className="hidden md:flex absolute top-full -right-20 mt-4 flex-col items-end gap-2 z-20">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -3100,11 +3100,11 @@ const BrandsAteliers = () => {
                       </div>
                     </div>
 
-                    {!picksZoomed && <div className="hidden md:block h-12" aria-hidden="true" />}
+                    {!picksZoomed && <div className="hidden md:block h-16" aria-hidden="true" />}
 
                     {/* Mobile: close (left) + quote (right) */}
                     {!picksZoomed && (
-                      <div className="md:hidden flex justify-between items-center w-full mt-2 pl-2">
+                      <div className="md:hidden flex justify-between items-center w-full mt-4 pl-2">
                         <div>
                           <button
                             onClick={requestClosePicks}

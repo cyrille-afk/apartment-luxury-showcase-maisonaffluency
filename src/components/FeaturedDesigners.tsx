@@ -3347,7 +3347,7 @@ const FeaturedDesigners = () => {
                         const designerId = curatorPicksDesigner.id ?? curatorPicksDesigner.name;
                         const designerName = curatorPicksDesigner.name;
                         return (
-                          <div className="hidden md:flex absolute top-full -right-20 mt-2 flex-col items-end gap-2 z-20">
+                          <div className="hidden md:flex absolute top-full -right-20 mt-4 flex-col items-end gap-2 z-20">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3382,11 +3382,11 @@ const FeaturedDesigners = () => {
                         );
                       })()}
                     </div>
-                    {!isZoomed && <div className="hidden md:block h-12" aria-hidden="true" />}
+                    {!isZoomed && <div className="hidden md:block h-16" aria-hidden="true" />}
 
                     {/* Outside image: mobile controls row */}
                     {!isZoomed && (
-                      <div className="md:hidden flex justify-between items-start w-full mt-2 pl-2">
+                      <div className="md:hidden flex justify-between items-start w-full mt-4 pl-2">
                         <div>
                           <button
                             onClick={() => {
