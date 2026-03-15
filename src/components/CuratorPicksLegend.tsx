@@ -1,9 +1,9 @@
 import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
 
-/** Replace the last space in each line with a non-breaking space to prevent orphans */
+/** Replace the last two spaces in each line with non-breaking spaces to prevent orphans (keeps last 3 words together) */
 const preventOrphans = (text: string): string =>
-  text.split("\n").map(line => line.replace(/ (\S+)$/, "\u00A0$1")).join("\n");
+  text.split("\n").map(line => line.replace(/ (\S+) (\S+)$/, "\u00A0$1\u00A0$2")).join("\n");
 
 interface CuratorPicksLegendProps {
   pick: CuratorPick;
