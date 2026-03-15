@@ -2331,6 +2331,27 @@ const FeaturedDesigners = () => {
   }, [selectedSubcategory, selectedCategory]);
   const minSwipeDistance = 50;
 
+  const goToNextPick = useCallback(() => {
+    if (!curatorPicksDesigner?.curatorPicks?.length) return;
+    setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+    setPicksHovered(false);
+  }, [curatorPicksDesigner]);
+
+  const goToPrevPick = useCallback(() => {
+    if (!curatorPicksDesigner?.curatorPicks?.length) return;
+    setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
+    setPicksHovered(false);
+  }, [curatorPicksDesigner]);
+
+  useLightboxSwipe({
+    containerRef: picksSwipeRef,
+    enabled: !!curatorPicksDesigner,
+    imageZoomedRef,
+    onSwipeLeft: goToNextPick,
+    onSwipeRight: goToPrevPick,
+    minDistance: minSwipeDistance,
+  });
+
   useEffect(() => {
     const handleCategorySync = (e: CustomEvent) => {
       const { category, subcategory, source } = e.detail || {};
