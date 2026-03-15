@@ -21,17 +21,10 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
 
   return (
     <div className={`text-center w-full px-4 md:px-12 mt-4 ${className}`}>
-      {/* Title — same as ProductGrid: merge year subtitles, show others separately */}
+      {/* Title — always merge subtitle into title for consistency with ProductGrid */}
       <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
-        {p.subtitle && /^\d{4}/.test(p.subtitle.trim())
-          ? `${pick.title} ${p.subtitle}`
-          : pick.title}
+        {p.subtitle ? `${pick.title} ${p.subtitle}` : pick.title}
       </h3>
-
-      {/* Subtitle — separate line, matching ProductGrid */}
-      {p.subtitle && !/^\d{4}/.test(p.subtitle.trim()) && (
-        <p className="font-body text-sm text-white/60 mt-0.5">{p.subtitle}</p>
-      )}
 
       {/* Materials */}
       {pick.materials && (
@@ -61,10 +54,10 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
         </p>
       )}
 
-      {/* Designer attribution — matching ProductGrid style */}
+      {/* Designer attribution — show only brand name (before " - ") to match ProductGrid */}
       {designerName && (
         <span className="block mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/30">
-          {designerName}
+          {designerName.includes(' - ') ? designerName.split(' - ')[0].trim() : designerName}
         </span>
       )}
 
