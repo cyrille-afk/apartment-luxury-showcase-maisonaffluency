@@ -118,7 +118,7 @@ const TradeShowroom = () => {
         // Build lookups from curators' picks (code-level source of truth)
         const tradeProducts = getAllTradeProducts();
         const pdfLookup = new Map<string, string>();
-        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string }>();
+        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string; image_url?: string | null }>();
         for (const tp of tradeProducts) {
           const tpKey = tp.product_name.trim().toLowerCase();
           if (tp.pdf_url) pdfLookup.set(tpKey, tp.pdf_url);
@@ -127,6 +127,7 @@ const TradeShowroom = () => {
             materials: tp.materials,
             dimensions: tp.dimensions,
             brand: tp.brand_name,
+            image_url: tp.image_url,
           });
         }
 
@@ -187,6 +188,7 @@ const TradeShowroom = () => {
               materials: meta?.materials || item.materials,
               dimensions: meta?.dimensions || item.dimensions,
               designer_name: meta?.brand || item.designer_name,
+              product_image_url: item.product_image_url || meta?.image_url || null,
               pdf_url: pdfLookup.get(key),
               trade_price_cents: price?.cents ?? null,
               currency: price?.currency,

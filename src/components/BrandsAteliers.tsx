@@ -647,7 +647,7 @@ const partnerBrands = [
     subcategory: "Decorative Objects",
     origin: "Thailand",
     description: "Master craftsman creating exquisite decorative objects using rare materials and ancient techniques, blending Eastern and Western artistic traditions.",
-    featured: "Straw Marquetry Mantle Box",
+    featured: "Mantle Boxes",
     instagram: "https://instagram.com/alexanderlamont",
     galleryIndex: GALLERY.A_DESIGN_TREASURE_TROVE,
   },
