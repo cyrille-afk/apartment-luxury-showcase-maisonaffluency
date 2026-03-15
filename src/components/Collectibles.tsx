@@ -1492,10 +1492,10 @@ const Collectibles = () => {
                       <div>
                         <button
                           onClick={closeCuratorPicks}
-                          className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                          className="p-1.5 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
                           aria-label="Close"
                         >
-                          <X size={16} />
+                          <X size={14} />
                         </button>
                       </div>
                       <div className="flex items-center gap-2 ml-auto">
