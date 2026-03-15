@@ -629,6 +629,12 @@ const Collectibles = () => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") goToPreviousPick();
+    if (e.key === "ArrowRight") goToNextPick();
+    if (e.key === "Escape") closeCuratorPicks();
+  };
+
   useLightboxSwipe({
     containerRef: picksSwipeRef,
     enabled: !!curatorPicksDesigner,
