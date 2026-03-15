@@ -2246,6 +2246,7 @@ const FeaturedDesigners = () => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
+  const touchStartYRef = useRef<number | null>(null);
   const [imageLoaded, setImageLoaded] = useState(true);
 
   // Deep-link handler: expand designer from URL hash
