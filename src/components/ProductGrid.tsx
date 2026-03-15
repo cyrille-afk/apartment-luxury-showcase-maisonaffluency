@@ -778,7 +778,7 @@ function singularizeSub(s: string): string {
                         setIsZoomed(false);
                         handleNavigateToDesigner(currentItem);
                       }}
-                      className="mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white/80 underline underline-offset-4 transition-colors"
+                      className="hidden md:block mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white/80 underline underline-offset-4 transition-colors"
                     >
                       View {currentItem.designerName}'s Profile
                     </button>
