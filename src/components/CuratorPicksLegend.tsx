@@ -54,10 +54,10 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
         </p>
       )}
 
-      {/* Designer attribution — matching ProductGrid style */}
+      {/* Designer attribution — show only brand name (before " - ") to match ProductGrid */}
       {designerName && (
         <span className="block mt-4 font-body text-[10px] uppercase tracking-[0.2em] text-white/30">
-          {designerName}
+          {designerName.includes(' - ') ? designerName.split(' - ')[0].trim() : designerName}
         </span>
       )}
 
