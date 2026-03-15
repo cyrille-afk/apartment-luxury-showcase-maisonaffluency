@@ -453,7 +453,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "Alexander_Lamont-Galea_Lantern.pdf"
       },
       { 
-        image: alexanderLamontPick5, 
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773578132/Screen_Shot_2026-03-15_at_8.30.15_PM_wmuyur.png", 
         title: "Corteza Console Table",
         subtitle: "",
         category: "Tables",
