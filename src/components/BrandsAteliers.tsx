@@ -3029,13 +3029,29 @@ const BrandsAteliers = () => {
                             ))}
                           </div>
                         )}
-                        <button
-                          onClick={() => setPicksZoomed(!picksZoomed)}
-                          className="md:hidden absolute bottom-2 left-2 z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
-                          aria-label={picksZoomed ? "Minimize image" : "Maximize image"}
-                        >
-                          {picksZoomed ? <Minimize2 size={16} className="text-white" /> : <Maximize2 size={16} className="text-white" />}
-                        </button>
+                        {/* Mobile Pin button — bottom-left */}
+                        {!picksZoomed && (() => {
+                          const currentPick = picksDesigner.curatorPicks[picksIndex];
+                          const designerId = picksDesigner.id ?? picksDesigner.name;
+                          return (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                togglePin({ pick: currentPick, designerName: picksDesigner.name, designerId, section: "ateliers" });
+                              }}
+                              className={cn(
+                                "md:hidden absolute bottom-2 left-2 z-10 p-2 rounded-full backdrop-blur-sm transition-all duration-300 cursor-pointer",
+                                isPinned(currentPick.title, designerId)
+                                  ? "bg-[hsl(var(--gold)/0.3)] border border-[hsl(var(--gold)/0.6)] text-white"
+                                  : "bg-black/40 border border-white/20 text-white/70 hover:text-white hover:bg-black/60",
+                                compareItems.length >= 3 && !isPinned(currentPick.title, designerId) && "opacity-40 pointer-events-none"
+                              )}
+                              aria-label={isPinned(currentPick.title, designerId) ? "Remove from selection" : "Pin"}
+                            >
+                              <Scale size={16} className="text-white" />
+                            </button>
+                          );
+                        })()}
                         {/* Desktop Quote + Pin — stacked vertically under PDF */}
                         {!picksZoomed && (() => {
                           const currentPick = picksDesigner.curatorPicks[picksIndex];
