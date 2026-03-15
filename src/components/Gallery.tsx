@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
+import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";

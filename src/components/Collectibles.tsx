@@ -4,6 +4,7 @@ import { GALLERY } from "@/constants/galleryIndex";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
+import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote, FileDown, CornerDownRight, Scale } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";

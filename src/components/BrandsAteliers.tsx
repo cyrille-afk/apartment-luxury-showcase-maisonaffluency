@@ -4,6 +4,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { GALLERY } from "@/constants/galleryIndex";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
+import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, Gem, Maximize2, Minimize2, Share2, FileDown, MessageSquareQuote, Scale } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
