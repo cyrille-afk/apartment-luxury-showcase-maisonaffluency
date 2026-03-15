@@ -3122,7 +3122,7 @@ const FeaturedDesigners = () => {
             {curatorPicksDesigner && (
               curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 ? (
                 <div 
-                  className="relative w-full h-full flex items-center justify-center"
+                  className="relative w-full h-full flex items-center justify-center touch-pan-y"
                   onTouchStart={(e) => {
                     if (imageZoomedRef.current) return;
                     setTouchEnd(null);
@@ -3130,7 +3130,16 @@ const FeaturedDesigners = () => {
                   }}
                   onTouchMove={(e) => {
                     if (imageZoomedRef.current) return;
-                    setTouchEnd(e.targetTouches[0].clientX);
+                    const currentX = e.targetTouches[0].clientX;
+                    setTouchEnd(currentX);
+                    // If horizontal swipe is dominant, prevent vertical scroll
+                    if (touchStart !== null) {
+                      const dx = Math.abs(currentX - touchStart);
+                      const dy = Math.abs(e.targetTouches[0].clientY - (e.target as HTMLElement).getBoundingClientRect().top);
+                      if (dx > 10 && dx > dy) {
+                        e.preventDefault();
+                      }
+                    }
                   }}
                   onTouchEnd={() => {
                     if (imageZoomedRef.current) return;
