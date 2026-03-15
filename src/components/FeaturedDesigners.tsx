@@ -699,7 +699,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         title: "Portal",
         subtitle: "Dining Table",
         category: "Furniture",
-        tags: ["Furniture", "Table"],
+        tags: ["Furniture", "Table", "Dining Table"],
         materials: "Nero Kinatra Marble",
         dimensions: "Ø 137 × H 74 cm",
         description: "Available in various Marbles, Travertine and Bleached Ash Wood",
