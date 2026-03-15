@@ -35,7 +35,7 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
         <>
           {/* Mobile: line breaks preserved */}
           <p className="font-body text-xs text-white/50 mt-2 leading-relaxed whitespace-pre-line md:hidden">
-            {pick.materials}
+            {preventOrphans(pick.materials)}
           </p>
           {/* Desktop: bullet separators */}
           <p className="font-body text-xs text-white/50 mt-2 leading-relaxed hidden md:block">
