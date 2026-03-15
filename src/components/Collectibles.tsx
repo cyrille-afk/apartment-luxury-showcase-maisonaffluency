@@ -440,7 +440,7 @@ const Collectibles = () => {
     };
   }, [curatorPicksDesigner]);
 
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
