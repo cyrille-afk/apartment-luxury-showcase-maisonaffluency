@@ -492,7 +492,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Decorative",
         tags: ["Decorative", "Vessels", "Bronze"],
         materials: "A group of bronze vessels that play on a sculptural idea of 'bondage' whereby knots and overlaps create an open structure full of tension",
-        dimensions: "FG000174 - Small: Ø 23 × H 18.5 cm – App. 5.5 kg\nFG000175 - Medium: Ø 26 × H 20 cm – App. 7 kg\nFG000176 - Large: Ø 34 × H 25.5 cm – App. 13 kg",
+        dimensions: "Small: Ø 23 × H 18.5 cm – App. 5.5 kg\nMedium: Ø 26 × H 20 cm – App. 7 kg\nLarge: Ø 34 × H 25.5 cm – App. 13 kg",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Reef_Vessels.pdf",
         pdfFilename: "Alexander_Lamont-Reef_Vessels.pdf"
       },
