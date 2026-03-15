@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import CuratorPicksLegend from "./CuratorPicksLegend";
 import { GALLERY } from "@/constants/galleryIndex";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { useInView } from "framer-motion";
