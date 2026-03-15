@@ -3097,16 +3097,9 @@ const BrandsAteliers = () => {
 
                     {!picksZoomed && <div className="hidden md:block h-12" aria-hidden="true" />}
 
-                    {/* Mobile: X (left) + Quote (right) */}
+                    {/* Mobile: quote button (left) */}
                     {!picksZoomed && (
                       <div className="md:hidden flex justify-between items-center w-full mt-2">
-                        <button
-                          onClick={requestClosePicks}
-                          className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
-                          aria-label="Close"
-                        >
-                          <X size={16} />
-                        </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
