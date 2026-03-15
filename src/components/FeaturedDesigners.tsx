@@ -3143,32 +3143,8 @@ const FeaturedDesigners = () => {
             {curatorPicksDesigner && (
               curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 ? (
                 <div 
-                  className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain touch-pan-y"
-                  onTouchStart={(e) => {
-                    if (imageZoomedRef.current) return;
-                    setTouchEnd(null);
-                    setTouchStart(e.targetTouches[0].clientX);
-                  }}
-                  onTouchMove={(e) => {
-                    if (imageZoomedRef.current) return;
-                    setTouchEnd(e.targetTouches[0].clientX);
-                  }}
-                  onTouchEnd={() => {
-                    if (imageZoomedRef.current) return;
-                    if (!touchStart || !curatorPicksDesigner.curatorPicks?.length) return;
-                    if (touchEnd !== null) {
-                      const distance = touchStart - touchEnd;
-                      if (distance > minSwipeDistance) {
-                        setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
-                        setPicksHovered(false);
-                      } else if (distance < -minSwipeDistance) {
-                        setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
-                        setPicksHovered(false);
-                      }
-                    }
-                    setTouchStart(null);
-                    setTouchEnd(null);
-                  }}
+                  ref={picksSwipeRef}
+                  className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain"
                 >
                   <div
                     ref={(el) => {
