@@ -1,6 +1,10 @@
 import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
 
+/** Replace the last space in each line with a non-breaking space to prevent orphans */
+const preventOrphans = (text: string): string =>
+  text.split("\n").map(line => line.replace(/ (\S+)$/, "\u00A0$1")).join("\n");
+
 interface CuratorPicksLegendProps {
   pick: CuratorPick;
   /** Designer/brand ID for provenance lookup */
@@ -31,7 +35,7 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
         <>
           {/* Mobile: line breaks preserved */}
           <p className="font-body text-xs text-white/50 mt-2 leading-relaxed whitespace-pre-line md:hidden">
-            {pick.materials}
+            {preventOrphans(pick.materials)}
           </p>
           {/* Desktop: bullet separators */}
           <p className="font-body text-xs text-white/50 mt-2 leading-relaxed hidden md:block">
@@ -44,7 +48,7 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
       {p.dimensions && (
         <>
           <p className="font-body text-sm text-white font-medium mt-1.5 whitespace-pre-line md:hidden">
-            {p.dimensions}
+            {preventOrphans(p.dimensions)}
           </p>
           <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 hidden md:block">
             {p.dimensions.replace(/\n/g, " · ")}
