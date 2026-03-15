@@ -48,7 +48,7 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
       {p.dimensions && (
         <>
           <p className="font-body text-sm text-white font-medium mt-1.5 whitespace-pre-line md:hidden">
-            {p.dimensions}
+            {preventOrphans(p.dimensions)}
           </p>
           <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 hidden md:block">
             {p.dimensions.replace(/\n/g, " · ")}
