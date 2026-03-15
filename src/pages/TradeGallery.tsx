@@ -360,7 +360,7 @@ const TradeGallery = () => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product.brand_name}</p>
+                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}</p>
                   <h3 className="font-display text-sm text-foreground truncate">{product.product_name}</h3>
                   <p className="font-body text-[10px] text-muted-foreground truncate">
                     {[product.dimensions, product.materials].filter(Boolean).join(" · ")}
