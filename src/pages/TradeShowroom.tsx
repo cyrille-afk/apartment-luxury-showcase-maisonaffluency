@@ -180,8 +180,13 @@ const TradeShowroom = () => {
             (!existing.dimensions && item.dimensions)
           ) {
             const price = priceLookup.get(key);
+            const meta = metadataLookup.get(key);
             seenByName.set(key, {
               ...item,
+              // Overlay canonical metadata from curators' picks (instant sync)
+              materials: meta?.materials || item.materials,
+              dimensions: meta?.dimensions || item.dimensions,
+              designer_name: meta?.brand || item.designer_name,
               pdf_url: pdfLookup.get(key),
               trade_price_cents: price?.cents ?? null,
               currency: price?.currency,
