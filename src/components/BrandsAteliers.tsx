@@ -2378,6 +2378,22 @@ const BrandsAteliers = () => {
     return featuredDesigners.find(d => d.id === designerId) || null;
   }, [picksDesignerName]);
 
+  const picksSwipeGoNext = useCallback(() => {
+    if (!picksDesigner?.curatorPicks?.length) return;
+    setPicksIndex(prev => prev === picksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+  }, [picksDesigner]);
+  const picksSwipeGoPrev = useCallback(() => {
+    if (!picksDesigner?.curatorPicks?.length) return;
+    setPicksIndex(prev => prev === 0 ? picksDesigner.curatorPicks.length - 1 : prev - 1);
+  }, [picksDesigner]);
+  useLightboxSwipe({
+    containerRef: picksSwipeRef,
+    enabled: !!picksDesignerName,
+    imageZoomedRef,
+    onSwipeLeft: picksSwipeGoNext,
+    onSwipeRight: picksSwipeGoPrev,
+  });
+
   const openPicks = useCallback((brandName: string, index?: number) => {
     const idx = index ?? 0;
     preloadPickImages(brandName, idx);
