@@ -3100,11 +3100,11 @@ const BrandsAteliers = () => {
                       </div>
                     </div>
 
-                    {!picksZoomed && <div className="hidden md:block h-12" aria-hidden="true" />}
+                    {!picksZoomed && <div className="hidden md:block h-16" aria-hidden="true" />}
 
                     {/* Mobile: close (left) + quote (right) */}
                     {!picksZoomed && (
-                      <div className="md:hidden flex justify-between items-center w-full mt-2 pl-2">
+                      <div className="md:hidden flex justify-between items-center w-full mt-4 pl-2">
                         <div>
                           <button
                             onClick={requestClosePicks}
