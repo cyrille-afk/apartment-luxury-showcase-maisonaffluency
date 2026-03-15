@@ -3104,7 +3104,7 @@ const BrandsAteliers = () => {
                       const designerId = picksDesigner.id ?? picksDesigner.name;
                       const designerName = picksDesigner.name;
                       return (
-                        <div className="md:hidden flex justify-between items-center w-full mt-2">
+                        <div className="md:hidden flex justify-between items-center w-full mt-2 pl-2">
                           <div>
                             <button
                               onClick={requestClosePicks}
