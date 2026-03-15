@@ -361,8 +361,8 @@ const Collectibles = () => {
   const [picksHovered, setPicksHovered] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
+  const picksSwipeRef = useRef<HTMLDivElement>(null);
 
   // Deep-link handler: expand designer from URL hash
   useEffect(() => {
