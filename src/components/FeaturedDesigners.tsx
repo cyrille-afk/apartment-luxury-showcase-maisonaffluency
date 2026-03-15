@@ -3128,15 +3128,16 @@ const FeaturedDesigners = () => {
                     if (imageZoomedRef.current) return;
                     setTouchEnd(null);
                     setTouchStart(e.targetTouches[0].clientX);
+                    touchStartYRef.current = e.targetTouches[0].clientY;
                   }}
                   onTouchMove={(e) => {
                     if (imageZoomedRef.current) return;
                     const currentX = e.targetTouches[0].clientX;
                     setTouchEnd(currentX);
                     // If horizontal swipe is dominant, prevent vertical scroll
-                    if (touchStart !== null) {
+                    if (touchStart !== null && touchStartYRef.current !== null) {
                       const dx = Math.abs(currentX - touchStart);
-                      const dy = Math.abs(e.targetTouches[0].clientY - (e.target as HTMLElement).getBoundingClientRect().top);
+                      const dy = Math.abs(e.targetTouches[0].clientY - touchStartYRef.current);
                       if (dx > 10 && dx > dy) {
                         e.preventDefault();
                       }
