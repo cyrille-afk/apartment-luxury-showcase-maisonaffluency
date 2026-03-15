@@ -2246,7 +2246,6 @@ const FeaturedDesigners = () => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
-  const touchStartYRef = useRef<number | null>(null);
   const [imageLoaded, setImageLoaded] = useState(true);
 
   // Deep-link handler: expand designer from URL hash
@@ -3123,25 +3122,15 @@ const FeaturedDesigners = () => {
             {curatorPicksDesigner && (
               curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 ? (
                 <div 
-                  className="relative w-full h-full flex items-center justify-center touch-pan-y"
+                  className="relative w-full h-full flex items-center justify-center"
                   onTouchStart={(e) => {
                     if (imageZoomedRef.current) return;
                     setTouchEnd(null);
                     setTouchStart(e.targetTouches[0].clientX);
-                    touchStartYRef.current = e.targetTouches[0].clientY;
                   }}
                   onTouchMove={(e) => {
                     if (imageZoomedRef.current) return;
-                    const currentX = e.targetTouches[0].clientX;
-                    setTouchEnd(currentX);
-                    // If horizontal swipe is dominant, prevent vertical scroll
-                    if (touchStart !== null && touchStartYRef.current !== null) {
-                      const dx = Math.abs(currentX - touchStart);
-                      const dy = Math.abs(e.targetTouches[0].clientY - touchStartYRef.current);
-                      if (dx > 10 && dx > dy) {
-                        e.preventDefault();
-                      }
-                    }
+                    setTouchEnd(e.targetTouches[0].clientX);
                   }}
                   onTouchEnd={() => {
                     if (imageZoomedRef.current) return;
@@ -3177,7 +3166,7 @@ const FeaturedDesigners = () => {
                       // Recheck after images load
                       setTimeout(checkScroll, 500);
                     }}
-                    className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible overscroll-contain ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
+                    className={`flex flex-col items-center justify-start md:justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}>
                     <div className="relative inline-flex flex-col items-center overflow-visible"
                       onMouseEnter={() => { if (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.hoverImage) setPicksHovered(true); }}
                       onMouseLeave={() => setPicksHovered(false)}
@@ -3219,12 +3208,11 @@ const FeaturedDesigners = () => {
                         const isFiltered = !pickMatchesFilter(currentPick);
                         return (
                           <>
-                            <div className="md:contents w-full h-[55vh] md:h-auto flex items-center justify-center">
                             <img
                               src={currentPick?.image}
                               alt={currentPick?.title || "Curator's pick"}
                               sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
-                              className={`rounded-lg shadow-2xl cursor-zoom-in object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] h-[55vh] md:h-auto md:max-h-[60vh] md:max-w-[70vw]'} ${isFiltered ? 'blur-sm opacity-40 transition-[filter,opacity] duration-300' : ''} ${picksHovered && currentPick?.hoverImage ? 'opacity-0 transition-opacity duration-500' : 'opacity-100 transition-opacity duration-500'}`}
+                              className={`rounded-lg shadow-2xl cursor-zoom-in object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40 transition-[filter,opacity] duration-300' : ''} ${picksHovered && currentPick?.hoverImage ? 'opacity-0 transition-opacity duration-500' : 'opacity-100 transition-opacity duration-500'}`}
                               decoding="sync"
                               loading="eager"
                               fetchPriority="high"
@@ -3234,11 +3222,10 @@ const FeaturedDesigners = () => {
                               <img
                                 src={currentPick.hoverImage}
                                 alt={`${currentPick?.title} - alternate view`}
-                                className={`absolute inset-0 w-full h-full object-contain rounded-lg select-none pointer-events-none transition-opacity duration-500 ${picksHovered ? 'opacity-100' : 'opacity-0'} ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] h-[55vh] md:h-auto md:max-h-[60vh] md:max-w-[70vw]'}`}
+                                className={`absolute inset-0 w-full h-full object-contain rounded-lg select-none pointer-events-none transition-opacity duration-500 ${picksHovered ? 'opacity-100' : 'opacity-0'} ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'}`}
                                 draggable={false}
                               />
                             )}
-                            </div>
                           </>
                         );
                       })()}
