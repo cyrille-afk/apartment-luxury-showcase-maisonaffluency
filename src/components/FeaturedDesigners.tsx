@@ -3217,11 +3217,12 @@ const FeaturedDesigners = () => {
                         const isFiltered = !pickMatchesFilter(currentPick);
                         return (
                           <>
+                            <div className="md:contents w-full h-[55vh] md:h-auto flex items-center justify-center">
                             <img
                               src={currentPick?.image}
                               alt={currentPick?.title || "Curator's pick"}
                               sizes="(max-width: 767px) 90vw, (max-width: 1024px) 80vw, 60vw"
-                              className={`rounded-lg shadow-2xl cursor-zoom-in object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'} ${isFiltered ? 'blur-sm opacity-40 transition-[filter,opacity] duration-300' : ''} ${picksHovered && currentPick?.hoverImage ? 'opacity-0 transition-opacity duration-500' : 'opacity-100 transition-opacity duration-500'}`}
+                              className={`rounded-lg shadow-2xl cursor-zoom-in object-contain ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] h-[55vh] md:h-auto md:max-h-[60vh] md:max-w-[70vw]'} ${isFiltered ? 'blur-sm opacity-40 transition-[filter,opacity] duration-300' : ''} ${picksHovered && currentPick?.hoverImage ? 'opacity-0 transition-opacity duration-500' : 'opacity-100 transition-opacity duration-500'}`}
                               decoding="sync"
                               loading="eager"
                               fetchPriority="high"
@@ -3231,10 +3232,11 @@ const FeaturedDesigners = () => {
                               <img
                                 src={currentPick.hoverImage}
                                 alt={`${currentPick?.title} - alternate view`}
-                                className={`absolute inset-0 w-full h-full object-contain rounded-lg select-none pointer-events-none transition-opacity duration-500 ${picksHovered ? 'opacity-100' : 'opacity-0'} ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]'}`}
+                                className={`absolute inset-0 w-full h-full object-contain rounded-lg select-none pointer-events-none transition-opacity duration-500 ${picksHovered ? 'opacity-100' : 'opacity-0'} ${isZoomed ? 'max-h-[90vh] max-w-[90vw]' : 'max-w-[85vw] h-[55vh] md:h-auto md:max-h-[60vh] md:max-w-[70vw]'}`}
                                 draggable={false}
                               />
                             )}
+                            </div>
                           </>
                         );
                       })()}
