@@ -420,7 +420,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "Alexander_Lamont-Casque_Bar_Cabinet.pdf"
       },
       { 
-        image: alexanderLamontPick1, 
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773578109/Screen_Shot_2026-03-15_at_8.30.52_PM_vm6hej.png", 
         title: "Ondas Sconce",
         subtitle: "Clear",
         category: "Lighting",
