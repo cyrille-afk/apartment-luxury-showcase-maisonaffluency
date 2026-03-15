@@ -408,7 +408,7 @@ const Navigation = () => {
               </button>
               <div className="flex items-center gap-3 mt-1 mb-2">
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
-                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-foreground font-bold">Since 2017</span>
+                <span className="font-body text-[10px] uppercase tracking-[0.3em] text-foreground font-bold">Since 2017</span>
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
               </div>
             </div>
