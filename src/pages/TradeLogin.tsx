@@ -19,7 +19,7 @@ const TradeLogin = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: window.location.origin + "/trade",
     });
     if (error) {
       toast({ title: "Google Sign-In Failed", description: String(error), variant: "destructive" });
