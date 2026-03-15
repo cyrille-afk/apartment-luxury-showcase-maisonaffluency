@@ -4,6 +4,7 @@ import { GALLERY } from "@/constants/galleryIndex";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
+import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote, FileDown, CornerDownRight, Scale } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
@@ -360,8 +361,8 @@ const Collectibles = () => {
   const [picksHovered, setPicksHovered] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
+  const picksSwipeRef = useRef<HTMLDivElement>(null);
 
   // Deep-link handler: expand designer from URL hash
   useEffect(() => {
@@ -439,7 +440,7 @@ const Collectibles = () => {
     };
   }, [curatorPicksDesigner]);
 
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
@@ -634,29 +635,13 @@ const Collectibles = () => {
     if (e.key === "Escape") closeCuratorPicks();
   };
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    if (imageZoomedRef.current) return;
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (imageZoomedRef.current) return;
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (imageZoomedRef.current) return;
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) {
-      goToNextPick();
-    } else if (isRightSwipe) {
-      goToPreviousPick();
-    }
-  };
+  useLightboxSwipe({
+    containerRef: picksSwipeRef,
+    enabled: !!curatorPicksDesigner,
+    imageZoomedRef,
+    onSwipeLeft: goToNextPick,
+    onSwipeRight: goToPreviousPick,
+  });
 
   const handleDoubleTap = () => {
     const now = Date.now();
@@ -1267,10 +1252,8 @@ const Collectibles = () => {
           
           {curatorPicksDesigner?.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 && (
             <div 
-              className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain touch-pan-y"
-              onTouchStart={onTouchStart}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onTouchEnd}
+              ref={picksSwipeRef}
+              className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain"
             >
               {/* Desktop Close button moved inside image container below */}
 
@@ -1302,11 +1285,8 @@ const Collectibles = () => {
                   observer.observe(el, { childList: true, subtree: true });
                   setTimeout(checkScroll, 500);
                 }}
-                className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none touch-pan-y ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}
-                style={{ WebkitUserSelect: 'none' }}
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}>
+                className={`flex flex-col items-center justify-center max-w-[90vw] px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none ${isZoomed ? 'max-h-[95vh] pb-4' : 'max-h-[85vh] pb-4'}`}
+                style={{ WebkitUserSelect: 'none' }}>
                 <div 
                   className={`relative overflow-visible transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}
                   onClick={handleDoubleTap}

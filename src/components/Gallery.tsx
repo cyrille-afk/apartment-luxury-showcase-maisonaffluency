@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
+import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
@@ -499,49 +500,16 @@ const Gallery = () => {
   const goToNext = () => {
     setCurrentItemIndex(prev => prev === currentSectionItems.length - 1 ? 0 : prev + 1);
   };
-  // Swipe detection via native listeners to avoid interfering with PinchZoomImage
+  // Swipe detection via shared hook with native non-passive listeners
   const swipeContainerRef = useRef<HTMLDivElement>(null);
-  const swipeTouchStart = useRef<number | null>(null);
-  const swipeTouchEnd = useRef<number | null>(null);
-
-
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const el = swipeContainerRef.current;
-    if (!el) return;
-
-    const handleSwipeStart = (e: TouchEvent) => {
-      if (imageZoomedRef.current) return;
-      if (e.touches.length > 1) return;
-      swipeTouchEnd.current = null;
-      swipeTouchStart.current = e.touches[0].clientX;
-    };
-    const handleSwipeMove = (e: TouchEvent) => {
-      if (imageZoomedRef.current) return;
-      if (e.touches.length > 1) return;
-      swipeTouchEnd.current = e.touches[0].clientX;
-    };
-    const handleSwipeEnd = (e: TouchEvent) => {
-      if (imageZoomedRef.current) return;
-      if (swipeTouchStart.current === null) return;
-      const endX = swipeTouchEnd.current ?? e.changedTouches?.[0]?.clientX ?? null;
-      if (endX === null) return;
-      const distance = swipeTouchStart.current - endX;
-      if (distance > minSwipeDistance) goToNext();
-      else if (distance < -minSwipeDistance) goToPrevious();
-      swipeTouchStart.current = null;
-      swipeTouchEnd.current = null;
-    };
-
-    el.addEventListener("touchstart", handleSwipeStart, { passive: true });
-    el.addEventListener("touchmove", handleSwipeMove, { passive: true });
-    el.addEventListener("touchend", handleSwipeEnd, { passive: true });
-    return () => {
-      el.removeEventListener("touchstart", handleSwipeStart);
-      el.removeEventListener("touchmove", handleSwipeMove);
-      el.removeEventListener("touchend", handleSwipeEnd);
-    };
-  }, [lightboxOpen]);
+  useLightboxSwipe({
+    containerRef: swipeContainerRef,
+    enabled: lightboxOpen,
+    imageZoomedRef,
+    onSwipeLeft: goToNext,
+    onSwipeRight: goToPrevious,
+    minDistance: minSwipeDistance,
+  });
   return <>
       <section id="gallery" ref={ref} className="pt-0 pb-16 px-4 md:pt-0 md:pb-24 md:px-12 lg:px-20 bg-muted/30 scroll-mt-24">
         <div className="mx-auto max-w-7xl">
@@ -862,7 +830,7 @@ const Gallery = () => {
              /* ── Desktop: existing layout ── */
              <div
                ref={swipeContainerRef}
-               className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain touch-pan-y"
+               className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain"
              >
 
                 {/* Pill indicator */}

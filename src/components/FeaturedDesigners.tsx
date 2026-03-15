@@ -4,6 +4,7 @@ import { GALLERY } from "@/constants/galleryIndex";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { useInView } from "framer-motion";
 import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";
+import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import { Instagram, Search, X, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Gem, Maximize2, Minimize2, SlidersHorizontal, FileDown, MessageSquareQuote, CornerDownRight, Scale } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
@@ -2243,9 +2244,8 @@ const FeaturedDesigners = () => {
   const [isZoomed, setIsZoomed] = useState(false);
   const [picksHovered, setPicksHovered] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const imageZoomedRef = useRef(false);
+  const picksSwipeRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(true);
 
   // Deep-link handler: expand designer from URL hash
@@ -2330,6 +2330,27 @@ const FeaturedDesigners = () => {
     };
   }, [selectedSubcategory, selectedCategory]);
   const minSwipeDistance = 50;
+
+  const goToNextPick = useCallback(() => {
+    if (!curatorPicksDesigner?.curatorPicks?.length) return;
+    setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
+    setPicksHovered(false);
+  }, [curatorPicksDesigner]);
+
+  const goToPrevPick = useCallback(() => {
+    if (!curatorPicksDesigner?.curatorPicks?.length) return;
+    setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
+    setPicksHovered(false);
+  }, [curatorPicksDesigner]);
+
+  useLightboxSwipe({
+    containerRef: picksSwipeRef,
+    enabled: !!curatorPicksDesigner,
+    imageZoomedRef,
+    onSwipeLeft: goToNextPick,
+    onSwipeRight: goToPrevPick,
+    minDistance: minSwipeDistance,
+  });
 
   useEffect(() => {
     const handleCategorySync = (e: CustomEvent) => {
@@ -3122,32 +3143,8 @@ const FeaturedDesigners = () => {
             {curatorPicksDesigner && (
               curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 ? (
                 <div 
-                  className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain touch-pan-y"
-                  onTouchStart={(e) => {
-                    if (imageZoomedRef.current) return;
-                    setTouchEnd(null);
-                    setTouchStart(e.targetTouches[0].clientX);
-                  }}
-                  onTouchMove={(e) => {
-                    if (imageZoomedRef.current) return;
-                    setTouchEnd(e.targetTouches[0].clientX);
-                  }}
-                  onTouchEnd={() => {
-                    if (imageZoomedRef.current) return;
-                    if (!touchStart || !curatorPicksDesigner.curatorPicks?.length) return;
-                    if (touchEnd !== null) {
-                      const distance = touchStart - touchEnd;
-                      if (distance > minSwipeDistance) {
-                        setCuratorPickIndex(prev => prev === curatorPicksDesigner.curatorPicks.length - 1 ? 0 : prev + 1);
-                        setPicksHovered(false);
-                      } else if (distance < -minSwipeDistance) {
-                        setCuratorPickIndex(prev => prev === 0 ? curatorPicksDesigner.curatorPicks.length - 1 : prev - 1);
-                        setPicksHovered(false);
-                      }
-                    }
-                    setTouchStart(null);
-                    setTouchEnd(null);
-                  }}
+                  ref={picksSwipeRef}
+                  className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain"
                 >
                   <div
                     ref={(el) => {
