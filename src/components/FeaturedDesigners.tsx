@@ -3122,7 +3122,7 @@ const FeaturedDesigners = () => {
             {curatorPicksDesigner && (
               curatorPicksDesigner.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 ? (
                 <div 
-                  className="relative w-full h-full flex items-center justify-center"
+                  className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain touch-pan-y"
                   onTouchStart={(e) => {
                     if (imageZoomedRef.current) return;
                     setTouchEnd(null);
