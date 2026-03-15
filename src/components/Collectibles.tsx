@@ -629,35 +629,13 @@ const Collectibles = () => {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowLeft") goToPreviousPick();
-    if (e.key === "ArrowRight") goToNextPick();
-    if (e.key === "Escape") closeCuratorPicks();
-  };
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    if (imageZoomedRef.current) return;
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (imageZoomedRef.current) return;
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (imageZoomedRef.current) return;
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) {
-      goToNextPick();
-    } else if (isRightSwipe) {
-      goToPreviousPick();
-    }
-  };
+  useLightboxSwipe({
+    containerRef: picksSwipeRef,
+    enabled: !!curatorPicksDesigner,
+    imageZoomedRef,
+    onSwipeLeft: goToNextPick,
+    onSwipeRight: goToPreviousPick,
+  });
 
   const handleDoubleTap = () => {
     const now = Date.now();
