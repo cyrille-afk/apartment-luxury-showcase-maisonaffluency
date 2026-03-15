@@ -57,7 +57,7 @@ const CuratorPicksLegend = ({ pick, designerId, onInquiry, className = "" }: Cur
 
       {/* Description */}
       {p.description && (
-        <p className="text-[11px] md:text-xs text-white/45 font-body mt-3 leading-relaxed text-justify md:text-center whitespace-pre-line max-w-xl mx-auto">
+        <p className="text-[11px] md:text-xs text-white/45 font-body mt-3 leading-relaxed text-center whitespace-pre-line max-w-xl mx-auto">
           {p.description}
         </p>
       )}

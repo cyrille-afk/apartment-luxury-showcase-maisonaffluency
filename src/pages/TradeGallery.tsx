@@ -316,7 +316,7 @@ const TradeGallery = () => {
                     )}
                   </div>
                 </div>
-                <div className="p-3">
+                <div className="p-3 text-center">
                   <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
                     {product.brand_name}
                   </p>
