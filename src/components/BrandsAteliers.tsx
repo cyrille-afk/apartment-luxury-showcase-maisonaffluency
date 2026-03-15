@@ -3144,6 +3144,7 @@ const BrandsAteliers = () => {
                         <CuratorPicksLegend
                           pick={picksDesigner.curatorPicks[picksIndex]}
                           designerId={picksDesigner.id ?? picksDesigner.name}
+                          designerName={picksDesigner.name}
                           onInquiry={() => setQuoteOpen(true)}
                         />
 
