@@ -1252,10 +1252,8 @@ const Collectibles = () => {
           
           {curatorPicksDesigner?.curatorPicks && curatorPicksDesigner.curatorPicks.length > 0 && (
             <div 
-              className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain touch-pan-y"
-              onTouchStart={onTouchStart}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onTouchEnd}
+              ref={picksSwipeRef}
+              className="relative w-full h-full flex items-center justify-center overflow-x-hidden overscroll-contain"
             >
               {/* Desktop Close button moved inside image container below */}
 
