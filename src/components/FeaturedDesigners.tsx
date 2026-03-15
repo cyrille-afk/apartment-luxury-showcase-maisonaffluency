@@ -3443,34 +3443,15 @@ const FeaturedDesigners = () => {
 
                     {/* Legend */}
                     {!isZoomed && (
-                      <div className="text-center mt-4 w-full px-4 md:px-12 relative">
-                        <p className="font-brand text-base md:text-lg text-white tracking-wide">
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
-                        </p>
-                        {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.subtitle && (
-                          <p className="text-xs text-white/50 font-body mt-0.5 italic">{(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).subtitle}</p>
-                        )}
-                        {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
-                          <p className="text-xs text-white/50 font-body mt-1">
-                            {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials!.replace(/\n/g, ' · ')}
-                          </p>
-                        )}
-                        {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.dimensions || (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.weight) && (
-                          <p className="text-xs text-white font-body font-medium mt-0.5 mb-1.5 whitespace-pre-line">
-                            {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.dimensions}
-                            {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.dimensions && (curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.weight && ' – '}
-                            {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.weight}
-                          </p>
-                        )}
-                        {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.description && (
-                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed text-justify md:text-center whitespace-pre-line">
-                            {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).description}
-                          </p>
-                        )}
+                      <div className="mt-4 relative">
+                        <CuratorPicksLegend
+                          pick={curatorPicksDesigner.curatorPicks[curatorPickIndex]}
+                          designerId={curatorPicksDesigner.id ?? curatorPicksDesigner.name}
+                        />
 
-                        {/* Thumbnail strip — inline, above contact line */}
+                        {/* Thumbnail strip */}
                         {curatorPicksDesigner.curatorPicks.length > 1 && (
-                          <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
+                          <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap px-4">
                             {curatorPicksDesigner.curatorPicks.map((pick, idx) => {
                               const matches = pickMatchesFilter(pick);
                               return (
@@ -3490,7 +3471,6 @@ const FeaturedDesigners = () => {
                             })}
                           </div>
                         )}
-
                       </div>
                     )}
                   </div>
