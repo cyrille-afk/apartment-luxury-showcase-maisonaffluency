@@ -3063,7 +3063,7 @@ const BrandsAteliers = () => {
                           const designerId = picksDesigner.id ?? picksDesigner.name;
                           const designerName = picksDesigner.name;
                           return (
-                            <div className="hidden md:flex absolute top-full -right-20 mt-2 flex-col items-end gap-2 z-20">
+                            <div className="hidden md:flex absolute top-full -right-20 mt-4 flex-col items-end gap-2 z-20">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
