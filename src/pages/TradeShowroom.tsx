@@ -514,7 +514,7 @@ const TradeShowroom = () => {
                     )}
                   </div>
                 </div>
-                <div className="p-3">
+                <div className="p-3 text-center">
                   {product.designer_name && (
                     <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
                       {product.designer_name}
