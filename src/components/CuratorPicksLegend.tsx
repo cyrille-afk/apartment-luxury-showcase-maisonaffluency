@@ -65,6 +65,14 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
           Photo: {pick.photoCredit}
         </p>
       )}
+/** Prevent orphan (widow) words: if the last word on a line would be alone,
+ *  join it to the previous word with a non-breaking space. Works per-line. */
+const preventOrphans = (text: string): string =>
+  text.split("\n").map(line => {
+    const words = line.split(" ");
+    if (words.length <= 2) return line;
+    return [...words.slice(0, -2), words.slice(-2).join("\u00A0")].join(" ");
+  }).join("\n");
 
 
       {/* Provenance badge — renders only when certificate data exists */}
