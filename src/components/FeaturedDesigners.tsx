@@ -3382,11 +3382,11 @@ const FeaturedDesigners = () => {
                         );
                       })()}
                     </div>
-                    {!isZoomed && <div className="hidden md:block h-12" aria-hidden="true" />}
+                    {!isZoomed && <div className="hidden md:block h-16" aria-hidden="true" />}
 
                     {/* Outside image: mobile controls row */}
                     {!isZoomed && (
-                      <div className="md:hidden flex justify-between items-start w-full mt-2 pl-2">
+                      <div className="md:hidden flex justify-between items-start w-full mt-4 pl-2">
                         <div>
                           <button
                             onClick={() => {
