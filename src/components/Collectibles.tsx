@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import CuratorPicksLegend from "./CuratorPicksLegend";
 import { GALLERY } from "@/constants/galleryIndex";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { useInView } from "framer-motion";
@@ -23,7 +24,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import CategorySidebar from "@/components/CategorySidebar";
-import { ProvenanceBadge } from "@/components/ProvenanceBadge";
+
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
@@ -1520,31 +1521,15 @@ const Collectibles = () => {
                   );
                 })()}
 
-                <div className={`mt-2 text-center transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
-                  <h3 className="text-sm md:text-base font-serif text-white mb-1">
-                    {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
-                  </h3>
-                  {(curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions) && (
-                    <div className="mt-2 w-full space-y-1">
-                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.materials && (
-                        <p className="text-xs md:text-sm text-white/60 font-body">
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].materials!.replace(/\n/g, ' · ')}
-                        </p>
-                      )}
-                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.dimensions && (
-                        <p className="text-xs md:text-sm text-white font-body font-medium">
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].dimensions}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  <ProvenanceBadge
+                <div className={`mt-2 transition-all duration-300 ${isZoomed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
+                  <CuratorPicksLegend
+                    pick={curatorPicksDesigner.curatorPicks[curatorPickIndex]}
                     designerId={curatorPicksDesigner.id ?? curatorPicksDesigner.name}
-                    pieceTitle={curatorPicksDesigner.curatorPicks[curatorPickIndex]?.title}
                   />
-                  {/* Thumbnail strip — inline, above contact line */}
+
+                  {/* Thumbnail strip */}
                   {curatorPicksDesigner.curatorPicks.length > 1 && (
-                    <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
+                    <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap px-4">
                       {curatorPicksDesigner.curatorPicks.map((pick, idx) => {
                         const matches = pickMatchesFilter(pick);
                         return (
@@ -1564,7 +1549,6 @@ const Collectibles = () => {
                       })}
                     </div>
                   )}
-
                 </div>
               </div>
 

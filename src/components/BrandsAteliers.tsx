@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import CuratorPicksLegend from "./CuratorPicksLegend";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { GALLERY } from "@/constants/galleryIndex";
 import { useInView, AnimatePresence } from "framer-motion";
@@ -3139,68 +3140,16 @@ const BrandsAteliers = () => {
                     )}
 
                     {!picksZoomed && (
-                      <div className="text-center mt-4 w-full px-4 md:px-12 relative">
-                        <p className="font-brand text-base md:text-lg text-white tracking-wide">
-                          {picksDesigner.curatorPicks[picksIndex]?.title}
-                        </p>
-                        {(picksDesigner.curatorPicks[picksIndex] as any)?.subtitle && (
-                          <p className="text-xs text-white/50 font-body mt-0.5 italic">{(picksDesigner.curatorPicks[picksIndex] as any).subtitle}</p>
-                        )}
-                        {picksDesigner.curatorPicks[picksIndex]?.materials && (() => {
-                          const mat = picksDesigner.curatorPicks[picksIndex].materials!;
-                          const ledIdx = mat.indexOf("\n\nAvailable in multiple LED options:");
-                          const dimRegex = /^.*\d+\s*[×x]\s*\d+.*(?:mm|cm|kg).*$/gmi;
-                          if (ledIdx === -1) {
-                            // No LED section — join all lines with · for a flowing sentence
-                            return (
-                              <p className="text-[10px] md:text-xs font-body mt-1 text-justify md:text-center text-white/50 whitespace-normal md:whitespace-pre-line">
-                                {mat}
-                              </p>
-                            );
-                          }
-                          // Has LED section — keep dimension lines with breaks, bold dims
-                          const before = mat.slice(0, ledIdx);
-                          const after = mat.slice(ledIdx + 2);
-                          const lines = before.split('\n');
-                          return (
-                            <>
-                              <p className="text-[10px] md:text-xs font-body mt-1 text-center whitespace-pre-line">
-                                {lines.map((line, i) => {
-                                  const isDim = dimRegex.test(line);
-                                  dimRegex.lastIndex = 0;
-                                  const isSilhouette = /silhouette/i.test(line);
-                                  const bold = isDim || isSilhouette;
-                                  return (
-                                    <span key={i}>
-                                      {i > 0 && <br />}
-                                      <span className={bold ? "text-white font-medium" : "text-white/50"}>
-                                        {line}
-                                      </span>
-                                    </span>
-                                  );
-                                })}
-                              </p>
-                              <p className="text-xs text-white/50 font-body mt-3 text-justify whitespace-pre-line">
-                                {after}
-                              </p>
-                            </>
-                          );
-                        })()}
-                        {((picksDesigner.curatorPicks[picksIndex] as any)?.dimensions || (picksDesigner.curatorPicks[picksIndex] as any)?.weight) && (
-                          <p className="text-xs text-white font-body font-medium mt-0.5 whitespace-pre-line">
-                            {(picksDesigner.curatorPicks[picksIndex] as any)?.dimensions}
-                            {(picksDesigner.curatorPicks[picksIndex] as any)?.dimensions && (picksDesigner.curatorPicks[picksIndex] as any)?.weight && ' – '}
-                            {(picksDesigner.curatorPicks[picksIndex] as any)?.weight}
-                          </p>
-                        )}
-                        {(picksDesigner.curatorPicks[picksIndex] as any)?.description && (
-                          <p className="text-xs text-white/50 font-body mt-2 leading-relaxed text-justify md:text-center whitespace-normal md:whitespace-pre-line">
-                            {(picksDesigner.curatorPicks[picksIndex] as any).description}
-                          </p>
-                        )}
+                      <div className="mt-4 relative">
+                        <CuratorPicksLegend
+                          pick={picksDesigner.curatorPicks[picksIndex]}
+                          designerId={picksDesigner.id ?? picksDesigner.name}
+                          onInquiry={() => setQuoteOpen(true)}
+                        />
 
+                        {/* Thumbnail strip */}
                         {picksDesigner.curatorPicks.length > 1 && (
-                          <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap">
+                          <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center flex-wrap md:flex-nowrap px-4">
                             {picksDesigner.curatorPicks.map((pick: CuratorPick, idx: number) => (
                               <button key={idx} onClick={() => { setPicksIndex(idx); setPicksZoomed(false); }} aria-label={`View ${pick.title}`}
                                 className={`flex-shrink-0 rounded-md overflow-hidden border-2 transition-all duration-200 ${picksIndex === idx ? 'border-white/80 scale-105' : 'border-transparent opacity-50 hover:opacity-80'}`}>
@@ -3215,18 +3164,6 @@ const BrandsAteliers = () => {
                             ))}
                           </div>
                         )}
-
-                        <p className="text-[11px] md:text-xs text-white/40 font-body mt-6 text-center leading-relaxed max-w-lg mx-auto">
-                          We carry all products by this brand. If you are not able to find your dream product in our gallery or would like an individual quotation, please{" "}
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setQuoteOpen(true); }}
-                            className="text-white/60 hover:text-white underline underline-offset-2 transition-colors cursor-pointer"
-                          >
-                            send us an inquiry
-                          </button>
-                          .
-                        </p>
-
                       </div>
                     )}
                   </div>
