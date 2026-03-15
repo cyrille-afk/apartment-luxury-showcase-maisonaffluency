@@ -1,6 +1,10 @@
 import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
 
+/** Replace the last space in each line with a non-breaking space to prevent orphans */
+const preventOrphans = (text: string): string =>
+  text.split("\n").map(line => line.replace(/ (\S+)$/, "\u00A0$1")).join("\n");
+
 interface CuratorPicksLegendProps {
   pick: CuratorPick;
   /** Designer/brand ID for provenance lookup */
