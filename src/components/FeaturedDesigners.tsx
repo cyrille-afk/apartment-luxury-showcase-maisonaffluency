@@ -481,7 +481,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         category: "Decorative",
         tags: ["Decorative", "Wall Art"],
         materials: "Bronze Koi carp appear to swim naturally across surfaces large and small. We can advise on arrangements for the wall and floor.",
-        dimensions: "FG000139 W 7.5 × L 36 cm – 1.2 kg  ·  FG000140 W 8.5 × L 40 cm – 1.5 kg\nFG000141 W 11.5 × L 43.5 cm – 2.4 kg  ·  FG000142 W 12 × L 47.5 cm – 2.5 kg  ·  FG000145 W 6.5 × L 34 cm – 1 kg",
+        dimensions: "W 7.5 × L 36 cm – 1.2 kg\nW 8.5 × L 40 cm – 1.5 kg\nW 11.5 × L 43.5 cm – 2.4 kg\nW 12 × L 47.5 cm – 2.5 kg\nW 6.5 × L 34 cm – 1 kg",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Koi_Carps.pdf",
         pdfFilename: "Alexander_Lamont-Koi_Carps_Wall_Art.pdf"
       },
