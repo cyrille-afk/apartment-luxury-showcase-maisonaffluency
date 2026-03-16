@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Trash2, Copy, ExternalLink, FileText, Image as ImageIcon, File } from "lucide-react";
+import { Loader2, Trash2, Copy, ExternalLink, FileText, Image as ImageIcon, File, Eye, X, Grid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
