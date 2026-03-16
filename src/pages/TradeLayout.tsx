@@ -5,6 +5,9 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TradeSidebar } from "@/components/trade/TradeSidebar";
 import { useAuth } from "@/hooks/useAuth";
 
+const CompareFab = lazy(() => import("@/components/CompareFab"));
+const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
+
 const TradeLayout = () => {
   const { user, loading, applicationStatus, isAdmin } = useAuth();
 
