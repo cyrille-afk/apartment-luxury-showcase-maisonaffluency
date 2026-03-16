@@ -1,8 +1,9 @@
+import { useState, useEffect } from "react";
 import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import {
+import { supabase } from "@/integrations/supabase/client";
   Sidebar,
   SidebarContent,
   SidebarGroup,
