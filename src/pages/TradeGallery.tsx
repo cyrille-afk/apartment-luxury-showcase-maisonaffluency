@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check } from "lucide-react";
-import CurrencyToggle, { type DisplayCurrency, formatPriceConverted } from "@/components/trade/CurrencyToggle";
+import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { getAllTradeProducts, getAllBrands, getAllCategories, getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
