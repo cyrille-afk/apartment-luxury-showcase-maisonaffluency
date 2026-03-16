@@ -19,7 +19,7 @@ function formatPrice(cents: number, currency: string): string {
 }
 
 const TradeGallery = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { toast } = useToast();
   const allProducts = useMemo(() => getAllTradeProducts(), []);
   const brands = useMemo(() => getAllBrands(allProducts), [allProducts]);
