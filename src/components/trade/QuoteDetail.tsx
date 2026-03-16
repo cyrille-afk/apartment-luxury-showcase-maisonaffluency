@@ -58,6 +58,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState(quoteNotes || "");
   const [adminNotes, setAdminNotes] = useState("");
+  const [currency, setCurrency] = useState<Currency>("SGD");
   const [clientCompany, setClientCompany] = useState("");
   const [clientName, setClientName] = useState("");
   const [currencyOpen, setCurrencyOpen] = useState(false);
