@@ -26,10 +26,7 @@ interface ShowroomProduct {
   currency?: string;
 }
 
-const formatPrice = (cents: number, currency: string) => {
-  const amount = cents / 100;
-  return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
-};
+
 
 interface DraftQuote {
   id: string;

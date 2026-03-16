@@ -15,9 +15,6 @@ interface DraftQuote {
   created_at: string;
 }
 
-function formatPrice(cents: number, currency: string): string {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(cents / 100);
-}
 
 const TradeGallery = () => {
   const { user, isAdmin } = useAuth();
