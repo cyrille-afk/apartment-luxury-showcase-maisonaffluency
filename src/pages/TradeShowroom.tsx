@@ -206,20 +206,28 @@ const TradeShowroom = () => {
           }
         }
 
-        // Build a price lookup from trade_products table
+        // Build a price lookup from trade_products table (trade price preferred, RRP fallback)
         const { data: pricedProducts } = await supabase
           .from("trade_products")
-          .select("product_name, trade_price_cents, currency")
-          .not("trade_price_cents", "is", null);
-        const priceLookup = new Map<string, { cents: number; currency: string }>();
+          .select("product_name, trade_price_cents, rrp_price_cents, currency");
+
+        const priceLookup = new Map<string, PriceMatch>();
+        const priceEntries: PriceMatch[] = [];
         if (pricedProducts) {
           for (const pp of pricedProducts) {
-            if (pp.trade_price_cents) {
-              priceLookup.set(pp.product_name.trim().toLowerCase(), {
-                cents: pp.trade_price_cents,
-                currency: pp.currency,
-              });
-            }
+            const cents = pp.trade_price_cents ?? pp.rrp_price_cents;
+            if (!cents) continue;
+
+            const entry: PriceMatch = {
+              name: pp.product_name,
+              cents,
+              currency: pp.currency,
+            };
+
+            priceEntries.push(entry);
+            priceLookup.set(pp.product_name.trim().toLowerCase(), entry);
+            const normalizedName = normalizeProductName(pp.product_name);
+            if (normalizedName) priceLookup.set(normalizedName, entry);
           }
         }
 
