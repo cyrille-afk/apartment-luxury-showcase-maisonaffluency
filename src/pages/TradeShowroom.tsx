@@ -416,6 +416,19 @@ const TradeShowroom = () => {
     setUploadingId(null);
   };
 
+  const toCompareItem = (product: ShowroomProduct): CompareItem => ({
+    pick: {
+      title: product.product_name,
+      image: product.product_image_url || "",
+      materials: product.materials,
+      dimensions: product.dimensions,
+      category: inferCategory(product.product_name),
+    },
+    designerName: product.designer_name?.includes(' - ') ? product.designer_name.split(' - ')[0].trim() : (product.designer_name || "Unknown"),
+    designerId: product.id,
+    section: "designers",
+  });
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
