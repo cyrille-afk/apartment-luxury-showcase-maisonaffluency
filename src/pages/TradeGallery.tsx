@@ -195,6 +195,21 @@ const TradeGallery = () => {
     });
   }, [allProducts, search, selectedBrand, selectedCategory, selectedSubcategory]);
 
+  const toCompareItem = (product: TradeProduct): CompareItem => ({
+    pick: {
+      title: product.product_name,
+      subtitle: product.subtitle,
+      image: product.image_url || "",
+      materials: product.materials,
+      dimensions: product.dimensions,
+      category: product.category,
+      subcategory: product.subcategory,
+    },
+    designerName: product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name,
+    designerId: product.id,
+    section: "designers",
+  });
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
