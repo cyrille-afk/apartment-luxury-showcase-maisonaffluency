@@ -257,6 +257,14 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
     toast({ title: "Notes saved" });
   };
 
+  const handleDeleteQuote = async () => {
+    // Delete items first, then the quote
+    await supabase.from("trade_quote_items").delete().eq("quote_id", quoteId);
+    await supabase.from("trade_quotes").delete().eq("id", quoteId);
+    toast({ title: "Quote deleted" });
+    onBack();
+  };
+
   const subtotalCents = items.reduce((sum, item) => {
     const priceStr = itemPrices[item.id];
     const cents = priceStr ? Math.round(parseFloat(priceStr) * 100) : 0;
