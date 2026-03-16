@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, Send, CheckCircle, DollarSign, ChevronRight, ArrowLeft, Save, CreditCard } from "lucide-react";
+import { Clock, Send, CheckCircle, DollarSign, ChevronRight, ArrowLeft, Save, CreditCard, Trash2 } from "lucide-react";
 import { QuoteCardSkeleton, QuoteItemSkeleton } from "@/components/trade/skeletons";
 import SectionHero from "@/components/trade/SectionHero";
 
