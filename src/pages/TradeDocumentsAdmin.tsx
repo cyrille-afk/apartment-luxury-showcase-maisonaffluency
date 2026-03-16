@@ -20,6 +20,7 @@ interface TradeDocument {
   file_url: string;
   file_size_bytes: number | null;
   cover_image_url: string | null;
+  sort_order: number;
   created_at: string;
 }
 
