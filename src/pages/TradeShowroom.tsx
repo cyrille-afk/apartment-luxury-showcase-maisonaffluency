@@ -760,6 +760,17 @@ const TradeShowroom = () => {
                     <FileDown className="h-4 w-4" />
                   </a>
                 )}
+                <button
+                  onClick={() => togglePin(toCompareItem(product))}
+                  className={cn(
+                    "p-2 rounded-full transition-all shrink-0",
+                    pinned ? "bg-[hsl(var(--gold))] text-foreground" : "text-muted-foreground hover:text-foreground",
+                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                  )}
+                  aria-label={pinned ? "Remove from selection" : "Pin"}
+                >
+                  <Scale className="h-3.5 w-3.5" />
+                </button>
               </div>
             );
           })}
