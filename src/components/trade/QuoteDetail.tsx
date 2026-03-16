@@ -193,6 +193,23 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     onStatusChange();
   };
 
+  const handleStripePayment = async () => {
+    setPayingStripe(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-quote-payment", {
+        body: { quoteId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err: any) {
+      toast({ title: "Payment error", description: err.message || "Could not initiate payment", variant: "destructive" });
+    } finally {
+      setPayingStripe(false);
+    }
+  };
+
   const subtotalCents = items.reduce((sum, item) => {
     const rawPrice = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? 0;
     const prodCurrency = item.trade_products?.currency || currency;
