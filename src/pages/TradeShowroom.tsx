@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, ExternalLink, FileDown, Upload, Loader2 } from "lucide-react";
+import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, FileDown, Upload, Loader2 } from "lucide-react";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
@@ -605,17 +605,6 @@ const TradeShowroom = () => {
                         <FileDown className="h-3.5 w-3.5" />
                       </a>
                     )}
-                    {product.link_url && (
-                      <a
-                        href={`/${product.link_url}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 bg-background/90 rounded-md text-foreground hover:bg-background transition-colors"
-                        title="View in gallery"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
-                    )}
                   </div>
                 </div>
                 <div className="p-3 text-center">
@@ -735,12 +724,6 @@ const TradeShowroom = () => {
                   <a href={product.pdf_url} target="_blank" rel="noopener noreferrer"
                     className="p-2 text-[hsl(var(--pdf-red))] hover:text-[hsl(var(--pdf-red))]/80 transition-colors" title="Spec sheet">
                     <FileDown className="h-4 w-4" />
-                  </a>
-                )}
-                {product.link_url && (
-                  <a href={`/${product.link_url}`} target="_blank" rel="noopener noreferrer"
-                    className="p-2 text-muted-foreground hover:text-foreground transition-colors" title="View in gallery">
-                    <ExternalLink className="h-4 w-4" />
                   </a>
                 )}
               </div>
