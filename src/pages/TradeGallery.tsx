@@ -39,6 +39,12 @@ const TradeGallery = () => {
 
   // Price lookup from trade_products table
   const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string }>>(new Map());
+  const [priceEntries, setPriceEntries] = useState<{ name: string; cents: number; currency: string }[]>([]);
+
+  const normalizeName = (s: string) =>
+    s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  const tokenizeName = (s: string) =>
+    normalizeName(s).split(" ").filter((t) => t.length > 2);
 
   useEffect(() => {
     const fetchPrices = async () => {
@@ -48,12 +54,18 @@ const TradeGallery = () => {
         .not("trade_price_cents", "is", null);
       if (data) {
         const lookup = new Map<string, { cents: number; currency: string }>();
+        const entries: { name: string; cents: number; currency: string }[] = [];
         for (const p of data) {
           if (p.trade_price_cents) {
-            lookup.set(p.product_name.trim().toLowerCase(), { cents: p.trade_price_cents, currency: p.currency });
+            const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency };
+            entries.push(entry);
+            lookup.set(p.product_name.trim().toLowerCase(), entry);
+            const norm = normalizeName(p.product_name);
+            if (norm) lookup.set(norm, entry);
           }
         }
         setPriceLookup(lookup);
+        setPriceEntries(entries);
       }
     };
     fetchPrices();
