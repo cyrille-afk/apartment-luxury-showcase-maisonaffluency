@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instag
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
 import GalleryHotspots from "./GalleryHotspots";
+import QuoteRequestDialog from "./QuoteRequestDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
