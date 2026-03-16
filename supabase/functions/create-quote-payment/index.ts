@@ -39,21 +39,24 @@ serve(async (req) => {
 
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
   );
 
   try {
     // Authenticate user
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData } = await supabaseClient.auth.getUser(token);
-    const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated");
+    const { data: userData, error: authErr } = await supabaseClient.auth.getUser(token);
+    const user = userData?.user;
+    if (authErr || !user?.email) throw new Error("User not authenticated");
 
     const { quoteId } = await req.json();
     if (!quoteId) throw new Error("quoteId is required");
 
-    // Fetch quote
+    console.log("[create-quote-payment] User:", user.id, "Quote:", quoteId);
+
+    // Fetch quote — use service role to bypass RLS, but verify ownership
     const { data: quote, error: qErr } = await supabaseClient
       .from("trade_quotes")
       .select("*")
@@ -61,7 +64,10 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .single();
 
-    if (qErr || !quote) throw new Error("Quote not found");
+    if (qErr || !quote) {
+      console.error("[create-quote-payment] Quote lookup failed:", qErr?.message);
+      throw new Error("Quote not found");
+    }
     if (quote.status !== "confirmed") throw new Error("Quote must be confirmed before payment");
 
     // Fetch quote items with products
