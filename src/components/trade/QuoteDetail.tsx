@@ -135,7 +135,43 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         supabase.from("trade_quotes").select("currency, client_name, admin_notes").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
-      setItems((itemsRes.data as QuoteItemWithProduct[]) || []);
+      let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
+
+      // Fallback price lookup: for items whose linked product has no trade_price_cents,
+      // search for another trade_products record with the same product_name that does.
+      const needsPrice = loadedItems.filter(
+        (i) => i.trade_products && !i.trade_products.trade_price_cents
+      );
+      if (needsPrice.length > 0) {
+        const names = needsPrice.map((i) => i.trade_products!.product_name);
+        const { data: priced } = await supabase
+          .from("trade_products")
+          .select("product_name, trade_price_cents, currency")
+          .in("product_name", names)
+          .not("trade_price_cents", "is", null);
+
+        if (priced && priced.length > 0) {
+          const priceMap = new Map(priced.map((p) => [p.product_name, p]));
+          loadedItems = loadedItems.map((item) => {
+            if (item.trade_products && !item.trade_products.trade_price_cents) {
+              const match = priceMap.get(item.trade_products.product_name);
+              if (match) {
+                return {
+                  ...item,
+                  trade_products: {
+                    ...item.trade_products,
+                    trade_price_cents: match.trade_price_cents,
+                    currency: match.currency,
+                  },
+                };
+              }
+            }
+            return item;
+          });
+        }
+      }
+
+      setItems(loadedItems);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
       if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
       if ((quoteRes.data as any)?.admin_notes) setAdminNotes((quoteRes.data as any).admin_notes);
