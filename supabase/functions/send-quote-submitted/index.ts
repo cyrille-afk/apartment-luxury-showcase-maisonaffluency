@@ -145,8 +145,8 @@ const handler = async (req: Request): Promise<Response> => {
     </div>`;
 
     const { error: emailError } = await resend.emails.send({
-      from: "Maison Affluency <trade@myaffluency.com>",
-      to: ["gregoire@myaffluency.com"],
+      from: "Maison Affluency <trade@maisonaffluency.com>",
+      to: ["gregoire@maisonaffluency.com"],
       subject: `📋 New Quote ${quoteNumber} — ${userName}${company !== "N/A" ? ` (${company})` : ""}`,
       html,
     });
