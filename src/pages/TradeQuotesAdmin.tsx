@@ -427,9 +427,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                           <h4 className="font-display text-xs text-foreground leading-tight">{product?.product_name || "Unknown"}</h4>
                           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product?.brand_name}</p>
                           {product?.dimensions && <p className="font-body text-[10px] text-muted-foreground">{product.dimensions}</p>}
-                          {product?.trade_price_cents && (
+                          {catalogPrices[item.id] && (
                             <p className="font-body text-[10px] text-muted-foreground/60">
-                              Catalog: {formatPrice(product.trade_price_cents, product.currency || currency)}
+                              Catalog: {formatPrice(catalogPrices[item.id].cents, catalogPrices[item.id].currency)}
                             </p>
                           )}
                         </div>
