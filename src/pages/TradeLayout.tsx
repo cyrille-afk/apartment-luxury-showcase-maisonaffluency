@@ -80,7 +80,6 @@ const TradeLayout = () => {
         <CompareFab />
         <CompareDrawer />
       </Suspense>
-      </div>
     </SidebarProvider>
   );
 };
