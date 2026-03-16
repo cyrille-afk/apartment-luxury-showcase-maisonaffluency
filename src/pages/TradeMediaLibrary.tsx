@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Trash2, Copy, ExternalLink, FileText, Image as ImageIcon, File, Eye, X, Grid, List } from "lucide-react";
+import { getCuratorPicksCatalog } from "@/lib/curatorPicksCatalog";
 import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -26,6 +27,7 @@ interface StorageFile {
 const BUCKET = "assets";
 
 const FOLDERS = ["documents", "journal", "journal/pdfs", "products", "provenance", "gallery"];
+const VIRTUAL_FOLDER_CURATOR = "curator-picks";
 
 function formatBytes(bytes: number) {
   if (bytes === 0) return "0 B";
@@ -83,6 +85,19 @@ export default function TradeMediaLibrary() {
     setLoading(false);
   };
 
+  // Virtual curator picks from Cloudinary / local assets
+  const curatorPickFiles = useMemo<StorageFile[]>(() => {
+    return getCuratorPicksCatalog().map((pick) => ({
+      name: pick.name,
+      folder: VIRTUAL_FOLDER_CURATOR,
+      fullPath: `${VIRTUAL_FOLDER_CURATOR}/${pick.title}`,
+      publicUrl: pick.url,
+      size: 0,
+      createdAt: "",
+      mimeType: "image/jpeg",
+    }));
+  }, []);
+
   useEffect(() => { fetchFiles(); }, []);
 
   const handleCopy = (url: string) => {
@@ -103,7 +118,9 @@ export default function TradeMediaLibrary() {
     setConfirmDelete(null);
   };
 
-  const filtered = filterFolder === "all" ? files : files.filter((f) => f.folder === filterFolder);
+  const allFiles = useMemo(() => [...files, ...curatorPickFiles], [files, curatorPickFiles]);
+  const filtered = filterFolder === "all" ? allFiles : allFiles.filter((f) => f.folder === filterFolder);
+  const isCuratorPick = (file: StorageFile) => file.folder === VIRTUAL_FOLDER_CURATOR;
   const isImage = (mime: string) => mime?.startsWith("image");
   const isPdf = (mime: string) => mime?.includes("pdf");
 
@@ -117,7 +134,7 @@ export default function TradeMediaLibrary() {
         <div>
           <h1 className="font-display text-2xl text-foreground">Media Library</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
-            {files.length} file{files.length !== 1 ? "s" : ""} across all folders
+            {allFiles.length} file{allFiles.length !== 1 ? "s" : ""} across all folders ({curatorPickFiles.length} curator picks)
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -157,7 +174,7 @@ export default function TradeMediaLibrary() {
         >
           All
         </button>
-        {FOLDERS.map((f) => (
+        {[...FOLDERS, VIRTUAL_FOLDER_CURATOR].map((f) => (
           <button
             key={f}
             onClick={() => setFilterFolder(f)}
@@ -165,7 +182,7 @@ export default function TradeMediaLibrary() {
               filterFolder === f ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
-            {f}
+            {f === VIRTUAL_FOLDER_CURATOR ? `curator picks (${curatorPickFiles.length})` : f}
           </button>
         ))}
       </div>
@@ -230,16 +247,18 @@ export default function TradeMediaLibrary() {
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-destructive hover:text-destructive"
-                    title="Delete"
-                    disabled={deleting === file.fullPath}
-                    onClick={() => setConfirmDelete(file)}
-                  >
-                    {deleting === file.fullPath ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
-                  </Button>
+                  {!isCuratorPick(file) && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive hover:text-destructive"
+                      title="Delete"
+                      disabled={deleting === file.fullPath}
+                      onClick={() => setConfirmDelete(file)}
+                    >
+                      {deleting === file.fullPath ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -293,16 +312,18 @@ export default function TradeMediaLibrary() {
                           <ExternalLink className="h-3.5 w-3.5" />
                         </a>
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        title="Delete"
-                        disabled={deleting === file.fullPath}
-                        onClick={() => setConfirmDelete(file)}
-                      >
-                        {deleting === file.fullPath ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                      </Button>
+                      {!isCuratorPick(file) && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          title="Delete"
+                          disabled={deleting === file.fullPath}
+                          onClick={() => setConfirmDelete(file)}
+                        >
+                          {deleting === file.fullPath ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
