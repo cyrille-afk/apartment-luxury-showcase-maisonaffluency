@@ -216,11 +216,17 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       setQuote(q);
       setAdminNotes(q?.admin_notes || "");
 
-      // Init price inputs from existing unit_price_cents or trade_price_cents
+      // Init price inputs from existing unit_price_cents, or trade_price_cents only if same currency
       const prices: Record<string, string> = {};
+      const quoteCurrency = (quoteRes.data as any)?.currency || "SGD";
       fetchedItems.forEach((item) => {
-        const cents = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? null;
-        prices[item.id] = cents ? (cents / 100).toFixed(2) : "";
+        if (item.unit_price_cents) {
+          prices[item.id] = (item.unit_price_cents / 100).toFixed(2);
+        } else if (item.trade_products?.trade_price_cents && (item.trade_products.currency || "SGD") === quoteCurrency) {
+          prices[item.id] = (item.trade_products.trade_price_cents / 100).toFixed(2);
+        } else {
+          prices[item.id] = "";
+        }
       });
       setItemPrices(prices);
       setLoading(false);
