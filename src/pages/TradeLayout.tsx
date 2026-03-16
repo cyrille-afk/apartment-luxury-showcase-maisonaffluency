@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Outlet, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
