@@ -85,6 +85,21 @@ export default function TradeMediaLibrary() {
     setLoading(false);
   };
 
+  // Virtual curator picks from Cloudinary / local assets
+  const curatorPickFiles = useMemo<StorageFile[]>(() => {
+    return getCuratorPicksCatalog().map((pick) => ({
+      name: pick.name,
+      folder: VIRTUAL_FOLDER_CURATOR,
+      fullPath: `${VIRTUAL_FOLDER_CURATOR}/${pick.title}`,
+      publicUrl: pick.url,
+      size: 0,
+      createdAt: "",
+      mimeType: "image/jpeg",
+    }));
+  }, []);
+    setLoading(false);
+  };
+
   useEffect(() => { fetchFiles(); }, []);
 
   const handleCopy = (url: string) => {
