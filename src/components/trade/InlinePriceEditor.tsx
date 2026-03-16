@@ -86,7 +86,7 @@ export default function InlinePriceEditor({ productName, currentPriceCents, curr
   return (
     <button
       onClick={(e) => { e.stopPropagation(); startEdit(); }}
-      className="group/price flex items-center gap-1 mt-1 cursor-pointer"
+      className="group/price flex items-center justify-center gap-1 mt-1 cursor-pointer w-full"
       title="Edit price"
     >
       {currentPriceCents ? (
