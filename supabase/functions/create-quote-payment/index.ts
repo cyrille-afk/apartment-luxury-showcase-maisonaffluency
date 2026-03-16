@@ -11,37 +11,25 @@ const corsHeaders = {
 /**
  * Stripe fee parameters — adjust per your Stripe account's rates.
  * Default: 3.4% + S$0.50 (Singapore domestic card rate).
+ * For non-SGD we use the same formula but with the equivalent fixed fee in minor units.
  */
 const STRIPE_PERCENT_FEE = 0.034;
-const STRIPE_FIXED_FEE_CENTS = 50; // in minor currency units (SGD cents)
+const STRIPE_FIXED_FEE_MINOR: Record<string, number> = {
+  SGD: 50,  // S$0.50
+  USD: 30,  // US$0.30
+  EUR: 25,  // €0.25
+  GBP: 20,  // £0.20
+};
 
-function calculateChargeWithFees(netCents: number): {
+function calculateChargeWithFees(netCents: number, currency: string): {
   chargeCents: number;
   feeCents: number;
 } {
+  const fixedFee = STRIPE_FIXED_FEE_MINOR[currency.toUpperCase()] ?? 50;
   const chargeCents = Math.ceil(
-    (netCents + STRIPE_FIXED_FEE_CENTS) / (1 - STRIPE_PERCENT_FEE)
+    (netCents + fixedFee) / (1 - STRIPE_PERCENT_FEE)
   );
   return { chargeCents, feeCents: chargeCents - netCents };
-}
-
-/** Fetch live FX rate from frankfurter.app */
-async function fetchRate(from: string, to: string): Promise<number> {
-  if (from === to) return 1;
-  try {
-    const res = await fetch(`https://api.frankfurter.app/latest?from=${from}&to=${to}`);
-    const data = await res.json();
-    if (data.rates?.[to]) return data.rates[to];
-  } catch {
-    // fall through to fallback
-  }
-  // Hardcoded fallback rates to SGD
-  const fallback: Record<string, number> = {
-    USD_SGD: 1.34,
-    EUR_SGD: 1.46,
-    GBP_SGD: 1.70,
-  };
-  return fallback[`${from}_${to}`] || 1;
 }
 
 serve(async (req) => {
@@ -84,39 +72,25 @@ serve(async (req) => {
 
     if (!items || items.length === 0) throw new Error("No items in quote");
 
-    // Collect unique product currencies that need conversion to SGD
-    const productCurrencies = new Set<string>();
-    for (const item of items) {
-      const cur = item.trade_products?.currency || "SGD";
-      if (cur !== "SGD") productCurrencies.add(cur);
-    }
+    // Use the quote's own currency — charge in the same currency the user sees
+    const currency = (quote.currency || "SGD").toLowerCase();
+    const currencyUpper = currency.toUpperCase();
 
-    // Fetch all needed FX rates in parallel
-    const rateMap: Record<string, number> = { SGD: 1 };
-    await Promise.all(
-      Array.from(productCurrencies).map(async (cur) => {
-        rateMap[cur] = await fetchRate(cur, "SGD");
-      })
-    );
-
-    // Calculate subtotal in SGD cents, converting each product's price
-    let subtotalSgdCents = 0;
+    // Calculate subtotal in the quote's currency (prices are already in that currency)
+    let subtotalCents = 0;
     for (const item of items) {
       const unitPrice = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? 0;
-      const prodCurrency = item.trade_products?.currency || "SGD";
-      const rate = rateMap[prodCurrency] || 1;
-      const unitPriceSgd = Math.round(unitPrice * rate);
-      subtotalSgdCents += unitPriceSgd * item.quantity;
+      subtotalCents += unitPrice * item.quantity;
     }
 
-    // Apply GST (9%) — always SGD now
-    let totalSgdCents = subtotalSgdCents;
-    if (subtotalSgdCents > 0) {
-      totalSgdCents = subtotalSgdCents + Math.round(subtotalSgdCents * 0.09);
+    // Apply GST for SGD only
+    let totalCents = subtotalCents;
+    if (currency === "sgd" && subtotalCents > 0) {
+      totalCents = subtotalCents + Math.round(subtotalCents * 0.09);
     }
 
-    // Add Stripe fees
-    const { chargeCents, feeCents } = calculateChargeWithFees(totalSgdCents);
+    // Add Stripe processing fees
+    const { chargeCents, feeCents } = calculateChargeWithFees(totalCents, currencyUpper);
 
     // Init Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -139,10 +113,10 @@ serve(async (req) => {
       line_items: [
         {
           price_data: {
-            currency: "sgd",
+            currency, // charge in the quote's original currency
             product_data: {
               name: `Maison Affluency — ${quoteNumber}`,
-              description: `${items.length} item${items.length > 1 ? "s" : ""} · converted to SGD · includes GST & processing fee`,
+              description: `${items.length} item${items.length > 1 ? "s" : ""} · includes processing fee${currency === "sgd" ? " & GST" : ""}`,
             },
             unit_amount: chargeCents,
           },
@@ -152,7 +126,8 @@ serve(async (req) => {
       mode: "payment",
       metadata: {
         quote_id: quoteId,
-        net_amount_sgd_cents: String(totalSgdCents),
+        currency: currencyUpper,
+        net_amount_cents: String(totalCents),
         fee_cents: String(feeCents),
       },
       success_url: `${origin}/trade/quotes?payment=success&quote=${quoteId}`,
