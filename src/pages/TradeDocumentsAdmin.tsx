@@ -347,6 +347,20 @@ const TradeDocumentsAdmin = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
+                  {doc.file_url?.toLowerCase().endsWith(".pdf") && (
+                    <button
+                      onClick={() => handleSetAsBrandThumbnail(doc)}
+                      disabled={extractingThumbnailId === doc.id}
+                      className="p-2 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-50"
+                      title="Use cover as brand thumbnail"
+                    >
+                      {extractingThumbnailId === doc.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Image className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  )}
                   <button
                     onClick={() => setEditing({ ...doc })}
                     className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
