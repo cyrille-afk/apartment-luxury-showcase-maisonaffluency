@@ -145,7 +145,7 @@ const TradeGallery = () => {
     [allProducts, selectedCategory]
   );
 
-  /** Find price by exact name, then by name+subtitle combo */
+  /** Find price by exact name, normalized name, substring, or token overlap */
   const getProductPrice = (product: TradeProduct): { cents: number; currency: string } | null => {
     const nameKey = product.product_name.trim().toLowerCase();
     if (priceLookup.has(nameKey)) return priceLookup.get(nameKey)!;
@@ -153,7 +153,27 @@ const TradeGallery = () => {
       const comboKey = `${nameKey} ${product.subtitle.trim().toLowerCase()}`;
       if (priceLookup.has(comboKey)) return priceLookup.get(comboKey)!;
     }
-    return null;
+    // Normalized match
+    const norm = normalizeName(product.product_name);
+    if (priceLookup.has(norm)) return priceLookup.get(norm)!;
+    // Substring match
+    for (const e of priceEntries) {
+      const cn = normalizeName(e.name);
+      if (cn.includes(norm) || norm.includes(cn)) return e;
+    }
+    // Token overlap
+    const targetTokens = new Set(tokenizeName(product.product_name));
+    if (targetTokens.size === 0) return null;
+    let best: { cents: number; currency: string } | null = null;
+    let bestScore = 0;
+    for (const e of priceEntries) {
+      const ct = tokenizeName(e.name);
+      let overlap = 0;
+      for (const t of ct) { if (targetTokens.has(t)) overlap++; }
+      const score = overlap / Math.max(targetTokens.size, ct.length);
+      if (score > 0.5 && score > bestScore) { bestScore = score; best = e; }
+    }
+    return best;
   };
 
   const filtered = useMemo(() => {
