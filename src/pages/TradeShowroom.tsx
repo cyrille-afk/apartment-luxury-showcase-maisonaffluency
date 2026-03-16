@@ -701,6 +701,8 @@ const TradeShowroom = () => {
                       productName={product.product_name}
                       currentPriceCents={product.trade_price_cents}
                       currency={product.currency || "SGD"}
+                      displayCurrency={displayCurrency}
+                      fxRates={fxRates}
                       onPriceUpdated={(cents, cur) => {
                         setProducts(prev => prev.map(p => p.id === product.id ? { ...p, trade_price_cents: cents, currency: cur } : p));
                       }}
