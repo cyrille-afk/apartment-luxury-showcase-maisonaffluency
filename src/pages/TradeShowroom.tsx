@@ -350,6 +350,13 @@ const TradeShowroom = () => {
         title="Showroom Collection"
         subtitle={`${filtered.length} ${filtered.length === 1 ? "piece" : "pieces"} from our Singapore gallery${selectedDesigner !== "all" ? ` by ${selectedDesigner}` : ""}${selectedSection !== "all" ? ` in ${selectedSection}` : ""}`}
       >
+        {isAdmin && (
+          <CsvPriceImport onComplete={() => {
+            // Trigger a refetch by toggling loading
+            setLoading(true);
+            setTimeout(() => window.location.reload(), 500);
+          }} />
+        )}
         <button
           onClick={() => setDrawerOpen(true)}
           className="relative p-2 border border-background/30 rounded-md text-background/70 hover:text-background hover:border-background/50 transition-colors"
