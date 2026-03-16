@@ -2823,34 +2823,7 @@ const FeaturedDesigners = () => {
                         <h3 className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 group-hover:text-primary">
                           {(() => {
                             const fmt = formatDesignerName(designer.name, (designer as any).displayName);
-                            const mobileLines = (designer as any).mobileNameLines;
-                            return (
-                              <>
-                                <span className="hidden md:inline">
-                                  {fmt.brand ? (
-                                    <>
-                                      {fmt.brand}
-                                      <span className="text-lg text-foreground/70"> — {fmt.person}</span>
-                                    </>
-                                  ) : fmt.person}
-                                </span>
-                                <span className="md:hidden">
-                                  {mobileLines ? (
-                                    <>
-                                      {mobileLines[0]}
-                                      <br />
-                                      <span className="text-lg">{mobileLines[1]}</span>
-                                    </>
-                                  ) : fmt.brand ? (
-                                    <>
-                                      {fmt.brand}
-                                      <br />
-                                      <span className="text-lg">{fmt.person}</span>
-                                    </>
-                                  ) : fmt.person}
-                                </span>
-                              </>
-                            );
+                            return fmt.brand || fmt.person;
                           })()}
                         </h3>
                       </div>
