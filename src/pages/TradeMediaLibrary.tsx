@@ -27,6 +27,7 @@ interface StorageFile {
 const BUCKET = "assets";
 
 const FOLDERS = ["documents", "journal", "journal/pdfs", "products", "provenance", "gallery"];
+const VIRTUAL_FOLDER_CURATOR = "curator-picks";
 
 function formatBytes(bytes: number) {
   if (bytes === 0) return "0 B";
