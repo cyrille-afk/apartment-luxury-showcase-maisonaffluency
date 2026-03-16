@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, Send, CheckCircle, DollarSign, ChevronRight, ArrowLeft, Save, CreditCard } from "lucide-react";
+import { Clock, Send, CheckCircle, DollarSign, ChevronRight, ArrowLeft, Save, CreditCard, Trash2 } from "lucide-react";
 import { QuoteCardSkeleton, QuoteItemSkeleton } from "@/components/trade/skeletons";
 import SectionHero from "@/components/trade/SectionHero";
 
@@ -197,6 +197,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   const [adminNotes, setAdminNotes] = useState("");
   const [itemPrices, setItemPrices] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -254,6 +255,14 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   const handleSaveNotes = async () => {
     await supabase.from("trade_quotes").update({ admin_notes: adminNotes || null } as any).eq("id", quoteId);
     toast({ title: "Notes saved" });
+  };
+
+  const handleDeleteQuote = async () => {
+    // Delete items first, then the quote
+    await supabase.from("trade_quote_items").delete().eq("quote_id", quoteId);
+    await supabase.from("trade_quotes").delete().eq("id", quoteId);
+    toast({ title: "Quote deleted" });
+    onBack();
   };
 
   const subtotalCents = items.reduce((sum, item) => {
@@ -431,6 +440,34 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
             </button>
           </div>
         )}
+
+        {/* Delete quote */}
+        <div className="border-t border-border p-4 md:p-6 flex items-center justify-between">
+          {!confirmDelete ? (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="inline-flex items-center gap-1.5 font-body text-[10px] text-destructive hover:text-destructive/80 uppercase tracking-wider transition-colors"
+            >
+              <Trash2 className="h-3.5 w-3.5" /> Delete Quote
+            </button>
+          ) : (
+            <div className="flex items-center gap-3">
+              <span className="font-body text-xs text-destructive">Delete this quote permanently?</span>
+              <button
+                onClick={handleDeleteQuote}
+                className="px-3 py-1.5 bg-destructive text-destructive-foreground font-body text-xs uppercase tracking-wider rounded-md hover:bg-destructive/90 transition-colors"
+              >
+                Confirm Delete
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-3 py-1.5 border border-border font-body text-xs uppercase tracking-wider rounded-md hover:bg-muted transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
