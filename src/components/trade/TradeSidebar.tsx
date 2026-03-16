@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
   SidebarContent,
@@ -29,7 +31,14 @@ export function TradeSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAdmin, signOut, profile } = useAuth();
+  const { isAdmin, signOut, profile, user } = useAuth();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("avatar_url").eq("id", user.id).single()
+      .then(({ data }) => { if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url); });
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -157,10 +166,23 @@ export function TradeSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border p-3">
-        {!collapsed && profile && (
-          <p className="font-body text-xs text-muted-foreground mb-2 truncate">
-            {profile.first_name} {profile.last_name}
-          </p>
+        {profile && (
+          <div className={`flex items-center gap-2.5 mb-2 ${collapsed ? "justify-center" : ""}`}>
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center shrink-0">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="font-display text-[10px] text-muted-foreground">
+                  {(profile.first_name?.[0] || "")}{(profile.last_name?.[0] || "")}
+                </span>
+              )}
+            </div>
+            {!collapsed && (
+              <p className="font-body text-xs text-muted-foreground truncate">
+                {profile.first_name} {profile.last_name}
+              </p>
+            )}
+          </div>
         )}
         <button
           onClick={handleSignOut}
