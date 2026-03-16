@@ -688,7 +688,7 @@ const TradeShowroom = () => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product.designer_name || "—"}</p>
+                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product.designer_name?.includes(' - ') ? product.designer_name.split(' - ')[0].trim() : product.designer_name || "—"}</p>
                   <h3 className="font-display text-sm text-foreground truncate">{product.product_name}</h3>
                   <p className="font-body text-[10px] text-muted-foreground truncate">
                     {product.image_identifier}
