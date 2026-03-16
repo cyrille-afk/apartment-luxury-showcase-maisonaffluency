@@ -136,13 +136,13 @@ async function exportCurrentProducts() {
 
   if (productMap.size === 0) return;
 
-  const header = "product_name,brand_name,trade_price,rrp_price,currency";
+  const header = "brand_name,product_name,trade_price,rrp_price,currency";
   const csvRows = [...productMap.values()]
     .sort((a, b) => a.brand.localeCompare(b.brand) || a.name.localeCompare(b.name))
     .map(p => {
       const name = p.name.includes(",") ? `"${p.name}"` : p.name;
       const brand = p.brand.includes(",") ? `"${p.brand}"` : p.brand;
-      return `${name},${brand},${p.trade},${p.rrp},${p.currency}`;
+      return `${brand},${name},${p.trade},${p.rrp},${p.currency}`;
     });
 
   const blob = new Blob([header + "\n" + csvRows.join("\n")], { type: "text/csv" });
