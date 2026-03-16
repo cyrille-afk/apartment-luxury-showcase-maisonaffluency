@@ -89,6 +89,73 @@ const roomToSection: Record<string, string> = {
 const getSection = (imageIdentifier: string): string =>
   roomToSection[imageIdentifier] || "Other";
 
+type PriceMatch = { name: string; cents: number; currency: string };
+
+const normalizeProductName = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/&/g, " and ")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\b(custom|details?|edition|ed|piece|volume|the|and|of|in)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const tokenizeProductName = (value: string): string[] =>
+  normalizeProductName(value).split(" ").filter((token) => token.length > 2);
+
+const findBestPriceMatch = (
+  productName: string,
+  exactLookup: Map<string, PriceMatch>,
+  priceEntries: PriceMatch[],
+): PriceMatch | undefined => {
+  const direct = exactLookup.get(productName.trim().toLowerCase());
+  if (direct) return direct;
+
+  const targetNorm = normalizeProductName(productName);
+  if (!targetNorm) return undefined;
+
+  const normalized = exactLookup.get(targetNorm);
+  if (normalized) return normalized;
+
+  const targetTokens = new Set(tokenizeProductName(productName));
+  let best: PriceMatch | undefined;
+  let bestScore = 0;
+
+  for (const entry of priceEntries) {
+    const candidateNorm = normalizeProductName(entry.name);
+    if (!candidateNorm) continue;
+
+    // Handle near-identical names (e.g. "Corteza Console" vs "Corteza Console Table")
+    if (candidateNorm.includes(targetNorm) || targetNorm.includes(candidateNorm)) {
+      const score = Math.min(candidateNorm.length, targetNorm.length) / Math.max(candidateNorm.length, targetNorm.length);
+      if (score > bestScore) {
+        best = entry;
+        bestScore = score;
+      }
+      continue;
+    }
+
+    // Token overlap fallback for variants (e.g. "YSA Wall Sconce" vs "YSA Wall Light")
+    const candidateTokens = tokenizeProductName(entry.name);
+    if (!candidateTokens.length || !targetTokens.size) continue;
+
+    let overlap = 0;
+    for (const token of candidateTokens) {
+      if (targetTokens.has(token)) overlap++;
+    }
+
+    const score = overlap / Math.max(candidateTokens.length, targetTokens.size);
+    if (overlap >= 2 && score > bestScore) {
+      best = entry;
+      bestScore = score;
+    }
+  }
+
+  return bestScore >= 0.5 ? best : undefined;
+};
+
 const TradeShowroom = () => {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
@@ -139,20 +206,28 @@ const TradeShowroom = () => {
           }
         }
 
-        // Build a price lookup from trade_products table
+        // Build a price lookup from trade_products table (trade price preferred, RRP fallback)
         const { data: pricedProducts } = await supabase
           .from("trade_products")
-          .select("product_name, trade_price_cents, currency")
-          .not("trade_price_cents", "is", null);
-        const priceLookup = new Map<string, { cents: number; currency: string }>();
+          .select("product_name, trade_price_cents, rrp_price_cents, currency");
+
+        const priceLookup = new Map<string, PriceMatch>();
+        const priceEntries: PriceMatch[] = [];
         if (pricedProducts) {
           for (const pp of pricedProducts) {
-            if (pp.trade_price_cents) {
-              priceLookup.set(pp.product_name.trim().toLowerCase(), {
-                cents: pp.trade_price_cents,
-                currency: pp.currency,
-              });
-            }
+            const cents = pp.trade_price_cents ?? pp.rrp_price_cents;
+            if (!cents) continue;
+
+            const entry: PriceMatch = {
+              name: pp.product_name,
+              cents,
+              currency: pp.currency,
+            };
+
+            priceEntries.push(entry);
+            priceLookup.set(pp.product_name.trim().toLowerCase(), entry);
+            const normalizedName = normalizeProductName(pp.product_name);
+            if (normalizedName) priceLookup.set(normalizedName, entry);
           }
         }
 
@@ -169,7 +244,7 @@ const TradeShowroom = () => {
             const existingKey = seenImageUrls.get(item.product_image_url)!;
             const existingItem = seenByName.get(existingKey);
             if (existingItem) {
-              const price = priceLookup.get(key);
+              const price = findBestPriceMatch(item.product_name, priceLookup, priceEntries);
               const pdf = pdfLookup.get(key);
               if (price && !existingItem.trade_price_cents) {
                 existingItem.trade_price_cents = price.cents;
@@ -188,7 +263,7 @@ const TradeShowroom = () => {
             (!existing.materials && item.materials) ||
             (!existing.dimensions && item.dimensions)
           ) {
-            const price = priceLookup.get(key);
+            const price = findBestPriceMatch(item.product_name, priceLookup, priceEntries);
             const meta = metadataLookup.get(key);
             seenByName.set(key, {
               ...item,
