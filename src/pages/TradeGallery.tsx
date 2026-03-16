@@ -353,7 +353,7 @@ const TradeGallery = () => {
                   )}
                   {price && (
                     <p className="font-display text-sm text-accent font-semibold mt-1">
-                      {formatPriceConverted(price.cents, price.currency, displayCurrency)}
+                      {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
                     </p>
                   )}
                 </div>
