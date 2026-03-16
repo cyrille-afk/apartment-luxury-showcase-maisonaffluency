@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Trash2, Copy, ExternalLink, FileText, Image as ImageIcon, File, Eye, X, Grid, List } from "lucide-react";
+import { getCuratorPicksCatalog } from "@/lib/curatorPicksCatalog";
 import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
