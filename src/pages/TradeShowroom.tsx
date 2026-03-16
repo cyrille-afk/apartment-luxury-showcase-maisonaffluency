@@ -591,6 +591,22 @@ const TradeShowroom = () => {
                       {getSection(product.image_identifier)}
                     </span>
                   </div>
+                  {/* Pin button */}
+                  {!isAdmin && (
+                    <button
+                      onClick={() => togglePin(toCompareItem(product))}
+                      className={cn(
+                        "absolute top-2 right-2 z-10 p-1.5 rounded-full transition-all",
+                        pinned
+                          ? "bg-[hsl(var(--gold))] text-foreground shadow-md"
+                          : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90",
+                        compareItems.length >= 3 && !pinned && "pointer-events-none"
+                      )}
+                      aria-label={pinned ? "Remove from selection" : "Pin to selection"}
+                    >
+                      <Scale className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                   {/* Overlay actions */}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
