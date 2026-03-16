@@ -21,16 +21,22 @@ interface ImportResult {
 }
 
 function parseCsv(text: string): ImportRow[] {
-  const lines = text.trim().split(/\r?\n/);
+  // Remove BOM and split lines, filtering out completely empty/whitespace-only rows
+  const allLines = text.replace(/^\uFEFF/, "").trim().split(/\r?\n/);
+  const lines = allLines.filter(l => l.replace(/,/g, "").trim().length > 0);
   if (lines.length < 2) return [];
 
   const header = lines[0].toLowerCase().split(",").map(h => h.trim().replace(/^"|"$/g, ""));
   const nameIdx = header.findIndex(h => h.includes("product") || h.includes("name") || h.includes("item"));
-  const tradeIdx = header.findIndex(h => h.includes("trade") || h.includes("price"));
+  // Match "trade_price" or "trade price" first, then fall back to any column with "price"
+  const tradeIdx = header.findIndex(h => h.includes("trade"));
+  const priceIdx = tradeIdx >= 0 ? tradeIdx : header.findIndex(h => h.includes("price"));
   const rrpIdx = header.findIndex(h => h.includes("rrp") || h.includes("retail"));
   const currIdx = header.findIndex(h => h.includes("currency") || h.includes("curr"));
 
-  if (nameIdx === -1 || tradeIdx === -1) return [];
+  // Use trade price column if found, otherwise use any price column (e.g. rrp_price)
+  const effectivePriceIdx = priceIdx >= 0 ? priceIdx : -1;
+  if (nameIdx === -1 || effectivePriceIdx === -1) return [];
 
   const rows: ImportRow[] = [];
   for (let i = 1; i < lines.length; i++) {
