@@ -14,10 +14,22 @@ interface Hotspot {
   link_url: string | null;
 }
 
+interface HotspotProduct {
+  product_name: string;
+  designer_name: string | null;
+  product_image_url: string | null;
+  materials: string | null;
+  dimensions: string | null;
+}
+
 interface GalleryHotspotsProps {
   imageIdentifier: string;
   visible: boolean;
   onCloseLightbox?: () => void;
+  /** Trade: callback to add hotspot product to active quote */
+  onAddToQuote?: (product: HotspotProduct) => void;
+  /** Public: callback to open quote request dialog pre-filled */
+  onRequestQuote?: (productName: string, designerName: string) => void;
 }
 
 interface PendingHotspot {
