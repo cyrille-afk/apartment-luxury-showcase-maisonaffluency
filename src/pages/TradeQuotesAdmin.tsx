@@ -198,6 +198,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   const [itemPrices, setItemPrices] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [catalogPrices, setCatalogPrices] = useState<Record<string, { cents: number; currency: string }>>({});
 
   useEffect(() => {
     const load = async () => {
@@ -218,13 +219,55 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
 
       const quoteCurrency = (quoteRes.data as any)?.currency || "SGD";
 
+      // Fuzzy matching helpers
+      const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+      const tokenize = (s: string) => normalize(s).split(" ").filter(Boolean);
+
+      // For items without a price, try fuzzy-match against all priced trade_products
+      const unpricedItems = fetchedItems.filter((i) => !i.unit_price_cents && !i.trade_products?.trade_price_cents);
+      let pricedCatalog: Array<{ product_name: string; brand_name: string; trade_price_cents: number; currency: string }> = [];
+
+      if (unpricedItems.length > 0) {
+        const { data: allPriced } = await supabase
+          .from("trade_products")
+          .select("product_name, brand_name, trade_price_cents, currency")
+          .not("trade_price_cents", "is", null)
+          .eq("is_active", true);
+        pricedCatalog = (allPriced || []) as any;
+      }
+
+      const findFuzzyPrice = (name: string) => {
+        const norm = normalize(name);
+        const tokens = tokenize(name);
+        let best: (typeof pricedCatalog)[0] | null = null;
+        let bestScore = 0;
+        for (const entry of pricedCatalog) {
+          const cn = normalize(entry.product_name);
+          if (cn === norm) return entry;
+          if (cn.includes(norm) || norm.includes(cn)) return entry;
+          const ct = tokenize(entry.product_name);
+          const overlap = tokens.filter((t) => ct.includes(t)).length;
+          const score = overlap / Math.max(ct.length, tokens.length);
+          if (score > 0.5 && score > bestScore) { bestScore = score; best = entry; }
+        }
+        return best;
+      };
+
+      // Build a resolved price map: item.id → { cents, currency }
+      const resolvedPrices: Record<string, { cents: number; currency: string }> = {};
+      fetchedItems.forEach((item) => {
+        if (item.trade_products?.trade_price_cents) {
+          resolvedPrices[item.id] = { cents: item.trade_products.trade_price_cents, currency: item.trade_products.currency || "SGD" };
+        } else if (!item.unit_price_cents) {
+          const match = findFuzzyPrice(item.trade_products?.product_name || "");
+          if (match) resolvedPrices[item.id] = { cents: match.trade_price_cents, currency: match.currency };
+        }
+      });
+
       // Collect unique source currencies that differ from quote currency
       const sourceCurrencies = new Set<string>();
-      fetchedItems.forEach((item) => {
-        const prodCurrency = item.trade_products?.currency;
-        if (prodCurrency && prodCurrency !== quoteCurrency && item.trade_products?.trade_price_cents && !item.unit_price_cents) {
-          sourceCurrencies.add(prodCurrency);
-        }
+      Object.values(resolvedPrices).forEach(({ currency: c }) => {
+        if (c !== quoteCurrency) sourceCurrencies.add(c);
       });
 
       // Fetch exchange rates if needed
@@ -245,28 +288,31 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
         );
       }
 
-      // Init price inputs: existing unit_price_cents, or converted catalog price
+      // Init price inputs: existing unit_price_cents, or resolved catalog price (converted if needed)
       const prices: Record<string, string> = {};
       fetchedItems.forEach((item) => {
         if (item.unit_price_cents) {
           prices[item.id] = (item.unit_price_cents / 100).toFixed(2);
-        } else if (item.trade_products?.trade_price_cents) {
-          const prodCurrency = item.trade_products.currency || "SGD";
-          if (prodCurrency === quoteCurrency) {
-            prices[item.id] = (item.trade_products.trade_price_cents / 100).toFixed(2);
-          } else {
-            const rate = fxRates[`${prodCurrency}_${quoteCurrency}`];
-            if (rate) {
-              prices[item.id] = (Math.round(item.trade_products.trade_price_cents * rate) / 100).toFixed(2);
-            } else {
-              prices[item.id] = "";
-            }
-          }
         } else {
-          prices[item.id] = "";
+          const resolved = resolvedPrices[item.id];
+          if (resolved) {
+            if (resolved.currency === quoteCurrency) {
+              prices[item.id] = (resolved.cents / 100).toFixed(2);
+            } else {
+              const rate = fxRates[`${resolved.currency}_${quoteCurrency}`];
+              if (rate) {
+                prices[item.id] = (Math.round(resolved.cents * rate) / 100).toFixed(2);
+              } else {
+                prices[item.id] = "";
+              }
+            }
+          } else {
+            prices[item.id] = "";
+          }
         }
       });
       setItemPrices(prices);
+      setCatalogPrices(resolvedPrices);
       setLoading(false);
     };
     load();
@@ -381,9 +427,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                           <h4 className="font-display text-xs text-foreground leading-tight">{product?.product_name || "Unknown"}</h4>
                           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product?.brand_name}</p>
                           {product?.dimensions && <p className="font-body text-[10px] text-muted-foreground">{product.dimensions}</p>}
-                          {product?.trade_price_cents && (
+                          {catalogPrices[item.id] && (
                             <p className="font-body text-[10px] text-muted-foreground/60">
-                              Catalog: {formatPrice(product.trade_price_cents, product.currency || currency)}
+                              Catalog: {formatPrice(catalogPrices[item.id].cents, catalogPrices[item.id].currency)}
                             </p>
                           )}
                         </div>
@@ -403,9 +449,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                             className="w-full pl-8 pr-2 py-1.5 border border-border rounded-md font-body text-sm text-foreground text-right bg-background focus:outline-none focus:ring-1 focus:ring-primary/30"
                           />
                         </div>
-                        {product?.trade_price_cents && product.currency && product.currency !== currency && (
+                        {catalogPrices[item.id] && catalogPrices[item.id].currency !== currency && (
                           <p className="font-body text-[9px] text-muted-foreground/50 text-right mt-0.5 italic">
-                            {formatPrice(product.trade_price_cents, product.currency)} catalog
+                            {formatPrice(catalogPrices[item.id].cents, catalogPrices[item.id].currency)} catalog
                           </p>
                         )}
                       </div>
