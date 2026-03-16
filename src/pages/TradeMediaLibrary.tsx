@@ -97,8 +97,6 @@ export default function TradeMediaLibrary() {
       mimeType: "image/jpeg",
     }));
   }, []);
-    setLoading(false);
-  };
 
   useEffect(() => { fetchFiles(); }, []);
 
