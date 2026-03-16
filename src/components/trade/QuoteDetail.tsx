@@ -684,6 +684,29 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
+        {/* Revise Quote — shown for submitted or priced quotes */}
+        {(quoteStatus === "submitted" || quoteStatus === "priced") && (
+          <div className="border-t border-border p-4 md:p-6 lg:p-8 flex items-center justify-between print:hidden">
+            <p className="font-body text-[10px] text-muted-foreground max-w-xs">
+              Need to make changes? Revise will reopen the quote as a draft so you can add or remove items, then resubmit.
+            </p>
+            <button
+              onClick={async () => {
+                await supabase.from("trade_quotes").update({
+                  status: "draft",
+                  submitted_at: null,
+                  responded_at: null,
+                } as any).eq("id", quoteId);
+                toast({ title: "Quote reopened", description: "You can now edit items and resubmit." });
+                onStatusChange();
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 border border-border font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-muted transition-colors text-foreground"
+            >
+              <Edit3 className="h-3.5 w-3.5" /> Revise Quote
+            </button>
+          </div>
+        )}
+
         {isPriced && (
           <div className="border-t border-border p-4 md:p-6 lg:p-8 flex items-center justify-end print:hidden">
             <button
