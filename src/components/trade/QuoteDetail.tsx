@@ -576,6 +576,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         </div>
 
+        {/* Admin notes (shown when priced/confirmed) */}
+        {adminNotes && (isPriced || isConfirmed) && (
+          <div className="border-t border-border p-4 md:p-6 lg:p-8">
+            <label className="font-body text-[10px] text-muted-foreground uppercase tracking-widest block mb-2">Notes from Maison Affluency</label>
+            <p className="font-body text-sm text-foreground/80 italic whitespace-pre-wrap">"{adminNotes}"</p>
+          </div>
+        )}
+
         {/* Actions — hidden in print */}
         {isDraft && (
           <div className="border-t border-border p-4 md:p-6 lg:p-8 flex items-center justify-between print:hidden">
@@ -585,6 +593,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <button onClick={handleSubmit} disabled={items.length === 0} className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-40">
               <Send className="h-3.5 w-3.5" /> Submit
             </button>
+          </div>
+        )}
+
+        {isPriced && (
+          <div className="border-t border-border p-4 md:p-6 lg:p-8 flex items-center justify-end print:hidden">
+            <button
+              onClick={handleConfirmOrder}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors"
+            >
+              <CheckCircle className="h-3.5 w-3.5" /> Confirm Order
+            </button>
+          </div>
+        )}
+
+        {isConfirmed && (
+          <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden">
+            <div className="flex items-center gap-2 font-body text-sm text-emerald-600">
+              <CheckCircle className="h-4 w-4" />
+              <span>Order confirmed — our team will follow up with payment and shipping details.</span>
+            </div>
           </div>
         )}
       </div>
