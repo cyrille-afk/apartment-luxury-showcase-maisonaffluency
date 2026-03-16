@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, FileText, X } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, X, Image, Loader2 } from "lucide-react";
 import CloudUpload from "@/components/trade/CloudUpload";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import {
@@ -43,6 +43,25 @@ const emptyDoc = (): Omit<TradeDocument, "id" | "created_at"> => ({
 const inputClass =
   "w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors";
 
+/** Extract the first page of a PDF as a high-quality JPEG blob */
+async function extractPdfCover(pdfUrl: string): Promise<Blob> {
+  const pdfjsLib = await import("pdfjs-dist");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+  const pdf = await pdfjsLib.getDocument({ url: pdfUrl, disableAutoFetch: true, disableStream: true }).promise;
+  const page = await pdf.getPage(1);
+  const vp = page.getViewport({ scale: 1 });
+  const scale = 400 / vp.width; // 400px wide for good carousel quality
+  const svp = page.getViewport({ scale });
+  const canvas = document.createElement("canvas");
+  canvas.width = svp.width;
+  canvas.height = svp.height;
+  const ctx = canvas.getContext("2d")!;
+  await page.render({ canvasContext: ctx, viewport: svp }).promise;
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Canvas toBlob failed"))), "image/jpeg", 0.85);
+  });
+}
+
 const TradeDocumentsAdmin = () => {
   const { isAdmin, loading } = useAuth();
   const { toast } = useToast();
@@ -52,6 +71,7 @@ const TradeDocumentsAdmin = () => {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<TradeDocument | null>(null);
   const [selectedBrand, setSelectedBrand] = useState("all");
+  const [extractingThumbnailId, setExtractingThumbnailId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAdmin) fetchDocs();
@@ -109,6 +129,33 @@ const TradeDocumentsAdmin = () => {
     setDeleteTarget(null);
     fetchDocs();
   };
+
+  const handleSetAsBrandThumbnail = useCallback(async (doc: TradeDocument) => {
+    const isPdf = doc.file_url?.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      toast({ title: "Only PDF documents can be extracted", variant: "destructive" });
+      return;
+    }
+    setExtractingThumbnailId(doc.id);
+    try {
+      const blob = await extractPdfCover(doc.file_url);
+      const path = `brand-thumbnails/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const { error: uploadError } = await supabase.storage.from("assets").upload(path, blob, { contentType: "image/jpeg" });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+      const { error: upsertError } = await supabase
+        .from("brand_thumbnails")
+        .upsert({ brand_name: doc.brand_name, thumbnail_url: urlData.publicUrl }, { onConflict: "brand_name" });
+      if (upsertError) throw upsertError;
+
+      toast({ title: `Brand thumbnail set`, description: `"${doc.title}" cover → ${doc.brand_name} carousel` });
+    } catch (err: any) {
+      toast({ title: "Extraction failed", description: err.message, variant: "destructive" });
+    } finally {
+      setExtractingThumbnailId(null);
+    }
+  }, [toast]);
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
@@ -300,6 +347,20 @@ const TradeDocumentsAdmin = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
+                  {doc.file_url?.toLowerCase().endsWith(".pdf") && (
+                    <button
+                      onClick={() => handleSetAsBrandThumbnail(doc)}
+                      disabled={extractingThumbnailId === doc.id}
+                      className="p-2 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-50"
+                      title="Use cover as brand thumbnail"
+                    >
+                      {extractingThumbnailId === doc.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Image className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  )}
                   <button
                     onClick={() => setEditing({ ...doc })}
                     className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
