@@ -387,7 +387,7 @@ const TradeGallery = () => {
                 </div>
                 {price && (
                   <span className="font-display text-sm text-accent font-semibold shrink-0">
-                    {formatPriceConverted(price.cents, price.currency, displayCurrency)}
+                    {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
                   </span>
                 )}
                 <button
