@@ -89,6 +89,73 @@ const roomToSection: Record<string, string> = {
 const getSection = (imageIdentifier: string): string =>
   roomToSection[imageIdentifier] || "Other";
 
+type PriceMatch = { name: string; cents: number; currency: string };
+
+const normalizeProductName = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/&/g, " and ")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\b(custom|details?|edition|ed|piece|volume|the|and|of|in)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const tokenizeProductName = (value: string): string[] =>
+  normalizeProductName(value).split(" ").filter((token) => token.length > 2);
+
+const findBestPriceMatch = (
+  productName: string,
+  exactLookup: Map<string, PriceMatch>,
+  priceEntries: PriceMatch[],
+): PriceMatch | undefined => {
+  const direct = exactLookup.get(productName.trim().toLowerCase());
+  if (direct) return direct;
+
+  const targetNorm = normalizeProductName(productName);
+  if (!targetNorm) return undefined;
+
+  const normalized = exactLookup.get(targetNorm);
+  if (normalized) return normalized;
+
+  const targetTokens = new Set(tokenizeProductName(productName));
+  let best: PriceMatch | undefined;
+  let bestScore = 0;
+
+  for (const entry of priceEntries) {
+    const candidateNorm = normalizeProductName(entry.name);
+    if (!candidateNorm) continue;
+
+    // Handle near-identical names (e.g. "Corteza Console" vs "Corteza Console Table")
+    if (candidateNorm.includes(targetNorm) || targetNorm.includes(candidateNorm)) {
+      const score = Math.min(candidateNorm.length, targetNorm.length) / Math.max(candidateNorm.length, targetNorm.length);
+      if (score > bestScore) {
+        best = entry;
+        bestScore = score;
+      }
+      continue;
+    }
+
+    // Token overlap fallback for variants (e.g. "YSA Wall Sconce" vs "YSA Wall Light")
+    const candidateTokens = tokenizeProductName(entry.name);
+    if (!candidateTokens.length || !targetTokens.size) continue;
+
+    let overlap = 0;
+    for (const token of candidateTokens) {
+      if (targetTokens.has(token)) overlap++;
+    }
+
+    const score = overlap / Math.max(candidateTokens.length, targetTokens.size);
+    if (overlap >= 2 && score > bestScore) {
+      best = entry;
+      bestScore = score;
+    }
+  }
+
+  return bestScore >= 0.5 ? best : undefined;
+};
+
 const TradeShowroom = () => {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
