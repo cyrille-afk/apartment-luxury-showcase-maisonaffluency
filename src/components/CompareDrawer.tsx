@@ -1,15 +1,81 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Ruler, Layers, MessageSquareQuote, Trash2 } from "lucide-react";
+import { X, Ruler, Layers, MessageSquareQuote, ShoppingCart, Trash2, Loader2 } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import QuoteRequestDialog from "./QuoteRequestDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const CompareDrawer = () => {
   const { items, isComparing, setIsComparing, removeItem, clearAll } = useCompare();
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [quoteProduct, setQuoteProduct] = useState<{ name?: string; designer?: string }>({});
+  const location = useLocation();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [addingAll, setAddingAll] = useState(false);
+
+  const isTradePortal = location.pathname.startsWith("/trade");
 
   if (!isComparing || items.length === 0) return null;
+
+  const handleAddAllToQuote = async () => {
+    if (!user || items.length === 0) return;
+    setAddingAll(true);
+
+    try {
+      // Get or create a draft quote
+      let quoteId: string;
+      const { data: drafts } = await supabase
+        .from("trade_quotes")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "draft")
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (drafts && drafts.length > 0) {
+        quoteId = drafts[0].id;
+      } else {
+        const { data: newQuote, error: createErr } = await supabase
+          .from("trade_quotes")
+          .insert({ user_id: user.id, status: "draft" })
+          .select("id")
+          .single();
+        if (createErr || !newQuote) throw new Error(createErr?.message || "Failed to create quote");
+        quoteId = newQuote.id;
+      }
+
+      // Add each pinned item
+      let added = 0;
+      for (const item of items) {
+        const { error } = await supabase.rpc("add_gallery_product_to_quote", {
+          _user_id: user.id,
+          _quote_id: quoteId,
+          _product_name: item.pick.title,
+          _brand_name: item.designerName,
+          _category: item.pick.category || "",
+          _image_url: item.pick.image || null,
+          _dimensions: item.pick.dimensions || null,
+          _materials: item.pick.materials || null,
+          _quantity: 1,
+        });
+        if (!error) added++;
+      }
+
+      toast({
+        title: `${added} item${added !== 1 ? "s" : ""} added to quote`,
+        description: `QU-${quoteId.slice(0, 6).toUpperCase()}`,
+      });
+      clearAll();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setAddingAll(false);
+    }
+  };
 
   const colClass = items.length === 1 ? "grid-cols-1 max-w-md" : items.length === 2 ? "grid-cols-2 max-w-4xl" : "grid-cols-3 max-w-6xl";
 
@@ -31,6 +97,21 @@ const CompareDrawer = () => {
                 <p className="font-body text-xs text-white/50 mt-0.5">{items.length} of 3 items selected</p>
               </div>
               <div className="flex items-center gap-3">
+                {/* Trade: Add All to Quote */}
+                {isTradePortal && (
+                  <button
+                    onClick={handleAddAllToQuote}
+                    disabled={addingAll}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[hsl(var(--gold))] text-foreground hover:bg-[hsl(var(--gold))]/90 font-body text-xs uppercase tracking-[0.12em] transition-all disabled:opacity-60"
+                  >
+                    {addingAll ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <ShoppingCart size={14} />
+                    )}
+                    Add All to Quote
+                  </button>
+                )}
                 <button
                   onClick={clearAll}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-white/20 text-white/60 hover:text-white hover:border-white/40 font-body text-xs uppercase tracking-[0.12em] transition-all"
@@ -124,18 +205,71 @@ const CompareDrawer = () => {
                         </div>
                       )}
 
-                      {/* Quote button - pinned to bottom */}
+                      {/* Action button - pinned to bottom */}
                       <div className="mt-auto pt-3">
-                        <button
-                          onClick={() => {
-                            setQuoteProduct({ name: item.pick.title, designer: item.designerName });
-                            setQuoteOpen(true);
-                          }}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-[hsl(var(--gold))] bg-white/5 text-white hover:bg-white/10 font-body text-[10px] uppercase tracking-[0.12em] transition-all w-full justify-center"
-                        >
-                          <MessageSquareQuote size={14} />
-                          Request a Quote
-                        </button>
+                        {isTradePortal ? (
+                          <button
+                            onClick={async () => {
+                              if (!user) return;
+                              setAddingAll(true);
+                              try {
+                                let quoteId: string;
+                                const { data: drafts } = await supabase
+                                  .from("trade_quotes")
+                                  .select("id")
+                                  .eq("user_id", user.id)
+                                  .eq("status", "draft")
+                                  .order("created_at", { ascending: false })
+                                  .limit(1);
+                                if (drafts && drafts.length > 0) {
+                                  quoteId = drafts[0].id;
+                                } else {
+                                  const { data: nq, error: ce } = await supabase
+                                    .from("trade_quotes")
+                                    .insert({ user_id: user.id, status: "draft" })
+                                    .select("id")
+                                    .single();
+                                  if (ce || !nq) throw new Error(ce?.message || "Failed");
+                                  quoteId = nq.id;
+                                }
+                                const { error } = await supabase.rpc("add_gallery_product_to_quote", {
+                                  _user_id: user.id,
+                                  _quote_id: quoteId,
+                                  _product_name: item.pick.title,
+                                  _brand_name: item.designerName,
+                                  _category: item.pick.category || "",
+                                  _image_url: item.pick.image || null,
+                                  _dimensions: item.pick.dimensions || null,
+                                  _materials: item.pick.materials || null,
+                                  _quantity: 1,
+                                });
+                                if (error) throw error;
+                                toast({ title: "Added to quote", description: item.pick.title });
+                                removeItem(item.pick.title);
+                              } catch (err: any) {
+                                toast({ title: "Error", description: err.message, variant: "destructive" });
+                              } finally {
+                                setAddingAll(false);
+                              }
+                            }}
+                            disabled={addingAll}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-[hsl(var(--gold))] bg-white/5 text-white hover:bg-white/10 font-body text-[10px] uppercase tracking-[0.12em] transition-all w-full justify-center disabled:opacity-60"
+                          >
+                            {addingAll ? <Loader2 size={14} className="animate-spin" /> : <ShoppingCart size={14} />}
+                            Add to Quote
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setQuoteProduct({ name: item.pick.title, designer: item.designerName });
+                              setQuoteOpen(true);
+                            }}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-[hsl(var(--gold))] bg-white/5 text-white hover:bg-white/10 font-body text-[10px] uppercase tracking-[0.12em] transition-all w-full justify-center"
+                          >
+                            <MessageSquareQuote size={14} />
+                            Request a Quote
+                          </button>
+                        )}
                       </div>
                     </div>
                   </motion.div>
