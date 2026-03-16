@@ -216,14 +216,52 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       setQuote(q);
       setAdminNotes(q?.admin_notes || "");
 
-      // Init price inputs from existing unit_price_cents, or trade_price_cents only if same currency
-      const prices: Record<string, string> = {};
       const quoteCurrency = (quoteRes.data as any)?.currency || "SGD";
+
+      // Collect unique source currencies that differ from quote currency
+      const sourceCurrencies = new Set<string>();
+      fetchedItems.forEach((item) => {
+        const prodCurrency = item.trade_products?.currency;
+        if (prodCurrency && prodCurrency !== quoteCurrency && item.trade_products?.trade_price_cents && !item.unit_price_cents) {
+          sourceCurrencies.add(prodCurrency);
+        }
+      });
+
+      // Fetch exchange rates if needed
+      const fxRates: Record<string, number> = {};
+      if (sourceCurrencies.size > 0) {
+        await Promise.all(
+          Array.from(sourceCurrencies).map(async (src) => {
+            try {
+              const res = await fetch(`https://api.frankfurter.app/latest?from=${src}&to=${quoteCurrency}`);
+              const data = await res.json();
+              if (data.rates?.[quoteCurrency]) {
+                fxRates[`${src}_${quoteCurrency}`] = data.rates[quoteCurrency];
+              }
+            } catch {
+              // silently fail
+            }
+          })
+        );
+      }
+
+      // Init price inputs: existing unit_price_cents, or converted catalog price
+      const prices: Record<string, string> = {};
       fetchedItems.forEach((item) => {
         if (item.unit_price_cents) {
           prices[item.id] = (item.unit_price_cents / 100).toFixed(2);
-        } else if (item.trade_products?.trade_price_cents && (item.trade_products.currency || "SGD") === quoteCurrency) {
-          prices[item.id] = (item.trade_products.trade_price_cents / 100).toFixed(2);
+        } else if (item.trade_products?.trade_price_cents) {
+          const prodCurrency = item.trade_products.currency || "SGD";
+          if (prodCurrency === quoteCurrency) {
+            prices[item.id] = (item.trade_products.trade_price_cents / 100).toFixed(2);
+          } else {
+            const rate = fxRates[`${prodCurrency}_${quoteCurrency}`];
+            if (rate) {
+              prices[item.id] = (Math.round(item.trade_products.trade_price_cents * rate) / 100).toFixed(2);
+            } else {
+              prices[item.id] = "";
+            }
+          }
         } else {
           prices[item.id] = "";
         }
