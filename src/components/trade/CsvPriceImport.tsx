@@ -192,15 +192,15 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
   return (
     <>
       <div className="flex items-center gap-1.5">
-        <Button variant="outline" size="sm" className="gap-1.5" onClick={() => fileRef.current?.click()}>
+        <Button variant="outline" size="sm" className="gap-1.5 bg-white text-foreground border-white/60 hover:bg-white/90" onClick={() => fileRef.current?.click()}>
           <FileSpreadsheet className="h-3.5 w-3.5" />
           Import Prices (CSV)
         </Button>
-        <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground" onClick={exportCurrentProducts}>
+        <Button variant="outline" size="sm" className="gap-1 bg-white/80 text-foreground border-white/60 hover:bg-white/90" onClick={exportCurrentProducts}>
           <Download className="h-3 w-3" />
           Export Products
         </Button>
-        <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground" onClick={downloadTemplate}>
+        <Button variant="outline" size="sm" className="gap-1 bg-white/80 text-foreground border-white/60 hover:bg-white/90" onClick={downloadTemplate}>
           <Download className="h-3 w-3" />
           Template
         </Button>
