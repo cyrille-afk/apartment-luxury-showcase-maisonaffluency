@@ -305,6 +305,7 @@ export const collectibleDesigners: Array<{
     philosophy: "The material, colors and light are inseparable in my work. I create my own textures from the earth itself.",
     curatorPicks: [
       { image: pierreBonnefilleBronzePainting208, title: "Bronze Painting 208, 2024", category: "Wall Art", tags: ["Wall Art", "Art"], materials: "Mixed media on metallic mesh", dimensions: "H 225 x W 515 cm" },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773620660/Screen_Shot_2026-03-16_at_8.23.51_AM_u4u9b8.png", hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773620318/AffluencySG_075_1_2_1_kge9am.jpg", title: "Bronze Painting 204, 2023", category: "Wall Art", tags: ["Wall Art", "Art"], materials: "(Signed & Dated)\nMixed Media On Metallic Mesh", dimensions: "130 × 130 cm" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/pierrebonnefille/" },
