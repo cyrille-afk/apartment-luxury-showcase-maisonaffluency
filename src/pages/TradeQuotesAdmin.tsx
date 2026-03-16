@@ -247,7 +247,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
           if (cn.includes(norm) || norm.includes(cn)) return entry;
           const ct = tokenize(entry.product_name);
           const overlap = tokens.filter((t) => ct.includes(t)).length;
-          const score = overlap / Math.max(ct.length, tokens.length);
+          const score = overlap / Math.min(ct.length, tokens.length);
           if (score > 0.5 && score > bestScore) { bestScore = score; best = entry; }
         }
         return best;
