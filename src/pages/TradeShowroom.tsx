@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, ExternalLink, FileDown, Upload, Loader2 } from "lucide-react";
+import CsvPriceImport from "@/components/trade/CsvPriceImport";
+import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { supabase } from "@/integrations/supabase/client";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useAuth } from "@/hooks/useAuth";
@@ -348,6 +350,13 @@ const TradeShowroom = () => {
         title="Showroom Collection"
         subtitle={`${filtered.length} ${filtered.length === 1 ? "piece" : "pieces"} from our Singapore gallery${selectedDesigner !== "all" ? ` by ${selectedDesigner}` : ""}${selectedSection !== "all" ? ` in ${selectedSection}` : ""}`}
       >
+        {isAdmin && (
+          <CsvPriceImport onComplete={() => {
+            // Trigger a refetch by toggling loading
+            setLoading(true);
+            setTimeout(() => window.location.reload(), 500);
+          }} />
+        )}
         <button
           onClick={() => setDrawerOpen(true)}
           className="relative p-2 border border-background/30 rounded-md text-background/70 hover:text-background hover:border-background/50 transition-colors"
@@ -548,11 +557,20 @@ const TradeShowroom = () => {
                   {product.materials && (
                     <p className="font-body text-[10px] text-muted-foreground line-clamp-2">{product.materials}</p>
                   )}
-                  {product.trade_price_cents && product.currency && (
+                  {isAdmin ? (
+                    <InlinePriceEditor
+                      productName={product.product_name}
+                      currentPriceCents={product.trade_price_cents}
+                      currency={product.currency || "SGD"}
+                      onPriceUpdated={(cents, cur) => {
+                        setProducts(prev => prev.map(p => p.id === product.id ? { ...p, trade_price_cents: cents, currency: cur } : p));
+                      }}
+                    />
+                  ) : product.trade_price_cents && product.currency ? (
                     <p className="font-display text-sm text-accent font-semibold mt-1">
                       {formatPrice(product.trade_price_cents, product.currency)}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </div>
             );
@@ -599,11 +617,22 @@ const TradeShowroom = () => {
                     {product.materials ? ` · ${product.materials}` : ""}
                   </p>
                 </div>
-                {product.trade_price_cents && product.currency && (
+                {isAdmin ? (
+                  <div className="shrink-0">
+                    <InlinePriceEditor
+                      productName={product.product_name}
+                      currentPriceCents={product.trade_price_cents}
+                      currency={product.currency || "SGD"}
+                      onPriceUpdated={(cents, cur) => {
+                        setProducts(prev => prev.map(p => p.id === product.id ? { ...p, trade_price_cents: cents, currency: cur } : p));
+                      }}
+                    />
+                  </div>
+                ) : product.trade_price_cents && product.currency ? (
                   <span className="font-display text-base text-accent font-semibold shrink-0">
                     {formatPrice(product.trade_price_cents, product.currency)}
                   </span>
-                )}
+                ) : null}
                 <button
                   onClick={() => handleAddToQuote(product)}
                   disabled={isAdding}
