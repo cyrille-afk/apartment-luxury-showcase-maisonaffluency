@@ -1029,7 +1029,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     notableWorksLink: { text: "Lyric Desk", galleryIndex: GALLERY.A_SOPHISTICATED_BOUDOIR },
     philosophy: "Furniture should not just serve the body, but also nourish the soul and inspire the mind.",
     curatorPicks: [
-      { image: brunoDeMaistreLyricDesk, hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773621701/IMG_5419_2_d42il7.jpg", title: "Lyric", subtitle: "Desk", category: "Tables", subcategory: "Desks", tags: ["Tables", "Desks"], materials: "Walnut Structure\nFull Grain Pure Aniline Bull Leather Mat", dimensions: "W 145 × D 75 × H 73 cm" },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773622082/Screen_Shot_2026-03-16_at_8.10.13_AM_en11bh.png", hoverImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773621701/IMG_5419_2_d42il7.jpg", title: "Lyric", subtitle: "Desk", category: "Tables", subcategory: "Desks", tags: ["Tables", "Desks"], materials: "Walnut Structure\nFull Grain Pure Aniline Bull Leather Mat", dimensions: "W 145 × D 75 × H 73 cm" },
     ],
     links: [
       { type: "Instagram", url: "https://instagram.com/bruno_de_maistre_bdm" },
