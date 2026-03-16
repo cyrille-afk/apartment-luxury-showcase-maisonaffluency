@@ -172,6 +172,26 @@ const TradeGallery = () => {
         title="Trade Gallery"
         subtitle={`${filtered.length} ${filtered.length === 1 ? "product" : "products"}${selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}`}
       >
+        {isAdmin && (
+          <CsvPriceImport onComplete={() => {
+            // Refetch prices after import
+            supabase
+              .from("trade_products")
+              .select("product_name, trade_price_cents, currency")
+              .not("trade_price_cents", "is", null)
+              .then(({ data }) => {
+                if (data) {
+                  const lookup = new Map<string, { cents: number; currency: string }>();
+                  for (const p of data) {
+                    if (p.trade_price_cents) {
+                      lookup.set(p.product_name.trim().toLowerCase(), { cents: p.trade_price_cents, currency: p.currency });
+                    }
+                  }
+                  setPriceLookup(lookup);
+                }
+              });
+          }} />
+        )}
         <button
           onClick={() => setDrawerOpen(true)}
           className="relative p-2 border border-background/30 rounded-md text-background/70 hover:text-background hover:border-background/50 transition-colors"
