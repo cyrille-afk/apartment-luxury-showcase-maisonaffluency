@@ -168,7 +168,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-body text-[9px] text-muted-foreground uppercase tracking-wider">
-                    {item.product?.brand_name}
+                    {item.product?.brand_name?.includes(' - ') ? item.product.brand_name.split(' - ')[0].trim() : item.product?.brand_name}
                   </p>
                   <p className="font-display text-xs text-foreground truncate">
                     {item.product?.product_name}
