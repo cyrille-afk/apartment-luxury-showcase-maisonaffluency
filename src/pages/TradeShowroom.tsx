@@ -506,6 +506,7 @@ const TradeShowroom = () => {
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
+          <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
         </div>
       </div>
 

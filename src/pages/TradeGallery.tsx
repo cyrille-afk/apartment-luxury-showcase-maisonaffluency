@@ -275,6 +275,7 @@ const TradeGallery = () => {
               ))}
             </select>
           )}
+          <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
         </div>
       </div>
 
