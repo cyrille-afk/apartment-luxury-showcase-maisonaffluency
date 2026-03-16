@@ -244,7 +244,7 @@ const TradeShowroom = () => {
             const existingKey = seenImageUrls.get(item.product_image_url)!;
             const existingItem = seenByName.get(existingKey);
             if (existingItem) {
-              const price = priceLookup.get(key);
+              const price = findBestPriceMatch(item.product_name, priceLookup, priceEntries);
               const pdf = pdfLookup.get(key);
               if (price && !existingItem.trade_price_cents) {
                 existingItem.trade_price_cents = price.cents;
