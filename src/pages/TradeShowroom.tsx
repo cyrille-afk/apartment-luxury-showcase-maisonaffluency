@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, FileDown, Upload, Loader2 } from "lucide-react";
+import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, FileDown, Upload, Loader2, Scale } from "lucide-react";
+import { useCompare, type CompareItem } from "@/contexts/CompareContext";
+import { cn } from "@/lib/utils";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
