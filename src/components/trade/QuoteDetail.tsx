@@ -626,17 +626,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         )}
 
         {isConfirmed && (() => {
-          // Calculate the SGD-converted total for Stripe display
-          const sgdSubtotal = items.reduce((sum, item) => {
-            const rawPrice = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? 0;
-            const prodCurrency = item.trade_products?.currency || "SGD";
-            const converted = convertCents(rawPrice, prodCurrency, "SGD") ?? rawPrice;
-            return sum + converted * item.quantity;
-          }, 0);
-          const sgdAfterGst = sgdSubtotal + Math.round(sgdSubtotal * 0.09);
-          // Stripe fee pass-through: ceil((net + 50) / (1 - 0.034))
-          const sgdCharge = Math.ceil((sgdAfterGst + 50) / (1 - 0.034));
-          const hasConversion = currency !== "SGD" && sgdSubtotal > 0;
+          // Calculate total in quote's own currency (what Stripe will charge)
+          const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
+          const withGst = currency === "SGD" && afterDiscount > 0
+            ? afterDiscount + Math.round(afterDiscount * 0.09)
+            : afterDiscount;
+          // Stripe fee pass-through with currency-appropriate fixed fee
+          const fixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
+          const fixedFee = fixedFees[currency] ?? 50;
+          const chargeTotal = Math.ceil((withGst + fixedFee) / (1 - 0.034));
+          const feeDisplay = currency === "SGD" ? "S$0.50" : currency === "USD" ? "US$0.30" : currency === "EUR" ? "€0.25" : currency === "GBP" ? "£0.20" : "0.50";
 
           return (
             <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden">
@@ -654,29 +653,24 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     {payingStripe ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CreditCard className="h-3.5 w-3.5" />}
                     {payingStripe ? "Redirecting…" : "Pay with Stripe"}
                   </button>
-                  {sgdSubtotal > 0 && (
+                  {subtotalCents > 0 && (
                     <span className="font-body text-[10px] text-muted-foreground">
-                      Stripe charge: S${formatPriceRaw(sgdCharge, "SGD")} SGD (incl. GST + processing fee)
+                      Stripe charge: {currencySymbol(currency)}{formatPriceRaw(chargeTotal, currency)} {currency} (incl.{currency === "SGD" ? " GST +" : ""} processing fee)
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Currency & fee notice */}
-              {sgdSubtotal > 0 && (
+              {/* Payment info notice */}
+              {subtotalCents > 0 && (
                 <div className="mt-4 rounded-md border border-border bg-muted/30 px-4 py-3 space-y-1.5">
                   <p className="font-body text-[11px] text-foreground/80 font-medium">Payment Information</p>
                   <ul className="font-body text-[10px] text-muted-foreground space-y-1 list-disc list-inside">
-                    <li>All payments are processed in <span className="font-medium text-foreground/70">SGD (Singapore Dollar)</span>.</li>
-                    {hasConversion && (
-                      <li>
-                        Your quote is priced in {currency}. Prices have been converted to SGD at today's live exchange rate.
-                      </li>
-                    )}
-                    <li>A processing fee of 3.4% + S$0.50 is included in the charge above.</li>
+                    <li>Payment will be charged in <span className="font-medium text-foreground/70">{currency}</span> — the same currency shown on your quote.</li>
+                    <li>A processing fee of 3.4% + {feeDisplay} is included in the total above.</li>
+                    {currency === "SGD" && <li>9% GST is included for SGD payments.</li>}
                     <li>
-                      If your card or bank account is in a currency other than SGD, your bank or Stripe may apply an additional
-                      currency conversion fee of approximately <span className="font-medium text-foreground/70">1–2%</span>.
+                      If your card is denominated in a different currency, your bank may apply a foreign transaction fee of approximately <span className="font-medium text-foreground/70">1–2%</span>.
                     </li>
                   </ul>
                 </div>
