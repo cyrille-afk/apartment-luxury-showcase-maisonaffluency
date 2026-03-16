@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check } from "lucide-react";
+import CurrencyToggle, { type DisplayCurrency, formatPriceConverted } from "@/components/trade/CurrencyToggle";
 import { getAllTradeProducts, getAllBrands, getAllCategories, getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,9 +15,6 @@ interface DraftQuote {
   created_at: string;
 }
 
-function formatPrice(cents: number, currency: string): string {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(cents / 100);
-}
 
 const TradeGallery = () => {
   const { user, isAdmin } = useAuth();
@@ -30,6 +28,7 @@ const TradeGallery = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
@@ -273,6 +272,7 @@ const TradeGallery = () => {
               ))}
             </select>
           )}
+          <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
         </div>
       </div>
 
@@ -352,7 +352,7 @@ const TradeGallery = () => {
                   )}
                   {price && (
                     <p className="font-display text-sm text-accent font-semibold mt-1">
-                      {formatPrice(price.cents, price.currency)}
+                      {formatPriceConverted(price.cents, price.currency, displayCurrency)}
                     </p>
                   )}
                 </div>
@@ -386,7 +386,7 @@ const TradeGallery = () => {
                 </div>
                 {price && (
                   <span className="font-display text-sm text-accent font-semibold shrink-0">
-                    {formatPrice(price.cents, price.currency)}
+                    {formatPriceConverted(price.cents, price.currency, displayCurrency)}
                   </span>
                 )}
                 <button

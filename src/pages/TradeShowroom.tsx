@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, ExternalLink, FileDown, Upload, Loader2 } from "lucide-react";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
+import CurrencyToggle, { type DisplayCurrency, formatPriceConverted } from "@/components/trade/CurrencyToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,10 +26,7 @@ interface ShowroomProduct {
   currency?: string;
 }
 
-const formatPrice = (cents: number, currency: string) => {
-  const amount = cents / 100;
-  return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
-};
+
 
 interface DraftQuote {
   id: string;
@@ -168,6 +166,7 @@ const TradeShowroom = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedSection, setSelectedSection] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
@@ -504,6 +503,7 @@ const TradeShowroom = () => {
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
+          <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
         </div>
       </div>
 
@@ -643,7 +643,7 @@ const TradeShowroom = () => {
                     />
                   ) : product.trade_price_cents && product.currency ? (
                     <p className="font-display text-sm text-accent font-semibold mt-1">
-                      {formatPrice(product.trade_price_cents, product.currency)}
+                      {formatPriceConverted(product.trade_price_cents, product.currency, displayCurrency)}
                     </p>
                   ) : null}
                 </div>
@@ -705,7 +705,7 @@ const TradeShowroom = () => {
                   </div>
                 ) : product.trade_price_cents && product.currency ? (
                   <span className="font-display text-base text-accent font-semibold shrink-0">
-                    {formatPrice(product.trade_price_cents, product.currency)}
+                    {formatPriceConverted(product.trade_price_cents, product.currency, displayCurrency)}
                   </span>
                 ) : null}
                 <button
