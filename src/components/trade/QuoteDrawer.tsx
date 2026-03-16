@@ -146,9 +146,13 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                     <span className="font-body text-[10px] text-muted-foreground">
                       Qty: {item.quantity}
                     </span>
-                    {item.product?.trade_price_cents && (
+                    {item.product?.trade_price_cents ? (
                       <span className="font-body text-[10px] text-primary font-medium">
                         {formatPrice(item.product.trade_price_cents, item.product.currency)}
+                      </span>
+                    ) : (
+                      <span className="font-body text-[9px] text-muted-foreground/60 italic">
+                        Price on request
                       </span>
                     )}
                   </div>
