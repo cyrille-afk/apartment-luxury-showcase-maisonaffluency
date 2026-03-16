@@ -87,29 +87,69 @@ function downloadTemplate() {
 }
 
 async function exportCurrentProducts() {
-  const { supabase } = await import("@/integrations/supabase/client");
-  const { data } = await supabase
+  const [{ supabase }, { getAllTradeProducts }] = await Promise.all([
+    import("@/integrations/supabase/client"),
+    import("@/lib/tradeProducts"),
+  ]);
+
+  // Fetch DB products with prices
+  const { data: dbProducts } = await supabase
     .from("trade_products")
-    .select("product_name, trade_price_cents, rrp_price_cents, currency")
+    .select("product_name, brand_name, trade_price_cents, rrp_price_cents, currency")
     .eq("is_active", true)
     .order("product_name");
 
-  if (!data || data.length === 0) return;
+  // Get all gallery/hardcoded products
+  const galleryProducts = getAllTradeProducts();
 
-  const header = "product_name,trade_price,rrp_price,currency";
-  const csvRows = data.map(p => {
-    const trade = p.trade_price_cents ? (p.trade_price_cents / 100).toFixed(0) : "";
-    const rrp = p.rrp_price_cents ? (p.rrp_price_cents / 100).toFixed(0) : "";
-    // Quote product names that contain commas
-    const name = p.product_name.includes(",") ? `"${p.product_name}"` : p.product_name;
-    return `${name},${trade},${rrp},${p.currency}`;
-  });
+  // Build a map keyed by lowercase product name, merging both sources
+  const productMap = new Map<string, { name: string; brand: string; trade: string; rrp: string; currency: string }>();
+
+  // Gallery products first (these have the canonical names)
+  for (const gp of galleryProducts) {
+    const key = gp.product_name.trim().toLowerCase();
+    if (!productMap.has(key)) {
+      productMap.set(key, { name: gp.product_name, brand: gp.brand_name, trade: "", rrp: "", currency: "EUR" });
+    }
+  }
+
+  // Overlay DB prices
+  if (dbProducts) {
+    for (const dp of dbProducts) {
+      const key = dp.product_name.trim().toLowerCase();
+      const existing = productMap.get(key);
+      if (existing) {
+        existing.trade = dp.trade_price_cents ? (dp.trade_price_cents / 100).toFixed(0) : "";
+        existing.rrp = dp.rrp_price_cents ? (dp.rrp_price_cents / 100).toFixed(0) : "";
+        existing.currency = dp.currency;
+      } else {
+        productMap.set(key, {
+          name: dp.product_name,
+          brand: dp.brand_name,
+          trade: dp.trade_price_cents ? (dp.trade_price_cents / 100).toFixed(0) : "",
+          rrp: dp.rrp_price_cents ? (dp.rrp_price_cents / 100).toFixed(0) : "",
+          currency: dp.currency,
+        });
+      }
+    }
+  }
+
+  if (productMap.size === 0) return;
+
+  const header = "product_name,brand_name,trade_price,rrp_price,currency";
+  const csvRows = [...productMap.values()]
+    .sort((a, b) => a.brand.localeCompare(b.brand) || a.name.localeCompare(b.name))
+    .map(p => {
+      const name = p.name.includes(",") ? `"${p.name}"` : p.name;
+      const brand = p.brand.includes(",") ? `"${p.brand}"` : p.brand;
+      return `${name},${brand},${p.trade},${p.rrp},${p.currency}`;
+    });
 
   const blob = new Blob([header + "\n" + csvRows.join("\n")], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "current_products.csv";
+  a.download = "all_products.csv";
   a.click();
   URL.revokeObjectURL(url);
 }
