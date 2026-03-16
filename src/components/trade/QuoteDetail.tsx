@@ -254,6 +254,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       status: "confirmed",
       confirmed_at: new Date().toISOString(),
     } as any).eq("id", quoteId);
+
+    // Send confirmation notification email
+    supabase.functions.invoke("send-quote-confirmed", {
+      body: { quoteId },
+    }).catch((err) => console.error("Order confirmation email failed:", err));
+
     toast({ title: "Order confirmed!", description: "We'll be in touch with next steps." });
     onStatusChange();
   };
