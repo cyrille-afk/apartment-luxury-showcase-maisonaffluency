@@ -218,13 +218,55 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
 
       const quoteCurrency = (quoteRes.data as any)?.currency || "SGD";
 
+      // Fuzzy matching helpers
+      const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+      const tokenize = (s: string) => normalize(s).split(" ").filter(Boolean);
+
+      // For items without a price, try fuzzy-match against all priced trade_products
+      const unpricedItems = fetchedItems.filter((i) => !i.unit_price_cents && !i.trade_products?.trade_price_cents);
+      let pricedCatalog: Array<{ product_name: string; brand_name: string; trade_price_cents: number; currency: string }> = [];
+
+      if (unpricedItems.length > 0) {
+        const { data: allPriced } = await supabase
+          .from("trade_products")
+          .select("product_name, brand_name, trade_price_cents, currency")
+          .not("trade_price_cents", "is", null)
+          .eq("is_active", true);
+        pricedCatalog = (allPriced || []) as any;
+      }
+
+      const findFuzzyPrice = (name: string) => {
+        const norm = normalize(name);
+        const tokens = tokenize(name);
+        let best: (typeof pricedCatalog)[0] | null = null;
+        let bestScore = 0;
+        for (const entry of pricedCatalog) {
+          const cn = normalize(entry.product_name);
+          if (cn === norm) return entry;
+          if (cn.includes(norm) || norm.includes(cn)) return entry;
+          const ct = tokenize(entry.product_name);
+          const overlap = tokens.filter((t) => ct.includes(t)).length;
+          const score = overlap / Math.max(ct.length, tokens.length);
+          if (score > 0.5 && score > bestScore) { bestScore = score; best = entry; }
+        }
+        return best;
+      };
+
+      // Build a resolved price map: item.id → { cents, currency }
+      const resolvedPrices: Record<string, { cents: number; currency: string }> = {};
+      fetchedItems.forEach((item) => {
+        if (item.trade_products?.trade_price_cents) {
+          resolvedPrices[item.id] = { cents: item.trade_products.trade_price_cents, currency: item.trade_products.currency || "SGD" };
+        } else if (!item.unit_price_cents) {
+          const match = findFuzzyPrice(item.trade_products?.product_name || "");
+          if (match) resolvedPrices[item.id] = { cents: match.trade_price_cents, currency: match.currency };
+        }
+      });
+
       // Collect unique source currencies that differ from quote currency
       const sourceCurrencies = new Set<string>();
-      fetchedItems.forEach((item) => {
-        const prodCurrency = item.trade_products?.currency;
-        if (prodCurrency && prodCurrency !== quoteCurrency && item.trade_products?.trade_price_cents && !item.unit_price_cents) {
-          sourceCurrencies.add(prodCurrency);
-        }
+      Object.values(resolvedPrices).forEach(({ currency: c }) => {
+        if (c !== quoteCurrency) sourceCurrencies.add(c);
       });
 
       // Fetch exchange rates if needed
@@ -245,25 +287,27 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
         );
       }
 
-      // Init price inputs: existing unit_price_cents, or converted catalog price
+      // Init price inputs: existing unit_price_cents, or resolved catalog price (converted if needed)
       const prices: Record<string, string> = {};
       fetchedItems.forEach((item) => {
         if (item.unit_price_cents) {
           prices[item.id] = (item.unit_price_cents / 100).toFixed(2);
-        } else if (item.trade_products?.trade_price_cents) {
-          const prodCurrency = item.trade_products.currency || "SGD";
-          if (prodCurrency === quoteCurrency) {
-            prices[item.id] = (item.trade_products.trade_price_cents / 100).toFixed(2);
-          } else {
-            const rate = fxRates[`${prodCurrency}_${quoteCurrency}`];
-            if (rate) {
-              prices[item.id] = (Math.round(item.trade_products.trade_price_cents * rate) / 100).toFixed(2);
-            } else {
-              prices[item.id] = "";
-            }
-          }
         } else {
-          prices[item.id] = "";
+          const resolved = resolvedPrices[item.id];
+          if (resolved) {
+            if (resolved.currency === quoteCurrency) {
+              prices[item.id] = (resolved.cents / 100).toFixed(2);
+            } else {
+              const rate = fxRates[`${resolved.currency}_${quoteCurrency}`];
+              if (rate) {
+                prices[item.id] = (Math.round(resolved.cents * rate) / 100).toFixed(2);
+              } else {
+                prices[item.id] = "";
+              }
+            }
+          } else {
+            prices[item.id] = "";
+          }
         }
       });
       setItemPrices(prices);
