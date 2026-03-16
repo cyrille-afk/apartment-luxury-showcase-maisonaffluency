@@ -159,6 +159,7 @@ const findBestPriceMatch = (
 const TradeShowroom = () => {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
+  const { isPinned, togglePin, items: compareItems } = useCompare();
   const [uploadingId, setUploadingId] = useState<string | null>(null);
 
   const [products, setProducts] = useState<ShowroomProduct[]>([]);
