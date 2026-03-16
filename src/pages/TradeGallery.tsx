@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check } from "lucide-react";
+import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale } from "lucide-react";
+import { useCompare, type CompareItem } from "@/contexts/CompareContext";
+import { cn } from "@/lib/utils";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { getAllTradeProducts, getAllBrands, getAllCategories, getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +20,7 @@ interface DraftQuote {
 
 const TradeGallery = () => {
   const { user, isAdmin } = useAuth();
+  const { isPinned, togglePin, items: compareItems } = useCompare();
   const { toast } = useToast();
   const allProducts = useMemo(() => getAllTradeProducts(), []);
   const brands = useMemo(() => getAllBrands(allProducts), [allProducts]);
@@ -192,6 +195,21 @@ const TradeGallery = () => {
     });
   }, [allProducts, search, selectedBrand, selectedCategory, selectedSubcategory]);
 
+  const toCompareItem = (product: TradeProduct): CompareItem => ({
+    pick: {
+      title: product.product_name,
+      subtitle: product.subtitle,
+      image: product.image_url || "",
+      materials: product.materials,
+      dimensions: product.dimensions,
+      category: product.category,
+      subcategory: product.subcategory,
+    },
+    designerName: product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name,
+    designerId: product.id,
+    section: "designers",
+  });
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
@@ -328,6 +346,7 @@ const TradeGallery = () => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const price = getProductPrice(product);
+            const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
                 <div className="aspect-square bg-muted/30 relative overflow-hidden">
@@ -343,6 +362,20 @@ const TradeGallery = () => {
                       <Package className="h-6 w-6 text-muted-foreground/30" />
                     </div>
                   )}
+                  {/* Pin button */}
+                  <button
+                    onClick={() => togglePin(toCompareItem(product))}
+                    className={cn(
+                      "absolute top-2 right-2 z-10 p-1.5 rounded-full transition-all",
+                      pinned
+                        ? "bg-[hsl(var(--gold))] text-foreground shadow-md"
+                        : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90",
+                      compareItems.length >= 3 && !pinned && "pointer-events-none"
+                    )}
+                    aria-label={pinned ? "Remove from selection" : "Pin to selection"}
+                  >
+                    <Scale className="h-3.5 w-3.5" />
+                  </button>
                   {/* Overlay actions */}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
@@ -405,6 +438,7 @@ const TradeGallery = () => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const price = getProductPrice(product);
+            const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
                 <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0">
@@ -452,6 +486,17 @@ const TradeGallery = () => {
                     <FileDown className="h-4 w-4" />
                   </a>
                 )}
+                <button
+                  onClick={() => togglePin(toCompareItem(product))}
+                  className={cn(
+                    "p-2 rounded-full transition-all shrink-0",
+                    pinned ? "bg-[hsl(var(--gold))] text-foreground" : "text-muted-foreground hover:text-foreground",
+                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                  )}
+                  aria-label={pinned ? "Remove from selection" : "Pin"}
+                >
+                  <Scale className="h-3.5 w-3.5" />
+                </button>
               </div>
             );
           })}

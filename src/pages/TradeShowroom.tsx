@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, FileDown, Upload, Loader2 } from "lucide-react";
+import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, FileDown, Upload, Loader2, Scale } from "lucide-react";
+import { useCompare, type CompareItem } from "@/contexts/CompareContext";
+import { cn } from "@/lib/utils";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
@@ -157,6 +159,7 @@ const findBestPriceMatch = (
 const TradeShowroom = () => {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
+  const { isPinned, togglePin, items: compareItems } = useCompare();
   const [uploadingId, setUploadingId] = useState<string | null>(null);
 
   const [products, setProducts] = useState<ShowroomProduct[]>([]);
@@ -413,6 +416,19 @@ const TradeShowroom = () => {
     setUploadingId(null);
   };
 
+  const toCompareItem = (product: ShowroomProduct): CompareItem => ({
+    pick: {
+      title: product.product_name,
+      image: product.product_image_url || "",
+      materials: product.materials,
+      dimensions: product.dimensions,
+      category: inferCategory(product.product_name),
+    },
+    designerName: product.designer_name?.includes(' - ') ? product.designer_name.split(' - ')[0].trim() : (product.designer_name || "Unknown"),
+    designerId: product.id,
+    section: "designers",
+  });
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
@@ -525,6 +541,7 @@ const TradeShowroom = () => {
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
+            const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
                 <div className="aspect-square bg-muted/30 relative overflow-hidden">
@@ -574,6 +591,22 @@ const TradeShowroom = () => {
                       {getSection(product.image_identifier)}
                     </span>
                   </div>
+                  {/* Pin button */}
+                  {!isAdmin && (
+                    <button
+                      onClick={() => togglePin(toCompareItem(product))}
+                      className={cn(
+                        "absolute top-2 right-2 z-10 p-1.5 rounded-full transition-all",
+                        pinned
+                          ? "bg-[hsl(var(--gold))] text-foreground shadow-md"
+                          : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90",
+                        compareItems.length >= 3 && !pinned && "pointer-events-none"
+                      )}
+                      aria-label={pinned ? "Remove from selection" : "Pin to selection"}
+                    >
+                      <Scale className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                   {/* Overlay actions */}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
@@ -648,6 +681,7 @@ const TradeShowroom = () => {
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
+            const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors group">
                 <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0 relative">
@@ -726,6 +760,17 @@ const TradeShowroom = () => {
                     <FileDown className="h-4 w-4" />
                   </a>
                 )}
+                <button
+                  onClick={() => togglePin(toCompareItem(product))}
+                  className={cn(
+                    "p-2 rounded-full transition-all shrink-0",
+                    pinned ? "bg-[hsl(var(--gold))] text-foreground" : "text-muted-foreground hover:text-foreground",
+                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                  )}
+                  aria-label={pinned ? "Remove from selection" : "Pin"}
+                >
+                  <Scale className="h-3.5 w-3.5" />
+                </button>
               </div>
             );
           })}
