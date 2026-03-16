@@ -1065,12 +1065,7 @@ const Collectibles = () => {
                           <h3 className="font-serif text-xl md:text-2xl text-foreground group-hover:text-primary transition-colors duration-300">
                             {(() => {
                               const fmt = formatDesignerName(designer.name);
-                              return fmt.brand ? (
-                                <>
-                                  {fmt.brand}
-                                  <span className="text-lg text-foreground/70"> — {fmt.person}</span>
-                                </>
-                              ) : fmt.person;
+                              return fmt.brand || fmt.person;
                             })()}
                           </h3>
                         </div>
