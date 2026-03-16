@@ -621,7 +621,7 @@ const TradeShowroom = () => {
                 <div className="p-3 text-center">
                   {product.designer_name && (
                     <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
-                      {product.designer_name}
+                      {product.designer_name.includes(' - ') ? product.designer_name.split(' - ')[0].trim() : product.designer_name}
                     </p>
                   )}
                   <h3 className="font-display text-sm text-foreground leading-tight mb-0.5 truncate">
