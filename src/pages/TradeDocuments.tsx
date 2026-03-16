@@ -54,7 +54,9 @@ const TradeDocuments = () => {
       const { data } = await supabase
         .from("trade_documents")
         .select("*")
-        .order("brand_name", { ascending: true });
+        .order("brand_name", { ascending: true })
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
       setDocuments((data as TradeDocument[]) || []);
       setLoading(false);
     };
