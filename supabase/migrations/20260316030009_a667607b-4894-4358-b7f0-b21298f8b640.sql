@@ -1,0 +1,1 @@
+ALTER TABLE public.trade_documents ADD COLUMN sort_order smallint NOT NULL DEFAULT 0;

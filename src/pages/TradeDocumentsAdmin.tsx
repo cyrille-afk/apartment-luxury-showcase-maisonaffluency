@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, FileText, X, Image, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, X, Image, Loader2, ArrowUp, ArrowDown } from "lucide-react";
 import CloudUpload from "@/components/trade/CloudUpload";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import {
@@ -20,6 +20,7 @@ interface TradeDocument {
   file_url: string;
   file_size_bytes: number | null;
   cover_image_url: string | null;
+  sort_order: number;
   created_at: string;
 }
 
@@ -38,6 +39,7 @@ const emptyDoc = (): Omit<TradeDocument, "id" | "created_at"> => ({
   file_url: "",
   file_size_bytes: null,
   cover_image_url: null,
+  sort_order: 0,
 });
 
 const inputClass =
@@ -82,10 +84,33 @@ const TradeDocumentsAdmin = () => {
     const { data } = await supabase
       .from("trade_documents")
       .select("*")
-      .order("brand_name", { ascending: true });
+      .order("brand_name", { ascending: true })
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
     setDocuments((data as TradeDocument[]) || []);
     setFetching(false);
   };
+
+  /** Swap sort_order of two documents within the same brand */
+  const handleReorder = useCallback(async (doc: TradeDocument, direction: "up" | "down") => {
+    const brandDocs = documents.filter(d => d.brand_name === doc.brand_name);
+    const idx = brandDocs.findIndex(d => d.id === doc.id);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= brandDocs.length) return;
+
+    const other = brandDocs[swapIdx];
+    const myOrder = doc.sort_order;
+    const otherOrder = other.sort_order;
+    // If they have the same sort_order, offset them
+    const newMyOrder = otherOrder;
+    const newOtherOrder = myOrder === otherOrder ? myOrder + (direction === "up" ? 1 : -1) : myOrder;
+
+    await Promise.all([
+      supabase.from("trade_documents").update({ sort_order: newMyOrder }).eq("id", doc.id),
+      supabase.from("trade_documents").update({ sort_order: newOtherOrder }).eq("id", other.id),
+    ]);
+    fetchDocs();
+  }, [documents]);
 
   const handleSave = async () => {
     if (!editing) return;
@@ -347,6 +372,32 @@ const TradeDocumentsAdmin = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
+                  {/* Reorder within brand */}
+                  {(() => {
+                    const brandDocs = documents.filter(d => d.brand_name === doc.brand_name);
+                    const idx = brandDocs.findIndex(d => d.id === doc.id);
+                    return (
+                      <>
+                        <button
+                          onClick={() => handleReorder(doc, "up")}
+                          disabled={idx <= 0}
+                          className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                          title="Move up"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleReorder(doc, "down")}
+                          disabled={idx >= brandDocs.length - 1}
+                          className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                          title="Move down"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    );
+                  })()}
+                  <span className="w-px h-4 bg-border mx-0.5" />
                   {doc.file_url?.toLowerCase().endsWith(".pdf") && (
                     <button
                       onClick={() => handleSetAsBrandThumbnail(doc)}

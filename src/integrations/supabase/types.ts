@@ -322,6 +322,7 @@ export type Database = {
           file_size_bytes: number | null
           file_url: string
           id: string
+          sort_order: number
           title: string
         }
         Insert: {
@@ -332,6 +333,7 @@ export type Database = {
           file_size_bytes?: number | null
           file_url: string
           id?: string
+          sort_order?: number
           title: string
         }
         Update: {
@@ -342,6 +344,7 @@ export type Database = {
           file_size_bytes?: number | null
           file_url?: string
           id?: string
+          sort_order?: number
           title?: string
         }
         Relationships: []
