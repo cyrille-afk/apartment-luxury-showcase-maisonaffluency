@@ -312,6 +312,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
         }
       });
       setItemPrices(prices);
+      setCatalogPrices(resolvedPrices);
       setLoading(false);
     };
     load();
