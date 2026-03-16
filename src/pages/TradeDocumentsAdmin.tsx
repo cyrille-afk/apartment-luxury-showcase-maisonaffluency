@@ -43,6 +43,25 @@ const emptyDoc = (): Omit<TradeDocument, "id" | "created_at"> => ({
 const inputClass =
   "w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors";
 
+/** Extract the first page of a PDF as a high-quality JPEG blob */
+async function extractPdfCover(pdfUrl: string): Promise<Blob> {
+  const pdfjsLib = await import("pdfjs-dist");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+  const pdf = await pdfjsLib.getDocument({ url: pdfUrl, disableAutoFetch: true, disableStream: true }).promise;
+  const page = await pdf.getPage(1);
+  const vp = page.getViewport({ scale: 1 });
+  const scale = 400 / vp.width; // 400px wide for good carousel quality
+  const svp = page.getViewport({ scale });
+  const canvas = document.createElement("canvas");
+  canvas.width = svp.width;
+  canvas.height = svp.height;
+  const ctx = canvas.getContext("2d")!;
+  await page.render({ canvasContext: ctx, viewport: svp }).promise;
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Canvas toBlob failed"))), "image/jpeg", 0.85);
+  });
+}
+
 const TradeDocumentsAdmin = () => {
   const { isAdmin, loading } = useAuth();
   const { toast } = useToast();
@@ -52,6 +71,7 @@ const TradeDocumentsAdmin = () => {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<TradeDocument | null>(null);
   const [selectedBrand, setSelectedBrand] = useState("all");
+  const [extractingThumbnailId, setExtractingThumbnailId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAdmin) fetchDocs();
