@@ -106,10 +106,12 @@ async function exportCurrentProducts() {
   const productMap = new Map<string, { name: string; brand: string; trade: string; rrp: string; currency: string }>();
 
   // Gallery products first (these have the canonical names)
+  // Simplify brand names to match card display (strip " - DesignerInfo" suffix)
+  const simplifyBrand = (b: string) => b.includes(' - ') ? b.split(' - ')[0].trim() : b;
   for (const gp of galleryProducts) {
     const key = gp.product_name.trim().toLowerCase();
     if (!productMap.has(key)) {
-      productMap.set(key, { name: gp.product_name, brand: gp.brand_name, trade: "", rrp: "", currency: "EUR" });
+      productMap.set(key, { name: gp.product_name, brand: simplifyBrand(gp.brand_name), trade: "", rrp: "", currency: "EUR" });
     }
   }
 
