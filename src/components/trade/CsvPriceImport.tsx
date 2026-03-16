@@ -20,31 +20,54 @@ interface ImportResult {
   skipped: string[];
 }
 
+/** Parse a single CSV line respecting quoted fields like "18,900" */
+function parseCsvLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (const ch of line) {
+    if (ch === '"') { inQuotes = !inQuotes; continue; }
+    if (ch === ',' && !inQuotes) { result.push(current.trim()); current = ""; continue; }
+    current += ch;
+  }
+  result.push(current.trim());
+  return result;
+}
+
 function parseCsv(text: string): ImportRow[] {
-  const lines = text.trim().split(/\r?\n/);
+  // Remove BOM and split lines, filtering out completely empty/whitespace-only rows
+  const allLines = text.replace(/^\uFEFF/, "").trim().split(/\r?\n/);
+  const lines = allLines.filter(l => l.replace(/,/g, "").trim().length > 0);
   if (lines.length < 2) return [];
 
   const header = lines[0].toLowerCase().split(",").map(h => h.trim().replace(/^"|"$/g, ""));
   const nameIdx = header.findIndex(h => h.includes("product") || h.includes("name") || h.includes("item"));
-  const tradeIdx = header.findIndex(h => h.includes("trade") || h.includes("price"));
+  // Match "trade_price" or "trade price" first, then fall back to any column with "price"
+  const tradeIdx = header.findIndex(h => h.includes("trade"));
+  const priceIdx = tradeIdx >= 0 ? tradeIdx : header.findIndex(h => h.includes("price"));
   const rrpIdx = header.findIndex(h => h.includes("rrp") || h.includes("retail"));
   const currIdx = header.findIndex(h => h.includes("currency") || h.includes("curr"));
 
-  if (nameIdx === -1 || tradeIdx === -1) return [];
+  // Use trade price column if found, otherwise use any price column (e.g. rrp_price)
+  const effectivePriceIdx = priceIdx >= 0 ? priceIdx : -1;
+  if (nameIdx === -1 || effectivePriceIdx === -1) return [];
 
   const rows: ImportRow[] = [];
   for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+    // Parse CSV respecting quoted fields (e.g. "18,900")
+    const cols = parseCsvLine(lines[i]);
     const name = cols[nameIdx]?.trim();
-    const tradeStr = cols[tradeIdx]?.replace(/[^0-9.]/g, "");
-    const trade = parseFloat(tradeStr);
-    if (!name || isNaN(trade)) continue;
+    const priceStr = cols[effectivePriceIdx]?.replace(/[^0-9.]/g, "");
+    const price = parseFloat(priceStr);
+    if (!name || isNaN(price)) continue;
 
-    const rrpStr = rrpIdx >= 0 ? cols[rrpIdx]?.replace(/[^0-9.]/g, "") : undefined;
+    // If we used a generic "price" column that's actually rrp, store it as rrp too
+    const isRrpColumn = rrpIdx >= 0 || (tradeIdx < 0 && header[effectivePriceIdx]?.includes("rrp"));
+    const rrpStr = rrpIdx >= 0 ? cols[rrpIdx]?.replace(/[^0-9.]/g, "") : (isRrpColumn ? priceStr : undefined);
     const rrp = rrpStr ? parseFloat(rrpStr) : undefined;
-    const currency = currIdx >= 0 && cols[currIdx] ? cols[currIdx].toUpperCase() : "SGD";
+    const currency = currIdx >= 0 && cols[currIdx] ? cols[currIdx].toUpperCase().trim() : "SGD";
 
-    rows.push({ product_name: name, trade_price: trade, rrp_price: rrp && !isNaN(rrp) ? rrp : undefined, currency });
+    rows.push({ product_name: name, trade_price: price, rrp_price: rrp && !isNaN(rrp) ? rrp : undefined, currency });
   }
   return rows;
 }
