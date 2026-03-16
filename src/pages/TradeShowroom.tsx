@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Search, Grid3X3, List, ShoppingCart, Check, Package, MapPin, ExternalLink, FileDown, Upload, Loader2 } from "lucide-react";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
-import CurrencyToggle, { type DisplayCurrency, formatPriceConverted } from "@/components/trade/CurrencyToggle";
+import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useAuth } from "@/hooks/useAuth";
@@ -167,6 +167,7 @@ const TradeShowroom = () => {
   const [selectedSection, setSelectedSection] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const fxRates = useFxRates();
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
@@ -643,7 +644,7 @@ const TradeShowroom = () => {
                     />
                   ) : product.trade_price_cents && product.currency ? (
                     <p className="font-display text-sm text-accent font-semibold mt-1">
-                      {formatPriceConverted(product.trade_price_cents, product.currency, displayCurrency)}
+                      {formatPriceConverted(product.trade_price_cents, product.currency, displayCurrency, fxRates)}
                     </p>
                   ) : null}
                 </div>
@@ -705,7 +706,7 @@ const TradeShowroom = () => {
                   </div>
                 ) : product.trade_price_cents && product.currency ? (
                   <span className="font-display text-base text-accent font-semibold shrink-0">
-                    {formatPriceConverted(product.trade_price_cents, product.currency, displayCurrency)}
+                    {formatPriceConverted(product.trade_price_cents, product.currency, displayCurrency, fxRates)}
                   </span>
                 ) : null}
                 <button

@@ -1,31 +1,90 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export type DisplayCurrency = "original" | "SGD" | "EUR" | "USD";
 
-/** Approximate FX rates to SGD (base). Updated periodically. */
-const TO_SGD: Record<string, number> = {
-  SGD: 1,
-  EUR: 1.46,
-  USD: 1.34,
-  GBP: 1.70,
-};
+const SUPPORTED_CURRENCIES: DisplayCurrency[] = ["SGD", "EUR", "USD"];
 
-/** Convert cents in `fromCurrency` → cents in `toCurrency` */
-export function convertCents(cents: number, fromCurrency: string, toCurrency: DisplayCurrency): number {
-  if (toCurrency === "original" || toCurrency === fromCurrency) return cents;
-  const fromRate = TO_SGD[fromCurrency] ?? 1;
-  const toRate = TO_SGD[toCurrency] ?? 1;
-  return Math.round((cents * fromRate) / toRate);
+/** Cache live rates so multiple components don't re-fetch */
+let _rateCache: { rates: Record<string, number>; ts: number } | null = null;
+const CACHE_TTL = 5 * 60 * 1000; // 5 min
+
+async function fetchLiveRates(): Promise<Record<string, number>> {
+  if (_rateCache && Date.now() - _rateCache.ts < CACHE_TTL) return _rateCache.rates;
+
+  const rates: Record<string, number> = {};
+  // Fetch rates from each currency to all others
+  await Promise.all(
+    SUPPORTED_CURRENCIES.map(async (src) => {
+      const targets = SUPPORTED_CURRENCIES.filter((c) => c !== src).join(",");
+      try {
+        const res = await fetch(`https://api.frankfurter.app/latest?from=${src}&to=${targets}`);
+        const data = await res.json();
+        if (data.rates) {
+          for (const [tgt, rate] of Object.entries(data.rates)) {
+            rates[`${src}_${tgt}`] = rate as number;
+          }
+        }
+      } catch {
+        // silently fail — fallback rates used
+      }
+    })
+  );
+
+  // Self-rates
+  for (const c of SUPPORTED_CURRENCIES) rates[`${c}_${c}`] = 1;
+
+  if (Object.keys(rates).length > SUPPORTED_CURRENCIES.length) {
+    _rateCache = { rates, ts: Date.now() };
+  }
+  return rates;
 }
 
-/** Format cents as a price string in the given display currency */
+/** Hardcoded fallback if API is unreachable */
+const FALLBACK_RATES: Record<string, number> = {
+  SGD_SGD: 1, EUR_EUR: 1, USD_USD: 1,
+  EUR_SGD: 1.46, EUR_USD: 1.08,
+  USD_SGD: 1.34, USD_EUR: 0.93,
+  SGD_EUR: 0.68, SGD_USD: 0.75,
+};
+
+/** Hook to access live FX rates */
+export function useFxRates() {
+  const [rates, setRates] = useState<Record<string, number>>(
+    _rateCache?.rates ?? FALLBACK_RATES
+  );
+
+  useEffect(() => {
+    fetchLiveRates().then((r) => {
+      if (Object.keys(r).length > 0) setRates(r);
+    });
+  }, []);
+
+  return rates;
+}
+
+/** Convert cents using a rates map */
+export function convertCents(
+  cents: number,
+  fromCurrency: string,
+  toCurrency: DisplayCurrency,
+  rates: Record<string, number>,
+): number {
+  if (toCurrency === "original" || toCurrency === fromCurrency) return cents;
+  const key = `${fromCurrency}_${toCurrency}`;
+  const rate = rates[key];
+  if (!rate) return cents; // unconverted fallback
+  return Math.round(cents * rate);
+}
+
+/** Format cents as a price string, converting via live rates */
 export function formatPriceConverted(
   cents: number,
   originalCurrency: string,
   displayCurrency: DisplayCurrency,
+  rates: Record<string, number>,
 ): string {
   const targetCurrency = displayCurrency === "original" ? originalCurrency : displayCurrency;
-  const targetCents = convertCents(cents, originalCurrency, displayCurrency);
+  const targetCents = convertCents(cents, originalCurrency, displayCurrency, rates);
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: targetCurrency,
