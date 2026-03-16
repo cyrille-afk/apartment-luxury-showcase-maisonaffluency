@@ -76,7 +76,7 @@ function parseCsv(text: string): ImportRow[] {
 }
 
 function downloadTemplate() {
-  const csv = `product_name,trade_price,rrp_price,currency\nCorteza Console,12500,18900,USD\nAngelo M side table,1800,2492,EUR\n`;
+  const csv = `brand_name,product_name,trade_price,rrp_price,currency\nVéronèse,YSA Wall Light,3300,3300,EUR\nAtelier BdM,Lyric Desk,13750,13750,EUR\n`;
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
