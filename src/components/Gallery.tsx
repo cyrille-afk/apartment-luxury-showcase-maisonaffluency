@@ -918,13 +918,12 @@ const Gallery = () => {
            )}
         </DialogContent>
       </Dialog>
-    </>
-    <QuoteRequestDialog
-      open={quoteDialogOpen}
-      onOpenChange={setQuoteDialogOpen}
-      productName={quoteProduct.name}
-      designerName={quoteProduct.designer}
-    />
+      <QuoteRequestDialog
+        open={quoteDialogOpen}
+        onOpenChange={setQuoteDialogOpen}
+        productName={quoteProduct.name}
+        designerName={quoteProduct.designer}
+      />
     </>;
 };
 export default Gallery;
