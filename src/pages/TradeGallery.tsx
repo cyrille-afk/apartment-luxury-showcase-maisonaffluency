@@ -20,6 +20,7 @@ interface DraftQuote {
 
 const TradeGallery = () => {
   const { user, isAdmin } = useAuth();
+  const { isPinned, togglePin, items: compareItems } = useCompare();
   const { toast } = useToast();
   const allProducts = useMemo(() => getAllTradeProducts(), []);
   const brands = useMemo(() => getAllBrands(allProducts), [allProducts]);
