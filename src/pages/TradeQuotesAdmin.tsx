@@ -223,11 +223,11 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
       const tokenize = (s: string) => normalize(s).split(" ").filter(Boolean);
 
-      // For items without a price, try fuzzy-match against all priced trade_products
-      const unpricedItems = fetchedItems.filter((i) => !i.unit_price_cents && !i.trade_products?.trade_price_cents);
+      // For items missing direct catalog price, try fuzzy-match against priced trade_products
+      const needsCatalogResolution = fetchedItems.filter((i) => !i.trade_products?.trade_price_cents);
       let pricedCatalog: Array<{ product_name: string; brand_name: string; trade_price_cents: number; currency: string }> = [];
 
-      if (unpricedItems.length > 0) {
+      if (needsCatalogResolution.length > 0) {
         const { data: allPriced } = await supabase
           .from("trade_products")
           .select("product_name, brand_name, trade_price_cents, currency")
@@ -258,7 +258,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       fetchedItems.forEach((item) => {
         if (item.trade_products?.trade_price_cents) {
           resolvedPrices[item.id] = { cents: item.trade_products.trade_price_cents, currency: item.trade_products.currency || "SGD" };
-        } else if (!item.unit_price_cents) {
+        } else {
           const match = findFuzzyPrice(item.trade_products?.product_name || "");
           if (match) resolvedPrices[item.id] = { cents: match.trade_price_cents, currency: match.currency };
         }
