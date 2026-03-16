@@ -45,13 +45,43 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
         .order("created_at", { ascending: false });
 
       if (data) {
-        setItems(
-          (data as any[]).map((d) => ({
-            id: d.id,
-            quantity: d.quantity,
-            product: Array.isArray(d.product) ? d.product[0] : d.product,
-          }))
-        );
+        const mapped = (data as any[]).map((d) => ({
+          id: d.id,
+          quantity: d.quantity,
+          product: Array.isArray(d.product) ? d.product[0] : d.product,
+        }));
+
+        // For items without a price, try to find a priced record by product_name
+        const needsPrice = mapped.filter((m) => m.product && !m.product.trade_price_cents);
+        if (needsPrice.length > 0) {
+          const names = needsPrice.map((m) => m.product.product_name);
+          const { data: priced } = await supabase
+            .from("trade_products")
+            .select("product_name, trade_price_cents, currency")
+            .in("product_name", names)
+            .not("trade_price_cents", "is", null);
+
+          if (priced && priced.length > 0) {
+            const priceLookup = new Map<string, { cents: number; currency: string }>();
+            for (const p of priced) {
+              const key = p.product_name.trim().toLowerCase();
+              if (!priceLookup.has(key)) {
+                priceLookup.set(key, { cents: p.trade_price_cents!, currency: p.currency });
+              }
+            }
+            for (const item of mapped) {
+              if (item.product && !item.product.trade_price_cents) {
+                const match = priceLookup.get(item.product.product_name.trim().toLowerCase());
+                if (match) {
+                  item.product.trade_price_cents = match.cents;
+                  item.product.currency = match.currency;
+                }
+              }
+            }
+          }
+        }
+
+        setItems(mapped);
       }
       setLoading(false);
     };
