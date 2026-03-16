@@ -130,6 +130,33 @@ const TradeDocumentsAdmin = () => {
     fetchDocs();
   };
 
+  const handleSetAsBrandThumbnail = useCallback(async (doc: TradeDocument) => {
+    const isPdf = doc.file_url?.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      toast({ title: "Only PDF documents can be extracted", variant: "destructive" });
+      return;
+    }
+    setExtractingThumbnailId(doc.id);
+    try {
+      const blob = await extractPdfCover(doc.file_url);
+      const path = `brand-thumbnails/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const { error: uploadError } = await supabase.storage.from("assets").upload(path, blob, { contentType: "image/jpeg" });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+      const { error: upsertError } = await supabase
+        .from("brand_thumbnails")
+        .upsert({ brand_name: doc.brand_name, thumbnail_url: urlData.publicUrl }, { onConflict: "brand_name" });
+      if (upsertError) throw upsertError;
+
+      toast({ title: `Brand thumbnail set`, description: `"${doc.title}" cover → ${doc.brand_name} carousel` });
+    } catch (err: any) {
+      toast({ title: "Extraction failed", description: err.message, variant: "destructive" });
+    } finally {
+      setExtractingThumbnailId(null);
+    }
+  }, [toast]);
+
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
