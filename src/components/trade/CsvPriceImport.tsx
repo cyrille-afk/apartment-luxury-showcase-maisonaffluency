@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, Loader2, CheckCircle2, AlertCircle, FileSpreadsheet } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, FileSpreadsheet, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import {
 
 interface ImportRow {
   product_name: string;
-  trade_price: number;
+  trade_price?: number;
   rrp_price?: number;
   currency: string;
 }
@@ -35,41 +35,55 @@ function parseCsvLine(line: string): string[] {
 }
 
 function parseCsv(text: string): ImportRow[] {
-  // Remove BOM and split lines, filtering out completely empty/whitespace-only rows
   const allLines = text.replace(/^\uFEFF/, "").trim().split(/\r?\n/);
   const lines = allLines.filter(l => l.replace(/,/g, "").trim().length > 0);
   if (lines.length < 2) return [];
 
   const header = lines[0].toLowerCase().split(",").map(h => h.trim().replace(/^"|"$/g, ""));
   const nameIdx = header.findIndex(h => h.includes("product") || h.includes("name") || h.includes("item"));
-  // Match "trade_price" or "trade price" first, then fall back to any column with "price"
   const tradeIdx = header.findIndex(h => h.includes("trade"));
-  const priceIdx = tradeIdx >= 0 ? tradeIdx : header.findIndex(h => h.includes("price"));
   const rrpIdx = header.findIndex(h => h.includes("rrp") || h.includes("retail"));
   const currIdx = header.findIndex(h => h.includes("currency") || h.includes("curr"));
 
-  // Use trade price column if found, otherwise use any price column (e.g. rrp_price)
-  const effectivePriceIdx = priceIdx >= 0 ? priceIdx : -1;
-  if (nameIdx === -1 || effectivePriceIdx === -1) return [];
+  // Need at least product name and one price column
+  if (nameIdx === -1 || (tradeIdx === -1 && rrpIdx === -1)) return [];
 
   const rows: ImportRow[] = [];
   for (let i = 1; i < lines.length; i++) {
-    // Parse CSV respecting quoted fields (e.g. "18,900")
     const cols = parseCsvLine(lines[i]);
     const name = cols[nameIdx]?.trim();
-    const priceStr = cols[effectivePriceIdx]?.replace(/[^0-9.]/g, "");
-    const price = parseFloat(priceStr);
-    if (!name || isNaN(price)) continue;
+    if (!name) continue;
 
-    // If we used a generic "price" column that's actually rrp, store it as rrp too
-    const isRrpColumn = rrpIdx >= 0 || (tradeIdx < 0 && header[effectivePriceIdx]?.includes("rrp"));
-    const rrpStr = rrpIdx >= 0 ? cols[rrpIdx]?.replace(/[^0-9.]/g, "") : (isRrpColumn ? priceStr : undefined);
-    const rrp = rrpStr ? parseFloat(rrpStr) : undefined;
+    const tradeStr = tradeIdx >= 0 ? cols[tradeIdx]?.replace(/[^0-9.]/g, "") : undefined;
+    const tradePrice = tradeStr ? parseFloat(tradeStr) : undefined;
+
+    const rrpStr = rrpIdx >= 0 ? cols[rrpIdx]?.replace(/[^0-9.]/g, "") : undefined;
+    const rrpPrice = rrpStr ? parseFloat(rrpStr) : undefined;
+
+    // Skip rows with no valid price at all
+    if ((tradePrice === undefined || isNaN(tradePrice)) && (rrpPrice === undefined || isNaN(rrpPrice))) continue;
+
     const currency = currIdx >= 0 && cols[currIdx] ? cols[currIdx].toUpperCase().trim() : "SGD";
 
-    rows.push({ product_name: name, trade_price: price, rrp_price: rrp && !isNaN(rrp) ? rrp : undefined, currency });
+    rows.push({
+      product_name: name,
+      trade_price: tradePrice && !isNaN(tradePrice) ? tradePrice : undefined,
+      rrp_price: rrpPrice && !isNaN(rrpPrice) ? rrpPrice : undefined,
+      currency,
+    });
   }
   return rows;
+}
+
+function downloadTemplate() {
+  const csv = `product_name,trade_price,rrp_price,currency\nCorteza Console,12500,18900,USD\nAngelo M side table,1800,2492,EUR\n`;
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "price_import_template.csv";
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export default function CsvPriceImport({ onComplete }: { onComplete?: () => void }) {
@@ -80,6 +94,9 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
 
+  const hasTradeCol = rows.some(r => r.trade_price !== undefined);
+  const hasRrpCol = rows.some(r => r.rrp_price !== undefined);
+
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -87,7 +104,7 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
     reader.onload = () => {
       const parsed = parseCsv(reader.result as string);
       if (parsed.length === 0) {
-        toast({ title: "Invalid CSV", description: "Could not find product_name and price columns.", variant: "destructive" });
+        toast({ title: "Invalid CSV", description: "Need product_name and at least one price column (trade_price or rrp_price).", variant: "destructive" });
         return;
       }
       setRows(parsed);
@@ -105,10 +122,9 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
     const skipped: string[] = [];
 
     for (const row of rows) {
-      const priceCents = Math.round(row.trade_price * 100);
+      const tradeCents = row.trade_price ? Math.round(row.trade_price * 100) : null;
       const rrpCents = row.rrp_price ? Math.round(row.rrp_price * 100) : null;
 
-      // Try to find existing product
       const { data: existing } = await supabase
         .from("trade_products")
         .select("id")
@@ -116,22 +132,21 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
         .limit(1);
 
       if (existing && existing.length > 0) {
+        const updateData: Record<string, unknown> = { currency: row.currency };
+        if (tradeCents !== null) updateData.trade_price_cents = tradeCents;
+        if (rrpCents !== null) updateData.rrp_price_cents = rrpCents;
+
         const { error } = await supabase
           .from("trade_products")
-          .update({
-            trade_price_cents: priceCents,
-            ...(rrpCents !== null ? { rrp_price_cents: rrpCents } : {}),
-            currency: row.currency,
-          })
+          .update(updateData)
           .eq("id", existing[0].id);
         if (error) skipped.push(`${row.product_name} (update failed)`);
         else matched++;
       } else {
-        // Create new product
         const { error } = await supabase.from("trade_products").insert({
           product_name: row.product_name,
           brand_name: "Unknown",
-          trade_price_cents: priceCents,
+          trade_price_cents: tradeCents,
           rrp_price_cents: rrpCents,
           currency: row.currency,
         });
@@ -148,10 +163,16 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
 
   return (
     <>
-      <Button variant="outline" size="sm" className="gap-1.5" onClick={() => fileRef.current?.click()}>
-        <FileSpreadsheet className="h-3.5 w-3.5" />
-        Import Prices (CSV)
-      </Button>
+      <div className="flex items-center gap-1.5">
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={() => fileRef.current?.click()}>
+          <FileSpreadsheet className="h-3.5 w-3.5" />
+          Import Prices (CSV)
+        </Button>
+        <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground" onClick={downloadTemplate}>
+          <Download className="h-3 w-3" />
+          Template
+        </Button>
+      </div>
       <input ref={fileRef} type="file" accept=".csv,.txt" className="hidden" onChange={handleFile} />
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -159,7 +180,10 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
           <DialogHeader>
             <DialogTitle>Import Prices</DialogTitle>
             <DialogDescription>
-              {rows.length} product{rows.length !== 1 ? "s" : ""} found in CSV. Review before importing.
+              {rows.length} product{rows.length !== 1 ? "s" : ""} found.
+              {hasTradeCol && hasRrpCol && " Both trade & RRP prices detected."}
+              {hasTradeCol && !hasRrpCol && " Trade prices detected (no RRP column)."}
+              {!hasTradeCol && hasRrpCol && " RRP prices detected (no trade price column)."}
             </DialogDescription>
           </DialogHeader>
 
@@ -168,8 +192,8 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
               <thead className="bg-muted/50 sticky top-0">
                 <tr>
                   <th className="text-left p-2 font-body">Product</th>
-                  <th className="text-right p-2 font-body">Trade Price</th>
-                  <th className="text-right p-2 font-body">RRP</th>
+                  {hasTradeCol && <th className="text-right p-2 font-body">Trade</th>}
+                  {hasRrpCol && <th className="text-right p-2 font-body">RRP</th>}
                   <th className="text-right p-2 font-body">Curr</th>
                 </tr>
               </thead>
@@ -177,8 +201,12 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
                 {rows.map((r, i) => (
                   <tr key={i} className="border-t border-border">
                     <td className="p-2 font-body truncate max-w-[200px]">{r.product_name}</td>
-                    <td className="p-2 font-body text-right">{r.trade_price.toLocaleString()}</td>
-                    <td className="p-2 font-body text-right text-muted-foreground">{r.rrp_price?.toLocaleString() || "—"}</td>
+                    {hasTradeCol && (
+                      <td className="p-2 font-body text-right">{r.trade_price?.toLocaleString() ?? "—"}</td>
+                    )}
+                    {hasRrpCol && (
+                      <td className="p-2 font-body text-right text-muted-foreground">{r.rrp_price?.toLocaleString() ?? "—"}</td>
+                    )}
                     <td className="p-2 font-body text-right">{r.currency}</td>
                   </tr>
                 ))}
@@ -188,7 +216,7 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
 
           {result && (
             <div className="flex items-start gap-2 p-3 rounded-md bg-muted/30 text-xs font-body">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+              <CheckCircle2 className="h-4 w-4 text-accent shrink-0 mt-0.5" />
               <div>
                 <p><strong>{result.matched}</strong> updated, <strong>{result.created}</strong> created</p>
                 {result.skipped.length > 0 && (
