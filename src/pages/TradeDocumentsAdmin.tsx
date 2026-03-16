@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, FileText, X } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, X, Image, Loader2 } from "lucide-react";
 import CloudUpload from "@/components/trade/CloudUpload";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import {
