@@ -372,6 +372,32 @@ const TradeDocumentsAdmin = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
+                  {/* Reorder within brand */}
+                  {(() => {
+                    const brandDocs = documents.filter(d => d.brand_name === doc.brand_name);
+                    const idx = brandDocs.findIndex(d => d.id === doc.id);
+                    return (
+                      <>
+                        <button
+                          onClick={() => handleReorder(doc, "up")}
+                          disabled={idx <= 0}
+                          className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                          title="Move up"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleReorder(doc, "down")}
+                          disabled={idx >= brandDocs.length - 1}
+                          className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                          title="Move down"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    );
+                  })()}
+                  <span className="w-px h-4 bg-border mx-0.5" />
                   {doc.file_url?.toLowerCase().endsWith(".pdf") && (
                     <button
                       onClick={() => handleSetAsBrandThumbnail(doc)}
