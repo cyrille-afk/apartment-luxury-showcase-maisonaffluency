@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign } from "lucide-react";
+import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign, AlertCircle } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,12 +33,36 @@ export function TradeSidebar() {
   const navigate = useNavigate();
   const { isAdmin, signOut, profile, user } = useAuth();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [submittedCount, setSubmittedCount] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("avatar_url").eq("id", user.id).single()
       .then(({ data }) => { if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url); });
   }, [user]);
+
+  // Fetch count of submitted quotes for admin badge
+  useEffect(() => {
+    if (!isAdmin) return;
+    const fetchCount = async () => {
+      const { count } = await supabase
+        .from("trade_quotes")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "submitted");
+      setSubmittedCount(count || 0);
+    };
+    fetchCount();
+
+    // Subscribe to realtime changes on trade_quotes
+    const channel = supabase
+      .channel("trade-quotes-badge")
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => {
+        fetchCount();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [isAdmin]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -142,7 +166,20 @@ export function TradeSidebar() {
                         activeClassName="bg-muted text-foreground font-medium"
                       >
                         <DollarSign className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span>Quotes</span>}
+                        {!collapsed && (
+                          <span className="flex items-center gap-2">
+                            Quote Mgmt
+                            {submittedCount > 0 && (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-medium leading-none">
+                                <AlertCircle className="h-2.5 w-2.5" />
+                                {submittedCount}
+                              </span>
+                            )}
+                          </span>
+                        )}
+                        {collapsed && submittedCount > 0 && (
+                          <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-destructive" />
+                        )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
