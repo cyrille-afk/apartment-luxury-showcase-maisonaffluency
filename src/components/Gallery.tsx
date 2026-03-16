@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instag
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
 import GalleryHotspots from "./GalleryHotspots";
+import QuoteRequestDialog from "./QuoteRequestDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -239,6 +240,15 @@ const Gallery = () => {
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
+
+  // Quote request dialog state (triggered from hotspot pins)
+  const [quoteDialogOpen, setQuoteDialogOpen] = useState(false);
+  const [quoteProduct, setQuoteProduct] = useState<{ name: string; designer: string }>({ name: "", designer: "" });
+
+  const handleHotspotQuoteRequest = useCallback((productName: string, designerName: string) => {
+    setQuoteProduct({ name: productName, designer: designerName });
+    setQuoteDialogOpen(true);
+  }, []);
 
   // Pulsing hotspot hint — show once per session on the first hotspot section image
   const [showHotspotHint, setShowHotspotHint] = useState(() => {
@@ -792,10 +802,11 @@ const Gallery = () => {
                            />
                            {i === currentItemIndex && (
                              <GalleryHotspots
-                               imageIdentifier={item.title}
-                               visible={true}
-                               onCloseLightbox={closeLightbox}
-                             />
+                                imageIdentifier={item.title}
+                                visible={true}
+                                onCloseLightbox={closeLightbox}
+                                onRequestQuote={handleHotspotQuoteRequest}
+                              />
                            )}
                           </div>
                         </div>
@@ -853,10 +864,11 @@ const Gallery = () => {
                    <div className="relative inline-block shrink-0">
                      <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[95vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
                      <GalleryHotspots
-                        imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
-                        visible={!imageZoomed}
-                        onCloseLightbox={closeLightbox}
-                      />
+                         imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
+                         visible={!imageZoomed}
+                         onCloseLightbox={closeLightbox}
+                         onRequestQuote={handleHotspotQuoteRequest}
+                       />
                       {/* Close button — desktop: near image */}
                       <button
                         onClick={closeLightbox}
@@ -906,6 +918,12 @@ const Gallery = () => {
            )}
         </DialogContent>
       </Dialog>
+      <QuoteRequestDialog
+        open={quoteDialogOpen}
+        onOpenChange={setQuoteDialogOpen}
+        productName={quoteProduct.name}
+        designerName={quoteProduct.designer}
+      />
     </>;
 };
 export default Gallery;

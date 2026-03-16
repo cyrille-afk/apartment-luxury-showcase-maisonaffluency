@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Plus, X, Trash2, GripVertical, Pencil, Check } from "lucide-react";
+import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,10 +14,22 @@ interface Hotspot {
   link_url: string | null;
 }
 
+interface HotspotProduct {
+  product_name: string;
+  designer_name: string | null;
+  product_image_url: string | null;
+  materials: string | null;
+  dimensions: string | null;
+}
+
 interface GalleryHotspotsProps {
   imageIdentifier: string;
   visible: boolean;
   onCloseLightbox?: () => void;
+  /** Trade: callback to add hotspot product to active quote */
+  onAddToQuote?: (product: HotspotProduct) => void;
+  /** Public: callback to open quote request dialog pre-filled */
+  onRequestQuote?: (productName: string, designerName: string) => void;
 }
 
 interface PendingHotspot {
@@ -25,7 +37,7 @@ interface PendingHotspot {
   y_percent: number;
 }
 
-const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox }: GalleryHotspotsProps) => {
+const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote }: GalleryHotspotsProps) => {
   const isMobile = useIsMobile();
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -273,7 +285,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox }: GalleryH
                         {hotspot.designer_name && (
                           <p className="text-xs text-muted-foreground font-body mt-0.5">{hotspot.designer_name}</p>
                         )}
-                        {hotspot.link_url && (
+                        {hotspot.link_url && !onAddToQuote && !onRequestQuote && (
                           <button
                             className="inline-block mt-2 text-xs text-primary underline underline-offset-2 font-body hover:text-primary/80 transition-colors"
                             onClick={(e) => {
@@ -284,7 +296,6 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox }: GalleryH
                                 if (url.startsWith('/#')) hash = url.slice(1);
                                 if (hash.startsWith('#/curators/')) hash = '#curators/' + hash.slice('#/curators/'.length);
                                 setActiveId(null);
-                                // Save restore context so gallery lightbox re-opens after curators' picks closes
                                 sessionStorage.setItem('__gallery_hotspot_restore', JSON.stringify({ imageIdentifier }));
                                 onCloseLightbox?.();
                                 setTimeout(() => {
@@ -299,6 +310,43 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox }: GalleryH
                             View details →
                           </button>
                         )}
+
+                        {/* Trade: Add to Quote */}
+                        {onAddToQuote && (
+                          <button
+                            className="flex items-center gap-1.5 mt-2.5 w-full text-xs font-body bg-foreground text-background rounded px-3 py-2 hover:bg-foreground/90 transition-colors justify-center"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onAddToQuote({
+                                product_name: hotspot.product_name,
+                                designer_name: hotspot.designer_name,
+                                product_image_url: hotspot.product_image_url,
+                                materials: (hotspot as any).materials || null,
+                                dimensions: (hotspot as any).dimensions || null,
+                              });
+                              setActiveId(null);
+                            }}
+                          >
+                            <ShoppingCart className="w-3 h-3" />
+                            Add to Quote
+                          </button>
+                        )}
+
+                        {/* Public: Request a Quote */}
+                        {onRequestQuote && (
+                          <button
+                            className="flex items-center gap-1.5 mt-2.5 w-full text-xs font-body bg-foreground text-background rounded px-3 py-2 hover:bg-foreground/90 transition-colors justify-center"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRequestQuote(hotspot.product_name, hotspot.designer_name || "");
+                              setActiveId(null);
+                            }}
+                          >
+                            <MessageSquare className="w-3 h-3" />
+                            Request a Quote
+                          </button>
+                        )}
+
                         {editMode && (
                           <div className="mt-2 flex items-center gap-3">
                             <button onClick={() => startEditing(hotspot)} className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors">
