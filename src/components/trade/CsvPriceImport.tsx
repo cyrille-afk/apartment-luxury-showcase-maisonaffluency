@@ -196,6 +196,10 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
           <FileSpreadsheet className="h-3.5 w-3.5" />
           Import Prices (CSV)
         </Button>
+        <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground" onClick={exportCurrentProducts}>
+          <Download className="h-3 w-3" />
+          Export Products
+        </Button>
         <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground" onClick={downloadTemplate}>
           <Download className="h-3 w-3" />
           Template
