@@ -40,15 +40,20 @@ function parseCsv(text: string): ImportRow[] {
 
   const rows: ImportRow[] = [];
   for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+    // Parse CSV respecting quoted fields (e.g. "18,900")
+    const cols = parseCsvLine(lines[i]);
     const name = cols[nameIdx]?.trim();
-    const tradeStr = cols[tradeIdx]?.replace(/[^0-9.]/g, "");
-    const trade = parseFloat(tradeStr);
-    if (!name || isNaN(trade)) continue;
+    const priceStr = cols[effectivePriceIdx]?.replace(/[^0-9.]/g, "");
+    const price = parseFloat(priceStr);
+    if (!name || isNaN(price)) continue;
 
-    const rrpStr = rrpIdx >= 0 ? cols[rrpIdx]?.replace(/[^0-9.]/g, "") : undefined;
+    // If we used a generic "price" column that's actually rrp, store it as rrp too
+    const isRrpColumn = rrpIdx >= 0 || (tradeIdx < 0 && header[effectivePriceIdx]?.includes("rrp"));
+    const rrpStr = rrpIdx >= 0 ? cols[rrpIdx]?.replace(/[^0-9.]/g, "") : (isRrpColumn ? priceStr : undefined);
     const rrp = rrpStr ? parseFloat(rrpStr) : undefined;
-    const currency = currIdx >= 0 && cols[currIdx] ? cols[currIdx].toUpperCase() : "SGD";
+    const currency = currIdx >= 0 && cols[currIdx] ? cols[currIdx].toUpperCase().trim() : "SGD";
+
+    rows.push({ product_name: name, trade_price: price, rrp_price: rrp && !isNaN(rrp) ? rrp : undefined, currency });
 
     rows.push({ product_name: name, trade_price: trade, rrp_price: rrp && !isNaN(rrp) ? rrp : undefined, currency });
   }
