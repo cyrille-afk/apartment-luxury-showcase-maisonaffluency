@@ -241,6 +241,15 @@ const Gallery = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
 
+  // Quote request dialog state (triggered from hotspot pins)
+  const [quoteDialogOpen, setQuoteDialogOpen] = useState(false);
+  const [quoteProduct, setQuoteProduct] = useState<{ name: string; designer: string }>({ name: "", designer: "" });
+
+  const handleHotspotQuoteRequest = useCallback((productName: string, designerName: string) => {
+    setQuoteProduct({ name: productName, designer: designerName });
+    setQuoteDialogOpen(true);
+  }, []);
+
   // Pulsing hotspot hint — show once per session on the first hotspot section image
   const [showHotspotHint, setShowHotspotHint] = useState(() => {
     if (typeof window === "undefined") return false;
