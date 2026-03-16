@@ -214,12 +214,18 @@ const TradeGallery = () => {
               .then(({ data }) => {
                 if (data) {
                   const lookup = new Map<string, { cents: number; currency: string }>();
+                  const entries: { name: string; cents: number; currency: string }[] = [];
                   for (const p of data) {
                     if (p.trade_price_cents) {
-                      lookup.set(p.product_name.trim().toLowerCase(), { cents: p.trade_price_cents, currency: p.currency });
+                      const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency };
+                      entries.push(entry);
+                      lookup.set(p.product_name.trim().toLowerCase(), entry);
+                      const norm = normalizeName(p.product_name);
+                      if (norm) lookup.set(norm, entry);
                     }
                   }
                   setPriceLookup(lookup);
+                  setPriceEntries(entries);
                 }
               });
           }} />
