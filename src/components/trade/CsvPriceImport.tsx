@@ -68,8 +68,6 @@ function parseCsv(text: string): ImportRow[] {
     const currency = currIdx >= 0 && cols[currIdx] ? cols[currIdx].toUpperCase().trim() : "SGD";
 
     rows.push({ product_name: name, trade_price: price, rrp_price: rrp && !isNaN(rrp) ? rrp : undefined, currency });
-
-    rows.push({ product_name: name, trade_price: trade, rrp_price: rrp && !isNaN(rrp) ? rrp : undefined, currency });
   }
   return rows;
 }
