@@ -101,6 +101,7 @@ const App = () => {
             <Route path="provenance" element={<TradeProvenance />} />
             <Route path="documents-admin" element={<TradeDocumentsAdmin />} />
             <Route path="media" element={<TradeMediaLibrary />} />
+            <Route path="quotes-admin" element={<TradeQuotesAdmin />} />
             <Route path="settings" element={<TradeSettings />} />
           </Route>
           
