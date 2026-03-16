@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Building, Phone, Mail, Save } from "lucide-react";
+import { User, Lock, Building, Phone, Mail, Save, Camera, Loader2 } from "lucide-react";
 import { z } from "zod";
 
 const profileSchema = z.object({
@@ -28,6 +28,9 @@ const TradeSettings = () => {
   const [changingPassword, setChangingPassword] = useState(false);
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
   const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     first_name: "",
@@ -52,18 +55,58 @@ const TradeSettings = () => {
     }
   }, [profile]);
 
-  // Fetch phone separately since it's not in the auth context profile
+  // Fetch phone and avatar separately
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("phone")
+      .select("phone, avatar_url")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
         if (data?.phone) setForm((f) => ({ ...f, phone: data.phone }));
+        if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url);
       });
   }, [user]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image file", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 5 MB", variant: "destructive" });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${user.id}/avatar.${ext}`;
+
+    // Upload (upsert)
+    const { error: uploadErr } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { contentType: file.type, upsert: true });
+
+    if (uploadErr) {
+      toast({ title: "Upload failed", description: uploadErr.message, variant: "destructive" });
+      setUploadingAvatar(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+    const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`; // cache-bust
+
+    // Save to profile
+    await supabase.from("profiles").update({ avatar_url: publicUrl } as any).eq("id", user.id);
+    setAvatarUrl(publicUrl);
+    toast({ title: "Photo updated" });
+    setUploadingAvatar(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,7 +130,7 @@ const TradeSettings = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Profile updated" });
-      refreshRoles(); // refresh profile data in context
+      refreshRoles();
     }
     setSaving(false);
   };
@@ -123,6 +166,8 @@ const TradeSettings = () => {
   const FieldError = ({ field, errors }: { field: string; errors: Record<string, string> }) =>
     errors[field] ? <p className="font-body text-[10px] text-destructive mt-1">{errors[field]}</p> : null;
 
+  const initials = `${form.first_name?.[0] || ""}${form.last_name?.[0] || ""}`.toUpperCase() || "?";
+
   return (
     <>
       <Helmet><title>Settings — Trade Portal — Maison Affluency</title></Helmet>
@@ -131,6 +176,55 @@ const TradeSettings = () => {
       <p className="font-body text-sm text-muted-foreground mb-8">
         Manage your trade account details and preferences.
       </p>
+
+      {/* Profile Photo */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-5">
+          <Camera className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-display text-base text-foreground">Profile Photo</h2>
+        </div>
+        <div className="flex items-center gap-5">
+          <div className="relative group">
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="font-display text-xl text-muted-foreground">{initials}</span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              className="absolute inset-0 rounded-full bg-foreground/0 group-hover:bg-foreground/40 flex items-center justify-center transition-colors cursor-pointer"
+            >
+              {uploadingAvatar ? (
+                <Loader2 className="h-5 w-5 text-background animate-spin" />
+              ) : (
+                <Camera className="h-5 w-5 text-background opacity-0 group-hover:opacity-100 transition-opacity" />
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
+          </div>
+          <div>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              className="font-body text-xs text-foreground hover:underline underline-offset-4 transition-colors"
+            >
+              {uploadingAvatar ? "Uploading…" : "Change photo"}
+            </button>
+            <p className="font-body text-[10px] text-muted-foreground mt-1">JPG, PNG or WebP · Max 5 MB</p>
+          </div>
+        </div>
+      </div>
 
       {/* Profile Section */}
       <form onSubmit={handleSaveProfile} className="mb-10">
