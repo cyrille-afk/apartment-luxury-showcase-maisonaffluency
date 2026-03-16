@@ -134,7 +134,7 @@ export default function TradeMediaLibrary() {
         <div>
           <h1 className="font-display text-2xl text-foreground">Media Library</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
-            {files.length} file{files.length !== 1 ? "s" : ""} across all folders
+            {allFiles.length} file{allFiles.length !== 1 ? "s" : ""} across all folders ({curatorPickFiles.length} curator picks)
           </p>
         </div>
         <div className="flex items-center gap-3">
