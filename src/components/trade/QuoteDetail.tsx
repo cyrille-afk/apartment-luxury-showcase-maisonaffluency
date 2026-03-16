@@ -239,6 +239,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       status: "submitted",
       submitted_at: new Date().toISOString(),
     }).eq("id", quoteId);
+
+    // Notify admin via email (fire-and-forget)
+    supabase.functions.invoke("send-quote-submitted", {
+      body: { quoteId },
+    }).catch((err) => console.error("Quote notification email failed:", err));
+
     toast({ title: "Quote submitted", description: "Our team will review and respond within 1-2 business days." });
     onStatusChange();
   };
