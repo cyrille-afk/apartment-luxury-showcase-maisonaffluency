@@ -449,9 +449,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                             className="w-full pl-8 pr-2 py-1.5 border border-border rounded-md font-body text-sm text-foreground text-right bg-background focus:outline-none focus:ring-1 focus:ring-primary/30"
                           />
                         </div>
-                        {product?.trade_price_cents && product.currency && product.currency !== currency && (
+                        {catalogPrices[item.id] && catalogPrices[item.id].currency !== currency && (
                           <p className="font-body text-[9px] text-muted-foreground/50 text-right mt-0.5 italic">
-                            {formatPrice(product.trade_price_cents, product.currency)} catalog
+                            {formatPrice(catalogPrices[item.id].cents, catalogPrices[item.id].currency)} catalog
                           </p>
                         )}
                       </div>
