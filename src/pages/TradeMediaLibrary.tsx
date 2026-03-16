@@ -174,7 +174,7 @@ export default function TradeMediaLibrary() {
         >
           All
         </button>
-        {FOLDERS.map((f) => (
+        {[...FOLDERS, VIRTUAL_FOLDER_CURATOR].map((f) => (
           <button
             key={f}
             onClick={() => setFilterFolder(f)}
@@ -182,7 +182,7 @@ export default function TradeMediaLibrary() {
               filterFolder === f ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
-            {f}
+            {f === VIRTUAL_FOLDER_CURATOR ? `curator picks (${curatorPickFiles.length})` : f}
           </button>
         ))}
       </div>
