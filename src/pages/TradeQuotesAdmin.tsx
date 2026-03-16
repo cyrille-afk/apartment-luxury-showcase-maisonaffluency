@@ -440,6 +440,34 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
             </button>
           </div>
         )}
+
+        {/* Delete quote */}
+        <div className="border-t border-border p-4 md:p-6 flex items-center justify-between">
+          {!confirmDelete ? (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="inline-flex items-center gap-1.5 font-body text-[10px] text-destructive hover:text-destructive/80 uppercase tracking-wider transition-colors"
+            >
+              <Trash2 className="h-3.5 w-3.5" /> Delete Quote
+            </button>
+          ) : (
+            <div className="flex items-center gap-3">
+              <span className="font-body text-xs text-destructive">Delete this quote permanently?</span>
+              <button
+                onClick={handleDeleteQuote}
+                className="px-3 py-1.5 bg-destructive text-destructive-foreground font-body text-xs uppercase tracking-wider rounded-md hover:bg-destructive/90 transition-colors"
+              >
+                Confirm Delete
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-3 py-1.5 border border-border font-body text-xs uppercase tracking-wider rounded-md hover:bg-muted transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
