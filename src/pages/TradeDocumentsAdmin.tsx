@@ -84,10 +84,33 @@ const TradeDocumentsAdmin = () => {
     const { data } = await supabase
       .from("trade_documents")
       .select("*")
-      .order("brand_name", { ascending: true });
+      .order("brand_name", { ascending: true })
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
     setDocuments((data as TradeDocument[]) || []);
     setFetching(false);
   };
+
+  /** Swap sort_order of two documents within the same brand */
+  const handleReorder = useCallback(async (doc: TradeDocument, direction: "up" | "down") => {
+    const brandDocs = documents.filter(d => d.brand_name === doc.brand_name);
+    const idx = brandDocs.findIndex(d => d.id === doc.id);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= brandDocs.length) return;
+
+    const other = brandDocs[swapIdx];
+    const myOrder = doc.sort_order;
+    const otherOrder = other.sort_order;
+    // If they have the same sort_order, offset them
+    const newMyOrder = otherOrder;
+    const newOtherOrder = myOrder === otherOrder ? myOrder + (direction === "up" ? 1 : -1) : myOrder;
+
+    await Promise.all([
+      supabase.from("trade_documents").update({ sort_order: newMyOrder }).eq("id", doc.id),
+      supabase.from("trade_documents").update({ sort_order: newOtherOrder }).eq("id", other.id),
+    ]);
+    fetchDocs();
+  }, [documents]);
 
   const handleSave = async () => {
     if (!editing) return;
