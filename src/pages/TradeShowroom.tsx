@@ -167,6 +167,7 @@ const TradeShowroom = () => {
   const [selectedSection, setSelectedSection] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const fxRates = useFxRates();
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
