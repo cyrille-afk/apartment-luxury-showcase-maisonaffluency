@@ -395,7 +395,11 @@ const Collectibles = () => {
       if (!match) return;
       const designerId = match[1];
       const index = match[2] ? parseInt(match[2], 10) : 0;
-      const designer = collectibleDesigners.find(d => d.id === designerId);
+      const aliasToCollectibleId: Record<string, string> = {
+        "pierre-bonnefille-collectible": "pierre-bonnefille",
+      };
+      const resolvedDesignerId = aliasToCollectibleId[designerId] ?? designerId;
+      const designer = collectibleDesigners.find(d => d.id === resolvedDesignerId);
       if (designer && designer.curatorPicks?.length) {
         await warmCuratorPickSet(designer.curatorPicks, index);
         setCuratorPicksDesigner(designer);
