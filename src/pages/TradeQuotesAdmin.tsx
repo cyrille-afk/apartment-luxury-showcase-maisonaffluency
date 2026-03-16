@@ -425,7 +425,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                         </div>
                         <div className="min-w-0">
                           <h4 className="font-display text-xs text-foreground leading-tight">{product?.product_name || "Unknown"}</h4>
-                          <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product?.brand_name}</p>
+                          <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">{product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}</p>
                           {product?.dimensions && <p className="font-body text-[10px] text-muted-foreground">{product.dimensions}</p>}
                           {catalogPrices[item.id] && (
                             <p className="font-body text-[10px] text-muted-foreground/60">
