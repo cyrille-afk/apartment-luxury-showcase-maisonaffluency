@@ -557,11 +557,20 @@ const TradeShowroom = () => {
                   {product.materials && (
                     <p className="font-body text-[10px] text-muted-foreground line-clamp-2">{product.materials}</p>
                   )}
-                  {product.trade_price_cents && product.currency && (
+                  {isAdmin ? (
+                    <InlinePriceEditor
+                      productName={product.product_name}
+                      currentPriceCents={product.trade_price_cents}
+                      currency={product.currency || "SGD"}
+                      onPriceUpdated={(cents, cur) => {
+                        setProducts(prev => prev.map(p => p.id === product.id ? { ...p, trade_price_cents: cents, currency: cur } : p));
+                      }}
+                    />
+                  ) : product.trade_price_cents && product.currency ? (
                     <p className="font-display text-sm text-accent font-semibold mt-1">
                       {formatPrice(product.trade_price_cents, product.currency)}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </div>
             );
