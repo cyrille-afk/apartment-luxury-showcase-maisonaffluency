@@ -86,6 +86,34 @@ function downloadTemplate() {
   URL.revokeObjectURL(url);
 }
 
+async function exportCurrentProducts() {
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data } = await supabase
+    .from("trade_products")
+    .select("product_name, trade_price_cents, rrp_price_cents, currency")
+    .eq("is_active", true)
+    .order("product_name");
+
+  if (!data || data.length === 0) return;
+
+  const header = "product_name,trade_price,rrp_price,currency";
+  const csvRows = data.map(p => {
+    const trade = p.trade_price_cents ? (p.trade_price_cents / 100).toFixed(0) : "";
+    const rrp = p.rrp_price_cents ? (p.rrp_price_cents / 100).toFixed(0) : "";
+    // Quote product names that contain commas
+    const name = p.product_name.includes(",") ? `"${p.product_name}"` : p.product_name;
+    return `${name},${trade},${rrp},${p.currency}`;
+  });
+
+  const blob = new Blob([header + "\n" + csvRows.join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "current_products.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function CsvPriceImport({ onComplete }: { onComplete?: () => void }) {
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
