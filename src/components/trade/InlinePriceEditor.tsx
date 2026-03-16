@@ -2,18 +2,18 @@ import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X, Pencil, Loader2 } from "lucide-react";
+import { type DisplayCurrency, formatPriceConverted } from "@/components/trade/CurrencyToggle";
 
 interface InlinePriceEditorProps {
   productName: string;
   currentPriceCents?: number | null;
   currency?: string;
+  displayCurrency?: DisplayCurrency;
+  fxRates?: Record<string, number>;
   onPriceUpdated?: (newCents: number, currency: string) => void;
 }
 
-const formatPrice = (cents: number, currency: string) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(cents / 100);
-
-export default function InlinePriceEditor({ productName, currentPriceCents, currency = "SGD", onPriceUpdated }: InlinePriceEditorProps) {
+export default function InlinePriceEditor({ productName, currentPriceCents, currency = "SGD", displayCurrency = "original", fxRates = {}, onPriceUpdated }: InlinePriceEditorProps) {
   const { toast } = useToast();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState("");
@@ -40,7 +40,6 @@ export default function InlinePriceEditor({ productName, currentPriceCents, curr
     setSaving(true);
     const cents = Math.round(num * 100);
 
-    // Upsert: find by name or create
     const { data: existing } = await supabase
       .from("trade_products")
       .select("id")
@@ -91,7 +90,7 @@ export default function InlinePriceEditor({ productName, currentPriceCents, curr
     >
       {currentPriceCents ? (
         <span className="font-display text-sm text-accent font-semibold">
-          {formatPrice(currentPriceCents, currency)}
+          {formatPriceConverted(currentPriceCents, currency, displayCurrency, fxRates)}
         </span>
       ) : (
         <span className="font-body text-[10px] text-muted-foreground/60 italic">Set price</span>
