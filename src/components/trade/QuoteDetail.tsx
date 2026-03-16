@@ -625,30 +625,52 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
-        {isConfirmed && (
-          <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-2 font-body text-sm text-emerald-600">
-                <CheckCircle className="h-4 w-4" />
-                <span>Order confirmed</span>
+        {isConfirmed && (() => {
+          // Calculate the SGD-converted total for Stripe display
+          const sgdSubtotal = items.reduce((sum, item) => {
+            const rawPrice = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? 0;
+            const prodCurrency = item.trade_products?.currency || "SGD";
+            const converted = convertCents(rawPrice, prodCurrency, "SGD") ?? rawPrice;
+            return sum + converted * item.quantity;
+          }, 0);
+          const sgdAfterGst = sgdSubtotal + Math.round(sgdSubtotal * 0.09);
+          // Stripe fee pass-through: ceil((net + 50) / (1 - 0.034))
+          const sgdCharge = Math.ceil((sgdAfterGst + 50) / (1 - 0.034));
+
+          return (
+            <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-2 font-body text-sm text-emerald-600">
+                  <CheckCircle className="h-4 w-4" />
+                  <span>Order confirmed</span>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <button
+                    onClick={handleStripePayment}
+                    disabled={payingStripe}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-50"
+                  >
+                    {payingStripe ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CreditCard className="h-3.5 w-3.5" />}
+                    {payingStripe ? "Redirecting…" : "Pay with Stripe"}
+                  </button>
+                  {sgdSubtotal > 0 && (
+                    <span className="font-body text-[10px] text-muted-foreground">
+                      Stripe charge: S${formatPriceRaw(sgdCharge, "SGD")} (incl. GST + 3.4% + S$0.50 fee)
+                    </span>
+                  )}
+                  {currency !== "SGD" && sgdSubtotal > 0 && (
+                    <span className="font-body text-[10px] text-muted-foreground/60">
+                      All prices converted to SGD at live rates for payment
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <button
-                  onClick={handleStripePayment}
-                  disabled={payingStripe}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-50"
-                >
-                  {payingStripe ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CreditCard className="h-3.5 w-3.5" />}
-                  {payingStripe ? "Redirecting…" : "Pay with Stripe"}
-                </button>
-                <span className="font-body text-[10px] text-muted-foreground">Processing fee (3.4% + S$0.50) included</span>
-              </div>
+              <p className="font-body text-[10px] text-muted-foreground mt-3">
+                Or pay via bank transfer using the details above.
+              </p>
             </div>
-            <p className="font-body text-[10px] text-muted-foreground mt-3">
-              Or pay via bank transfer using the details above.
-            </p>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );
