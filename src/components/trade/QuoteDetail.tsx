@@ -66,6 +66,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
+  const isPriced = quoteStatus === "priced";
+  const isConfirmed = quoteStatus === "confirmed" || quoteStatus === "paid";
+  const isReadOnly = !isDraft;
 
   const createdDate = new Date(quoteCreatedAt);
   const expiryDate = new Date(createdDate);
