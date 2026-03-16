@@ -739,6 +739,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Lighting", "Floor Lamp"],
         materials: "Waxed Aged Brass & Bronze Suede",
         dimensions: "H 112–152 cm · Rotating Arm L 97 cm",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/APPARATUS_UK_2026_METRONOME_READING_LAMP.pdf",
+        pdfFilename: "Apparatus_Studio-Metronome_Reading_Floor_Lamp.pdf"
       },
     ],
     links: [
