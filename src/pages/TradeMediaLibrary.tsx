@@ -312,16 +312,18 @@ export default function TradeMediaLibrary() {
                           <ExternalLink className="h-3.5 w-3.5" />
                         </a>
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        title="Delete"
-                        disabled={deleting === file.fullPath}
-                        onClick={() => setConfirmDelete(file)}
-                      >
-                        {deleting === file.fullPath ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                      </Button>
+                      {!isCuratorPick(file) && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          title="Delete"
+                          disabled={deleting === file.fullPath}
+                          onClick={() => setConfirmDelete(file)}
+                        >
+                          {deleting === file.fullPath ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
