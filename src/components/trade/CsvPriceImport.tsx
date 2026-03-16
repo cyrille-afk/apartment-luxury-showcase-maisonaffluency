@@ -20,6 +20,20 @@ interface ImportResult {
   skipped: string[];
 }
 
+/** Parse a single CSV line respecting quoted fields like "18,900" */
+function parseCsvLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (const ch of line) {
+    if (ch === '"') { inQuotes = !inQuotes; continue; }
+    if (ch === ',' && !inQuotes) { result.push(current.trim()); current = ""; continue; }
+    current += ch;
+  }
+  result.push(current.trim());
+  return result;
+}
+
 function parseCsv(text: string): ImportRow[] {
   // Remove BOM and split lines, filtering out completely empty/whitespace-only rows
   const allLines = text.replace(/^\uFEFF/, "").trim().split(/\r?\n/);
