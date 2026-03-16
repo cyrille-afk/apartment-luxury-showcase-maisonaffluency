@@ -263,7 +263,7 @@ const TradeShowroom = () => {
             (!existing.materials && item.materials) ||
             (!existing.dimensions && item.dimensions)
           ) {
-            const price = priceLookup.get(key);
+            const price = findBestPriceMatch(item.product_name, priceLookup, priceEntries);
             const meta = metadataLookup.get(key);
             seenByName.set(key, {
               ...item,
