@@ -726,12 +726,6 @@ const TradeShowroom = () => {
                     <FileDown className="h-4 w-4" />
                   </a>
                 )}
-                {product.link_url && (
-                  <a href={`/${product.link_url}`} target="_blank" rel="noopener noreferrer"
-                    className="p-2 text-muted-foreground hover:text-foreground transition-colors" title="View in gallery">
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                )}
               </div>
             );
           })}
