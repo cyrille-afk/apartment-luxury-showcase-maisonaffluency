@@ -617,11 +617,22 @@ const TradeShowroom = () => {
                     {product.materials ? ` · ${product.materials}` : ""}
                   </p>
                 </div>
-                {product.trade_price_cents && product.currency && (
+                {isAdmin ? (
+                  <div className="shrink-0">
+                    <InlinePriceEditor
+                      productName={product.product_name}
+                      currentPriceCents={product.trade_price_cents}
+                      currency={product.currency || "SGD"}
+                      onPriceUpdated={(cents, cur) => {
+                        setProducts(prev => prev.map(p => p.id === product.id ? { ...p, trade_price_cents: cents, currency: cur } : p));
+                      }}
+                    />
+                  </div>
+                ) : product.trade_price_cents && product.currency ? (
                   <span className="font-display text-base text-accent font-semibold shrink-0">
                     {formatPrice(product.trade_price_cents, product.currency)}
                   </span>
-                )}
+                ) : null}
                 <button
                   onClick={() => handleAddToQuote(product)}
                   disabled={isAdding}
