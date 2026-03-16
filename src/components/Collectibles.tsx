@@ -397,6 +397,7 @@ const Collectibles = () => {
       const index = match[2] ? parseInt(match[2], 10) : 0;
       const aliasToCollectibleId: Record<string, string> = {
         "pierre-bonnefille-collectible": "pierre-bonnefille",
+        "atelier-demichelis-collectible": "atelier-demichelis",
       };
       const resolvedDesignerId = aliasToCollectibleId[designerId] ?? designerId;
       const designer = collectibleDesigners.find(d => d.id === resolvedDesignerId);
