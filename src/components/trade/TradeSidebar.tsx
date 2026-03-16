@@ -165,10 +165,23 @@ export function TradeSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border p-3">
-        {!collapsed && profile && (
-          <p className="font-body text-xs text-muted-foreground mb-2 truncate">
-            {profile.first_name} {profile.last_name}
-          </p>
+        {profile && (
+          <div className={`flex items-center gap-2.5 mb-2 ${collapsed ? "justify-center" : ""}`}>
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center shrink-0">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="font-display text-[10px] text-muted-foreground">
+                  {(profile.first_name?.[0] || "")}{(profile.last_name?.[0] || "")}
+                </span>
+              )}
+            </div>
+            {!collapsed && (
+              <p className="font-body text-xs text-muted-foreground truncate">
+                {profile.first_name} {profile.last_name}
+              </p>
+            )}
+          </div>
         )}
         <button
           onClick={handleSignOut}
