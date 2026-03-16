@@ -118,7 +118,9 @@ export default function TradeMediaLibrary() {
     setConfirmDelete(null);
   };
 
-  const filtered = filterFolder === "all" ? files : files.filter((f) => f.folder === filterFolder);
+  const allFiles = useMemo(() => [...files, ...curatorPickFiles], [files, curatorPickFiles]);
+  const filtered = filterFolder === "all" ? allFiles : allFiles.filter((f) => f.folder === filterFolder);
+  const isCuratorPick = (file: StorageFile) => file.folder === VIRTUAL_FOLDER_CURATOR;
   const isImage = (mime: string) => mime?.startsWith("image");
   const isPdf = (mime: string) => mime?.includes("pdf");
 
