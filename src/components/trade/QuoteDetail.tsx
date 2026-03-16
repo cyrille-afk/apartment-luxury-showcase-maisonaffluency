@@ -636,6 +636,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           const sgdAfterGst = sgdSubtotal + Math.round(sgdSubtotal * 0.09);
           // Stripe fee pass-through: ceil((net + 50) / (1 - 0.034))
           const sgdCharge = Math.ceil((sgdAfterGst + 50) / (1 - 0.034));
+          const hasConversion = currency !== "SGD" && sgdSubtotal > 0;
 
           return (
             <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden">
@@ -655,18 +656,34 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </button>
                   {sgdSubtotal > 0 && (
                     <span className="font-body text-[10px] text-muted-foreground">
-                      Stripe charge: S${formatPriceRaw(sgdCharge, "SGD")} (incl. GST + 3.4% + S$0.50 fee)
-                    </span>
-                  )}
-                  {currency !== "SGD" && sgdSubtotal > 0 && (
-                    <span className="font-body text-[10px] text-muted-foreground/60">
-                      All prices converted to SGD at live rates for payment
+                      Stripe charge: S${formatPriceRaw(sgdCharge, "SGD")} SGD (incl. GST + processing fee)
                     </span>
                   )}
                 </div>
               </div>
+
+              {/* Currency & fee notice */}
+              {sgdSubtotal > 0 && (
+                <div className="mt-4 rounded-md border border-border bg-muted/30 px-4 py-3 space-y-1.5">
+                  <p className="font-body text-[11px] text-foreground/80 font-medium">Payment Information</p>
+                  <ul className="font-body text-[10px] text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>All payments are processed in <span className="font-medium text-foreground/70">SGD (Singapore Dollar)</span>.</li>
+                    {hasConversion && (
+                      <li>
+                        Your quote is priced in {currency}. Prices have been converted to SGD at today's live exchange rate.
+                      </li>
+                    )}
+                    <li>A processing fee of 3.4% + S$0.50 is included in the charge above.</li>
+                    <li>
+                      If your card or bank account is in a currency other than SGD, your bank or Stripe may apply an additional
+                      currency conversion fee of approximately <span className="font-medium text-foreground/70">1–2%</span>.
+                    </li>
+                  </ul>
+                </div>
+              )}
+
               <p className="font-body text-[10px] text-muted-foreground mt-3">
-                Or pay via bank transfer using the details above.
+                Or pay via bank transfer using the details above to avoid card processing fees.
               </p>
             </div>
           );
