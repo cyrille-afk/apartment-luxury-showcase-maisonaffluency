@@ -198,6 +198,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   const [itemPrices, setItemPrices] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [catalogPrices, setCatalogPrices] = useState<Record<string, { cents: number; currency: string }>>({});
 
   useEffect(() => {
     const load = async () => {
