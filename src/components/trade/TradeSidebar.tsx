@@ -1,4 +1,4 @@
-import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive } from "lucide-react";
+import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -122,6 +122,18 @@ export function TradeSidebar() {
                       >
                         <Upload className="h-4 w-4 shrink-0" />
                         {!collapsed && <span>Documents</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to="/trade/quotes-admin"
+                        className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                        activeClassName="bg-muted text-foreground font-medium"
+                      >
+                        <DollarSign className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span>Quotes</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

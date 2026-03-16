@@ -462,33 +462,42 @@ export type Database = {
       }
       trade_quotes: {
         Row: {
+          admin_notes: string | null
           client_name: string | null
+          confirmed_at: string | null
           created_at: string
           currency: string
           id: string
           notes: string | null
+          responded_at: string | null
           status: string
           submitted_at: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
           client_name?: string | null
+          confirmed_at?: string | null
           created_at?: string
           currency?: string
           id?: string
           notes?: string | null
+          responded_at?: string | null
           status?: string
           submitted_at?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
           client_name?: string | null
+          confirmed_at?: string | null
           created_at?: string
           currency?: string
           id?: string
           notes?: string | null
+          responded_at?: string | null
           status?: string
           submitted_at?: string | null
           updated_at?: string

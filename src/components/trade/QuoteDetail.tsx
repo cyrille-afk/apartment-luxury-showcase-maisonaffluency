@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle } from "lucide-react";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import affluencyLogo from "@/assets/affluency-logo-square.jpg";
 
@@ -57,6 +57,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [items, setItems] = useState<QuoteItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState(quoteNotes || "");
+  const [adminNotes, setAdminNotes] = useState("");
   const [currency, setCurrency] = useState<Currency>("SGD");
   const [clientCompany, setClientCompany] = useState("");
   const [clientName, setClientName] = useState("");
@@ -66,6 +67,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
+  const isPriced = quoteStatus === "priced";
+  const isConfirmed = quoteStatus === "confirmed" || quoteStatus === "paid";
+  const isReadOnly = !isDraft;
 
   const createdDate = new Date(quoteCreatedAt);
   const expiryDate = new Date(createdDate);
@@ -127,12 +131,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, currency, image_url, dimensions, materials, lead_time, sku)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency, client_name").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, client_name, admin_notes").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       setItems((itemsRes.data as QuoteItemWithProduct[]) || []);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
       if (quoteRes.data?.client_name) setClientName(quoteRes.data.client_name as string);
+      if ((quoteRes.data as any)?.admin_notes) setAdminNotes((quoteRes.data as any).admin_notes);
       if (profileRes?.data?.company) setClientCompany(profileRes.data.company);
       setLoading(false);
     };
@@ -164,6 +169,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       submitted_at: new Date().toISOString(),
     }).eq("id", quoteId);
     toast({ title: "Quote submitted", description: "Our team will review and respond within 1-2 business days." });
+    onStatusChange();
+  };
+
+  const handleConfirmOrder = async () => {
+    await supabase.from("trade_quotes").update({
+      status: "confirmed",
+      confirmed_at: new Date().toISOString(),
+    } as any).eq("id", quoteId);
+    toast({ title: "Order confirmed!", description: "We'll be in touch with next steps." });
     onStatusChange();
   };
 
@@ -562,6 +576,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         </div>
 
+        {/* Admin notes (shown when priced/confirmed) */}
+        {adminNotes && (isPriced || isConfirmed) && (
+          <div className="border-t border-border p-4 md:p-6 lg:p-8">
+            <label className="font-body text-[10px] text-muted-foreground uppercase tracking-widest block mb-2">Notes from Maison Affluency</label>
+            <p className="font-body text-sm text-foreground/80 italic whitespace-pre-wrap">"{adminNotes}"</p>
+          </div>
+        )}
+
         {/* Actions — hidden in print */}
         {isDraft && (
           <div className="border-t border-border p-4 md:p-6 lg:p-8 flex items-center justify-between print:hidden">
@@ -571,6 +593,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <button onClick={handleSubmit} disabled={items.length === 0} className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-40">
               <Send className="h-3.5 w-3.5" /> Submit
             </button>
+          </div>
+        )}
+
+        {isPriced && (
+          <div className="border-t border-border p-4 md:p-6 lg:p-8 flex items-center justify-end print:hidden">
+            <button
+              onClick={handleConfirmOrder}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors"
+            >
+              <CheckCircle className="h-3.5 w-3.5" /> Confirm Order
+            </button>
+          </div>
+        )}
+
+        {isConfirmed && (
+          <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden">
+            <div className="flex items-center gap-2 font-body text-sm text-emerald-600">
+              <CheckCircle className="h-4 w-4" />
+              <span>Order confirmed — our team will follow up with payment and shipping details.</span>
+            </div>
           </div>
         )}
       </div>

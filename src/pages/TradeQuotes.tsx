@@ -21,7 +21,9 @@ interface Quote {
 const statusConfig: Record<string, { label: string; icon: typeof Clock; className: string }> = {
   draft: { label: "Draft", icon: FileText, className: "bg-muted text-muted-foreground" },
   submitted: { label: "Submitted", icon: Send, className: "bg-primary/10 text-primary" },
-  reviewed: { label: "Reviewed", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
+  priced: { label: "Priced — Review", icon: Clock, className: "bg-amber-500/10 text-amber-600" },
+  confirmed: { label: "Order Confirmed", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
+  paid: { label: "Paid", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
 };
 
 const TradeQuotes = () => {
