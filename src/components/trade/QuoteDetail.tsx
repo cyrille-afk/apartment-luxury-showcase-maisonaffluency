@@ -172,6 +172,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     onStatusChange();
   };
 
+  const handleConfirmOrder = async () => {
+    await supabase.from("trade_quotes").update({
+      status: "confirmed",
+      confirmed_at: new Date().toISOString(),
+    } as any).eq("id", quoteId);
+    toast({ title: "Order confirmed!", description: "We'll be in touch with next steps." });
+    onStatusChange();
+  };
+
   const handleSaveNotes = async () => {
     await supabase.from("trade_quotes").update({ notes: notes || null }).eq("id", quoteId);
     toast({ title: "Notes saved" });
