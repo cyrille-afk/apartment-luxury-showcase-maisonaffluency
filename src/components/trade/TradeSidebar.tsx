@@ -30,7 +30,14 @@ export function TradeSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAdmin, signOut, profile } = useAuth();
+  const { isAdmin, signOut, profile, user } = useAuth();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("avatar_url").eq("id", user.id).single()
+      .then(({ data }) => { if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url); });
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
