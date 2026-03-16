@@ -1,0 +1,1 @@
+UPDATE gallery_hotspots SET link_url = '#curators/pierre-bonnefille/1' WHERE id = 'ffe2716b-39fb-4894-86be-f7cc3738f0f5';
