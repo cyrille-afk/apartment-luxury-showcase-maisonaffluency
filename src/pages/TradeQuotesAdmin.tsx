@@ -219,12 +219,17 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
 
       const quoteCurrency = (quoteRes.data as any)?.currency || "SGD";
 
-      // Fuzzy matching helpers
+      // Fuzzy matching helpers (singularized token matching + brand boost)
       const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
-      const tokenize = (s: string) => normalize(s).split(" ").filter(Boolean);
+      const singularize = (t: string) => (t.endsWith("s") && t.length > 3 ? t.slice(0, -1) : t);
+      const tokenize = (s: string) =>
+        normalize(s)
+          .split(" ")
+          .map(singularize)
+          .filter((t) => t.length > 1);
 
       // For items missing direct catalog price, try fuzzy-match against priced trade_products
-      const needsCatalogResolution = fetchedItems.filter((i) => !i.trade_products?.trade_price_cents);
+      const needsCatalogResolution = fetchedItems.filter((i) => i.trade_products && i.trade_products.trade_price_cents == null);
       let pricedCatalog: Array<{ product_name: string; brand_name: string; trade_price_cents: number; currency: string }> = [];
 
       if (needsCatalogResolution.length > 0) {
@@ -236,30 +241,56 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
         pricedCatalog = (allPriced || []) as any;
       }
 
-      const findFuzzyPrice = (name: string) => {
+      const findFuzzyPrice = (name: string, brandName?: string | null) => {
         const norm = normalize(name);
         const tokens = tokenize(name);
+        const normalizedBrand = normalize(brandName || "");
+
         let best: (typeof pricedCatalog)[0] | null = null;
         let bestScore = 0;
+
         for (const entry of pricedCatalog) {
-          const cn = normalize(entry.product_name);
-          if (cn === norm) return entry;
-          if (cn.includes(norm) || norm.includes(cn)) return entry;
-          const ct = tokenize(entry.product_name);
-          const overlap = tokens.filter((t) => ct.includes(t)).length;
-          const score = overlap / Math.min(ct.length, tokens.length);
-          if (score > 0.5 && score > bestScore) { bestScore = score; best = entry; }
+          const candidateName = normalize(entry.product_name);
+          if (candidateName === norm) return entry;
+
+          const candidateTokens = tokenize(entry.product_name);
+          const overlap = tokens.filter((t) => candidateTokens.includes(t)).length;
+          const tokenScore = overlap > 0 ? overlap / Math.max(candidateTokens.length, tokens.length) : 0;
+
+          const candidateBrand = normalize(entry.brand_name || "");
+          const brandScore =
+            normalizedBrand && candidateBrand
+              ? candidateBrand === normalizedBrand
+                ? 0.25
+                : candidateBrand.includes(normalizedBrand) || normalizedBrand.includes(candidateBrand)
+                  ? 0.15
+                  : 0
+              : 0;
+
+          const containsScore =
+            candidateName.includes(norm) || norm.includes(candidateName)
+              ? 0.95
+              : 0;
+
+          const score = Math.max(containsScore, tokenScore + brandScore);
+          const isStrongTokenMatch = overlap >= 2 || tokenScore >= 0.55;
+
+          if ((containsScore > 0 || isStrongTokenMatch) && score > bestScore) {
+            best = entry;
+            bestScore = score;
+          }
         }
+
         return best;
       };
 
       // Build a resolved price map: item.id → { cents, currency }
       const resolvedPrices: Record<string, { cents: number; currency: string }> = {};
       fetchedItems.forEach((item) => {
-        if (item.trade_products?.trade_price_cents) {
+        if (item.trade_products?.trade_price_cents != null) {
           resolvedPrices[item.id] = { cents: item.trade_products.trade_price_cents, currency: item.trade_products.currency || "SGD" };
         } else {
-          const match = findFuzzyPrice(item.trade_products?.product_name || "");
+          const match = findFuzzyPrice(item.trade_products?.product_name || "", item.trade_products?.brand_name);
           if (match) resolvedPrices[item.id] = { cents: match.trade_price_cents, currency: match.currency };
         }
       });
