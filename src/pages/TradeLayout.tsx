@@ -76,6 +76,11 @@ const TradeLayout = () => {
           </main>
         </div>
       </div>
+      <Suspense fallback={null}>
+        <CompareFab />
+        <CompareDrawer />
+      </Suspense>
+      </div>
     </SidebarProvider>
   );
 };
