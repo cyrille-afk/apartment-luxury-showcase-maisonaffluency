@@ -802,10 +802,11 @@ const Gallery = () => {
                            />
                            {i === currentItemIndex && (
                              <GalleryHotspots
-                               imageIdentifier={item.title}
-                               visible={true}
-                               onCloseLightbox={closeLightbox}
-                             />
+                                imageIdentifier={item.title}
+                                visible={true}
+                                onCloseLightbox={closeLightbox}
+                                onRequestQuote={handleHotspotQuoteRequest}
+                              />
                            )}
                           </div>
                         </div>
