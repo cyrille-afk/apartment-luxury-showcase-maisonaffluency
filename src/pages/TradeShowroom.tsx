@@ -121,14 +121,20 @@ const TradeShowroom = () => {
         const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string; image_url?: string | null }>();
         for (const tp of tradeProducts) {
           const tpKey = tp.product_name.trim().toLowerCase();
-          if (tp.pdf_url) pdfLookup.set(tpKey, tp.pdf_url);
-          // Store canonical metadata from curators' picks so showroom stays in sync
-          metadataLookup.set(tpKey, {
+          const metaEntry = {
             materials: tp.materials,
             dimensions: tp.dimensions,
             brand: tp.brand_name,
             image_url: tp.image_url,
-          });
+          };
+          if (tp.pdf_url) pdfLookup.set(tpKey, tp.pdf_url);
+          metadataLookup.set(tpKey, metaEntry);
+          // Also register combined title+subtitle key (e.g. "lyric desk") for hotspot matching
+          if (tp.subtitle) {
+            const comboKey = `${tpKey} ${tp.subtitle.trim().toLowerCase()}`;
+            metadataLookup.set(comboKey, metaEntry);
+            if (tp.pdf_url) pdfLookup.set(comboKey, tp.pdf_url);
+          }
         }
 
         // Build a price lookup from trade_products table
