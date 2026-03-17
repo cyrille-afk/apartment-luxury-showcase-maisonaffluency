@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
+
 const DISMISS_KEY = "trade_cta_dismissed";
 
 const TradeFloatingCTA = () => {
