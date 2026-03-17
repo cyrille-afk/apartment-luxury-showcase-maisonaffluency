@@ -233,6 +233,48 @@ const TradeSamples = () => {
             </div>
 
             <div className="space-y-1.5">
+              <Label className="font-body text-xs">Reference Photo</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.size > 10 * 1024 * 1024) {
+                      toast.error("Image must be under 10 MB");
+                      return;
+                    }
+                    setImageFile(file);
+                    setImagePreview(URL.createObjectURL(file));
+                  }
+                }}
+              />
+              {imagePreview ? (
+                <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-border">
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => { setImageFile(null); setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                    className="absolute top-1 right-1 p-0.5 rounded-full bg-foreground/70 text-background hover:bg-foreground transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 px-4 py-3 border border-dashed border-border rounded-lg text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-colors font-body text-xs"
+                >
+                  <ImagePlus className="h-4 w-4" />
+                  Attach a photo
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
               <Label className="font-body text-xs">Notes</Label>
               <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Finish, colour, size preferences or special instructions" rows={3} />
             </div>
