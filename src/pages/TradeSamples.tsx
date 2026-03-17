@@ -98,6 +98,24 @@ const TradeSamples = () => {
     if (!user || !productName.trim() || !brandName.trim()) return;
     setSubmitting(true);
 
+    let imageUrl: string | null = null;
+
+    // Upload image if provided
+    if (imageFile) {
+      const ext = imageFile.name.split(".").pop() || "jpg";
+      const path = `samples/${user.id}/${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from("assets")
+        .upload(path, imageFile, { contentType: imageFile.type });
+      if (uploadErr) {
+        toast.error("Failed to upload image");
+        setSubmitting(false);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+      imageUrl = urlData.publicUrl;
+    }
+
     const { error } = await supabase.from("trade_sample_requests").insert({
       user_id: user.id,
       product_name: productName.trim(),
@@ -109,6 +127,7 @@ const TradeSamples = () => {
       shipping_country: country.trim(),
       return_by: returnBy ? format(returnBy, "yyyy-MM-dd") : null,
       notes: notes.trim() || null,
+      image_url: imageUrl,
     } as any);
 
     setSubmitting(false);
