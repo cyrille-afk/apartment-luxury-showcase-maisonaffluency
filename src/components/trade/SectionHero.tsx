@@ -17,8 +17,8 @@ interface SectionHeroProps {
 }
 
 const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) => {
-  const imageId = heroImages[section];
-  const imageUrl = cloudinaryUrl(imageId, {
+  const entry = heroImages[section];
+  const imageUrl = cloudinaryUrl(entry.id, {
     width: 1600,
     height: 600,
     quality: "auto",
@@ -33,6 +33,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
           src={imageUrl}
           alt={title}
           className="w-full h-full object-cover"
+          style={entry.objectPosition ? { objectPosition: entry.objectPosition } : undefined}
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/30 to-foreground/10" />
