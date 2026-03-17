@@ -285,6 +285,9 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         {hotspot.designer_name && (
                           <p className="text-xs text-muted-foreground font-body mt-0.5">{hotspot.designer_name}</p>
                         )}
+                        {!onAddToQuote && (
+                          <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-1.5 italic">Price on request</p>
+                        )}
                         {hotspot.link_url && !onAddToQuote && !onRequestQuote && (
                           <button
                             className="inline-block mt-2 text-xs text-primary underline underline-offset-2 font-body hover:text-primary/80 transition-colors"
