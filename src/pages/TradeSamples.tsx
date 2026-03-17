@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Package, Plus, Clock, Truck, CheckCircle, RotateCcw, X } from "lucide-react";
+import { Package, Plus, Clock, Truck, CheckCircle, RotateCcw, X, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +28,7 @@ interface SampleRequest {
   status: string;
   admin_notes: string | null;
   tracking_number: string | null;
+  image_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -61,7 +62,9 @@ const TradeSamples = () => {
   const [country, setCountry] = useState("Singapore");
   const [returnBy, setReturnBy] = useState<Date | undefined>();
   const [notes, setNotes] = useState("");
-
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const fetchRequests = async () => {
     const { data } = await supabase
       .from("trade_sample_requests")
@@ -87,12 +90,31 @@ const TradeSamples = () => {
   const resetForm = () => {
     setProductName(""); setBrandName(""); setClientName(""); setProjectName("");
     setAddress(""); setCity(""); setCountry("Singapore"); setReturnBy(undefined); setNotes("");
+    setImageFile(null); setImagePreview(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !productName.trim() || !brandName.trim()) return;
     setSubmitting(true);
+
+    let imageUrl: string | null = null;
+
+    // Upload image if provided
+    if (imageFile) {
+      const ext = imageFile.name.split(".").pop() || "jpg";
+      const path = `samples/${user.id}/${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from("assets")
+        .upload(path, imageFile, { contentType: imageFile.type });
+      if (uploadErr) {
+        toast.error("Failed to upload image");
+        setSubmitting(false);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+      imageUrl = urlData.publicUrl;
+    }
 
     const { error } = await supabase.from("trade_sample_requests").insert({
       user_id: user.id,
@@ -105,6 +127,7 @@ const TradeSamples = () => {
       shipping_country: country.trim(),
       return_by: returnBy ? format(returnBy, "yyyy-MM-dd") : null,
       notes: notes.trim() || null,
+      image_url: imageUrl,
     } as any);
 
     setSubmitting(false);
@@ -210,6 +233,48 @@ const TradeSamples = () => {
             </div>
 
             <div className="space-y-1.5">
+              <Label className="font-body text-xs">Reference Photo</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.size > 10 * 1024 * 1024) {
+                      toast.error("Image must be under 10 MB");
+                      return;
+                    }
+                    setImageFile(file);
+                    setImagePreview(URL.createObjectURL(file));
+                  }
+                }}
+              />
+              {imagePreview ? (
+                <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-border">
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => { setImageFile(null); setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                    className="absolute top-1 right-1 p-0.5 rounded-full bg-foreground/70 text-background hover:bg-foreground transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 px-4 py-3 border border-dashed border-border rounded-lg text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-colors font-body text-xs"
+                >
+                  <ImagePlus className="h-4 w-4" />
+                  Attach a photo
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
               <Label className="font-body text-xs">Notes</Label>
               <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Finish, colour, size preferences or special instructions" rows={3} />
             </div>
@@ -275,6 +340,9 @@ function SampleRow({ request: req }: { request: SampleRequest }) {
 
   return (
     <div className="px-4 py-3.5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+      {req.image_url && (
+        <img src={req.image_url} alt={req.product_name} className="w-10 h-10 rounded object-cover border border-border shrink-0" />
+      )}
       <div className="flex-1 min-w-0">
         <p className="font-body text-sm text-foreground truncate">{req.product_name}</p>
         <p className="font-body text-[10px] text-muted-foreground">
