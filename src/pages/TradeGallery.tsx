@@ -454,11 +454,21 @@ const TradeGallery = () => {
                    {product.materials && (
                     <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>
                   )}
-                  {price && (
+                  {isAdmin ? (
+                    <InlinePriceEditor
+                      productName={product.product_name}
+                      brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
+                      currentPriceCents={price?.cents}
+                      currency={price?.currency || "SGD"}
+                      displayCurrency={displayCurrency}
+                      fxRates={fxRates}
+                      onPriceUpdated={() => refreshPrices()}
+                    />
+                  ) : price ? (
                     <p className="font-display text-sm text-accent font-semibold mt-1">
                       {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </div>
             );
