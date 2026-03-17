@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign, AlertCircle } from "lucide-react";
+import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign, AlertCircle, Package } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,6 +23,7 @@ const mainItems = [
   { title: "Gallery", url: "/trade/gallery", icon: Image },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
   { title: "Documents", url: "/trade/documents", icon: FolderOpen },
+  { title: "Samples", url: "/trade/samples", icon: Package },
   { title: "Settings", url: "/trade/settings", icon: Settings },
 ];
 

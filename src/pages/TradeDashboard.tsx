@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
-  Clock, FileSpreadsheet, BookOpen, FileDown, MapPin,
+  Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package,
 } from "lucide-react";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { Link } from "react-router-dom";
@@ -32,6 +32,7 @@ const quickLinks = [
   { title: "Browse Website Products", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery", image: thumb("living-room-hero_zxfcxl") },
   { title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", image: thumb("details-console_hk6uxt") },
   { title: "Documents", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", image: thumb("home-office-desk_g0ywv2") },
+  { title: "Request Samples", description: "Order product samples for your projects", icon: Package, to: "/trade/samples", image: thumb("details-console_hk6uxt") },
 ];
 
 const typeLabels: Record<string, string> = {
