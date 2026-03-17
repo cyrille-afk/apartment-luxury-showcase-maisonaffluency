@@ -125,6 +125,31 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     return fuzzyPriceMatch(productName, priceExactMap, tradePrices);
   }, [tradePrices, priceExactMap]);
 
+  // ── Edition lookup from curator picks ──
+  const editionLookup = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of getAllTradeProducts()) {
+      if (p.edition) m.set(normalizeName(p.product_name), p.edition);
+    }
+    return m;
+  }, []);
+
+  const getHotspotEdition = useCallback((productName: string): string | null => {
+    const key = normalizeName(productName);
+    const exact = editionLookup.get(key);
+    if (exact) return exact;
+    // fuzzy token match
+    const tokens = tokenize(productName);
+    if (!tokens.length) return null;
+    for (const [k, v] of editionLookup) {
+      const eTokens = tokenize(k);
+      const overlap = tokens.filter(t => eTokens.includes(t)).length;
+      const shorter = Math.min(tokens.length, eTokens.length);
+      if (shorter > 0 && overlap / shorter > 0.5) return v;
+    }
+    return null;
+  }, [editionLookup]);
+
   useEffect(() => {
     if (!imageIdentifier) return;
     // Clear old hotspots immediately to avoid showing stale markers on new image
