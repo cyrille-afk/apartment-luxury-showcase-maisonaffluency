@@ -219,6 +219,7 @@ const TradeGallery = () => {
       product_name: product.product_name,
       subtitle: product.subtitle,
       image_url: product.image_url,
+      hover_image_url: product.hover_image_url,
       brand_name: product.brand_name,
       materials: product.materials,
       dimensions: product.dimensions,

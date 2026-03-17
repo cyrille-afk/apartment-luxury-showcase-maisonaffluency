@@ -3,12 +3,14 @@ import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2 } from 
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
+import { useEffect, useState } from "react";
 
 export interface TradeProductLightboxItem {
   id: string;
   product_name: string;
   subtitle?: string;
   image_url: string | null;
+  hover_image_url?: string;
   brand_name: string;
   materials?: string | null;
   dimensions?: string | null;
@@ -28,6 +30,11 @@ interface TradeProductLightboxProps {
 
 const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdded }: TradeProductLightboxProps) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const [showHoverImage, setShowHoverImage] = useState(false);
+
+  useEffect(() => {
+    setShowHoverImage(false);
+  }, [product?.id]);
 
   if (!product) return null;
 
