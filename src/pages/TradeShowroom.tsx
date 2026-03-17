@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import SectionHero from "@/components/trade/SectionHero";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
+import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 
 interface ShowroomProduct {
   id: string;
@@ -177,6 +178,7 @@ const TradeShowroom = () => {
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
+  const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
 
   // Fetch hotspot products (deduplicated by product_name + designer_name)
   useEffect(() => {
@@ -429,6 +431,26 @@ const TradeShowroom = () => {
     section: "designers",
   });
 
+  const toLightboxItem = (product: ShowroomProduct): TradeProductLightboxItem => {
+    const hasTrade = product.trade_price_cents && product.currency;
+    return {
+      id: product.id,
+      product_name: product.product_name,
+      image_url: product.product_image_url,
+      brand_name: product.designer_name || "Unknown",
+      materials: product.materials,
+      dimensions: product.dimensions,
+      category: inferCategory(product.product_name),
+      pdf_url: product.pdf_url,
+      price: hasTrade ? formatPriceConverted(product.trade_price_cents!, product.currency!, displayCurrency, fxRates) : null,
+    };
+  };
+
+  const handleLightboxAddToQuote = (item: TradeProductLightboxItem) => {
+    const product = products.find((p) => p.id === item.id);
+    if (product) handleAddToQuote(product);
+  };
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
@@ -544,7 +566,7 @@ const TradeShowroom = () => {
             const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
-                <div className="aspect-square bg-muted/30 relative overflow-hidden">
+                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.product_image_url ? (
                     <img
                       src={product.product_image_url}
@@ -782,6 +804,13 @@ const TradeShowroom = () => {
         refreshKey={drawerRefreshKey}
       />
     </div>
+      <TradeProductLightbox
+        product={lightboxProduct}
+        onClose={() => setLightboxProduct(null)}
+        onAddToQuote={handleLightboxAddToQuote}
+        isAdding={!!addingProductId}
+        isAdded={lightboxProduct ? addedProductIds.has(lightboxProduct.id) : false}
+      />
     </>
   );
 };

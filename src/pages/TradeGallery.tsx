@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import SectionHero from "@/components/trade/SectionHero";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
+import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 
 interface DraftQuote {
   id: string;
@@ -39,6 +40,7 @@ const TradeGallery = () => {
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
+  const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
 
   // Price lookup from trade_products table
   const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string }>>(new Map());
@@ -210,6 +212,28 @@ const TradeGallery = () => {
     section: "designers",
   });
 
+  const toLightboxItem = (product: TradeProduct): TradeProductLightboxItem => {
+    const price = getProductPrice(product);
+    return {
+      id: product.id,
+      product_name: product.product_name,
+      subtitle: product.subtitle,
+      image_url: product.image_url,
+      brand_name: product.brand_name,
+      materials: product.materials,
+      dimensions: product.dimensions,
+      category: product.category,
+      subcategory: product.subcategory,
+      pdf_url: product.pdf_url,
+      price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates) : null,
+    };
+  };
+
+  const handleLightboxAddToQuote = (item: TradeProductLightboxItem) => {
+    const product = allProducts.find((p) => p.id === item.id);
+    if (product) handleAddToQuote(product);
+  };
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
@@ -349,7 +373,7 @@ const TradeGallery = () => {
             const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
-                <div className="aspect-square bg-muted/30 relative overflow-hidden">
+                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.image_url ? (
                     <img
                       src={product.image_url}
@@ -510,6 +534,13 @@ const TradeGallery = () => {
         refreshKey={drawerRefreshKey}
       />
     </div>
+      <TradeProductLightbox
+        product={lightboxProduct}
+        onClose={() => setLightboxProduct(null)}
+        onAddToQuote={handleLightboxAddToQuote}
+        isAdding={!!addingProductId}
+        isAdded={lightboxProduct ? addedProductIds.has(lightboxProduct.id) : false}
+      />
     </>
   );
 };
