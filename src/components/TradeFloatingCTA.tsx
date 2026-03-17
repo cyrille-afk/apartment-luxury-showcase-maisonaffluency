@@ -13,8 +13,10 @@ const TradeFloatingCTA = () => {
     try { return sessionStorage.getItem(DISMISS_KEY) === "1"; } catch { return false; }
   });
 
+  const hasTradeAccess = isTradeUser || isAdmin;
+
   useEffect(() => {
-    if (dismissed || loading || user) return;
+    if (dismissed || loading || hasTradeAccess) return;
     const timer = setTimeout(() => setVisible(true), 4000);
     return () => clearTimeout(timer);
   }, [dismissed, loading, user]);
