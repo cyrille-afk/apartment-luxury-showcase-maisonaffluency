@@ -9,6 +9,47 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
+const CompareImage = ({ item }: { item: ReturnType<typeof useCompare>["items"][0] }) => {
+  const { removeItem } = useCompare();
+  const [hovered, setHovered] = useState(false);
+  const hasHover = !!item.pick.hoverImage;
+
+  return (
+    <div
+      className="relative aspect-[4/5] bg-[#f0eeeb] rounded-sm overflow-hidden flex items-center justify-center mb-4"
+      onMouseEnter={() => hasHover && setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <img
+        src={item.pick.image}
+        alt={item.pick.title}
+        className={cn(
+          "max-w-[85%] max-h-[85%] object-contain transition-opacity duration-300",
+          hovered && hasHover ? "opacity-0" : "opacity-100"
+        )}
+        style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+      />
+      {hasHover && (
+        <img
+          src={item.pick.hoverImage}
+          alt={`${item.pick.title} - in context`}
+          className={cn(
+            "absolute inset-0 m-auto max-w-[85%] max-h-[85%] object-contain pointer-events-none transition-opacity duration-300",
+            hovered ? "opacity-100" : "opacity-0"
+          )}
+        />
+      )}
+      <button
+        onClick={() => removeItem(item.pick.title)}
+        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/70 hover:text-white hover:bg-black/70 transition-all backdrop-blur-sm"
+        aria-label={`Remove ${item.pick.title}`}
+      >
+        <X size={14} />
+      </button>
+    </div>
+  );
+};
+
 const CompareDrawer = () => {
   const { items, isComparing, setIsComparing, removeItem, clearAll } = useCompare();
   const [quoteOpen, setQuoteOpen] = useState(false);
