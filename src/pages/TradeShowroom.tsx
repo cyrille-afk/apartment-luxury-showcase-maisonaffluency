@@ -431,6 +431,26 @@ const TradeShowroom = () => {
     section: "designers",
   });
 
+  const toLightboxItem = (product: ShowroomProduct): TradeProductLightboxItem => {
+    const price = getProductPrice(product);
+    return {
+      id: product.id,
+      product_name: product.product_name,
+      image_url: product.product_image_url,
+      brand_name: product.designer_name || "Unknown",
+      materials: product.materials,
+      dimensions: product.dimensions,
+      category: inferCategory(product.product_name),
+      pdf_url: product.pdf_url,
+      price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates) : null,
+    };
+  };
+
+  const handleLightboxAddToQuote = (item: TradeProductLightboxItem) => {
+    const product = products.find((p) => p.id === item.id);
+    if (product) handleAddToQuote(product);
+  };
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
