@@ -84,6 +84,7 @@ const HeroManager = () => {
 
     if (!error) {
       setHeroes((prev) => ({ ...prev, [sectionKey]: { ...prev[sectionKey], gravity } }));
+      invalidateHeroCache();
     }
     setSaving(null);
   };
