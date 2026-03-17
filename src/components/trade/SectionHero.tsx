@@ -32,7 +32,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
         <img
           src={imageUrl}
           alt={title}
-          className="w-full h-full object-cover"
+          className={`w-full h-full object-cover ${entry.gravity === "east" ? "object-right" : entry.gravity === "west" ? "object-left" : "object-center"}`}
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/30 to-foreground/10" />
