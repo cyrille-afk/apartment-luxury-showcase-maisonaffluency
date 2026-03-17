@@ -71,7 +71,7 @@ const benefits = [
 ];
 
 const stats = [
-  { value: "50+", label: "Designer Brands" },
+  { value: "70+", label: "Designers & Ateliers" },
   { value: "15+", label: "Countries Served" },
   { value: "100%", label: "Insured Shipping" },
   { value: "48h", label: "Quote Turnaround" },
