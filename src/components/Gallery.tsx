@@ -927,12 +927,14 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
            )}
         </DialogContent>
       </Dialog>
-      <QuoteRequestDialog
-        open={quoteDialogOpen}
-        onOpenChange={setQuoteDialogOpen}
-        productName={quoteProduct.name}
-        designerName={quoteProduct.designer}
-      />
+      {!onHotspotAddToQuote && (
+        <QuoteRequestDialog
+          open={quoteDialogOpen}
+          onOpenChange={setQuoteDialogOpen}
+          productName={quoteProduct.name}
+          designerName={quoteProduct.designer}
+        />
+      )}
     </>;
 };
 export default Gallery;
