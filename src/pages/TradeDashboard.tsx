@@ -32,7 +32,7 @@ const quickLinks = [
   { title: "Browse Website Products", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery", image: thumb("living-room-hero_zxfcxl") },
   { title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", image: thumb("details-console_hk6uxt") },
   { title: "Documents", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", image: thumb("home-office-desk_g0ywv2") },
-  { title: "Request Samples", description: "Order product samples for your projects", icon: Package, to: "/trade/samples", image: thumb("details-console_hk6uxt") },
+  { title: "Request Samples", description: "Order product samples for your projects", icon: Package, to: "/trade/samples", image: thumb("v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v") },
 ];
 
 const typeLabels: Record<string, string> = {
