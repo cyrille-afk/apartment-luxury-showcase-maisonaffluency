@@ -255,30 +255,7 @@ const TradeGallery = () => {
         subtitle={`${filtered.length} ${filtered.length === 1 ? "product" : "products"}${selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}`}
       >
         {isAdmin && (
-          <CsvPriceImport onComplete={() => {
-            // Refetch prices after import
-            supabase
-              .from("trade_products")
-              .select("product_name, trade_price_cents, currency")
-              .not("trade_price_cents", "is", null)
-              .then(({ data }) => {
-                if (data) {
-                  const lookup = new Map<string, { cents: number; currency: string }>();
-                  const entries: { name: string; cents: number; currency: string }[] = [];
-                  for (const p of data) {
-                    if (p.trade_price_cents) {
-                      const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency };
-                      entries.push(entry);
-                      lookup.set(p.product_name.trim().toLowerCase(), entry);
-                      const norm = normalizeName(p.product_name);
-                      if (norm) lookup.set(norm, entry);
-                    }
-                  }
-                  setPriceLookup(lookup);
-                  setPriceEntries(entries);
-                }
-              });
-          }} />
+          <CsvPriceImport onComplete={() => refreshPrices()} />
         )}
         <button
           onClick={() => setDrawerOpen(true)}
