@@ -10,6 +10,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import TaxonomyAudit from "@/components/trade/TaxonomyAudit";
 
 interface Application {
   id: string;
@@ -112,8 +113,9 @@ const TradeAdmin = () => {
   return (
     <>
       <Helmet><title>Admin — Trade Portal — Maison Affluency</title></Helmet>
-    <div className="max-w-5xl">
-      <h1 className="font-display text-2xl text-foreground mb-6">Trade Applications</h1>
+    <div className="max-w-5xl space-y-6">
+      <TaxonomyAudit />
+      <h1 className="font-display text-2xl text-foreground">Trade Applications</h1>
 
       {/* Filter tabs */}
       <div className="flex gap-2 mb-6">
