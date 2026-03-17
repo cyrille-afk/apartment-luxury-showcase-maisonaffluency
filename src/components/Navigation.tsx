@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 const leftNavItems = [{
@@ -77,16 +78,6 @@ const contactOptions = [
   },
 ];
 
-const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
-
-const SUBCATEGORY_MAP: Record<string, string[]> = {
-  "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
-  "Tables": ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables"],
-  "Storage": ["Bookcases", "Cabinets"],
-  "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
-  "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-  "Décor": ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
-};
 
 const navItems = [...leftNavItems, ...rightNavItems];
 

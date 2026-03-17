@@ -5,6 +5,12 @@
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
 import { atelierOnlyPicks } from "@/components/BrandsAteliers";
+import {
+  CATEGORY_ORDER,
+  getSubcategoriesForCategory,
+  normalizeCategory,
+  normalizeSubcategory,
+} from "@/lib/productTaxonomy";
 
 export interface TradeProduct {
   id: string;
@@ -24,72 +30,6 @@ export interface TradeProduct {
   pdf_urls?: { label: string; url: string; filename?: string }[];
 }
 
-// Map non-canonical subcategory values to their canonical (plural) form
-const SUBCATEGORY_NORMALIZE: Record<string, string> = {
-  "Console": "Consoles",
-  "Coffee Table": "Coffee Tables",
-  "Dining Table": "Dining Tables",
-  "Side Table": "Side Tables",
-  "Desk": "Desks",
-  "Cabinet": "Cabinets",
-  "Bookcase": "Bookcases",
-  "Bookcases & Credenzas": "Bookcases",
-  "Sofa": "Sofas",
-  "Armchair": "Armchairs",
-  "Chair": "Chairs",
-  "Bar Stool": "Bar Stools",
-  "Ottoman": "Ottomans & Stools",
-  "Stool": "Ottomans & Stools",
-  "Stools": "Ottomans & Stools",
-  "Daybed": "Daybeds & Benches",
-  "Bench": "Daybeds & Benches",
-  "Wall Light": "Wall Lights",
-  "Ceiling Light": "Ceiling Lights",
-  "Floor Light": "Floor Lights",
-  "Floor Lamp": "Floor Lights",
-  "Floor Lamps": "Floor Lights",
-  "Table Light": "Table Lights",
-  "Table Lamp": "Table Lights",
-  "Table Lamps": "Table Lights",
-  "Pendant": "Ceiling Lights",
-  "Pendants": "Ceiling Lights",
-  "Chandelier": "Ceiling Lights",
-  "Chandeliers": "Ceiling Lights",
-  "Vase": "Vases & Vessels",
-  "Vases": "Vases & Vessels",
-  "Vessel": "Vases & Vessels",
-  "Vessels": "Vases & Vessels",
-  "Mirror": "Mirrors",
-  "Book": "Books",
-  "Candle Holder": "Candle Holders",
-  "Decorative Object": "Decorative Objects",
-  "Sculptural Object": "Decorative Objects",
-  "Tableware": "Decorative Objects",
-  "Sideboards": "Cabinets",
-  "Sideboard": "Cabinets",
-  "Hand-Knotted Rug": "Hand-Knotted Rugs",
-  "Hand-Tufted Rug": "Hand-Tufted Rugs",
-  "Hand-Woven Rug": "Hand-Woven Rugs",
-  "Wallcoverings": "Decorative Objects",
-};
-
-// Map non-canonical category values to canonical ones
-const CATEGORY_NORMALIZE: Record<string, string> = {
-  "Decorative Object": "Décor",
-  "Decorative Objects": "Décor",
-  "Furniture": "Tables",
-  "Wall Art": "Décor",
-};
-
-function normalizeCategory(cat: string): string {
-  return CATEGORY_NORMALIZE[cat] || cat;
-}
-
-function normalizeSubcategory(sub: string | undefined): string | undefined {
-  if (!sub) return sub;
-  return SUBCATEGORY_NORMALIZE[sub] || sub;
-}
-
 let _cachedProducts: TradeProduct[] | null = null;
 
 export function getAllTradeProducts(): TradeProduct[] {
@@ -107,7 +47,7 @@ export function getAllTradeProducts(): TradeProduct[] {
         brand_name: brandName,
         product_name: pick.title,
         subtitle: pick.subtitle,
-        category: normalizeCategory(rawCategory),
+        category: normalizeCategory(rawCategory) || rawCategory,
         subcategory: normalizeSubcategory(pick.subcategory || pick.tags?.[1]),
         tags: pick.tags || [],
         materials: pick.materials,
@@ -147,17 +87,6 @@ export function getAllTradeProducts(): TradeProduct[] {
   return products;
 }
 
-export const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
-
-export const SUBCATEGORY_MAP: Record<string, string[]> = {
-  "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
-  "Tables": ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables"],
-  "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
-  "Storage": ["Bookcases", "Cabinets"],
-  "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-  "Décor": ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
-};
-
 export function getAllBrands(products: TradeProduct[]): string[] {
   return [...new Set(products.map((p) => p.brand_name))].sort();
 }
@@ -167,5 +96,5 @@ export function getAllCategories(_products?: TradeProduct[]): string[] {
 }
 
 export function getSubcategories(_products: TradeProduct[], category: string): string[] {
-  return SUBCATEGORY_MAP[category] || [];
+  return getSubcategoriesForCategory(category);
 }

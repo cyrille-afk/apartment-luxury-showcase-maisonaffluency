@@ -27,6 +27,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
+import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 
 // Designer profile images — served via Cloudinary CDN
 const dImg = (name: string) =>
@@ -2388,19 +2389,7 @@ const FeaturedDesigners = () => {
     };
   }, []);
 
-  // Fixed category order
-  const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
-
-  // Collect categories and subcategories from curators' picks
-  // Use the same subcategory names as the All Categories navigation
-  const categoryMap = useMemo<Record<string, string[]>>(() => ({
-    "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
-    "Tables": ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables"],
-    "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
-    "Storage": ["Bookcases", "Cabinets"],
-    "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-    "Décor": ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
-  }), []);
+  const categoryMap = SUBCATEGORY_MAP;
 
   const categories = useMemo(() => {
     const ordered = CATEGORY_ORDER.filter(cat => categoryMap[cat]);

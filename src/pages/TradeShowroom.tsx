@@ -8,6 +8,7 @@ import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { CATEGORY_ORDER } from "@/lib/productTaxonomy";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
@@ -24,6 +25,8 @@ interface ShowroomProduct {
   product_image_url: string | null;
   link_url: string | null;
   image_identifier: string;
+  category?: string | null;
+  subcategory?: string | null;
   pdf_url?: string;
   trade_price_cents?: number | null;
   currency?: string;
@@ -36,23 +39,30 @@ interface DraftQuote {
   created_at: string;
 }
 
-const categoryKeywords: [string, string[]][] = [
-  ["Lighting", ["lamp", "light", "pendant", "chandelier", "sconce"]],
-  ["Seating", ["chair", "armchair", "sofa", "loveseat", "stool", "bench", "ottoman", "lounge chair"]],
-  ["Tables", ["table", "desk", "coffee table", "side table", "console"]],
-  ["Storage", ["bookcase", "credenza", "cabinet"]],
-  ["Rugs & Textiles", ["rug", "fabric", "curtain", "throw", "cushion", "headboard"]],
-  ["Wall & Surfaces", ["wallcover", "wallpaper", "mirror", "wall lamp", "wall light", "diasec"]],
-  ["Decorative Objects", ["vase", "vessel", "bowl", "candle", "incense", "centerpiece", "box", "sculpture", "book cover"]],
-  ["Art", ["painting", "drawing", "bronze painting"]],
-];
-
 const inferCategory = (name: string): string => {
   const lower = name.toLowerCase();
-  for (const [cat, keywords] of categoryKeywords) {
-    if (keywords.some((kw) => lower.includes(kw))) return cat;
+
+  if (["rug", "textile", "fabric", "curtain", "throw", "cushion", "headboard"].some((kw) => lower.includes(kw))) {
+    return "Rugs";
   }
-  return "Other";
+
+  if (["chair", "armchair", "sofa", "loveseat", "stool", "bench", "ottoman", "lounge chair", "daybed"].some((kw) => lower.includes(kw))) {
+    return "Seating";
+  }
+
+  if (["table", "desk", "coffee table", "side table", "console"].some((kw) => lower.includes(kw))) {
+    return "Tables";
+  }
+
+  if (["lamp", "light", "pendant", "chandelier", "sconce"].some((kw) => lower.includes(kw))) {
+    return "Lighting";
+  }
+
+  if (["bookcase", "credenza", "cabinet", "sideboard"].some((kw) => lower.includes(kw))) {
+    return "Storage";
+  }
+
+  return "Décor";
 };
 
 // Map individual room titles to their parent gallery section
@@ -192,7 +202,7 @@ const TradeShowroom = () => {
         // Build lookups from curators' picks (code-level source of truth)
         const tradeProducts = getAllTradeProducts();
         const pdfLookup = new Map<string, string>();
-        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string; image_url?: string | null }>();
+        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string; image_url?: string | null; category?: string; subcategory?: string }>();
         for (const tp of tradeProducts) {
           const tpKey = tp.product_name.trim().toLowerCase();
           const metaEntry = {
@@ -200,6 +210,8 @@ const TradeShowroom = () => {
             dimensions: tp.dimensions,
             brand: tp.brand_name,
             image_url: tp.image_url,
+            category: tp.category,
+            subcategory: tp.subcategory,
           };
           if (tp.pdf_url) pdfLookup.set(tpKey, tp.pdf_url);
           metadataLookup.set(tpKey, metaEntry);
@@ -277,6 +289,8 @@ const TradeShowroom = () => {
               dimensions: meta?.dimensions || item.dimensions,
               designer_name: meta?.brand || item.designer_name,
               product_image_url: meta?.image_url || item.product_image_url || null,
+              category: meta?.category || inferCategory(item.product_name),
+              subcategory: meta?.subcategory || null,
               pdf_url: pdfLookup.get(key),
               trade_price_cents: price?.cents ?? null,
               currency: price?.currency,
@@ -309,7 +323,10 @@ const TradeShowroom = () => {
   }, [user]);
 
   const designers = useMemo(() => [...new Set(products.map((p) => p.designer_name).filter(Boolean) as string[])].sort(), [products]);
-  const categories = useMemo(() => [...new Set(products.map((p) => inferCategory(p.product_name)))].sort(), [products]);
+  const categories = useMemo(
+    () => CATEGORY_ORDER.filter((cat) => products.some((p) => p.category === cat)),
+    [products]
+  );
   const sections = useMemo(() => {
     const sectionSet = new Set(products.map((p) => getSection(p.image_identifier)));
     return [...sectionSet].sort();
@@ -324,7 +341,7 @@ const TradeShowroom = () => {
         p.designer_name?.toLowerCase().includes(q) ||
         p.materials?.toLowerCase().includes(q);
       const matchesDesigner = selectedDesigner === "all" || p.designer_name === selectedDesigner;
-      const matchesCategory = selectedCategory === "all" || inferCategory(p.product_name) === selectedCategory;
+      const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
       const matchesSection = selectedSection === "all" || getSection(p.image_identifier) === selectedSection;
       return matchesSearch && matchesDesigner && matchesCategory && matchesSection;
     });
@@ -424,7 +441,8 @@ const TradeShowroom = () => {
       image: product.product_image_url || "",
       materials: product.materials,
       dimensions: product.dimensions,
-      category: inferCategory(product.product_name),
+      category: product.category || inferCategory(product.product_name),
+      subcategory: product.subcategory || undefined,
     },
     designerName: product.designer_name?.includes(' - ') ? product.designer_name.split(' - ')[0].trim() : (product.designer_name || "Unknown"),
     designerId: product.id,
@@ -440,7 +458,8 @@ const TradeShowroom = () => {
       brand_name: product.designer_name || "Unknown",
       materials: product.materials,
       dimensions: product.dimensions,
-      category: inferCategory(product.product_name),
+      category: product.category || inferCategory(product.product_name),
+      subcategory: product.subcategory || undefined,
       pdf_url: product.pdf_url,
       price: hasTrade ? formatPriceConverted(product.trade_price_cents!, product.currency!, displayCurrency, fxRates) : null,
     };
