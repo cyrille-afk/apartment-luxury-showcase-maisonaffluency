@@ -52,29 +52,30 @@ const TradeGallery = () => {
   const tokenizeName = (s: string) =>
     normalizeName(s).split(" ").filter((t) => t.length > 2);
 
-  useEffect(() => {
-    const fetchPrices = async () => {
-      const { data } = await supabase
-        .from("trade_products")
-        .select("product_name, trade_price_cents, currency")
-        .not("trade_price_cents", "is", null);
-      if (data) {
-        const lookup = new Map<string, { cents: number; currency: string }>();
-        const entries: { name: string; cents: number; currency: string }[] = [];
-        for (const p of data) {
-          if (p.trade_price_cents) {
-            const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency };
-            entries.push(entry);
-            lookup.set(p.product_name.trim().toLowerCase(), entry);
-            const norm = normalizeName(p.product_name);
-            if (norm) lookup.set(norm, entry);
-          }
+  const refreshPrices = async () => {
+    const { data } = await supabase
+      .from("trade_products")
+      .select("product_name, trade_price_cents, currency")
+      .not("trade_price_cents", "is", null);
+    if (data) {
+      const lookup = new Map<string, { cents: number; currency: string }>();
+      const entries: { name: string; cents: number; currency: string }[] = [];
+      for (const p of data) {
+        if (p.trade_price_cents) {
+          const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency };
+          entries.push(entry);
+          lookup.set(p.product_name.trim().toLowerCase(), entry);
+          const norm = normalizeName(p.product_name);
+          if (norm) lookup.set(norm, entry);
         }
-        setPriceLookup(lookup);
-        setPriceEntries(entries);
       }
-    };
-    fetchPrices();
+      setPriceLookup(lookup);
+      setPriceEntries(entries);
+    }
+  };
+
+  useEffect(() => {
+    refreshPrices();
   }, []);
 
   // Fetch user's draft quotes
