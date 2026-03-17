@@ -277,11 +277,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     onStatusChange();
   };
 
-  const handleStripePayment = async () => {
+  const handleStripePayment = async (paymentType: "deposit" | "balance" = "deposit") => {
     setPayingStripe(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-quote-payment", {
-        body: { quoteId },
+        body: { quoteId, paymentType },
       });
       if (error) throw error;
       if (data?.url) {
