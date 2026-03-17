@@ -499,11 +499,23 @@ const TradeGallery = () => {
                     {[product.dimensions, product.materials].filter(Boolean).join(" · ")}
                   </p>
                 </div>
-                {price && (
+                {isAdmin ? (
+                  <div className="shrink-0">
+                    <InlinePriceEditor
+                      productName={product.product_name}
+                      brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
+                      currentPriceCents={price?.cents}
+                      currency={price?.currency || "SGD"}
+                      displayCurrency={displayCurrency}
+                      fxRates={fxRates}
+                      onPriceUpdated={() => refreshPrices()}
+                    />
+                  </div>
+                ) : price ? (
                   <span className="font-display text-sm text-accent font-semibold shrink-0">
                     {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
                   </span>
-                )}
+                ) : null}
                 <button
                   onClick={() => handleAddToQuote(product)}
                   disabled={isAdding}
