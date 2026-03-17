@@ -223,8 +223,8 @@ const TradeLanding = () => {
         </div>
 
         {/* ─── Stats Bar ─── */}
-        <div className="w-full bg-foreground">
-          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-background/10">
+        <div className="w-full border-y border-border">
+          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
             {stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -234,10 +234,10 @@ const TradeLanding = () => {
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 className="flex flex-col items-center py-6 md:py-8"
               >
-                <span className="font-display text-2xl md:text-3xl text-background tracking-wide">
+                <span className="font-display text-2xl md:text-3xl text-foreground/80 tracking-wide">
                   {stat.value}
                 </span>
-                <span className="font-body text-[11px] md:text-xs text-background/60 uppercase tracking-[0.15em] mt-1">
+                <span className="font-body text-[11px] md:text-xs text-muted-foreground uppercase tracking-[0.15em] mt-1">
                   {stat.label}
                 </span>
               </motion.div>
