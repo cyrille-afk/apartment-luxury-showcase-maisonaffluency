@@ -804,6 +804,13 @@ const TradeShowroom = () => {
         refreshKey={drawerRefreshKey}
       />
     </div>
+      <TradeProductLightbox
+        product={lightboxProduct}
+        onClose={() => setLightboxProduct(null)}
+        onAddToQuote={handleLightboxAddToQuote}
+        isAdding={!!addingProductId}
+        isAdded={lightboxProduct ? addedProductIds.has(lightboxProduct.id) : false}
+      />
     </>
   );
 };
