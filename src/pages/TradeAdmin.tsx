@@ -11,6 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import TaxonomyAudit from "@/components/trade/TaxonomyAudit";
+import HeroManager from "@/components/trade/HeroManager";
 
 interface Application {
   id: string;
@@ -115,6 +116,14 @@ const TradeAdmin = () => {
       <Helmet><title>Admin — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-5xl space-y-6">
       <TaxonomyAudit />
+
+      {/* Section Hero Manager */}
+      <div className="space-y-3">
+        <h2 className="font-display text-lg text-foreground">Section Hero Images</h2>
+        <p className="font-body text-xs text-muted-foreground">Upload custom hero banners for trade portal sections. Remove to revert to defaults.</p>
+        <HeroManager />
+      </div>
+
       <h1 className="font-display text-2xl text-foreground">Trade Applications</h1>
 
       {/* Filter tabs */}

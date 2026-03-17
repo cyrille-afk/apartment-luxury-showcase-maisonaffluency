@@ -352,6 +352,33 @@ export type Database = {
           },
         ]
       }
+      section_heroes: {
+        Row: {
+          created_at: string
+          gravity: string
+          id: string
+          image_url: string
+          section_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          gravity?: string
+          id?: string
+          image_url: string
+          section_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          gravity?: string
+          id?: string
+          image_url?: string
+          section_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
