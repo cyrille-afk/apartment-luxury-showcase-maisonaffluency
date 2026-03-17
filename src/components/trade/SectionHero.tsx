@@ -4,6 +4,7 @@ const heroImages: Record<string, string> = {
   showroom: "bespoke-sofa_gxidtx",
   gallery: "living-room-hero_zxfcxl",
   quotes: "v1773726568/AffluencySG_081_dk5rn7",
+  "quotes-admin": "v1773652807/singapore-dollar_jaymbz",
   documents: "home-office-desk_g0ywv2",
   provenance: "details-console_hk6uxt",
 };
