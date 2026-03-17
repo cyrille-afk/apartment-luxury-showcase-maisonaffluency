@@ -43,7 +43,7 @@ const benefits = [
     title: "Trade Pricing & Bespoke Quotations",
     description:
       "View pricing instantly when you sign in with your trade account and save time with our bespoke quotations, a comprehensive multi-product document listing all prices at a glance.",
-    image: cloudinaryUrl("v1773726568/AffluencySG_081_dk5rn7", { width: 1400, quality: "auto:good", crop: "fill" }),
+    image: cloudinaryUrl("v1773726568/AffluencySG_081_dk5rn7", { width: 1400, height: 1050, quality: "auto:good", crop: "fill", gravity: "auto" }),
   },
   {
     title: "Dedicated Client Advisor",
