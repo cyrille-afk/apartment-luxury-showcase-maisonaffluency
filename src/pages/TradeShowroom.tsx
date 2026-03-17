@@ -1,22 +1,27 @@
 import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, MapPin, Grid3X3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import SectionHero from "@/components/trade/SectionHero";
 import Gallery from "@/components/Gallery";
+import ShowroomGridView from "@/components/trade/ShowroomGridView";
+import { cn } from "@/lib/utils";
 
 interface DraftQuote {
   id: string;
   created_at: string;
 }
 
+type ViewTab = "gallery" | "grid";
+
 const TradeShowroom = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
+  const [activeTab, setActiveTab] = useState<ViewTab>("gallery");
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -89,7 +94,6 @@ const TradeShowroom = () => {
       if (activeQuoteId) {
         await addProductToQuote(product, activeQuoteId);
       } else {
-        // Create a new draft quote first
         const { data, error } = await supabase
           .from("trade_quotes")
           .insert({ user_id: user.id, status: "draft" })
@@ -108,6 +112,11 @@ const TradeShowroom = () => {
     [user, activeQuoteId, addProductToQuote, toast],
   );
 
+  const handleQuoteCreated = useCallback((quote: { id: string; created_at: string }) => {
+    setDraftQuotes((prev) => [quote, ...prev]);
+    setActiveQuoteId(quote.id);
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -116,8 +125,11 @@ const TradeShowroom = () => {
       <div className="max-w-7xl">
         <SectionHero
           section="showroom"
-          title="Interactive Showroom"
-          subtitle="Navigate the gallery rooms and discover products through interactive hotspots"
+          title="Showroom"
+          subtitle={activeTab === "gallery"
+            ? "Navigate the gallery rooms and discover products through interactive hotspots"
+            : "Browse all showroom products with filters and search"
+          }
         >
           <button
             onClick={() => setDrawerOpen(true)}
@@ -128,9 +140,46 @@ const TradeShowroom = () => {
           </button>
         </SectionHero>
 
-        <div className="mt-6">
-          <Gallery onHotspotAddToQuote={handleHotspotAddToQuote} hideIntro />
+        {/* Tab switcher */}
+        <div className="flex items-center gap-1 mb-6 border-b border-border">
+          <button
+            onClick={() => setActiveTab("gallery")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 font-body text-xs uppercase tracking-[0.1em] transition-colors border-b-2 -mb-px",
+              activeTab === "gallery"
+                ? "border-foreground text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <MapPin className="h-3.5 w-3.5" />
+            Interactive Gallery
+          </button>
+          <button
+            onClick={() => setActiveTab("grid")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 font-body text-xs uppercase tracking-[0.1em] transition-colors border-b-2 -mb-px",
+              activeTab === "grid"
+                ? "border-foreground text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Grid3X3 className="h-3.5 w-3.5" />
+            Product Grid
+          </button>
         </div>
+
+        {/* Tab content */}
+        {activeTab === "gallery" ? (
+          <Gallery onHotspotAddToQuote={handleHotspotAddToQuote} hideIntro />
+        ) : (
+          <ShowroomGridView
+            activeQuoteId={activeQuoteId}
+            onQuoteCreated={handleQuoteCreated}
+            drawerRefreshKey={drawerRefreshKey}
+            onDrawerRefreshKeyChange={setDrawerRefreshKey}
+            onDrawerOpen={() => setDrawerOpen(true)}
+          />
+        )}
       </div>
 
       <QuoteDrawer
