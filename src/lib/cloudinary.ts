@@ -12,7 +12,7 @@ export interface CloudinaryTransform {
   quality?: "auto" | "auto:low" | "auto:eco" | "auto:good" | "auto:best" | number;
   format?: "auto" | "webp" | "avif" | "jpg" | "png";
   crop?: "fill" | "fit" | "scale" | "thumb" | "limit" | "pad";
-  gravity?: "auto" | "face" | "center" | "north" | "south";
+  gravity?: "auto" | "face" | "center" | "north" | "south" | "east" | "west";
   dpr?: "auto" | number;
   blur?: number;
 }
