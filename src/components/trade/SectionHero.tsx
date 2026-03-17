@@ -1,8 +1,8 @@
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
-const heroImages: Record<string, { id: string; objectPosition?: string }> = {
+const heroImages: Record<string, { id: string; gravity?: "auto" | "face" | "center" | "north" | "south" | "east" | "west" }> = {
   showroom: { id: "bespoke-sofa_gxidtx" },
-  gallery: { id: "v1773731066/Screen_Shot_2026-03-17_at_3.03.40_PM_b8dux9", objectPosition: "right center" },
+  gallery: { id: "v1773731066/Screen_Shot_2026-03-17_at_3.03.40_PM_b8dux9", gravity: "east" },
   quotes: { id: "v1773726568/AffluencySG_081_dk5rn7" },
   "quotes-admin": { id: "v1773652807/singapore-dollar_jaymbz" },
   documents: { id: "home-office-desk_g0ywv2" },
@@ -23,7 +23,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
     height: 600,
     quality: "auto",
     crop: "fill",
-    gravity: "auto",
+    gravity: entry.gravity || "auto",
   });
 
   return (
@@ -33,7 +33,6 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
           src={imageUrl}
           alt={title}
           className="w-full h-full object-cover"
-          style={entry.objectPosition ? { objectPosition: entry.objectPosition } : undefined}
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/30 to-foreground/10" />
