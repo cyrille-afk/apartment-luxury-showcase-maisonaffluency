@@ -25,6 +25,8 @@ interface ShowroomProduct {
   product_image_url: string | null;
   link_url: string | null;
   image_identifier: string;
+  category?: string | null;
+  subcategory?: string | null;
   pdf_url?: string;
   trade_price_cents?: number | null;
   currency?: string;
