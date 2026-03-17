@@ -23,7 +23,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
     height: 600,
     quality: "auto",
     crop: "fill",
-    gravity: "auto",
+    gravity: entry.gravity || "auto",
   });
 
   return (
@@ -33,7 +33,6 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
           src={imageUrl}
           alt={title}
           className="w-full h-full object-cover"
-          style={entry.objectPosition ? { objectPosition: entry.objectPosition } : undefined}
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/30 to-foreground/10" />
