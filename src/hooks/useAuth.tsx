@@ -7,6 +7,7 @@ interface AuthContextType {
   loading: boolean;
   isTradeUser: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   profile: { first_name: string; last_name: string; company: string; email: string } | null;
   applicationStatus: "none" | "pending" | "approved" | "rejected";
   signOut: () => Promise<void>;
