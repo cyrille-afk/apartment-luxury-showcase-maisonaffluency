@@ -55,7 +55,7 @@ const benefits = [
     title: "Custom Requests",
     description:
       "Let us use our global connections to specialist workshops and renowned designers to help you find the best solutions. From inspiration to customisation, we help find the solutions for a seamless experience.",
-    image: cloudinaryUrl("v1773473515/global-connections-map-stockcake_aqtsiq", { width: 1400, quality: "auto:good", crop: "fill" }),
+    image: cloudinaryUrl("v1773750566/Screen_Shot_2026-03-17_at_8.10.41_PM_pvh4n7", { width: 1400, quality: "auto:good", crop: "fill" }),
   },
   {
     title: "Samples & Swatches",
