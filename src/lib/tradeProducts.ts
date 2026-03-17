@@ -80,17 +80,25 @@ export function getAllTradeProducts(): TradeProduct[] {
   return products;
 }
 
+export const CATEGORY_ORDER = ["Seating", "Tables", "Lighting", "Storage", "Rugs", "Décor"];
+
+export const SUBCATEGORY_MAP: Record<string, string[]> = {
+  "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools"],
+  "Tables": ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables"],
+  "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
+  "Storage": ["Bookcases", "Cabinets"],
+  "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
+  "Décor": ["Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"],
+};
+
 export function getAllBrands(products: TradeProduct[]): string[] {
   return [...new Set(products.map((p) => p.brand_name))].sort();
 }
 
-export function getAllCategories(products: TradeProduct[]): string[] {
-  return [...new Set(products.map((p) => p.category).filter(Boolean))].sort();
+export function getAllCategories(_products?: TradeProduct[]): string[] {
+  return [...CATEGORY_ORDER];
 }
 
-export function getSubcategories(products: TradeProduct[], category: string): string[] {
-  const subs = products
-    .filter((p) => p.category === category && p.subcategory)
-    .map((p) => p.subcategory!);
-  return [...new Set(subs)].sort();
+export function getSubcategories(_products: TradeProduct[], category: string): string[] {
+  return SUBCATEGORY_MAP[category] || [];
 }
