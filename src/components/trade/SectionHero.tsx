@@ -2,7 +2,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 
 const heroImages: Record<string, string> = {
   showroom: "bespoke-sofa_gxidtx",
-  gallery: "living-room-hero_zxfcxl",
+  gallery: "v1773731066/Screen_Shot_2026-03-17_at_3.03.40_PM_b8dux9",
   quotes: "v1773726568/AffluencySG_081_dk5rn7",
   "quotes-admin": "v1773652807/singapore-dollar_jaymbz",
   documents: "home-office-desk_g0ywv2",
