@@ -186,7 +186,7 @@ const TradeAdmin = () => {
                   </p>
                 </div>
 
-                {app.status === "pending" && (
+                {app.status === "pending" && isSuperAdmin && (
                   <div className="flex gap-2 shrink-0">
                     <button
                       onClick={() => setConfirmDialog({ app, action: "approved" })}
