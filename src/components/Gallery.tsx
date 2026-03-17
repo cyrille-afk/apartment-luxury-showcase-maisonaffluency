@@ -874,7 +874,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
                          visible={!imageZoomed}
                          onCloseLightbox={closeLightbox}
-                         onRequestQuote={handleHotspotQuoteRequest}
+                         {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest })}
                        />
                       {/* Close button — desktop: near image */}
                       <button
