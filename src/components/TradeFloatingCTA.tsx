@@ -44,7 +44,7 @@ const TradeFloatingCTA = () => {
         </button>
         {/* Desktop: single row */}
         <div className="hidden sm:flex items-center gap-4">
-          <p className="font-body text-xs tracking-wide whitespace-nowrap">
+          <p className="font-body text-xs uppercase tracking-[0.15em] whitespace-nowrap">
             Architect or Interior Designer?
           </p>
           <Link
