@@ -47,7 +47,8 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; classNam
   submitted: { label: "Submitted", icon: Send, className: "bg-primary/10 text-primary" },
   priced: { label: "Priced", icon: DollarSign, className: "bg-amber-500/10 text-amber-600" },
   confirmed: { label: "Confirmed", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
-  paid: { label: "Paid", icon: CreditCard, className: "bg-emerald-500/10 text-emerald-600" },
+  deposit_paid: { label: "Deposit Paid", icon: CreditCard, className: "bg-emerald-500/10 text-emerald-600" },
+  paid: { label: "Fully Paid", icon: CreditCard, className: "bg-emerald-500/10 text-emerald-600" },
 };
 
 const currencySymbol = (c: string) => {
