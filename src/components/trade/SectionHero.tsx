@@ -1,12 +1,12 @@
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
-const heroImages: Record<string, string> = {
-  showroom: "bespoke-sofa_gxidtx",
-  gallery: "v1773731066/Screen_Shot_2026-03-17_at_3.03.40_PM_b8dux9",
-  quotes: "v1773726568/AffluencySG_081_dk5rn7",
-  "quotes-admin": "v1773652807/singapore-dollar_jaymbz",
-  documents: "home-office-desk_g0ywv2",
-  provenance: "details-console_hk6uxt",
+const heroImages: Record<string, { id: string; objectPosition?: string }> = {
+  showroom: { id: "bespoke-sofa_gxidtx" },
+  gallery: { id: "v1773731066/Screen_Shot_2026-03-17_at_3.03.40_PM_b8dux9", objectPosition: "right center" },
+  quotes: { id: "v1773726568/AffluencySG_081_dk5rn7" },
+  "quotes-admin": { id: "v1773652807/singapore-dollar_jaymbz" },
+  documents: { id: "home-office-desk_g0ywv2" },
+  provenance: { id: "details-console_hk6uxt" },
 };
 
 interface SectionHeroProps {
