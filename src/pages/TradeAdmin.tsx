@@ -29,7 +29,7 @@ interface Application {
 }
 
 const TradeAdmin = () => {
-  const { isAdmin, loading, user } = useAuth();
+  const { isAdmin, isSuperAdmin, loading, user } = useAuth();
   const { toast } = useToast();
   const [applications, setApplications] = useState<Application[]>([]);
   const [fetching, setFetching] = useState(true);
