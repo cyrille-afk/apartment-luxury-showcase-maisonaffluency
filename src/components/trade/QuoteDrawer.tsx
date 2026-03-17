@@ -229,15 +229,35 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                     <span className="font-body text-[10px] text-muted-foreground">
                       Qty: {item.quantity}
                     </span>
-                    {item.product?.trade_price_cents ? (
-                      <span className="font-body text-[10px] text-primary font-medium">
-                        {formatPrice(item.product.trade_price_cents, item.product.currency)}
-                      </span>
-                    ) : (
-                      <span className="font-body text-[9px] text-muted-foreground/60 italic">
-                        Price on request
-                      </span>
-                    )}
+                    {(() => {
+                      const cents = item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
+                      if (item.sgdPriceCents) {
+                        return (
+                          <div className="flex flex-col">
+                            <span className="font-body text-[10px] text-primary font-medium">
+                              {formatPrice(item.sgdPriceCents, "SGD")}
+                            </span>
+                            {item.catalogPriceCents && item.catalogCurrency && (
+                              <span className="font-body text-[8px] text-muted-foreground/60">
+                                Catalog: {formatPrice(item.catalogPriceCents, item.catalogCurrency)}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      } else if (cents) {
+                        return (
+                          <span className="font-body text-[10px] text-primary font-medium">
+                            {formatPrice(cents, item.product.currency)}
+                          </span>
+                        );
+                      } else {
+                        return (
+                          <span className="font-body text-[9px] text-muted-foreground/60 italic">
+                            Price on request
+                          </span>
+                        );
+                      }
+                    })()}
                   </div>
                 </div>
                 <button
