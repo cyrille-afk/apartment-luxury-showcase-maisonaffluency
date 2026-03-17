@@ -22,6 +22,7 @@ const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
 const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings"));
 const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
+const TradeSamples = lazy(() => import("./pages/TradeSamples"));
 const TradeJournal = lazy(() => import("./pages/TradeJournal"));
 const TradeProvenance = lazy(() => import("./pages/TradeProvenance"));
 const TradeDocumentsAdmin = lazy(() => import("./pages/TradeDocumentsAdmin"));
