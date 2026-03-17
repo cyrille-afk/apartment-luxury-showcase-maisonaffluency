@@ -6,6 +6,7 @@ export type CompareItem = {
   designerName: string;
   designerId: string;
   section: "designers" | "collectibles" | "ateliers";
+  price?: string | null;
 };
 
 type CompareContextType = {

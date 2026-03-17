@@ -48,6 +48,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
       title: product.product_name,
       subtitle: product.subtitle,
       image: product.image_url || "",
+      hoverImage: product.hover_image_url,
       materials: product.materials,
       dimensions: product.dimensions,
       category: product.category,
@@ -56,6 +57,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     designerName: designerDisplay,
     designerId: product.id,
     section: "designers",
+    price: product.price,
   };
 
   return createPortal(
