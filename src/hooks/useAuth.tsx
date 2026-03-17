@@ -43,7 +43,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (rolesRes.data) {
       const roles = rolesRes.data.map((r: any) => r.role);
       setIsTradeUser(roles.includes("trade_user"));
-      setIsAdmin(roles.includes("admin"));
+      setIsSuperAdmin(roles.includes("super_admin"));
+      setIsAdmin(roles.includes("admin") || roles.includes("super_admin"));
     }
 
     if (profileRes.data) {
