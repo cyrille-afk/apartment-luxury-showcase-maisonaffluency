@@ -3,7 +3,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 const heroImages: Record<string, string> = {
   showroom: "bespoke-sofa_gxidtx",
   gallery: "living-room-hero_zxfcxl",
-  quotes: "details-console_hk6uxt",
+  quotes: "v1773726568/AffluencySG_081_dk5rn7",
   documents: "home-office-desk_g0ywv2",
   provenance: "details-console_hk6uxt",
 };
