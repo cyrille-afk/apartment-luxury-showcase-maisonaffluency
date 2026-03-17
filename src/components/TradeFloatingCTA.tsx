@@ -38,9 +38,9 @@ const TradeFloatingCTA = () => {
         <button
           onClick={dismiss}
           aria-label="Dismiss"
-          className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-foreground border border-accent/20 hover:bg-foreground/80 transition-colors"
+          className="absolute -top-2 -right-2 p-1.5 rounded-full bg-foreground border border-background/20 hover:bg-foreground/80 transition-colors shadow-md z-10"
         >
-          <X className="w-3 h-3 text-background" />
+          <X className="w-3.5 h-3.5 text-background" />
         </button>
         {/* Desktop: single row */}
         <div className="hidden sm:flex items-center gap-4">
