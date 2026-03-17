@@ -222,7 +222,14 @@ const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean
   );
 };
 
-const Gallery = () => {
+interface GalleryProps {
+  /** Trade mode: pass to GalleryHotspots as onAddToQuote */
+  onHotspotAddToQuote?: (product: { product_name: string; designer_name: string | null; product_image_url: string | null; materials: string | null; dimensions: string | null }) => void;
+  /** Hide the section intro text (e.g. when embedded in trade portal) */
+  hideIntro?: boolean;
+}
+
+const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const isMobile = useIsMobile();
   const ref = useRef(null);
   const isInView = useInView(ref, {
