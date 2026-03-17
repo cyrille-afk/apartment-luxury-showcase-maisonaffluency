@@ -700,6 +700,7 @@ const TradeShowroom = () => {
                   {isAdmin ? (
                     <InlinePriceEditor
                       productName={product.product_name}
+                      brandName={product.designer_name?.includes(' - ') ? product.designer_name.split(' - ')[0].trim() : product.designer_name}
                       currentPriceCents={product.trade_price_cents}
                       currency={product.currency || "SGD"}
                       displayCurrency={displayCurrency}
