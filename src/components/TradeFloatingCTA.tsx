@@ -21,7 +21,7 @@ const TradeFloatingCTA = () => {
     return () => clearTimeout(timer);
   }, [dismissed, loading, user]);
 
-  if (!visible || user) return null;
+  if (!visible || hasTradeAccess) return null;
 
   const dismiss = () => {
     setVisible(false);
