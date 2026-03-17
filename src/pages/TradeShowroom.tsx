@@ -210,6 +210,8 @@ const TradeShowroom = () => {
             dimensions: tp.dimensions,
             brand: tp.brand_name,
             image_url: tp.image_url,
+            category: tp.category,
+            subcategory: tp.subcategory,
           };
           if (tp.pdf_url) pdfLookup.set(tpKey, tp.pdf_url);
           metadataLookup.set(tpKey, metaEntry);
