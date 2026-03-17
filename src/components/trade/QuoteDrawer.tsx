@@ -13,6 +13,7 @@ interface QuoteItem {
     brand_name: string;
     image_url: string | null;
     trade_price_cents: number | null;
+    rrp_price_cents: number | null;
     currency: string;
   };
   /** Original catalog price before conversion */
