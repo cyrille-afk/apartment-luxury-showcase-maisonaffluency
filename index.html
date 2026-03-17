@@ -188,9 +188,19 @@
       setTimeout(function(){ document.documentElement.classList.add('css-ready'); }, 3000);
     </script>
 
-    <!-- Google Analytics - deferred to not block LCP -->
+    <!-- GA opt-out: visit any page with ?ga_optout=true to set, ?ga_optout=false to clear -->
+    <script>
+      (function(){
+        var p = new URLSearchParams(window.location.search);
+        if (p.get('ga_optout') === 'true') localStorage.setItem('ga_optout','1');
+        if (p.get('ga_optout') === 'false') localStorage.removeItem('ga_optout');
+      })();
+    </script>
+
+    <!-- Google Analytics - deferred to not block LCP, skipped if opted out -->
     <script>
       window.addEventListener('load', function() {
+        if (localStorage.getItem('ga_optout') === '1') return;
         setTimeout(function() {
           var s = document.createElement('script');
           s.src = 'https://www.googletagmanager.com/gtag/js?id=G-H79D6NNBLF';
