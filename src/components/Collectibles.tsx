@@ -249,7 +249,7 @@ export const collectibleDesigners: Array<{
     notableWorksLink: { text: "Unknow N.83 Cotissi Vessel", galleryIndex: GALLERY.THE_DETAILS_MAKE_THE_DESIGN },
     philosophy: "Glass is a living material that captures light and transforms space into poetry.",
     curatorPicks: [
-      { image: marcantonioCotissiVessel, title: "Cotissi Vessel", category: "Decorative Object", subcategory: "Vessels", materials: "Hand-blown Murano glass", dimensions: "H35 × Ø20 cm", edition: "Unique Piece" },
+      { image: marcantonioCotissiVessel, title: "Unknow N.83 Cotissi Vessel", category: "Decorative Object", subcategory: "Vessels", materials: "Hand-blown Murano glass", dimensions: "H32 × Ø37 cm", edition: "Unique Piece" },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/marcantoniobrandolinistudio/" },
