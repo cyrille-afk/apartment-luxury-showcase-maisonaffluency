@@ -33,8 +33,8 @@ const TradeFloatingCTA = () => {
     >
       <div className="relative flex items-center gap-4 bg-foreground/95 backdrop-blur-sm text-background px-5 py-3 rounded-full shadow-lg border border-accent/20 max-w-[90vw]">
         <p className="font-body text-xs sm:text-sm tracking-wide whitespace-nowrap">
-          <span className="hidden sm:inline">Are you a design professional? </span>
-          <span className="sm:hidden">Design professional? </span>
+          <span className="hidden sm:inline">Architect or Interior Designer? </span>
+          <span className="sm:hidden">Architect or Designer? </span>
         </p>
         <Link
           to="/trade/register"
