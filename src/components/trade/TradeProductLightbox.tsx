@@ -58,7 +58,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }}
-        className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-8"
+        className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-8"
         onClick={onClose}
       >
         <motion.div
