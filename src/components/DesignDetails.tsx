@@ -28,7 +28,7 @@ const DesignDetails = () => {
             <img
               src={cloudinaryUrl("v1773758590/Screen_Shot_2026-03-17_at_10.40.56_PM_mlwtop", { width: 1200, quality: "auto:good", crop: "limit" })}
               alt="Maison Affluency Trade Program — exclusive benefits for architects and interior designers"
-              className="w-full h-full object-cover object-[center_45%] group-hover:scale-[1.02] transition-transform duration-700"
+              className="w-full h-full object-cover object-[center_50%] group-hover:scale-[1.02] transition-transform duration-700"
               loading="lazy"
               decoding="async"
             />
