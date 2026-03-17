@@ -3,6 +3,7 @@ import { X, Ruler, Layers, MessageSquareQuote, ShoppingCart, Trash2, Loader2 } f
 import { useCompare } from "@/contexts/CompareContext";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
