@@ -27,6 +27,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
+import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 
 // Designer profile images — served via Cloudinary CDN
 const dImg = (name: string) =>
