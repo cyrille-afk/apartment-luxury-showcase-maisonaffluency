@@ -758,33 +758,44 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
-        {isConfirmed && (() => {
-          // Calculate total in quote's own currency (what Stripe will charge)
+        {isConfirmed && !isFullyPaid && (() => {
           const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
           const withGst = currency === "SGD" && afterDiscount > 0
             ? afterDiscount + Math.round(afterDiscount * 0.09)
             : afterDiscount;
-          // Stripe fee pass-through with currency-appropriate fixed fee
+
+          const isPayingDeposit = quoteStatus === "confirmed";
+          const isPayingBalance = quoteStatus === "deposit_paid";
+          const portionCents = isPayingDeposit ? Math.round(withGst * 0.6) : Math.round(withGst * 0.4);
           const fixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
           const fixedFee = fixedFees[currency] ?? 50;
-          const chargeTotal = Math.ceil((withGst + fixedFee) / (1 - 0.034));
+          const chargeTotal = Math.ceil((portionCents + fixedFee) / (1 - 0.034));
           const feeDisplay = currency === "SGD" ? "S$0.50" : currency === "USD" ? "US$0.30" : currency === "EUR" ? "€0.25" : currency === "GBP" ? "£0.20" : "0.50";
+          const paymentLabel = isPayingDeposit ? "Pay 60% Deposit" : "Pay 40% Balance";
+          const paymentType = isPayingDeposit ? "deposit" : "balance";
 
           return (
             <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-2 font-body text-sm text-emerald-600">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>Order confirmed</span>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 font-body text-sm text-emerald-600">
+                    <CheckCircle className="h-4 w-4" />
+                    <span>{isPayingBalance ? "Deposit paid — balance due" : "Order confirmed"}</span>
+                  </div>
+                  {isPayingBalance && (
+                    <p className="font-body text-[10px] text-muted-foreground">
+                      60% deposit received. Please pay the remaining 40% balance to complete your order.
+                    </p>
+                  )}
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <button
-                    onClick={handleStripePayment}
+                    onClick={() => handleStripePayment(paymentType)}
                     disabled={payingStripe}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-50"
                   >
                     {payingStripe ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CreditCard className="h-3.5 w-3.5" />}
-                    {payingStripe ? "Redirecting…" : "Pay with Stripe"}
+                    {payingStripe ? "Redirecting…" : paymentLabel}
                   </button>
                   {subtotalCents > 0 && (
                     <span className="font-body text-[10px] text-muted-foreground">
@@ -794,14 +805,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 </div>
               </div>
 
-              {/* Payment info notice */}
               {subtotalCents > 0 && (
                 <div className="mt-4 rounded-md border border-border bg-muted/30 px-4 py-3 space-y-1.5">
                   <p className="font-body text-[11px] text-foreground/80 font-medium">Payment Information</p>
                   <ul className="font-body text-[10px] text-muted-foreground space-y-1 list-disc list-inside">
-                    <li>Payment will be charged in <span className="font-medium text-foreground/70">{currency}</span> — the same currency shown on your quote.</li>
-                    <li>A processing fee of 3.4% + {feeDisplay} is included in the total above.</li>
-                    {currency === "SGD" && <li>9% GST is included for SGD payments.</li>}
+                    <li>You are paying the <span className="font-medium text-foreground/70">{isPayingDeposit ? "60% deposit" : "40% balance"}</span> of {currencySymbol(currency)}{formatPriceRaw(portionCents, currency)} {currency}.</li>
+                    <li>A processing fee of 3.4% + {feeDisplay} is included in the Stripe charge above.</li>
+                    {currency === "SGD" && <li>9% GST is included.</li>}
                     <li>
                       If your card is denominated in a different currency, your bank may apply a foreign transaction fee of approximately <span className="font-medium text-foreground/70">1–2%</span>.
                     </li>
@@ -815,6 +825,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             </div>
           );
         })()}
+
+        {isFullyPaid && (
+          <div className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden">
+            <div className="flex items-center gap-2 font-body text-sm text-emerald-600">
+              <CheckCircle className="h-4 w-4" />
+              <span>Fully paid</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
