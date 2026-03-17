@@ -1,8 +1,50 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+
+/* ── Price helpers ── */
+interface TradePrice { cents: number; currency: string; }
+
+const normalizeName = (s: string) =>
+  s.toLowerCase().replace(/['']/g, "'").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+
+const tokenize = (s: string) => normalizeName(s).split(" ").filter(t => t.length > 2);
+
+function fuzzyPriceMatch(
+  name: string,
+  exactMap: Map<string, TradePrice>,
+  entries: { name: string; cents: number; currency: string }[],
+): TradePrice | null {
+  const key = normalizeName(name);
+  const exact = exactMap.get(key);
+  if (exact) return exact;
+  const tokens = tokenize(name);
+  if (!tokens.length) return null;
+  let best: TradePrice | null = null;
+  let bestScore = 0;
+  for (const e of entries) {
+    const eTokens = tokenize(e.name);
+    const overlap = tokens.filter(t => eTokens.includes(t)).length;
+    const shorter = Math.min(tokens.length, eTokens.length);
+    const score = shorter > 0 ? overlap / shorter : 0;
+    if (score > bestScore && score > 0.5) {
+      bestScore = score;
+      best = { cents: e.cents, currency: e.currency };
+    }
+  }
+  return best;
+}
+
+function formatPrice(cents: number, currency: string): string {
+  const amount = cents / 100;
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+  } catch {
+    return `${currency} ${amount.toLocaleString()}`;
+  }
+}
 
 interface Hotspot {
   id: string;
