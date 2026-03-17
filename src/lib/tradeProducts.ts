@@ -24,6 +24,72 @@ export interface TradeProduct {
   pdf_urls?: { label: string; url: string; filename?: string }[];
 }
 
+// Map non-canonical subcategory values to their canonical (plural) form
+const SUBCATEGORY_NORMALIZE: Record<string, string> = {
+  "Console": "Consoles",
+  "Coffee Table": "Coffee Tables",
+  "Dining Table": "Dining Tables",
+  "Side Table": "Side Tables",
+  "Desk": "Desks",
+  "Cabinet": "Cabinets",
+  "Bookcase": "Bookcases",
+  "Bookcases & Credenzas": "Bookcases",
+  "Sofa": "Sofas",
+  "Armchair": "Armchairs",
+  "Chair": "Chairs",
+  "Bar Stool": "Bar Stools",
+  "Ottoman": "Ottomans & Stools",
+  "Stool": "Ottomans & Stools",
+  "Stools": "Ottomans & Stools",
+  "Daybed": "Daybeds & Benches",
+  "Bench": "Daybeds & Benches",
+  "Wall Light": "Wall Lights",
+  "Ceiling Light": "Ceiling Lights",
+  "Floor Light": "Floor Lights",
+  "Floor Lamp": "Floor Lights",
+  "Floor Lamps": "Floor Lights",
+  "Table Light": "Table Lights",
+  "Table Lamp": "Table Lights",
+  "Table Lamps": "Table Lights",
+  "Pendant": "Ceiling Lights",
+  "Pendants": "Ceiling Lights",
+  "Chandelier": "Ceiling Lights",
+  "Chandeliers": "Ceiling Lights",
+  "Vase": "Vases & Vessels",
+  "Vases": "Vases & Vessels",
+  "Vessel": "Vases & Vessels",
+  "Vessels": "Vases & Vessels",
+  "Mirror": "Mirrors",
+  "Book": "Books",
+  "Candle Holder": "Candle Holders",
+  "Decorative Object": "Decorative Objects",
+  "Sculptural Object": "Decorative Objects",
+  "Tableware": "Decorative Objects",
+  "Sideboards": "Cabinets",
+  "Sideboard": "Cabinets",
+  "Hand-Knotted Rug": "Hand-Knotted Rugs",
+  "Hand-Tufted Rug": "Hand-Tufted Rugs",
+  "Hand-Woven Rug": "Hand-Woven Rugs",
+  "Wallcoverings": "Decorative Objects",
+};
+
+// Map non-canonical category values to canonical ones
+const CATEGORY_NORMALIZE: Record<string, string> = {
+  "Decorative Object": "Décor",
+  "Decorative Objects": "Décor",
+  "Furniture": "Tables",
+  "Wall Art": "Décor",
+};
+
+function normalizeCategory(cat: string): string {
+  return CATEGORY_NORMALIZE[cat] || cat;
+}
+
+function normalizeSubcategory(sub: string | undefined): string | undefined {
+  if (!sub) return sub;
+  return SUBCATEGORY_NORMALIZE[sub] || sub;
+}
+
 let _cachedProducts: TradeProduct[] | null = null;
 
 export function getAllTradeProducts(): TradeProduct[] {
@@ -35,13 +101,14 @@ export function getAllTradeProducts(): TradeProduct[] {
   const addPicks = (brandName: string, picks: CuratorPick[]) => {
     for (const pick of picks) {
       if (!pick.title) continue;
+      const rawCategory = pick.category || pick.tags?.[0] || "Uncategorized";
       products.push({
         id: `tp-${idx++}`,
         brand_name: brandName,
         product_name: pick.title,
         subtitle: pick.subtitle,
-        category: pick.category || pick.tags?.[0] || "Uncategorized",
-        subcategory: pick.subcategory || pick.tags?.[1],
+        category: normalizeCategory(rawCategory),
+        subcategory: normalizeSubcategory(pick.subcategory || pick.tags?.[1]),
         tags: pick.tags || [],
         materials: pick.materials,
         dimensions: pick.dimensions,
