@@ -812,7 +812,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                                 imageIdentifier={item.title}
                                 visible={true}
                                 onCloseLightbox={closeLightbox}
-                                onRequestQuote={handleHotspotQuoteRequest}
+                                 {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest })}
                               />
                            )}
                           </div>
