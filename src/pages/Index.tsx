@@ -28,6 +28,7 @@ const StickyBottomNav = lazy(() => import("@/components/StickyBottomNav"));
 const JournalTeaser = lazy(() => import("@/components/JournalTeaser"));
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
+const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
 const ParallaxInterlude = lazy(() => import("@/components/ParallaxInterlude"));
 
 /**
