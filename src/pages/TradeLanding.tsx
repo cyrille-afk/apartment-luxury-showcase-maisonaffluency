@@ -232,7 +232,7 @@ const TradeLanding = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="flex flex-col items-center py-6 md:py-8"
+                className="flex flex-col items-center py-4 md:py-5"
               >
                 <span className="font-display text-2xl md:text-3xl text-foreground/80 tracking-wide">
                   {stat.value}
