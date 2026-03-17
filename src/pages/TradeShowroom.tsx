@@ -37,23 +37,30 @@ interface DraftQuote {
   created_at: string;
 }
 
-const categoryKeywords: [string, string[]][] = [
-  ["Lighting", ["lamp", "light", "pendant", "chandelier", "sconce"]],
-  ["Seating", ["chair", "armchair", "sofa", "loveseat", "stool", "bench", "ottoman", "lounge chair"]],
-  ["Tables", ["table", "desk", "coffee table", "side table", "console"]],
-  ["Storage", ["bookcase", "credenza", "cabinet"]],
-  ["Rugs & Textiles", ["rug", "fabric", "curtain", "throw", "cushion", "headboard"]],
-  ["Wall & Surfaces", ["wallcover", "wallpaper", "mirror", "wall lamp", "wall light", "diasec"]],
-  ["Decorative Objects", ["vase", "vessel", "bowl", "candle", "incense", "centerpiece", "box", "sculpture", "book cover"]],
-  ["Art", ["painting", "drawing", "bronze painting"]],
-];
-
 const inferCategory = (name: string): string => {
   const lower = name.toLowerCase();
-  for (const [cat, keywords] of categoryKeywords) {
-    if (keywords.some((kw) => lower.includes(kw))) return cat;
+
+  if (["rug", "textile", "fabric", "curtain", "throw", "cushion", "headboard"].some((kw) => lower.includes(kw))) {
+    return "Rugs";
   }
-  return "Other";
+
+  if (["chair", "armchair", "sofa", "loveseat", "stool", "bench", "ottoman", "lounge chair", "daybed"].some((kw) => lower.includes(kw))) {
+    return "Seating";
+  }
+
+  if (["table", "desk", "coffee table", "side table", "console"].some((kw) => lower.includes(kw))) {
+    return "Tables";
+  }
+
+  if (["lamp", "light", "pendant", "chandelier", "sconce"].some((kw) => lower.includes(kw))) {
+    return "Lighting";
+  }
+
+  if (["bookcase", "credenza", "cabinet", "sideboard"].some((kw) => lower.includes(kw))) {
+    return "Storage";
+  }
+
+  return "Décor";
 };
 
 // Map individual room titles to their parent gallery section
