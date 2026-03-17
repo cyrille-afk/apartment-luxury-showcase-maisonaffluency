@@ -3158,8 +3158,8 @@ const FeaturedDesigners = () => {
                       )}
                       {!isZoomed && (() => {
                         const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
-                        const tags: string[] = pick?.tags?.length > 0 ? pick.tags : pick?.category ? [pick.category] : [];
-                        const specialTags = tags.filter((t: string) => /couture|edition|limited/i.test(t));
+                        const tags: string[] = pick?.tags || [];
+                        const specialTags = tags.filter((t: string) => /couture|edition|limited|re-edition|unique/i.test(t));
                         const hasEdition = !!pick?.edition;
                         return (specialTags.length > 0 || hasEdition) ? (
                           <div className="absolute top-2 right-2 z-20 flex flex-wrap gap-1.5 justify-end">
