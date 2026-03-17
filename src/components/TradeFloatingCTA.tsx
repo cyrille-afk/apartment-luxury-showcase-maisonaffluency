@@ -40,7 +40,7 @@ const TradeFloatingCTA = () => {
           to="/trade/register"
           className="shrink-0 px-4 py-1.5 bg-accent text-foreground font-body text-xs uppercase tracking-[0.15em] rounded-full hover:bg-accent/80 transition-colors whitespace-nowrap"
         >
-          Join Trade Program
+          Join Our Trade Program
         </Link>
         <button
           onClick={dismiss}
