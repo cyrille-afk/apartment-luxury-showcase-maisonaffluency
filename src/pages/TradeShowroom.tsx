@@ -458,7 +458,8 @@ const TradeShowroom = () => {
       brand_name: product.designer_name || "Unknown",
       materials: product.materials,
       dimensions: product.dimensions,
-      category: inferCategory(product.product_name),
+      category: product.category || inferCategory(product.product_name),
+      subcategory: product.subcategory || undefined,
       pdf_url: product.pdf_url,
       price: hasTrade ? formatPriceConverted(product.trade_price_cents!, product.currency!, displayCurrency, fxRates) : null,
     };
