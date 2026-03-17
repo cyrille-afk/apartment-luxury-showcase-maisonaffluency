@@ -37,7 +37,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/30 to-foreground/10" />
       </div>
-      <div className="relative px-4 py-8 md:px-6 md:py-12 lg:py-16 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+      <div className="relative px-3 py-8 md:px-4 md:py-12 lg:py-16 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
           <h1 className="font-display text-xl md:text-2xl text-background mb-1">{title}</h1>
           {subtitle && (
