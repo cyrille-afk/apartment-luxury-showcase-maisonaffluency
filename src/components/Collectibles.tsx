@@ -1282,18 +1282,11 @@ const Collectibles = () => {
                   className={`relative overflow-visible transition-all duration-300 ${isZoomed ? 'max-h-[85vh]' : ''}`}
                   onClick={handleDoubleTap}
                 >
-                  {!isZoomed && (curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category || curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition) && (
+                  {!isZoomed && curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition && (
                     <div className="flex items-center gap-2 mb-2">
-                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.category && (
-                        <span className="hidden md:inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].category}
-                        </span>
-                      )}
-                      {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition && (
-                        <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
-                          {curatorPicksDesigner.curatorPicks[curatorPickIndex].edition}
-                        </span>
-                      )}
+                      <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
+                        {curatorPicksDesigner.curatorPicks[curatorPickIndex].edition}
+                      </span>
                     </div>
                   )}
                   <div className="relative inline-block overflow-visible"
