@@ -646,6 +646,63 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_sample_requests: {
+        Row: {
+          admin_notes: string | null
+          brand_name: string
+          client_name: string
+          created_at: string
+          id: string
+          notes: string | null
+          product_name: string
+          project_name: string
+          return_by: string | null
+          shipping_address: string
+          shipping_city: string
+          shipping_country: string
+          status: Database["public"]["Enums"]["sample_request_status"]
+          tracking_number: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          brand_name: string
+          client_name?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_name: string
+          project_name?: string
+          return_by?: string | null
+          shipping_address?: string
+          shipping_city?: string
+          shipping_country?: string
+          status?: Database["public"]["Enums"]["sample_request_status"]
+          tracking_number?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          brand_name?: string
+          client_name?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_name?: string
+          project_name?: string
+          return_by?: string | null
+          shipping_address?: string
+          shipping_city?: string
+          shipping_country?: string
+          status?: Database["public"]["Enums"]["sample_request_status"]
+          tracking_number?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -724,6 +781,13 @@ export type Database = {
         | "design_trend"
         | "project_showcase"
         | "international_editorial"
+      sample_request_status:
+        | "requested"
+        | "approved"
+        | "shipped"
+        | "delivered"
+        | "returned"
+        | "cancelled"
       trade_application_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -859,6 +923,14 @@ export const Constants = {
         "design_trend",
         "project_showcase",
         "international_editorial",
+      ],
+      sample_request_status: [
+        "requested",
+        "approved",
+        "shipped",
+        "delivered",
+        "returned",
+        "cancelled",
       ],
       trade_application_status: ["pending", "approved", "rejected"],
     },
