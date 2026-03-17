@@ -542,7 +542,10 @@ function singularizeSub(s: string): string {
                   {/* Special tags */}
                   {(() => {
                     const tags: string[] = currentItem.pick.tags || [];
-                    const specialTags = tags.filter(t => /couture|edition|limited|re-edition/i.test(t));
+                    const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique/i.test(t));
+                    if (currentItem.pick.edition && !specialTags.some(t => t.toLowerCase() === currentItem.pick.edition!.toLowerCase())) {
+                      specialTags.unshift(currentItem.pick.edition);
+                    }
                     return specialTags.length > 0 && !isZoomed ? (
                       <div className="absolute top-2 right-2 z-20 flex flex-wrap gap-1.5 justify-end">
                         {specialTags.map((tag, i) => (
