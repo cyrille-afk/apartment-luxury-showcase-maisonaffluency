@@ -340,6 +340,9 @@ function SampleRow({ request: req }: { request: SampleRequest }) {
 
   return (
     <div className="px-4 py-3.5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+      {req.image_url && (
+        <img src={req.image_url} alt={req.product_name} className="w-10 h-10 rounded object-cover border border-border shrink-0" />
+      )}
       <div className="flex-1 min-w-0">
         <p className="font-body text-sm text-foreground truncate">{req.product_name}</p>
         <p className="font-body text-[10px] text-muted-foreground">
