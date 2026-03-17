@@ -548,7 +548,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               {/* Totals */}
               <div className="border-t border-border mt-2 pt-4">
                 <div className="flex justify-end">
-                  <div className="w-64 space-y-1">
+                  <div className="w-72 space-y-1">
                     <div className="flex justify-between font-body text-xs text-muted-foreground">
                       <span>Subtotal</span>
                       <span>{formatPriceRaw(subtotalCents, currency) || "TBD"}</span>
@@ -573,14 +573,40 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       const total = currency === "SGD" && afterDiscount > 0
                         ? afterDiscount + Math.round(afterDiscount * 0.09)
                         : afterDiscount;
+                      const depositCents = Math.round(total * 0.6);
+                      const balanceCents = total - depositCents;
                       return (
-                        <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
-                          <span className="uppercase tracking-wider">Total {currency}</span>
-                          <span className="font-medium">
-                            {currencySymbol(currency)}{" "}
-                            {formatPriceRaw(total, currency) || "TBD"}
-                          </span>
-                        </div>
+                        <>
+                          <div className="flex justify-between font-display text-sm text-foreground pt-2 border-t border-border">
+                            <span className="uppercase tracking-wider">Total {currency}</span>
+                            <span className="font-medium">
+                              {currencySymbol(currency)}{" "}
+                              {formatPriceRaw(total, currency) || "TBD"}
+                            </span>
+                          </div>
+
+                          {/* 60/40 deposit/balance breakdown — shown when priced or later */}
+                          {(isPriced || isConfirmed) && total > 0 && (
+                            <div className="mt-3 pt-3 border-t border-dashed border-border space-y-1.5">
+                              <div className="flex justify-between font-body text-xs">
+                                <span className={isDepositPaid || isFullyPaid ? "text-emerald-600" : "text-foreground/80"}>
+                                  {isDepositPaid || isFullyPaid ? "✓ " : ""}60% Deposit
+                                </span>
+                                <span className={isDepositPaid || isFullyPaid ? "text-emerald-600 font-medium" : "text-foreground/80"}>
+                                  {currencySymbol(currency)} {formatPriceRaw(depositCents, currency)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between font-body text-xs">
+                                <span className={isFullyPaid ? "text-emerald-600" : "text-muted-foreground"}>
+                                  {isFullyPaid ? "✓ " : ""}40% Balance
+                                </span>
+                                <span className={isFullyPaid ? "text-emerald-600 font-medium" : "text-muted-foreground"}>
+                                  {currencySymbol(currency)} {formatPriceRaw(balanceCents, currency)}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </>
                       );
                     })()}
                   </div>
