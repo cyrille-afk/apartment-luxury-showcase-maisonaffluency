@@ -383,6 +383,15 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         {hotspot.designer_name && (
                           <p className="text-xs text-muted-foreground font-body mt-0.5">{hotspot.designer_name}</p>
                         )}
+                        {/* Edition badge */}
+                        {(() => {
+                          const edition = getHotspotEdition(hotspot.product_name);
+                          return edition ? (
+                            <p className="font-body text-[10px] uppercase tracking-[0.12em] text-[hsl(var(--gold))] mt-1">
+                              {edition}
+                            </p>
+                          ) : null;
+                        })()}
                         {/* Trade price */}
                         {onAddToQuote && (() => {
                           const price = getHotspotPrice(hotspot.product_name);
