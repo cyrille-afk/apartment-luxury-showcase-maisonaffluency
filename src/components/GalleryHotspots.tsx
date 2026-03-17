@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ── Price helpers ── */
