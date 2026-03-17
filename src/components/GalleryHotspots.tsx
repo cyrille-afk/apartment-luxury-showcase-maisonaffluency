@@ -254,7 +254,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                 }`}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="bg-white rounded-lg shadow-2xl border border-primary/10 overflow-hidden">
+                <div className="bg-white/80 backdrop-blur-md rounded-lg shadow-2xl border border-primary/10 overflow-hidden">
                   {editMode && editingId === hotspot.id ? (
                     /* Inline edit form */
                     <div className="p-3 w-[260px]">
