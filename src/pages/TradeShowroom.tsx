@@ -178,6 +178,7 @@ const TradeShowroom = () => {
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
+  const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
 
   // Fetch hotspot products (deduplicated by product_name + designer_name)
   useEffect(() => {
