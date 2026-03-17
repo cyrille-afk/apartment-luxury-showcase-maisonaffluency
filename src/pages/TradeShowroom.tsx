@@ -341,7 +341,7 @@ const TradeShowroom = () => {
         p.designer_name?.toLowerCase().includes(q) ||
         p.materials?.toLowerCase().includes(q);
       const matchesDesigner = selectedDesigner === "all" || p.designer_name === selectedDesigner;
-      const matchesCategory = selectedCategory === "all" || inferCategory(p.product_name) === selectedCategory;
+      const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
       const matchesSection = selectedSection === "all" || getSection(p.image_identifier) === selectedSection;
       return matchesSearch && matchesDesigner && matchesCategory && matchesSection;
     });
