@@ -18,22 +18,6 @@ interface DraftQuote {
   created_at: string;
 }
 
-  const toLightboxItem = (product: TradeProduct): TradeProductLightboxItem => {
-    const price = getProductPrice(product);
-    return {
-      id: product.id,
-      product_name: product.product_name,
-      subtitle: product.subtitle,
-      image_url: product.image_url,
-      brand_name: product.brand_name,
-      materials: product.materials,
-      dimensions: product.dimensions,
-      category: product.category,
-      subcategory: product.subcategory,
-      pdf_url: product.pdf_url,
-      price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates) : null,
-    };
-  };
 
 const TradeGallery = () => {
   const { user, isAdmin } = useAuth();
