@@ -297,7 +297,7 @@ const TradeLanding = () => {
                           <img
                             src={benefit.image}
                             alt={benefit.title}
-                            className="w-full h-full object-cover object-top"
+                            className="w-full h-full object-cover object-bottom"
                             loading="lazy"
                             decoding="async"
                             data-pin-nopin="true"
