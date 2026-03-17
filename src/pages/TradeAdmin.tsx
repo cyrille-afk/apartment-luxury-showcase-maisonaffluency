@@ -11,6 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import TaxonomyAudit from "@/components/trade/TaxonomyAudit";
+import HeroManager from "@/components/trade/HeroManager";
 
 interface Application {
   id: string;
