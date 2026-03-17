@@ -3,22 +3,25 @@ import { Link } from "react-router-dom";
 import { X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
+
 const DISMISS_KEY = "trade_cta_dismissed";
 
 const TradeFloatingCTA = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, isTradeUser, isAdmin } = useAuth();
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(() => {
     try { return sessionStorage.getItem(DISMISS_KEY) === "1"; } catch { return false; }
   });
 
+  const hasTradeAccess = isTradeUser || isAdmin;
+
   useEffect(() => {
-    if (dismissed || loading || user) return;
+    if (dismissed || loading || hasTradeAccess) return;
     const timer = setTimeout(() => setVisible(true), 4000);
     return () => clearTimeout(timer);
   }, [dismissed, loading, user]);
 
-  if (!visible || user) return null;
+  if (!visible || hasTradeAccess) return null;
 
   const dismiss = () => {
     setVisible(false);
