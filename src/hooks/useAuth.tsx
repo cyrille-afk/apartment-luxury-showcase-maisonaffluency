@@ -99,6 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         setIsTradeUser(false);
         setIsAdmin(false);
+        setIsSuperAdmin(false);
         setProfile(null);
         setApplicationStatus("none");
 
