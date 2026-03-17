@@ -84,6 +84,7 @@ const HeroManager = () => {
 
     if (!error) {
       setHeroes((prev) => ({ ...prev, [sectionKey]: { ...prev[sectionKey], gravity } }));
+      invalidateHeroCache();
     }
     setSaving(null);
   };
@@ -121,11 +122,22 @@ const HeroManager = () => {
           <div key={section.key} className="border border-border rounded-lg overflow-hidden">
             {/* Preview */}
             <div className="relative h-28 md:h-36 overflow-hidden">
-              <img
-                src={previewUrl}
-                alt={section.label}
-                className="w-full h-full object-cover"
-              />
+              {(() => {
+                const g = hero?.gravity || "auto";
+                const posClass =
+                  g === "east" ? "object-right" :
+                  g === "west" ? "object-left" :
+                  g === "north" ? "object-top" :
+                  g === "south" ? "object-bottom" :
+                  "object-center";
+                return (
+                  <img
+                    src={previewUrl}
+                    alt={section.label}
+                    className={`w-full h-full object-cover ${posClass}`}
+                  />
+                );
+              })()}
               <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/20 to-transparent" />
               <div className="absolute bottom-3 left-4">
                 <p className="font-display text-sm text-background">{section.label}</p>
