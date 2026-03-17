@@ -426,7 +426,7 @@ const Navigation = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-8 lg:gap-14 pb-3">
+          <div className="flex items-center gap-6 lg:gap-10 pb-3">
             {leftNavItems.map((item, index) => (
               <React.Fragment key={item.href}>
                 <button 
@@ -467,7 +467,7 @@ const Navigation = () => {
             {/* Journal — visually separated from exhibition nav */}
             <button
               onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
-              className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground ml-10 lg:ml-20"
+              className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground ml-8 lg:ml-14"
             >
               Journal
               <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
