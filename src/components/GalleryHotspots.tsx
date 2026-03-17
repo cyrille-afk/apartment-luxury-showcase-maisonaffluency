@@ -94,6 +94,36 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
 
+  // ── Trade price lookup ──
+  const [tradePrices, setTradePrices] = useState<{ name: string; cents: number; currency: string }[]>([]);
+
+  useEffect(() => {
+    if (!onAddToQuote) return; // only fetch for trade mode
+    const fetchPrices = async () => {
+      const { data } = await supabase
+        .from("trade_products")
+        .select("product_name, trade_price_cents, rrp_price_cents, currency");
+      if (data) {
+        const entries = data
+          .map(p => ({ name: p.product_name, cents: p.trade_price_cents ?? p.rrp_price_cents ?? 0, currency: p.currency }))
+          .filter(e => e.cents > 0);
+        setTradePrices(entries);
+      }
+    };
+    fetchPrices();
+  }, [!!onAddToQuote]);
+
+  const priceExactMap = useMemo(() => {
+    const m = new Map<string, TradePrice>();
+    for (const e of tradePrices) m.set(normalizeName(e.name), { cents: e.cents, currency: e.currency });
+    return m;
+  }, [tradePrices]);
+
+  const getHotspotPrice = useCallback((productName: string): TradePrice | null => {
+    if (!tradePrices.length) return null;
+    return fuzzyPriceMatch(productName, priceExactMap, tradePrices);
+  }, [tradePrices, priceExactMap]);
+
   useEffect(() => {
     if (!imageIdentifier) return;
     // Clear old hotspots immediately to avoid showing stale markers on new image
