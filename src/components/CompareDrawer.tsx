@@ -142,21 +142,7 @@ const CompareDrawer = () => {
                     className="flex h-full flex-col"
                   >
                     {/* Image */}
-                    <div className="relative aspect-[4/5] bg-[#f0eeeb] rounded-sm overflow-hidden flex items-center justify-center mb-4">
-                      <img
-                        src={item.pick.image}
-                        alt={item.pick.title}
-                        className="max-w-[85%] max-h-[85%] object-contain"
-                        style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
-                      />
-                      <button
-                        onClick={() => removeItem(item.pick.title)}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/70 hover:text-white hover:bg-black/70 transition-all backdrop-blur-sm"
-                        aria-label={`Remove ${item.pick.title}`}
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
+                    <CompareImage item={item} />
 
                     {/* Info */}
                     <div className="flex flex-1 flex-col gap-3">
