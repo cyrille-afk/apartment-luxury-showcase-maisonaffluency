@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import CloudUpload from "./CloudUpload";
 import { ImageIcon, Trash2, Loader2 } from "lucide-react";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { invalidateHeroCache } from "./SectionHero";
 
 const HERO_SECTIONS = [
   { key: "gallery", label: "Trade Gallery", fallbackId: "v1773731066/Screen_Shot_2026-03-17_at_3.03.40_PM_b8dux9" },
