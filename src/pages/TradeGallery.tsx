@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import SectionHero from "@/components/trade/SectionHero";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
+import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 
 interface DraftQuote {
@@ -51,29 +52,30 @@ const TradeGallery = () => {
   const tokenizeName = (s: string) =>
     normalizeName(s).split(" ").filter((t) => t.length > 2);
 
-  useEffect(() => {
-    const fetchPrices = async () => {
-      const { data } = await supabase
-        .from("trade_products")
-        .select("product_name, trade_price_cents, currency")
-        .not("trade_price_cents", "is", null);
-      if (data) {
-        const lookup = new Map<string, { cents: number; currency: string }>();
-        const entries: { name: string; cents: number; currency: string }[] = [];
-        for (const p of data) {
-          if (p.trade_price_cents) {
-            const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency };
-            entries.push(entry);
-            lookup.set(p.product_name.trim().toLowerCase(), entry);
-            const norm = normalizeName(p.product_name);
-            if (norm) lookup.set(norm, entry);
-          }
+  const refreshPrices = async () => {
+    const { data } = await supabase
+      .from("trade_products")
+      .select("product_name, trade_price_cents, currency")
+      .not("trade_price_cents", "is", null);
+    if (data) {
+      const lookup = new Map<string, { cents: number; currency: string }>();
+      const entries: { name: string; cents: number; currency: string }[] = [];
+      for (const p of data) {
+        if (p.trade_price_cents) {
+          const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency };
+          entries.push(entry);
+          lookup.set(p.product_name.trim().toLowerCase(), entry);
+          const norm = normalizeName(p.product_name);
+          if (norm) lookup.set(norm, entry);
         }
-        setPriceLookup(lookup);
-        setPriceEntries(entries);
       }
-    };
-    fetchPrices();
+      setPriceLookup(lookup);
+      setPriceEntries(entries);
+    }
+  };
+
+  useEffect(() => {
+    refreshPrices();
   }, []);
 
   // Fetch user's draft quotes
@@ -253,30 +255,7 @@ const TradeGallery = () => {
         subtitle={`${filtered.length} ${filtered.length === 1 ? "product" : "products"}${selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}`}
       >
         {isAdmin && (
-          <CsvPriceImport onComplete={() => {
-            // Refetch prices after import
-            supabase
-              .from("trade_products")
-              .select("product_name, trade_price_cents, currency")
-              .not("trade_price_cents", "is", null)
-              .then(({ data }) => {
-                if (data) {
-                  const lookup = new Map<string, { cents: number; currency: string }>();
-                  const entries: { name: string; cents: number; currency: string }[] = [];
-                  for (const p of data) {
-                    if (p.trade_price_cents) {
-                      const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency };
-                      entries.push(entry);
-                      lookup.set(p.product_name.trim().toLowerCase(), entry);
-                      const norm = normalizeName(p.product_name);
-                      if (norm) lookup.set(norm, entry);
-                    }
-                  }
-                  setPriceLookup(lookup);
-                  setPriceEntries(entries);
-                }
-              });
-          }} />
+          <CsvPriceImport onComplete={() => refreshPrices()} />
         )}
         <button
           onClick={() => setDrawerOpen(true)}
@@ -452,11 +431,21 @@ const TradeGallery = () => {
                    {product.materials && (
                     <p className="font-body text-[10px] text-muted-foreground truncate">{product.materials}</p>
                   )}
-                  {price && (
+                  {isAdmin ? (
+                    <InlinePriceEditor
+                      productName={product.product_name}
+                      brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
+                      currentPriceCents={price?.cents}
+                      currency={price?.currency || "SGD"}
+                      displayCurrency={displayCurrency}
+                      fxRates={fxRates}
+                      onPriceUpdated={() => refreshPrices()}
+                    />
+                  ) : price ? (
                     <p className="font-display text-sm text-accent font-semibold mt-1">
                       {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </div>
             );
@@ -487,11 +476,23 @@ const TradeGallery = () => {
                     {[product.dimensions, product.materials].filter(Boolean).join(" · ")}
                   </p>
                 </div>
-                {price && (
+                {isAdmin ? (
+                  <div className="shrink-0">
+                    <InlinePriceEditor
+                      productName={product.product_name}
+                      brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
+                      currentPriceCents={price?.cents}
+                      currency={price?.currency || "SGD"}
+                      displayCurrency={displayCurrency}
+                      fxRates={fxRates}
+                      onPriceUpdated={() => refreshPrices()}
+                    />
+                  </div>
+                ) : price ? (
                   <span className="font-display text-sm text-accent font-semibold shrink-0">
                     {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
                   </span>
-                )}
+                ) : null}
                 <button
                   onClick={() => handleAddToQuote(product)}
                   disabled={isAdding}
