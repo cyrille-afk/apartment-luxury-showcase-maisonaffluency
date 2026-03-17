@@ -2,7 +2,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 
 const heroImages: Record<string, { id: string; gravity?: "auto" | "face" | "center" | "north" | "south" | "east" | "west" }> = {
   showroom: { id: "bespoke-sofa_gxidtx" },
-  gallery: { id: "v1773731066/Screen_Shot_2026-03-17_at_3.03.40_PM_b8dux9", gravity: "center" },
+  gallery: { id: "v1773731066/Screen_Shot_2026-03-17_at_3.03.40_PM_b8dux9", gravity: "west" },
   quotes: { id: "v1773726568/AffluencySG_081_dk5rn7" },
   "quotes-admin": { id: "v1773652807/singapore-dollar_jaymbz" },
   documents: { id: "home-office-desk_g0ywv2" },
