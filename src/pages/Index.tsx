@@ -479,6 +479,7 @@ const Index = () => {
         <Suspense fallback={null}>
           <CompareFab />
           <CompareDrawer />
+          <TradeFloatingCTA />
         </Suspense>
       )}
     </>
