@@ -23,6 +23,7 @@ const mainItems = [
   { title: "Gallery", url: "/trade/gallery", icon: Image },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
   { title: "Documents", url: "/trade/documents", icon: FolderOpen },
+  { title: "Samples", url: "/trade/samples", icon: Package },
   { title: "Settings", url: "/trade/settings", icon: Settings },
 ];
 

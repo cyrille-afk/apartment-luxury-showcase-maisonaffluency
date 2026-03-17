@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
-  Clock, FileSpreadsheet, BookOpen, FileDown, MapPin,
+  Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package,
 } from "lucide-react";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { Link } from "react-router-dom";
