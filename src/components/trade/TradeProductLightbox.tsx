@@ -155,18 +155,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               </div>
             )}
 
-            {product.category && (
-              <div className="flex flex-wrap gap-1.5">
-                <span className="px-2 py-0.5 text-[9px] uppercase tracking-wider font-body bg-muted text-muted-foreground rounded-full border border-border">
-                  {product.category}
-                </span>
-                {product.subcategory && product.subcategory !== product.category && (
-                  <span className="px-2 py-0.5 text-[9px] uppercase tracking-wider font-body bg-muted text-muted-foreground rounded-full border border-border">
-                    {product.subcategory}
-                  </span>
-                )}
-              </div>
-            )}
 
             {product.price && (
               <p className="font-display text-lg text-accent font-semibold">
