@@ -432,7 +432,7 @@ const TradeShowroom = () => {
   });
 
   const toLightboxItem = (product: ShowroomProduct): TradeProductLightboxItem => {
-    const price = getProductPrice(product);
+    const hasTrade = product.trade_price_cents && product.currency;
     return {
       id: product.id,
       product_name: product.product_name,
@@ -442,7 +442,7 @@ const TradeShowroom = () => {
       dimensions: product.dimensions,
       category: inferCategory(product.product_name),
       pdf_url: product.pdf_url,
-      price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates) : null,
+      price: hasTrade ? formatPriceConverted(product.trade_price_cents!, product.currency!, displayCurrency, fxRates) : null,
     };
   };
 
