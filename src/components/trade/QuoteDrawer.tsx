@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Trash2, Package, ArrowRight } from "lucide-react";
 import { DrawerItemSkeleton } from "@/components/trade/skeletons";
@@ -13,8 +13,14 @@ interface QuoteItem {
     brand_name: string;
     image_url: string | null;
     trade_price_cents: number | null;
+    rrp_price_cents: number | null;
     currency: string;
   };
+  /** Original catalog price before conversion */
+  catalogPriceCents?: number | null;
+  catalogCurrency?: string;
+  /** Price converted to SGD */
+  sgdPriceCents?: number | null;
 }
 
 interface QuoteDrawerProps {
@@ -34,30 +40,33 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Cache exchange rates
+  const ratesRef = useRef<Record<string, number>>({});
+
   useEffect(() => {
     if (!open || !quoteId) return;
     const fetchItems = async () => {
       setLoading(true);
       const { data } = await supabase
         .from("trade_quote_items")
-        .select("id, quantity, product:trade_products(product_name, brand_name, image_url, trade_price_cents, currency)")
+        .select("id, quantity, product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency)")
         .eq("quote_id", quoteId)
         .order("created_at", { ascending: false });
 
       if (data) {
-        const mapped = (data as any[]).map((d) => ({
+        const mapped: QuoteItem[] = (data as any[]).map((d) => ({
           id: d.id,
           quantity: d.quantity,
           product: Array.isArray(d.product) ? d.product[0] : d.product,
         }));
 
         // For items without a price, try to find a priced record via fuzzy matching
-        const needsPrice = mapped.filter((m) => m.product && !m.product.trade_price_cents);
+        const needsPrice = mapped.filter((m) => m.product && !m.product.trade_price_cents && !m.product.rrp_price_cents);
         if (needsPrice.length > 0) {
           const { data: priced } = await supabase
             .from("trade_products")
-            .select("product_name, trade_price_cents, currency")
-            .not("trade_price_cents", "is", null);
+            .select("product_name, brand_name, trade_price_cents, rrp_price_cents, currency")
+            .or("trade_price_cents.not.is.null,rrp_price_cents.not.is.null");
 
           if (priced && priced.length > 0) {
             const normalize = (s: string) =>
@@ -65,49 +74,92 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
             const tokenize = (s: string) =>
               normalize(s).split(" ").filter((t) => t.length > 2);
 
-            const exactLookup = new Map<string, { cents: number; currency: string }>();
-            const entries: { name: string; cents: number; currency: string }[] = [];
+            type PriceEntry = { name: string; brand: string; cents: number; currency: string };
+            const exactLookup = new Map<string, PriceEntry>();
+            const entries: PriceEntry[] = [];
             for (const p of priced) {
-              const entry = { name: p.product_name, cents: p.trade_price_cents!, currency: p.currency };
+              const cents = p.trade_price_cents ?? p.rrp_price_cents;
+              if (!cents) continue;
+              const entry: PriceEntry = { name: p.product_name, brand: p.brand_name, cents, currency: p.currency };
               entries.push(entry);
               exactLookup.set(p.product_name.trim().toLowerCase(), entry);
               const norm = normalize(p.product_name);
               if (norm) exactLookup.set(norm, entry);
             }
 
-            const findMatch = (name: string) => {
+            const findMatch = (name: string, brand: string) => {
               const key = name.trim().toLowerCase();
               if (exactLookup.has(key)) return exactLookup.get(key)!;
               const norm = normalize(name);
               if (exactLookup.has(norm)) return exactLookup.get(norm)!;
+
               // Substring match
               for (const e of entries) {
                 const cn = normalize(e.name);
                 if (cn.includes(norm) || norm.includes(cn)) return e;
               }
-              // Token overlap
+
+              // Token overlap — use MIN for score to handle short canonical names matched against long hotspot names
               const targetTokens = new Set(tokenize(name));
+              const brandNorm = normalize(brand);
               if (targetTokens.size === 0) return undefined;
-              let best: typeof entries[0] | undefined;
+              let best: PriceEntry | undefined;
               let bestScore = 0;
               for (const e of entries) {
                 const ct = tokenize(e.name);
                 let overlap = 0;
                 for (const t of ct) { if (targetTokens.has(t)) overlap++; }
-                const score = overlap / Math.max(targetTokens.size, ct.length);
-                if (score > 0.5 && score > bestScore) { bestScore = score; best = e; }
+                // Score relative to the shorter set (so "Ricky Rug" 2/2 = 1.0 when both tokens match)
+                const score = overlap / Math.min(targetTokens.size, ct.length);
+                // Brand bonus: boost if brands match
+                const brandMatch = normalize(e.brand).includes(brandNorm) || brandNorm.includes(normalize(e.brand));
+                const adjusted = brandMatch ? score * 1.2 : score;
+                if (adjusted > 0.5 && adjusted > bestScore) { bestScore = adjusted; best = e; }
               }
               return best;
             };
 
             for (const item of mapped) {
-              if (item.product && !item.product.trade_price_cents) {
-                const match = findMatch(item.product.product_name);
+              if (item.product && !item.product.trade_price_cents && !item.product.rrp_price_cents) {
+                const match = findMatch(item.product.product_name, item.product.brand_name);
                 if (match) {
                   item.product.trade_price_cents = match.cents;
                   item.product.currency = match.currency;
                 }
               }
+            }
+          }
+        }
+
+        // Convert non-SGD prices to SGD and store catalog reference
+        const currenciesToConvert = new Set<string>();
+        for (const item of mapped) {
+          const cents = item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
+          if (cents && item.product.currency !== "SGD") {
+            currenciesToConvert.add(item.product.currency);
+          }
+        }
+
+        // Fetch exchange rates if needed
+        for (const src of currenciesToConvert) {
+          if (!ratesRef.current[src]) {
+            try {
+              const res = await fetch(`https://api.frankfurter.app/latest?from=${src}&to=SGD`);
+              const data = await res.json();
+              if (data.rates?.SGD) ratesRef.current[src] = data.rates.SGD;
+            } catch { /* fallback: no conversion */ }
+          }
+        }
+
+        // Apply conversion
+        for (const item of mapped) {
+          const cents = item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
+          if (cents && item.product.currency !== "SGD") {
+            const rate = ratesRef.current[item.product.currency];
+            if (rate) {
+              item.catalogPriceCents = cents;
+              item.catalogCurrency = item.product.currency;
+              item.sgdPriceCents = Math.round(cents * rate);
             }
           }
         }
@@ -177,15 +229,35 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                     <span className="font-body text-[10px] text-muted-foreground">
                       Qty: {item.quantity}
                     </span>
-                    {item.product?.trade_price_cents ? (
-                      <span className="font-body text-[10px] text-primary font-medium">
-                        {formatPrice(item.product.trade_price_cents, item.product.currency)}
-                      </span>
-                    ) : (
-                      <span className="font-body text-[9px] text-muted-foreground/60 italic">
-                        Price on request
-                      </span>
-                    )}
+                    {(() => {
+                      const cents = item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
+                      if (item.sgdPriceCents) {
+                        return (
+                          <div className="flex flex-col">
+                            <span className="font-body text-[10px] text-primary font-medium">
+                              {formatPrice(item.sgdPriceCents, "SGD")}
+                            </span>
+                            {item.catalogPriceCents && item.catalogCurrency && (
+                              <span className="font-body text-[8px] text-muted-foreground/60">
+                                Catalog: {formatPrice(item.catalogPriceCents, item.catalogCurrency)}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      } else if (cents) {
+                        return (
+                          <span className="font-body text-[10px] text-primary font-medium">
+                            {formatPrice(cents, item.product.currency)}
+                          </span>
+                        );
+                      } else {
+                        return (
+                          <span className="font-body text-[9px] text-muted-foreground/60 italic">
+                            Price on request
+                          </span>
+                        );
+                      }
+                    })()}
                   </div>
                 </div>
                 <button
