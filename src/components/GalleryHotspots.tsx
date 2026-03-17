@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ── Price helpers ── */
@@ -123,6 +124,31 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     if (!tradePrices.length) return null;
     return fuzzyPriceMatch(productName, priceExactMap, tradePrices);
   }, [tradePrices, priceExactMap]);
+
+  // ── Edition lookup from curator picks ──
+  const editionLookup = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of getAllTradeProducts()) {
+      if (p.edition) m.set(normalizeName(p.product_name), p.edition);
+    }
+    return m;
+  }, []);
+
+  const getHotspotEdition = useCallback((productName: string): string | null => {
+    const key = normalizeName(productName);
+    const exact = editionLookup.get(key);
+    if (exact) return exact;
+    // fuzzy token match
+    const tokens = tokenize(productName);
+    if (!tokens.length) return null;
+    for (const [k, v] of editionLookup) {
+      const eTokens = tokenize(k);
+      const overlap = tokens.filter(t => eTokens.includes(t)).length;
+      const shorter = Math.min(tokens.length, eTokens.length);
+      if (shorter > 0 && overlap / shorter > 0.5) return v;
+    }
+    return null;
+  }, [editionLookup]);
 
   useEffect(() => {
     if (!imageIdentifier) return;
@@ -357,6 +383,15 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         {hotspot.designer_name && (
                           <p className="text-xs text-muted-foreground font-body mt-0.5">{hotspot.designer_name}</p>
                         )}
+                        {/* Edition badge */}
+                        {(() => {
+                          const edition = getHotspotEdition(hotspot.product_name);
+                          return edition ? (
+                            <p className="font-body text-[10px] uppercase tracking-[0.12em] text-[hsl(var(--gold))] mt-1">
+                              {edition}
+                            </p>
+                          ) : null;
+                        })()}
                         {/* Trade price */}
                         {onAddToQuote && (() => {
                           const price = getHotspotPrice(hotspot.product_name);
