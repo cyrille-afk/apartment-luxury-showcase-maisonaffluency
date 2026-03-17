@@ -35,6 +35,9 @@ function loadHeroOverrides() {
           heroCache![r.section_key] = { image_url: r.image_url, gravity: r.gravity };
         });
       }
+    })
+    .catch(() => {
+      heroCache = {};
     });
   return heroCachePromise;
 }
