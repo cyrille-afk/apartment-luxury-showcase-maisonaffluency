@@ -62,7 +62,9 @@ const TradeSamples = () => {
   const [country, setCountry] = useState("Singapore");
   const [returnBy, setReturnBy] = useState<Date | undefined>();
   const [notes, setNotes] = useState("");
-
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const fetchRequests = async () => {
     const { data } = await supabase
       .from("trade_sample_requests")
