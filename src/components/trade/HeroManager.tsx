@@ -96,6 +96,7 @@ const HeroManager = () => {
       delete next[sectionKey];
       return next;
     });
+    invalidateHeroCache();
     toast({ title: "Reverted to default hero" });
     setSaving(null);
   };
