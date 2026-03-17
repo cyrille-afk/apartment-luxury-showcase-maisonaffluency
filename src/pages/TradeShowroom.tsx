@@ -447,6 +447,9 @@ const TradeShowroom = () => {
     designerName: product.designer_name?.includes(' - ') ? product.designer_name.split(' - ')[0].trim() : (product.designer_name || "Unknown"),
     designerId: product.id,
     section: "designers",
+    price: product.trade_price_cents && product.currency
+      ? formatPriceConverted(product.trade_price_cents, product.currency, displayCurrency, fxRates)
+      : null,
   });
 
   const toLightboxItem = (product: ShowroomProduct): TradeProductLightboxItem => {

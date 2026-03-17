@@ -202,6 +202,7 @@ const TradeGallery = () => {
       title: product.product_name,
       subtitle: product.subtitle,
       image: product.image_url || "",
+      hoverImage: product.hover_image_url,
       materials: product.materials,
       dimensions: product.dimensions,
       category: product.category,
@@ -210,6 +211,10 @@ const TradeGallery = () => {
     designerName: product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name,
     designerId: product.id,
     section: "designers",
+    price: (() => {
+      const p = getProductPrice(product);
+      return p ? formatPriceConverted(p.cents, p.currency, displayCurrency, fxRates) : null;
+    })(),
   });
 
   const toLightboxItem = (product: TradeProduct): TradeProductLightboxItem => {
