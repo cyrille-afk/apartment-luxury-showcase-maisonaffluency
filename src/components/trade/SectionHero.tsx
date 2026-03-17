@@ -25,18 +25,18 @@ let heroCachePromise: Promise<void> | null = null;
 function loadHeroOverrides() {
   if (heroCache) return Promise.resolve();
   if (heroCachePromise) return heroCachePromise;
-  heroCachePromise = supabase
-    .from("section_heroes")
-    .select("section_key, image_url, gravity")
-    .then(({ data }) => {
+  heroCachePromise = Promise.resolve(
+    supabase
+      .from("section_heroes")
+      .select("section_key, image_url, gravity")
+  ).then(({ data }) => {
       heroCache = {};
       if (data) {
         data.forEach((r: any) => {
           heroCache![r.section_key] = { image_url: r.image_url, gravity: r.gravity };
         });
       }
-    })
-    .catch(() => {
+    }).catch(() => {
       heroCache = {};
     });
   return heroCachePromise;
