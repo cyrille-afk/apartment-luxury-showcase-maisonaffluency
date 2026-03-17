@@ -1,8 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,7 +48,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Use service role to fetch quote details + profile
     const adminClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -93,6 +89,8 @@ const handler = async (req: Request): Promise<Response> => {
         <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;color:#333;text-align:center;">${item.quantity}</td>
       </tr>`;
     }).join("");
+
+    const subject = `📋 New Quote ${quoteNumber} — ${userName}${company !== "N/A" ? ` (${company})` : ""}`;
 
     const html = `
     <div style="font-family:Georgia,'Times New Roman',serif;max-width:600px;margin:0 auto;color:#333;">
@@ -144,18 +142,53 @@ const handler = async (req: Request): Promise<Response> => {
       </p>
     </div>`;
 
-    const { error: emailError } = await resend.emails.send({
-      from: "Maison Affluency <trade@maisonaffluency.com>",
-      to: ["gregoire@maisonaffluency.com"],
-      subject: `📋 New Quote ${quoteNumber} — ${userName}${company !== "N/A" ? ` (${company})` : ""}`,
-      html,
-    });
+    // Fetch all admin emails
+    const { data: adminRoles } = await adminClient
+      .from("user_roles")
+      .select("user_id")
+      .in("role", ["admin", "super_admin"]);
 
-    if (emailError) {
-      console.error("Email send error:", emailError);
-      return new Response(JSON.stringify({ error: "Failed to send email", details: emailError }), {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+    const adminUserIds = [...new Set((adminRoles || []).map((r: any) => r.user_id))];
+    let adminEmails: string[] = [];
+    if (adminUserIds.length > 0) {
+      const { data: adminProfiles } = await adminClient
+        .from("profiles")
+        .select("email")
+        .in("id", adminUserIds);
+      adminEmails = [...new Set((adminProfiles || []).map((p: any) => p.email).filter(Boolean))];
+    }
+    if (adminEmails.length === 0) {
+      adminEmails = ["gregoire@maisonaffluency.com"];
+    }
+
+    // Enqueue one email per admin
+    for (const recipientEmail of adminEmails) {
+      const messageId = `quote-submitted-${quoteId}-${recipientEmail.split("@")[0]}`;
+      const { error: enqueueError } = await adminClient.rpc("enqueue_email", {
+        queue_name: "transactional_emails",
+        payload: {
+          to: recipientEmail,
+          from: "Maison Affluency Trade <trade@notify.www.maisonaffluency.com>",
+          sender_domain: "notify.www.maisonaffluency.com",
+          subject,
+          html,
+          purpose: "transactional",
+          label: "quote-submitted",
+          message_id: messageId,
+          idempotency_key: messageId,
+          queued_at: new Date().toISOString(),
+        },
+      });
+
+      if (enqueueError) {
+        console.error("Enqueue error for", recipientEmail, enqueueError);
+      }
+
+      await adminClient.from("email_send_log").insert({
+        message_id: messageId,
+        template_name: "quote-submitted",
+        recipient_email: recipientEmail,
+        status: "pending",
       });
     }
 

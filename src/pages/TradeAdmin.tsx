@@ -29,7 +29,7 @@ interface Application {
 }
 
 const TradeAdmin = () => {
-  const { isAdmin, loading, user } = useAuth();
+  const { isAdmin, isSuperAdmin, loading, user } = useAuth();
   const { toast } = useToast();
   const [applications, setApplications] = useState<Application[]>([]);
   const [fetching, setFetching] = useState(true);
@@ -186,7 +186,7 @@ const TradeAdmin = () => {
                   </p>
                 </div>
 
-                {app.status === "pending" && (
+                {app.status === "pending" && isSuperAdmin && (
                   <div className="flex gap-2 shrink-0">
                     <button
                       onClick={() => setConfirmDialog({ app, action: "approved" })}

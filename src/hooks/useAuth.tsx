@@ -7,6 +7,7 @@ interface AuthContextType {
   loading: boolean;
   isTradeUser: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   profile: { first_name: string; last_name: string; company: string; email: string } | null;
   applicationStatus: "none" | "pending" | "approved" | "rejected";
   signOut: () => Promise<void>;
@@ -26,6 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isTradeUser, setIsTradeUser] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [profile, setProfile] = useState<AuthContextType["profile"]>(null);
   const [applicationStatus, setApplicationStatus] = useState<AuthContextType["applicationStatus"]>("none");
   // Hold a reference to the dynamically-imported supabase client
@@ -41,7 +43,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (rolesRes.data) {
       const roles = rolesRes.data.map((r: any) => r.role);
       setIsTradeUser(roles.includes("trade_user"));
-      setIsAdmin(roles.includes("admin"));
+      setIsSuperAdmin(roles.includes("super_admin"));
+      setIsAdmin(roles.includes("admin") || roles.includes("super_admin"));
     }
 
     if (profileRes.data) {
@@ -96,6 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         setIsTradeUser(false);
         setIsAdmin(false);
+        setIsSuperAdmin(false);
         setProfile(null);
         setApplicationStatus("none");
 
@@ -130,7 +134,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user, sbClient, fetchUserData]);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isTradeUser, isAdmin, profile, applicationStatus, signOut, refreshRoles }}>
+    <AuthContext.Provider value={{ user, session, loading, isTradeUser, isAdmin, isSuperAdmin, profile, applicationStatus, signOut, refreshRoles }}>
       {children}
     </AuthContext.Provider>
   );
