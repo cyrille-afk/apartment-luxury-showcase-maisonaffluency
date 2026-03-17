@@ -86,14 +86,35 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           </button>
 
           {/* Image */}
-          <div className="relative w-full md:w-1/2 aspect-square md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0">
+          <div
+            className="relative w-full md:w-1/2 aspect-square md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0"
+            onMouseEnter={() => {
+              if (product.hover_image_url) setShowHoverImage(true);
+            }}
+            onMouseLeave={() => setShowHoverImage(false)}
+          >
             {product.image_url ? (
-              <img
-                src={product.image_url}
-                alt={product.product_name}
-                className="max-w-[90%] max-h-[90%] object-contain"
-                style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
-              />
+              <>
+                <img
+                  src={product.image_url}
+                  alt={product.product_name}
+                  className={cn(
+                    "max-w-[90%] max-h-[90%] object-contain transition-opacity duration-300",
+                    showHoverImage && product.hover_image_url ? "opacity-0" : "opacity-100"
+                  )}
+                  style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
+                />
+                {product.hover_image_url && (
+                  <img
+                    src={product.hover_image_url}
+                    alt={`${product.product_name} in context`}
+                    className={cn(
+                      "absolute max-w-[90%] max-h-[90%] object-contain pointer-events-none transition-opacity duration-300",
+                      showHoverImage ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                )}
+              </>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <span className="font-body text-sm text-muted-foreground">No image</span>
