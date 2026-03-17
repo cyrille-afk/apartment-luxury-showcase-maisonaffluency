@@ -323,7 +323,10 @@ const TradeShowroom = () => {
   }, [user]);
 
   const designers = useMemo(() => [...new Set(products.map((p) => p.designer_name).filter(Boolean) as string[])].sort(), [products]);
-  const categories = useMemo(() => [...new Set(products.map((p) => inferCategory(p.product_name)))].sort(), [products]);
+  const categories = useMemo(
+    () => CATEGORY_ORDER.filter((cat) => products.some((p) => p.category === cat)),
+    [products]
+  );
   const sections = useMemo(() => {
     const sectionSet = new Set(products.map((p) => getSection(p.image_identifier)));
     return [...sectionSet].sort();
