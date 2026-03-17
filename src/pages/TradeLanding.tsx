@@ -49,7 +49,7 @@ const benefits = [
     title: "Dedicated Client Advisor",
     description:
       "Maison Affluency nurture one-on-one relationships with its clients offering personalised and tailored advice on each project. From access to confidential sourcing, design collaborations and curation of artworks, our curating team offers a solid partnership.",
-    image: cloudinaryUrl("v1773752133/PHOTO-2025-07-12-17-23-36_nyhv7y", { width: 1400, quality: "auto:good", crop: "fill", gravity: "north" }),
+    image: cloudinaryUrl("v1773752378/Screen_Shot_2026-03-17_at_8.58.35_PM_mu5zwl", { width: 1400, quality: "auto:good", crop: "fill", gravity: "north" }),
   },
   {
     title: "Custom Requests",
