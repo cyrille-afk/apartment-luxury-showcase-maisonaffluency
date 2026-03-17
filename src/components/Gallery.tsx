@@ -222,7 +222,14 @@ const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean
   );
 };
 
-const Gallery = () => {
+interface GalleryProps {
+  /** Trade mode: pass to GalleryHotspots as onAddToQuote */
+  onHotspotAddToQuote?: (product: { product_name: string; designer_name: string | null; product_image_url: string | null; materials: string | null; dimensions: string | null }) => void;
+  /** Hide the section intro text (e.g. when embedded in trade portal) */
+  hideIntro?: boolean;
+}
+
+const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const isMobile = useIsMobile();
   const ref = useRef(null);
   const isInView = useInView(ref, {
@@ -537,9 +544,11 @@ const Gallery = () => {
                 {filteredExperiences.length} {filteredExperiences.length === 1 ? "scene" : "scenes"} · {activeCategory}
               </p>
             )}
-            <h2 className="hidden md:block text-base md:text-base lg:text-lg leading-relaxed text-foreground text-justify font-serif">
-              This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism.<br />Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.
-            </h2>
+            {!hideIntro && (
+              <h2 className="hidden md:block text-base md:text-base lg:text-lg leading-relaxed text-foreground text-justify font-serif">
+                This experiential residence represents a harmonious dialogue between Eastern aesthetics and Western modernism.<br />Each space has been thoughtfully crafted to showcase the interplay of texture, light, and artisanal craftsmanship.
+              </h2>
+            )}
           </motion.div>
 
           {(() => {
@@ -805,7 +814,7 @@ const Gallery = () => {
                                 imageIdentifier={item.title}
                                 visible={true}
                                 onCloseLightbox={closeLightbox}
-                                onRequestQuote={handleHotspotQuoteRequest}
+                                 {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest })}
                               />
                            )}
                           </div>
@@ -867,7 +876,7 @@ const Gallery = () => {
                          imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
                          visible={!imageZoomed}
                          onCloseLightbox={closeLightbox}
-                         onRequestQuote={handleHotspotQuoteRequest}
+                         {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest })}
                        />
                       {/* Close button — desktop: near image */}
                       <button
@@ -918,12 +927,14 @@ const Gallery = () => {
            )}
         </DialogContent>
       </Dialog>
-      <QuoteRequestDialog
-        open={quoteDialogOpen}
-        onOpenChange={setQuoteDialogOpen}
-        productName={quoteProduct.name}
-        designerName={quoteProduct.designer}
-      />
+      {!onHotspotAddToQuote && (
+        <QuoteRequestDialog
+          open={quoteDialogOpen}
+          onOpenChange={setQuoteDialogOpen}
+          productName={quoteProduct.name}
+          designerName={quoteProduct.designer}
+        />
+      )}
     </>;
 };
 export default Gallery;
