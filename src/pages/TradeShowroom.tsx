@@ -202,7 +202,7 @@ const TradeShowroom = () => {
         // Build lookups from curators' picks (code-level source of truth)
         const tradeProducts = getAllTradeProducts();
         const pdfLookup = new Map<string, string>();
-        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string; image_url?: string | null }>();
+        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string; image_url?: string | null; category?: string; subcategory?: string }>();
         for (const tp of tradeProducts) {
           const tpKey = tp.product_name.trim().toLowerCase();
           const metaEntry = {
