@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight } from "lucide-react";
+import { Plus, FileText, Clock, CheckCircle, Send, Trash2, ShoppingCart, ChevronRight, CreditCard } from "lucide-react";
 import { QuoteCardSkeleton } from "@/components/trade/skeletons";
 import QuoteDetail from "@/components/trade/QuoteDetail";
 import SectionHero from "@/components/trade/SectionHero";
@@ -23,7 +23,8 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; classNam
   submitted: { label: "Submitted", icon: Send, className: "bg-primary/10 text-primary" },
   priced: { label: "Priced — Review", icon: Clock, className: "bg-amber-500/10 text-amber-600" },
   confirmed: { label: "Order Confirmed", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
-  paid: { label: "Paid", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
+  deposit_paid: { label: "Deposit Paid", icon: CreditCard, className: "bg-emerald-500/10 text-emerald-600" },
+  paid: { label: "Fully Paid", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-600" },
 };
 
 const TradeQuotes = () => {

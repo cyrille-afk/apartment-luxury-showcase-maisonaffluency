@@ -31,25 +31,42 @@ serve(async (req) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const quoteId = session.metadata?.quote_id;
+    const paymentType = session.metadata?.payment_type || "deposit";
 
     if (quoteId && session.payment_status === "paid") {
-      console.log(`[STRIPE-WEBHOOK] Payment completed for quote ${quoteId}`);
+      console.log(`[STRIPE-WEBHOOK] Payment completed for quote ${quoteId}, type: ${paymentType}`);
 
       const supabase = createClient(
         Deno.env.get("SUPABASE_URL") ?? "",
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
       );
 
-      const { error } = await supabase
-        .from("trade_quotes")
-        .update({ status: "paid", updated_at: new Date().toISOString() })
-        .eq("id", quoteId)
-        .eq("status", "confirmed"); // Only update if still confirmed (idempotent)
+      if (paymentType === "deposit") {
+        // Deposit paid → move to deposit_paid
+        const { error } = await supabase
+          .from("trade_quotes")
+          .update({ status: "deposit_paid", updated_at: new Date().toISOString() })
+          .eq("id", quoteId)
+          .eq("status", "confirmed");
 
-      if (error) {
-        console.error(`[STRIPE-WEBHOOK] Failed to update quote ${quoteId}:`, error);
-      } else {
-        console.log(`[STRIPE-WEBHOOK] Quote ${quoteId} marked as paid`);
+        if (error) {
+          console.error(`[STRIPE-WEBHOOK] Failed to update quote ${quoteId}:`, error);
+        } else {
+          console.log(`[STRIPE-WEBHOOK] Quote ${quoteId} marked as deposit_paid`);
+        }
+      } else if (paymentType === "balance") {
+        // Balance paid → move to paid
+        const { error } = await supabase
+          .from("trade_quotes")
+          .update({ status: "paid", updated_at: new Date().toISOString() })
+          .eq("id", quoteId)
+          .eq("status", "deposit_paid");
+
+        if (error) {
+          console.error(`[STRIPE-WEBHOOK] Failed to update quote ${quoteId}:`, error);
+        } else {
+          console.log(`[STRIPE-WEBHOOK] Quote ${quoteId} marked as paid`);
+        }
       }
     }
   }
