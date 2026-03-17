@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronDown } from "lucide-react";
+import { ArrowLeft, ChevronDown, Quote } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -35,6 +35,34 @@ const benefits = [
     description:
       "Let us help you navigate the many pitfalls of the freight world by recommending the most appropriate partners with full insurance coverage. Maximising time whilst minimising frictions.",
     image: cloudinaryUrl("v1773473193/quality-control_dvxvmb", { width: 1400, quality: "auto:good", crop: "fill" }),
+  },
+];
+
+const stats = [
+  { value: "50+", label: "Designer Brands" },
+  { value: "15+", label: "Countries Served" },
+  { value: "100%", label: "Insured Shipping" },
+  { value: "48h", label: "Quote Turnaround" },
+];
+
+const testimonials = [
+  {
+    quote: "The dedicated advisor made our sourcing process seamless. We saved weeks on our hospitality project thanks to their global network and bespoke quotation system.",
+    name: "Sarah L.",
+    title: "Principal, Studio Interiors",
+    location: "Singapore",
+  },
+  {
+    quote: "Access to exclusive collections and consolidated shipping has been invaluable. Maison Affluency truly understands the needs of design professionals working across borders.",
+    name: "James T.",
+    title: "Creative Director",
+    location: "Hong Kong",
+  },
+  {
+    quote: "Their material library is exceptional. Being able to request samples directly and receive a comprehensive quote within days has transformed how we specify for clients.",
+    name: "Mei W.",
+    title: "Interior Architect",
+    location: "Kuala Lumpur",
   },
 ];
 
@@ -161,6 +189,29 @@ const TradeLanding = () => {
           </motion.div>
         </div>
 
+        {/* ─── Stats Bar ─── */}
+        <div className="w-full bg-foreground">
+          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-background/10">
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="flex flex-col items-center py-6 md:py-8"
+              >
+                <span className="font-display text-2xl md:text-3xl text-background tracking-wide">
+                  {stat.value}
+                </span>
+                <span className="font-body text-[11px] md:text-xs text-background/60 uppercase tracking-[0.15em] mt-1">
+                  {stat.label}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
         {/* ─── Intro text block ─── */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -269,31 +320,120 @@ const TradeLanding = () => {
           })}
         </div>
 
+        {/* ─── Testimonials ─── */}
+        <div className="w-full bg-muted/20 border-y border-border">
+          <div className="max-w-6xl mx-auto px-6 md:px-12 py-14 md:py-20">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="text-center mb-10 md:mb-14"
+            >
+              <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
+                Trusted by Design Professionals
+              </h2>
+              <p className="font-body text-sm text-muted-foreground max-w-lg mx-auto">
+                Hear from architects and interior designers who rely on our trade program for their projects.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+              {testimonials.map((t, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.6, delay: i * 0.15 }}
+                  className="relative bg-background border border-border rounded-sm p-6 md:p-8 flex flex-col"
+                >
+                  <Quote className="w-5 h-5 text-accent/50 mb-4 shrink-0" />
+                  <p className="font-body text-sm leading-relaxed text-muted-foreground flex-1 text-justify">
+                    "{t.quote}"
+                  </p>
+                  <div className="mt-6 pt-4 border-t border-border">
+                    <p className="font-display text-sm text-foreground">{t.name}</p>
+                    <p className="font-body text-xs text-muted-foreground mt-0.5">
+                      {t.title} · {t.location}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ─── How It Works ─── */}
+        <div className="max-w-4xl mx-auto px-6 md:px-12 py-14 md:py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="text-center mb-10 md:mb-14"
+          >
+            <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
+              How It Works
+            </h2>
+            <p className="font-body text-sm text-muted-foreground max-w-lg mx-auto">
+              Getting started takes less than five minutes.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+            {[
+              { step: "01", title: "Apply Online", desc: "Complete a short application with your company credentials and professional background." },
+              { step: "02", title: "Get Approved", desc: "Our team reviews your application within 1–2 business days and activates your trade account." },
+              { step: "03", title: "Start Sourcing", desc: "Access trade pricing, request bespoke quotations, and work directly with your dedicated advisor." },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.15 }}
+                className="text-center"
+              >
+                <span className="font-display text-3xl md:text-4xl text-accent/40 tracking-wider">
+                  {item.step}
+                </span>
+                <h3 className="font-display text-base md:text-lg text-foreground mt-3 mb-2">
+                  {item.title}
+                </h3>
+                <p className="font-body text-sm leading-relaxed text-muted-foreground">
+                  {item.desc}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
         {/* ─── Final CTA ─── */}
-        <div className="w-full bg-muted/30 border-t border-border">
+        <div className="w-full bg-foreground">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="max-w-3xl mx-auto px-6 py-14 md:py-28 text-center"
+            className="max-w-3xl mx-auto px-6 py-14 md:py-24 text-center"
           >
-            <h2 className="font-display text-2xl md:text-3xl text-foreground mb-4">
+            <h2 className="font-display text-2xl md:text-3xl text-background mb-4">
               Join The Trade Program
             </h2>
-            <p className="font-body text-base text-muted-foreground mb-10 max-w-xl mx-auto">
-              Apply today and unlock exclusive benefits designed for architects and interior designers.
+            <p className="font-body text-sm md:text-base text-background/60 mb-10 max-w-xl mx-auto leading-relaxed">
+              Apply today and unlock exclusive pricing, a dedicated advisor, and bespoke services designed for architects and interior designers.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
               <Link
                 to="/trade/register"
-                className="inline-flex items-center px-8 py-3 bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300"
+                className="inline-flex items-center px-8 py-3 bg-background hover:bg-background/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 min-w-[160px] justify-center"
               >
                 Apply Now
               </Link>
               <Link
                 to="/trade/login"
-                className="font-body text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+                className="font-body text-sm text-background/50 underline underline-offset-4 hover:text-background transition-colors"
               >
                 Already a member? Sign in
               </Link>
