@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isTradeUser, setIsTradeUser] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [profile, setProfile] = useState<AuthContextType["profile"]>(null);
   const [applicationStatus, setApplicationStatus] = useState<AuthContextType["applicationStatus"]>("none");
   // Hold a reference to the dynamically-imported supabase client
