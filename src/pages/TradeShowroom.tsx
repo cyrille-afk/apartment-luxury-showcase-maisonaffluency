@@ -289,6 +289,8 @@ const TradeShowroom = () => {
               dimensions: meta?.dimensions || item.dimensions,
               designer_name: meta?.brand || item.designer_name,
               product_image_url: meta?.image_url || item.product_image_url || null,
+              category: meta?.category || inferCategory(item.product_name),
+              subcategory: meta?.subcategory || null,
               pdf_url: pdfLookup.get(key),
               trade_price_cents: price?.cents ?? null,
               currency: price?.currency,
