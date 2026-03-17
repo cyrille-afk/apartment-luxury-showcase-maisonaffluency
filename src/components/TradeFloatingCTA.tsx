@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 const DISMISS_KEY = "trade_cta_dismissed";
 
 const TradeFloatingCTA = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, isTradeUser, isAdmin } = useAuth();
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(() => {
     try { return sessionStorage.getItem(DISMISS_KEY) === "1"; } catch { return false; }
