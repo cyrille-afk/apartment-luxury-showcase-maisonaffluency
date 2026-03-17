@@ -108,98 +108,106 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
               ))}
 
-              {isAdmin && (
-                <>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/trade/admin"
-                        className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                        activeClassName="bg-muted text-foreground font-medium"
-                      >
-                        <Shield className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span>Admin</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/trade/journal"
-                        className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                        activeClassName="bg-muted text-foreground font-medium"
-                      >
-                        <Newspaper className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span>Journal</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/trade/provenance"
-                        className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                        activeClassName="bg-muted text-foreground font-medium"
-                      >
-                        <Award className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span>Provenance</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/trade/documents-admin"
-                        className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                        activeClassName="bg-muted text-foreground font-medium"
-                      >
-                        <Upload className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span>Documents</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/trade/quotes-admin"
-                        className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                        activeClassName="bg-muted text-foreground font-medium"
-                      >
-                        <DollarSign className="h-4 w-4 shrink-0" />
-                        {!collapsed && (
-                          <span className="flex items-center gap-2">
-                            Quote Mgmt
-                            {submittedCount > 0 && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-medium leading-none">
-                                <AlertCircle className="h-2.5 w-2.5" />
-                                {submittedCount}
-                              </span>
-                            )}
-                          </span>
-                        )}
-                        {collapsed && submittedCount > 0 && (
-                          <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-destructive" />
-                        )}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/trade/media"
-                        className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                        activeClassName="bg-muted text-foreground font-medium"
-                      >
-                        <FolderArchive className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span>Media Library</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </>
-              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              {!collapsed && "Admin"}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/admin"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                      activeClassName="bg-muted text-foreground font-medium"
+                    >
+                      <Shield className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Admin</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/journal"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                      activeClassName="bg-muted text-foreground font-medium"
+                    >
+                      <Newspaper className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Journal</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/provenance"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                      activeClassName="bg-muted text-foreground font-medium"
+                    >
+                      <Award className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Provenance</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/documents-admin"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                      activeClassName="bg-muted text-foreground font-medium"
+                    >
+                      <Upload className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Documents</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/quotes-admin"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                      activeClassName="bg-muted text-foreground font-medium"
+                    >
+                      <DollarSign className="h-4 w-4 shrink-0" />
+                      {!collapsed && (
+                        <span className="flex items-center gap-2">
+                          Quote Mgmt
+                          {submittedCount > 0 && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-medium leading-none">
+                              <AlertCircle className="h-2.5 w-2.5" />
+                              {submittedCount}
+                            </span>
+                          )}
+                        </span>
+                      )}
+                      {collapsed && submittedCount > 0 && (
+                        <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-destructive" />
+                      )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/media"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                      activeClassName="bg-muted text-foreground font-medium"
+                    >
+                      <FolderArchive className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Media Library</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border p-3">
