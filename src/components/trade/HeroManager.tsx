@@ -66,6 +66,7 @@ const HeroManager = () => {
       toast({ title: "Failed to save", description: error.message, variant: "destructive" });
     } else {
       setHeroes((prev) => ({ ...prev, [sectionKey]: { section_key: sectionKey, image_url: urls[0], gravity } }));
+      invalidateHeroCache();
       toast({ title: "Hero image updated" });
     }
     setSaving(null);
