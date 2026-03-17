@@ -1,0 +1,1 @@
+ALTER TABLE public.trade_sample_requests ADD COLUMN image_url text DEFAULT NULL;
