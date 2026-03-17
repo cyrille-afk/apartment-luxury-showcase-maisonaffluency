@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Trash2, Package, ArrowRight } from "lucide-react";
 import { DrawerItemSkeleton } from "@/components/trade/skeletons";
@@ -15,6 +15,11 @@ interface QuoteItem {
     trade_price_cents: number | null;
     currency: string;
   };
+  /** Original catalog price before conversion */
+  catalogPriceCents?: number | null;
+  catalogCurrency?: string;
+  /** Price converted to SGD */
+  sgdPriceCents?: number | null;
 }
 
 interface QuoteDrawerProps {
