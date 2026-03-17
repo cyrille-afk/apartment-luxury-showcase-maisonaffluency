@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import SectionHero from "@/components/trade/SectionHero";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
+import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 
 interface ShowroomProduct {
   id: string;
