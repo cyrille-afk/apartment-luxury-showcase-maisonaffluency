@@ -1,8 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -102,6 +99,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     const subtotalStr = `${currency} ${(subtotalCents / 100).toFixed(2)}`;
 
+    const subject = `✅ Order Confirmed ${quoteNumber} — ${userName}${company !== "N/A" ? ` (${company})` : ""}`;
+
     const html = `
     <div style="font-family:Georgia,'Times New Roman',serif;max-width:600px;margin:0 auto;color:#333;">
       <div style="border-bottom:1px solid #e0dcd5;padding-bottom:20px;margin-bottom:24px;">
@@ -154,20 +153,39 @@ const handler = async (req: Request): Promise<Response> => {
       </p>
     </div>`;
 
-    const { error: emailError } = await resend.emails.send({
-      from: "Maison Affluency <trade@maisonaffluency.com>",
-      to: ["gregoire@maisonaffluency.com"],
-      subject: `✅ Order Confirmed ${quoteNumber} — ${userName}${company !== "N/A" ? ` (${company})` : ""}`,
-      html,
+    // Enqueue via the email queue for reliable delivery through the verified domain
+    const messageId = `quote-confirmed-${quoteId}`;
+    const { error: enqueueError } = await adminClient.rpc("enqueue_email", {
+      queue_name: "transactional_emails",
+      payload: {
+        to: "gregoire@maisonaffluency.com",
+        from: "Maison Affluency Trade <trade@notify.www.maisonaffluency.com>",
+        sender_domain: "notify.www.maisonaffluency.com",
+        subject,
+        html,
+        purpose: "transactional",
+        label: "quote-confirmed",
+        message_id: messageId,
+        idempotency_key: messageId,
+        queued_at: new Date().toISOString(),
+      },
     });
 
-    if (emailError) {
-      console.error("Email send error:", emailError);
-      return new Response(JSON.stringify({ error: "Failed to send email", details: emailError }), {
+    if (enqueueError) {
+      console.error("Enqueue error:", enqueueError);
+      return new Response(JSON.stringify({ error: "Failed to enqueue email", details: enqueueError }), {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
+
+    // Log pending status
+    await adminClient.from("email_send_log").insert({
+      message_id: messageId,
+      template_name: "quote-confirmed",
+      recipient_email: "gregoire@maisonaffluency.com",
+      status: "pending",
+    });
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json", ...corsHeaders },
