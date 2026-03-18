@@ -67,6 +67,10 @@ serve(async (req) => {
       if (!swapPrompt.trim()) throw new Error("A swap prompt describing what to replace is required");
 
       prompt = `You are given an interior architectural render. The user wants to swap a specific piece of furniture/product in the scene. Their instruction: "${swapPrompt}". Remove the specified item and replace it IN THE EXACT SAME POSITION, at the correct scale and perspective, with the replacement product shown in the second image. Match the lighting, shadows, and perspective of the original scene perfectly so the replacement looks naturally integrated. Keep everything else in the scene exactly as is. Style: ${defaultStyle}.`;
+    } else if (mode === "freeform") {
+      const userPrompt = body.userPrompt;
+      if (!userPrompt?.trim()) throw new Error("userPrompt is required for freeform mode");
+      prompt = `You are an expert architectural visualization AI. You are given an interior/architectural render. Apply the following user instruction to this image, keeping the overall scene intact unless told otherwise. Instruction: "${userPrompt}". Style: ${defaultStyle}. Produce a single cohesive professional architectural rendering as output.`;
     } else if (mode === "scene_edit") {
       const placementDesc = (placements || [])
         .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name} at position (${p.position?.x_percent ?? 50}% from left, ${p.position?.y_percent ?? 50}% from top), size ${p.size_percent ?? 15}% of image width, rotated ${p.rotation_degrees ?? 0}°`)
