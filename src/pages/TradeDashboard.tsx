@@ -29,7 +29,7 @@ const thumb = (id: string) =>
 
 const quickLinks = [
   { title: "Browse Showroom", description: "Review items from the Maison Affluency gallery", icon: MapPin, to: "/trade/showroom", image: thumb("living-room-hero_zxfcxl") },
-  { title: "Browse Website Products", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery", image: thumb("bespoke-sofa_gxidtx") },
+  { title: "Browse Website Products", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1773811405/IMG_6996_tfx4bp.jpg" },
   { title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", image: "https://res.cloudinary.com/dif1oamtj/image/upload/e_contrast:20,e_saturation:15/v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg.png" },
   { title: "Brand Library", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", image: thumb("v1773790684/AffluencySG_086_2_1_2_xpvcnw") },
   { title: "Request Samples", description: "Order product samples for your projects", icon: Package, to: "/trade/samples", image: thumb("v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v") },
