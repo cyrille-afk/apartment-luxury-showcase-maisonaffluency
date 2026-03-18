@@ -208,6 +208,9 @@ const TradeAxonometric = () => {
   const [aiSending, setAiSending] = useState(false);
   const [aiHistory, setAiHistory] = useState<{ role: "user" | "ai"; text: string; imageUrl?: string }[]>([]);
   const aiChatRef = useRef<HTMLDivElement>(null);
+  const [aiAttachedProduct, setAiAttachedProduct] = useState<SelectedProduct | null>(null);
+  const [aiProductPickerOpen, setAiProductPickerOpen] = useState(false);
+  const [aiProductSearch, setAiProductSearch] = useState("");
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
