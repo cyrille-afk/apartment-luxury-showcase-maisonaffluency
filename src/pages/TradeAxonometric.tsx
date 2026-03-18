@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
 type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite";
