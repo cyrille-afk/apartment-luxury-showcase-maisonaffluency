@@ -111,9 +111,10 @@ const TradePresentationViewer = () => {
     if (!newComment.trim() || !user) return;
     setSubmitting(true);
     const slide = slides[currentSlide];
+    const currentActualSlide = currentSlide === 0 ? null : slides[currentSlide - 1];
     await (supabase as any).from("presentation_comments").insert({
       presentation_id: id,
-      slide_id: slide?.id || null,
+      slide_id: currentActualSlide?.id || null,
       user_id: user.id,
       content: newComment.trim(),
     });
@@ -134,8 +135,11 @@ const TradePresentationViewer = () => {
   if (loading) return null;
   if (!user) return <Navigate to="/trade/login" replace />;
 
-  const slide = slides[currentSlide];
-  const slideComments = comments.filter(c => c.slide_id === slide?.id);
+  // Slide 0 = cover page, then gallery slides start at index 1
+  const totalSlides = slides.length + 1;
+  const isCoverSlide = currentSlide === 0;
+  const actualSlide = isCoverSlide ? null : slides[currentSlide - 1];
+  const slideComments = comments.filter(c => actualSlide && c.slide_id === actualSlide.id);
   const generalComments = comments.filter(c => !c.slide_id);
 
   return (
@@ -157,7 +161,7 @@ const TradePresentationViewer = () => {
                 <p className="font-body text-[10px] text-muted-foreground">
                   {presentation?.client_name && `${presentation.client_name} · `}
                   {presentation?.project_name && `${presentation.project_name} · `}
-                  Slide {currentSlide + 1} of {slides.length}
+                  Slide {currentSlide + 1} of {totalSlides}
                 </p>
               </div>
             </div>
@@ -174,8 +178,8 @@ const TradePresentationViewer = () => {
                   </span>
                 )}
               </button>
-              {slide?.image_url && (
-                <a href={slide.image_url} download target="_blank" rel="noopener noreferrer" className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" title="Download">
+              {actualSlide?.image_url && (
+                <a href={actualSlide.image_url} download target="_blank" rel="noopener noreferrer" className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" title="Download">
                   <Download className="w-4 h-4" />
                 </a>
               )}
@@ -185,19 +189,44 @@ const TradePresentationViewer = () => {
             </div>
           </div>
 
-          {slides.length === 0 ? (
+          {slides.length === 0 && !isCoverSlide ? (
             <div className="text-center py-16">
               <p className="font-body text-sm text-muted-foreground">This presentation has no slides yet.</p>
             </div>
           ) : (
             <div className="flex flex-col items-center flex-1">
-              {/* Main slide */}
+              {/* Main slide area */}
               <div className={`relative w-full ${fullscreen ? "flex-1" : ""} flex items-center justify-center p-6`}>
-                <img
-                  src={slide?.image_url}
-                  alt={slide?.title}
-                  className={`max-w-full ${fullscreen ? "max-h-[calc(100vh-180px)]" : "max-h-[60vh]"} object-contain rounded-lg`}
-                />
+                {isCoverSlide ? (
+                  /* Cover Page */
+                  <div className={`w-full ${fullscreen ? "max-h-[calc(100vh-180px)]" : "max-h-[60vh]"} aspect-[16/9] max-w-4xl bg-foreground rounded-lg flex flex-col items-center justify-center text-center px-12 relative overflow-hidden`}>
+                    {/* Subtle border frame */}
+                    <div className="absolute inset-4 border border-background/20 rounded-md pointer-events-none" />
+                    <span className="font-body text-[10px] text-background/40 uppercase tracking-[0.35em] mb-6">Prepared by</span>
+                    <h2 className="font-display text-4xl md:text-5xl text-background tracking-wide mb-2">Maison Affluency</h2>
+                    <div className="w-16 h-px bg-background/30 my-6" />
+                    {presentation?.title && (
+                      <h3 className="font-display text-xl md:text-2xl text-background/90 mb-3">{presentation.title}</h3>
+                    )}
+                    {presentation?.client_name && (
+                      <p className="font-body text-sm text-background/60 mb-1">For {presentation.client_name}</p>
+                    )}
+                    {presentation?.project_name && (
+                      <p className="font-body text-sm text-background/60 mb-4">{presentation.project_name}</p>
+                    )}
+                    <p className="font-body text-xs text-background/40 mt-4">
+                      {format(new Date(presentation?.created_at || new Date()), "MMMM yyyy")}
+                    </p>
+                  </div>
+                ) : (
+                  /* Gallery slide */
+                  <img
+                    src={actualSlide?.image_url}
+                    alt={actualSlide?.title}
+                    className={`max-w-full ${fullscreen ? "max-h-[calc(100vh-180px)]" : "max-h-[60vh]"} object-contain rounded-lg`}
+                  />
+                )}
+                {/* Nav arrows */}
                 <button
                   onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
                   disabled={currentSlide === 0}
@@ -206,34 +235,43 @@ const TradePresentationViewer = () => {
                   <ArrowLeft className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
-                  disabled={currentSlide >= slides.length - 1}
+                  onClick={() => setCurrentSlide(Math.min(totalSlides - 1, currentSlide + 1))}
+                  disabled={currentSlide >= totalSlides - 1}
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-background/80 border border-border text-muted-foreground hover:text-foreground transition-colors disabled:opacity-20"
                 >
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Slide info */}
-              {slide && (slide.title || slide.description) && (
+              {/* Slide info (gallery slides only) */}
+              {actualSlide && (actualSlide.title || actualSlide.description) && (
                 <div className="text-center px-6 pb-4 max-w-2xl">
-                  {slide.title && <h2 className="font-display text-xl text-foreground mb-1">{slide.title}</h2>}
-                  {slide.description && <p className="font-body text-sm text-muted-foreground">{slide.description}</p>}
+                  {actualSlide.title && <h2 className="font-display text-xl text-foreground mb-1">{actualSlide.title}</h2>}
+                  {actualSlide.description && <p className="font-body text-sm text-muted-foreground">{actualSlide.description}</p>}
                   <div className="flex items-center justify-center gap-4 mt-2 text-[10px] text-muted-foreground/60 font-body">
-                    {slide.project_name && <span>Project: {slide.project_name}</span>}
-                    {slide.style_preset && <span>Style: {slide.style_preset}</span>}
+                    {actualSlide.project_name && <span>Project: {actualSlide.project_name}</span>}
+                    {actualSlide.style_preset && <span>Style: {actualSlide.style_preset}</span>}
                   </div>
                 </div>
               )}
 
               {/* Thumbnail strip */}
               <div className="flex items-center gap-2 p-4 overflow-x-auto max-w-full border-t border-border">
+                {/* Cover thumbnail */}
+                <button
+                  onClick={() => setCurrentSlide(0)}
+                  className={`shrink-0 rounded-md overflow-hidden border-2 transition-all w-16 h-12 flex items-center justify-center ${
+                    currentSlide === 0 ? "border-primary ring-2 ring-primary/20 bg-foreground" : "border-border hover:border-foreground/30 bg-foreground/80"
+                  }`}
+                >
+                  <span className="font-display text-[8px] text-background tracking-wider">MA</span>
+                </button>
                 {slides.map((s, i) => (
                   <button
                     key={s.id}
-                    onClick={() => setCurrentSlide(i)}
+                    onClick={() => setCurrentSlide(i + 1)}
                     className={`shrink-0 rounded-md overflow-hidden border-2 transition-all ${
-                      i === currentSlide ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-foreground/30"
+                      i + 1 === currentSlide ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-foreground/30"
                     }`}
                   >
                     <img src={s.image_url} alt={s.title} className="w-16 h-12 object-cover" />
@@ -250,7 +288,7 @@ const TradePresentationViewer = () => {
             <div className="p-4 border-b border-border">
               <h3 className="font-display text-sm text-foreground">Comments</h3>
               <p className="font-body text-[10px] text-muted-foreground mt-0.5">
-                {slide ? `On slide ${currentSlide + 1}: ${slide.title || "Untitled"}` : "Select a slide"}
+                {isCoverSlide ? "Cover page" : actualSlide ? `On slide ${currentSlide}: ${actualSlide.title || "Untitled"}` : "Select a slide"}
               </p>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
