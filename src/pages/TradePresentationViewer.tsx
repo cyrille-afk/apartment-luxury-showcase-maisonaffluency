@@ -111,9 +111,10 @@ const TradePresentationViewer = () => {
     if (!newComment.trim() || !user) return;
     setSubmitting(true);
     const slide = slides[currentSlide];
+    const currentActualSlide = currentSlide === 0 ? null : slides[currentSlide - 1];
     await (supabase as any).from("presentation_comments").insert({
       presentation_id: id,
-      slide_id: slide?.id || null,
+      slide_id: currentActualSlide?.id || null,
       user_id: user.id,
       content: newComment.trim(),
     });
