@@ -310,6 +310,99 @@ export type Database = {
         }
         Relationships: []
       }
+      presentation_slides: {
+        Row: {
+          created_at: string
+          description: string | null
+          gallery_item_id: string | null
+          id: string
+          image_url: string
+          presentation_id: string
+          project_name: string | null
+          sort_order: number
+          style_preset: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          gallery_item_id?: string | null
+          id?: string
+          image_url: string
+          presentation_id: string
+          project_name?: string | null
+          sort_order?: number
+          style_preset?: string | null
+          title?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          gallery_item_id?: string | null
+          id?: string
+          image_url?: string
+          presentation_id?: string
+          project_name?: string | null
+          sort_order?: number
+          style_preset?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presentation_slides_gallery_item_id_fkey"
+            columns: ["gallery_item_id"]
+            isOneToOne: false
+            referencedRelation: "axonometric_gallery"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presentation_slides_presentation_id_fkey"
+            columns: ["presentation_id"]
+            isOneToOne: false
+            referencedRelation: "presentations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      presentations: {
+        Row: {
+          client_name: string | null
+          cover_style: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_published: boolean
+          project_name: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_name?: string | null
+          cover_style?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          project_name?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string | null
+          cover_style?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          project_name?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
