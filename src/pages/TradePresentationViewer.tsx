@@ -78,7 +78,7 @@ const TradePresentationViewer = () => {
         .order("created_at", { ascending: true });
       if (error) throw error;
       // Fetch user names
-      const userIds = [...new Set((data || []).map((c: any) => c.user_id))];
+      const userIds = [...new Set((data || []).map((c: any) => c.user_id))] as string[];
       const { data: profiles } = await supabase.from("profiles").select("id, first_name, last_name, email").in("id", userIds);
       const profileMap = new Map((profiles || []).map(p => [p.id, p]));
       return (data || []).map((c: any) => ({
