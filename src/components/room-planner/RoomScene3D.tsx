@@ -141,6 +141,49 @@ function ProductTexturePlane({ url, hovered }: { url: string; hovered: boolean }
   );
 }
 
+const SNAP_GRID = 0.5; // meters
+
+function snapToGrid(val: number, grid: number): number {
+  return Math.round(val / grid) * grid;
+}
+
+/** Visual snap guides that appear while dragging */
+function SnapGuides({ position, visible }: { position: { x: number; z: number }; visible: boolean }) {
+  if (!visible) return null;
+  const sx = snapToGrid(position.x, SNAP_GRID);
+  const sz = snapToGrid(position.z, SNAP_GRID);
+  return (
+    <group>
+      {/* Cross-hair lines at snapped position */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[new Float32Array([sx, 0.03, -20, sx, 0.03, 20]), 3]}
+            count={2}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial color="#4a90d9" transparent opacity={0.25} />
+      </line>
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[new Float32Array([-20, 0.03, sz, 20, 0.03, sz]), 3]}
+            count={2}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial color="#4a90d9" transparent opacity={0.25} />
+      </line>
+      {/* Snap dot */}
+      <mesh position={[sx, 0.04, sz]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.08, 16]} />
+        <meshBasicMaterial color="#4a90d9" transparent opacity={0.6} />
+      </mesh>
+    </group>
+  );
+}
+
 /** Draggable + rotatable product in the 3D scene */
 function PlacedProductMesh({
   product,
@@ -180,8 +223,10 @@ function PlacedProductMesh({
       raycaster.setFromCamera(mouse, camera);
       const intersection = new THREE.Vector3();
       if (raycaster.ray.intersectPlane(floorPlane, intersection)) {
+        const snappedX = snapToGrid(intersection.x, SNAP_GRID);
+        const snappedZ = snapToGrid(intersection.z, SNAP_GRID);
         onUpdate?.({
-          position: { x: intersection.x, y: product.position.y, z: intersection.z },
+          position: { x: snappedX, y: product.position.y, z: snappedZ },
         });
       }
     };
@@ -213,7 +258,9 @@ function PlacedProductMesh({
     return () => gl.domElement.removeEventListener("wheel", handleWheel);
   }, [hovered, dragging, gl, product.rotation, onUpdate]);
 
-  return (
+   return (
+    <>
+    <SnapGuides position={{ x: product.position.x, z: product.position.z }} visible={dragging} />
     <group
       ref={groupRef}
       position={[product.position.x, product.position.y, product.position.z]}
@@ -298,6 +345,7 @@ function PlacedProductMesh({
         )}
       </Html>
     </group>
+    </>
   );
 }
 
@@ -361,7 +409,7 @@ function Scene({ rooms, placedProducts, wallHeight, ppm, imgCenter, onProductUpd
       <FloorPlane onFloorClick={onFloorClick} />
 
       {/* Grid helper */}
-      <gridHelper args={[40, 40, "#d4d0cc", "#e8e4e0"]} />
+      <gridHelper args={[40, 80, "#d4d0cc", "#e8e4e0"]} />
 
       {/* Rooms */}
       {rooms.map((room) => (
