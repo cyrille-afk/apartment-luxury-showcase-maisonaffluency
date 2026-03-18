@@ -287,7 +287,7 @@ const TradePresentationViewer = () => {
             <div className="p-4 border-b border-border">
               <h3 className="font-display text-sm text-foreground">Comments</h3>
               <p className="font-body text-[10px] text-muted-foreground mt-0.5">
-                {slide ? `On slide ${currentSlide + 1}: ${slide.title || "Untitled"}` : "Select a slide"}
+                {isCoverSlide ? "Cover page" : actualSlide ? `On slide ${currentSlide}: ${actualSlide.title || "Untitled"}` : "Select a slide"}
               </p>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
