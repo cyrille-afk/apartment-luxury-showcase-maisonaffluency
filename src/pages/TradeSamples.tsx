@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Package, Plus, Clock, Truck, CheckCircle, RotateCcw, X, ImagePlus } from "lucide-react";
+import { Package, Plus, Clock, Truck, CheckCircle, RotateCcw, X, ImagePlus, FileDown } from "lucide-react";
 import SectionHero from "@/components/trade/SectionHero";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
