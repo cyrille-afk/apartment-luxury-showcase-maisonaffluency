@@ -85,6 +85,9 @@ serve(async (req) => {
       const userPrompt = body.userPrompt;
       if (!userPrompt?.trim()) throw new Error("userPrompt is required for freeform mode");
       prompt = `You are an expert architectural visualization AI. You are given an interior/architectural render. Apply the following user instruction to this image.\n\nCRITICAL RULE: You MUST keep ALL other elements in the scene EXACTLY as they are. Only modify what is explicitly requested. Every piece of furniture, decoration, wall, floor, ceiling, plant, artwork, rug, lighting fixture, and architectural detail that is NOT mentioned in the instruction must remain completely unchanged and in its exact original position. The output should be identical to the input except for the specific change requested.\n\nInstruction: "${userPrompt}"\n\nStyle: ${defaultStyle}. Produce a single cohesive professional architectural rendering as output.`;
+    } else if (mode === "turntable_angle") {
+      const angle = turntableAngle ?? 0;
+      prompt = `You are given a 3D axonometric architectural render. Rotate the entire scene ${angle} degrees clockwise around the vertical axis and re-render it from this new viewing angle. Maintain EXACTLY the same room geometry, furniture, materials, textures, lighting quality, and style. The scene content must be identical — only the camera orbit angle changes. Produce a single cohesive professional architectural rendering from the new angle.\n\nRotation: ${angle}° clockwise from the original view.\nStyle: ${defaultStyle}.`;
     } else if (mode === "scene_edit") {
       const placementDesc = (placements || [])
         .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name} at position (${p.position?.x_percent ?? 50}% from left, ${p.position?.y_percent ?? 50}% from top), size ${p.size_percent ?? 15}% of image width, rotated ${p.rotation_degrees ?? 0}°`)
