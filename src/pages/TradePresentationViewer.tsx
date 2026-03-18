@@ -207,6 +207,16 @@ const TradePresentationViewer = () => {
                   </span>
                 )}
               </button>
+              {isAdmin && slides.length > 0 && (
+                <button
+                  onClick={handleExportPdf}
+                  disabled={exportingPdf}
+                  className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+                  title="Export as PDF"
+                >
+                  {exportingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+                </button>
+              )}
               {actualSlide?.image_url && (
                 <a href={actualSlide.image_url} download target="_blank" rel="noopener noreferrer" className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" title="Download">
                   <Download className="w-4 h-4" />
