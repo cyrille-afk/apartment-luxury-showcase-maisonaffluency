@@ -76,6 +76,14 @@ const TradeAxonometric = () => {
 
     setGenerating(true);
     try {
+      // Mark request as in_progress if working from queue
+      if (activeRequestId) {
+        await (supabase as any)
+          .from("axonometric_requests")
+          .update({ status: "in_progress" })
+          .eq("id", activeRequestId);
+      }
+
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: {
           imageUrl: sourceImage,
@@ -101,6 +109,41 @@ const TradeAxonometric = () => {
       toast({ title: "Generation failed", description: e.message, variant: "destructive" });
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const loadFromQueue = (req: any) => {
+    setSourceImage(req.image_url);
+    setActiveRequestId(req.id);
+    setAdminNotes(req.admin_notes || "");
+    setMode(req.request_type === "section" ? "section_to_axo" : "elevation_to_axo");
+    setShowQueue(false);
+    setResult(null);
+  };
+
+  const completeRequest = async () => {
+    if (!activeRequestId || !result) return;
+    const resultUrl = result.storedUrl || result.imageUrl;
+    try {
+      await (supabase as any)
+        .from("axonometric_requests")
+        .update({
+          status: "completed",
+          result_image_url: resultUrl,
+          admin_notes: adminNotes.trim().slice(0, 1000) || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", activeRequestId);
+
+      toast({ title: "Request completed and result delivered" });
+      setActiveRequestId(null);
+      setSourceImage(null);
+      setResult(null);
+      setAdminNotes("");
+      setShowQueue(true);
+      queryClient.invalidateQueries({ queryKey: ["axonometric-requests-admin"] });
+    } catch (e: any) {
+      toast({ title: "Failed to update request", description: e.message, variant: "destructive" });
     }
   };
 
