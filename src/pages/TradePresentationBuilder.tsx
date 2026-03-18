@@ -91,6 +91,21 @@ const TradePresentationBuilder = () => {
     enabled: !!isAdmin && showGalleryPicker,
   });
 
+  // Fetch shares
+  const { data: shares = [], refetch: refetchShares } = useQuery({
+    queryKey: ["presentation-shares", id],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("presentation_shares")
+        .select("*")
+        .eq("presentation_id", id)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data as { id: string; shared_with_email: string; shared_with_user_id: string | null; role: string; created_at: string }[];
+    },
+    enabled: !!id && !!isAdmin,
+  });
+
   // Sync form state when presentation loads
   useEffect(() => {
     if (presentation) {
