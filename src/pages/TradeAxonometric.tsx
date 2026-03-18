@@ -425,7 +425,7 @@ const TradeAxonometric = () => {
     }
   };
 
-
+  const filterStyle = {
     filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) sepia(${Math.abs(warmth)}%)`,
   };
 
