@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SectionHero from "@/components/trade/SectionHero";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
