@@ -410,10 +410,18 @@ const TradeAxonometric = () => {
 
   const sendAiPrompt = async () => {
     if (!aiPrompt.trim() || !result) return;
+
+    const normalizeForGateway = (url: string | null | undefined) => {
+      if (!url) return null;
+      if (url.startsWith("blob:") || url.startsWith("user-uploads://")) return null;
+      return toAbsoluteUrl(url);
+    };
+
     const currentImageUrl = result.storedUrl || result.imageUrl;
     const userMsg = aiPrompt.trim();
     const attachedProduct = aiAttachedProduct;
     const productLabel = attachedProduct ? ` [with: ${attachedProduct.product_name}]` : "";
+
     setAiHistory((prev) => [...prev, { role: "user", text: userMsg + productLabel }]);
     setAiPrompt("");
     setAiAttachedProduct(null);
@@ -421,22 +429,55 @@ const TradeAxonometric = () => {
     setAiSending(true);
 
     try {
+      const normalizedSceneUrl = normalizeForGateway(currentImageUrl);
+      if (!normalizedSceneUrl) {
+        throw new Error("Current render is not publicly accessible yet. Please regenerate or re-upload before using AI Edit.");
+      }
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) {
+        throw new Error("Your session expired. Please sign in again, then retry the swap.");
+      }
+
       const body: any = {
-        imageUrl: toAbsoluteUrl(currentImageUrl),
+        imageUrl: normalizedSceneUrl,
         style,
       };
 
       if (attachedProduct) {
-        // Use product_swap mode with single swap
+        const replacementUrl = normalizeForGateway(attachedProduct.image_url);
+        if (!replacementUrl) {
+          throw new Error("Selected product image is invalid. Please pick another product image.");
+        }
+
         body.mode = "product_swap";
-        body.swaps = [{ prompt: userMsg, imageUrl: toAbsoluteUrl(attachedProduct.image_url)! }];
+        body.swaps = [{ prompt: userMsg, imageUrl: replacementUrl }];
       } else {
         body.mode = "freeform";
         body.userPrompt = userMsg;
       }
 
-      const { data, error } = await supabase.functions.invoke("axonometric-generate", { body });
-      if (error) throw error;
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
+        body,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (error) {
+        let msg = error.message;
+        const response = (error as any)?.context;
+        if (response?.clone) {
+          try {
+            const parsed = await response.clone().json();
+            msg = parsed?.error || parsed?.message || msg;
+          } catch {
+            // keep fallback message
+          }
+        }
+        throw new Error(msg);
+      }
       if (data?.error) throw new Error(data.error);
 
       const gen: GenerationResult = {
