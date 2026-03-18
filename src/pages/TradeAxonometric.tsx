@@ -610,17 +610,6 @@ const TradeAxonometric = () => {
                     </div>
                   ))}
                 </div>
-                {overlayImages.length < 5 && (
-                  <CloudUpload
-                    folder="axonometric-cad-blocks"
-                    accept="image/*"
-                    multiple
-                    label="Or upload custom CAD blocks"
-                    onUpload={(urls) =>
-                      setOverlayImages((prev) => [...prev, ...urls].slice(0, 5))
-                    }
-                  />
-                )}
               </div>
             )}
 
