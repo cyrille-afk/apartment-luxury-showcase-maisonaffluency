@@ -311,11 +311,11 @@ const TradeAxonometric = () => {
       }
 
       const body: any = {
-        imageUrl: sourceImage,
+        imageUrl: toAbsoluteUrl(sourceImage),
         mode,
         style,
-        overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages : undefined,
-        technicalDrawingUrl: mode === "cad_overlay" ? technicalDrawingUrl : undefined,
+        overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages.map(u => toAbsoluteUrl(u)).filter(Boolean) : undefined,
+        technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
       };
 
 
