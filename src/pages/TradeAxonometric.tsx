@@ -214,6 +214,11 @@ const TradeAxonometric = () => {
         })
         .eq("id", activeRequestId);
 
+      // Send email notification to the user
+      supabase.functions.invoke("send-axo-status-notification", {
+        body: { requestId: activeRequestId, newStatus: "completed" },
+      }).catch((err) => console.error("Failed to send status notification:", err));
+
       toast({ title: "Request completed and result delivered" });
       setActiveRequestId(null);
       setSourceImage(null);
