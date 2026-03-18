@@ -140,6 +140,10 @@ const TradePresentationViewer = () => {
     if (!presentation || slides.length === 0) return;
     setExportingPdf(true);
     try {
+      const [{ pdf }, { default: PresentationPDF }] = await Promise.all([
+        loadPdfRenderer(),
+        loadPresentationPDF(),
+      ]);
       const blob = await pdf(
         <PresentationPDF
           title={presentation.title || ""}
