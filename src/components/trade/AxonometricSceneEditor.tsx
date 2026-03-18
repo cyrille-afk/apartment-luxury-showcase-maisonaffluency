@@ -44,6 +44,7 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
   const [productSearch, setProductSearch] = useState("");
   const [sceneCategory, setSceneCategory] = useState("");
   const [sceneSubcategory, setSceneSubcategory] = useState("");
+  const [sceneBrand, setSceneBrand] = useState("");
   const [generating, setGenerating] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [imgSize, setImgSize] = useState({ w: 0, h: 0 });
