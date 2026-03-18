@@ -32,6 +32,9 @@ const TradeQuotesAdmin = lazy(() => import("./pages/TradeQuotesAdmin"));
 const TradeAxonometric = lazy(() => import("./pages/TradeAxonometric"));
 const TradeAxonometricRequests = lazy(() => import("./pages/TradeAxonometricRequests"));
 const TradeAxonometricGallery = lazy(() => import("./pages/TradeAxonometricGallery"));
+const TradePresentations = lazy(() => import("./pages/TradePresentations"));
+const TradePresentationBuilder = lazy(() => import("./pages/TradePresentationBuilder"));
+const TradePresentationViewer = lazy(() => import("./pages/TradePresentationViewer"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Journal = lazy(() => import("./pages/Journal"));
 const JournalArticle = lazy(() => import("./pages/JournalArticle"));
@@ -105,6 +108,9 @@ const App = () => {
                     <Route path="axonometric" element={<TradeAxonometric />} />
                     <Route path="axonometric-requests" element={<TradeAxonometricRequests />} />
                     <Route path="axonometric-gallery" element={<TradeAxonometricGallery />} />
+                    <Route path="presentations" element={<TradePresentations />} />
+                    <Route path="presentations/:id" element={<TradePresentationBuilder />} />
+                    <Route path="presentations/:id/view" element={<TradePresentationViewer />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 
