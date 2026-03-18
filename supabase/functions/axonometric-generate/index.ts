@@ -247,8 +247,19 @@ Style: ${defaultStyle}.`;
       }
     }
 
+    // Proposal refine: original layout reference + previous proposal (imageUrl)
+    if (mode === "proposal_refine") {
+      // content already has [text_prompt, previous_proposal_image]
+      // Insert original layout reference before the proposal
+      if (referenceImageUrl) {
+        const proposalEntry = content[1];
+        content[1] = { type: "image_url", image_url: { url: referenceImageUrl } };
+        content.splice(2, 0, proposalEntry);
+      }
+    }
+
     // Pro model for heavy transformations, flash for iterative/turntable flows to reduce wait states
-    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay", "proposal_render"];
+    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay", "proposal_render", "proposal_refine"];
     const selectedModel = proModes.includes(mode)
       ? "google/gemini-3-pro-image-preview"
       : "google/gemini-3.1-flash-image-preview";
