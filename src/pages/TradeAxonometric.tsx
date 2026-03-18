@@ -587,7 +587,7 @@ const TradeAxonometric = () => {
     } catch (e: any) {
       const message = e?.message || "AI edit failed";
       const rateLimited = isRateLimitedError(message);
-      if (rateLimited) startCooldown(() => handleAiEdit(userMsg));
+      if (rateLimited) startCooldown(() => sendAiPrompt());
       toast({
         title: rateLimited ? "Backend is busy" : "AI edit failed",
         description: rateLimited
