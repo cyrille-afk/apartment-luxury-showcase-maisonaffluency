@@ -21,7 +21,7 @@ const DesignDetails = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           {/* Compact teaser card */}
-          <div className="max-w-3xl mx-auto p-[2px] rounded-sm" style={{ background: 'hsl(36 40% 65%)' }}>
+          <div className="max-w-3xl mx-auto p-[2px] rounded-sm bg-foreground">
             <Link
               to="/trade/program"
               className="group block overflow-hidden rounded-sm relative aspect-[5/3]"
