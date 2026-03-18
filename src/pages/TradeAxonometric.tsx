@@ -197,6 +197,7 @@ const TradeAxonometric = () => {
   const [galleryDesc, setGalleryDesc] = useState("");
   const [savingToGallery, setSavingToGallery] = useState(false);
   const [showSceneEditor, setShowSceneEditor] = useState(false);
+  const [showDrafts, setShowDrafts] = useState(false);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
