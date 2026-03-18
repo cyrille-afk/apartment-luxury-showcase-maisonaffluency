@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
-  Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package,
+  Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package, Box,
 } from "lucide-react";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { Link } from "react-router-dom";
@@ -34,6 +34,7 @@ const DASH_CARDS = [
   { key: "dash-library", title: "Brand Library", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", fallbackId: "v1773790684/AffluencySG_086_2_1_2_xpvcnw", fallbackImage: null as string | null, defaultGravity: "auto" },
   { key: "dash-samples", title: "Request Samples", description: "Order product samples for your projects", icon: Package, to: "/trade/samples", fallbackId: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v", fallbackImage: null as string | null, defaultGravity: "auto" },
   { key: "dash-quotes", title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/e_contrast:20,e_saturation:15/v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg.png", defaultGravity: "auto" },
+  { key: "dash-3d-studio", title: "3D Studio", description: "Submit drawings for 3D renders & browse gallery", icon: Box, to: "/trade/axonometric-requests", fallbackId: null as string | null, fallbackImage: null as string | null, defaultGravity: "auto" },
 ];
 
 const GRAVITY_TO_POSITION: Record<string, string> = {
@@ -72,6 +73,7 @@ const TradeDashboard = () => {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
+  const [studioStats, setStudioStats] = useState<{ count: number; latestImage: string | null }>({ count: 0, latestImage: null });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -153,6 +155,22 @@ const TradeDashboard = () => {
       items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setActivity(items.slice(0, 8));
 
+      // Fetch 3D Studio gallery stats
+      const { count: galleryCount } = await (supabase as any)
+        .from("axonometric_gallery")
+        .select("*", { count: "exact", head: true })
+        .eq("is_published", true);
+      const { data: latestRender } = await (supabase as any)
+        .from("axonometric_gallery")
+        .select("image_url")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      setStudioStats({
+        count: galleryCount || 0,
+        latestImage: latestRender?.[0]?.image_url || null,
+      });
+
       setLoading(false);
     };
     fetchData();
@@ -161,6 +179,8 @@ const TradeDashboard = () => {
   const getCardImage = (card: typeof DASH_CARDS[number]) => {
     const override = heroOverrides[card.key];
     if (override) return override.image_url;
+    // 3D Studio: use latest gallery render as dynamic thumbnail
+    if (card.key === "dash-3d-studio" && studioStats.latestImage) return studioStats.latestImage;
     if (card.fallbackImage) return card.fallbackImage;
     if (card.fallbackId) return thumb(card.fallbackId);
     return "";
@@ -186,7 +206,7 @@ const TradeDashboard = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
         {DASH_CARDS.map((card) => (
           <Link
             key={card.to}
@@ -194,13 +214,24 @@ const TradeDashboard = () => {
             className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all"
           >
             <div className="relative aspect-[3/2] overflow-hidden">
-              <img
-                src={getCardImage(card)}
-                alt={card.title}
-                loading="lazy"
-                className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${getCardPosition(card)}`}
-              />
+              {getCardImage(card) ? (
+                <img
+                  src={getCardImage(card)}
+                  alt={card.title}
+                  loading="lazy"
+                  className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${getCardPosition(card)}`}
+                />
+              ) : (
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <card.icon className="w-8 h-8 text-muted-foreground/30" />
+                </div>
+              )}
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
+              {card.key === "dash-3d-studio" && studioStats.count > 0 && (
+                <span className="absolute top-2 right-2 inline-flex items-center px-2 py-0.5 rounded-full bg-background/80 backdrop-blur-sm font-body text-[10px] text-foreground border border-border">
+                  {studioStats.count} render{studioStats.count !== 1 ? "s" : ""}
+                </span>
+              )}
             </div>
             <div className="p-3 md:p-4">
               <h3 className="font-display text-sm md:text-base text-foreground mb-0.5 md:mb-1">{card.title}</h3>
