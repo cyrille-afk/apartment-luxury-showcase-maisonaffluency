@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, Download, ArrowLeft,
+  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send,
 } from "lucide-react";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -49,6 +49,9 @@ export default function ProposalBuilder({
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [generating, setGenerating] = useState(false);
   const [proposalResult, setProposalResult] = useState<string | null>(null);
+  const [proposalHistory, setProposalHistory] = useState<string[]>([]);
+  const [refinementPrompt, setRefinementPrompt] = useState("");
+  const [refining, setRefining] = useState(false);
 
   // Product picker state
   const [pickerOpen, setPickerOpen] = useState(true);
@@ -121,6 +124,7 @@ export default function ProposalBuilder({
       if (data?.error) throw new Error(data.error);
 
       const resultUrl = data.storedUrl || data.imageUrl;
+      setProposalHistory((prev) => [...prev, resultUrl]);
       setProposalResult(resultUrl);
       onResult?.({ imageUrl: data.imageUrl, storedUrl: data.storedUrl, text: data.text, pinnedProducts: selectedProducts });
       toast({ title: "Proposal generated successfully" });
@@ -128,6 +132,47 @@ export default function ProposalBuilder({
       toast({ title: "Proposal generation failed", description: e?.message || "Unknown error", variant: "destructive" });
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const refineProposal = async () => {
+    if (!proposalResult || !refinementPrompt.trim()) return;
+    setRefining(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Session expired. Please sign in again.");
+
+      const placements = selectedProducts.map((p) => ({
+        product_name: p.product_name,
+        brand_name: p.brand_name,
+      }));
+
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
+        body: {
+          imageUrl: toAbsoluteUrl(proposalResult),
+          referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
+          mode: "proposal_refine",
+          style,
+          placements,
+          refinementPrompt: refinementPrompt.trim(),
+        },
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+
+      const resultUrl = data.storedUrl || data.imageUrl;
+      setProposalHistory((prev) => [...prev, resultUrl]);
+      setProposalResult(resultUrl);
+      setRefinementPrompt("");
+      onResult?.({ imageUrl: data.imageUrl, storedUrl: data.storedUrl, text: data.text, pinnedProducts: selectedProducts });
+      toast({ title: "Proposal refined successfully" });
+    } catch (e: any) {
+      toast({ title: "Refinement failed", description: e?.message || "Unknown error", variant: "destructive" });
+    } finally {
+      setRefining(false);
     }
   };
 
@@ -200,8 +245,48 @@ export default function ProposalBuilder({
           </h3>
 
           {proposalResult ? (
-            <div className="border border-border rounded-lg overflow-hidden bg-muted/10">
-              <img src={proposalResult} alt="Generated proposal" className="w-full object-contain" />
+            <div className="space-y-2">
+              <div className="border border-border rounded-lg overflow-hidden bg-muted/10">
+                <img src={proposalResult} alt="Generated proposal" className="w-full object-contain" />
+              </div>
+              {/* Iteration count */}
+              {proposalHistory.length > 1 && (
+                <p className="font-body text-[10px] text-muted-foreground text-right">
+                  Iteration {proposalHistory.length}
+                </p>
+              )}
+              {/* Refinement prompt */}
+              <div className="flex gap-2">
+                <Input
+                  value={refinementPrompt}
+                  onChange={(e) => setRefinementPrompt(e.target.value)}
+                  placeholder="Refine: e.g. 'Move the sofa further left', 'Make the rug larger'…"
+                  className="font-body text-xs flex-1"
+                  onKeyDown={(e) => e.key === "Enter" && !refining && refineProposal()}
+                  disabled={refining}
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={refineProposal}
+                  disabled={refining || !refinementPrompt.trim()}
+                >
+                  {refining ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Send className="w-3.5 h-3.5" />
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={generateProposal}
+                  disabled={generating || refining}
+                  title="Regenerate from scratch"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </Button>
+              </div>
             </div>
           ) : emptyRoomUrl ? (
             <div className="border border-border rounded-lg overflow-hidden bg-muted/10">

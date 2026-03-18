@@ -40,7 +40,7 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const body = await req.json();
-    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl } = body;
+    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl, refinementPrompt } = body;
     // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "product_swap" | "scene_edit" | "freeform" | "turntable_angle"
 
     if (!imageUrl) throw new Error("imageUrl is required");
@@ -112,6 +112,28 @@ CRITICAL RULES:
 - Keep ALL architectural elements (walls, floors, ceilings, windows, doors) from the empty room EXACTLY as they are
 - Add realistic shadows, lighting, and perspective matching the room's existing lighting
 - The final result must look like a single cohesive professional architectural rendering
+
+Style: ${defaultStyle}.`;
+    } else if (mode === "proposal_refine") {
+      const productList = (placements || [])
+        .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name}`)
+        .join("\n");
+      const userInstruction = refinementPrompt || "Improve the placement and integration of furniture.";
+      prompt = `You are given TWO images:
+1. FIRST IMAGE: The ORIGINAL client layout — use this as the spatial reference for furniture positions and orientations.
+2. SECOND IMAGE: A previously generated proposal that needs refinement.
+
+The proposal contains these products:
+${productList}
+
+ADMIN'S REFINEMENT REQUEST: "${userInstruction}"
+
+Apply the requested changes while following these rules:
+- Keep ALL architectural elements (walls, floors, ceilings, windows, doors) EXACTLY as they are
+- Maintain the same products listed above — do NOT add or remove any
+- Respect the original client layout's spatial intent unless the refinement explicitly asks to change positions
+- Add realistic shadows, lighting, and perspective
+- The result must look like a single cohesive professional architectural rendering
 
 Style: ${defaultStyle}.`;
     } else if (mode === "scene_edit") {
@@ -225,8 +247,19 @@ Style: ${defaultStyle}.`;
       }
     }
 
+    // Proposal refine: original layout reference + previous proposal (imageUrl)
+    if (mode === "proposal_refine") {
+      // content already has [text_prompt, previous_proposal_image]
+      // Insert original layout reference before the proposal
+      if (referenceImageUrl) {
+        const proposalEntry = content[1];
+        content[1] = { type: "image_url", image_url: { url: referenceImageUrl } };
+        content.splice(2, 0, proposalEntry);
+      }
+    }
+
     // Pro model for heavy transformations, flash for iterative/turntable flows to reduce wait states
-    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay", "proposal_render"];
+    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay", "proposal_render", "proposal_refine"];
     const selectedModel = proModes.includes(mode)
       ? "google/gemini-3-pro-image-preview"
       : "google/gemini-3.1-flash-image-preview";
