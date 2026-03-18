@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from "react";
-import { Canvas, useLoader, useThree } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera, Html, useTexture } from "@react-three/drei";
+import { useMemo, useState } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import * as THREE from "three";
 import type { Room, PlacedProduct, Point2D } from "./types";
 
