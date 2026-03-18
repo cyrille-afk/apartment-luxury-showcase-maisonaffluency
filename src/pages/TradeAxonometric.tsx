@@ -264,15 +264,20 @@ const TradeAxonometric = () => {
           .eq("id", activeRequestId);
       }
 
-      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-        body: {
-          imageUrl: sourceImage,
-          mode,
-          style,
-          overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages : undefined,
-          technicalDrawingUrl: mode === "cad_overlay" ? technicalDrawingUrl : undefined,
-        },
-      });
+      const body: any = {
+        imageUrl: sourceImage,
+        mode,
+        style,
+        overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages : undefined,
+        technicalDrawingUrl: mode === "cad_overlay" ? technicalDrawingUrl : undefined,
+      };
+
+      if (mode === "product_swap" && swapProduct) {
+        body.replacementImageUrl = swapProduct.image_url;
+        body.swapPrompt = swapPrompt;
+      }
+
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", { body });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
