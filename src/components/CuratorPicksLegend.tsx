@@ -22,18 +22,6 @@ interface CuratorPicksLegendProps {
  */
 const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, className = "" }: CuratorPicksLegendProps) => {
   const p = pick as any; // access optional extended fields
-  const navigate = useNavigate();
-  const { user, isTradeUser, isAdmin } = useAuth();
-
-  const handleRequestSample = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const params = new URLSearchParams();
-    const fullTitle = p.subtitle ? `${pick.title} ${p.subtitle}` : pick.title;
-    params.set("product", fullTitle);
-    if (designerName) params.set("brand", designerName);
-    if (pick.image) params.set("image", pick.image);
-    navigate(`/trade/samples?${params.toString()}`);
-  };
 
   return (
     <div className={`text-center w-full px-4 md:px-12 mt-4 ${className}`}>
