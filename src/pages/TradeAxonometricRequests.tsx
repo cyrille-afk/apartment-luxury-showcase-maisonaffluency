@@ -269,9 +269,30 @@ const TradeAxonometricRequests = () => {
                       <p className="font-display text-sm text-foreground">{req.project_name || "Untitled"}</p>
                       <p className="font-body text-xs text-muted-foreground capitalize">{req.request_type} drawing</p>
                     </div>
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${status.color}`}>
-                      {status.label}
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${status.color}`}>
+                        {status.label}
+                      </span>
+                      {canEdit(req.status) && (
+                        <button
+                          onClick={() => startEdit(req)}
+                          className="p-1 rounded hover:bg-muted transition-colors"
+                          title="Edit request"
+                        >
+                          <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                        </button>
+                      )}
+                      {canDelete(req.status) && (
+                        <button
+                          onClick={() => handleDelete(req.id)}
+                          disabled={deleting === req.id}
+                          className="p-1 rounded hover:bg-destructive/10 transition-colors"
+                          title="Delete request"
+                        >
+                          <Trash2 className={`w-3.5 h-3.5 ${deleting === req.id ? "text-muted-foreground animate-pulse" : "text-destructive/70"}`} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   {req.notes && (
                     <p className="font-body text-xs text-muted-foreground line-clamp-2">{req.notes}</p>
@@ -299,6 +320,72 @@ const TradeAxonometricRequests = () => {
           })}
         </div>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingRequest} onOpenChange={(open) => { if (!open) { setEditingRequest(null); setImageUrl(null); setProjectName(""); setNotes(""); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">Edit Request</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="font-body text-xs text-muted-foreground">Project Name *</label>
+              <Input
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                maxLength={200}
+                className="font-body text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="font-body text-xs text-muted-foreground">Drawing Type *</label>
+              <Select value={requestType} onValueChange={(v: any) => setRequestType(v)}>
+                <SelectTrigger className="font-body text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="elevation" className="font-body text-sm">Room Elevation</SelectItem>
+                  <SelectItem value="section" className="font-body text-sm">Building Section</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="font-body text-xs text-muted-foreground">Drawing</label>
+              {imageUrl ? (
+                <div className="relative group">
+                  <img src={imageUrl} alt="Drawing" className="w-full max-h-48 object-contain rounded-md border border-border" />
+                  <button
+                    onClick={() => setImageUrl(null)}
+                    className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3.5 h-3.5 text-foreground" />
+                  </button>
+                </div>
+              ) : (
+                <CloudUpload
+                  folder="axonometric-submissions"
+                  accept="image/*"
+                  label="Upload new drawing"
+                  onUpload={(urls) => setImageUrl(urls[0])}
+                />
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <label className="font-body text-xs text-muted-foreground">Notes</label>
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                maxLength={1000}
+                rows={3}
+                className="font-body text-sm"
+              />
+            </div>
+            <Button onClick={handleEditSave} disabled={submitting || !imageUrl || !projectName.trim()} className="w-full">
+              {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving…</> : "Save Changes"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
