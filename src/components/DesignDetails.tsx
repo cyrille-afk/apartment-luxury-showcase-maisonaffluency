@@ -41,7 +41,7 @@ const DesignDetails = () => {
               <p className="font-display text-sm sm:text-base md:text-lg text-white mt-2 sm:mt-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light">
                 Exclusive Benefits for Professionals
               </p>
-              <span className="mt-6 sm:mt-8 inline-flex items-center gap-2 bg-white/15 group-hover:bg-white/25 backdrop-blur-sm border border-white/30 group-hover:border-white/50 text-white px-5 py-2.5 font-body text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
+              <span className="mt-6 sm:mt-8 inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/30 text-white px-5 py-2.5 font-body text-xs uppercase tracking-wider rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
                 Learn More
               </span>
             </div>
