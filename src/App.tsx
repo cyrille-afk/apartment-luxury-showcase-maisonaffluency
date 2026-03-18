@@ -108,6 +108,9 @@ const App = () => {
                     <Route path="axonometric" element={<TradeAxonometric />} />
                     <Route path="axonometric-requests" element={<TradeAxonometricRequests />} />
                     <Route path="axonometric-gallery" element={<TradeAxonometricGallery />} />
+                    <Route path="presentations" element={<TradePresentations />} />
+                    <Route path="presentations/:id" element={<TradePresentationBuilder />} />
+                    <Route path="presentations/:id/view" element={<TradePresentationViewer />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 
