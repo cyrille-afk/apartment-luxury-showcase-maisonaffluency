@@ -263,6 +263,60 @@ const TradeAxonometric = () => {
     setResult(gen);
   }, [history, historyIndex]);
 
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const extractInvokeErrorMessage = async (error: any) => {
+    let message = error?.message || "Generation failed";
+    const response = error?.context;
+    if (response?.clone) {
+      try {
+        const parsed = await response.clone().json();
+        message = parsed?.error || parsed?.message || message;
+      } catch {
+        // keep fallback message
+      }
+    }
+    return message;
+  };
+
+  const isRateLimitedError = (message: string) =>
+    /(rate limit|too many requests|try again shortly|please wait|429)/i.test(message);
+
+  const invokeAxonometricGenerate = async (body: any, accessToken?: string, maxRetries = 1) => {
+    const timeoutMs = 120000;
+    let lastMessage = "Generation failed";
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const invokePromise = supabase.functions
+          .invoke("axonometric-generate", {
+            body,
+            headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+          })
+          .then(async ({ data, error }) => {
+            if (error) {
+              throw new Error(await extractInvokeErrorMessage(error));
+            }
+            if (data?.error) throw new Error(data.error);
+            return data;
+          });
+
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error("Request timed out. Please retry.")), timeoutMs);
+        });
+
+        return await Promise.race([invokePromise, timeoutPromise]);
+      } catch (e: any) {
+        lastMessage = e?.message || "Generation failed";
+        if (!isRateLimitedError(lastMessage) || attempt === maxRetries) {
+          throw new Error(lastMessage);
+        }
+        await sleep(2000 * (attempt + 1));
+      }
+    }
+
+    throw new Error(lastMessage);
+  };
 
   const { data: pendingRequests } = useQuery({
     queryKey: ["axonometric-requests-admin"],
