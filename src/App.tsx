@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
 import { CompareProvider } from "@/contexts/CompareContext";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -50,16 +51,7 @@ const PageTracker = lazy(() => import("./hooks/usePageTracking").then(m => {
   return { default: Tracker };
 }));
 
-// Lazy-load QueryClientProvider so @tanstack/react-query isn't in the critical bundle
-const LazyQueryProvider = lazy(() =>
-  import("@tanstack/react-query").then(m => {
-    const qc = new m.QueryClient();
-    const Provider = ({ children }: { children: React.ReactNode }) => (
-      <m.QueryClientProvider client={qc}>{children}</m.QueryClientProvider>
-    );
-    return { default: Provider };
-  })
-);
+const queryClient = new QueryClient();
 
 const App = () => {
   const [showDeferredUi, setShowDeferredUi] = useState(false);
@@ -78,64 +70,64 @@ const App = () => {
 
   return (
     <HelmetProvider>
-    <AuthProvider>
-    <CompareProvider>
-    <BrowserRouter>
-      {MAINTENANCE_MODE ? (
-        <Routes>
-          <Route path="*" element={<Suspense fallback={null}><ComingSoon /></Suspense>} />
-        </Routes>
-      ) : (
-        <Routes>
-          <Route path="/" element={<Index />} />
+      <AuthProvider>
+        <CompareProvider>
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              {MAINTENANCE_MODE ? (
+                <Routes>
+                  <Route path="*" element={<Suspense fallback={null}><ComingSoon /></Suspense>} />
+                </Routes>
+              ) : (
+                <Routes>
+                  <Route path="/" element={<Index />} />
 
-          {/* Trade Portal */}
-          <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
-          <Route path="/trade/program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
-          <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
-          <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
-          <Route path="/journal" element={<Suspense fallback={null}><Journal /></Suspense>} />
-          <Route path="/journal/:slug" element={<Suspense fallback={null}><JournalArticle /></Suspense>} />
-          <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
-            <Route index element={<TradeDashboard />} />
-            <Route path="admin" element={<TradeAdmin />} />
-            <Route path="gallery" element={<TradeGallery />} />
-            <Route path="quotes" element={<TradeQuotes />} />
-            <Route path="documents" element={<TradeDocuments />} />
-            <Route path="showroom" element={<TradeShowroom />} />
-            <Route path="samples" element={<TradeSamples />} />
-            <Route path="journal" element={<TradeJournal />} />
-            <Route path="provenance" element={<TradeProvenance />} />
-            <Route path="documents-admin" element={<TradeDocumentsAdmin />} />
-            <Route path="media" element={<TradeMediaLibrary />} />
-            <Route path="quotes-admin" element={<TradeQuotesAdmin />} />
-            <Route path="axonometric" element={<TradeAxonometric />} />
-            <Route path="axonometric-requests" element={<TradeAxonometricRequests />} />
-            <Route path="axonometric-gallery" element={<TradeAxonometricGallery />} />
-            <Route path="settings" element={<TradeSettings />} />
-          </Route>
-          
-          <Route path="/privacy" element={<Suspense fallback={null}><PrivacyPolicy /></Suspense>} />
-          <Route path="/terms" element={<Suspense fallback={null}><TermsOfService /></Suspense>} />
-          <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
-        </Routes>
-      )}
+                  {/* Trade Portal */}
+                  <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
+                  <Route path="/trade/program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
+                  <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
+                  <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
+                  <Route path="/journal" element={<Suspense fallback={null}><Journal /></Suspense>} />
+                  <Route path="/journal/:slug" element={<Suspense fallback={null}><JournalArticle /></Suspense>} />
+                  <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
+                    <Route index element={<TradeDashboard />} />
+                    <Route path="admin" element={<TradeAdmin />} />
+                    <Route path="gallery" element={<TradeGallery />} />
+                    <Route path="quotes" element={<TradeQuotes />} />
+                    <Route path="documents" element={<TradeDocuments />} />
+                    <Route path="showroom" element={<TradeShowroom />} />
+                    <Route path="samples" element={<TradeSamples />} />
+                    <Route path="journal" element={<TradeJournal />} />
+                    <Route path="provenance" element={<TradeProvenance />} />
+                    <Route path="documents-admin" element={<TradeDocumentsAdmin />} />
+                    <Route path="media" element={<TradeMediaLibrary />} />
+                    <Route path="quotes-admin" element={<TradeQuotesAdmin />} />
+                    <Route path="axonometric" element={<TradeAxonometric />} />
+                    <Route path="axonometric-requests" element={<TradeAxonometricRequests />} />
+                    <Route path="axonometric-gallery" element={<TradeAxonometricGallery />} />
+                    <Route path="settings" element={<TradeSettings />} />
+                  </Route>
 
-      {/* Deferred UI: providers + toasts mount after hero is painted */}
-      {showDeferredUi && (
-        <Suspense fallback={null}>
-          <LazyQueryProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <PageTracker />
-            </TooltipProvider>
-          </LazyQueryProvider>
-        </Suspense>
-      )}
-    </BrowserRouter>
-    </CompareProvider>
-    </AuthProvider>
+                  <Route path="/privacy" element={<Suspense fallback={null}><PrivacyPolicy /></Suspense>} />
+                  <Route path="/terms" element={<Suspense fallback={null}><TermsOfService /></Suspense>} />
+                  <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
+                </Routes>
+              )}
+
+              {/* Deferred UI: toasts + analytics mount after hero is painted */}
+              {showDeferredUi && (
+                <Suspense fallback={null}>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    <PageTracker />
+                  </TooltipProvider>
+                </Suspense>
+              )}
+            </BrowserRouter>
+          </QueryClientProvider>
+        </CompareProvider>
+      </AuthProvider>
     </HelmetProvider>
   );
 };
