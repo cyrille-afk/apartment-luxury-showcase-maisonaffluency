@@ -452,8 +452,7 @@ const TradeAxonometric = () => {
         sourceProduct: result.sourceProduct,
         mode: result.mode,
       };
-      setResult(gen);
-      setHistory((prev) => [gen, ...prev]);
+      pushResult(gen);
       setAiHistory((prev) => [...prev, { role: "ai", text: userMsg, imageUrl: data.storedUrl || data.imageUrl }]);
       setTimeout(() => aiChatRef.current?.scrollTo({ top: aiChatRef.current.scrollHeight, behavior: "smooth" }), 100);
     } catch (e: any) {
