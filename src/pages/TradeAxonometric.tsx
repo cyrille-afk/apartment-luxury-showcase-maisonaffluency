@@ -539,8 +539,33 @@ const TradeAxonometric = () => {
                 )}
                 <h3 className="font-display text-xs text-foreground pt-2">CAD Blocks to Insert</h3>
                 <p className="font-body text-[10px] text-muted-foreground">
-                  Use previously generated CAD blocks or upload custom ones
+                  Select products from the platform or upload custom CAD blocks (max 5)
                 </p>
+
+                {/* Product picker for sourcing CAD blocks from platform */}
+                {overlayImages.length < 5 && (
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                      <Input
+                        placeholder="Search platform products for CAD blocks…"
+                        value={cadProductSearch}
+                        onChange={(e) => setCadProductSearch(e.target.value)}
+                        className="pl-8 h-8 text-xs"
+                      />
+                    </div>
+                    <ProductPicker
+                      search={cadProductSearch}
+                      onSelect={(product) => {
+                        if (product.image_url && overlayImages.length < 5) {
+                          setOverlayImages((prev) => [...prev, product.image_url].slice(0, 5));
+                        }
+                      }}
+                      selectedProduct={null}
+                    />
+                  </div>
+                )}
+
                 <div className="flex flex-wrap gap-2">
                   {overlayImages.map((img, i) => (
                     <div key={i} className="relative w-16 h-16 border border-border rounded overflow-hidden group">
@@ -559,7 +584,7 @@ const TradeAxonometric = () => {
                     folder="axonometric-cad-blocks"
                     accept="image/*"
                     multiple
-                    label="Add CAD block images"
+                    label="Or upload custom CAD blocks"
                     onUpload={(urls) =>
                       setOverlayImages((prev) => [...prev, ...urls].slice(0, 5))
                     }
