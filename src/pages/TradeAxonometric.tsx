@@ -31,6 +31,43 @@ const STYLE_PRESETS = [
   { value: "contemporary Scandinavian design with light wood, white walls, and soft daylight", label: "Scandinavian" },
 ];
 
+/** Inline product picker for platform images */
+const ProductPicker = ({ search, onSelect, selectedUrl }: { search: string; onSelect: (url: string) => void; selectedUrl: string | null }) => {
+  const products = useMemo(() => {
+    const all = getAllTradeProducts().filter((p) => p.image_url);
+    if (!search.trim()) return all.slice(0, 24);
+    const q = search.toLowerCase();
+    return all.filter(
+      (p) =>
+        p.product_name.toLowerCase().includes(q) ||
+        p.brand_name.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q)
+    ).slice(0, 24);
+  }, [search]);
+
+  if (products.length === 0) {
+    return <p className="font-body text-xs text-muted-foreground py-4 text-center">No products found</p>;
+  }
+
+  return (
+    <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+      {products.map((p) => (
+        <button
+          key={p.id}
+          onClick={() => p.image_url && onSelect(p.image_url)}
+          className={`rounded border overflow-hidden text-left transition-all ${
+            selectedUrl === p.image_url ? "border-foreground ring-1 ring-foreground" : "border-border hover:border-foreground/30"
+          }`}
+          title={`${p.product_name} — ${p.brand_name}${p.dimensions ? ` — ${p.dimensions}` : ""}`}
+        >
+          <img src={p.image_url!} alt={p.product_name} className="w-full aspect-square object-cover" />
+          <p className="font-body text-[9px] text-muted-foreground truncate px-1 py-0.5">{p.product_name}</p>
+        </button>
+      ))}
+    </div>
+  );
+};
+
 const TradeAxonometric = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
