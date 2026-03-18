@@ -22,7 +22,7 @@ const mainItems = [
   { title: "Showroom", url: "/trade/showroom", icon: MapPin },
   { title: "Gallery", url: "/trade/gallery", icon: Image },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
-  { title: "Documents", url: "/trade/documents", icon: FolderOpen },
+  { title: "Brand Library", url: "/trade/documents", icon: FolderOpen },
   { title: "Sample Requests", url: "/trade/samples", icon: Package },
   { title: "Settings", url: "/trade/settings", icon: Settings },
 ];

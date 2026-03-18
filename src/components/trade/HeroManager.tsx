@@ -8,7 +8,7 @@ import { invalidateHeroCache } from "./SectionHero";
 
 const HERO_SECTIONS = [
   { key: "gallery", label: "Trade Gallery", fallbackId: "v1773731066/Screen_Shot_2026-03-17_at_3.03.40_PM_b8dux9" },
-  { key: "documents", label: "Documents & Catalogues", fallbackId: "home-office-desk_g0ywv2" },
+  { key: "documents", label: "Brand Library", fallbackId: "home-office-desk_g0ywv2" },
   { key: "provenance", label: "Provenance & Certificates", fallbackId: "details-console_hk6uxt" },
 ] as const;
 
