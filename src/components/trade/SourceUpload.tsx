@@ -15,6 +15,15 @@ interface SourceUploadProps {
 const MAX_PREVIEW_PAGES = 20;
 const MAX_UPLOAD_DIMENSION = 4096;
 const MAX_UPLOAD_PIXELS = 12_000_000;
+const PDF_PARSE_TIMEOUT_MS = 30000;
+const PDF_RENDER_TIMEOUT_MS = 20000;
+
+const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number, timeoutMessage: string): Promise<T> => {
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+  });
+  return Promise.race([promise, timeoutPromise]);
+};
 
 /** Upload source image or PDF (with page selector for multi-page PDFs) */
 const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or PDF", onSourceReady }: SourceUploadProps) => {
@@ -29,26 +38,49 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
   const [selectedPage, setSelectedPage] = useState(1);
   const [loadingPreviews, setLoadingPreviews] = useState(false);
 
-  const getPdfLib = async () => {
+  const getPdfLib = async (): Promise<any> => {
     const pdfjsLib = await import("pdfjs-dist");
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
+    try {
+      const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = worker.default;
+    } catch {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+    }
+
     return pdfjsLib;
   };
 
   const renderPagePreview = async (pdf: any, pageNum: number, scale: number): Promise<string> => {
-    const page = await pdf.getPage(pageNum);
+    const page: any = await withTimeout<any>(
+      pdf.getPage(pageNum),
+      PDF_RENDER_TIMEOUT_MS,
+      `PDF page ${pageNum} took too long to load`
+    );
+
     const viewport = page.getViewport({ scale });
     const canvas = document.createElement("canvas");
     canvas.width = viewport.width;
     canvas.height = viewport.height;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not render PDF page preview");
-    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    await withTimeout(
+      page.render({ canvasContext: ctx, viewport }).promise,
+      PDF_RENDER_TIMEOUT_MS,
+      `PDF page ${pageNum} took too long to render`
+    );
+
     return canvas.toDataURL("image/png");
   };
 
   const renderPageForUpload = async (pdf: any, pageNum: number) => {
-    const page = await pdf.getPage(pageNum);
+    const page: any = await withTimeout<any>(
+      pdf.getPage(pageNum),
+      PDF_RENDER_TIMEOUT_MS,
+      `PDF page ${pageNum} took too long to load`
+    );
+
     const baseViewport = page.getViewport({ scale: 1 });
 
     const maxScaleByDimension = Math.min(
@@ -70,7 +102,11 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not render PDF page");
 
-    await page.render({ canvasContext: ctx, viewport }).promise;
+    await withTimeout(
+      page.render({ canvasContext: ctx, viewport }).promise,
+      PDF_RENDER_TIMEOUT_MS,
+      `PDF page ${pageNum} took too long to render`
+    );
 
     const blob = await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob((b) => {
@@ -87,7 +123,12 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
     try {
       const pdfjsLib = await getPdfLib();
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf: any = await withTimeout<any>(
+        pdfjsLib.getDocument({ data: arrayBuffer }).promise,
+        PDF_PARSE_TIMEOUT_MS,
+        "PDF parsing timed out. Try a smaller or less complex PDF."
+      );
+
       const count = pdf.numPages;
       setPdfPageCount(count);
       setSelectedPage(1);
@@ -114,7 +155,11 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
     try {
       const pdfjsLib = await getPdfLib();
       const arrayBuffer = await pdfFile.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf: any = await withTimeout<any>(
+        pdfjsLib.getDocument({ data: arrayBuffer }).promise,
+        PDF_PARSE_TIMEOUT_MS,
+        "PDF parsing timed out. Try a smaller or less complex PDF."
+      );
       const { blob } = await renderPageForUpload(pdf, pageToUse);
 
       const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
@@ -127,7 +172,11 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
       setPdfPreviews([]);
       setPdfPageCount(0);
     } catch (e: any) {
-      toast({ title: "Upload failed", description: e.message, variant: "destructive" });
+      const rawMessage = e?.message || "Upload failed";
+      const description = /row-level security|permission denied|jwt/i.test(rawMessage)
+        ? "Your account doesn’t currently have upload permission. Sign out/in and retry; if it still fails, ask an admin to approve your trade access."
+        : rawMessage;
+      toast({ title: "Upload failed", description, variant: "destructive" });
     } finally {
       setUploading(false);
     }
