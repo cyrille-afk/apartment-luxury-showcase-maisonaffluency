@@ -400,19 +400,6 @@ const TradeAxonometric = () => {
     }
   };
 
-  const iterateOnResult = () => {
-    if (result?.storedUrl || result?.imageUrl) {
-      setSourceImage(result.storedUrl || result.imageUrl);
-      setMode("stylize");
-    }
-  };
-
-  const compositeMode = () => {
-    if (result?.storedUrl || result?.imageUrl) {
-      setSourceImage(result.storedUrl || result.imageUrl);
-      setMode("composite");
-    }
-  };
 
   const sendAiPrompt = async () => {
     if (!aiPrompt.trim() || !result) return;
