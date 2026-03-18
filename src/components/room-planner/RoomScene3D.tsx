@@ -258,7 +258,9 @@ function PlacedProductMesh({
     return () => gl.domElement.removeEventListener("wheel", handleWheel);
   }, [hovered, dragging, gl, product.rotation, onUpdate]);
 
-  return (
+   return (
+    <>
+    <SnapGuides position={{ x: product.position.x, z: product.position.z }} visible={dragging} />
     <group
       ref={groupRef}
       position={[product.position.x, product.position.y, product.position.z]}
