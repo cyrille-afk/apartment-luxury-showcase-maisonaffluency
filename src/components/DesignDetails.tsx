@@ -45,8 +45,8 @@ const DesignDetails = () => {
                 Learn More
               </span>
             </div>
-          </Link>
-        </motion.div>
+            </Link>
+          </div>
       </div>
     </section>
   );
