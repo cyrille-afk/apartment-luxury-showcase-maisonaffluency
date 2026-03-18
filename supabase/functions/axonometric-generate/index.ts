@@ -60,6 +60,13 @@ serve(async (req) => {
       prompt = `Convert this 3D product/furniture image into a clean 2D CAD-style technical vector block drawing. Generate multiple orthographic views: front elevation, side elevation, and top/plan view. Use clean black line work on a white background, similar to an AutoCAD or technical architecture block. Estimate and label the approximate dimensions (width × depth × height) in millimeters based on the visible proportions and typical furniture/object sizing. Include dimension lines with arrows. The output should look like a professional CAD furniture block ready to be inserted into architectural floor plans or elevation drawings. No shading, no color — pure technical line drawing style.`;
     } else if (mode === "cad_overlay") {
       prompt = `Take this architectural technical drawing (floor plan or elevation) and insert the provided CAD furniture/product block drawings into the appropriate positions. Scale the blocks to match the drawing's proportions. Maintain the technical drawing style — clean lines, no shading. Position the product blocks logically within rooms or against walls as appropriate for the product type. Keep the original technical drawing intact and overlay the product blocks seamlessly.`;
+    } else if (mode === "product_swap") {
+      const swapPrompt = body.swapPrompt || "";
+      const replacementImageUrl = body.replacementImageUrl;
+      if (!replacementImageUrl) throw new Error("replacementImageUrl is required for product_swap mode");
+      if (!swapPrompt.trim()) throw new Error("A swap prompt describing what to replace is required");
+
+      prompt = `You are given an interior architectural render. The user wants to swap a specific piece of furniture/product in the scene. Their instruction: "${swapPrompt}". Remove the specified item and replace it IN THE EXACT SAME POSITION, at the correct scale and perspective, with the replacement product shown in the second image. Match the lighting, shadows, and perspective of the original scene perfectly so the replacement looks naturally integrated. Keep everything else in the scene exactly as is. Style: ${defaultStyle}.`;
     } else if (mode === "scene_edit") {
       const placementDesc = (placements || [])
         .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name} at position (${p.position?.x_percent ?? 50}% from left, ${p.position?.y_percent ?? 50}% from top), size ${p.size_percent ?? 15}% of image width, rotated ${p.rotation_degrees ?? 0}°`)
@@ -78,7 +85,7 @@ serve(async (req) => {
         throw new Error("Scene edit requires either a mask (erase areas) or product placements");
       }
     } else {
-      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, scene_edit");
+      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, product_swap, scene_edit");
     }
 
     // Build message content
@@ -87,6 +94,14 @@ serve(async (req) => {
       type: "image_url",
       image_url: { url: imageUrl },
     });
+
+    // Add replacement product image for product_swap mode
+    if (mode === "product_swap" && body.replacementImageUrl) {
+      content.push({
+        type: "image_url",
+        image_url: { url: body.replacementImageUrl },
+      });
+    }
 
     // Add overlay product images for composite mode
     if (mode === "composite" && overlayImages && Array.isArray(overlayImages)) {
