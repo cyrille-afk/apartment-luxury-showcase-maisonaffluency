@@ -458,8 +458,28 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
 
           {/* Product Picker */}
           <div className="flex-1 overflow-hidden flex flex-col">
-            <div className="p-3 border-b border-border">
-              <p className="font-display text-xs text-foreground mb-2">Add Products</p>
+            <div className="p-3 border-b border-border space-y-2">
+              <p className="font-display text-xs text-foreground">Add Products</p>
+              <div className="flex gap-1.5">
+                <select
+                  value={sceneCategory}
+                  onChange={(e) => { setSceneCategory(e.target.value); setSceneSubcategory(""); }}
+                  className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                >
+                  <option value="">All Categories</option>
+                  {CATEGORY_ORDER.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                {sceneCategory && (SUBCATEGORY_MAP[sceneCategory] || []).length > 0 && (
+                  <select
+                    value={sceneSubcategory}
+                    onChange={(e) => setSceneSubcategory(e.target.value)}
+                    className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                  >
+                    <option value="">All {sceneCategory}</option>
+                    {(SUBCATEGORY_MAP[sceneCategory] || []).map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                )}
+              </div>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <input
