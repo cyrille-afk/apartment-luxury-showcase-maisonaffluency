@@ -214,11 +214,6 @@ const TradeAxonometric = () => {
   const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
 
-  // Turntable state
-  const TURNTABLE_ANGLES = [0, 60, 120, 180, 240, 300];
-  const [turntableImages, setTurntableImages] = useState<string[]>([]);
-  const [turntableGenerating, setTurntableGenerating] = useState(false);
-  const [showTurntable, setShowTurntable] = useState(false);
 
   // AI dialogue state
   const [aiPrompt, setAiPrompt] = useState("");
