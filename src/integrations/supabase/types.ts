@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      axonometric_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          image_url: string
+          notes: string | null
+          project_name: string
+          request_type: string
+          result_image_url: string | null
+          status: Database["public"]["Enums"]["axonometric_request_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          notes?: string | null
+          project_name?: string
+          request_type?: string
+          result_image_url?: string | null
+          status?: Database["public"]["Enums"]["axonometric_request_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          notes?: string | null
+          project_name?: string
+          request_type?: string
+          result_image_url?: string | null
+          status?: Database["public"]["Enums"]["axonometric_request_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       brand_thumbnails: {
         Row: {
           brand_name: string
@@ -855,6 +897,11 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "trade_user" | "super_admin"
+      axonometric_request_status:
+        | "pending"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
       journal_category:
         | "designer_interview"
         | "collection_story"
@@ -997,6 +1044,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "trade_user", "super_admin"],
+      axonometric_request_status: [
+        "pending",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
       journal_category: [
         "designer_interview",
         "collection_story",

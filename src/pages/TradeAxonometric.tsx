@@ -4,11 +4,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CloudUpload from "@/components/trade/CloudUpload";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight } from "lucide-react";
+import { format } from "date-fns";
 
 type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite";
 
@@ -29,6 +32,7 @@ const STYLE_PRESETS = [
 const TradeAxonometric = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const [sourceImage, setSourceImage] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("elevation_to_axo");
@@ -37,12 +41,30 @@ const TradeAxonometric = () => {
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [history, setHistory] = useState<GenerationResult[]>([]);
+  const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
+  const [adminNotes, setAdminNotes] = useState("");
+  const [showQueue, setShowQueue] = useState(true);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [saturation, setSaturation] = useState(100);
   const [warmth, setWarmth] = useState(0);
+
+  // Fetch pending requests
+  const { data: pendingRequests } = useQuery({
+    queryKey: ["axonometric-requests-admin"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("axonometric_requests")
+        .select("*, profiles:user_id(first_name, last_name, company)")
+        .in("status", ["pending", "in_progress"])
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data as any[];
+    },
+    enabled: isAdmin,
+  });
 
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
@@ -54,6 +76,14 @@ const TradeAxonometric = () => {
 
     setGenerating(true);
     try {
+      // Mark request as in_progress if working from queue
+      if (activeRequestId) {
+        await (supabase as any)
+          .from("axonometric_requests")
+          .update({ status: "in_progress" })
+          .eq("id", activeRequestId);
+      }
+
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: {
           imageUrl: sourceImage,
@@ -79,6 +109,41 @@ const TradeAxonometric = () => {
       toast({ title: "Generation failed", description: e.message, variant: "destructive" });
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const loadFromQueue = (req: any) => {
+    setSourceImage(req.image_url);
+    setActiveRequestId(req.id);
+    setAdminNotes(req.admin_notes || "");
+    setMode(req.request_type === "section" ? "section_to_axo" : "elevation_to_axo");
+    setShowQueue(false);
+    setResult(null);
+  };
+
+  const completeRequest = async () => {
+    if (!activeRequestId || !result) return;
+    const resultUrl = result.storedUrl || result.imageUrl;
+    try {
+      await (supabase as any)
+        .from("axonometric_requests")
+        .update({
+          status: "completed",
+          result_image_url: resultUrl,
+          admin_notes: adminNotes.trim().slice(0, 1000) || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", activeRequestId);
+
+      toast({ title: "Request completed and result delivered" });
+      setActiveRequestId(null);
+      setSourceImage(null);
+      setResult(null);
+      setAdminNotes("");
+      setShowQueue(true);
+      queryClient.invalidateQueries({ queryKey: ["axonometric-requests-admin"] });
+    } catch (e: any) {
+      toast({ title: "Failed to update request", description: e.message, variant: "destructive" });
     }
   };
 
@@ -124,12 +189,72 @@ const TradeAxonometric = () => {
 
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="font-display text-2xl text-foreground">Axonometric Studio</h1>
-          <p className="font-body text-sm text-muted-foreground mt-1">
-            Transform 2D elevations and sections into stylised 3D axonometric views using AI
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-2xl text-foreground">Axonometric Studio</h1>
+            <p className="font-body text-sm text-muted-foreground mt-1">
+              Transform 2D elevations and sections into stylised 3D axonometric views using AI
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {activeRequestId && (
+              <Button variant="outline" size="sm" onClick={() => { setActiveRequestId(null); setSourceImage(null); setResult(null); setShowQueue(true); }}>
+                <Inbox className="w-3.5 h-3.5 mr-1.5" />Back to Queue
+              </Button>
+            )}
+            <Button
+              variant={showQueue ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowQueue(!showQueue)}
+            >
+              <Inbox className="w-3.5 h-3.5 mr-1.5" />
+              Queue
+              {pendingRequests && pendingRequests.length > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-medium">
+                  {pendingRequests.length}
+                </span>
+              )}
+            </Button>
+          </div>
         </div>
+
+        {/* Request Queue */}
+        {showQueue && pendingRequests && pendingRequests.length > 0 && (
+          <div className="border border-border rounded-lg divide-y divide-border">
+            <div className="px-5 py-3 bg-muted/30">
+              <h2 className="font-display text-sm text-foreground">Pending Requests</h2>
+            </div>
+            {pendingRequests.map((req: any) => {
+              const profile = req.profiles;
+              const userName = profile ? `${profile.first_name} ${profile.last_name}`.trim() : "Unknown";
+              return (
+                <div key={req.id} className="flex items-center gap-4 px-5 py-3 hover:bg-muted/20 transition-colors">
+                  <img src={req.image_url} alt="" className="w-16 h-16 object-cover rounded border border-border shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display text-sm text-foreground">{req.project_name || "Untitled"}</p>
+                    <p className="font-body text-xs text-muted-foreground">
+                      {userName}{profile?.company ? ` · ${profile.company}` : ""} · {req.request_type} · {format(new Date(req.created_at), "d MMM yyyy")}
+                    </p>
+                    {req.notes && <p className="font-body text-xs text-muted-foreground/70 line-clamp-1 mt-0.5">{req.notes}</p>}
+                  </div>
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${req.status === "in_progress" ? "bg-blue-500/10 text-blue-700" : "bg-yellow-500/10 text-yellow-700"}`}>
+                    {req.status === "in_progress" ? "In Progress" : "Pending"}
+                  </span>
+                  <Button variant="outline" size="sm" onClick={() => loadFromQueue(req)}>
+                    <ArrowRight className="w-3.5 h-3.5 mr-1" />Process
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {showQueue && (!pendingRequests || pendingRequests.length === 0) && (
+          <div className="border border-dashed border-border rounded-lg py-12 flex flex-col items-center justify-center gap-2">
+            <CheckCircle2 className="w-6 h-6 text-muted-foreground/40" />
+            <p className="font-body text-sm text-muted-foreground">No pending requests — all caught up</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left: Controls */}
@@ -324,6 +449,25 @@ const TradeAxonometric = () => {
                     <Download className="w-3.5 h-3.5" />
                   </Button>
                 </div>
+
+                {/* Deliver to requester */}
+                {activeRequestId && (
+                  <div className="border border-foreground/20 rounded-lg p-5 space-y-3 bg-muted/20">
+                    <h2 className="font-display text-sm text-foreground">Deliver to Requester</h2>
+                    <Textarea
+                      value={adminNotes}
+                      onChange={(e) => setAdminNotes(e.target.value)}
+                      placeholder="Add notes for the user (optional)…"
+                      maxLength={1000}
+                      rows={2}
+                      className="font-body text-xs"
+                    />
+                    <Button onClick={completeRequest} className="w-full" size="sm">
+                      <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                      Mark Complete & Deliver Result
+                    </Button>
+                  </div>
+                )}
 
                 {result.text && (
                   <p className="font-body text-xs text-muted-foreground italic">{result.text}</p>
