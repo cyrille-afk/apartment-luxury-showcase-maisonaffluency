@@ -194,6 +194,7 @@ const TradeAxonometricRequests = () => {
                   <SelectContent>
                     <SelectItem value="elevation" className="font-body text-sm">Room Elevation</SelectItem>
                     <SelectItem value="section" className="font-body text-sm">Building Section</SelectItem>
+                    <SelectItem value="section_plan" className="font-body text-sm">Section Plan</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
