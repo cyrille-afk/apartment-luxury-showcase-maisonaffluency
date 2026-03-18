@@ -15,6 +15,7 @@ const HERO_SECTIONS = [
   { key: "dash-gallery", label: "Dashboard · Website Products", fallbackId: "v1773811405/IMG_6996_tfx4bp" },
   { key: "dash-quotes", label: "Dashboard · Quote Builder", fallbackId: "v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg" },
   { key: "dash-library", label: "Dashboard · Brand Library", fallbackId: "v1773790684/AffluencySG_086_2_1_2_xpvcnw" },
+  { key: "dash-room-planner", label: "Dashboard · Room Planner", fallbackId: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v" },
 ] as const;
 
 const GRAVITY_OPTIONS = [
