@@ -1045,13 +1045,77 @@ const TradeAxonometric = () => {
                     </div>
                   )}
 
+                  {/* Attached product preview */}
+                  {aiAttachedProduct && (
+                    <div className="flex items-center gap-2 px-3 pt-2.5">
+                      <div className="flex items-center gap-2 bg-muted/40 rounded-md px-2.5 py-1.5 flex-1 min-w-0">
+                        <img src={aiAttachedProduct.image_url} alt="" className="w-8 h-8 rounded border border-border object-cover shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-display text-[10px] text-foreground truncate">{aiAttachedProduct.product_name}</p>
+                          <p className="font-body text-[9px] text-muted-foreground truncate">by {aiAttachedProduct.brand_name}</p>
+                        </div>
+                        <button onClick={() => setAiAttachedProduct(null)} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Product picker dropdown */}
+                  {aiProductPickerOpen && !aiAttachedProduct && (
+                    <div className="px-3 pt-2.5 space-y-2">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Search products…"
+                          value={aiProductSearch}
+                          onChange={(e) => setAiProductSearch(e.target.value)}
+                          className="w-full pl-7 pr-3 py-1.5 border border-border rounded-md font-body text-[11px] bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                        />
+                      </div>
+                      <CategoryFilterBar
+                        category={pickerCategory}
+                        subcategory={pickerSubcategory}
+                        brand={pickerBrand}
+                        onCategoryChange={setPickerCategory}
+                        onSubcategoryChange={setPickerSubcategory}
+                        onBrandChange={setPickerBrand}
+                      />
+                      <ProductPicker
+                        search={aiProductSearch}
+                        category={pickerCategory || undefined}
+                        subcategory={pickerSubcategory || undefined}
+                        brand={pickerBrand || undefined}
+                        onSelect={(product) => {
+                          setAiAttachedProduct(product);
+                          setAiProductPickerOpen(false);
+                          setAiProductSearch("");
+                        }}
+                        selectedProduct={null}
+                      />
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2 p-3">
+                    <button
+                      onClick={() => setAiProductPickerOpen(!aiProductPickerOpen)}
+                      disabled={aiSending}
+                      className={`shrink-0 rounded-md border p-2 transition-colors disabled:opacity-50 ${
+                        aiAttachedProduct || aiProductPickerOpen
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                      }`}
+                      title="Attach a product image"
+                    >
+                      <ImagePlus className="w-3.5 h-3.5" />
+                    </button>
                     <input
                       type="text"
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendAiPrompt(); } }}
-                      placeholder='e.g. "Change the sofa to dark blue velvet" or "Add a plant in the corner"'
+                      placeholder={aiAttachedProduct ? '"Replace the sofa with this product"' : '"Change the sofa to dark blue velvet"'}
                       disabled={aiSending}
                       className="flex-1 border border-border rounded-md px-3 py-2 font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 disabled:opacity-50"
                     />
