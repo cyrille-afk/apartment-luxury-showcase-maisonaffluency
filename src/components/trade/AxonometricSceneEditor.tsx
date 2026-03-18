@@ -2,6 +2,12 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { getAllTradeProducts, getAllBrands } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { supabase } from "@/integrations/supabase/client";
+
+const toAbsoluteUrl = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
+  return `${window.location.origin}${url.startsWith("/") ? "" : "/"}${url}`;
+};
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -231,12 +237,12 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: {
-          imageUrl,
+          imageUrl: toAbsoluteUrl(imageUrl),
           mode: "scene_edit",
           style,
           maskDataUrl,
           placements,
-          overlayImages: placedProducts.map((p) => p.image_url),
+          overlayImages: placedProducts.map((p) => toAbsoluteUrl(p.image_url)).filter(Boolean),
         },
       });
 

@@ -5,6 +5,13 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+
+/** Ensure image URLs are absolute so the AI gateway can fetch them */
+const toAbsoluteUrl = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
+  return `${window.location.origin}${url.startsWith("/") ? "" : "/"}${url}`;
+};
 import SectionHero from "@/components/trade/SectionHero";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -304,11 +311,11 @@ const TradeAxonometric = () => {
       }
 
       const body: any = {
-        imageUrl: sourceImage,
+        imageUrl: toAbsoluteUrl(sourceImage),
         mode,
         style,
-        overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages : undefined,
-        technicalDrawingUrl: mode === "cad_overlay" ? technicalDrawingUrl : undefined,
+        overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages.map(u => toAbsoluteUrl(u)).filter(Boolean) : undefined,
+        technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
       };
 
 
@@ -415,14 +422,14 @@ const TradeAxonometric = () => {
 
     try {
       const body: any = {
-        imageUrl: currentImageUrl,
+        imageUrl: toAbsoluteUrl(currentImageUrl),
         style,
       };
 
       if (attachedProduct) {
         // Use product_swap mode with single swap
         body.mode = "product_swap";
-        body.swaps = [{ prompt: userMsg, imageUrl: attachedProduct.image_url }];
+        body.swaps = [{ prompt: userMsg, imageUrl: toAbsoluteUrl(attachedProduct.image_url)! }];
       } else {
         body.mode = "freeform";
         body.userPrompt = userMsg;
