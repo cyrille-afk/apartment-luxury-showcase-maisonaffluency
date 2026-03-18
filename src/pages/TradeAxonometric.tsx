@@ -11,16 +11,26 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ArrowLeftRight, ExternalLink, Link2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
 type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay";
 
+interface SelectedProduct {
+  product_name: string;
+  brand_name: string;
+  image_url: string;
+  dimensions?: string;
+  materials?: string;
+}
+
 interface GenerationResult {
   imageUrl: string;
   storedUrl: string | null;
   text: string;
+  sourceProduct?: SelectedProduct | null;
+  mode: Mode;
 }
 
 const STYLE_PRESETS = [
@@ -32,7 +42,7 @@ const STYLE_PRESETS = [
 ];
 
 /** Inline product picker for platform images */
-const ProductPicker = ({ search, onSelect, selectedUrl }: { search: string; onSelect: (url: string) => void; selectedUrl: string | null }) => {
+const ProductPicker = ({ search, onSelect, selectedProduct }: { search: string; onSelect: (product: SelectedProduct) => void; selectedProduct: SelectedProduct | null }) => {
   const products = useMemo(() => {
     const all = getAllTradeProducts().filter((p) => p.image_url);
     if (!search.trim()) return all.slice(0, 24);
@@ -54,14 +64,23 @@ const ProductPicker = ({ search, onSelect, selectedUrl }: { search: string; onSe
       {products.map((p) => (
         <button
           key={p.id}
-          onClick={() => p.image_url && onSelect(p.image_url)}
+          onClick={() => p.image_url && onSelect({
+            product_name: p.product_name,
+            brand_name: p.brand_name,
+            image_url: p.image_url!,
+            dimensions: p.dimensions,
+            materials: p.materials,
+          })}
           className={`rounded border overflow-hidden text-left transition-all ${
-            selectedUrl === p.image_url ? "border-foreground ring-1 ring-foreground" : "border-border hover:border-foreground/30"
+            selectedProduct?.image_url === p.image_url ? "border-foreground ring-1 ring-foreground" : "border-border hover:border-foreground/30"
           }`}
           title={`${p.product_name} — ${p.brand_name}${p.dimensions ? ` — ${p.dimensions}` : ""}`}
         >
           <img src={p.image_url!} alt={p.product_name} className="w-full aspect-square object-cover" />
-          <p className="font-body text-[9px] text-muted-foreground truncate px-1 py-0.5">{p.product_name}</p>
+          <div className="px-1 py-0.5">
+            <p className="font-body text-[9px] text-foreground truncate">{p.product_name}</p>
+            <p className="font-body text-[8px] text-muted-foreground truncate">{p.brand_name}</p>
+          </div>
         </button>
       ))}
     </div>
@@ -80,6 +99,7 @@ const TradeAxonometric = () => {
   const [cadBlocks, setCadBlocks] = useState<string[]>([]);
   const [technicalDrawingUrl, setTechnicalDrawingUrl] = useState<string | null>(null);
   const [productSearch, setProductSearch] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [history, setHistory] = useState<GenerationResult[]>([]);
@@ -146,6 +166,8 @@ const TradeAxonometric = () => {
         imageUrl: data.imageUrl,
         storedUrl: data.storedUrl,
         text: data.text,
+        sourceProduct: selectedProduct,
+        mode,
       };
       setResult(gen);
       setHistory((prev) => [gen, ...prev]);
@@ -339,18 +361,40 @@ const TradeAxonometric = () => {
               </p>
 
               {sourceImage ? (
-                <div className="relative group">
-                  <img
-                    src={sourceImage}
-                    alt="Source"
-                    className="w-full rounded-md border border-border object-contain max-h-64"
-                  />
-                  <button
-                    onClick={() => setSourceImage(null)}
-                    className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                  </button>
+                <div className="space-y-2">
+                  <div className="relative group">
+                    <img
+                      src={sourceImage}
+                      alt="Source"
+                      className="w-full rounded-md border border-border object-contain max-h-64"
+                    />
+                    <button
+                      onClick={() => { setSourceImage(null); setSelectedProduct(null); }}
+                      className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  {selectedProduct && (
+                    <div className="flex items-center justify-between bg-muted/30 rounded-md px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="font-display text-xs text-foreground truncate">{selectedProduct.product_name}</p>
+                        <p className="font-body text-[10px] text-muted-foreground truncate">by {selectedProduct.brand_name}</p>
+                        {selectedProduct.dimensions && (
+                          <p className="font-body text-[10px] text-muted-foreground">{selectedProduct.dimensions}</p>
+                        )}
+                      </div>
+                      <a
+                        href={selectedProduct.image_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 ml-2 text-muted-foreground hover:text-foreground transition-colors"
+                        title="View original 3D image"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <CloudUpload
@@ -459,8 +503,11 @@ const TradeAxonometric = () => {
                 </div>
                 <ProductPicker
                   search={productSearch}
-                  onSelect={(imageUrl) => setSourceImage(imageUrl)}
-                  selectedUrl={sourceImage}
+                  onSelect={(product) => {
+                    setSelectedProduct(product);
+                    setSourceImage(product.image_url);
+                  }}
+                  selectedProduct={selectedProduct}
                 />
               </div>
             )}
@@ -555,6 +602,33 @@ const TradeAxonometric = () => {
                   />
                 </div>
 
+                {/* Source Product Link — click to view original 3D */}
+                {result.sourceProduct && (
+                  <div className="flex items-center gap-3 bg-muted/30 border border-border rounded-lg px-4 py-3">
+                    <a
+                      href={result.sourceProduct.image_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 w-10 h-10 rounded border border-border overflow-hidden hover:ring-1 hover:ring-foreground transition-all"
+                      title="View original 3D image"
+                    >
+                      <img src={result.sourceProduct.image_url} alt="" className="w-full h-full object-cover" />
+                    </a>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display text-xs text-foreground truncate">{result.sourceProduct.product_name}</p>
+                      <p className="font-body text-[10px] text-muted-foreground truncate">by {result.sourceProduct.brand_name}</p>
+                    </div>
+                    <a
+                      href={result.sourceProduct.image_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 flex items-center gap-1 font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Link2 className="w-3 h-3" />View 3D
+                    </a>
+                  </div>
+                )}
+
                 {/* Filter Controls */}
                 <div className="border border-border rounded-lg p-5 space-y-4">
                   <div className="flex items-center justify-between">
@@ -590,7 +664,38 @@ const TradeAxonometric = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {/* 3D↔2D Toggle */}
+                  {result.mode === "3d_to_cad" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        setSourceImage(result.storedUrl || result.imageUrl);
+                        setMode("elevation_to_axo");
+                        setResult(null);
+                      }}
+                    >
+                      <ArrowLeftRight className="w-3.5 h-3.5 mr-1.5" />
+                      2D → 3D
+                    </Button>
+                  )}
+                  {(result.mode === "elevation_to_axo" || result.mode === "section_to_axo" || result.mode === "stylize") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        setSourceImage(result.storedUrl || result.imageUrl);
+                        setMode("3d_to_cad");
+                        setResult(null);
+                      }}
+                    >
+                      <ArrowLeftRight className="w-3.5 h-3.5 mr-1.5" />
+                      3D → CAD
+                    </Button>
+                  )}
                   <Button variant="outline" size="sm" onClick={iterateOnResult} className="flex-1">
                     <Paintbrush className="w-3.5 h-3.5 mr-1.5" />
                     Re-stylize
