@@ -114,7 +114,7 @@ const TradeDocuments = () => {
 
   return (
     <>
-      <Helmet><title>Documents — Trade Portal — Maison Affluency</title></Helmet>
+      <Helmet><title>Brand Library — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-5xl">
       <SectionHero
         section="documents"
