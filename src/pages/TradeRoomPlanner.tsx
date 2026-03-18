@@ -197,6 +197,12 @@ const TradeRoomPlanner = () => {
     setPlacedProducts((prev) => prev.filter((p) => p.id !== productId));
   }, []);
 
+  const handleProductUpdate = useCallback((productId: string, updates: Partial<PlacedProduct>) => {
+    setPlacedProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, ...updates } : p))
+    );
+  }, []);
+
   return (
     <>
       <Helmet>
