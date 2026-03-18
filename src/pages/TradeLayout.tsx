@@ -73,7 +73,13 @@ const TradeLayout = () => {
             <span className="font-body text-[10px] md:text-xs text-muted-foreground uppercase tracking-[0.15em]">Trade Portal</span>
           </header>
           <main className="flex-1 p-4 md:p-6 lg:p-8">
-            <Outlet />
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            }>
+              <Outlet />
+            </Suspense>
           </main>
         </div>
       </div>
