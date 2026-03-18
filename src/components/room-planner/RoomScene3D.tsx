@@ -345,6 +345,7 @@ function PlacedProductMesh({
         )}
       </Html>
     </group>
+    </>
   );
 }
 
