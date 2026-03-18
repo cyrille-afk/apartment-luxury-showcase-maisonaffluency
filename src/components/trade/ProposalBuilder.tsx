@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, Download, ArrowLeft,
+  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send,
 } from "lucide-react";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
