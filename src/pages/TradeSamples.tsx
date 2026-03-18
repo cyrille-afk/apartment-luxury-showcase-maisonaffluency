@@ -68,6 +68,7 @@ const TradeSamples = () => {
   const [notes, setNotes] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [tearsheetUrl, setTearsheetUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill from URL params (e.g. from curator picks "Request Sample" button)
