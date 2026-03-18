@@ -101,6 +101,7 @@ const TradeAxonometric = () => {
   const [technicalDrawingUrl, setTechnicalDrawingUrl] = useState<string | null>(null);
   const [productSearch, setProductSearch] = useState("");
   const [cadProductSearch, setCadProductSearch] = useState("");
+  const [compositeProductSearch, setCompositeProductSearch] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
@@ -470,8 +471,33 @@ const TradeAxonometric = () => {
               <div className="border border-border rounded-lg p-5 space-y-4">
                 <h2 className="font-display text-sm text-foreground">Product Images to Overlay</h2>
                 <p className="font-body text-xs text-muted-foreground">
-                  Upload up to 5 product images to place into the axonometric view
+                  Select up to 5 products from the platform to place into the axonometric view
                 </p>
+
+                {overlayImages.length < 5 && (
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder="Search platform products…"
+                        value={compositeProductSearch}
+                        onChange={(e) => setCompositeProductSearch(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 border border-border rounded-md font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                      />
+                    </div>
+                    <ProductPicker
+                      search={compositeProductSearch}
+                      onSelect={(product) => {
+                        if (product.image_url && overlayImages.length < 5) {
+                          setOverlayImages((prev) => [...prev, product.image_url].slice(0, 5));
+                        }
+                      }}
+                      selectedProduct={null}
+                    />
+                  </div>
+                )}
+
                 <div className="flex flex-wrap gap-2">
                   {overlayImages.map((img, i) => (
                     <div key={i} className="relative w-16 h-16 border border-border rounded overflow-hidden group">
@@ -485,17 +511,6 @@ const TradeAxonometric = () => {
                     </div>
                   ))}
                 </div>
-                {overlayImages.length < 5 && (
-                  <CloudUpload
-                    folder="axonometric-overlays"
-                    accept="image/*"
-                    multiple
-                    label="Add product images"
-                    onUpload={(urls) =>
-                      setOverlayImages((prev) => [...prev, ...urls].slice(0, 5))
-                    }
-                  />
-                )}
               </div>
             )}
 
