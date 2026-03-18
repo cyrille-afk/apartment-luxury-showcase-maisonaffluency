@@ -92,7 +92,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
             loading="eager"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/30 to-foreground/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/30 via-foreground/15 to-foreground/5" />
       </div>
       <div className="relative px-3 py-8 md:px-4 md:py-12 lg:py-16 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
