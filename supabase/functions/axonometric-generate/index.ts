@@ -110,12 +110,19 @@ serve(async (req) => {
       image_url: { url: imageUrl },
     });
 
-    // Add replacement product image for product_swap mode
-    if (mode === "product_swap" && body.replacementImageUrl) {
-      content.push({
-        type: "image_url",
-        image_url: { url: body.replacementImageUrl },
-      });
+    // Add replacement product images for product_swap mode
+    if (mode === "product_swap") {
+      const swaps = body.swaps as { prompt: string; imageUrl: string }[] | undefined;
+      const singleImage = body.replacementImageUrl;
+      const swapList = swaps && swaps.length > 0
+        ? swaps
+        : singleImage ? [{ prompt: "", imageUrl: singleImage }] : [];
+      for (const s of swapList.slice(0, 5)) {
+        content.push({
+          type: "image_url",
+          image_url: { url: s.imageUrl },
+        });
+      }
     }
 
     // Add overlay product images for composite mode
