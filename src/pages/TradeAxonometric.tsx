@@ -45,6 +45,9 @@ const TradeAxonometric = () => {
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [showQueue, setShowQueue] = useState(true);
+  const [galleryTitle, setGalleryTitle] = useState("");
+  const [galleryDesc, setGalleryDesc] = useState("");
+  const [savingToGallery, setSavingToGallery] = useState(false);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
