@@ -31,6 +31,8 @@ const TradeAxonometricRequests = () => {
   const [requestType, setRequestType] = useState<"elevation" | "section">("elevation");
   const [projectName, setProjectName] = useState("");
   const [notes, setNotes] = useState("");
+  const [editingRequest, setEditingRequest] = useState<any | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const { data: requests, refetch } = useQuery({
     queryKey: ["axonometric-requests", user?.id],
