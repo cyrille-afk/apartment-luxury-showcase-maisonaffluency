@@ -47,6 +47,7 @@ const DesignDetails = () => {
             </div>
             </Link>
           </div>
+        </motion.div>
       </div>
     </section>
   );
