@@ -355,6 +355,21 @@ function SampleAdminRow({
             </div>
           )}
 
+          {req.tearsheet_url && (
+            <div>
+              <span className="block font-body text-[10px] uppercase tracking-wider text-muted-foreground/60 mb-1">Spec Sheet</span>
+              <a
+                href={req.tearsheet_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[hsl(var(--gold))]/30 rounded-md font-body text-[11px] text-[hsl(var(--gold))] hover:bg-[hsl(var(--gold))]/10 transition-colors"
+              >
+                <FileDown className="h-3.5 w-3.5" />
+                View Tearsheet
+              </a>
+            </div>
+          )}
+
           {/* Audit Trail */}
           <div>
             <span className="flex items-center gap-1.5 font-body text-[10px] uppercase tracking-wider text-muted-foreground/60 mb-2">
