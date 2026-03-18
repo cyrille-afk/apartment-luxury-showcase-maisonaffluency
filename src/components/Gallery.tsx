@@ -288,7 +288,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     const timer = setTimeout(() => {
       setShowHotspotHint(false);
       sessionStorage.setItem("__hotspot_hint_seen", "1");
-    }, 6000);
+    }, 15000);
     return () => clearTimeout(timer);
   }, [hintVisible]);
 
