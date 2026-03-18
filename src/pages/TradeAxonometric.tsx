@@ -602,6 +602,33 @@ const TradeAxonometric = () => {
                   />
                 </div>
 
+                {/* Source Product Link — click to view original 3D */}
+                {result.sourceProduct && (
+                  <div className="flex items-center gap-3 bg-muted/30 border border-border rounded-lg px-4 py-3">
+                    <a
+                      href={result.sourceProduct.image_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 w-10 h-10 rounded border border-border overflow-hidden hover:ring-1 hover:ring-foreground transition-all"
+                      title="View original 3D image"
+                    >
+                      <img src={result.sourceProduct.image_url} alt="" className="w-full h-full object-cover" />
+                    </a>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display text-xs text-foreground truncate">{result.sourceProduct.product_name}</p>
+                      <p className="font-body text-[10px] text-muted-foreground truncate">by {result.sourceProduct.brand_name}</p>
+                    </div>
+                    <a
+                      href={result.sourceProduct.image_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 flex items-center gap-1 font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Link2 className="w-3 h-3" />View 3D
+                    </a>
+                  </div>
+                )}
+
                 {/* Filter Controls */}
                 <div className="border border-border rounded-lg p-5 space-y-4">
                   <div className="flex items-center justify-between">
