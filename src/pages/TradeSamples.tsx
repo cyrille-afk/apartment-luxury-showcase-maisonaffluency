@@ -76,10 +76,12 @@ const TradeSamples = () => {
     const product = searchParams.get("product");
     const brand = searchParams.get("brand");
     const image = searchParams.get("image");
+    const tearsheet = searchParams.get("tearsheet");
     if (product || brand) {
       if (product) setProductName(product);
       if (brand) setBrandName(brand);
       if (image) setImagePreview(image);
+      if (tearsheet) setTearsheetUrl(tearsheet);
       setShowForm(true);
       // Clean URL params after reading
       setSearchParams({}, { replace: true });
