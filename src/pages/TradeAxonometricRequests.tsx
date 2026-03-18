@@ -29,7 +29,7 @@ const TradeAxonometricRequests = () => {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [requestType, setRequestType] = useState<"elevation" | "section">("elevation");
+  const [requestType, setRequestType] = useState<"elevation" | "section" | "section_plan">("elevation");
   const [projectName, setProjectName] = useState("");
   const [notes, setNotes] = useState("");
   const [editingRequest, setEditingRequest] = useState<any | null>(null);
