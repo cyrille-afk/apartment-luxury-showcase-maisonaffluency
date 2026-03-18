@@ -279,9 +279,8 @@ const TradeAxonometric = () => {
         technicalDrawingUrl: mode === "cad_overlay" ? technicalDrawingUrl : undefined,
       };
 
-      if (mode === "product_swap" && swapProduct) {
-        body.replacementImageUrl = swapProduct.image_url;
-        body.swapPrompt = swapPrompt;
+      if (mode === "product_swap" && swapItems.length > 0) {
+        body.swaps = swapItems.map((s) => ({ prompt: s.prompt, imageUrl: s.product.image_url }));
       }
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", { body });
