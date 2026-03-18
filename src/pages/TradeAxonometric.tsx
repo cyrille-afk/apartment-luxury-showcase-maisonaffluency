@@ -817,6 +817,70 @@ const TradeAxonometric = () => {
               </div>
             )}
 
+            {/* Product Swap mode */}
+            {mode === "product_swap" && (
+              <div className="border border-border rounded-lg p-5 space-y-4">
+                <h2 className="font-display text-sm text-foreground">Swap Product</h2>
+                <p className="font-body text-xs text-muted-foreground">
+                  Describe what to replace (e.g. "replace the grey sofa") and pick the replacement product. The AI will swap it in the exact same position.
+                </p>
+
+                <Textarea
+                  value={swapPrompt}
+                  onChange={(e) => setSwapPrompt(e.target.value)}
+                  placeholder='e.g. "Replace the grey corner sofa with this product" or "Swap the coffee table"'
+                  rows={2}
+                  maxLength={500}
+                  className="font-body text-xs"
+                />
+
+                <div className="space-y-2">
+                  <h3 className="font-display text-xs text-foreground">Replacement Product</h3>
+                  {swapProduct ? (
+                    <div className="flex items-center gap-3 bg-muted/30 rounded-md px-3 py-2">
+                      <img src={swapProduct.image_url} alt="" className="w-12 h-12 rounded border border-border object-cover shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-display text-xs text-foreground truncate">{swapProduct.product_name}</p>
+                        <p className="font-body text-[10px] text-muted-foreground truncate">by {swapProduct.brand_name}</p>
+                      </div>
+                      <button onClick={() => setSwapProduct(null)} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Search platform products…"
+                          value={swapProductSearch}
+                          onChange={(e) => setSwapProductSearch(e.target.value)}
+                          className="w-full pl-9 pr-4 py-2 border border-border rounded-md font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                        />
+                      </div>
+                      <CategoryFilterBar
+                        category={pickerCategory}
+                        subcategory={pickerSubcategory}
+                        brand={pickerBrand}
+                        onCategoryChange={setPickerCategory}
+                        onSubcategoryChange={setPickerSubcategory}
+                        onBrandChange={setPickerBrand}
+                      />
+                      <ProductPicker
+                        search={swapProductSearch}
+                        category={pickerCategory || undefined}
+                        subcategory={pickerSubcategory || undefined}
+                        brand={pickerBrand || undefined}
+                        onSelect={(product) => setSwapProduct(product)}
+                        selectedProduct={swapProduct}
+                      />
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Generate Button */}
             <Button
               onClick={generate}
