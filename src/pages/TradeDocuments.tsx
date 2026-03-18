@@ -118,7 +118,7 @@ const TradeDocuments = () => {
     <div className="max-w-5xl">
       <SectionHero
         section="documents"
-        title="Document Library"
+        title="Brand Library"
         subtitle="Access tearsheets, catalogues, and price lists organized by brand."
       />
 
