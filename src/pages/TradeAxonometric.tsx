@@ -324,8 +324,7 @@ const TradeAxonometric = () => {
         sourceProduct: selectedProduct,
         mode,
       };
-      setResult(gen);
-      setHistory((prev) => [gen, ...prev]);
+      pushResult(gen);
       toast({ title: "Axonometric view generated" });
     } catch (e: any) {
       console.error(e);
