@@ -387,6 +387,11 @@ function SampleRow({ request: req }: { request: SampleRequest }) {
         </p>
       </div>
       <div className="flex items-center gap-3 shrink-0">
+        {req.tearsheet_url && (
+          <a href={req.tearsheet_url} target="_blank" rel="noopener noreferrer" title="View spec sheet" className="text-[hsl(var(--gold))] hover:text-foreground transition-colors">
+            <FileDown className="h-3.5 w-3.5" />
+          </a>
+        )}
         {req.return_by && (
           <span className="font-body text-[10px] text-muted-foreground">
             Return by {formatDate(req.return_by)}
