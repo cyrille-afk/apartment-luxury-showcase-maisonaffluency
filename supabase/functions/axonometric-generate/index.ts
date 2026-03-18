@@ -203,14 +203,24 @@ Style: ${defaultStyle}.`;
       }
     }
 
-    // Proposal render: add product images after the empty room
-    if (mode === "proposal_render" && placements && Array.isArray(placements)) {
-      for (const p of placements.slice(0, 5)) {
-        if (p.image_url) {
-          content.push({
-            type: "image_url",
-            image_url: { url: p.image_url },
-          });
+    // Proposal render: add reference (original furnished) image, then empty room is already the main imageUrl, then product images
+    if (mode === "proposal_render") {
+      // Insert original furnished image BEFORE the empty room (which is already content[1])
+      if (referenceImageUrl) {
+        // The main imageUrl = empty room. We need original first, then empty, then products.
+        // Restructure: [text_prompt, original_furnished, empty_room, ...product_images]
+        const emptyRoomEntry = content[1]; // the imageUrl (empty room)
+        content[1] = { type: "image_url", image_url: { url: referenceImageUrl } };
+        content.splice(2, 0, emptyRoomEntry);
+      }
+      if (placements && Array.isArray(placements)) {
+        for (const p of placements.slice(0, 5)) {
+          if (p.image_url) {
+            content.push({
+              type: "image_url",
+              image_url: { url: p.image_url },
+            });
+          }
         }
       }
     }
