@@ -16,7 +16,16 @@ const Footer = () => {
   };
 
   return (
-    <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
+    <>
+      <div className="border-t border-border bg-muted/30 px-6 py-3 text-center">
+        <span className="font-body text-xs text-muted-foreground">
+          By using this site you agree to our{" "}
+          <a href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">Privacy Policy</a>
+          {" "}&{" "}
+          <a href="/terms" className="underline underline-offset-2 hover:text-foreground transition-colors">Terms of Service</a>
+        </span>
+      </div>
+      <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-center gap-6">
           <TooltipProvider>
