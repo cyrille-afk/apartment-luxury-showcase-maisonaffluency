@@ -185,8 +185,20 @@ serve(async (req) => {
       }
     }
 
+    // Proposal render: add product images after the empty room
+    if (mode === "proposal_render" && placements && Array.isArray(placements)) {
+      for (const p of placements.slice(0, 5)) {
+        if (p.image_url) {
+          content.push({
+            type: "image_url",
+            image_url: { url: p.image_url },
+          });
+        }
+      }
+    }
+
     // Pro model for heavy transformations, flash for iterative/turntable flows to reduce wait states
-    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay"];
+    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay", "proposal_render"];
     const selectedModel = proModes.includes(mode)
       ? "google/gemini-3-pro-image-preview"
       : "google/gemini-3.1-flash-image-preview";
