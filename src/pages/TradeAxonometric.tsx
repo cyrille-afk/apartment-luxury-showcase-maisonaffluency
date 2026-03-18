@@ -39,6 +39,9 @@ const TradeAxonometric = () => {
   const [mode, setMode] = useState<Mode>("elevation_to_axo");
   const [style, setStyle] = useState(STYLE_PRESETS[0].value);
   const [overlayImages, setOverlayImages] = useState<string[]>([]);
+  const [cadBlocks, setCadBlocks] = useState<string[]>([]);
+  const [technicalDrawingUrl, setTechnicalDrawingUrl] = useState<string | null>(null);
+  const [productSearch, setProductSearch] = useState("");
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [history, setHistory] = useState<GenerationResult[]>([]);
