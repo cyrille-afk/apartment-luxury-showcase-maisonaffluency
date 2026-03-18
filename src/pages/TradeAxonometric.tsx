@@ -101,6 +101,7 @@ const TradeAxonometric = () => {
   const [technicalDrawingUrl, setTechnicalDrawingUrl] = useState<string | null>(null);
   const [productSearch, setProductSearch] = useState("");
   const [cadProductSearch, setCadProductSearch] = useState("");
+  const [compositeProductSearch, setCompositeProductSearch] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
