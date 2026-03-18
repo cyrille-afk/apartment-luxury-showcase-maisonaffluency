@@ -214,13 +214,24 @@ const TradeDashboard = () => {
             className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all"
           >
             <div className="relative aspect-[3/2] overflow-hidden">
-              <img
-                src={getCardImage(card)}
-                alt={card.title}
-                loading="lazy"
-                className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${getCardPosition(card)}`}
-              />
+              {getCardImage(card) ? (
+                <img
+                  src={getCardImage(card)}
+                  alt={card.title}
+                  loading="lazy"
+                  className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${getCardPosition(card)}`}
+                />
+              ) : (
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <card.icon className="w-8 h-8 text-muted-foreground/30" />
+                </div>
+              )}
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
+              {card.key === "dash-3d-studio" && studioStats.count > 0 && (
+                <span className="absolute top-2 right-2 inline-flex items-center px-2 py-0.5 rounded-full bg-background/80 backdrop-blur-sm font-body text-[10px] text-foreground border border-border">
+                  {studioStats.count} render{studioStats.count !== 1 ? "s" : ""}
+                </span>
+              )}
             </div>
             <div className="p-3 md:p-4">
               <h3 className="font-display text-sm md:text-base text-foreground mb-0.5 md:mb-1">{card.title}</h3>
