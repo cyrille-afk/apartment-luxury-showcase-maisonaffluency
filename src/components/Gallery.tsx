@@ -3,7 +3,7 @@ import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy, MapPin } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
 import GalleryHotspots from "./GalleryHotspots";
@@ -569,9 +569,17 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary mb-2">
-                    {section.experience}
-                  </h3>
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary mb-2">
+                      {section.experience}
+                    </h3>
+                    {!section.items.some(i => i.description) && (
+                      <span className="hidden md:inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body mb-2">
+                        <MapPin className="h-3 w-3" />
+                        Interactive Gallery
+                      </span>
+                    )}
+                  </div>
                   {originalSectionIndex === 0 && (
                     <TooltipProvider delayDuration={200}>
                       <Tooltip>
