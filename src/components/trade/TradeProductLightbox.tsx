@@ -32,6 +32,7 @@ interface TradeProductLightboxProps {
 const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdded }: TradeProductLightboxProps) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const [showHoverImage, setShowHoverImage] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setShowHoverImage(false);
