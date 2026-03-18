@@ -21,9 +21,9 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ExternalLink, Link2, X, Undo2, Redo2, Trash2, Upload, RotateCw, Timer } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ExternalLink, Link2, X, Undo2, Redo2, Trash2, Upload, Timer } from "lucide-react";
 const AxonometricSceneEditor = lazy(() => import("@/components/trade/AxonometricSceneEditor"));
-const TurntableViewer = lazy(() => import("@/components/trade/TurntableViewer"));
+
 const ProposalBuilder = lazy(() => import("@/components/trade/ProposalBuilder"));
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
@@ -214,11 +214,6 @@ const TradeAxonometric = () => {
   const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
 
-  // Turntable state
-  const TURNTABLE_ANGLES = [0, 60, 120, 180, 240, 300];
-  const [turntableImages, setTurntableImages] = useState<string[]>([]);
-  const [turntableGenerating, setTurntableGenerating] = useState(false);
-  const [showTurntable, setShowTurntable] = useState(false);
 
   // AI dialogue state
   const [aiPrompt, setAiPrompt] = useState("");
@@ -631,84 +626,6 @@ const TradeAxonometric = () => {
     }
   };
 
-  // Turntable: generate 6 views at different angles sequentially
-  const generateTurntable = async () => {
-    if (!result) return;
-    const baseUrl = result.storedUrl || result.imageUrl;
-    setTurntableImages([]);
-    setTurntableGenerating(true);
-    setShowTurntable(true);
-
-    let completedViews = 0;
-    let pausedForRateLimit = false;
-
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
-      if (!accessToken) {
-        toast({ title: "Session expired", description: "Please sign in again.", variant: "destructive" });
-        return;
-      }
-
-      for (let i = 0; i < TURNTABLE_ANGLES.length; i++) {
-        const angle = TURNTABLE_ANGLES[i];
-
-        try {
-          if (angle === 0) {
-            setTurntableImages((prev) => [...prev, baseUrl]);
-            completedViews += 1;
-            continue;
-          }
-
-          const data = await invokeAxonometricGenerate({
-            imageUrl: toAbsoluteUrl(baseUrl),
-            mode: "turntable_angle",
-            style,
-            turntableAngle: angle,
-          }, accessToken, 2);
-
-          const viewUrl = data.storedUrl || data.imageUrl;
-          setTurntableImages((prev) => [...prev, viewUrl]);
-          completedViews += 1;
-        } catch (e: any) {
-          const message = e?.message || `Angle ${angle}° failed`;
-
-          if (isRateLimitedError(message)) {
-            pausedForRateLimit = true;
-            startCooldown(() => generateTurntable());
-            toast({
-              title: "Turntable paused — auto-retry queued",
-              description: "Will resume when cooldown ends.",
-              variant: "destructive",
-            });
-            break;
-          }
-
-          console.error(`Turntable angle ${angle}° failed:`, e);
-          toast({ title: `Angle ${angle}° failed`, description: message, variant: "destructive" });
-          setTurntableImages((prev) => [...prev, baseUrl]);
-          completedViews += 1;
-        }
-
-        if (i < TURNTABLE_ANGLES.length - 1) {
-          await sleep(900);
-        }
-      }
-
-      if (!pausedForRateLimit) {
-        toast({ title: `Turntable ready — ${completedViews} views generated` });
-      }
-    } finally {
-      setTurntableGenerating(false);
-    }
-  };
-
-  const downloadTurntableImage = (url: string, index: number) => {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `turntable-${TURNTABLE_ANGLES[index]}deg-${Date.now()}.png`;
-    a.click();
-  };
 
   const filterStyle = {
     filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) sepia(${Math.abs(warmth)}%)`,
@@ -1455,18 +1372,6 @@ const TradeAxonometric = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={generateTurntable}
-                    disabled={turntableGenerating || isCoolingDown}
-                  >
-                    {turntableGenerating ? (
-                      <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Generating Orbit…</>
-                    ) : (
-                      <><RotateCw className="w-3.5 h-3.5 mr-1.5" />Orbit Turntable</>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
                     onClick={() => setShowProposal(true)}
                     disabled={!result}
                   >
@@ -1475,17 +1380,6 @@ const TradeAxonometric = () => {
                     {emptyRoomGenerating && <Loader2 className="w-3 h-3 ml-1.5 animate-spin" />}
                   </Button>
                 </div>
-
-                {/* Turntable Viewer */}
-                {showTurntable && (
-                  <Suspense fallback={<div className="py-8 text-center font-body text-xs text-muted-foreground">Loading viewer…</div>}>
-                    <TurntableViewer
-                      images={turntableImages}
-                      generating={turntableGenerating}
-                      onDownload={downloadTurntableImage}
-                    />
-                  </Suspense>
-                )}
 
                 {/* Save to Gallery */}
                 <div className="border border-border rounded-lg p-5 space-y-3">
