@@ -484,6 +484,14 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
                   </select>
                 )}
               </div>
+              <select
+                value={sceneBrand}
+                onChange={(e) => setSceneBrand(e.target.value)}
+                className="w-full border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+              >
+                <option value="">All Brands</option>
+                {allBrands.map((b) => <option key={b} value={b}>{b}</option>)}
+              </select>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <input
