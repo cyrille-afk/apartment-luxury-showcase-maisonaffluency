@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Package, Plus, Clock, Truck, CheckCircle, RotateCcw, X, ImagePlus } from "lucide-react";
+import { Package, Plus, Clock, Truck, CheckCircle, RotateCcw, X, ImagePlus, FileDown } from "lucide-react";
 import SectionHero from "@/components/trade/SectionHero";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ interface SampleRequest {
   admin_notes: string | null;
   tracking_number: string | null;
   image_url: string | null;
+  tearsheet_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -67,6 +68,7 @@ const TradeSamples = () => {
   const [notes, setNotes] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [tearsheetUrl, setTearsheetUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill from URL params (e.g. from curator picks "Request Sample" button)
@@ -74,10 +76,12 @@ const TradeSamples = () => {
     const product = searchParams.get("product");
     const brand = searchParams.get("brand");
     const image = searchParams.get("image");
+    const tearsheet = searchParams.get("tearsheet");
     if (product || brand) {
       if (product) setProductName(product);
       if (brand) setBrandName(brand);
       if (image) setImagePreview(image);
+      if (tearsheet) setTearsheetUrl(tearsheet);
       setShowForm(true);
       // Clean URL params after reading
       setSearchParams({}, { replace: true });
@@ -109,7 +113,7 @@ const TradeSamples = () => {
   const resetForm = () => {
     setProductName(""); setBrandName(""); setClientName(""); setProjectName("");
     setAddress(""); setCity(""); setCountry("Singapore"); setReturnBy(undefined); setNotes("");
-    setImageFile(null); setImagePreview(null);
+    setImageFile(null); setImagePreview(null); setTearsheetUrl(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,6 +154,7 @@ const TradeSamples = () => {
       return_by: returnBy ? format(returnBy, "yyyy-MM-dd") : null,
       notes: notes.trim() || null,
       image_url: imageUrl,
+      tearsheet_url: tearsheetUrl,
     } as any);
 
     setSubmitting(false);
@@ -299,6 +304,16 @@ const TradeSamples = () => {
               <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Finish, colour, size preferences or special instructions" rows={3} />
             </div>
 
+            {tearsheetUrl && (
+              <div className="flex items-center gap-2 px-3 py-2 border border-border rounded-md bg-muted/30">
+                <FileDown className="h-3.5 w-3.5 text-[hsl(var(--gold))] shrink-0" />
+                <span className="font-body text-xs text-foreground truncate flex-1">Spec sheet attached</span>
+                <button type="button" onClick={() => setTearsheetUrl(null)} className="text-muted-foreground hover:text-foreground transition-colors">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+
             <Button type="submit" disabled={submitting || !productName.trim() || !brandName.trim()} className="w-full md:w-auto">
               {submitting ? "Submitting…" : "Submit Request"}
             </Button>
@@ -372,6 +387,11 @@ function SampleRow({ request: req }: { request: SampleRequest }) {
         </p>
       </div>
       <div className="flex items-center gap-3 shrink-0">
+        {req.tearsheet_url && (
+          <a href={req.tearsheet_url} target="_blank" rel="noopener noreferrer" title="View spec sheet" className="text-[hsl(var(--gold))] hover:text-foreground transition-colors">
+            <FileDown className="h-3.5 w-3.5" />
+          </a>
+        )}
         {req.return_by && (
           <span className="font-body text-[10px] text-muted-foreground">
             Return by {formatDate(req.return_by)}

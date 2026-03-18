@@ -222,6 +222,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   params.set("product", product.product_name);
                   if (product.brand_name) params.set("brand", product.brand_name);
                   if (product.image_url) params.set("image", product.image_url);
+                  if (product.pdf_url) params.set("tearsheet", product.pdf_url);
                   onClose();
                   navigate(`/trade/samples?${params.toString()}`);
                 }}
