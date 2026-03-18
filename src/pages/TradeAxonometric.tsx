@@ -960,6 +960,47 @@ const TradeAxonometric = () => {
                   />
                 </div>
 
+                {/* AI Dialogue Box */}
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <div className="px-4 py-2.5 bg-muted/30 border-b border-border flex items-center gap-2">
+                    <Wand2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    <h3 className="font-display text-xs text-foreground">AI Edit Prompt</h3>
+                    <span className="font-body text-[10px] text-muted-foreground ml-auto">Describe changes to apply</span>
+                  </div>
+
+                  {aiHistory.length > 0 && (
+                    <div ref={aiChatRef} className="max-h-48 overflow-y-auto divide-y divide-border/50">
+                      {aiHistory.map((msg, i) => (
+                        <div key={i} className={`px-4 py-2.5 text-xs font-body ${msg.role === "user" ? "bg-muted/10" : "bg-muted/30"}`}>
+                          <span className="font-medium text-muted-foreground mr-1.5">{msg.role === "user" ? "You:" : "AI:"}</span>
+                          {msg.role === "ai" && msg.imageUrl ? (
+                            <span className="text-foreground">Applied: {msg.text}</span>
+                          ) : msg.role === "ai" && msg.text.startsWith("Error:") ? (
+                            <span className="text-destructive">{msg.text}</span>
+                          ) : (
+                            <span className="text-foreground">{msg.text}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 p-3">
+                    <input
+                      type="text"
+                      value={aiPrompt}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendAiPrompt(); } }}
+                      placeholder='e.g. "Change the sofa to dark blue velvet" or "Add a plant in the corner"'
+                      disabled={aiSending}
+                      className="flex-1 border border-border rounded-md px-3 py-2 font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 disabled:opacity-50"
+                    />
+                    <Button size="sm" onClick={sendAiPrompt} disabled={aiSending || !aiPrompt.trim()}>
+                      {aiSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+                    </Button>
+                  </div>
+                </div>
+
                 {/* Source Product Link — click to view original 3D */}
                 {result.sourceProduct && (
                   <div className="flex items-center gap-3 bg-muted/30 border border-border rounded-lg px-4 py-3">
