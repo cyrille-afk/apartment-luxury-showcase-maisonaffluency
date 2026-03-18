@@ -231,6 +231,32 @@ const TradeAxonometric = () => {
   const [saturation, setSaturation] = useState(100);
   const [warmth, setWarmth] = useState(0);
 
+  // Rate-limit cooldown timer
+  const COOLDOWN_SECONDS = 45;
+  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
+
+  const startCooldown = useCallback(() => {
+    setCooldownUntil(Date.now() + COOLDOWN_SECONDS * 1000);
+  }, []);
+
+  const isCoolingDown = cooldownRemaining > 0;
+
+  useEffect(() => {
+    if (!cooldownUntil) {
+      setCooldownRemaining(0);
+      return;
+    }
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+      setCooldownRemaining(left);
+      if (left <= 0) setCooldownUntil(null);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [cooldownUntil]);
+
   // Undo / Redo through generation history
   const canUndo = history.length > 1 && historyIndex < history.length - 1;
   const canRedo = historyIndex > 0;
