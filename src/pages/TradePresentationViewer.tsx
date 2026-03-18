@@ -135,6 +135,32 @@ const TradePresentationViewer = () => {
     setFullscreen(!fullscreen);
   };
 
+  const handleExportPdf = useCallback(async () => {
+    if (!presentation || slides.length === 0) return;
+    setExportingPdf(true);
+    try {
+      const blob = await pdf(
+        <PresentationPDF
+          title={presentation.title || ""}
+          clientName={presentation.client_name || undefined}
+          projectName={presentation.project_name || undefined}
+          createdAt={presentation.created_at || new Date().toISOString()}
+          slides={slides}
+        />
+      ).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${(presentation.title || "Presentation").replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "-")}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PDF export failed:", err);
+    } finally {
+      setExportingPdf(false);
+    }
+  }, [presentation, slides]);
+
   if (loading) return null;
   if (!user) return <Navigate to="/trade/login" replace />;
 
