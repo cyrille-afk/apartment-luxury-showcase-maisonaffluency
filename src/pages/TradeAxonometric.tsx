@@ -185,6 +185,7 @@ const TradeAxonometric = () => {
   const [compositeProductSearch, setCompositeProductSearch] = useState("");
   const [pickerCategory, setPickerCategory] = useState("");
   const [pickerSubcategory, setPickerSubcategory] = useState("");
+  const [pickerBrand, setPickerBrand] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
