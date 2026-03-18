@@ -13,7 +13,7 @@ const DesignDetails = () => {
   });
 
   return (
-    <section ref={ref} className="pt-16 pb-12 px-4 md:pt-20 md:pb-24 md:px-12 lg:px-20 bg-background">
+    <section ref={ref} className="pt-24 pb-12 px-4 md:pt-32 md:pb-24 md:px-12 lg:px-20 bg-background">
       <div className="mx-auto max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -21,7 +21,7 @@ const DesignDetails = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           {/* Compact teaser card */}
-          <div className="max-w-3xl mx-auto p-[2px] rounded-sm bg-foreground">
+          <div className="max-w-3xl mx-auto p-[4px] rounded-sm bg-foreground">
             <Link
               to="/trade/program"
               className="group block overflow-hidden rounded-sm relative aspect-[5/3]"
