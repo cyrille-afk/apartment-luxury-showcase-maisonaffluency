@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, GripVertical, Save, Eye, Check } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, GripVertical, Save, Eye, Check, Share2, X, UserPlus } from "lucide-react";
 
 interface Slide {
   id: string;
@@ -44,6 +44,8 @@ const TradePresentationBuilder = () => {
   const [saving, setSaving] = useState(false);
   const [showGalleryPicker, setShowGalleryPicker] = useState(false);
   const [selectedGalleryIds, setSelectedGalleryIds] = useState<Set<string>>(new Set());
+  const [showSharePanel, setShowSharePanel] = useState(false);
+  const [shareEmail, setShareEmail] = useState("");
 
   // Fetch presentation
   const { data: presentation } = useQuery({
@@ -87,6 +89,21 @@ const TradePresentationBuilder = () => {
       return data as GalleryItem[];
     },
     enabled: !!isAdmin && showGalleryPicker,
+  });
+
+  // Fetch shares
+  const { data: shares = [], refetch: refetchShares } = useQuery({
+    queryKey: ["presentation-shares", id],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("presentation_shares")
+        .select("*")
+        .eq("presentation_id", id)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data as { id: string; shared_with_email: string; shared_with_user_id: string | null; role: string; created_at: string }[];
+    },
+    enabled: !!id && !!isAdmin,
   });
 
   // Sync form state when presentation loads
@@ -172,6 +189,34 @@ const TradePresentationBuilder = () => {
     refetchSlides();
   }, [refetchSlides]);
 
+  const handleAddShare = async () => {
+    const email = shareEmail.trim().toLowerCase();
+    if (!email || !email.includes("@")) {
+      toast({ title: "Enter a valid email", variant: "destructive" });
+      return;
+    }
+    const { data: profile } = await supabase.from("profiles").select("id").eq("email", email).single();
+    const { error } = await (supabase as any).from("presentation_shares").insert({
+      presentation_id: id,
+      shared_with_email: email,
+      shared_with_user_id: profile?.id || null,
+      role: "viewer",
+    });
+    if (error) {
+      if (error.code === "23505") toast({ title: "Already shared with this email" });
+      else toast({ title: "Error sharing", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: `Shared with ${email}` });
+    setShareEmail("");
+    refetchShares();
+  };
+
+  const handleRemoveShare = async (shareId: string) => {
+    await (supabase as any).from("presentation_shares").delete().eq("id", shareId);
+    refetchShares();
+  };
+
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
@@ -187,6 +232,13 @@ const TradePresentationBuilder = () => {
           <div className="flex-1">
             <h1 className="font-display text-2xl text-foreground">Edit Presentation</h1>
           </div>
+          <button
+            onClick={() => setShowSharePanel(!showSharePanel)}
+            className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-full font-body text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            Share {shares.length > 0 && `(${shares.length})`}
+          </button>
           <button
             onClick={() => navigate(`/trade/presentations/${id}/view`)}
             className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-full font-body text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -219,6 +271,50 @@ const TradePresentationBuilder = () => {
             <input value={projectName} onChange={(e) => setProjectName(e.target.value)} className={inputClass} placeholder="Project name" />
           </div>
         </div>
+
+        {/* Share Panel */}
+        {showSharePanel && (
+          <div className="mb-8 border border-border rounded-lg p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display text-lg text-foreground">Share with Viewers</h2>
+              <button onClick={() => setShowSharePanel(false)} className="p-1 text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="flex gap-3 mb-4">
+              <input
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddShare()}
+                className={inputClass + " flex-1"}
+                placeholder="Email address (e.g. gregoire@maisonaffluency.com)"
+              />
+              <button
+                onClick={handleAddShare}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:opacity-90 transition-opacity shrink-0"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                Share
+              </button>
+            </div>
+            {shares.length > 0 && (
+              <div className="space-y-2">
+                {shares.map((s) => (
+                  <div key={s.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                    <div>
+                      <p className="font-body text-sm text-foreground">{s.shared_with_email}</p>
+                      <p className="font-body text-[10px] text-muted-foreground">Viewer · Can comment</p>
+                    </div>
+                    <button onClick={() => handleRemoveShare(s.id)} className="p-1.5 text-muted-foreground hover:text-destructive transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {shares.length === 0 && (
+              <p className="font-body text-xs text-muted-foreground">No one has been invited yet. Shared viewers can view slides and leave comments.</p>
+            )}
+          </div>
+        )}
 
         {/* Slides */}
         <div className="flex items-center justify-between mb-4">
