@@ -623,9 +623,10 @@ const TradeAxonometric = () => {
 
           if (isRateLimitedError(message)) {
             pausedForRateLimit = true;
+            startCooldown();
             toast({
               title: "Turntable paused",
-              description: "Rate limit hit — wait ~60 seconds, then tap Orbit Turntable again.",
+              description: "Cooldown timer started — retry when it reaches zero.",
               variant: "destructive",
             });
             break;
