@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, GripVertical, Save, Eye, Check } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, GripVertical, Save, Eye, Check, Share2, X, UserPlus } from "lucide-react";
 
 interface Slide {
   id: string;
