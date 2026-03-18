@@ -202,6 +202,12 @@ const TradeAxonometric = () => {
   const [swapProduct, setSwapProduct] = useState<SelectedProduct | null>(null);
   const [swapProductSearch, setSwapProductSearch] = useState("");
 
+  // AI dialogue state
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiSending, setAiSending] = useState(false);
+  const [aiHistory, setAiHistory] = useState<{ role: "user" | "ai"; text: string; imageUrl?: string }[]>([]);
+  const aiChatRef = useRef<HTMLDivElement>(null);
+
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
