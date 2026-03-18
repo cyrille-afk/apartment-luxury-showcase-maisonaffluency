@@ -645,10 +645,10 @@ const TradeAxonometric = () => {
 
           if (isRateLimitedError(message)) {
             pausedForRateLimit = true;
-            startCooldown();
+            startCooldown(() => generateTurntable());
             toast({
-              title: "Turntable paused",
-              description: "Cooldown timer started — retry when it reaches zero.",
+              title: "Turntable paused — auto-retry queued",
+              description: "Will resume when cooldown ends.",
               variant: "destructive",
             });
             break;
