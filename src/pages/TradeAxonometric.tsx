@@ -197,6 +197,7 @@ const TradeAxonometric = () => {
   const [galleryDesc, setGalleryDesc] = useState("");
   const [savingToGallery, setSavingToGallery] = useState(false);
   const [showSceneEditor, setShowSceneEditor] = useState(false);
+  const [showDrafts, setShowDrafts] = useState(false);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
@@ -214,7 +215,6 @@ const TradeAxonometric = () => {
         .in("status", ["pending", "in_progress"])
         .order("created_at", { ascending: true });
       if (error) throw error;
-      // Fetch profile info separately to avoid FK join issues
       const userIds = [...new Set((data || []).map((r: any) => r.user_id))] as string[];
       const { data: profiles } = userIds.length > 0
         ? await supabase.from("profiles").select("id, first_name, last_name, company").in("id", userIds)
@@ -224,6 +224,21 @@ const TradeAxonometric = () => {
         ...r,
         profiles: profileMap.get(r.user_id) || null,
       }));
+    },
+    enabled: isAdmin,
+  });
+
+  // Fetch unpublished gallery drafts
+  const { data: galleryDrafts } = useQuery({
+    queryKey: ["axonometric-gallery-drafts-studio"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("axonometric_gallery")
+        .select("*")
+        .eq("is_published", false)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as any[];
     },
     enabled: isAdmin,
   });
@@ -397,9 +412,22 @@ const TradeAxonometric = () => {
               </Button>
             )}
             <Button
+              variant={showDrafts ? "default" : "outline"}
+              size="sm"
+              onClick={() => { setShowDrafts(!showDrafts); if (!showDrafts) setShowQueue(false); }}
+            >
+              <EyeOff className="w-3.5 h-3.5 mr-1.5" />
+              My Drafts
+              {galleryDrafts && galleryDrafts.length > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-[10px] font-medium">
+                  {galleryDrafts.length}
+                </span>
+              )}
+            </Button>
+            <Button
               variant={showQueue ? "default" : "outline"}
               size="sm"
-              onClick={() => setShowQueue(!showQueue)}
+              onClick={() => { setShowQueue(!showQueue); if (!showQueue) setShowDrafts(false); }}
             >
               <Inbox className="w-3.5 h-3.5 mr-1.5" />
               Queue
@@ -447,6 +475,55 @@ const TradeAxonometric = () => {
           <div className="border border-dashed border-border rounded-lg py-12 flex flex-col items-center justify-center gap-2">
             <CheckCircle2 className="w-6 h-6 text-muted-foreground/40" />
             <p className="font-body text-sm text-muted-foreground">No pending requests — all caught up</p>
+          </div>
+        )}
+
+        {/* My Drafts Panel */}
+        {showDrafts && galleryDrafts && galleryDrafts.length > 0 && (
+          <div className="border border-border rounded-lg divide-y divide-border">
+            <div className="px-5 py-3 bg-muted/30">
+              <h2 className="font-display text-sm text-foreground">Unpublished Drafts</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+              {galleryDrafts.map((draft: any) => (
+                <div key={draft.id} className="border border-border rounded-lg overflow-hidden group">
+                  <div className="aspect-[4/3] overflow-hidden bg-muted relative">
+                    <img src={draft.image_url} alt={draft.title} className="w-full h-full object-cover" />
+                    <span className="absolute top-2 left-2 font-body text-[10px] px-1.5 py-0.5 rounded bg-foreground/80 text-background">Draft</span>
+                  </div>
+                  <div className="p-3 space-y-2">
+                    <p className="font-display text-sm text-foreground line-clamp-1">{draft.title || "Untitled"}</p>
+                    <div className="flex items-center gap-1.5">
+                      {draft.style_preset && (
+                        <span className="font-body text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">{draft.style_preset}</span>
+                      )}
+                      <span className="font-body text-[10px] text-muted-foreground ml-auto">{format(new Date(draft.created_at), "d MMM yyyy")}</span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        setSourceImage(draft.image_url);
+                        setResult({ imageUrl: draft.image_url, storedUrl: draft.image_url, text: "", mode: "elevation_to_axo" });
+                        setGalleryTitle(draft.title || "");
+                        setGalleryDesc(draft.description || "");
+                        setShowDrafts(false);
+                      }}
+                    >
+                      <ArrowRight className="w-3.5 h-3.5 mr-1.5" />Resume Editing
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {showDrafts && (!galleryDrafts || galleryDrafts.length === 0) && (
+          <div className="border border-dashed border-border rounded-lg py-12 flex flex-col items-center justify-center gap-2">
+            <EyeOff className="w-6 h-6 text-muted-foreground/40" />
+            <p className="font-body text-sm text-muted-foreground">No drafts saved yet</p>
           </div>
         )}
 
