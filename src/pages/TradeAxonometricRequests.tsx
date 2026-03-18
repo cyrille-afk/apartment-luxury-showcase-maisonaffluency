@@ -29,7 +29,7 @@ const TradeAxonometricRequests = () => {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [requestType, setRequestType] = useState<"elevation" | "section">("elevation");
+  const [requestType, setRequestType] = useState<"elevation" | "section" | "section_plan">("elevation");
   const [projectName, setProjectName] = useState("");
   const [notes, setNotes] = useState("");
   const [editingRequest, setEditingRequest] = useState<any | null>(null);
@@ -194,6 +194,7 @@ const TradeAxonometricRequests = () => {
                   <SelectContent>
                     <SelectItem value="elevation" className="font-body text-sm">Room Elevation</SelectItem>
                     <SelectItem value="section" className="font-body text-sm">Building Section</SelectItem>
+                    <SelectItem value="section_plan" className="font-body text-sm">Section Plan</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -344,8 +345,9 @@ const TradeAxonometricRequests = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="elevation" className="font-body text-sm">Room Elevation</SelectItem>
-                  <SelectItem value="section" className="font-body text-sm">Building Section</SelectItem>
+                   <SelectItem value="elevation" className="font-body text-sm">Room Elevation</SelectItem>
+                    <SelectItem value="section" className="font-body text-sm">Building Section</SelectItem>
+                    <SelectItem value="section_plan" className="font-body text-sm">Section Plan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
