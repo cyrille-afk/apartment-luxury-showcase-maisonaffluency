@@ -310,6 +310,83 @@ export type Database = {
         }
         Relationships: []
       }
+      presentation_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          presentation_id: string
+          slide_id: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          presentation_id: string
+          slide_id?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          presentation_id?: string
+          slide_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presentation_comments_presentation_id_fkey"
+            columns: ["presentation_id"]
+            isOneToOne: false
+            referencedRelation: "presentations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presentation_comments_slide_id_fkey"
+            columns: ["slide_id"]
+            isOneToOne: false
+            referencedRelation: "presentation_slides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      presentation_shares: {
+        Row: {
+          created_at: string
+          id: string
+          presentation_id: string
+          role: string
+          shared_with_email: string
+          shared_with_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          presentation_id: string
+          role?: string
+          shared_with_email: string
+          shared_with_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          presentation_id?: string
+          role?: string
+          shared_with_email?: string
+          shared_with_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presentation_shares_presentation_id_fkey"
+            columns: ["presentation_id"]
+            isOneToOne: false
+            referencedRelation: "presentations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       presentation_slides: {
         Row: {
           created_at: string
