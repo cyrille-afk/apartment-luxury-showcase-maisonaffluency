@@ -117,6 +117,47 @@ const ProductPicker = ({
   );
 };
 
+/** Category + Subcategory filter row */
+const CategoryFilterBar = ({
+  category,
+  subcategory,
+  onCategoryChange,
+  onSubcategoryChange,
+}: {
+  category: string;
+  subcategory: string;
+  onCategoryChange: (v: string) => void;
+  onSubcategoryChange: (v: string) => void;
+}) => {
+  const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
+  return (
+    <div className="flex gap-1.5">
+      <select
+        value={category}
+        onChange={(e) => { onCategoryChange(e.target.value); onSubcategoryChange(""); }}
+        className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+      >
+        <option value="">All Categories</option>
+        {CATEGORY_ORDER.map((c) => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+      </select>
+      {subcategories.length > 0 && (
+        <select
+          value={subcategory}
+          onChange={(e) => onSubcategoryChange(e.target.value)}
+          className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+        >
+          <option value="">All {category}</option>
+          {subcategories.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      )}
+    </div>
+  );
+};
+
 const TradeAxonometric = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
