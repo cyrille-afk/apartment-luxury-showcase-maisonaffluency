@@ -333,6 +333,8 @@ const TradeAxonometric = () => {
                   { value: "section_to_axo", label: "Section → 3D", icon: Layers },
                   { value: "stylize", label: "Stylize", icon: Paintbrush },
                   { value: "composite", label: "Add Products", icon: ImagePlus },
+                  { value: "3d_to_cad", label: "3D → CAD Block", icon: PenTool },
+                  { value: "cad_overlay", label: "CAD Overlay", icon: FileInput },
                 ] as const).map((m) => (
                   <button
                     key={m.value}
