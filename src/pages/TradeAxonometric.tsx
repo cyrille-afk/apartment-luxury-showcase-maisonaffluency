@@ -32,6 +32,7 @@ const STYLE_PRESETS = [
 const TradeAxonometric = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const [sourceImage, setSourceImage] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("elevation_to_axo");
@@ -40,12 +41,30 @@ const TradeAxonometric = () => {
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [history, setHistory] = useState<GenerationResult[]>([]);
+  const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
+  const [adminNotes, setAdminNotes] = useState("");
+  const [showQueue, setShowQueue] = useState(true);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [saturation, setSaturation] = useState(100);
   const [warmth, setWarmth] = useState(0);
+
+  // Fetch pending requests
+  const { data: pendingRequests } = useQuery({
+    queryKey: ["axonometric-requests-admin"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("axonometric_requests")
+        .select("*, profiles:user_id(first_name, last_name, company)")
+        .in("status", ["pending", "in_progress"])
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data as any[];
+    },
+    enabled: isAdmin,
+  });
 
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
