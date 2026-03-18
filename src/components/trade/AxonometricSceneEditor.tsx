@@ -231,12 +231,12 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: {
-          imageUrl,
+          imageUrl: toAbsoluteUrl(imageUrl),
           mode: "scene_edit",
           style,
           maskDataUrl,
           placements,
-          overlayImages: placedProducts.map((p) => p.image_url),
+          overlayImages: placedProducts.map((p) => toAbsoluteUrl(p.image_url)).filter(Boolean),
         },
       });
 

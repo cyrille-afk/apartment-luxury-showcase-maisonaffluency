@@ -422,14 +422,14 @@ const TradeAxonometric = () => {
 
     try {
       const body: any = {
-        imageUrl: currentImageUrl,
+        imageUrl: toAbsoluteUrl(currentImageUrl),
         style,
       };
 
       if (attachedProduct) {
         // Use product_swap mode with single swap
         body.mode = "product_swap";
-        body.swaps = [{ prompt: userMsg, imageUrl: attachedProduct.image_url }];
+        body.swaps = [{ prompt: userMsg, imageUrl: toAbsoluteUrl(attachedProduct.image_url)! }];
       } else {
         body.mode = "freeform";
         body.userPrompt = userMsg;
