@@ -1259,7 +1259,30 @@ const TradeAxonometric = () => {
                   <Button variant="outline" size="sm" onClick={downloadImage}>
                     <Download className="w-3.5 h-3.5 mr-1.5" />Download
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={generateTurntable}
+                    disabled={turntableGenerating}
+                  >
+                    {turntableGenerating ? (
+                      <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Generating Orbit…</>
+                    ) : (
+                      <><RotateCw className="w-3.5 h-3.5 mr-1.5" />Orbit Turntable</>
+                    )}
+                  </Button>
                 </div>
+
+                {/* Turntable Viewer */}
+                {showTurntable && (
+                  <Suspense fallback={<div className="py-8 text-center font-body text-xs text-muted-foreground">Loading viewer…</div>}>
+                    <TurntableViewer
+                      images={turntableImages}
+                      generating={turntableGenerating}
+                      onDownload={downloadTurntableImage}
+                    />
+                  </Suspense>
+                )}
 
                 {/* Save to Gallery */}
                 <div className="border border-border rounded-lg p-5 space-y-3">
