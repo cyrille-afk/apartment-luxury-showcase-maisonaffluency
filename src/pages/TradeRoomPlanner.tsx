@@ -419,7 +419,8 @@ const TradeRoomPlanner = () => {
                     wallHeight={2.8}
                     pixelsPerMeter={pixelsPerMeter}
                     planImageUrl={planImageUrl!}
-                    onProductClick={handleRemoveProduct}
+                    onProductUpdate={handleProductUpdate}
+                    onProductDelete={handleRemoveProduct}
                     onFloorClick={handleFloorClick}
                   />
                 </Suspense>
