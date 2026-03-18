@@ -22,6 +22,7 @@ const DesignDetails = () => {
         >
           {/* Compact teaser card */}
           <div className="max-w-3xl mx-auto p-[4px] rounded-sm bg-foreground">
+            <div className="p-[6px] sm:p-[8px] md:p-[10px] rounded-sm bg-white">
             <Link
               to="/trade/program"
               className="group block overflow-hidden rounded-sm relative aspect-[5/3]"
@@ -34,8 +35,6 @@ const DesignDetails = () => {
               decoding="async"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-            {/* Inner white wrapper border frame */}
-            <div className="absolute inset-3 sm:inset-4 md:inset-5 border border-white/40 rounded-sm pointer-events-none" />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
               <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] tracking-wide">
                 Trade Program
@@ -48,6 +47,7 @@ const DesignDetails = () => {
               </span>
             </div>
             </Link>
+            </div>
           </div>
         </motion.div>
       </div>
