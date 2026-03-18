@@ -75,6 +75,7 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
     let all = getAllTradeProducts().filter((p) => p.image_url);
     if (sceneCategory) all = all.filter((p) => p.category === sceneCategory);
     if (sceneSubcategory) all = all.filter((p) => p.subcategory === sceneSubcategory);
+    if (sceneBrand) all = all.filter((p) => p.brand_name === sceneBrand);
     if (productSearch.trim()) {
       const q = productSearch.toLowerCase();
       all = all.filter(
