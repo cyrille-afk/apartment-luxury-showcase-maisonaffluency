@@ -245,8 +245,48 @@ export default function ProposalBuilder({
           </h3>
 
           {proposalResult ? (
-            <div className="border border-border rounded-lg overflow-hidden bg-muted/10">
-              <img src={proposalResult} alt="Generated proposal" className="w-full object-contain" />
+            <div className="space-y-2">
+              <div className="border border-border rounded-lg overflow-hidden bg-muted/10">
+                <img src={proposalResult} alt="Generated proposal" className="w-full object-contain" />
+              </div>
+              {/* Iteration count */}
+              {proposalHistory.length > 1 && (
+                <p className="font-body text-[10px] text-muted-foreground text-right">
+                  Iteration {proposalHistory.length}
+                </p>
+              )}
+              {/* Refinement prompt */}
+              <div className="flex gap-2">
+                <Input
+                  value={refinementPrompt}
+                  onChange={(e) => setRefinementPrompt(e.target.value)}
+                  placeholder="Refine: e.g. 'Move the sofa further left', 'Make the rug larger'…"
+                  className="font-body text-xs flex-1"
+                  onKeyDown={(e) => e.key === "Enter" && !refining && refineProposal()}
+                  disabled={refining}
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={refineProposal}
+                  disabled={refining || !refinementPrompt.trim()}
+                >
+                  {refining ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Send className="w-3.5 h-3.5" />
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={generateProposal}
+                  disabled={generating || refining}
+                  title="Regenerate from scratch"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </Button>
+              </div>
             </div>
           ) : emptyRoomUrl ? (
             <div className="border border-border rounded-lg overflow-hidden bg-muted/10">
