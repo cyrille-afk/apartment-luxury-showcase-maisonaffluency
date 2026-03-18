@@ -442,6 +442,9 @@ const TradeAxonometric = () => {
       };
       pushResult(gen);
       toast({ title: "Axonometric view generated" });
+
+      // Auto-generate empty room for Proposal Builder
+      generateEmptyRoom(data.storedUrl || data.imageUrl);
     } catch (e: any) {
       console.error(e);
       const message = e?.message || "Generation failed";
