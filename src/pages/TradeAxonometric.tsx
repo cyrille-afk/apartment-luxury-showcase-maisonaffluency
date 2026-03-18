@@ -21,8 +21,9 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ExternalLink, Link2, X, Undo2, Redo2, Trash2, Upload } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ExternalLink, Link2, X, Undo2, Redo2, Trash2, Upload, RotateCw } from "lucide-react";
 const AxonometricSceneEditor = lazy(() => import("@/components/trade/AxonometricSceneEditor"));
+const TurntableViewer = lazy(() => import("@/components/trade/TurntableViewer"));
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
@@ -208,6 +209,12 @@ const TradeAxonometric = () => {
   const [savingToGallery, setSavingToGallery] = useState(false);
   const [showSceneEditor, setShowSceneEditor] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
+
+  // Turntable state
+  const TURNTABLE_ANGLES = [0, 60, 120, 180, 240, 300];
+  const [turntableImages, setTurntableImages] = useState<string[]>([]);
+  const [turntableGenerating, setTurntableGenerating] = useState(false);
+  const [showTurntable, setShowTurntable] = useState(false);
 
   // AI dialogue state
   const [aiPrompt, setAiPrompt] = useState("");
@@ -498,6 +505,63 @@ const TradeAxonometric = () => {
     } finally {
       setAiSending(false);
     }
+  };
+
+  // Turntable: generate 6 views at different angles sequentially
+  const generateTurntable = async () => {
+    if (!result) return;
+    const baseUrl = result.storedUrl || result.imageUrl;
+    setTurntableImages([]);
+    setTurntableGenerating(true);
+    setShowTurntable(true);
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) {
+      toast({ title: "Session expired", description: "Please sign in again.", variant: "destructive" });
+      setTurntableGenerating(false);
+      return;
+    }
+
+    for (let i = 0; i < TURNTABLE_ANGLES.length; i++) {
+      const angle = TURNTABLE_ANGLES[i];
+      try {
+        if (angle === 0) {
+          setTurntableImages((prev) => [...prev, baseUrl]);
+          continue;
+        }
+
+        const { data, error } = await supabase.functions.invoke("axonometric-generate", {
+          body: {
+            imageUrl: toAbsoluteUrl(baseUrl),
+            mode: "turntable_angle",
+            style,
+            turntableAngle: angle,
+          },
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+
+        const viewUrl = data.storedUrl || data.imageUrl;
+        setTurntableImages((prev) => [...prev, viewUrl]);
+      } catch (e: any) {
+        console.error(`Turntable angle ${angle}° failed:`, e);
+        toast({ title: `Angle ${angle}° failed`, description: e.message, variant: "destructive" });
+        setTurntableImages((prev) => [...prev, baseUrl]);
+      }
+    }
+
+    setTurntableGenerating(false);
+    toast({ title: "Turntable complete — 6 views generated" });
+  };
+
+  const downloadTurntableImage = (url: string, index: number) => {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `turntable-${TURNTABLE_ANGLES[index]}deg-${Date.now()}.png`;
+    a.click();
   };
 
   const filterStyle = {
@@ -1195,7 +1259,30 @@ const TradeAxonometric = () => {
                   <Button variant="outline" size="sm" onClick={downloadImage}>
                     <Download className="w-3.5 h-3.5 mr-1.5" />Download
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={generateTurntable}
+                    disabled={turntableGenerating}
+                  >
+                    {turntableGenerating ? (
+                      <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Generating Orbit…</>
+                    ) : (
+                      <><RotateCw className="w-3.5 h-3.5 mr-1.5" />Orbit Turntable</>
+                    )}
+                  </Button>
                 </div>
+
+                {/* Turntable Viewer */}
+                {showTurntable && (
+                  <Suspense fallback={<div className="py-8 text-center font-body text-xs text-muted-foreground">Loading viewer…</div>}>
+                    <TurntableViewer
+                      images={turntableImages}
+                      generating={turntableGenerating}
+                      onDownload={downloadTurntableImage}
+                    />
+                  </Suspense>
+                )}
 
                 {/* Save to Gallery */}
                 <div className="border border-border rounded-lg p-5 space-y-3">
