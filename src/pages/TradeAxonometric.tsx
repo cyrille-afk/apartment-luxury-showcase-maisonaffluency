@@ -79,7 +79,7 @@ const ProductPicker = ({
       );
     }
     return all.slice(0, 24);
-  }, [search, category, subcategory]);
+  }, [search, category, subcategory, brand]);
 
   if (products.length === 0) {
     return <p className="font-body text-xs text-muted-foreground py-4 text-center">No products found</p>;
