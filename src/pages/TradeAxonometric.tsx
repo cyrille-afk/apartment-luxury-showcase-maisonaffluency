@@ -1625,14 +1625,9 @@ const TradeAxonometric = () => {
                 style={style}
                 onClose={() => setShowProposal(false)}
                 onResult={(res) => {
-                  const gen: GenerationResult = {
-                    imageUrl: res.imageUrl,
-                    storedUrl: res.storedUrl,
-                    text: res.text,
-                    sourceProduct: result.sourceProduct,
-                    mode: "composite",
-                  };
-                  pushResult(gen);
+                  // Proposal stays in the builder's side-by-side view;
+                  // don't overwrite the main studio result.
+                  toast({ title: "Proposal generated", description: "Your proposal is shown side-by-side with the client's original." });
                 }}
               />
             </Suspense>
