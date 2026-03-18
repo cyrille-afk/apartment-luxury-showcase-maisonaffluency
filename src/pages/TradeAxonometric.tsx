@@ -481,8 +481,11 @@ const TradeAxonometric = () => {
                 </div>
                 <ProductPicker
                   search={productSearch}
-                  onSelect={(imageUrl) => setSourceImage(imageUrl)}
-                  selectedUrl={sourceImage}
+                  onSelect={(product) => {
+                    setSelectedProduct(product);
+                    setSourceImage(product.image_url);
+                  }}
+                  selectedProduct={selectedProduct}
                 />
               </div>
             )}
