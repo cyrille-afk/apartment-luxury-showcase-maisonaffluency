@@ -197,6 +197,12 @@ const TradeRoomPlanner = () => {
     setPlacedProducts((prev) => prev.filter((p) => p.id !== productId));
   }, []);
 
+  const handleProductUpdate = useCallback((productId: string, updates: Partial<PlacedProduct>) => {
+    setPlacedProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, ...updates } : p))
+    );
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -413,7 +419,8 @@ const TradeRoomPlanner = () => {
                     wallHeight={2.8}
                     pixelsPerMeter={pixelsPerMeter}
                     planImageUrl={planImageUrl!}
-                    onProductClick={handleRemoveProduct}
+                    onProductUpdate={handleProductUpdate}
+                    onProductDelete={handleRemoveProduct}
                     onFloorClick={handleFloorClick}
                   />
                 </Suspense>

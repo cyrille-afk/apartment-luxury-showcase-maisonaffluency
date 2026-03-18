@@ -1,5 +1,5 @@
-import { useMemo, useState, useEffect, useRef } from "react";
-import { Canvas, useLoader } from "@react-three/fiber";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import * as THREE from "three";
 import type { Room, PlacedProduct, Point2D } from "./types";
@@ -10,7 +10,8 @@ interface RoomScene3DProps {
   wallHeight?: number;
   pixelsPerMeter?: number;
   planImageUrl: string;
-  onProductClick?: (productId: string) => void;
+  onProductUpdate?: (id: string, updates: Partial<PlacedProduct>) => void;
+  onProductDelete?: (id: string) => void;
   onFloorClick?: (position: { x: number; y: number; z: number }) => void;
 }
 
@@ -34,9 +35,7 @@ function RoomFloor({ room, ppm, imgCenter }: { room: Room; ppm: number; imgCente
 
   const geometry = useMemo(() => new THREE.ShapeGeometry(shape), [shape]);
 
-  // Parse room color into Three.js color
   const color = useMemo(() => {
-    // Approximate HSL parsing
     const match = room.color.match(/hsl\((\d+)\s+(\d+)%\s+(\d+)%\)/);
     if (match) {
       const h = parseInt(match[1]) / 360;
@@ -142,18 +141,97 @@ function ProductTexturePlane({ url, hovered }: { url: string; hovered: boolean }
   );
 }
 
-function PlacedProductMesh({ product, onClick }: { product: PlacedProduct; onClick?: () => void }) {
+/** Draggable + rotatable product in the 3D scene */
+function PlacedProductMesh({
+  product,
+  onUpdate,
+  onDelete,
+  onDragStart,
+  onDragEnd,
+}: {
+  product: PlacedProduct;
+  onUpdate?: (updates: Partial<PlacedProduct>) => void;
+  onDelete?: () => void;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
+}) {
   const [hovered, setHovered] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const groupRef = useRef<THREE.Group>(null);
+  const { camera, gl, raycaster } = useThree();
+  const floorPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), -product.position.y), [product.position.y]);
+
+  const onPointerDown = useCallback((e: any) => {
+    e.stopPropagation();
+    setDragging(true);
+    onDragStart?.();
+    gl.domElement.style.cursor = "grabbing";
+  }, [gl, onDragStart]);
+
+  useEffect(() => {
+    if (!dragging) return;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      const rect = gl.domElement.getBoundingClientRect();
+      const mouse = new THREE.Vector2(
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1,
+      );
+      raycaster.setFromCamera(mouse, camera);
+      const intersection = new THREE.Vector3();
+      if (raycaster.ray.intersectPlane(floorPlane, intersection)) {
+        onUpdate?.({
+          position: { x: intersection.x, y: product.position.y, z: intersection.z },
+        });
+      }
+    };
+
+    const handlePointerUp = () => {
+      setDragging(false);
+      onDragEnd?.();
+      gl.domElement.style.cursor = "auto";
+    };
+
+    gl.domElement.addEventListener("pointermove", handlePointerMove);
+    gl.domElement.addEventListener("pointerup", handlePointerUp);
+    return () => {
+      gl.domElement.removeEventListener("pointermove", handlePointerMove);
+      gl.domElement.removeEventListener("pointerup", handlePointerUp);
+    };
+  }, [dragging, camera, gl, raycaster, floorPlane, product.position.y, onUpdate, onDragEnd]);
+
+  // Scroll to rotate when hovered
+  useEffect(() => {
+    if (!hovered || dragging) return;
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const delta = e.deltaY > 0 ? 0.15 : -0.15;
+      onUpdate?.({ rotation: product.rotation + delta });
+    };
+    gl.domElement.addEventListener("wheel", handleWheel, { passive: false });
+    return () => gl.domElement.removeEventListener("wheel", handleWheel);
+  }, [hovered, dragging, gl, product.rotation, onUpdate]);
 
   return (
-    <group position={[product.position.x, product.position.y, product.position.z]}>
-      {/* Product billboard */}
+    <group
+      ref={groupRef}
+      position={[product.position.x, product.position.y, product.position.z]}
+    >
+      {/* Draggable product visual */}
       <group
         rotation={[0, product.rotation, 0]}
         scale={product.scale}
-        onClick={(e) => { e.stopPropagation(); onClick?.(); }}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
+        onPointerDown={onPointerDown}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          if (!dragging) gl.domElement.style.cursor = "grab";
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          if (!dragging) gl.domElement.style.cursor = "auto";
+        }}
       >
         {product.imageUrl ? (
           <ProductTexturePlane url={product.imageUrl} hovered={hovered} />
@@ -165,11 +243,45 @@ function PlacedProductMesh({ product, onClick }: { product: PlacedProduct; onCli
         )}
       </group>
 
-      {/* Label */}
+      {/* Ground shadow/indicator ring */}
+      {(hovered || dragging) && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -product.position.y + 0.02, 0]}>
+          <ringGeometry args={[0.4 * product.scale, 0.5 * product.scale, 32]} />
+          <meshBasicMaterial color={dragging ? "#4a90d9" : "#999999"} transparent opacity={0.5} side={THREE.DoubleSide} />
+        </mesh>
+      )}
+
+      {/* Rotation indicator arrow */}
+      {hovered && !dragging && (
+        <mesh rotation={[-Math.PI / 2, product.rotation, 0]} position={[0, -product.position.y + 0.03, 0]}>
+          <circleGeometry args={[0.55 * product.scale, 32, 0, Math.PI * 0.15]} />
+          <meshBasicMaterial color="#4a90d9" transparent opacity={0.4} side={THREE.DoubleSide} />
+        </mesh>
+      )}
+
+      {/* Label + controls */}
       <Html position={[0, 0.7 * product.scale, 0]} center distanceFactor={8}>
-        <div className="bg-background/90 border border-border rounded px-2 py-1 pointer-events-none whitespace-nowrap">
-          <span className="font-body text-[10px] text-foreground">{product.productName}</span>
+        <div className="flex items-center gap-1 pointer-events-none">
+          <div className="bg-background/90 border border-border rounded px-2 py-1 whitespace-nowrap">
+            <span className="font-body text-[10px] text-foreground">{product.productName}</span>
+          </div>
+          {hovered && (
+            <button
+              className="pointer-events-auto bg-destructive/90 text-destructive-foreground rounded px-1.5 py-0.5 font-body text-[10px] hover:bg-destructive transition-colors"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); onDelete?.(); }}
+            >
+              ✕
+            </button>
+          )}
         </div>
+        {hovered && !dragging && (
+          <div className="text-center mt-1 pointer-events-none">
+            <span className="font-body text-[8px] text-muted-foreground bg-background/80 rounded px-1.5 py-0.5">
+              drag to move · scroll to rotate
+            </span>
+          </div>
+        )}
       </Html>
     </group>
   );
@@ -194,19 +306,31 @@ function FloorPlane({ onFloorClick }: { onFloorClick?: (pos: { x: number; y: num
   );
 }
 
-function Scene({ rooms, placedProducts, wallHeight, ppm, imgCenter, onProductClick, onFloorClick }: {
+function Scene({ rooms, placedProducts, wallHeight, ppm, imgCenter, onProductUpdate, onProductDelete, onFloorClick }: {
   rooms: Room[];
   placedProducts: PlacedProduct[];
   wallHeight: number;
   ppm: number;
   imgCenter: Point2D;
-  onProductClick?: (id: string) => void;
+  onProductUpdate?: (id: string, updates: Partial<PlacedProduct>) => void;
+  onProductDelete?: (id: string) => void;
   onFloorClick?: (pos: { x: number; y: number; z: number }) => void;
 }) {
+  const controlsRef = useRef<any>(null);
+  const [isDraggingProduct, setIsDraggingProduct] = useState(false);
+
+  // Disable orbit controls while dragging a product
+  useEffect(() => {
+    if (controlsRef.current) {
+      controlsRef.current.enabled = !isDraggingProduct;
+    }
+  }, [isDraggingProduct]);
+
   return (
     <>
       <PerspectiveCamera makeDefault position={[0, 12, 15]} fov={50} />
       <OrbitControls
+        ref={controlsRef}
         maxPolarAngle={Math.PI / 2.1}
         minDistance={3}
         maxDistance={50}
@@ -238,7 +362,10 @@ function Scene({ rooms, placedProducts, wallHeight, ppm, imgCenter, onProductCli
         <PlacedProductMesh
           key={product.id}
           product={product}
-          onClick={() => onProductClick?.(product.id)}
+          onUpdate={(updates) => onProductUpdate?.(product.id, updates)}
+          onDelete={() => onProductDelete?.(product.id)}
+          onDragStart={() => setIsDraggingProduct(true)}
+          onDragEnd={() => setIsDraggingProduct(false)}
         />
       ))}
     </>
@@ -251,10 +378,10 @@ const RoomScene3D = ({
   wallHeight = 2.8,
   pixelsPerMeter = 50,
   planImageUrl,
-  onProductClick,
+  onProductUpdate,
+  onProductDelete,
   onFloorClick,
 }: RoomScene3DProps) => {
-  // Compute image center for coordinate conversion
   const imgCenter = useMemo(() => {
     const allPoints = rooms.flatMap((r) => r.corners);
     if (allPoints.length === 0) return { x: 0, y: 0 };
@@ -272,7 +399,8 @@ const RoomScene3D = ({
           wallHeight={wallHeight}
           ppm={pixelsPerMeter}
           imgCenter={imgCenter}
-          onProductClick={onProductClick}
+          onProductUpdate={onProductUpdate}
+          onProductDelete={onProductDelete}
           onFloorClick={onFloorClick}
         />
       </Canvas>
