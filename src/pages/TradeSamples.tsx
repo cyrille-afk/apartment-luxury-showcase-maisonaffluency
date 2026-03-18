@@ -118,7 +118,7 @@ const TradeSamples = () => {
 
     let imageUrl: string | null = null;
 
-    // Upload image if provided
+    // Upload image if a file was selected, otherwise use pre-filled URL
     if (imageFile) {
       const ext = imageFile.name.split(".").pop() || "jpg";
       const path = `samples/${user.id}/${Date.now()}.${ext}`;
@@ -132,6 +132,9 @@ const TradeSamples = () => {
       }
       const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
       imageUrl = urlData.publicUrl;
+    } else if (imagePreview && !imageFile) {
+      // Pre-filled image URL from curator picks
+      imageUrl = imagePreview;
     }
 
     const { error } = await supabase.from("trade_sample_requests").insert({
