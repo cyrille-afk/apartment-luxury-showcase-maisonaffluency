@@ -409,7 +409,7 @@ function Scene({ rooms, placedProducts, wallHeight, ppm, imgCenter, onProductUpd
       <FloorPlane onFloorClick={onFloorClick} />
 
       {/* Grid helper */}
-      <gridHelper args={[40, 40, "#d4d0cc", "#e8e4e0"]} />
+      <gridHelper args={[40, 80, "#d4d0cc", "#e8e4e0"]} />
 
       {/* Rooms */}
       {rooms.map((room) => (
