@@ -272,6 +272,50 @@ const TradePresentationBuilder = () => {
           </div>
         </div>
 
+        {/* Share Panel */}
+        {showSharePanel && (
+          <div className="mb-8 border border-border rounded-lg p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display text-lg text-foreground">Share with Viewers</h2>
+              <button onClick={() => setShowSharePanel(false)} className="p-1 text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="flex gap-3 mb-4">
+              <input
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddShare()}
+                className={inputClass + " flex-1"}
+                placeholder="Email address (e.g. gregoire@maisonaffluency.com)"
+              />
+              <button
+                onClick={handleAddShare}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:opacity-90 transition-opacity shrink-0"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                Share
+              </button>
+            </div>
+            {shares.length > 0 && (
+              <div className="space-y-2">
+                {shares.map((s) => (
+                  <div key={s.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                    <div>
+                      <p className="font-body text-sm text-foreground">{s.shared_with_email}</p>
+                      <p className="font-body text-[10px] text-muted-foreground">Viewer · Can comment</p>
+                    </div>
+                    <button onClick={() => handleRemoveShare(s.id)} className="p-1.5 text-muted-foreground hover:text-destructive transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {shares.length === 0 && (
+              <p className="font-body text-xs text-muted-foreground">No one has been invited yet. Shared viewers can view slides and leave comments.</p>
+            )}
+          </div>
+        )}
+
         {/* Slides */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-lg text-foreground">Slides ({slides.length})</h2>
