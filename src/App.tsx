@@ -111,6 +111,7 @@ const App = () => {
             <Route path="quotes-admin" element={<TradeQuotesAdmin />} />
             <Route path="axonometric" element={<TradeAxonometric />} />
             <Route path="axonometric-requests" element={<TradeAxonometricRequests />} />
+            <Route path="axonometric-gallery" element={<TradeAxonometricGallery />} />
             <Route path="settings" element={<TradeSettings />} />
           </Route>
           
