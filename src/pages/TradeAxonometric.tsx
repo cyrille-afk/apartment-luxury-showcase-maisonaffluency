@@ -24,6 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ExternalLink, Link2, X, Undo2, Redo2, Trash2, Upload, RotateCw, Timer } from "lucide-react";
 const AxonometricSceneEditor = lazy(() => import("@/components/trade/AxonometricSceneEditor"));
 const TurntableViewer = lazy(() => import("@/components/trade/TurntableViewer"));
+const ProposalBuilder = lazy(() => import("@/components/trade/ProposalBuilder"));
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
@@ -209,6 +210,9 @@ const TradeAxonometric = () => {
   const [savingToGallery, setSavingToGallery] = useState(false);
   const [showSceneEditor, setShowSceneEditor] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
+  const [showProposal, setShowProposal] = useState(false);
+  const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
+  const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
 
   // Turntable state
   const TURNTABLE_ANGLES = [0, 60, 120, 180, 240, 300];
@@ -403,6 +407,29 @@ const TradeAxonometric = () => {
 
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
+  const generateEmptyRoom = async (imageUrl: string) => {
+    setEmptyRoomGenerating(true);
+    setEmptyRoomUrl(null);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) return;
+
+      const data = await invokeAxonometricGenerate({
+        imageUrl: toAbsoluteUrl(imageUrl),
+        mode: "clean_room",
+        style,
+      }, accessToken, 1);
+
+      setEmptyRoomUrl(data.storedUrl || data.imageUrl);
+    } catch (e: any) {
+      console.error("Empty room generation failed:", e);
+      // Non-blocking — don't toast, proposal is optional
+    } finally {
+      setEmptyRoomGenerating(false);
+    }
+  };
+
   const generate = async () => {
     if (!sourceImage) {
       toast({ title: "Upload an image first", variant: "destructive" });
@@ -438,6 +465,9 @@ const TradeAxonometric = () => {
       };
       pushResult(gen);
       toast({ title: "Axonometric view generated" });
+
+      // Auto-generate empty room for Proposal Builder
+      generateEmptyRoom(data.storedUrl || data.imageUrl);
     } catch (e: any) {
       console.error(e);
       const message = e?.message || "Generation failed";
@@ -1434,6 +1464,16 @@ const TradeAxonometric = () => {
                       <><RotateCw className="w-3.5 h-3.5 mr-1.5" />Orbit Turntable</>
                     )}
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowProposal(true)}
+                    disabled={!result}
+                  >
+                    <Layers className="w-3.5 h-3.5 mr-1.5" />
+                    Proposal Builder
+                    {emptyRoomGenerating && <Loader2 className="w-3 h-3 ml-1.5 animate-spin" />}
+                  </Button>
                 </div>
 
                 {/* Turntable Viewer */}
@@ -1571,6 +1611,33 @@ const TradeAxonometric = () => {
             }}
           />
         </Suspense>
+      )}
+
+      {/* Proposal Builder */}
+      {showProposal && result && (
+        <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <Suspense fallback={<div className="py-16 text-center font-body text-sm text-muted-foreground">Loading Proposal Builder…</div>}>
+              <ProposalBuilder
+                furnishedImageUrl={result.storedUrl || result.imageUrl}
+                emptyRoomUrl={emptyRoomUrl}
+                emptyRoomGenerating={emptyRoomGenerating}
+                style={style}
+                onClose={() => setShowProposal(false)}
+                onResult={(res) => {
+                  const gen: GenerationResult = {
+                    imageUrl: res.imageUrl,
+                    storedUrl: res.storedUrl,
+                    text: res.text,
+                    sourceProduct: result.sourceProduct,
+                    mode: "composite",
+                  };
+                  pushResult(gen);
+                }}
+              />
+            </Suspense>
+          </div>
+        </div>
       )}
     </>
   );
