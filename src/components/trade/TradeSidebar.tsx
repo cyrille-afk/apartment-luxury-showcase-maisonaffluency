@@ -24,6 +24,7 @@ const mainItems = [
   { title: "Brand Library", url: "/trade/documents", icon: FolderOpen },
   { title: "Sample Requests", url: "/trade/samples", icon: Package },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
+  { title: "Room Planner", url: "/trade/room-planner", icon: Box },
   { title: "Settings", url: "/trade/settings", icon: Settings },
 ];
 
