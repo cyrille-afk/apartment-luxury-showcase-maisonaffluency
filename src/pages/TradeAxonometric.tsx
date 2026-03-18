@@ -524,27 +524,7 @@ const TradeAxonometric = () => {
         body.userPrompt = userMsg;
       }
 
-      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-        body,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (error) {
-        let msg = error.message;
-        const response = (error as any)?.context;
-        if (response?.clone) {
-          try {
-            const parsed = await response.clone().json();
-            msg = parsed?.error || parsed?.message || msg;
-          } catch {
-            // keep fallback message
-          }
-        }
-        throw new Error(msg);
-      }
-      if (data?.error) throw new Error(data.error);
+      const data = await invokeAxonometricGenerate(body, accessToken, 1);
 
       const gen: GenerationResult = {
         imageUrl: data.imageUrl,
@@ -557,8 +537,15 @@ const TradeAxonometric = () => {
       setAiHistory((prev) => [...prev, { role: "ai", text: userMsg, imageUrl: data.storedUrl || data.imageUrl }]);
       setTimeout(() => aiChatRef.current?.scrollTo({ top: aiChatRef.current.scrollHeight, behavior: "smooth" }), 100);
     } catch (e: any) {
-      toast({ title: "AI edit failed", description: e.message, variant: "destructive" });
-      setAiHistory((prev) => [...prev, { role: "ai", text: `Error: ${e.message}` }]);
+      const message = e?.message || "AI edit failed";
+      toast({
+        title: isRateLimitedError(message) ? "Backend is busy" : "AI edit failed",
+        description: isRateLimitedError(message)
+          ? "Too many requests right now — please wait 30–60 seconds and retry."
+          : message,
+        variant: "destructive",
+      });
+      setAiHistory((prev) => [...prev, { role: "ai", text: `Error: ${message}` }]);
     } finally {
       setAiSending(false);
     }
@@ -572,46 +559,67 @@ const TradeAxonometric = () => {
     setTurntableGenerating(true);
     setShowTurntable(true);
 
-    const { data: sessionData } = await supabase.auth.getSession();
-    const accessToken = sessionData.session?.access_token;
-    if (!accessToken) {
-      toast({ title: "Session expired", description: "Please sign in again.", variant: "destructive" });
-      setTurntableGenerating(false);
-      return;
-    }
+    let completedViews = 0;
+    let pausedForRateLimit = false;
 
-    for (let i = 0; i < TURNTABLE_ANGLES.length; i++) {
-      const angle = TURNTABLE_ANGLES[i];
-      try {
-        if (angle === 0) {
-          setTurntableImages((prev) => [...prev, baseUrl]);
-          continue;
-        }
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) {
+        toast({ title: "Session expired", description: "Please sign in again.", variant: "destructive" });
+        return;
+      }
 
-        const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-          body: {
+      for (let i = 0; i < TURNTABLE_ANGLES.length; i++) {
+        const angle = TURNTABLE_ANGLES[i];
+
+        try {
+          if (angle === 0) {
+            setTurntableImages((prev) => [...prev, baseUrl]);
+            completedViews += 1;
+            continue;
+          }
+
+          const data = await invokeAxonometricGenerate({
             imageUrl: toAbsoluteUrl(baseUrl),
             mode: "turntable_angle",
             style,
             turntableAngle: angle,
-          },
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
+          }, accessToken, 2);
 
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
+          const viewUrl = data.storedUrl || data.imageUrl;
+          setTurntableImages((prev) => [...prev, viewUrl]);
+          completedViews += 1;
+        } catch (e: any) {
+          const message = e?.message || `Angle ${angle}° failed`;
 
-        const viewUrl = data.storedUrl || data.imageUrl;
-        setTurntableImages((prev) => [...prev, viewUrl]);
-      } catch (e: any) {
-        console.error(`Turntable angle ${angle}° failed:`, e);
-        toast({ title: `Angle ${angle}° failed`, description: e.message, variant: "destructive" });
-        setTurntableImages((prev) => [...prev, baseUrl]);
+          if (isRateLimitedError(message)) {
+            pausedForRateLimit = true;
+            toast({
+              title: "Turntable paused",
+              description: "Rate limit hit — wait ~60 seconds, then tap Orbit Turntable again.",
+              variant: "destructive",
+            });
+            break;
+          }
+
+          console.error(`Turntable angle ${angle}° failed:`, e);
+          toast({ title: `Angle ${angle}° failed`, description: message, variant: "destructive" });
+          setTurntableImages((prev) => [...prev, baseUrl]);
+          completedViews += 1;
+        }
+
+        if (i < TURNTABLE_ANGLES.length - 1) {
+          await sleep(900);
+        }
       }
-    }
 
-    setTurntableGenerating(false);
-    toast({ title: "Turntable complete — 6 views generated" });
+      if (!pausedForRateLimit) {
+        toast({ title: `Turntable ready — ${completedViews} views generated` });
+      }
+    } finally {
+      setTurntableGenerating(false);
+    }
   };
 
   const downloadTurntableImage = (url: string, index: number) => {
