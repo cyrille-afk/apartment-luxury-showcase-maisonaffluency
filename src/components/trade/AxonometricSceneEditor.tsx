@@ -71,16 +71,23 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
 
   // Product picker data
   const products = useMemo(() => {
-    const all = getAllTradeProducts().filter((p) => p.image_url);
-    if (!productSearch.trim()) return all.slice(0, 30);
-    const q = productSearch.toLowerCase();
-    return all.filter(
-      (p) =>
-        p.product_name.toLowerCase().includes(q) ||
-        p.brand_name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
-    ).slice(0, 30);
-  }, [productSearch]);
+    let all = getAllTradeProducts().filter((p) => p.image_url);
+    if (sceneCategory) all = all.filter((p) => p.category === sceneCategory);
+    if (sceneSubcategory) all = all.filter((p) => p.subcategory === sceneSubcategory);
+    if (productSearch.trim()) {
+      const q = productSearch.toLowerCase();
+      all = all.filter(
+        (p) =>
+          p.product_name.toLowerCase().includes(q) ||
+          p.brand_name.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          (p.subcategory && p.subcategory.toLowerCase().includes(q)) ||
+          (p.materials && p.materials.toLowerCase().includes(q)) ||
+          p.tags.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    return all.slice(0, 30);
+  }, [productSearch, sceneCategory, sceneSubcategory]);
 
   // Drawing (eraser)
   const getCanvasCoords = useCallback((e: React.MouseEvent) => {
