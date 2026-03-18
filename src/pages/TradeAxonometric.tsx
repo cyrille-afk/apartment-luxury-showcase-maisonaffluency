@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ArrowLeftRight, ExternalLink, Link2, MousePointer2, X } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ArrowLeftRight, ExternalLink, Link2, MousePointer2, X, Undo2, Redo2 } from "lucide-react";
 const AxonometricSceneEditor = lazy(() => import("@/components/trade/AxonometricSceneEditor"));
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
@@ -190,6 +190,7 @@ const TradeAxonometric = () => {
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [history, setHistory] = useState<GenerationResult[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1); // -1 = no history navigated
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [showQueue, setShowQueue] = useState(true);
@@ -214,7 +215,39 @@ const TradeAxonometric = () => {
   const [saturation, setSaturation] = useState(100);
   const [warmth, setWarmth] = useState(0);
 
-  // Fetch pending requests
+  // Undo / Redo through generation history
+  const canUndo = history.length > 1 && historyIndex < history.length - 1;
+  const canRedo = historyIndex > 0;
+
+  const handleUndo = useCallback(() => {
+    if (!canUndo) return;
+    const nextIdx = historyIndex === -1 ? 1 : historyIndex + 1;
+    setHistoryIndex(nextIdx);
+    setResult(history[nextIdx]);
+  }, [canUndo, historyIndex, history]);
+
+  const handleRedo = useCallback(() => {
+    if (!canRedo) return;
+    const nextIdx = historyIndex - 1;
+    if (nextIdx <= 0) {
+      setHistoryIndex(-1);
+      setResult(history[0]);
+    } else {
+      setHistoryIndex(nextIdx);
+      setResult(history[nextIdx]);
+    }
+  }, [canRedo, historyIndex, history]);
+
+  // Helper: push a new result and reset undo position
+  const pushResult = useCallback((gen: GenerationResult) => {
+    // If we've undone some steps, trim the history before pushing
+    const trimmed = historyIndex > 0 ? history.slice(historyIndex) : history;
+    setHistory([gen, ...trimmed]);
+    setHistoryIndex(-1);
+    setResult(gen);
+  }, [history, historyIndex]);
+
+
   const { data: pendingRequests } = useQuery({
     queryKey: ["axonometric-requests-admin"],
     queryFn: async () => {
@@ -291,8 +324,7 @@ const TradeAxonometric = () => {
         sourceProduct: selectedProduct,
         mode,
       };
-      setResult(gen);
-      setHistory((prev) => [gen, ...prev]);
+      pushResult(gen);
       toast({ title: "Axonometric view generated" });
     } catch (e: any) {
       console.error(e);
@@ -420,8 +452,7 @@ const TradeAxonometric = () => {
         sourceProduct: result.sourceProduct,
         mode: result.mode,
       };
-      setResult(gen);
-      setHistory((prev) => [gen, ...prev]);
+      pushResult(gen);
       setAiHistory((prev) => [...prev, { role: "ai", text: userMsg, imageUrl: data.storedUrl || data.imageUrl }]);
       setTimeout(() => aiChatRef.current?.scrollTo({ top: aiChatRef.current.scrollHeight, behavior: "smooth" }), 100);
     } catch (e: any) {
@@ -908,7 +939,29 @@ const TradeAxonometric = () => {
                   <div className="px-4 py-2.5 bg-muted/30 border-b border-border flex items-center gap-2">
                     <Wand2 className="w-3.5 h-3.5 text-muted-foreground" />
                     <h3 className="font-display text-xs text-foreground">AI Edit Prompt</h3>
-                    <span className="font-body text-[10px] text-muted-foreground ml-auto">Describe changes to apply</span>
+                    <div className="flex items-center gap-1 ml-auto">
+                      <button
+                        onClick={handleUndo}
+                        disabled={!canUndo}
+                        className="p-1 rounded transition-colors disabled:opacity-30 text-muted-foreground hover:text-foreground disabled:hover:text-muted-foreground"
+                        title="Undo — step back to previous version"
+                      >
+                        <Undo2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={handleRedo}
+                        disabled={!canRedo}
+                        className="p-1 rounded transition-colors disabled:opacity-30 text-muted-foreground hover:text-foreground disabled:hover:text-muted-foreground"
+                        title="Redo — step forward"
+                      >
+                        <Redo2 className="w-3.5 h-3.5" />
+                      </button>
+                      {history.length > 1 && (
+                        <span className="font-body text-[9px] text-muted-foreground tabular-nums ml-1">
+                          {historyIndex === -1 ? 1 : historyIndex + 1}/{history.length}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {aiHistory.length > 0 && (
@@ -1238,8 +1291,7 @@ const TradeAxonometric = () => {
                 sourceProduct: result.sourceProduct,
                 mode: "composite",
               };
-              setResult(gen);
-              setHistory((prev) => [gen, ...prev]);
+              pushResult(gen);
               setShowSceneEditor(false);
             }}
           />
