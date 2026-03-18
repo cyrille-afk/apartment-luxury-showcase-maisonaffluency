@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import { Loader2, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
 
 interface SourceUploadProps {
   /** Storage folder path */
@@ -12,6 +11,10 @@ interface SourceUploadProps {
   /** Called with the public URL after upload */
   onSourceReady: (url: string) => void;
 }
+
+const MAX_PREVIEW_PAGES = 20;
+const MAX_UPLOAD_DIMENSION = 4096;
+const MAX_UPLOAD_PIXELS = 12_000_000;
 
 /** Upload source image or PDF (with page selector for multi-page PDFs) */
 const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or PDF", onSourceReady }: SourceUploadProps) => {
@@ -32,15 +35,51 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
     return pdfjsLib;
   };
 
-  const renderPage = async (pdf: any, pageNum: number, scale: number): Promise<string> => {
+  const renderPagePreview = async (pdf: any, pageNum: number, scale: number): Promise<string> => {
     const page = await pdf.getPage(pageNum);
     const viewport = page.getViewport({ scale });
     const canvas = document.createElement("canvas");
     canvas.width = viewport.width;
     canvas.height = viewport.height;
-    const ctx = canvas.getContext("2d")!;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not render PDF page preview");
     await page.render({ canvasContext: ctx, viewport }).promise;
     return canvas.toDataURL("image/png");
+  };
+
+  const renderPageForUpload = async (pdf: any, pageNum: number) => {
+    const page = await pdf.getPage(pageNum);
+    const baseViewport = page.getViewport({ scale: 1 });
+
+    const maxScaleByDimension = Math.min(
+      MAX_UPLOAD_DIMENSION / baseViewport.width,
+      MAX_UPLOAD_DIMENSION / baseViewport.height
+    );
+    const maxScaleByPixels = Math.sqrt(MAX_UPLOAD_PIXELS / (baseViewport.width * baseViewport.height));
+    const safeScale = Math.min(3, maxScaleByDimension, maxScaleByPixels);
+
+    if (!Number.isFinite(safeScale) || safeScale <= 0) {
+      throw new Error("PDF page dimensions are invalid for rendering");
+    }
+
+    const viewport = page.getViewport({ scale: safeScale });
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not render PDF page");
+
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((b) => {
+        if (b) resolve(b);
+        else reject(new Error("Failed to encode selected PDF page"));
+      }, "image/jpeg", 0.92);
+    });
+
+    return { blob, scale: safeScale };
   };
 
   const loadPdfPreviews = async (file: File) => {
@@ -53,10 +92,10 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
       setPdfPageCount(count);
       setSelectedPage(1);
 
-      const maxPreviews = Math.min(count, 20);
+      const maxPreviews = Math.min(count, MAX_PREVIEW_PAGES);
       const previews: string[] = [];
       for (let i = 1; i <= maxPreviews; i++) {
-        previews.push(await renderPage(pdf, i, 0.5));
+        previews.push(await renderPagePreview(pdf, i, 0.5));
       }
       setPdfPreviews(previews);
     } catch (e: any) {
@@ -67,26 +106,26 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
     }
   };
 
-  const confirmPageSelection = async () => {
+  const confirmPageSelection = async (pageOverride?: number) => {
     if (!pdfFile) return;
+    const pageToUse = pageOverride ?? selectedPage;
+
     setUploading(true);
     try {
       const pdfjsLib = await getPdfLib();
       const arrayBuffer = await pdfFile.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      const dataUrl = await renderPage(pdf, selectedPage, 3);
+      const { blob } = await renderPageForUpload(pdf, pageToUse);
 
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-
-      const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-      const { error } = await supabase.storage.from("assets").upload(path, blob, { contentType: "image/png" });
+      const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const { error } = await supabase.storage.from("assets").upload(path, blob, { contentType: "image/jpeg" });
       if (error) throw error;
 
       const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
       onSourceReady(urlData.publicUrl);
       setPdfFile(null);
       setPdfPreviews([]);
+      setPdfPageCount(0);
     } catch (e: any) {
       toast({ title: "Upload failed", description: e.message, variant: "destructive" });
     } finally {
@@ -132,7 +171,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
             Select page from PDF{pdfPageCount > 0 ? ` (${pdfPageCount} pages)` : ""}
           </h3>
           <button
-            onClick={() => { setPdfFile(null); setPdfPreviews([]); }}
+            onClick={() => { setPdfFile(null); setPdfPreviews([]); setPdfPageCount(0); }}
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="w-3.5 h-3.5" />
@@ -146,36 +185,39 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
           </div>
         ) : (
           <>
+            <p className="font-body text-[11px] text-muted-foreground">Click a page to use it as your source drawing.</p>
             <div className="grid grid-cols-4 gap-2 max-h-60 overflow-y-auto pr-1">
-              {pdfPreviews.map((preview, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedPage(i + 1)}
-                  className={`relative rounded border overflow-hidden transition-all ${
-                    selectedPage === i + 1
-                      ? "border-foreground ring-1 ring-foreground"
-                      : "border-border hover:border-foreground/30"
-                  }`}
-                >
-                  <img src={preview} alt={`Page ${i + 1}`} className="w-full aspect-[3/4] object-contain bg-white" />
-                  <span className="absolute bottom-0 inset-x-0 bg-background/80 backdrop-blur-sm text-center font-body text-[9px] text-foreground py-0.5">
-                    {i + 1}
-                  </span>
-                </button>
-              ))}
+              {pdfPreviews.map((preview, i) => {
+                const pageNum = i + 1;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      if (uploading) return;
+                      setSelectedPage(pageNum);
+                      void confirmPageSelection(pageNum);
+                    }}
+                    disabled={uploading}
+                    className={`relative rounded border overflow-hidden transition-all ${
+                      selectedPage === pageNum
+                        ? "border-foreground ring-1 ring-foreground"
+                        : "border-border hover:border-foreground/30"
+                    } ${uploading ? "opacity-70 pointer-events-none" : ""}`}
+                  >
+                    <img src={preview} alt={`Page ${pageNum}`} className="w-full aspect-[3/4] object-contain bg-background" />
+                    <span className="absolute bottom-0 inset-x-0 bg-background/80 backdrop-blur-sm text-center font-body text-[9px] text-foreground py-0.5">
+                      {pageNum}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-            <Button
-              onClick={confirmPageSelection}
-              disabled={uploading}
-              size="sm"
-              className="w-full"
-            >
-              {uploading ? (
-                <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> Extracting…</>
-              ) : (
-                <>Use page {selectedPage}</>
-              )}
-            </Button>
+            {uploading && (
+              <div className="flex items-center justify-center gap-1.5 py-1">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+                <span className="font-body text-xs text-muted-foreground">Preparing page {selectedPage}…</span>
+              </div>
+            )}
           </>
         )}
       </div>
