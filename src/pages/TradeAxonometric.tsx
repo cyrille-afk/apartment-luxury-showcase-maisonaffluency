@@ -361,18 +361,40 @@ const TradeAxonometric = () => {
               </p>
 
               {sourceImage ? (
-                <div className="relative group">
-                  <img
-                    src={sourceImage}
-                    alt="Source"
-                    className="w-full rounded-md border border-border object-contain max-h-64"
-                  />
-                  <button
-                    onClick={() => setSourceImage(null)}
-                    className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                  </button>
+                <div className="space-y-2">
+                  <div className="relative group">
+                    <img
+                      src={sourceImage}
+                      alt="Source"
+                      className="w-full rounded-md border border-border object-contain max-h-64"
+                    />
+                    <button
+                      onClick={() => { setSourceImage(null); setSelectedProduct(null); }}
+                      className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  {selectedProduct && (
+                    <div className="flex items-center justify-between bg-muted/30 rounded-md px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="font-display text-xs text-foreground truncate">{selectedProduct.product_name}</p>
+                        <p className="font-body text-[10px] text-muted-foreground truncate">by {selectedProduct.brand_name}</p>
+                        {selectedProduct.dimensions && (
+                          <p className="font-body text-[10px] text-muted-foreground">{selectedProduct.dimensions}</p>
+                        )}
+                      </div>
+                      <a
+                        href={selectedProduct.image_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 ml-2 text-muted-foreground hover:text-foreground transition-colors"
+                        title="View original 3D image"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <CloudUpload
