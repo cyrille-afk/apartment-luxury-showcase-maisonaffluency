@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import TaxonomyAudit from "@/components/trade/TaxonomyAudit";
 import HeroManager from "@/components/trade/HeroManager";
+import SampleRequestsAdmin from "@/components/trade/SampleRequestsAdmin";
 
 interface Application {
   id: string;
@@ -123,6 +124,9 @@ const TradeAdmin = () => {
         <p className="font-body text-xs text-muted-foreground">Upload custom hero banners for trade portal sections. Remove to revert to defaults.</p>
         <HeroManager />
       </div>
+
+      {/* Sample Requests Manager */}
+      <SampleRequestsAdmin />
 
       <h1 className="font-display text-2xl text-foreground">Trade Applications</h1>
 
