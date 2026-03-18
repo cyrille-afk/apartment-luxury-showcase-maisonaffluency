@@ -13,7 +13,7 @@ const DesignDetails = () => {
   });
 
   return (
-    <section ref={ref} className="pt-0 pb-12 px-4 md:pt-0 md:pb-24 md:px-12 lg:px-20 bg-background">
+    <section ref={ref} className="pt-8 pb-12 px-4 md:pt-12 md:pb-24 md:px-12 lg:px-20 bg-background">
       <div className="mx-auto max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -21,10 +21,11 @@ const DesignDetails = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           {/* Compact teaser card */}
-          <Link
-            to="/trade/program"
-            className="group block overflow-hidden rounded-sm relative max-w-3xl mx-auto aspect-[5/3]"
-          >
+          <div className="max-w-3xl mx-auto p-[2px] rounded-sm" style={{ background: 'hsl(36 40% 65%)' }}>
+            <Link
+              to="/trade/program"
+              className="group block overflow-hidden rounded-sm relative aspect-[5/3]"
+            >
             <img
               src={cloudinaryUrl("v1773758590/Screen_Shot_2026-03-17_at_10.40.56_PM_mlwtop", { width: 1200, quality: "auto:good", crop: "limit" })}
               alt="Maison Affluency Trade Program — exclusive benefits for architects and interior designers"
@@ -44,7 +45,8 @@ const DesignDetails = () => {
                 Learn More
               </span>
             </div>
-          </Link>
+            </Link>
+          </div>
         </motion.div>
       </div>
     </section>
