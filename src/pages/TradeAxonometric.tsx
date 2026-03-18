@@ -263,6 +263,60 @@ const TradeAxonometric = () => {
     setResult(gen);
   }, [history, historyIndex]);
 
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const extractInvokeErrorMessage = async (error: any) => {
+    let message = error?.message || "Generation failed";
+    const response = error?.context;
+    if (response?.clone) {
+      try {
+        const parsed = await response.clone().json();
+        message = parsed?.error || parsed?.message || message;
+      } catch {
+        // keep fallback message
+      }
+    }
+    return message;
+  };
+
+  const isRateLimitedError = (message: string) =>
+    /(rate limit|too many requests|try again shortly|please wait|429)/i.test(message);
+
+  const invokeAxonometricGenerate = async (body: any, accessToken?: string, maxRetries = 1) => {
+    const timeoutMs = 120000;
+    let lastMessage = "Generation failed";
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const invokePromise = supabase.functions
+          .invoke("axonometric-generate", {
+            body,
+            headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+          })
+          .then(async ({ data, error }) => {
+            if (error) {
+              throw new Error(await extractInvokeErrorMessage(error));
+            }
+            if (data?.error) throw new Error(data.error);
+            return data;
+          });
+
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error("Request timed out. Please retry.")), timeoutMs);
+        });
+
+        return await Promise.race([invokePromise, timeoutPromise]);
+      } catch (e: any) {
+        lastMessage = e?.message || "Generation failed";
+        if (!isRateLimitedError(lastMessage) || attempt === maxRetries) {
+          throw new Error(lastMessage);
+        }
+        await sleep(2000 * (attempt + 1));
+      }
+    }
+
+    throw new Error(lastMessage);
+  };
 
   const { data: pendingRequests } = useQuery({
     queryKey: ["axonometric-requests-admin"],
@@ -327,11 +381,7 @@ const TradeAxonometric = () => {
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
       };
 
-
-      const { data, error } = await supabase.functions.invoke("axonometric-generate", { body });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const data = await invokeAxonometricGenerate(body, undefined, 1);
 
       const gen: GenerationResult = {
         imageUrl: data.imageUrl,
@@ -344,7 +394,14 @@ const TradeAxonometric = () => {
       toast({ title: "Axonometric view generated" });
     } catch (e: any) {
       console.error(e);
-      toast({ title: "Generation failed", description: e.message, variant: "destructive" });
+      const message = e?.message || "Generation failed";
+      toast({
+        title: isRateLimitedError(message) ? "Backend is busy" : "Generation failed",
+        description: isRateLimitedError(message)
+          ? "Too many requests right now — please wait 30–60 seconds and retry."
+          : message,
+        variant: "destructive",
+      });
     } finally {
       setGenerating(false);
     }
@@ -467,27 +524,7 @@ const TradeAxonometric = () => {
         body.userPrompt = userMsg;
       }
 
-      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-        body,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (error) {
-        let msg = error.message;
-        const response = (error as any)?.context;
-        if (response?.clone) {
-          try {
-            const parsed = await response.clone().json();
-            msg = parsed?.error || parsed?.message || msg;
-          } catch {
-            // keep fallback message
-          }
-        }
-        throw new Error(msg);
-      }
-      if (data?.error) throw new Error(data.error);
+      const data = await invokeAxonometricGenerate(body, accessToken, 1);
 
       const gen: GenerationResult = {
         imageUrl: data.imageUrl,
@@ -500,8 +537,15 @@ const TradeAxonometric = () => {
       setAiHistory((prev) => [...prev, { role: "ai", text: userMsg, imageUrl: data.storedUrl || data.imageUrl }]);
       setTimeout(() => aiChatRef.current?.scrollTo({ top: aiChatRef.current.scrollHeight, behavior: "smooth" }), 100);
     } catch (e: any) {
-      toast({ title: "AI edit failed", description: e.message, variant: "destructive" });
-      setAiHistory((prev) => [...prev, { role: "ai", text: `Error: ${e.message}` }]);
+      const message = e?.message || "AI edit failed";
+      toast({
+        title: isRateLimitedError(message) ? "Backend is busy" : "AI edit failed",
+        description: isRateLimitedError(message)
+          ? "Too many requests right now — please wait 30–60 seconds and retry."
+          : message,
+        variant: "destructive",
+      });
+      setAiHistory((prev) => [...prev, { role: "ai", text: `Error: ${message}` }]);
     } finally {
       setAiSending(false);
     }
@@ -515,46 +559,67 @@ const TradeAxonometric = () => {
     setTurntableGenerating(true);
     setShowTurntable(true);
 
-    const { data: sessionData } = await supabase.auth.getSession();
-    const accessToken = sessionData.session?.access_token;
-    if (!accessToken) {
-      toast({ title: "Session expired", description: "Please sign in again.", variant: "destructive" });
-      setTurntableGenerating(false);
-      return;
-    }
+    let completedViews = 0;
+    let pausedForRateLimit = false;
 
-    for (let i = 0; i < TURNTABLE_ANGLES.length; i++) {
-      const angle = TURNTABLE_ANGLES[i];
-      try {
-        if (angle === 0) {
-          setTurntableImages((prev) => [...prev, baseUrl]);
-          continue;
-        }
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) {
+        toast({ title: "Session expired", description: "Please sign in again.", variant: "destructive" });
+        return;
+      }
 
-        const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-          body: {
+      for (let i = 0; i < TURNTABLE_ANGLES.length; i++) {
+        const angle = TURNTABLE_ANGLES[i];
+
+        try {
+          if (angle === 0) {
+            setTurntableImages((prev) => [...prev, baseUrl]);
+            completedViews += 1;
+            continue;
+          }
+
+          const data = await invokeAxonometricGenerate({
             imageUrl: toAbsoluteUrl(baseUrl),
             mode: "turntable_angle",
             style,
             turntableAngle: angle,
-          },
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
+          }, accessToken, 2);
 
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
+          const viewUrl = data.storedUrl || data.imageUrl;
+          setTurntableImages((prev) => [...prev, viewUrl]);
+          completedViews += 1;
+        } catch (e: any) {
+          const message = e?.message || `Angle ${angle}° failed`;
 
-        const viewUrl = data.storedUrl || data.imageUrl;
-        setTurntableImages((prev) => [...prev, viewUrl]);
-      } catch (e: any) {
-        console.error(`Turntable angle ${angle}° failed:`, e);
-        toast({ title: `Angle ${angle}° failed`, description: e.message, variant: "destructive" });
-        setTurntableImages((prev) => [...prev, baseUrl]);
+          if (isRateLimitedError(message)) {
+            pausedForRateLimit = true;
+            toast({
+              title: "Turntable paused",
+              description: "Rate limit hit — wait ~60 seconds, then tap Orbit Turntable again.",
+              variant: "destructive",
+            });
+            break;
+          }
+
+          console.error(`Turntable angle ${angle}° failed:`, e);
+          toast({ title: `Angle ${angle}° failed`, description: message, variant: "destructive" });
+          setTurntableImages((prev) => [...prev, baseUrl]);
+          completedViews += 1;
+        }
+
+        if (i < TURNTABLE_ANGLES.length - 1) {
+          await sleep(900);
+        }
       }
-    }
 
-    setTurntableGenerating(false);
-    toast({ title: "Turntable complete — 6 views generated" });
+      if (!pausedForRateLimit) {
+        toast({ title: `Turntable ready — ${completedViews} views generated` });
+      }
+    } finally {
+      setTurntableGenerating(false);
+    }
   };
 
   const downloadTurntableImage = (url: string, index: number) => {
