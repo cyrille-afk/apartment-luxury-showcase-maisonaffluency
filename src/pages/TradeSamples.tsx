@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Package, Plus, Clock, Truck, CheckCircle, RotateCcw, X, ImagePlus } from "lucide-react";

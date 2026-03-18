@@ -1,5 +1,8 @@
 import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { Package } from "lucide-react";
 
 /** Replace the last two spaces in each line with non-breaking spaces to prevent orphans (keeps last 3 words together) */
 const preventOrphans = (text: string): string =>
@@ -22,6 +25,18 @@ interface CuratorPicksLegendProps {
  */
 const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, className = "" }: CuratorPicksLegendProps) => {
   const p = pick as any; // access optional extended fields
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleRequestSample = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const params = new URLSearchParams();
+    const fullTitle = p.subtitle ? `${pick.title} ${p.subtitle}` : pick.title;
+    params.set("product", fullTitle);
+    if (designerName) params.set("brand", designerName);
+    if (pick.image) params.set("image", pick.image);
+    navigate(`/trade/samples?${params.toString()}`);
+  };
 
   return (
     <div className={`text-center w-full px-4 md:px-12 mt-4 ${className}`}>
@@ -70,7 +85,6 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
         </p>
       )}
 
-
       {/* Provenance badge — renders only when certificate data exists */}
       {designerId && (
         <ProvenanceBadge
@@ -78,6 +92,17 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
           pieceTitle={pick.title}
           className="mt-3"
         />
+      )}
+
+      {/* Request Sample CTA — only for authenticated trade users */}
+      {user && (
+        <button
+          onClick={handleRequestSample}
+          className="inline-flex items-center gap-1.5 mt-4 px-4 py-1.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white/80 hover:text-white hover:bg-white/20 transition-all font-body text-[11px] uppercase tracking-[0.12em]"
+        >
+          <Package className="h-3 w-3" />
+          Request Sample
+        </button>
       )}
 
       {/* Inquiry CTA */}
