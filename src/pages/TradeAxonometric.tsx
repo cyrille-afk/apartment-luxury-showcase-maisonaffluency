@@ -327,7 +327,7 @@ const TradeAxonometric = () => {
             {/* Mode */}
             <div className="border border-border rounded-lg p-5 space-y-4">
               <h2 className="font-display text-sm text-foreground">Generation Mode</h2>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
                 {([
                   { value: "elevation_to_axo", label: "Elevation → 3D", icon: Wand2 },
                   { value: "section_to_axo", label: "Section → 3D", icon: Layers },
