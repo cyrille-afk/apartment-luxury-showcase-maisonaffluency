@@ -151,7 +151,32 @@ const TradeAxonometric = () => {
     }
   };
 
-  const iterateOnResult = () => {
+  const saveToGallery = async (publish: boolean) => {
+    if (!result) return;
+    const imageUrl = result.storedUrl || result.imageUrl;
+    setSavingToGallery(true);
+    try {
+      const { error } = await (supabase as any).from("axonometric_gallery").insert({
+        created_by: (await supabase.auth.getUser()).data.user?.id,
+        title: galleryTitle.trim().slice(0, 200),
+        description: galleryDesc.trim().slice(0, 500) || null,
+        image_url: imageUrl,
+        style_preset: STYLE_PRESETS.find(s => s.value === style)?.label || null,
+        project_name: activeRequestId ? (pendingRequests?.find((r: any) => r.id === activeRequestId)?.project_name || null) : null,
+        request_id: activeRequestId || null,
+        is_published: publish,
+      });
+      if (error) throw error;
+      toast({ title: publish ? "Saved & published to gallery" : "Saved as draft" });
+      setGalleryTitle("");
+      setGalleryDesc("");
+    } catch (e: any) {
+      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSavingToGallery(false);
+    }
+  };
+
     if (result?.storedUrl || result?.imageUrl) {
       setSourceImage(result.storedUrl || result.imageUrl);
       setMode("stylize");
