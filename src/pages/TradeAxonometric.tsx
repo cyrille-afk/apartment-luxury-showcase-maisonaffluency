@@ -18,7 +18,7 @@ const AxonometricSceneEditor = lazy(() => import("@/components/trade/Axonometric
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
-type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "product_swap";
+type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay";
 
 interface SelectedProduct {
   product_name: string;
