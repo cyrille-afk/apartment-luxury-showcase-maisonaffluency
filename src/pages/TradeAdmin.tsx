@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, ExternalLink } from "lucide-react";
+import { Check, X, Clock, ExternalLink, ChevronRight } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ApplicationCardSkeleton } from "@/components/trade/skeletons";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -118,12 +119,17 @@ const TradeAdmin = () => {
     <div className="max-w-5xl space-y-6">
       <TaxonomyAudit />
 
-      {/* Section Hero Manager */}
-      <div className="space-y-3">
-        <h2 className="font-display text-lg text-foreground">Section Hero Images</h2>
-        <p className="font-body text-xs text-muted-foreground">Upload custom hero banners for trade portal sections. Remove to revert to defaults.</p>
-        <HeroManager />
-      </div>
+      {/* Section Hero Manager — collapsible */}
+      <Collapsible>
+        <CollapsibleTrigger className="flex items-center gap-2 group cursor-pointer">
+          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-90" />
+          <h2 className="font-display text-lg text-foreground">Section Hero Images</h2>
+        </CollapsibleTrigger>
+        <p className="font-body text-xs text-muted-foreground ml-6">Upload custom hero banners for trade portal sections. Remove to revert to defaults.</p>
+        <CollapsibleContent className="mt-3">
+          <HeroManager />
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Sample Requests Manager */}
       <SampleRequestsAdmin />
