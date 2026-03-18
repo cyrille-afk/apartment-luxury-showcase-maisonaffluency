@@ -760,6 +760,10 @@ const TradeAxonometric = () => {
                     <ImagePlus className="w-3.5 h-3.5 mr-1.5" />
                     Add Products
                   </Button>
+                  <Button variant="outline" size="sm" onClick={() => setShowSceneEditor(true)} className="flex-1">
+                    <MousePointer2 className="w-3.5 h-3.5 mr-1.5" />
+                    Edit Scene
+                  </Button>
                   <Button variant="outline" size="sm" onClick={downloadImage}>
                     <Download className="w-3.5 h-3.5" />
                   </Button>
