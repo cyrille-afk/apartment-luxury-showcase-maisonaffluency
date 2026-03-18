@@ -154,6 +154,7 @@ const TradeSamples = () => {
       return_by: returnBy ? format(returnBy, "yyyy-MM-dd") : null,
       notes: notes.trim() || null,
       image_url: imageUrl,
+      tearsheet_url: tearsheetUrl,
     } as any);
 
     setSubmitting(false);
