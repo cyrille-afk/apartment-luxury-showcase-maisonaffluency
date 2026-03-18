@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import TaxonomyAudit from "@/components/trade/TaxonomyAudit";
 import HeroManager from "@/components/trade/HeroManager";
+import SampleRequestsAdmin from "@/components/trade/SampleRequestsAdmin";
 
 interface Application {
   id: string;
