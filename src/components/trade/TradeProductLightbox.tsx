@@ -1,9 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2 } from "lucide-react";
+import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Package } from "lucide-react";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export interface TradeProductLightboxItem {
   id: string;
