@@ -85,7 +85,7 @@ serve(async (req) => {
         throw new Error("Scene edit requires either a mask (erase areas) or product placements");
       }
     } else {
-      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, scene_edit");
+      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, product_swap, scene_edit");
     }
 
     // Build message content
