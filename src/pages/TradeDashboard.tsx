@@ -155,6 +155,22 @@ const TradeDashboard = () => {
       items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setActivity(items.slice(0, 8));
 
+      // Fetch 3D Studio gallery stats
+      const { count: galleryCount } = await (supabase as any)
+        .from("axonometric_gallery")
+        .select("*", { count: "exact", head: true })
+        .eq("is_published", true);
+      const { data: latestRender } = await (supabase as any)
+        .from("axonometric_gallery")
+        .select("image_url")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      setStudioStats({
+        count: galleryCount || 0,
+        latestImage: latestRender?.[0]?.image_url || null,
+      });
+
       setLoading(false);
     };
     fetchData();
