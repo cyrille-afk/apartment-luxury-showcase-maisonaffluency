@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, ExternalLink } from "lucide-react";
+import { Check, X, Clock, ExternalLink, ChevronRight } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ApplicationCardSkeleton } from "@/components/trade/skeletons";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
