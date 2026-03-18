@@ -189,6 +189,34 @@ const TradePresentationBuilder = () => {
     refetchSlides();
   }, [refetchSlides]);
 
+  const handleAddShare = async () => {
+    const email = shareEmail.trim().toLowerCase();
+    if (!email || !email.includes("@")) {
+      toast({ title: "Enter a valid email", variant: "destructive" });
+      return;
+    }
+    const { data: profile } = await supabase.from("profiles").select("id").eq("email", email).single();
+    const { error } = await (supabase as any).from("presentation_shares").insert({
+      presentation_id: id,
+      shared_with_email: email,
+      shared_with_user_id: profile?.id || null,
+      role: "viewer",
+    });
+    if (error) {
+      if (error.code === "23505") toast({ title: "Already shared with this email" });
+      else toast({ title: "Error sharing", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: `Shared with ${email}` });
+    setShareEmail("");
+    refetchShares();
+  };
+
+  const handleRemoveShare = async (shareId: string) => {
+    await (supabase as any).from("presentation_shares").delete().eq("id", shareId);
+    refetchShares();
+  };
+
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
