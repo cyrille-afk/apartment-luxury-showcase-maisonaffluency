@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { getAllTradeProducts, getAllBrands } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +44,7 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
   const [productSearch, setProductSearch] = useState("");
   const [sceneCategory, setSceneCategory] = useState("");
   const [sceneSubcategory, setSceneSubcategory] = useState("");
+  const [sceneBrand, setSceneBrand] = useState("");
   const [generating, setGenerating] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [imgSize, setImgSize] = useState({ w: 0, h: 0 });
@@ -74,6 +75,7 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
     let all = getAllTradeProducts().filter((p) => p.image_url);
     if (sceneCategory) all = all.filter((p) => p.category === sceneCategory);
     if (sceneSubcategory) all = all.filter((p) => p.subcategory === sceneSubcategory);
+    if (sceneBrand) all = all.filter((p) => p.brand_name === sceneBrand);
     if (productSearch.trim()) {
       const q = productSearch.toLowerCase();
       all = all.filter(
@@ -87,7 +89,9 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
       );
     }
     return all.slice(0, 30);
-  }, [productSearch, sceneCategory, sceneSubcategory]);
+  }, [productSearch, sceneCategory, sceneSubcategory, sceneBrand]);
+
+  const allBrands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
 
   // Drawing (eraser)
   const getCanvasCoords = useCallback((e: React.MouseEvent) => {
@@ -480,6 +484,14 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
                   </select>
                 )}
               </div>
+              <select
+                value={sceneBrand}
+                onChange={(e) => setSceneBrand(e.target.value)}
+                className="w-full border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+              >
+                <option value="">All Brands</option>
+                {allBrands.map((b) => <option key={b} value={b}>{b}</option>)}
+              </select>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <input

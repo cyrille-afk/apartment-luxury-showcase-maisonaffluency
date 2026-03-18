@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useMemo, lazy, Suspense } from "react";
-import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { getAllTradeProducts, getAllBrands } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
@@ -51,24 +51,20 @@ const ProductPicker = ({
   selectedProduct,
   category,
   subcategory,
+  brand,
 }: {
   search: string;
   onSelect: (product: SelectedProduct) => void;
   selectedProduct: SelectedProduct | null;
   category?: string;
   subcategory?: string;
+  brand?: string;
 }) => {
   const products = useMemo(() => {
     let all = getAllTradeProducts().filter((p) => p.image_url);
-
-    // Category filter
-    if (category) {
-      all = all.filter((p) => p.category === category);
-    }
-    // Subcategory filter
-    if (subcategory) {
-      all = all.filter((p) => p.subcategory === subcategory);
-    }
+    if (category) all = all.filter((p) => p.category === category);
+    if (subcategory) all = all.filter((p) => p.subcategory === subcategory);
+    if (brand) all = all.filter((p) => p.brand_name === brand);
     // Keyword search
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -83,7 +79,7 @@ const ProductPicker = ({
       );
     }
     return all.slice(0, 24);
-  }, [search, category, subcategory]);
+  }, [search, category, subcategory, brand]);
 
   if (products.length === 0) {
     return <p className="font-body text-xs text-muted-foreground py-4 text-center">No products found</p>;
@@ -117,25 +113,30 @@ const ProductPicker = ({
   );
 };
 
-/** Category + Subcategory filter row */
+/** Category + Subcategory + Brand filter row */
 const CategoryFilterBar = ({
   category,
   subcategory,
+  brand,
   onCategoryChange,
   onSubcategoryChange,
+  onBrandChange,
 }: {
   category: string;
   subcategory: string;
+  brand: string;
   onCategoryChange: (v: string) => void;
   onSubcategoryChange: (v: string) => void;
+  onBrandChange: (v: string) => void;
 }) => {
   const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
+  const brands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
   return (
-    <div className="flex gap-1.5">
+    <div className="flex flex-wrap gap-1.5">
       <select
         value={category}
         onChange={(e) => { onCategoryChange(e.target.value); onSubcategoryChange(""); }}
-        className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+        className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
       >
         <option value="">All Categories</option>
         {CATEGORY_ORDER.map((c) => (
@@ -146,7 +147,7 @@ const CategoryFilterBar = ({
         <select
           value={subcategory}
           onChange={(e) => onSubcategoryChange(e.target.value)}
-          className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+          className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
         >
           <option value="">All {category}</option>
           {subcategories.map((s) => (
@@ -154,6 +155,16 @@ const CategoryFilterBar = ({
           ))}
         </select>
       )}
+      <select
+        value={brand}
+        onChange={(e) => onBrandChange(e.target.value)}
+        className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+      >
+        <option value="">All Brands</option>
+        {brands.map((b) => (
+          <option key={b} value={b}>{b}</option>
+        ))}
+      </select>
     </div>
   );
 };
@@ -174,6 +185,7 @@ const TradeAxonometric = () => {
   const [compositeProductSearch, setCompositeProductSearch] = useState("");
   const [pickerCategory, setPickerCategory] = useState("");
   const [pickerSubcategory, setPickerSubcategory] = useState("");
+  const [pickerBrand, setPickerBrand] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
@@ -562,13 +574,16 @@ const TradeAxonometric = () => {
                     <CategoryFilterBar
                       category={pickerCategory}
                       subcategory={pickerSubcategory}
+                      brand={pickerBrand}
                       onCategoryChange={setPickerCategory}
                       onSubcategoryChange={setPickerSubcategory}
+                      onBrandChange={setPickerBrand}
                     />
                     <ProductPicker
                       search={compositeProductSearch}
                       category={pickerCategory || undefined}
                       subcategory={pickerSubcategory || undefined}
+                      brand={pickerBrand || undefined}
                       onSelect={(product) => {
                         if (product.image_url && overlayImages.length < 5) {
                           setOverlayImages((prev) => [...prev, product.image_url].slice(0, 5));
@@ -615,13 +630,16 @@ const TradeAxonometric = () => {
                 <CategoryFilterBar
                   category={pickerCategory}
                   subcategory={pickerSubcategory}
+                  brand={pickerBrand}
                   onCategoryChange={setPickerCategory}
                   onSubcategoryChange={setPickerSubcategory}
+                  onBrandChange={setPickerBrand}
                 />
                 <ProductPicker
                   search={productSearch}
                   category={pickerCategory || undefined}
                   subcategory={pickerSubcategory || undefined}
+                  brand={pickerBrand || undefined}
                   onSelect={(product) => {
                     setSelectedProduct(product);
                     setSourceImage(product.image_url);
@@ -676,13 +694,16 @@ const TradeAxonometric = () => {
                     <CategoryFilterBar
                       category={pickerCategory}
                       subcategory={pickerSubcategory}
+                      brand={pickerBrand}
                       onCategoryChange={setPickerCategory}
                       onSubcategoryChange={setPickerSubcategory}
+                      onBrandChange={setPickerBrand}
                     />
                     <ProductPicker
                       search={cadProductSearch}
                       category={pickerCategory || undefined}
                       subcategory={pickerSubcategory || undefined}
+                      brand={pickerBrand || undefined}
                       onSelect={(product) => {
                         if (product.image_url && overlayImages.length < 5) {
                           setOverlayImages((prev) => [...prev, product.image_url].slice(0, 5));
