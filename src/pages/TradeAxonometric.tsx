@@ -939,7 +939,29 @@ const TradeAxonometric = () => {
                   <div className="px-4 py-2.5 bg-muted/30 border-b border-border flex items-center gap-2">
                     <Wand2 className="w-3.5 h-3.5 text-muted-foreground" />
                     <h3 className="font-display text-xs text-foreground">AI Edit Prompt</h3>
-                    <span className="font-body text-[10px] text-muted-foreground ml-auto">Describe changes to apply</span>
+                    <div className="flex items-center gap-1 ml-auto">
+                      <button
+                        onClick={handleUndo}
+                        disabled={!canUndo}
+                        className="p-1 rounded transition-colors disabled:opacity-30 text-muted-foreground hover:text-foreground disabled:hover:text-muted-foreground"
+                        title="Undo — step back to previous version"
+                      >
+                        <Undo2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={handleRedo}
+                        disabled={!canRedo}
+                        className="p-1 rounded transition-colors disabled:opacity-30 text-muted-foreground hover:text-foreground disabled:hover:text-muted-foreground"
+                        title="Redo — step forward"
+                      >
+                        <Redo2 className="w-3.5 h-3.5" />
+                      </button>
+                      {history.length > 1 && (
+                        <span className="font-body text-[9px] text-muted-foreground tabular-nums ml-1">
+                          {historyIndex === -1 ? 1 : historyIndex + 1}/{history.length}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {aiHistory.length > 0 && (
