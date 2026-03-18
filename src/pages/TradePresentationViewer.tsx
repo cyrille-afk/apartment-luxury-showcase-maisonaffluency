@@ -160,7 +160,7 @@ const TradePresentationViewer = () => {
                 <p className="font-body text-[10px] text-muted-foreground">
                   {presentation?.client_name && `${presentation.client_name} · `}
                   {presentation?.project_name && `${presentation.project_name} · `}
-                  Slide {currentSlide + 1} of {slides.length}
+                  Slide {currentSlide + 1} of {totalSlides}
                 </p>
               </div>
             </div>
