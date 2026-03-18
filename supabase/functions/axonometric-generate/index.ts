@@ -80,6 +80,24 @@ serve(async (req) => {
       }
     }
 
+    // Add CAD blocks + technical drawing for cad_overlay mode
+    if (mode === "cad_overlay") {
+      if (technicalDrawingUrl) {
+        content.push({
+          type: "image_url",
+          image_url: { url: technicalDrawingUrl },
+        });
+      }
+      if (overlayImages && Array.isArray(overlayImages)) {
+        for (const img of overlayImages.slice(0, 5)) {
+          content.push({
+            type: "image_url",
+            image_url: { url: img },
+          });
+        }
+      }
+    }
+
     const aiResponse = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
