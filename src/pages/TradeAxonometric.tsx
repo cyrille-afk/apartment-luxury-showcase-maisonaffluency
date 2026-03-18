@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import SectionHero from "@/components/trade/SectionHero";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CloudUpload from "@/components/trade/CloudUpload";
@@ -284,13 +285,11 @@ const TradeAxonometric = () => {
 
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-2xl text-foreground">Axonometric Studio</h1>
-            <p className="font-body text-sm text-muted-foreground mt-1">
-              Transform 2D elevations and sections into stylised 3D axonometric views using AI
-            </p>
-          </div>
+        <SectionHero
+          section="axonometric"
+          title="Axonometric Studio"
+          subtitle="Transform 2D elevations and sections into stylised 3D axonometric views using AI"
+        >
           <div className="flex items-center gap-2">
             {activeRequestId && (
               <Button variant="outline" size="sm" onClick={() => { setActiveRequestId(null); setSourceImage(null); setResult(null); setShowQueue(true); }}>
@@ -311,7 +310,7 @@ const TradeAxonometric = () => {
               )}
             </Button>
           </div>
-        </div>
+        </SectionHero>
 
         {/* Request Queue */}
         {showQueue && pendingRequests && pendingRequests.length > 0 && (
