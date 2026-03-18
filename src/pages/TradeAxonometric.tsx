@@ -507,6 +507,63 @@ const TradeAxonometric = () => {
     }
   };
 
+  // Turntable: generate 6 views at different angles sequentially
+  const generateTurntable = async () => {
+    if (!result) return;
+    const baseUrl = result.storedUrl || result.imageUrl;
+    setTurntableImages([]);
+    setTurntableGenerating(true);
+    setShowTurntable(true);
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) {
+      toast({ title: "Session expired", description: "Please sign in again.", variant: "destructive" });
+      setTurntableGenerating(false);
+      return;
+    }
+
+    for (let i = 0; i < TURNTABLE_ANGLES.length; i++) {
+      const angle = TURNTABLE_ANGLES[i];
+      try {
+        if (angle === 0) {
+          setTurntableImages((prev) => [...prev, baseUrl]);
+          continue;
+        }
+
+        const { data, error } = await supabase.functions.invoke("axonometric-generate", {
+          body: {
+            imageUrl: toAbsoluteUrl(baseUrl),
+            mode: "turntable_angle",
+            style,
+            turntableAngle: angle,
+          },
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+
+        const viewUrl = data.storedUrl || data.imageUrl;
+        setTurntableImages((prev) => [...prev, viewUrl]);
+      } catch (e: any) {
+        console.error(`Turntable angle ${angle}° failed:`, e);
+        toast({ title: `Angle ${angle}° failed`, description: e.message, variant: "destructive" });
+        setTurntableImages((prev) => [...prev, baseUrl]);
+      }
+    }
+
+    setTurntableGenerating(false);
+    toast({ title: "Turntable complete — 6 views generated" });
+  };
+
+  const downloadTurntableImage = (url: string, index: number) => {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `turntable-${TURNTABLE_ANGLES[index]}deg-${Date.now()}.png`;
+    a.click();
+  };
+
   const filterStyle = {
     filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) sepia(${Math.abs(warmth)}%)`,
   };
