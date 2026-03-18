@@ -86,13 +86,11 @@ const TradeAxonometricRequests = () => {
       </Helmet>
 
       <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-2xl text-foreground">3D Studio</h1>
-            <p className="font-body text-sm text-muted-foreground mt-1">
-              Submit drawings for 3D renders or browse the gallery
-            </p>
-          </div>
+        <SectionHero
+          section="3d-studio"
+          title="3D Studio"
+          subtitle="Submit drawings for 3D renders or browse the gallery"
+        >
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild>
               <Link to="/trade/axonometric-gallery">
@@ -108,7 +106,7 @@ const TradeAxonometricRequests = () => {
               {showForm ? "Cancel" : "New Request"}
             </Button>
           </div>
-        </div>
+        </SectionHero>
 
         {/* Submission Form */}
         {showForm && (
