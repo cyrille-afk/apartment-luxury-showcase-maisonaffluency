@@ -29,6 +29,7 @@ interface SampleRequest {
   admin_notes: string | null;
   tracking_number: string | null;
   image_url: string | null;
+  tearsheet_url: string | null;
   status: string;
   created_at: string;
   updated_at: string;
