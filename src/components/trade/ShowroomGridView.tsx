@@ -120,10 +120,11 @@ const findBestPriceMatch = (
     if (!candidateTokens.length || !targetTokens.size) continue;
     let overlap = 0;
     for (const token of candidateTokens) { if (targetTokens.has(token)) overlap++; }
-    const score = overlap / Math.max(candidateTokens.length, targetTokens.size);
-    if (overlap >= 2 && score > bestScore) { best = entry; bestScore = score; }
+    const shorter = Math.min(candidateTokens.length, targetTokens.size);
+    const score = shorter > 0 ? overlap / shorter : 0;
+    if (score > bestScore && score > 0.5) { best = entry; bestScore = score; }
   }
-  return bestScore >= 0.5 ? best : undefined;
+  return best;
 };
 
 const ShowroomGridView = ({
