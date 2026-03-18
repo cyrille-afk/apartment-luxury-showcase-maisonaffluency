@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
+import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
@@ -10,11 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
-type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite";
+type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay";
 
 interface GenerationResult {
   imageUrl: string;
@@ -30,6 +31,43 @@ const STYLE_PRESETS = [
   { value: "contemporary Scandinavian design with light wood, white walls, and soft daylight", label: "Scandinavian" },
 ];
 
+/** Inline product picker for platform images */
+const ProductPicker = ({ search, onSelect, selectedUrl }: { search: string; onSelect: (url: string) => void; selectedUrl: string | null }) => {
+  const products = useMemo(() => {
+    const all = getAllTradeProducts().filter((p) => p.image_url);
+    if (!search.trim()) return all.slice(0, 24);
+    const q = search.toLowerCase();
+    return all.filter(
+      (p) =>
+        p.product_name.toLowerCase().includes(q) ||
+        p.brand_name.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q)
+    ).slice(0, 24);
+  }, [search]);
+
+  if (products.length === 0) {
+    return <p className="font-body text-xs text-muted-foreground py-4 text-center">No products found</p>;
+  }
+
+  return (
+    <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+      {products.map((p) => (
+        <button
+          key={p.id}
+          onClick={() => p.image_url && onSelect(p.image_url)}
+          className={`rounded border overflow-hidden text-left transition-all ${
+            selectedUrl === p.image_url ? "border-foreground ring-1 ring-foreground" : "border-border hover:border-foreground/30"
+          }`}
+          title={`${p.product_name} — ${p.brand_name}${p.dimensions ? ` — ${p.dimensions}` : ""}`}
+        >
+          <img src={p.image_url!} alt={p.product_name} className="w-full aspect-square object-cover" />
+          <p className="font-body text-[9px] text-muted-foreground truncate px-1 py-0.5">{p.product_name}</p>
+        </button>
+      ))}
+    </div>
+  );
+};
+
 const TradeAxonometric = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
@@ -39,6 +77,9 @@ const TradeAxonometric = () => {
   const [mode, setMode] = useState<Mode>("elevation_to_axo");
   const [style, setStyle] = useState(STYLE_PRESETS[0].value);
   const [overlayImages, setOverlayImages] = useState<string[]>([]);
+  const [cadBlocks, setCadBlocks] = useState<string[]>([]);
+  const [technicalDrawingUrl, setTechnicalDrawingUrl] = useState<string | null>(null);
+  const [productSearch, setProductSearch] = useState("");
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [history, setHistory] = useState<GenerationResult[]>([]);
@@ -93,7 +134,8 @@ const TradeAxonometric = () => {
           imageUrl: sourceImage,
           mode,
           style,
-          overlayImages: mode === "composite" ? overlayImages : undefined,
+          overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages : undefined,
+          technicalDrawingUrl: mode === "cad_overlay" ? technicalDrawingUrl : undefined,
         },
       });
 
@@ -323,12 +365,14 @@ const TradeAxonometric = () => {
             {/* Mode */}
             <div className="border border-border rounded-lg p-5 space-y-4">
               <h2 className="font-display text-sm text-foreground">Generation Mode</h2>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
                 {([
                   { value: "elevation_to_axo", label: "Elevation → 3D", icon: Wand2 },
                   { value: "section_to_axo", label: "Section → 3D", icon: Layers },
                   { value: "stylize", label: "Stylize", icon: Paintbrush },
                   { value: "composite", label: "Add Products", icon: ImagePlus },
+                  { value: "3d_to_cad", label: "3D → CAD Block", icon: PenTool },
+                  { value: "cad_overlay", label: "CAD Overlay", icon: FileInput },
                 ] as const).map((m) => (
                   <button
                     key={m.value}
@@ -389,6 +433,86 @@ const TradeAxonometric = () => {
                     accept="image/*"
                     multiple
                     label="Add product images"
+                    onUpload={(urls) =>
+                      setOverlayImages((prev) => [...prev, ...urls].slice(0, 5))
+                    }
+                  />
+                )}
+              </div>
+            )}
+
+            {/* 3D → CAD: Product Browser from platform */}
+            {mode === "3d_to_cad" && (
+              <div className="border border-border rounded-lg p-5 space-y-4">
+                <h2 className="font-display text-sm text-foreground">Select Product from Platform</h2>
+                <p className="font-body text-xs text-muted-foreground">
+                  Choose a 3D product image to convert into a 2D CAD vector block with estimated dimensions
+                </p>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    placeholder="Search products…"
+                    className="pl-9 font-body text-xs"
+                  />
+                </div>
+                <ProductPicker
+                  search={productSearch}
+                  onSelect={(imageUrl) => setSourceImage(imageUrl)}
+                  selectedUrl={sourceImage}
+                />
+              </div>
+            )}
+
+            {/* CAD Overlay: Technical drawing + CAD blocks */}
+            {mode === "cad_overlay" && (
+              <div className="border border-border rounded-lg p-5 space-y-4">
+                <h2 className="font-display text-sm text-foreground">Technical Drawing</h2>
+                <p className="font-body text-xs text-muted-foreground">
+                  Upload the technical drawing to overlay CAD blocks onto
+                </p>
+                {technicalDrawingUrl ? (
+                  <div className="relative group">
+                    <img src={technicalDrawingUrl} alt="Technical drawing" className="w-full max-h-40 object-contain rounded border border-border" />
+                    <button
+                      onClick={() => setTechnicalDrawingUrl(null)}
+                      className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <RotateCcw className="w-3 h-3 text-foreground" />
+                    </button>
+                  </div>
+                ) : (
+                  <CloudUpload
+                    folder="axonometric-technical"
+                    accept="image/*"
+                    label="Upload technical drawing"
+                    onUpload={(urls) => setTechnicalDrawingUrl(urls[0])}
+                  />
+                )}
+                <h3 className="font-display text-xs text-foreground pt-2">CAD Blocks to Insert</h3>
+                <p className="font-body text-[10px] text-muted-foreground">
+                  Use previously generated CAD blocks or upload custom ones
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {overlayImages.map((img, i) => (
+                    <div key={i} className="relative w-16 h-16 border border-border rounded overflow-hidden group">
+                      <img src={img} alt="" className="w-full h-full object-contain bg-white" />
+                      <button
+                        onClick={() => setOverlayImages((prev) => prev.filter((_, j) => j !== i))}
+                        className="absolute inset-0 bg-background/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <RotateCcw className="w-3 h-3 text-foreground" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {overlayImages.length < 5 && (
+                  <CloudUpload
+                    folder="axonometric-cad-blocks"
+                    accept="image/*"
+                    multiple
+                    label="Add CAD block images"
                     onUpload={(urls) =>
                       setOverlayImages((prev) => [...prev, ...urls].slice(0, 5))
                     }
