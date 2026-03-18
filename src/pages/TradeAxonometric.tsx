@@ -454,6 +454,52 @@ const TradeAxonometric = () => {
                   </Button>
                 </div>
 
+                {/* Save to Gallery */}
+                <div className="border border-border rounded-lg p-5 space-y-3">
+                  <h2 className="font-display text-sm text-foreground flex items-center gap-2">
+                    <Save className="w-3.5 h-3.5" />Save to Gallery
+                  </h2>
+                  <Input
+                    value={galleryTitle}
+                    onChange={(e) => setGalleryTitle(e.target.value)}
+                    placeholder="Title (e.g. Marina Bay Living Room)"
+                    maxLength={200}
+                    className="font-body text-xs"
+                  />
+                  <Textarea
+                    value={galleryDesc}
+                    onChange={(e) => setGalleryDesc(e.target.value)}
+                    placeholder="Description (optional)"
+                    maxLength={500}
+                    rows={2}
+                    className="font-body text-xs"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      disabled={savingToGallery || !galleryTitle.trim()}
+                      onClick={async () => {
+                        await saveToGallery(false);
+                      }}
+                    >
+                      <EyeOff className="w-3.5 h-3.5 mr-1.5" />Save Draft
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1"
+                      disabled={savingToGallery || !galleryTitle.trim()}
+                      onClick={async () => {
+                        await saveToGallery(true);
+                      }}
+                    >
+                      {savingToGallery ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Eye className="w-3.5 h-3.5 mr-1.5" />}
+                      Save & Publish
+                    </Button>
+                  </div>
+                </div>
+
                 {/* Deliver to requester */}
                 {activeRequestId && (
                   <div className="border border-foreground/20 rounded-lg p-5 space-y-3 bg-muted/20">
