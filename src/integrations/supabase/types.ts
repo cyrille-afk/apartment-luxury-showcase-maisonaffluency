@@ -1001,6 +1001,7 @@ export type Database = {
           shipping_city: string
           shipping_country: string
           status: Database["public"]["Enums"]["sample_request_status"]
+          tearsheet_url: string | null
           tracking_number: string | null
           updated_at: string
           user_id: string
@@ -1020,6 +1021,7 @@ export type Database = {
           shipping_city?: string
           shipping_country?: string
           status?: Database["public"]["Enums"]["sample_request_status"]
+          tearsheet_url?: string | null
           tracking_number?: string | null
           updated_at?: string
           user_id: string
@@ -1039,6 +1041,7 @@ export type Database = {
           shipping_city?: string
           shipping_country?: string
           status?: Database["public"]["Enums"]["sample_request_status"]
+          tearsheet_url?: string | null
           tracking_number?: string | null
           updated_at?: string
           user_id?: string
