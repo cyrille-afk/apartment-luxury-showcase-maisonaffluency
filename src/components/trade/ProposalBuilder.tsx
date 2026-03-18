@@ -135,6 +135,47 @@ export default function ProposalBuilder({
     }
   };
 
+  const refineProposal = async () => {
+    if (!proposalResult || !refinementPrompt.trim()) return;
+    setRefining(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Session expired. Please sign in again.");
+
+      const placements = selectedProducts.map((p) => ({
+        product_name: p.product_name,
+        brand_name: p.brand_name,
+      }));
+
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
+        body: {
+          imageUrl: toAbsoluteUrl(proposalResult),
+          referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
+          mode: "proposal_refine",
+          style,
+          placements,
+          refinementPrompt: refinementPrompt.trim(),
+        },
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+
+      const resultUrl = data.storedUrl || data.imageUrl;
+      setProposalHistory((prev) => [...prev, resultUrl]);
+      setProposalResult(resultUrl);
+      setRefinementPrompt("");
+      onResult?.({ imageUrl: data.imageUrl, storedUrl: data.storedUrl, text: data.text, pinnedProducts: selectedProducts });
+      toast({ title: "Proposal refined successfully" });
+    } catch (e: any) {
+      toast({ title: "Refinement failed", description: e?.message || "Unknown error", variant: "destructive" });
+    } finally {
+      setRefining(false);
+    }
+  };
+
   const downloadProposal = () => {
     if (!proposalResult) return;
     const a = document.createElement("a");
