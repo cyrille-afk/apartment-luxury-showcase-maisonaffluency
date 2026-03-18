@@ -381,11 +381,7 @@ const TradeAxonometric = () => {
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
       };
 
-
-      const { data, error } = await supabase.functions.invoke("axonometric-generate", { body });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const data = await invokeAxonometricGenerate(body, undefined, 1);
 
       const gen: GenerationResult = {
         imageUrl: data.imageUrl,
@@ -398,7 +394,14 @@ const TradeAxonometric = () => {
       toast({ title: "Axonometric view generated" });
     } catch (e: any) {
       console.error(e);
-      toast({ title: "Generation failed", description: e.message, variant: "destructive" });
+      const message = e?.message || "Generation failed";
+      toast({
+        title: isRateLimitedError(message) ? "Backend is busy" : "Generation failed",
+        description: isRateLimitedError(message)
+          ? "Too many requests right now — please wait 30–60 seconds and retry."
+          : message,
+        variant: "destructive",
+      });
     } finally {
       setGenerating(false);
     }
