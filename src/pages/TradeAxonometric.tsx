@@ -1612,6 +1612,33 @@ const TradeAxonometric = () => {
           />
         </Suspense>
       )}
+
+      {/* Proposal Builder */}
+      {showProposal && result && (
+        <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <Suspense fallback={<div className="py-16 text-center font-body text-sm text-muted-foreground">Loading Proposal Builder…</div>}>
+              <ProposalBuilder
+                furnishedImageUrl={result.storedUrl || result.imageUrl}
+                emptyRoomUrl={emptyRoomUrl}
+                emptyRoomGenerating={emptyRoomGenerating}
+                style={style}
+                onClose={() => setShowProposal(false)}
+                onResult={(res) => {
+                  const gen: GenerationResult = {
+                    imageUrl: res.imageUrl,
+                    storedUrl: res.storedUrl,
+                    text: res.text,
+                    sourceProduct: result.sourceProduct,
+                    mode: "composite",
+                  };
+                  pushResult(gen);
+                }}
+              />
+            </Suspense>
+          </div>
+        </div>
+      )}
     </>
   );
 };
