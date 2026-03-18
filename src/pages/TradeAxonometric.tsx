@@ -696,7 +696,7 @@ const TradeAxonometric = () => {
             <div className="border border-border rounded-lg p-5 space-y-4">
               <h2 className="font-display text-sm text-foreground">Source Image</h2>
               <p className="font-body text-xs text-muted-foreground">
-                Upload a 2D elevation, section drawing, or a previously generated axonometric view
+                Upload a 2D elevation, section drawing, PDF, or a previously generated axonometric view
               </p>
 
               {sourceImage ? (
@@ -736,12 +736,7 @@ const TradeAxonometric = () => {
                   )}
                 </div>
               ) : (
-                <CloudUpload
-                  folder="axonometric-sources"
-                  accept="image/*"
-                  label="Upload elevation or section"
-                  onUpload={(urls) => setSourceImage(urls[0])}
-                />
+                <SourceUpload onSourceReady={(url) => setSourceImage(url)} />
               )}
             </div>
 
