@@ -412,9 +412,22 @@ const TradeAxonometric = () => {
               </Button>
             )}
             <Button
+              variant={showDrafts ? "default" : "outline"}
+              size="sm"
+              onClick={() => { setShowDrafts(!showDrafts); if (!showDrafts) setShowQueue(false); }}
+            >
+              <EyeOff className="w-3.5 h-3.5 mr-1.5" />
+              My Drafts
+              {galleryDrafts && galleryDrafts.length > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-[10px] font-medium">
+                  {galleryDrafts.length}
+                </span>
+              )}
+            </Button>
+            <Button
               variant={showQueue ? "default" : "outline"}
               size="sm"
-              onClick={() => setShowQueue(!showQueue)}
+              onClick={() => { setShowQueue(!showQueue); if (!showQueue) setShowDrafts(false); }}
             >
               <Inbox className="w-3.5 h-3.5 mr-1.5" />
               Queue
