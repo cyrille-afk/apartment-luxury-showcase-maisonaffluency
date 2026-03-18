@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ArrowLeftRight, ExternalLink, Link2, MousePointer2 } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ArrowLeftRight, ExternalLink, Link2, MousePointer2, X } from "lucide-react";
 const AxonometricSceneEditor = lazy(() => import("@/components/trade/AxonometricSceneEditor"));
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
@@ -506,9 +506,10 @@ const TradeAxonometric = () => {
                       <img src={img} alt="" className="w-full h-full object-cover" />
                       <button
                         onClick={() => setOverlayImages((prev) => prev.filter((_, j) => j !== i))}
-                        className="absolute inset-0 bg-background/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove"
                       >
-                        <RotateCcw className="w-3 h-3 text-foreground" />
+                        <X className="w-2.5 h-2.5" />
                       </button>
                     </div>
                   ))}
@@ -603,9 +604,10 @@ const TradeAxonometric = () => {
                       <img src={img} alt="" className="w-full h-full object-contain bg-white" />
                       <button
                         onClick={() => setOverlayImages((prev) => prev.filter((_, j) => j !== i))}
-                        className="absolute inset-0 bg-background/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove"
                       >
-                        <RotateCcw className="w-3 h-3 text-foreground" />
+                        <X className="w-2.5 h-2.5" />
                       </button>
                     </div>
                   ))}
