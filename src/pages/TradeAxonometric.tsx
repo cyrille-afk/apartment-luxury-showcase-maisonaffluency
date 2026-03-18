@@ -872,6 +872,29 @@ const TradeAxonometric = () => {
           </div>
         </div>
       </div>
+
+      {/* Scene Editor */}
+      {showSceneEditor && result && (
+        <Suspense fallback={null}>
+          <AxonometricSceneEditor
+            imageUrl={result.storedUrl || result.imageUrl}
+            style={style}
+            onClose={() => setShowSceneEditor(false)}
+            onResult={(res) => {
+              const gen: GenerationResult = {
+                imageUrl: res.imageUrl,
+                storedUrl: res.storedUrl,
+                text: res.text,
+                sourceProduct: result.sourceProduct,
+                mode: "composite",
+              };
+              setResult(gen);
+              setHistory((prev) => [gen, ...prev]);
+              setShowSceneEditor(false);
+            }}
+          />
+        </Suspense>
+      )}
     </>
   );
 };
