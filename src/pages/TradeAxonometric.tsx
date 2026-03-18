@@ -124,11 +124,20 @@ const TradeAxonometric = () => {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("axonometric_requests")
-        .select("*, profiles:user_id(first_name, last_name, company)")
+        .select("*")
         .in("status", ["pending", "in_progress"])
         .order("created_at", { ascending: true });
       if (error) throw error;
-      return data as any[];
+      // Fetch profile info separately to avoid FK join issues
+      const userIds = [...new Set((data || []).map((r: any) => r.user_id))] as string[];
+      const { data: profiles } = userIds.length > 0
+        ? await supabase.from("profiles").select("id, first_name, last_name, company").in("id", userIds)
+        : { data: [] };
+      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+      return (data || []).map((r: any) => ({
+        ...r,
+        profiles: profileMap.get(r.user_id) || null,
+      }));
     },
     enabled: isAdmin,
   });
