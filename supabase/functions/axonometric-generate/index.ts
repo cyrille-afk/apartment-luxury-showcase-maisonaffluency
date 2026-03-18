@@ -171,6 +171,12 @@ serve(async (req) => {
       }
     }
 
+    // Pro model for complex generation, flash for quick edits/swaps
+    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay"];
+    const selectedModel = proModes.includes(mode)
+      ? "google/gemini-3-pro-image-preview"
+      : "google/gemini-3.1-flash-image-preview";
+
     const aiResponse = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
@@ -180,7 +186,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3.1-flash-image-preview",
+          model: selectedModel,
           messages: [{ role: "user", content }],
           modalities: ["image", "text"],
         }),
