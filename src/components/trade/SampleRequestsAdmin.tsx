@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   Package, Clock, CheckCircle, Truck, RotateCcw, X,
   ChevronDown, ImagePlus, Link as LinkIcon, Loader2, Trash2,
+  History,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,16 @@ interface SampleRequest {
   profile?: { first_name: string; last_name: string; email: string } | null;
 }
 
+interface AuditEntry {
+  id: string;
+  old_status: string | null;
+  new_status: string;
+  changed_by: string | null;
+  notes: string | null;
+  created_at: string;
+  changer_profile?: { first_name: string; last_name: string; email: string } | null;
+}
+
 const STATUSES = ["requested", "approved", "shipped", "delivered", "returned", "cancelled"] as const;
 
 const statusConfig: Record<string, { label: string; icon: typeof Clock; color: string }> = {
@@ -47,6 +58,9 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; color: s
 
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+
+const formatDateTime = (d: string) =>
+  new Date(d).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
 export default function SampleRequestsAdmin() {
   const { isAdmin } = useAuth();
@@ -115,6 +129,73 @@ export default function SampleRequestsAdmin() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function AuditTrail({ requestId }: { requestId: string }) {
+  const [entries, setEntries] = useState<AuditEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("sample_request_audit_log" as any)
+        .select("*")
+        .eq("request_id", requestId)
+        .order("created_at", { ascending: true });
+
+      const items = (data as any[]) || [];
+      const changerIds = [...new Set(items.map((e: any) => e.changed_by).filter(Boolean))];
+      let profileMap: Record<string, any> = {};
+      if (changerIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, first_name, last_name, email")
+          .in("id", changerIds);
+        if (profiles) profileMap = Object.fromEntries(profiles.map((p: any) => [p.id, p]));
+      }
+
+      setEntries(items.map((e: any) => ({ ...e, changer_profile: profileMap[e.changed_by] || null })));
+      setLoading(false);
+    })();
+  }, [requestId]);
+
+  if (loading) return <div className="h-8 bg-muted/30 rounded animate-pulse" />;
+  if (entries.length === 0) return <p className="font-body text-[11px] text-muted-foreground italic">No audit history recorded.</p>;
+
+  return (
+    <div className="space-y-1.5">
+      {entries.map((entry) => {
+        const newCfg = statusConfig[entry.new_status];
+        const changerName = entry.changer_profile
+          ? `${entry.changer_profile.first_name} ${entry.changer_profile.last_name}`.trim() || entry.changer_profile.email
+          : entry.notes === "Initial state (pre-audit)" ? "System" : "Unknown";
+
+        return (
+          <div key={entry.id} className="flex items-start gap-2 font-body text-[11px]">
+            <div className="w-1.5 h-1.5 rounded-full bg-border mt-1.5 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <span className="text-muted-foreground">{formatDateTime(entry.created_at)}</span>
+              <span className="mx-1.5 text-muted-foreground/50">·</span>
+              <span className="text-foreground font-medium">{changerName}</span>
+              <span className="mx-1.5 text-muted-foreground/50">·</span>
+              {entry.old_status ? (
+                <span className="text-muted-foreground">
+                  <span className="capitalize">{entry.old_status}</span>
+                  {" → "}
+                  <span className={cn("capitalize font-medium", newCfg?.color?.split(" ")[0])}>{entry.new_status}</span>
+                </span>
+              ) : (
+                <span className="text-muted-foreground">
+                  Created as <span className={cn("capitalize font-medium", newCfg?.color?.split(" ")[0])}>{entry.new_status}</span>
+                </span>
+              )}
+              {entry.notes && <span className="text-muted-foreground/60 ml-1.5 italic">({entry.notes})</span>}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -272,6 +353,17 @@ function SampleAdminRow({
               <p className="font-body text-xs text-muted-foreground italic">"{req.notes}"</p>
             </div>
           )}
+
+          {/* Audit Trail */}
+          <div>
+            <span className="flex items-center gap-1.5 font-body text-[10px] uppercase tracking-wider text-muted-foreground/60 mb-2">
+              <History className="h-3 w-3" />
+              Audit Trail
+            </span>
+            <div className="bg-background border border-border rounded-lg p-3">
+              <AuditTrail requestId={req.id} />
+            </div>
+          </div>
 
           {/* Photo management */}
           <div>
