@@ -82,6 +82,63 @@ const TradeAxonometricRequests = () => {
     }
   };
 
+  const startEdit = (req: any) => {
+    setEditingRequest(req);
+    setProjectName(req.project_name || "");
+    setNotes(req.notes || "");
+    setRequestType(req.request_type as "elevation" | "section");
+    setImageUrl(req.image_url);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingRequest || !user || !imageUrl) return;
+    setSubmitting(true);
+    try {
+      const { error } = await (supabase as any)
+        .from("axonometric_requests")
+        .update({
+          project_name: projectName.trim().slice(0, 200),
+          notes: notes.trim().slice(0, 1000) || null,
+          request_type: requestType,
+          image_url: imageUrl,
+        })
+        .eq("id", editingRequest.id)
+        .eq("user_id", user.id);
+      if (error) throw error;
+      toast({ title: "Request updated" });
+      setEditingRequest(null);
+      setProjectName("");
+      setNotes("");
+      setImageUrl(null);
+      refetch();
+    } catch (e: any) {
+      toast({ title: "Update failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (reqId: string) => {
+    if (!user) return;
+    setDeleting(reqId);
+    try {
+      const { error } = await (supabase as any)
+        .from("axonometric_requests")
+        .delete()
+        .eq("id", reqId)
+        .eq("user_id", user.id);
+      if (error) throw error;
+      toast({ title: "Request deleted" });
+      refetch();
+    } catch (e: any) {
+      toast({ title: "Delete failed", description: e.message, variant: "destructive" });
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const canEdit = (status: string) => status === "pending";
+  const canDelete = (status: string) => status === "pending" || status === "in_progress";
   return (
     <>
       <Helmet>
