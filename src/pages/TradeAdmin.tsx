@@ -125,6 +125,9 @@ const TradeAdmin = () => {
         <HeroManager />
       </div>
 
+      {/* Sample Requests Manager */}
+      <SampleRequestsAdmin />
+
       <h1 className="font-display text-2xl text-foreground">Trade Applications</h1>
 
       {/* Filter tabs */}
