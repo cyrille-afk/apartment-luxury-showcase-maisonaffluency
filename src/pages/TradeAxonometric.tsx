@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo, lazy, Suspense } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect, lazy, Suspense } from "react";
 import { getAllTradeProducts, getAllBrands } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Helmet } from "react-helmet-async";
