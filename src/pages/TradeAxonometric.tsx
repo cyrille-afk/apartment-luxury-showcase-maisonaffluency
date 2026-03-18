@@ -51,24 +51,20 @@ const ProductPicker = ({
   selectedProduct,
   category,
   subcategory,
+  brand,
 }: {
   search: string;
   onSelect: (product: SelectedProduct) => void;
   selectedProduct: SelectedProduct | null;
   category?: string;
   subcategory?: string;
+  brand?: string;
 }) => {
   const products = useMemo(() => {
     let all = getAllTradeProducts().filter((p) => p.image_url);
-
-    // Category filter
-    if (category) {
-      all = all.filter((p) => p.category === category);
-    }
-    // Subcategory filter
-    if (subcategory) {
-      all = all.filter((p) => p.subcategory === subcategory);
-    }
+    if (category) all = all.filter((p) => p.category === category);
+    if (subcategory) all = all.filter((p) => p.subcategory === subcategory);
+    if (brand) all = all.filter((p) => p.brand_name === brand);
     // Keyword search
     if (search.trim()) {
       const q = search.toLowerCase();
