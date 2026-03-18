@@ -741,7 +741,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 4 ? "(max-width: 1024px) 50vw, 25vw" : "(max-width: 1024px) 50vw, 33vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         {/* Pulsing hotspot hint — desktop: first image of each hotspot section */}
-                        {!section.items.some(i => i.description) && index === 0 && showHotspotHint && (
+                        {!section.items.some(i => i.description) && showHotspotHint && (
                           <div ref={hotspotHintRef} className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
                             <div className="relative flex items-center justify-center">
                               <span className="absolute w-16 h-16 rounded-full border border-primary/15 animate-ping" style={{ animationDuration: "2.2s", animationDelay: "0s" }} />
