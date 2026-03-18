@@ -87,19 +87,26 @@ const TradeAxonometricRequests = () => {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-display text-2xl text-foreground">Axonometric Requests</h1>
+            <h1 className="font-display text-2xl text-foreground">3D Studio</h1>
             <p className="font-body text-sm text-muted-foreground mt-1">
-              Submit elevation or section drawings to be transformed into 3D axonometric views
+              Submit drawings for 3D renders or browse the gallery
             </p>
           </div>
-          <Button
-            onClick={() => setShowForm(!showForm)}
-            variant={showForm ? "outline" : "default"}
-            size="sm"
-          >
-            {showForm ? <X className="w-4 h-4 mr-1.5" /> : <Plus className="w-4 h-4 mr-1.5" />}
-            {showForm ? "Cancel" : "New Request"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/trade/axonometric-gallery">
+                <GalleryHorizontalEnd className="w-4 h-4 mr-1.5" />View Gallery
+              </Link>
+            </Button>
+            <Button
+              onClick={() => setShowForm(!showForm)}
+              variant={showForm ? "outline" : "default"}
+              size="sm"
+            >
+              {showForm ? <X className="w-4 h-4 mr-1.5" /> : <Plus className="w-4 h-4 mr-1.5" />}
+              {showForm ? "Cancel" : "New Request"}
+            </Button>
+          </div>
         </div>
 
         {/* Submission Form */}
