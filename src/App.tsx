@@ -109,6 +109,7 @@ const App = () => {
             <Route path="media" element={<TradeMediaLibrary />} />
             <Route path="quotes-admin" element={<TradeQuotesAdmin />} />
             <Route path="axonometric" element={<TradeAxonometric />} />
+            <Route path="axonometric-requests" element={<TradeAxonometricRequests />} />
             <Route path="settings" element={<TradeSettings />} />
           </Route>
           

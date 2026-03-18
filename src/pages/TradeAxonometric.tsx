@@ -450,6 +450,25 @@ const TradeAxonometric = () => {
                   </Button>
                 </div>
 
+                {/* Deliver to requester */}
+                {activeRequestId && (
+                  <div className="border border-foreground/20 rounded-lg p-5 space-y-3 bg-muted/20">
+                    <h2 className="font-display text-sm text-foreground">Deliver to Requester</h2>
+                    <Textarea
+                      value={adminNotes}
+                      onChange={(e) => setAdminNotes(e.target.value)}
+                      placeholder="Add notes for the user (optional)…"
+                      maxLength={1000}
+                      rows={2}
+                      className="font-body text-xs"
+                    />
+                    <Button onClick={completeRequest} className="w-full" size="sm">
+                      <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                      Mark Complete & Deliver Result
+                    </Button>
+                  </div>
+                )}
+
                 {result.text && (
                   <p className="font-body text-xs text-muted-foreground italic">{result.text}</p>
                 )}
