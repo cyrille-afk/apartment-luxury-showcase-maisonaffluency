@@ -304,6 +304,16 @@ const TradeSamples = () => {
               <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Finish, colour, size preferences or special instructions" rows={3} />
             </div>
 
+            {tearsheetUrl && (
+              <div className="flex items-center gap-2 px-3 py-2 border border-border rounded-md bg-muted/30">
+                <FileDown className="h-3.5 w-3.5 text-[hsl(var(--gold))] shrink-0" />
+                <span className="font-body text-xs text-foreground truncate flex-1">Spec sheet attached</span>
+                <button type="button" onClick={() => setTearsheetUrl(null)} className="text-muted-foreground hover:text-foreground transition-colors">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+
             <Button type="submit" disabled={submitting || !productName.trim() || !brandName.trim()} className="w-full md:w-auto">
               {submitting ? "Submitting…" : "Submit Request"}
             </Button>
