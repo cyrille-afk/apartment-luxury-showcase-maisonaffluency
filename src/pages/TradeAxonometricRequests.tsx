@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import CloudUpload from "@/components/trade/CloudUpload";
+import SourceUpload from "@/components/trade/SourceUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -211,11 +212,10 @@ const TradeAxonometricRequests = () => {
                   </button>
                 </div>
               ) : (
-                <CloudUpload
+                <SourceUpload
                   folder="axonometric-submissions"
-                  accept="image/*"
-                  label="Upload elevation or section drawing"
-                  onUpload={(urls) => setImageUrl(urls[0])}
+                  label="Upload elevation, section, or PDF"
+                  onSourceReady={(url) => setImageUrl(url)}
                 />
               )}
             </div>
