@@ -169,13 +169,11 @@ const TradeSamples = () => {
     <>
       <Helmet><title>Samples — Trade Portal — Maison Affluency</title></Helmet>
       <div className="max-w-3xl">
-        <div className="flex items-center justify-between mb-6 md:mb-8">
-          <div>
-            <h1 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground">Sample Requests</h1>
-            <p className="font-body text-xs md:text-sm text-muted-foreground mt-1">
-              Request product samples for your projects
-            </p>
-          </div>
+        <SectionHero
+          section="samples"
+          title="Sample Requests"
+          subtitle="Request product samples for your projects"
+        >
           <Button
             onClick={() => setShowForm(!showForm)}
             variant={showForm ? "outline" : "default"}
@@ -185,7 +183,7 @@ const TradeSamples = () => {
             {showForm ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
             {showForm ? "Cancel" : "New Request"}
           </Button>
-        </div>
+        </SectionHero>
 
         {/* New Request Form */}
         {showForm && (

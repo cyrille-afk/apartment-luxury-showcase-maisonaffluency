@@ -9,6 +9,7 @@ const heroDefaults: Record<string, { id: string; gravity?: "auto" | "face" | "ce
   "quotes-admin": { id: "v1773652807/singapore-dollar_jaymbz" },
   documents: { id: "home-office-desk_g0ywv2" },
   provenance: { id: "details-console_hk6uxt" },
+  samples: { id: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v" },
 };
 
 interface SectionHeroProps {
