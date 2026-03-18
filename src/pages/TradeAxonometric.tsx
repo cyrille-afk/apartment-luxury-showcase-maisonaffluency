@@ -44,18 +44,45 @@ const STYLE_PRESETS = [
 ];
 
 /** Inline product picker for platform images */
-const ProductPicker = ({ search, onSelect, selectedProduct }: { search: string; onSelect: (product: SelectedProduct) => void; selectedProduct: SelectedProduct | null }) => {
+const ProductPicker = ({
+  search,
+  onSelect,
+  selectedProduct,
+  category,
+  subcategory,
+}: {
+  search: string;
+  onSelect: (product: SelectedProduct) => void;
+  selectedProduct: SelectedProduct | null;
+  category?: string;
+  subcategory?: string;
+}) => {
   const products = useMemo(() => {
-    const all = getAllTradeProducts().filter((p) => p.image_url);
-    if (!search.trim()) return all.slice(0, 24);
-    const q = search.toLowerCase();
-    return all.filter(
-      (p) =>
-        p.product_name.toLowerCase().includes(q) ||
-        p.brand_name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
-    ).slice(0, 24);
-  }, [search]);
+    let all = getAllTradeProducts().filter((p) => p.image_url);
+
+    // Category filter
+    if (category) {
+      all = all.filter((p) => p.category === category);
+    }
+    // Subcategory filter
+    if (subcategory) {
+      all = all.filter((p) => p.subcategory === subcategory);
+    }
+    // Keyword search
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      all = all.filter(
+        (p) =>
+          p.product_name.toLowerCase().includes(q) ||
+          p.brand_name.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          (p.subcategory && p.subcategory.toLowerCase().includes(q)) ||
+          (p.materials && p.materials.toLowerCase().includes(q)) ||
+          p.tags.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    return all.slice(0, 24);
+  }, [search, category, subcategory]);
 
   if (products.length === 0) {
     return <p className="font-body text-xs text-muted-foreground py-4 text-center">No products found</p>;
