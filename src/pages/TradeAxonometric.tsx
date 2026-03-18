@@ -42,7 +42,7 @@ const STYLE_PRESETS = [
 ];
 
 /** Inline product picker for platform images */
-const ProductPicker = ({ search, onSelect, selectedUrl }: { search: string; onSelect: (url: string) => void; selectedUrl: string | null }) => {
+const ProductPicker = ({ search, onSelect, selectedProduct }: { search: string; onSelect: (product: SelectedProduct) => void; selectedProduct: SelectedProduct | null }) => {
   const products = useMemo(() => {
     const all = getAllTradeProducts().filter((p) => p.image_url);
     if (!search.trim()) return all.slice(0, 24);
@@ -64,14 +64,23 @@ const ProductPicker = ({ search, onSelect, selectedUrl }: { search: string; onSe
       {products.map((p) => (
         <button
           key={p.id}
-          onClick={() => p.image_url && onSelect(p.image_url)}
+          onClick={() => p.image_url && onSelect({
+            product_name: p.product_name,
+            brand_name: p.brand_name,
+            image_url: p.image_url!,
+            dimensions: p.dimensions,
+            materials: p.materials,
+          })}
           className={`rounded border overflow-hidden text-left transition-all ${
-            selectedUrl === p.image_url ? "border-foreground ring-1 ring-foreground" : "border-border hover:border-foreground/30"
+            selectedProduct?.image_url === p.image_url ? "border-foreground ring-1 ring-foreground" : "border-border hover:border-foreground/30"
           }`}
           title={`${p.product_name} — ${p.brand_name}${p.dimensions ? ` — ${p.dimensions}` : ""}`}
         >
           <img src={p.image_url!} alt={p.product_name} className="w-full aspect-square object-cover" />
-          <p className="font-body text-[9px] text-muted-foreground truncate px-1 py-0.5">{p.product_name}</p>
+          <div className="px-1 py-0.5">
+            <p className="font-body text-[9px] text-foreground truncate">{p.product_name}</p>
+            <p className="font-body text-[8px] text-muted-foreground truncate">{p.brand_name}</p>
+          </div>
         </button>
       ))}
     </div>
