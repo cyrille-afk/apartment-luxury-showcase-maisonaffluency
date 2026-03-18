@@ -210,6 +210,12 @@ const TradeAxonometric = () => {
   const [showSceneEditor, setShowSceneEditor] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
 
+  // Turntable state
+  const TURNTABLE_ANGLES = [0, 60, 120, 180, 240, 300];
+  const [turntableImages, setTurntableImages] = useState<string[]>([]);
+  const [turntableGenerating, setTurntableGenerating] = useState(false);
+  const [showTurntable, setShowTurntable] = useState(false);
+
   // AI dialogue state
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiSending, setAiSending] = useState(false);
