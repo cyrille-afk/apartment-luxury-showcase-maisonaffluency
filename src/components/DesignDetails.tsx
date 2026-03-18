@@ -13,7 +13,7 @@ const DesignDetails = () => {
   });
 
   return (
-    <section ref={ref} className="pt-8 pb-12 px-4 md:pt-12 md:pb-24 md:px-12 lg:px-20 bg-background">
+    <section ref={ref} className="pt-16 pb-12 px-4 md:pt-20 md:pb-24 md:px-12 lg:px-20 bg-background">
       <div className="mx-auto max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
