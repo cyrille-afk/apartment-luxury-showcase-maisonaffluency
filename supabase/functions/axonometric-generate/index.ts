@@ -41,9 +41,12 @@ serve(async (req) => {
 
     const body = await req.json();
     const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements } = body;
-    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "product_swap" | "scene_edit" | "freeform"
+    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "product_swap" | "scene_edit" | "freeform" | "turntable_angle"
 
     if (!imageUrl) throw new Error("imageUrl is required");
+
+    // Turntable angle mode — generates a single view at a specified angle
+    const turntableAngle = body.turntableAngle as number | undefined;
 
     let prompt = "";
     const defaultStyle = style || "photorealistic architectural rendering with warm natural lighting, high-end interior finishes";
