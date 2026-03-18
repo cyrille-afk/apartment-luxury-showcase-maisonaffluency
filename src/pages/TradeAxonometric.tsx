@@ -559,8 +559,16 @@ const TradeAxonometric = () => {
                         className="w-full pl-9 pr-4 py-2 border border-border rounded-md font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
                       />
                     </div>
+                    <CategoryFilterBar
+                      category={pickerCategory}
+                      subcategory={pickerSubcategory}
+                      onCategoryChange={setPickerCategory}
+                      onSubcategoryChange={setPickerSubcategory}
+                    />
                     <ProductPicker
                       search={compositeProductSearch}
+                      category={pickerCategory || undefined}
+                      subcategory={pickerSubcategory || undefined}
                       onSelect={(product) => {
                         if (product.image_url && overlayImages.length < 5) {
                           setOverlayImages((prev) => [...prev, product.image_url].slice(0, 5));
