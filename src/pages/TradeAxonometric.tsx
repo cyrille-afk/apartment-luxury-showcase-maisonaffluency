@@ -190,6 +190,7 @@ const TradeAxonometric = () => {
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [history, setHistory] = useState<GenerationResult[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1); // -1 = no history navigated
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [showQueue, setShowQueue] = useState(true);
