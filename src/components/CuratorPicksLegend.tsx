@@ -25,6 +25,7 @@ interface CuratorPicksLegendProps {
  */
 const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, className = "" }: CuratorPicksLegendProps) => {
   const p = pick as any; // access optional extended fields
+  const navigate = useNavigate();
   const { user, isTradeUser, isAdmin } = useAuth();
 
   const handleRequestSample = (e: React.MouseEvent) => {
