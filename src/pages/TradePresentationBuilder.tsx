@@ -44,6 +44,8 @@ const TradePresentationBuilder = () => {
   const [saving, setSaving] = useState(false);
   const [showGalleryPicker, setShowGalleryPicker] = useState(false);
   const [selectedGalleryIds, setSelectedGalleryIds] = useState<Set<string>>(new Set());
+  const [showSharePanel, setShowSharePanel] = useState(false);
+  const [shareEmail, setShareEmail] = useState("");
 
   // Fetch presentation
   const { data: presentation } = useQuery({
