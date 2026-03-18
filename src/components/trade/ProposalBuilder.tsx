@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { getAllTradeProducts, getAllBrands } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, GripVertical, ExternalLink, Download, ArrowLeft,
+  Loader2, Wand2, Search, X, Download, ArrowLeft,
 } from "lucide-react";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -15,15 +15,13 @@ const toAbsoluteUrl = (url: string | null | undefined): string | null => {
   return `${window.location.origin}${url.startsWith("/") ? "" : "/"}${url}`;
 };
 
-interface PinnedProduct {
+interface SelectedProduct {
   id: string;
   product_name: string;
   brand_name: string;
   image_url: string;
   dimensions?: string;
   materials?: string;
-  x_percent: number;
-  y_percent: number;
 }
 
 interface ProposalBuilderProps {
@@ -32,7 +30,7 @@ interface ProposalBuilderProps {
   emptyRoomGenerating: boolean;
   style: string;
   onClose: () => void;
-  onResult?: (result: { imageUrl: string; storedUrl: string | null; text: string; pinnedProducts: PinnedProduct[] }) => void;
+  onResult?: (result: { imageUrl: string; storedUrl: string | null; text: string; pinnedProducts: SelectedProduct[] }) => void;
 }
 
 let _pinId = 0;
@@ -47,22 +45,17 @@ export default function ProposalBuilder({
   onResult,
 }: ProposalBuilderProps) {
   const { toast } = useToast();
-  const canvasRef = useRef<HTMLDivElement>(null);
 
-  const [pins, setPins] = useState<PinnedProduct[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [generating, setGenerating] = useState(false);
   const [proposalResult, setProposalResult] = useState<string | null>(null);
 
   // Product picker state
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [subcategory, setSubcategory] = useState("");
   const [brand, setBrand] = useState("");
-
-  // Drag state
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-  const dragOffset = useRef({ x: 0, y: 0 });
 
   const products = useMemo(() => {
     let all = getAllTradeProducts().filter((p) => p.image_url);
@@ -84,79 +77,39 @@ export default function ProposalBuilder({
   const brands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
   const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
 
-  const addPin = useCallback((product: { product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string }) => {
-    if (pins.length >= 5) {
+  const addProduct = useCallback((product: { product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string }) => {
+    if (selectedProducts.length >= 5) {
       toast({ title: "Maximum 5 products per proposal", variant: "destructive" });
       return;
     }
-    setPins((prev) => [
+    setSelectedProducts((prev) => [
       ...prev,
-      {
-        id: nextPinId(),
-        product_name: product.product_name,
-        brand_name: product.brand_name,
-        image_url: product.image_url,
-        dimensions: product.dimensions,
-        materials: product.materials,
-        x_percent: 30 + Math.random() * 40,
-        y_percent: 30 + Math.random() * 40,
-      },
+      { id: nextPinId(), ...product },
     ]);
-  }, [pins.length, toast]);
+  }, [selectedProducts.length, toast]);
 
-  const removePin = useCallback((id: string) => {
-    setPins((prev) => prev.filter((p) => p.id !== id));
-  }, []);
-
-  const handleMouseDown = useCallback((e: React.MouseEvent, pinId: string) => {
-    e.preventDefault();
-    setDraggingId(pinId);
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const pin = pins.find((p) => p.id === pinId);
-    if (!pin) return;
-    const pinX = (pin.x_percent / 100) * rect.width;
-    const pinY = (pin.y_percent / 100) * rect.height;
-    dragOffset.current = { x: e.clientX - rect.left - pinX, y: e.clientY - rect.top - pinY };
-  }, [pins]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!draggingId || !canvasRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left - dragOffset.current.x) / rect.width) * 100;
-    const y = ((e.clientY - rect.top - dragOffset.current.y) / rect.height) * 100;
-    setPins((prev) =>
-      prev.map((p) =>
-        p.id === draggingId
-          ? { ...p, x_percent: Math.max(2, Math.min(98, x)), y_percent: Math.max(2, Math.min(98, y)) }
-          : p
-      )
-    );
-  }, [draggingId]);
-
-  const handleMouseUp = useCallback(() => {
-    setDraggingId(null);
+  const removeProduct = useCallback((id: string) => {
+    setSelectedProducts((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
   const generateProposal = async () => {
-    if (!emptyRoomUrl || pins.length === 0) return;
+    if (!emptyRoomUrl || selectedProducts.length === 0) return;
     setGenerating(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
       if (!accessToken) throw new Error("Session expired. Please sign in again.");
 
-      const placements = pins.map((p) => ({
+      const placements = selectedProducts.map((p) => ({
         product_name: p.product_name,
         brand_name: p.brand_name,
         image_url: toAbsoluteUrl(p.image_url),
-        x_percent: Math.round(p.x_percent),
-        y_percent: Math.round(p.y_percent),
       }));
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: {
           imageUrl: toAbsoluteUrl(emptyRoomUrl),
+          referenceImageUrl: toAbsoluteUrl(furnishedImageUrl),
           mode: "proposal_render",
           style,
           placements,
@@ -169,7 +122,7 @@ export default function ProposalBuilder({
 
       const resultUrl = data.storedUrl || data.imageUrl;
       setProposalResult(resultUrl);
-      onResult?.({ imageUrl: data.imageUrl, storedUrl: data.storedUrl, text: data.text, pinnedProducts: pins });
+      onResult?.({ imageUrl: data.imageUrl, storedUrl: data.storedUrl, text: data.text, pinnedProducts: selectedProducts });
       toast({ title: "Proposal generated successfully" });
     } catch (e: any) {
       toast({ title: "Proposal generation failed", description: e?.message || "Unknown error", variant: "destructive" });
@@ -197,7 +150,7 @@ export default function ProposalBuilder({
           <div>
             <h2 className="font-display text-sm text-foreground">Proposal Builder</h2>
             <p className="font-body text-[11px] text-muted-foreground">
-              Drag products onto the empty room to compose a furniture proposal
+              Select replacement products — AI will place them matching the client's original layout
             </p>
           </div>
         </div>
@@ -205,12 +158,12 @@ export default function ProposalBuilder({
           <Button
             size="sm"
             onClick={generateProposal}
-            disabled={generating || !emptyRoomUrl || pins.length === 0}
+            disabled={generating || !emptyRoomUrl || selectedProducts.length === 0}
           >
             {generating ? (
               <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Generating…</>
             ) : (
-              <><Wand2 className="w-3.5 h-3.5 mr-1.5" />Generate Proposal ({pins.length})</>
+              <><Wand2 className="w-3.5 h-3.5 mr-1.5" />Generate Proposal ({selectedProducts.length})</>
             )}
           </Button>
           {proposalResult && (
@@ -235,12 +188,15 @@ export default function ProposalBuilder({
               className="w-full object-contain"
             />
           </div>
+          <p className="font-body text-[10px] text-muted-foreground">
+            AI will analyse this layout to match furniture positions &amp; orientations
+          </p>
         </div>
 
-        {/* Right: Empty room with pins */}
+        {/* Right: Empty room or generated proposal */}
         <div className="space-y-2">
           <h3 className="font-display text-xs text-muted-foreground uppercase tracking-wider">
-            {proposalResult ? "Generated Proposal" : "Your Proposal — Drag to Position"}
+            {proposalResult ? "Generated Proposal" : "Empty Room Template"}
           </h3>
 
           {proposalResult ? (
@@ -248,57 +204,12 @@ export default function ProposalBuilder({
               <img src={proposalResult} alt="Generated proposal" className="w-full object-contain" />
             </div>
           ) : emptyRoomUrl ? (
-            <div
-              ref={canvasRef}
-              className="border border-border rounded-lg overflow-hidden bg-muted/10 relative select-none"
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              style={{ cursor: draggingId ? "grabbing" : "default" }}
-            >
+            <div className="border border-border rounded-lg overflow-hidden bg-muted/10">
               <img
                 src={emptyRoomUrl}
                 alt="Empty room template"
-                className="w-full object-contain pointer-events-none"
-                draggable={false}
+                className="w-full object-contain"
               />
-
-              {/* Draggable pins */}
-              {pins.map((pin) => (
-                <div
-                  key={pin.id}
-                  className="absolute group"
-                  style={{
-                    left: `${pin.x_percent}%`,
-                    top: `${pin.y_percent}%`,
-                    transform: "translate(-50%, -50%)",
-                    zIndex: draggingId === pin.id ? 50 : 10,
-                  }}
-                >
-                  <div
-                    className={`flex flex-col items-center ${draggingId === pin.id ? "scale-110" : ""} transition-transform`}
-                    onMouseDown={(e) => handleMouseDown(e, pin.id)}
-                    style={{ cursor: draggingId === pin.id ? "grabbing" : "grab" }}
-                  >
-                    {/* Product thumbnail */}
-                    <div className="w-14 h-14 rounded-md border-2 border-foreground bg-background shadow-lg overflow-hidden">
-                      <img src={pin.image_url} alt={pin.product_name} className="w-full h-full object-cover pointer-events-none" draggable={false} />
-                    </div>
-                    {/* Label */}
-                    <div className="mt-1 bg-foreground text-background px-2 py-0.5 rounded text-center max-w-[120px] shadow-md">
-                      <p className="font-display text-[9px] truncate">{pin.product_name}</p>
-                      <p className="font-body text-[8px] opacity-70 truncate">{pin.brand_name}</p>
-                    </div>
-                    {/* Remove button */}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); removePin(pin.id); }}
-                      className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-2.5 h-2.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
             </div>
           ) : emptyRoomGenerating ? (
             <div className="border border-dashed border-border rounded-lg flex flex-col items-center justify-center min-h-[300px] gap-3">
@@ -313,21 +224,21 @@ export default function ProposalBuilder({
         </div>
       </div>
 
-      {/* Pinned products summary */}
-      {pins.length > 0 && (
+      {/* Selected products summary */}
+      {selectedProducts.length > 0 && (
         <div className="border border-border rounded-lg p-4">
-          <h3 className="font-display text-xs text-foreground mb-3">Pinned Products ({pins.length}/5)</h3>
+          <h3 className="font-display text-xs text-foreground mb-3">Selected Products ({selectedProducts.length}/5)</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            {pins.map((pin) => (
-              <div key={pin.id} className="flex items-center gap-2 bg-muted/30 rounded-md px-2.5 py-2 group">
-                <img src={pin.image_url} alt="" className="w-9 h-9 rounded border border-border object-cover shrink-0" />
+            {selectedProducts.map((p) => (
+              <div key={p.id} className="flex items-center gap-2 bg-muted/30 rounded-md px-2.5 py-2 group">
+                <img src={p.image_url} alt="" className="w-9 h-9 rounded border border-border object-cover shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-display text-[10px] text-foreground truncate">{pin.product_name}</p>
-                  <p className="font-body text-[9px] text-muted-foreground truncate">{pin.brand_name}</p>
-                  {pin.dimensions && <p className="font-body text-[8px] text-muted-foreground/70 truncate">{pin.dimensions}</p>}
+                  <p className="font-display text-[10px] text-foreground truncate">{p.product_name}</p>
+                  <p className="font-body text-[9px] text-muted-foreground truncate">{p.brand_name}</p>
+                  {p.dimensions && <p className="font-body text-[8px] text-muted-foreground/70 truncate">{p.dimensions}</p>}
                 </div>
                 <button
-                  onClick={() => removePin(pin.id)}
+                  onClick={() => removeProduct(p.id)}
                   className="shrink-0 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
                 >
                   <X className="w-3 h-3" />
@@ -342,7 +253,7 @@ export default function ProposalBuilder({
       <div className="border border-border rounded-lg p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-display text-xs text-foreground">
-            Add Products to Proposal {pins.length >= 5 && <span className="text-muted-foreground">(max reached)</span>}
+            Add Products to Proposal {selectedProducts.length >= 5 && <span className="text-muted-foreground">(max reached)</span>}
           </h3>
           <button
             onClick={() => setPickerOpen(!pickerOpen)}
@@ -352,7 +263,7 @@ export default function ProposalBuilder({
           </button>
         </div>
 
-        {pickerOpen && pins.length < 5 && (
+        {pickerOpen && selectedProducts.length < 5 && (
           <div className="space-y-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -397,7 +308,7 @@ export default function ProposalBuilder({
                   key={p.id}
                   onClick={() =>
                     p.image_url &&
-                    addPin({
+                    addProduct({
                       product_name: p.product_name,
                       brand_name: p.brand_name,
                       image_url: p.image_url!,
