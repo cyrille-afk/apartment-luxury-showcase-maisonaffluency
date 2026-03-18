@@ -1,8 +1,5 @@
 import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { Package } from "lucide-react";
 
 /** Replace the last two spaces in each line with non-breaking spaces to prevent orphans (keeps last 3 words together) */
 const preventOrphans = (text: string): string =>
