@@ -1464,6 +1464,16 @@ const TradeAxonometric = () => {
                       <><RotateCw className="w-3.5 h-3.5 mr-1.5" />Orbit Turntable</>
                     )}
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowProposal(true)}
+                    disabled={!result}
+                  >
+                    <Layers className="w-3.5 h-3.5 mr-1.5" />
+                    Proposal Builder
+                    {emptyRoomGenerating && <Loader2 className="w-3 h-3 ml-1.5 animate-spin" />}
+                  </Button>
                 </div>
 
                 {/* Turntable Viewer */}
