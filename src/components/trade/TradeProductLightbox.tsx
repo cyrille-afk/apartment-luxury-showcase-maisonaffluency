@@ -1,9 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2 } from "lucide-react";
+import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Package } from "lucide-react";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export interface TradeProductLightboxItem {
   id: string;
@@ -31,6 +32,7 @@ interface TradeProductLightboxProps {
 const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdded }: TradeProductLightboxProps) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const [showHoverImage, setShowHoverImage] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setShowHoverImage(false);
@@ -212,6 +214,22 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   </a>
                 )}
               </div>
+
+              {/* Request Sample */}
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams();
+                  params.set("product", product.product_name);
+                  if (product.brand_name) params.set("brand", product.brand_name);
+                  if (product.image_url) params.set("image", product.image_url);
+                  onClose();
+                  navigate(`/trade/samples?${params.toString()}`);
+                }}
+                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+              >
+                <Package size={14} />
+                Request Sample
+              </button>
             </div>
           </div>
         </motion.div>
