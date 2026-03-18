@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { Canvas, useLoader } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import * as THREE from "three";
 import type { Room, PlacedProduct, Point2D } from "./types";
@@ -93,22 +93,77 @@ function RoomWalls({ room, ppm, imgCenter, wallHeight }: { room: Room; ppm: numb
   );
 }
 
+function ProductTexturePlane({ url, hovered }: { url: string; hovered: boolean }) {
+  const [texture, setTexture] = useState<THREE.Texture | null>(null);
+  const [aspect, setAspect] = useState(1);
+
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin("anonymous");
+    loader.load(
+      url,
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        setTexture(tex);
+        if (tex.image) {
+          setAspect(tex.image.width / tex.image.height);
+        }
+      },
+      undefined,
+      () => setTexture(null),
+    );
+    return () => { texture?.dispose(); };
+  }, [url]);
+
+  const width = aspect >= 1 ? 1 : aspect;
+  const height = aspect >= 1 ? 1 / aspect : 1;
+
+  if (!texture) {
+    return (
+      <mesh>
+        <planeGeometry args={[1, 1]} />
+        <meshStandardMaterial color={hovered ? "#f5f0eb" : "#ffffff"} side={THREE.DoubleSide} />
+      </mesh>
+    );
+  }
+
+  return (
+    <mesh>
+      <planeGeometry args={[width, height]} />
+      <meshStandardMaterial
+        map={texture}
+        side={THREE.DoubleSide}
+        transparent
+        opacity={hovered ? 0.85 : 1}
+        emissive={hovered ? new THREE.Color("#ffffff") : undefined}
+        emissiveIntensity={hovered ? 0.15 : 0}
+      />
+    </mesh>
+  );
+}
+
 function PlacedProductMesh({ product, onClick }: { product: PlacedProduct; onClick?: () => void }) {
   const [hovered, setHovered] = useState(false);
 
   return (
     <group position={[product.position.x, product.position.y, product.position.z]}>
       {/* Product billboard */}
-      <mesh
+      <group
         rotation={[0, product.rotation, 0]}
         scale={product.scale}
         onClick={(e) => { e.stopPropagation(); onClick?.(); }}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
       >
-        <planeGeometry args={[1, 1]} />
-        <meshStandardMaterial color={hovered ? "#f5f0eb" : "#ffffff"} side={THREE.DoubleSide} />
-      </mesh>
+        {product.imageUrl ? (
+          <ProductTexturePlane url={product.imageUrl} hovered={hovered} />
+        ) : (
+          <mesh>
+            <planeGeometry args={[1, 1]} />
+            <meshStandardMaterial color={hovered ? "#f5f0eb" : "#ffffff"} side={THREE.DoubleSide} />
+          </mesh>
+        )}
+      </group>
 
       {/* Label */}
       <Html position={[0, 0.7 * product.scale, 0]} center distanceFactor={8}>
