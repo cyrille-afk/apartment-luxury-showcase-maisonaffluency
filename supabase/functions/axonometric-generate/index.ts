@@ -39,8 +39,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const { imageUrl, mode, style, overlayImages } = await req.json();
-    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite"
+    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl } = await req.json();
+    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay"
 
     if (!imageUrl) throw new Error("imageUrl is required");
 
@@ -55,8 +55,12 @@ serve(async (req) => {
       prompt = `Enhance and stylize this architectural 3D axonometric view to give it a ${defaultStyle} feel. Add realistic textures, materials, shadows, and ambient lighting. Keep the geometry and spatial layout exactly the same but elevate the visual quality to a professional presentation rendering.`;
     } else if (mode === "composite") {
       prompt = `Take this 3D axonometric architectural view and incorporate the provided furniture/product images into the scene naturally. Place them at appropriate positions within the rooms, respecting scale, perspective, and the axonometric projection angle. Add realistic shadows and lighting to blend the products seamlessly into the architectural rendering. Style: ${defaultStyle}.`;
+    } else if (mode === "3d_to_cad") {
+      prompt = `Convert this 3D product/furniture image into a clean 2D CAD-style technical vector block drawing. Generate multiple orthographic views: front elevation, side elevation, and top/plan view. Use clean black line work on a white background, similar to an AutoCAD or technical architecture block. Estimate and label the approximate dimensions (width × depth × height) in millimeters based on the visible proportions and typical furniture/object sizing. Include dimension lines with arrows. The output should look like a professional CAD furniture block ready to be inserted into architectural floor plans or elevation drawings. No shading, no color — pure technical line drawing style.`;
+    } else if (mode === "cad_overlay") {
+      prompt = `Take this architectural technical drawing (floor plan or elevation) and insert the provided CAD furniture/product block drawings into the appropriate positions. Scale the blocks to match the drawing's proportions. Maintain the technical drawing style — clean lines, no shading. Position the product blocks logically within rooms or against walls as appropriate for the product type. Keep the original technical drawing intact and overlay the product blocks seamlessly.`;
     } else {
-      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite");
+      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay");
     }
 
     // Build message content
