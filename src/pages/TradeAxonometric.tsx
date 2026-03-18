@@ -1126,10 +1126,39 @@ const TradeAxonometric = () => {
             )}
 
 
+            {/* Cooldown Banner */}
+            {isCoolingDown && (
+              <div className="flex items-center gap-3 rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-4 py-3">
+                <Timer className="w-4 h-4 text-yellow-600 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-display text-xs text-foreground">Rate limit — cooldown active</p>
+                  <p className="font-body text-[11px] text-muted-foreground">
+                    You can retry in <span className="font-display text-foreground">{cooldownRemaining}s</span>
+                  </p>
+                </div>
+                <div className="relative w-8 h-8 shrink-0">
+                  <svg viewBox="0 0 36 36" className="w-8 h-8 -rotate-90">
+                    <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
+                    <circle
+                      cx="18" cy="18" r="15" fill="none"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth="3"
+                      strokeDasharray={`${(cooldownRemaining / COOLDOWN_SECONDS) * 94.25} 94.25`}
+                      strokeLinecap="round"
+                      className="transition-all duration-1000 ease-linear"
+                    />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center font-display text-[9px] text-foreground">
+                    {cooldownRemaining}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Generate Button */}
             <Button
               onClick={generate}
-              disabled={generating || !sourceImage}
+              disabled={generating || !sourceImage || isCoolingDown}
               className="w-full"
               size="lg"
             >
@@ -1137,6 +1166,11 @@ const TradeAxonometric = () => {
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Generating…
+                </>
+              ) : isCoolingDown ? (
+                <>
+                  <Timer className="w-4 h-4 mr-2" />
+                  Retry in {cooldownRemaining}s
                 </>
               ) : (
                 <>
