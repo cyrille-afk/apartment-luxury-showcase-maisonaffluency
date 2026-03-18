@@ -96,7 +96,8 @@ const TradeAxonometric = () => {
           imageUrl: sourceImage,
           mode,
           style,
-          overlayImages: mode === "composite" ? overlayImages : undefined,
+          overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages : undefined,
+          technicalDrawingUrl: mode === "cad_overlay" ? technicalDrawingUrl : undefined,
         },
       });
 
