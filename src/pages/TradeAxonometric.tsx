@@ -51,7 +51,86 @@ const STYLE_PRESETS = [
   { value: "contemporary Scandinavian design with light wood, white walls, and soft daylight", label: "Scandinavian" },
 ];
 
-/** Inline product picker for platform images */
+/** Upload source image or PDF (extracts first page) */
+const SourceUpload = ({ onSourceReady }: { onSourceReady: (url: string) => void }) => {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const extractPdfFirstPage = async (file: File): Promise<Blob> => {
+    const pdfjsLib = await import("pdfjs-dist");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const page = await pdf.getPage(1);
+    const scale = 3; // high-res extraction
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext("2d")!;
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    return new Promise((resolve) => canvas.toBlob((b) => resolve(b!), "image/png"));
+  };
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    setUploading(true);
+
+    try {
+      let uploadFile: File | Blob = file;
+      let ext = "png";
+      let contentType = "image/png";
+
+      if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+        toast({ title: "Extracting first page from PDF…" });
+        uploadFile = await extractPdfFirstPage(file);
+      } else {
+        ext = file.name.split(".").pop() || "jpg";
+        contentType = file.type || "image/jpeg";
+      }
+
+      const path = `axonometric-sources/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from("assets").upload(path, uploadFile, { contentType });
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+      onSourceReady(urlData.publicUrl);
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <label
+      className={`inline-flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-md cursor-pointer hover:border-foreground/30 transition-colors ${
+        uploading ? "opacity-50 pointer-events-none" : ""
+      }`}
+    >
+      {uploading ? (
+        <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin" />
+      ) : (
+        <Upload className="w-3.5 h-3.5 text-muted-foreground" />
+      )}
+      <span className="font-body text-xs text-muted-foreground">
+        {uploading ? "Processing…" : "Upload image or PDF"}
+      </span>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*,application/pdf"
+        className="hidden"
+        onChange={(e) => handleFiles(e.target.files)}
+      />
+    </label>
+  );
+};
+
+
 const ProductPicker = ({
   search,
   onSelect,
