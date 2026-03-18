@@ -577,20 +577,56 @@ const TradeAxonometric = () => {
                       )}
                       <span className="font-body text-[10px] text-muted-foreground ml-auto">{format(new Date(draft.created_at), "d MMM yyyy")}</span>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => {
-                        setSourceImage(draft.image_url);
-                        setResult({ imageUrl: draft.image_url, storedUrl: draft.image_url, text: "", mode: "elevation_to_axo" });
-                        setGalleryTitle(draft.title || "");
-                        setGalleryDesc(draft.description || "");
-                        setShowDrafts(false);
-                      }}
-                    >
-                      <ArrowRight className="w-3.5 h-3.5 mr-1.5" />Resume Editing
-                    </Button>
+                    <div className="flex gap-1.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => {
+                          setSourceImage(draft.image_url);
+                          setResult({ imageUrl: draft.image_url, storedUrl: draft.image_url, text: "", mode: "elevation_to_axo" });
+                          setGalleryTitle(draft.title || "");
+                          setGalleryDesc(draft.description || "");
+                          setShowDrafts(false);
+                        }}
+                      >
+                        <ArrowRight className="w-3.5 h-3.5 mr-1.5" />Resume
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          const { error } = await (supabase as any)
+                            .from("axonometric_gallery")
+                            .update({ is_published: true })
+                            .eq("id", draft.id);
+                          if (!error) {
+                            toast({ title: "Published to gallery" });
+                            queryClient.invalidateQueries({ queryKey: ["axonometric-gallery-drafts-studio"] });
+                          }
+                        }}
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          const { error } = await (supabase as any)
+                            .from("axonometric_gallery")
+                            .delete()
+                            .eq("id", draft.id);
+                          if (!error) {
+                            toast({ title: "Draft deleted" });
+                            queryClient.invalidateQueries({ queryKey: ["axonometric-gallery-drafts-studio"] });
+                          } else {
+                            toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+                          }
+                        }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
