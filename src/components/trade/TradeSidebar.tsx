@@ -21,8 +21,8 @@ const mainItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard },
   { title: "Showroom", url: "/trade/showroom", icon: MapPin },
   { title: "Gallery", url: "/trade/gallery", icon: Image },
-  { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
   { title: "Brand Library", url: "/trade/documents", icon: FolderOpen },
+  { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
   { title: "Sample Requests", url: "/trade/samples", icon: Package },
   { title: "Settings", url: "/trade/settings", icon: Settings },
 ];
