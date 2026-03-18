@@ -48,6 +48,7 @@ const formatDate = (d: string) =>
 
 const TradeSamples = () => {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [requests, setRequests] = useState<SampleRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -66,6 +67,22 @@ const TradeSamples = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Pre-fill from URL params (e.g. from curator picks "Request Sample" button)
+  useEffect(() => {
+    const product = searchParams.get("product");
+    const brand = searchParams.get("brand");
+    const image = searchParams.get("image");
+    if (product || brand) {
+      if (product) setProductName(product);
+      if (brand) setBrandName(brand);
+      if (image) setImagePreview(image);
+      setShowForm(true);
+      // Clean URL params after reading
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
+
   const fetchRequests = async () => {
     const { data } = await supabase
       .from("trade_sample_requests")
