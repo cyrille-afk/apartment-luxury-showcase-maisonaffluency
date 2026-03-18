@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useRef, useMemo, useCallback } from "react";
 import { getAllTradeProducts, getAllBrands } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send,
+  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload,
 } from "lucide-react";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -22,6 +22,7 @@ interface SelectedProduct {
   image_url: string;
   dimensions?: string;
   materials?: string;
+  isExternal?: boolean;
 }
 
 interface ProposalBuilderProps {
@@ -45,6 +46,7 @@ export default function ProposalBuilder({
   onResult,
 }: ProposalBuilderProps) {
   const { toast } = useToast();
+  const externalFileRef = useRef<HTMLInputElement>(null);
 
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [generating, setGenerating] = useState(false);
@@ -52,6 +54,13 @@ export default function ProposalBuilder({
   const [proposalHistory, setProposalHistory] = useState<string[]>([]);
   const [refinementPrompt, setRefinementPrompt] = useState("");
   const [refining, setRefining] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  // External upload dialog state
+  const [showExternalDialog, setShowExternalDialog] = useState(false);
+  const [externalName, setExternalName] = useState("");
+  const [externalBrand, setExternalBrand] = useState("");
+  const [externalUploading, setExternalUploading] = useState(false);
 
   // Product picker state
   const [pickerOpen, setPickerOpen] = useState(true);
@@ -80,7 +89,7 @@ export default function ProposalBuilder({
   const brands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
   const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
 
-  const addProduct = useCallback((product: { product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string }) => {
+  const addProduct = useCallback((product: { product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string; isExternal?: boolean }) => {
     if (selectedProducts.length >= 5) {
       toast({ title: "Maximum 5 products per proposal", variant: "destructive" });
       return;
@@ -94,6 +103,41 @@ export default function ProposalBuilder({
   const removeProduct = useCallback((id: string) => {
     setSelectedProducts((prev) => prev.filter((p) => p.id !== id));
   }, []);
+
+  // Handle external image upload
+  const handleExternalFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!externalName.trim()) {
+      toast({ title: "Please enter a product name first", variant: "destructive" });
+      return;
+    }
+
+    setExternalUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `proposal-externals/${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("assets").upload(path, file, { contentType: file.type });
+      if (uploadErr) throw uploadErr;
+
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+      addProduct({
+        product_name: externalName.trim(),
+        brand_name: externalBrand.trim() || "External",
+        image_url: urlData.publicUrl,
+        isExternal: true,
+      });
+      setExternalName("");
+      setExternalBrand("");
+      setShowExternalDialog(false);
+      toast({ title: "External product added" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err?.message || "Unknown error", variant: "destructive" });
+    } finally {
+      setExternalUploading(false);
+      if (externalFileRef.current) externalFileRef.current.value = "";
+    }
+  };
 
   const generateProposal = async () => {
     if (!emptyRoomUrl || selectedProducts.length === 0) return;
@@ -184,8 +228,77 @@ export default function ProposalBuilder({
     a.click();
   };
 
+  // Expanded fullscreen overlay for proposal
+  if (expanded && proposalResult) {
+    return (
+      <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="flex items-center gap-3">
+            <h2 className="font-display text-sm text-foreground">Proposal — Expanded View</h2>
+            {proposalHistory.length > 1 && (
+              <span className="font-body text-[10px] text-muted-foreground">Iteration {proposalHistory.length}</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={downloadProposal}>
+              <Download className="w-3.5 h-3.5 mr-1.5" />Download
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setExpanded(false)}>
+              <Minimize2 className="w-3.5 h-3.5 mr-1.5" />Collapse
+            </Button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
+          <img
+            src={proposalResult}
+            alt="Generated proposal"
+            className="max-w-full max-h-full object-contain rounded-lg"
+          />
+        </div>
+        <div className="p-4 border-t border-border">
+          <div className="max-w-2xl mx-auto flex gap-2">
+            <Input
+              value={refinementPrompt}
+              onChange={(e) => setRefinementPrompt(e.target.value)}
+              placeholder="Refine: e.g. 'Move the sofa further left', 'Rotate the chair to face the window'…"
+              className="font-body text-xs flex-1"
+              onKeyDown={(e) => e.key === "Enter" && !refining && refineProposal()}
+              disabled={refining}
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={refineProposal}
+              disabled={refining || !refinementPrompt.trim()}
+            >
+              {refining ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={generateProposal}
+              disabled={generating || refining}
+              title="Regenerate from scratch"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Hidden file input for external uploads */}
+      <input
+        ref={externalFileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleExternalFile}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -212,9 +325,14 @@ export default function ProposalBuilder({
             )}
           </Button>
           {proposalResult && (
-            <Button variant="outline" size="sm" onClick={downloadProposal}>
-              <Download className="w-3.5 h-3.5 mr-1.5" />Download
-            </Button>
+            <>
+              <Button variant="outline" size="sm" onClick={() => setExpanded(true)}>
+                <Maximize2 className="w-3.5 h-3.5 mr-1.5" />Expand
+              </Button>
+              <Button variant="outline" size="sm" onClick={downloadProposal}>
+                <Download className="w-3.5 h-3.5 mr-1.5" />Download
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -246,10 +364,15 @@ export default function ProposalBuilder({
 
           {proposalResult ? (
             <div className="space-y-2">
-              <div className="border border-border rounded-lg overflow-hidden bg-muted/10">
+              <div
+                className="border border-border rounded-lg overflow-hidden bg-muted/10 cursor-pointer group relative"
+                onClick={() => setExpanded(true)}
+              >
                 <img src={proposalResult} alt="Generated proposal" className="w-full object-contain" />
+                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors flex items-center justify-center">
+                  <Maximize2 className="w-6 h-6 text-foreground/0 group-hover:text-foreground/50 transition-colors" />
+                </div>
               </div>
-              {/* Iteration count */}
               {proposalHistory.length > 1 && (
                 <p className="font-body text-[10px] text-muted-foreground text-right">
                   Iteration {proposalHistory.length}
@@ -271,11 +394,7 @@ export default function ProposalBuilder({
                   onClick={refineProposal}
                   disabled={refining || !refinementPrompt.trim()}
                 >
-                  {refining ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Send className="w-3.5 h-3.5" />
-                  )}
+                  {refining ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                 </Button>
                 <Button
                   size="sm"
@@ -290,11 +409,7 @@ export default function ProposalBuilder({
             </div>
           ) : emptyRoomUrl ? (
             <div className="border border-border rounded-lg overflow-hidden bg-muted/10">
-              <img
-                src={emptyRoomUrl}
-                alt="Empty room template"
-                className="w-full object-contain"
-              />
+              <img src={emptyRoomUrl} alt="Empty room template" className="w-full object-contain" />
             </div>
           ) : emptyRoomGenerating ? (
             <div className="border border-dashed border-border rounded-lg flex flex-col items-center justify-center min-h-[300px] gap-3">
@@ -319,7 +434,10 @@ export default function ProposalBuilder({
                 <img src={p.image_url} alt="" className="w-9 h-9 rounded border border-border object-cover shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-display text-[10px] text-foreground truncate">{p.product_name}</p>
-                  <p className="font-body text-[9px] text-muted-foreground truncate">{p.brand_name}</p>
+                  <p className="font-body text-[9px] text-muted-foreground truncate">
+                    {p.brand_name}
+                    {p.isExternal && <span className="ml-1 text-muted-foreground/50">(ext)</span>}
+                  </p>
                   {p.dimensions && <p className="font-body text-[8px] text-muted-foreground/70 truncate">{p.dimensions}</p>}
                 </div>
                 <button
@@ -340,13 +458,59 @@ export default function ProposalBuilder({
           <h3 className="font-display text-xs text-foreground">
             Add Products to Proposal {selectedProducts.length >= 5 && <span className="text-muted-foreground">(max reached)</span>}
           </h3>
-          <button
-            onClick={() => setPickerOpen(!pickerOpen)}
-            className="font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {pickerOpen ? "Collapse" : "Expand"}
-          </button>
+          <div className="flex items-center gap-3">
+            {selectedProducts.length < 5 && (
+              <button
+                onClick={() => setShowExternalDialog(!showExternalDialog)}
+                className="font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                <Upload className="w-3 h-3" />
+                Import External
+              </button>
+            )}
+            <button
+              onClick={() => setPickerOpen(!pickerOpen)}
+              className="font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {pickerOpen ? "Collapse" : "Expand"}
+            </button>
+          </div>
         </div>
+
+        {/* External image upload mini-form */}
+        {showExternalDialog && selectedProducts.length < 5 && (
+          <div className="border border-dashed border-border rounded-md p-3 space-y-2 bg-muted/10">
+            <p className="font-body text-[10px] text-muted-foreground">
+              Import a product image not in the platform library
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Input
+                value={externalName}
+                onChange={(e) => setExternalName(e.target.value)}
+                placeholder="Product name *"
+                className="font-body text-xs flex-1 min-w-[120px]"
+              />
+              <Input
+                value={externalBrand}
+                onChange={(e) => setExternalBrand(e.target.value)}
+                placeholder="Brand (optional)"
+                className="font-body text-xs flex-1 min-w-[120px]"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!externalName.trim() || externalUploading}
+                onClick={() => externalFileRef.current?.click()}
+              >
+                {externalUploading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <><Upload className="w-3.5 h-3.5 mr-1.5" />Choose Image</>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
 
         {pickerOpen && selectedProducts.length < 5 && (
           <div className="space-y-2">
