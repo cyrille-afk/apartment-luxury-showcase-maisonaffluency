@@ -198,6 +198,7 @@ const TradeAxonometric = () => {
   const [savingToGallery, setSavingToGallery] = useState(false);
   const [showSceneEditor, setShowSceneEditor] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
+  const [swapItems, setSwapItems] = useState<{ prompt: string; product: SelectedProduct }[]>([]);
   const [swapPrompt, setSwapPrompt] = useState("");
   const [swapProduct, setSwapProduct] = useState<SelectedProduct | null>(null);
   const [swapProductSearch, setSwapProductSearch] = useState("");
@@ -278,9 +279,8 @@ const TradeAxonometric = () => {
         technicalDrawingUrl: mode === "cad_overlay" ? technicalDrawingUrl : undefined,
       };
 
-      if (mode === "product_swap" && swapProduct) {
-        body.replacementImageUrl = swapProduct.image_url;
-        body.swapPrompt = swapPrompt;
+      if (mode === "product_swap" && swapItems.length > 0) {
+        body.swaps = swapItems.map((s) => ({ prompt: s.prompt, imageUrl: s.product.image_url }));
       }
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", { body });
@@ -865,71 +865,117 @@ const TradeAxonometric = () => {
             {/* Product Swap mode */}
             {mode === "product_swap" && (
               <div className="border border-border rounded-lg p-5 space-y-4">
-                <h2 className="font-display text-sm text-foreground">Swap Product</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="font-display text-sm text-foreground">Swap Products</h2>
+                  <span className="font-body text-[10px] text-muted-foreground">{swapItems.length}/5 swaps</span>
+                </div>
                 <p className="font-body text-xs text-muted-foreground">
-                  Describe what to replace (e.g. "replace the grey sofa") and pick the replacement product. The AI will swap it in the exact same position.
+                  Add up to 5 product swaps. For each, describe what to replace and pick the replacement.
                 </p>
 
-                <Textarea
-                  value={swapPrompt}
-                  onChange={(e) => setSwapPrompt(e.target.value)}
-                  placeholder='e.g. "Replace the grey corner sofa with this product" or "Swap the coffee table"'
-                  rows={2}
-                  maxLength={500}
-                  className="font-body text-xs"
-                />
+                {/* Existing swap items */}
+                {swapItems.length > 0 && (
+                  <div className="space-y-2">
+                    {swapItems.map((item, i) => (
+                      <div key={i} className="flex items-start gap-2 bg-muted/20 rounded-md p-2.5 border border-border/50">
+                        <img src={item.product.image_url} alt="" className="w-10 h-10 rounded border border-border object-cover shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-display text-[11px] text-foreground truncate">{item.product.product_name}</p>
+                          <p className="font-body text-[10px] text-muted-foreground truncate">by {item.product.brand_name}</p>
+                          <p className="font-body text-[10px] text-muted-foreground/70 mt-0.5 line-clamp-2 italic">"{item.prompt}"</p>
+                        </div>
+                        <button
+                          onClick={() => setSwapItems((prev) => prev.filter((_, j) => j !== i))}
+                          className="shrink-0 text-muted-foreground hover:text-destructive transition-colors mt-0.5"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-                <div className="space-y-2">
-                  <h3 className="font-display text-xs text-foreground">Replacement Product</h3>
-                  {swapProduct ? (
-                    <div className="flex items-center gap-3 bg-muted/30 rounded-md px-3 py-2">
-                      <img src={swapProduct.image_url} alt="" className="w-12 h-12 rounded border border-border object-cover shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-display text-xs text-foreground truncate">{swapProduct.product_name}</p>
-                        <p className="font-body text-[10px] text-muted-foreground truncate">by {swapProduct.brand_name}</p>
+                {/* Add new swap */}
+                {swapItems.length < 5 && (
+                  <div className="space-y-3 border-t border-border/50 pt-3">
+                    <h3 className="font-display text-xs text-foreground">Add Swap {swapItems.length + 1}</h3>
+                    <Textarea
+                      value={swapPrompt}
+                      onChange={(e) => setSwapPrompt(e.target.value)}
+                      placeholder='e.g. "Replace the grey corner sofa" or "Swap the coffee table"'
+                      rows={2}
+                      maxLength={500}
+                      className="font-body text-xs"
+                    />
+
+                    {swapProduct ? (
+                      <div className="flex items-center gap-3 bg-muted/30 rounded-md px-3 py-2">
+                        <img src={swapProduct.image_url} alt="" className="w-12 h-12 rounded border border-border object-cover shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-display text-xs text-foreground truncate">{swapProduct.product_name}</p>
+                          <p className="font-body text-[10px] text-muted-foreground truncate">by {swapProduct.brand_name}</p>
+                        </div>
+                        <button onClick={() => setSwapProduct(null)} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
                       </div>
-                      <button onClick={() => setSwapProduct(null)} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                        <input
-                          type="text"
-                          placeholder="Search platform products…"
-                          value={swapProductSearch}
-                          onChange={(e) => setSwapProductSearch(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2 border border-border rounded-md font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    ) : (
+                      <>
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                          <input
+                            type="text"
+                            placeholder="Search platform products…"
+                            value={swapProductSearch}
+                            onChange={(e) => setSwapProductSearch(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2 border border-border rounded-md font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                          />
+                        </div>
+                        <CategoryFilterBar
+                          category={pickerCategory}
+                          subcategory={pickerSubcategory}
+                          brand={pickerBrand}
+                          onCategoryChange={setPickerCategory}
+                          onSubcategoryChange={setPickerSubcategory}
+                          onBrandChange={setPickerBrand}
                         />
-                      </div>
-                      <CategoryFilterBar
-                        category={pickerCategory}
-                        subcategory={pickerSubcategory}
-                        brand={pickerBrand}
-                        onCategoryChange={setPickerCategory}
-                        onSubcategoryChange={setPickerSubcategory}
-                        onBrandChange={setPickerBrand}
-                      />
-                      <ProductPicker
-                        search={swapProductSearch}
-                        category={pickerCategory || undefined}
-                        subcategory={pickerSubcategory || undefined}
-                        brand={pickerBrand || undefined}
-                        onSelect={(product) => setSwapProduct(product)}
-                        selectedProduct={swapProduct}
-                      />
-                    </>
-                  )}
-                </div>
+                        <ProductPicker
+                          search={swapProductSearch}
+                          category={pickerCategory || undefined}
+                          subcategory={pickerSubcategory || undefined}
+                          brand={pickerBrand || undefined}
+                          onSelect={(product) => setSwapProduct(product)}
+                          selectedProduct={swapProduct}
+                        />
+                      </>
+                    )}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      disabled={!swapProduct || !swapPrompt.trim()}
+                      onClick={() => {
+                        if (swapProduct && swapPrompt.trim()) {
+                          setSwapItems((prev) => [...prev, { prompt: swapPrompt.trim(), product: swapProduct }]);
+                          setSwapPrompt("");
+                          setSwapProduct(null);
+                          setSwapProductSearch("");
+                        }
+                      }}
+                    >
+                      <ImagePlus className="w-3.5 h-3.5 mr-1.5" />
+                      Add Swap {swapItems.length + 1}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Generate Button */}
             <Button
               onClick={generate}
-              disabled={generating || !sourceImage || (mode === "product_swap" && (!swapProduct || !swapPrompt.trim()))}
+              disabled={generating || !sourceImage || (mode === "product_swap" && swapItems.length === 0)}
               className="w-full"
               size="lg"
             >

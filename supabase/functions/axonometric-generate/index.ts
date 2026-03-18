@@ -61,12 +61,23 @@ serve(async (req) => {
     } else if (mode === "cad_overlay") {
       prompt = `Take this architectural technical drawing (floor plan or elevation) and insert the provided CAD furniture/product block drawings into the appropriate positions. Scale the blocks to match the drawing's proportions. Maintain the technical drawing style — clean lines, no shading. Position the product blocks logically within rooms or against walls as appropriate for the product type. Keep the original technical drawing intact and overlay the product blocks seamlessly.`;
     } else if (mode === "product_swap") {
-      const swapPrompt = body.swapPrompt || "";
-      const replacementImageUrl = body.replacementImageUrl;
-      if (!replacementImageUrl) throw new Error("replacementImageUrl is required for product_swap mode");
-      if (!swapPrompt.trim()) throw new Error("A swap prompt describing what to replace is required");
+      const swaps = body.swaps as { prompt: string; imageUrl: string }[] | undefined;
+      // Legacy single-swap support
+      const singlePrompt = body.swapPrompt || "";
+      const singleImage = body.replacementImageUrl;
 
-      prompt = `You are given an interior architectural render. The user wants to swap a specific piece of furniture/product in the scene. Their instruction: "${swapPrompt}". Remove the specified item and replace it IN THE EXACT SAME POSITION, at the correct scale and perspective, with the replacement product shown in the second image. Match the lighting, shadows, and perspective of the original scene perfectly so the replacement looks naturally integrated. Keep everything else in the scene exactly as is. Style: ${defaultStyle}.`;
+      const swapList = swaps && swaps.length > 0
+        ? swaps
+        : (singleImage && singlePrompt.trim()) ? [{ prompt: singlePrompt, imageUrl: singleImage }] : [];
+
+      if (swapList.length === 0) throw new Error("At least one swap (prompt + replacement image) is required");
+      if (swapList.length > 5) throw new Error("Maximum 5 swaps per generation");
+
+      const swapInstructions = swapList
+        .map((s, i) => `${i + 1}. ${s.prompt}`)
+        .join("\n");
+
+      prompt = `You are given an interior architectural render. The user wants to swap ${swapList.length === 1 ? "a specific piece" : "multiple pieces"} of furniture/products in the scene. For each swap instruction below, remove the specified item and replace it IN THE EXACT SAME POSITION with the corresponding replacement product image (provided in order after the scene image). Match scale, perspective, lighting, and shadows perfectly so each replacement looks naturally integrated. Keep everything else in the scene exactly as is.\n\nSwap instructions:\n${swapInstructions}\n\nStyle: ${defaultStyle}.`;
     } else if (mode === "freeform") {
       const userPrompt = body.userPrompt;
       if (!userPrompt?.trim()) throw new Error("userPrompt is required for freeform mode");
@@ -99,12 +110,19 @@ serve(async (req) => {
       image_url: { url: imageUrl },
     });
 
-    // Add replacement product image for product_swap mode
-    if (mode === "product_swap" && body.replacementImageUrl) {
-      content.push({
-        type: "image_url",
-        image_url: { url: body.replacementImageUrl },
-      });
+    // Add replacement product images for product_swap mode
+    if (mode === "product_swap") {
+      const swaps = body.swaps as { prompt: string; imageUrl: string }[] | undefined;
+      const singleImage = body.replacementImageUrl;
+      const swapList = swaps && swaps.length > 0
+        ? swaps
+        : singleImage ? [{ prompt: "", imageUrl: singleImage }] : [];
+      for (const s of swapList.slice(0, 5)) {
+        content.push({
+          type: "image_url",
+          image_url: { url: s.imageUrl },
+        });
+      }
     }
 
     // Add overlay product images for composite mode
