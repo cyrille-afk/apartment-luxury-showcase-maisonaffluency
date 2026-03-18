@@ -17,12 +17,12 @@ const Footer = () => {
 
   return (
     <>
-      <div className="border-t border-border bg-muted/30 px-6 py-3 text-center">
-        <span className="font-body text-xs text-muted-foreground">
+      <div className="border-t border-accent/20 bg-foreground/95 backdrop-blur-sm px-6 py-3 text-center">
+        <span className="font-body text-xs uppercase tracking-[0.15em] text-background/80">
           By using this site you agree to our{" "}
-          <a href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">Privacy Policy</a>
+          <a href="/privacy" className="text-background underline underline-offset-2 hover:text-accent transition-colors">Privacy Policy</a>
           {" "}&{" "}
-          <a href="/terms" className="underline underline-offset-2 hover:text-foreground transition-colors">Terms of Service</a>
+          <a href="/terms" className="text-background underline underline-offset-2 hover:text-accent transition-colors">Terms of Service</a>
         </span>
       </div>
       <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
