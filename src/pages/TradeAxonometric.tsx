@@ -1124,51 +1124,8 @@ const TradeAxonometric = () => {
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-2">
-                  {/* 3D↔2D Toggle */}
-                  {result.mode === "3d_to_cad" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => {
-                        setSourceImage(result.storedUrl || result.imageUrl);
-                        setMode("elevation_to_axo");
-                        setResult(null);
-                      }}
-                    >
-                      <ArrowLeftRight className="w-3.5 h-3.5 mr-1.5" />
-                      2D → 3D
-                    </Button>
-                  )}
-                  {(result.mode === "elevation_to_axo" || result.mode === "section_to_axo" || result.mode === "stylize") && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => {
-                        setSourceImage(result.storedUrl || result.imageUrl);
-                        setMode("3d_to_cad");
-                        setResult(null);
-                      }}
-                    >
-                      <ArrowLeftRight className="w-3.5 h-3.5 mr-1.5" />
-                      3D → CAD
-                    </Button>
-                  )}
-                  <Button variant="outline" size="sm" onClick={iterateOnResult} className="flex-1">
-                    <Paintbrush className="w-3.5 h-3.5 mr-1.5" />
-                    Re-stylize
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={compositeMode} className="flex-1">
-                    <ImagePlus className="w-3.5 h-3.5 mr-1.5" />
-                    Add Products
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setShowSceneEditor(true)} className="flex-1">
-                    <MousePointer2 className="w-3.5 h-3.5 mr-1.5" />
-                    Edit Scene
-                  </Button>
                   <Button variant="outline" size="sm" onClick={downloadImage}>
-                    <Download className="w-3.5 h-3.5" />
+                    <Download className="w-3.5 h-3.5 mr-1.5" />Download
                   </Button>
                 </div>
 
