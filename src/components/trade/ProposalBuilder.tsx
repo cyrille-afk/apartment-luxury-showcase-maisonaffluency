@@ -49,6 +49,9 @@ export default function ProposalBuilder({
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [generating, setGenerating] = useState(false);
   const [proposalResult, setProposalResult] = useState<string | null>(null);
+  const [proposalHistory, setProposalHistory] = useState<string[]>([]);
+  const [refinementPrompt, setRefinementPrompt] = useState("");
+  const [refining, setRefining] = useState(false);
 
   // Product picker state
   const [pickerOpen, setPickerOpen] = useState(true);
