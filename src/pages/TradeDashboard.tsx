@@ -24,16 +24,26 @@ interface ActivityItem {
   link?: string;
 }
 
-const thumb = (id: string) =>
-  cloudinaryUrl(id, { width: 600, height: 400, quality: "auto", crop: "fill", gravity: "auto" });
+const thumb = (id: string, gravity?: string) =>
+  cloudinaryUrl(id, { width: 600, height: 400, quality: "auto", crop: "fill", gravity: (gravity as any) || "auto" });
 
-const quickLinks = [
-  { title: "Browse Showroom", description: "Review items from the Maison Affluency gallery", icon: MapPin, to: "/trade/showroom", image: thumb("living-room-hero_zxfcxl") },
-  { title: "Browse Website Products", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1773811405/IMG_6996_tfx4bp.jpg", imagePosition: "object-bottom" },
-  { title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", image: "https://res.cloudinary.com/dif1oamtj/image/upload/e_contrast:20,e_saturation:15/v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg.png" },
-  { title: "Brand Library", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", image: thumb("v1773790684/AffluencySG_086_2_1_2_xpvcnw") },
-  { title: "Request Samples", description: "Order product samples for your projects", icon: Package, to: "/trade/samples", image: thumb("v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v") },
+// Dashboard card definitions – each has a section_heroes key for admin overrides
+const DASH_CARDS = [
+  { key: "dash-showroom", title: "Browse Showroom", description: "Review items from the Maison Affluency gallery", icon: MapPin, to: "/trade/showroom", fallbackId: "living-room-hero_zxfcxl", fallbackImage: null as string | null, defaultGravity: "auto" },
+  { key: "dash-gallery", title: "Browse Website Products", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/v1773811405/IMG_6996_tfx4bp.jpg", defaultGravity: "south" },
+  { key: "dash-quotes", title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/e_contrast:20,e_saturation:15/v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg.png", defaultGravity: "auto" },
+  { key: "dash-library", title: "Brand Library", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", fallbackId: "v1773790684/AffluencySG_086_2_1_2_xpvcnw", fallbackImage: null as string | null, defaultGravity: "auto" },
+  { key: "dash-samples", title: "Request Samples", description: "Order product samples for your projects", icon: Package, to: "/trade/samples", fallbackId: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v", fallbackImage: null as string | null, defaultGravity: "auto" },
 ];
+
+const GRAVITY_TO_POSITION: Record<string, string> = {
+  east: "object-right",
+  west: "object-left",
+  north: "object-top",
+  south: "object-bottom",
+  center: "object-center",
+  auto: "",
+};
 
 const typeLabels: Record<string, string> = {
   tearsheet: "Tearsheet",
