@@ -162,7 +162,7 @@ const TradeDashboard = () => {
                 src={link.image}
                 alt={link.title}
                 loading="lazy"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${(link as any).imagePosition || ''}`}
               />
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
             </div>
