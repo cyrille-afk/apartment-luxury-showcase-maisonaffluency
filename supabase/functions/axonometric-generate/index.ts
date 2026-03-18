@@ -95,6 +95,14 @@ serve(async (req) => {
       image_url: { url: imageUrl },
     });
 
+    // Add replacement product image for product_swap mode
+    if (mode === "product_swap" && body.replacementImageUrl) {
+      content.push({
+        type: "image_url",
+        image_url: { url: body.replacementImageUrl },
+      });
+    }
+
     // Add overlay product images for composite mode
     if (mode === "composite" && overlayImages && Array.isArray(overlayImages)) {
       for (const img of overlayImages.slice(0, 5)) {
