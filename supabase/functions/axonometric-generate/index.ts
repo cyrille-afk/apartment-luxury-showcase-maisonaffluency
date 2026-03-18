@@ -39,8 +39,9 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl } = await req.json();
-    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay"
+    const body = await req.json();
+    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements } = body;
+    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "scene_edit"
 
     if (!imageUrl) throw new Error("imageUrl is required");
 
@@ -59,8 +60,25 @@ serve(async (req) => {
       prompt = `Convert this 3D product/furniture image into a clean 2D CAD-style technical vector block drawing. Generate multiple orthographic views: front elevation, side elevation, and top/plan view. Use clean black line work on a white background, similar to an AutoCAD or technical architecture block. Estimate and label the approximate dimensions (width × depth × height) in millimeters based on the visible proportions and typical furniture/object sizing. Include dimension lines with arrows. The output should look like a professional CAD furniture block ready to be inserted into architectural floor plans or elevation drawings. No shading, no color — pure technical line drawing style.`;
     } else if (mode === "cad_overlay") {
       prompt = `Take this architectural technical drawing (floor plan or elevation) and insert the provided CAD furniture/product block drawings into the appropriate positions. Scale the blocks to match the drawing's proportions. Maintain the technical drawing style — clean lines, no shading. Position the product blocks logically within rooms or against walls as appropriate for the product type. Keep the original technical drawing intact and overlay the product blocks seamlessly.`;
+    } else if (mode === "scene_edit") {
+      const placementDesc = (placements || [])
+        .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name} at position (${p.position?.x_percent ?? 50}% from left, ${p.position?.y_percent ?? 50}% from top), size ${p.size_percent ?? 15}% of image width, rotated ${p.rotation_degrees ?? 0}°`)
+        .join("\n");
+
+      const hasMask = !!maskDataUrl;
+      const hasProducts = placements && placements.length > 0;
+
+      if (hasMask && hasProducts) {
+        prompt = `You are given an architectural 3D axonometric interior render. The areas marked in RED in the mask overlay should have the existing furniture REMOVED and replaced with a clean, empty version of that space (matching the room's flooring, wall texture, and lighting). Then, place the following product images into the scene at their specified positions, blending them naturally with correct perspective, shadows, and lighting:\n${placementDesc}\n\nStyle: ${defaultStyle}. Make the final result look like a single cohesive professional architectural rendering.`;
+      } else if (hasMask) {
+        prompt = `You are given an architectural 3D axonometric interior render. The areas marked in RED in the mask overlay contain furniture that should be REMOVED. Replace those areas with a clean, empty version of the space — matching the surrounding flooring, wall textures, and lighting. Keep everything else in the scene exactly as is. Style: ${defaultStyle}.`;
+      } else if (hasProducts) {
+        prompt = `You are given an architectural 3D axonometric interior render. Place the following product images into the scene at their specified positions, blending them naturally with correct axonometric perspective, realistic shadows, and lighting:\n${placementDesc}\n\nStyle: ${defaultStyle}. Make the final result look like a single cohesive professional architectural rendering.`;
+      } else {
+        throw new Error("Scene edit requires either a mask (erase areas) or product placements");
+      }
     } else {
-      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay");
+      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, scene_edit");
     }
 
     // Build message content
@@ -86,6 +104,24 @@ serve(async (req) => {
         content.push({
           type: "image_url",
           image_url: { url: technicalDrawingUrl },
+        });
+      }
+      if (overlayImages && Array.isArray(overlayImages)) {
+        for (const img of overlayImages.slice(0, 5)) {
+          content.push({
+            type: "image_url",
+            image_url: { url: img },
+          });
+        }
+      }
+    }
+
+    // Scene edit: add mask image + product images
+    if (mode === "scene_edit") {
+      if (maskDataUrl) {
+        content.push({
+          type: "image_url",
+          image_url: { url: maskDataUrl },
         });
       }
       if (overlayImages && Array.isArray(overlayImages)) {

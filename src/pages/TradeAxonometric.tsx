@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo, lazy, Suspense } from "react";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,7 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ArrowLeftRight, ExternalLink, Link2 } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ArrowLeftRight, ExternalLink, Link2, MousePointer2 } from "lucide-react";
+const AxonometricSceneEditor = lazy(() => import("@/components/trade/AxonometricSceneEditor"));
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
@@ -112,6 +113,7 @@ const TradeAxonometric = () => {
   const [galleryTitle, setGalleryTitle] = useState("");
   const [galleryDesc, setGalleryDesc] = useState("");
   const [savingToGallery, setSavingToGallery] = useState(false);
+  const [showSceneEditor, setShowSceneEditor] = useState(false);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
@@ -758,6 +760,10 @@ const TradeAxonometric = () => {
                     <ImagePlus className="w-3.5 h-3.5 mr-1.5" />
                     Add Products
                   </Button>
+                  <Button variant="outline" size="sm" onClick={() => setShowSceneEditor(true)} className="flex-1">
+                    <MousePointer2 className="w-3.5 h-3.5 mr-1.5" />
+                    Edit Scene
+                  </Button>
                   <Button variant="outline" size="sm" onClick={downloadImage}>
                     <Download className="w-3.5 h-3.5" />
                   </Button>
@@ -866,6 +872,29 @@ const TradeAxonometric = () => {
           </div>
         </div>
       </div>
+
+      {/* Scene Editor */}
+      {showSceneEditor && result && (
+        <Suspense fallback={null}>
+          <AxonometricSceneEditor
+            imageUrl={result.storedUrl || result.imageUrl}
+            style={style}
+            onClose={() => setShowSceneEditor(false)}
+            onResult={(res) => {
+              const gen: GenerationResult = {
+                imageUrl: res.imageUrl,
+                storedUrl: res.storedUrl,
+                text: res.text,
+                sourceProduct: result.sourceProduct,
+                mode: "composite",
+              };
+              setResult(gen);
+              setHistory((prev) => [gen, ...prev]);
+              setShowSceneEditor(false);
+            }}
+          />
+        </Suspense>
+      )}
     </>
   );
 };
