@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo, lazy, Suspense } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect, lazy, Suspense } from "react";
 import { getAllTradeProducts, getAllBrands } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Helmet } from "react-helmet-async";
@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ExternalLink, Link2, X, Undo2, Redo2, Trash2, Upload, RotateCw } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ExternalLink, Link2, X, Undo2, Redo2, Trash2, Upload, RotateCw, Timer } from "lucide-react";
 const AxonometricSceneEditor = lazy(() => import("@/components/trade/AxonometricSceneEditor"));
 const TurntableViewer = lazy(() => import("@/components/trade/TurntableViewer"));
 import { Input } from "@/components/ui/input";
@@ -231,6 +231,32 @@ const TradeAxonometric = () => {
   const [saturation, setSaturation] = useState(100);
   const [warmth, setWarmth] = useState(0);
 
+  // Rate-limit cooldown timer
+  const COOLDOWN_SECONDS = 45;
+  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
+
+  const startCooldown = useCallback(() => {
+    setCooldownUntil(Date.now() + COOLDOWN_SECONDS * 1000);
+  }, []);
+
+  const isCoolingDown = cooldownRemaining > 0;
+
+  useEffect(() => {
+    if (!cooldownUntil) {
+      setCooldownRemaining(0);
+      return;
+    }
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+      setCooldownRemaining(left);
+      if (left <= 0) setCooldownUntil(null);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [cooldownUntil]);
+
   // Undo / Redo through generation history
   const canUndo = history.length > 1 && historyIndex < history.length - 1;
   const canRedo = historyIndex > 0;
@@ -395,10 +421,11 @@ const TradeAxonometric = () => {
     } catch (e: any) {
       console.error(e);
       const message = e?.message || "Generation failed";
+      if (isRateLimitedError(message)) startCooldown();
       toast({
         title: isRateLimitedError(message) ? "Backend is busy" : "Generation failed",
         description: isRateLimitedError(message)
-          ? "Too many requests right now — please wait 30–60 seconds and retry."
+          ? "Cooldown timer started — retry when it reaches zero."
           : message,
         variant: "destructive",
       });
@@ -538,10 +565,11 @@ const TradeAxonometric = () => {
       setTimeout(() => aiChatRef.current?.scrollTo({ top: aiChatRef.current.scrollHeight, behavior: "smooth" }), 100);
     } catch (e: any) {
       const message = e?.message || "AI edit failed";
+      if (isRateLimitedError(message)) startCooldown();
       toast({
         title: isRateLimitedError(message) ? "Backend is busy" : "AI edit failed",
         description: isRateLimitedError(message)
-          ? "Too many requests right now — please wait 30–60 seconds and retry."
+          ? "Cooldown timer started — retry when it reaches zero."
           : message,
         variant: "destructive",
       });
@@ -595,9 +623,10 @@ const TradeAxonometric = () => {
 
           if (isRateLimitedError(message)) {
             pausedForRateLimit = true;
+            startCooldown();
             toast({
               title: "Turntable paused",
-              description: "Rate limit hit — wait ~60 seconds, then tap Orbit Turntable again.",
+              description: "Cooldown timer started — retry when it reaches zero.",
               variant: "destructive",
             });
             break;
@@ -1097,10 +1126,39 @@ const TradeAxonometric = () => {
             )}
 
 
+            {/* Cooldown Banner */}
+            {isCoolingDown && (
+              <div className="flex items-center gap-3 rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-4 py-3">
+                <Timer className="w-4 h-4 text-yellow-600 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-display text-xs text-foreground">Rate limit — cooldown active</p>
+                  <p className="font-body text-[11px] text-muted-foreground">
+                    You can retry in <span className="font-display text-foreground">{cooldownRemaining}s</span>
+                  </p>
+                </div>
+                <div className="relative w-8 h-8 shrink-0">
+                  <svg viewBox="0 0 36 36" className="w-8 h-8 -rotate-90">
+                    <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
+                    <circle
+                      cx="18" cy="18" r="15" fill="none"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth="3"
+                      strokeDasharray={`${(cooldownRemaining / COOLDOWN_SECONDS) * 94.25} 94.25`}
+                      strokeLinecap="round"
+                      className="transition-all duration-1000 ease-linear"
+                    />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center font-display text-[9px] text-foreground">
+                    {cooldownRemaining}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Generate Button */}
             <Button
               onClick={generate}
-              disabled={generating || !sourceImage}
+              disabled={generating || !sourceImage || isCoolingDown}
               className="w-full"
               size="lg"
             >
@@ -1108,6 +1166,11 @@ const TradeAxonometric = () => {
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Generating…
+                </>
+              ) : isCoolingDown ? (
+                <>
+                  <Timer className="w-4 h-4 mr-2" />
+                  Retry in {cooldownRemaining}s
                 </>
               ) : (
                 <>
@@ -1328,7 +1391,7 @@ const TradeAxonometric = () => {
                     variant="outline"
                     size="sm"
                     onClick={generateTurntable}
-                    disabled={turntableGenerating}
+                    disabled={turntableGenerating || isCoolingDown}
                   >
                     {turntableGenerating ? (
                       <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Generating Orbit…</>
