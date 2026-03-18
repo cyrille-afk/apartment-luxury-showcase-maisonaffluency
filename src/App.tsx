@@ -30,6 +30,7 @@ const TradeMediaLibrary = lazy(() => import("./pages/TradeMediaLibrary"));
 const TradeQuotesAdmin = lazy(() => import("./pages/TradeQuotesAdmin"));
 const TradeAxonometric = lazy(() => import("./pages/TradeAxonometric"));
 const TradeAxonometricRequests = lazy(() => import("./pages/TradeAxonometricRequests"));
+const TradeAxonometricGallery = lazy(() => import("./pages/TradeAxonometricGallery"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Journal = lazy(() => import("./pages/Journal"));
 const JournalArticle = lazy(() => import("./pages/JournalArticle"));
