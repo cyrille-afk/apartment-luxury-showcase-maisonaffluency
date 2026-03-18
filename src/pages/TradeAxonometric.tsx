@@ -14,7 +14,7 @@ import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inb
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
-type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite";
+type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay";
 
 interface GenerationResult {
   imageUrl: string;
