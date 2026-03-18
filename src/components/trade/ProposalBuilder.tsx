@@ -124,6 +124,7 @@ export default function ProposalBuilder({
       if (data?.error) throw new Error(data.error);
 
       const resultUrl = data.storedUrl || data.imageUrl;
+      setProposalHistory((prev) => [...prev, resultUrl]);
       setProposalResult(resultUrl);
       onResult?.({ imageUrl: data.imageUrl, storedUrl: data.storedUrl, text: data.text, pinnedProducts: selectedProducts });
       toast({ title: "Proposal generated successfully" });
