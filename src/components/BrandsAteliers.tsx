@@ -1710,6 +1710,15 @@ const partnerBrands = [
     origin: "France",
     description: "Born in the French Alps, Alpange is the unprecedented result of a singular dream shared by two impassioned music lovers and entrepreneurs, Raphaël Soudre and Franck Bacquet. Designed to deliver both a pure, organic sound and a memorable, multi-sensory experience, this ground-breaking, tech-enabled piano is more than an instrument. Alpange is uncharted common ground, where we can all create, connect, and share the soundtrack of our lives.",
   },
+  {
+    id: "jan-kath",
+    name: "Jan Kath",
+    category: "Rugs & Textiles",
+    subcategory: "Rugs",
+    origin: "Germany",
+    description: "Visionary rug designer redefining the ancient craft of carpet-making through bold, contemporary designs that layer traditional motifs with avant-garde aesthetics. Each hand-knotted piece from his ateliers in Nepal, Morocco, and Thailand pushes boundaries of color, texture, and narrative.",
+    instagram: "https://www.instagram.com/jankathofficial/?hl=en",
+  },
 ];
 
 // Background image map
