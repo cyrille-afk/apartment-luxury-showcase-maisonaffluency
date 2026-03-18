@@ -673,8 +673,16 @@ const TradeAxonometric = () => {
                         className="pl-8 h-8 text-xs"
                       />
                     </div>
+                    <CategoryFilterBar
+                      category={pickerCategory}
+                      subcategory={pickerSubcategory}
+                      onCategoryChange={setPickerCategory}
+                      onSubcategoryChange={setPickerSubcategory}
+                    />
                     <ProductPicker
                       search={cadProductSearch}
+                      category={pickerCategory || undefined}
+                      subcategory={pickerSubcategory || undefined}
                       onSelect={(product) => {
                         if (product.image_url && overlayImages.length < 5) {
                           setOverlayImages((prev) => [...prev, product.image_url].slice(0, 5));
