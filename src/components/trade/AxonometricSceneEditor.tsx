@@ -89,7 +89,9 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
       );
     }
     return all.slice(0, 30);
-  }, [productSearch, sceneCategory, sceneSubcategory]);
+  }, [productSearch, sceneCategory, sceneSubcategory, sceneBrand]);
+
+  const allBrands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
 
   // Drawing (eraser)
   const getCanvasCoords = useCallback((e: React.MouseEvent) => {
