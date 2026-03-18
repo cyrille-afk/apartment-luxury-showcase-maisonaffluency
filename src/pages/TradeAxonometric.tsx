@@ -565,10 +565,11 @@ const TradeAxonometric = () => {
       setTimeout(() => aiChatRef.current?.scrollTo({ top: aiChatRef.current.scrollHeight, behavior: "smooth" }), 100);
     } catch (e: any) {
       const message = e?.message || "AI edit failed";
+      if (isRateLimitedError(message)) startCooldown();
       toast({
         title: isRateLimitedError(message) ? "Backend is busy" : "AI edit failed",
         description: isRateLimitedError(message)
-          ? "Too many requests right now — please wait 30–60 seconds and retry."
+          ? "Cooldown timer started — retry when it reaches zero."
           : message,
         variant: "destructive",
       });
