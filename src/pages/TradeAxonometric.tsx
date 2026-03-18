@@ -16,6 +16,7 @@ import SectionHero from "@/components/trade/SectionHero";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CloudUpload from "@/components/trade/CloudUpload";
+import SourceUpload from "@/components/trade/SourceUpload";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";

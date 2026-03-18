@@ -212,11 +212,10 @@ const TradeAxonometricRequests = () => {
                   </button>
                 </div>
               ) : (
-                <CloudUpload
+                <SourceUpload
                   folder="axonometric-submissions"
-                  accept="image/*"
-                  label="Upload elevation or section drawing"
-                  onUpload={(urls) => setImageUrl(urls[0])}
+                  label="Upload elevation, section, or PDF"
+                  onSourceReady={(url) => setImageUrl(url)}
                 />
               )}
             </div>
