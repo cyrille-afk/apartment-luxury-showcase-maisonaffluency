@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo, lazy, Suspense } from "react";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";

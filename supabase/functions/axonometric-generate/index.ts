@@ -116,6 +116,24 @@ serve(async (req) => {
       }
     }
 
+    // Scene edit: add mask image + product images
+    if (mode === "scene_edit") {
+      if (maskDataUrl) {
+        content.push({
+          type: "image_url",
+          image_url: { url: maskDataUrl },
+        });
+      }
+      if (overlayImages && Array.isArray(overlayImages)) {
+        for (const img of overlayImages.slice(0, 5)) {
+          content.push({
+            type: "image_url",
+            image_url: { url: img },
+          });
+        }
+      }
+    }
+
     const aiResponse = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
