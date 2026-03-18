@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,8 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [dragging, setDragging] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
   const [productSearch, setProductSearch] = useState("");
+  const [sceneCategory, setSceneCategory] = useState("");
+  const [sceneSubcategory, setSceneSubcategory] = useState("");
   const [generating, setGenerating] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [imgSize, setImgSize] = useState({ w: 0, h: 0 });
@@ -68,16 +71,23 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
 
   // Product picker data
   const products = useMemo(() => {
-    const all = getAllTradeProducts().filter((p) => p.image_url);
-    if (!productSearch.trim()) return all.slice(0, 30);
-    const q = productSearch.toLowerCase();
-    return all.filter(
-      (p) =>
-        p.product_name.toLowerCase().includes(q) ||
-        p.brand_name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
-    ).slice(0, 30);
-  }, [productSearch]);
+    let all = getAllTradeProducts().filter((p) => p.image_url);
+    if (sceneCategory) all = all.filter((p) => p.category === sceneCategory);
+    if (sceneSubcategory) all = all.filter((p) => p.subcategory === sceneSubcategory);
+    if (productSearch.trim()) {
+      const q = productSearch.toLowerCase();
+      all = all.filter(
+        (p) =>
+          p.product_name.toLowerCase().includes(q) ||
+          p.brand_name.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          (p.subcategory && p.subcategory.toLowerCase().includes(q)) ||
+          (p.materials && p.materials.toLowerCase().includes(q)) ||
+          p.tags.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    return all.slice(0, 30);
+  }, [productSearch, sceneCategory, sceneSubcategory]);
 
   // Drawing (eraser)
   const getCanvasCoords = useCallback((e: React.MouseEvent) => {
@@ -448,8 +458,28 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
 
           {/* Product Picker */}
           <div className="flex-1 overflow-hidden flex flex-col">
-            <div className="p-3 border-b border-border">
-              <p className="font-display text-xs text-foreground mb-2">Add Products</p>
+            <div className="p-3 border-b border-border space-y-2">
+              <p className="font-display text-xs text-foreground">Add Products</p>
+              <div className="flex gap-1.5">
+                <select
+                  value={sceneCategory}
+                  onChange={(e) => { setSceneCategory(e.target.value); setSceneSubcategory(""); }}
+                  className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                >
+                  <option value="">All Categories</option>
+                  {CATEGORY_ORDER.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                {sceneCategory && (SUBCATEGORY_MAP[sceneCategory] || []).length > 0 && (
+                  <select
+                    value={sceneSubcategory}
+                    onChange={(e) => setSceneSubcategory(e.target.value)}
+                    className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                  >
+                    <option value="">All {sceneCategory}</option>
+                    {(SUBCATEGORY_MAP[sceneCategory] || []).map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                )}
+              </div>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <input

@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useMemo, lazy, Suspense } from "react";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
@@ -44,18 +45,45 @@ const STYLE_PRESETS = [
 ];
 
 /** Inline product picker for platform images */
-const ProductPicker = ({ search, onSelect, selectedProduct }: { search: string; onSelect: (product: SelectedProduct) => void; selectedProduct: SelectedProduct | null }) => {
+const ProductPicker = ({
+  search,
+  onSelect,
+  selectedProduct,
+  category,
+  subcategory,
+}: {
+  search: string;
+  onSelect: (product: SelectedProduct) => void;
+  selectedProduct: SelectedProduct | null;
+  category?: string;
+  subcategory?: string;
+}) => {
   const products = useMemo(() => {
-    const all = getAllTradeProducts().filter((p) => p.image_url);
-    if (!search.trim()) return all.slice(0, 24);
-    const q = search.toLowerCase();
-    return all.filter(
-      (p) =>
-        p.product_name.toLowerCase().includes(q) ||
-        p.brand_name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
-    ).slice(0, 24);
-  }, [search]);
+    let all = getAllTradeProducts().filter((p) => p.image_url);
+
+    // Category filter
+    if (category) {
+      all = all.filter((p) => p.category === category);
+    }
+    // Subcategory filter
+    if (subcategory) {
+      all = all.filter((p) => p.subcategory === subcategory);
+    }
+    // Keyword search
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      all = all.filter(
+        (p) =>
+          p.product_name.toLowerCase().includes(q) ||
+          p.brand_name.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          (p.subcategory && p.subcategory.toLowerCase().includes(q)) ||
+          (p.materials && p.materials.toLowerCase().includes(q)) ||
+          p.tags.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    return all.slice(0, 24);
+  }, [search, category, subcategory]);
 
   if (products.length === 0) {
     return <p className="font-body text-xs text-muted-foreground py-4 text-center">No products found</p>;
@@ -89,6 +117,47 @@ const ProductPicker = ({ search, onSelect, selectedProduct }: { search: string; 
   );
 };
 
+/** Category + Subcategory filter row */
+const CategoryFilterBar = ({
+  category,
+  subcategory,
+  onCategoryChange,
+  onSubcategoryChange,
+}: {
+  category: string;
+  subcategory: string;
+  onCategoryChange: (v: string) => void;
+  onSubcategoryChange: (v: string) => void;
+}) => {
+  const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
+  return (
+    <div className="flex gap-1.5">
+      <select
+        value={category}
+        onChange={(e) => { onCategoryChange(e.target.value); onSubcategoryChange(""); }}
+        className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+      >
+        <option value="">All Categories</option>
+        {CATEGORY_ORDER.map((c) => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+      </select>
+      {subcategories.length > 0 && (
+        <select
+          value={subcategory}
+          onChange={(e) => onSubcategoryChange(e.target.value)}
+          className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+        >
+          <option value="">All {category}</option>
+          {subcategories.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      )}
+    </div>
+  );
+};
+
 const TradeAxonometric = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
@@ -103,6 +172,8 @@ const TradeAxonometric = () => {
   const [productSearch, setProductSearch] = useState("");
   const [cadProductSearch, setCadProductSearch] = useState("");
   const [compositeProductSearch, setCompositeProductSearch] = useState("");
+  const [pickerCategory, setPickerCategory] = useState("");
+  const [pickerSubcategory, setPickerSubcategory] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
@@ -488,8 +559,16 @@ const TradeAxonometric = () => {
                         className="w-full pl-9 pr-4 py-2 border border-border rounded-md font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
                       />
                     </div>
+                    <CategoryFilterBar
+                      category={pickerCategory}
+                      subcategory={pickerSubcategory}
+                      onCategoryChange={setPickerCategory}
+                      onSubcategoryChange={setPickerSubcategory}
+                    />
                     <ProductPicker
                       search={compositeProductSearch}
+                      category={pickerCategory || undefined}
+                      subcategory={pickerSubcategory || undefined}
                       onSelect={(product) => {
                         if (product.image_url && overlayImages.length < 5) {
                           setOverlayImages((prev) => [...prev, product.image_url].slice(0, 5));
@@ -533,8 +612,16 @@ const TradeAxonometric = () => {
                     className="pl-9 font-body text-xs"
                   />
                 </div>
+                <CategoryFilterBar
+                  category={pickerCategory}
+                  subcategory={pickerSubcategory}
+                  onCategoryChange={setPickerCategory}
+                  onSubcategoryChange={setPickerSubcategory}
+                />
                 <ProductPicker
                   search={productSearch}
+                  category={pickerCategory || undefined}
+                  subcategory={pickerSubcategory || undefined}
                   onSelect={(product) => {
                     setSelectedProduct(product);
                     setSourceImage(product.image_url);
@@ -586,8 +673,16 @@ const TradeAxonometric = () => {
                         className="pl-8 h-8 text-xs"
                       />
                     </div>
+                    <CategoryFilterBar
+                      category={pickerCategory}
+                      subcategory={pickerSubcategory}
+                      onCategoryChange={setPickerCategory}
+                      onSubcategoryChange={setPickerSubcategory}
+                    />
                     <ProductPicker
                       search={cadProductSearch}
+                      category={pickerCategory || undefined}
+                      subcategory={pickerSubcategory || undefined}
                       onSelect={(product) => {
                         if (product.image_url && overlayImages.length < 5) {
                           setOverlayImages((prev) => [...prev, product.image_url].slice(0, 5));
