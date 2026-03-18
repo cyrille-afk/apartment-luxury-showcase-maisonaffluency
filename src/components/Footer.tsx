@@ -62,10 +62,6 @@ const Footer = () => {
         </div>
         
         <div className="mt-8 border-t border-border pt-8 flex flex-col items-center gap-3">
-          <div className="flex gap-6">
-            <a href="/privacy" className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
-            <a href="/terms" className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
-          </div>
           <p className="font-body text-xs text-muted-foreground">© 2026 Affluency ETC Pte Ltd. All rights reserved. For professional use only.</p>
         </div>
       </div>
