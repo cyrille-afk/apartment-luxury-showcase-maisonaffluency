@@ -6,8 +6,9 @@ import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, MessageSquare, Send, FileDown, Loader2 } from "lucide-react";
 import { format } from "date-fns";
-import { pdf } from "@react-pdf/renderer";
-import PresentationPDF from "@/components/trade/PresentationPDF";
+// Lazy-loaded to avoid crash on module init
+const loadPdfRenderer = () => import("@react-pdf/renderer");
+const loadPresentationPDF = () => import("@/components/trade/PresentationPDF");
 
 interface Slide {
   id: string;
