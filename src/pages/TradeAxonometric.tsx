@@ -215,7 +215,6 @@ const TradeAxonometric = () => {
         .in("status", ["pending", "in_progress"])
         .order("created_at", { ascending: true });
       if (error) throw error;
-      // Fetch profile info separately to avoid FK join issues
       const userIds = [...new Set((data || []).map((r: any) => r.user_id))] as string[];
       const { data: profiles } = userIds.length > 0
         ? await supabase.from("profiles").select("id, first_name, last_name, company").in("id", userIds)
@@ -225,6 +224,21 @@ const TradeAxonometric = () => {
         ...r,
         profiles: profileMap.get(r.user_id) || null,
       }));
+    },
+    enabled: isAdmin,
+  });
+
+  // Fetch unpublished gallery drafts
+  const { data: galleryDrafts } = useQuery({
+    queryKey: ["axonometric-gallery-drafts-studio"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("axonometric_gallery")
+        .select("*")
+        .eq("is_published", false)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as any[];
     },
     enabled: isAdmin,
   });
