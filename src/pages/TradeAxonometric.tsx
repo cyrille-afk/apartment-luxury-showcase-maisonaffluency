@@ -386,7 +386,46 @@ const TradeAxonometric = () => {
     }
   };
 
-  const filterStyle = {
+  const sendAiPrompt = async () => {
+    if (!aiPrompt.trim() || !result) return;
+    const currentImageUrl = result.storedUrl || result.imageUrl;
+    const userMsg = aiPrompt.trim();
+    setAiHistory((prev) => [...prev, { role: "user", text: userMsg }]);
+    setAiPrompt("");
+    setAiSending(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
+        body: {
+          imageUrl: currentImageUrl,
+          mode: "freeform",
+          style,
+          userPrompt: userMsg,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const gen: GenerationResult = {
+        imageUrl: data.imageUrl,
+        storedUrl: data.storedUrl,
+        text: data.text,
+        sourceProduct: result.sourceProduct,
+        mode: result.mode,
+      };
+      setResult(gen);
+      setHistory((prev) => [gen, ...prev]);
+      setAiHistory((prev) => [...prev, { role: "ai", text: userMsg, imageUrl: data.storedUrl || data.imageUrl }]);
+      setTimeout(() => aiChatRef.current?.scrollTo({ top: aiChatRef.current.scrollHeight, behavior: "smooth" }), 100);
+    } catch (e: any) {
+      toast({ title: "AI edit failed", description: e.message, variant: "destructive" });
+      setAiHistory((prev) => [...prev, { role: "ai", text: `Error: ${e.message}` }]);
+    } finally {
+      setAiSending(false);
+    }
+  };
+
+
     filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) sepia(${Math.abs(warmth)}%)`,
   };
 
