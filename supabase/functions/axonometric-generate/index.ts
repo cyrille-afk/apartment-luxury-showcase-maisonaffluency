@@ -91,11 +91,29 @@ serve(async (req) => {
     } else if (mode === "clean_room") {
       prompt = `You are given a 3D axonometric architectural interior render. REMOVE ALL movable furniture, decorations, rugs, plants, artwork, and accessories from the scene. Keep ONLY the architectural shell: walls, floors, ceilings, windows, doors, built-in cabinetry, and fixed architectural elements. Fill the areas where furniture was removed with matching floor/wall textures so the room looks naturally empty and clean. The result should be a pristine, empty architectural space ready for new furniture placement.\n\nStyle: ${defaultStyle}.`;
     } else if (mode === "proposal_render") {
-      const placementDesc = (placements || [])
-        .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name} — place at approximately (${p.x_percent}% from left, ${p.y_percent}% from top) of the image`)
+      const productList = (placements || [])
+        .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name}`)
         .join("\n");
       if (!placements || placements.length === 0) throw new Error("At least one product placement is required");
-      prompt = `You are given an EMPTY architectural 3D axonometric interior render (no furniture). Place the following products into this empty room at their specified approximate positions. Each product image is provided in order after the room image. Match the axonometric perspective, add realistic shadows and lighting, and ensure each product looks naturally integrated into the space.\n\nProduct placements:\n${placementDesc}\n\nCRITICAL: Keep ALL architectural elements (walls, floors, ceilings, windows, doors) EXACTLY as they are. Only ADD the specified products. The final result must look like a single cohesive professional architectural rendering.\n\nStyle: ${defaultStyle}.`;
+      prompt = `You are given THREE types of images in order:
+1. FIRST IMAGE: The ORIGINAL furnished room — this is the client's layout showing their intended furniture arrangement, positions, and orientations. Study it carefully to understand WHERE each piece of furniture is placed, which DIRECTION it faces (left, right, toward camera, etc.), and the overall spatial composition.
+2. SECOND IMAGE: The same room EMPTIED of all furniture — this is the blank canvas.
+3. REMAINING IMAGES: Product photos of the replacement furniture pieces to place into the empty room.
+
+Your task: Place the following replacement products into the EMPTY room, matching the EXACT spatial layout, positions, and orientations from the ORIGINAL furnished image. Each product should go where the corresponding type of furniture was in the original — sofas replace sofas, tables replace tables, chairs replace chairs, etc. Match the facing direction (left/right/forward) as shown in the original.
+
+Products to place:
+${productList}
+
+CRITICAL RULES:
+- Analyze the original furnished image to understand the furniture layout intent
+- Place each product in the position that best matches where similar furniture existed in the original
+- Match the ORIENTATION and FACING DIRECTION of each piece as shown in the original layout
+- Keep ALL architectural elements (walls, floors, ceilings, windows, doors) from the empty room EXACTLY as they are
+- Add realistic shadows, lighting, and perspective matching the room's existing lighting
+- The final result must look like a single cohesive professional architectural rendering
+
+Style: ${defaultStyle}.`;
     } else if (mode === "scene_edit") {
       const placementDesc = (placements || [])
         .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name} at position (${p.position?.x_percent ?? 50}% from left, ${p.position?.y_percent ?? 50}% from top), size ${p.size_percent ?? 15}% of image width, rotated ${p.rotation_degrees ?? 0}°`)
