@@ -113,25 +113,30 @@ const ProductPicker = ({
   );
 };
 
-/** Category + Subcategory filter row */
+/** Category + Subcategory + Brand filter row */
 const CategoryFilterBar = ({
   category,
   subcategory,
+  brand,
   onCategoryChange,
   onSubcategoryChange,
+  onBrandChange,
 }: {
   category: string;
   subcategory: string;
+  brand: string;
   onCategoryChange: (v: string) => void;
   onSubcategoryChange: (v: string) => void;
+  onBrandChange: (v: string) => void;
 }) => {
   const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
+  const brands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
   return (
-    <div className="flex gap-1.5">
+    <div className="flex flex-wrap gap-1.5">
       <select
         value={category}
         onChange={(e) => { onCategoryChange(e.target.value); onSubcategoryChange(""); }}
-        className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+        className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
       >
         <option value="">All Categories</option>
         {CATEGORY_ORDER.map((c) => (
@@ -142,7 +147,7 @@ const CategoryFilterBar = ({
         <select
           value={subcategory}
           onChange={(e) => onSubcategoryChange(e.target.value)}
-          className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+          className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
         >
           <option value="">All {category}</option>
           {subcategories.map((s) => (
@@ -150,6 +155,16 @@ const CategoryFilterBar = ({
           ))}
         </select>
       )}
+      <select
+        value={brand}
+        onChange={(e) => onBrandChange(e.target.value)}
+        className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+      >
+        <option value="">All Brands</option>
+        {brands.map((b) => (
+          <option key={b} value={b}>{b}</option>
+        ))}
+      </select>
     </div>
   );
 };
