@@ -604,9 +604,10 @@ const TradeAxonometric = () => {
                       <img src={img} alt="" className="w-full h-full object-contain bg-white" />
                       <button
                         onClick={() => setOverlayImages((prev) => prev.filter((_, j) => j !== i))}
-                        className="absolute inset-0 bg-background/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove"
                       >
-                        <RotateCcw className="w-3 h-3 text-foreground" />
+                        <X className="w-2.5 h-2.5" />
                       </button>
                     </div>
                   ))}
