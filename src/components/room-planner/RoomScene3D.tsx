@@ -276,8 +276,22 @@ function PlacedProductMesh({
           )}
         </div>
         {hovered && !dragging && (
-          <div className="text-center mt-1 pointer-events-none">
-            <span className="font-body text-[8px] text-muted-foreground bg-background/80 rounded px-1.5 py-0.5">
+          <div className="flex flex-col items-center gap-1 mt-1">
+            <div className="pointer-events-auto flex items-center gap-1.5 bg-background/90 border border-border rounded px-2 py-1">
+              <span className="font-body text-[8px] text-muted-foreground select-none">S</span>
+              <input
+                type="range"
+                min={0.3}
+                max={3}
+                step={0.05}
+                value={product.scale}
+                onChange={(e) => { e.stopPropagation(); onUpdate?.({ scale: parseFloat(e.target.value) }); }}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="w-16 h-1 accent-primary cursor-pointer"
+              />
+              <span className="font-body text-[8px] text-muted-foreground select-none">L</span>
+            </div>
+            <span className="font-body text-[8px] text-muted-foreground bg-background/80 rounded px-1.5 py-0.5 pointer-events-none">
               drag to move · scroll to rotate
             </span>
           </div>
