@@ -352,45 +352,6 @@ export type Database = {
           },
         ]
       }
-      room_planner_projects: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          pixels_per_meter: number
-          placed_products: Json
-          plan_image_url: string | null
-          rooms: Json
-          updated_at: string
-          user_id: string
-          wall_height: number
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name?: string
-          pixels_per_meter?: number
-          placed_products?: Json
-          plan_image_url?: string | null
-          rooms?: Json
-          updated_at?: string
-          user_id: string
-          wall_height?: number
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          pixels_per_meter?: number
-          placed_products?: Json
-          plan_image_url?: string | null
-          rooms?: Json
-          updated_at?: string
-          user_id?: string
-          wall_height?: number
-        }
-        Relationships: []
-      }
       sample_request_audit_log: {
         Row: {
           changed_by: string | null

@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
-  Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package, Box,
+  Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package,
 } from "lucide-react";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { Link } from "react-router-dom";
@@ -34,7 +34,6 @@ const DASH_CARDS = [
   { key: "dash-library", title: "Brand Library", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", fallbackId: "v1773790684/AffluencySG_086_2_1_2_xpvcnw", fallbackImage: null as string | null, defaultGravity: "auto" },
   { key: "dash-samples", title: "Request Samples", description: "Order product samples for your projects", icon: Package, to: "/trade/samples", fallbackId: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v", fallbackImage: null as string | null, defaultGravity: "auto" },
   { key: "dash-quotes", title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/e_contrast:20,e_saturation:15/v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg.png", defaultGravity: "auto" },
-  { key: "dash-room-planner", title: "Room Planner", description: "Design your space in 3D with our products", icon: Box, to: "/trade/room-planner", fallbackId: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v", fallbackImage: null as string | null, defaultGravity: "auto" },
 ];
 
 const GRAVITY_TO_POSITION: Record<string, string> = {
