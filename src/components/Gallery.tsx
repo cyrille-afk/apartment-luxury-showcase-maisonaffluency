@@ -575,7 +575,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     </h3>
                     {!section.items.some(i => i.description) && (
                       <span className="hidden md:inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body mb-2">
-                        <MapPin className="h-3 w-3" />
+                        <span className="relative flex items-center justify-center w-4 h-4">
+                          <span className="absolute inset-0 rounded-full border border-primary/20 animate-ping" style={{ animationDuration: "2.2s" }} />
+                          <span className="absolute inset-[3px] rounded-full border border-primary/25 animate-ping" style={{ animationDuration: "2.2s", animationDelay: "0.5s" }} />
+                          <MapPin className="relative h-2.5 w-2.5 text-primary/60" />
+                        </span>
                         Interactive Gallery
                       </span>
                     )}
