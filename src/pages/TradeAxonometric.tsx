@@ -407,6 +407,29 @@ const TradeAxonometric = () => {
 
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
+  const generateEmptyRoom = async (imageUrl: string) => {
+    setEmptyRoomGenerating(true);
+    setEmptyRoomUrl(null);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) return;
+
+      const data = await invokeAxonometricGenerate({
+        imageUrl: toAbsoluteUrl(imageUrl),
+        mode: "clean_room",
+        style,
+      }, accessToken, 1);
+
+      setEmptyRoomUrl(data.storedUrl || data.imageUrl);
+    } catch (e: any) {
+      console.error("Empty room generation failed:", e);
+      // Non-blocking — don't toast, proposal is optional
+    } finally {
+      setEmptyRoomGenerating(false);
+    }
+  };
+
   const generate = async () => {
     if (!sourceImage) {
       toast({ title: "Upload an image first", variant: "destructive" });
