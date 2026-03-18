@@ -95,7 +95,7 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
       )}
 
       {/* Request Sample CTA — only for authenticated trade users */}
-      {user && (
+      {user && (isTradeUser || isAdmin) && (
         <button
           onClick={handleRequestSample}
           className="inline-flex items-center gap-1.5 mt-4 px-4 py-1.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white/80 hover:text-white hover:bg-white/20 transition-all font-body text-[11px] uppercase tracking-[0.12em]"
