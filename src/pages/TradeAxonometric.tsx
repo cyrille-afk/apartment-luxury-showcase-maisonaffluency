@@ -393,19 +393,30 @@ const TradeAxonometric = () => {
     if (!aiPrompt.trim() || !result) return;
     const currentImageUrl = result.storedUrl || result.imageUrl;
     const userMsg = aiPrompt.trim();
-    setAiHistory((prev) => [...prev, { role: "user", text: userMsg }]);
+    const attachedProduct = aiAttachedProduct;
+    const productLabel = attachedProduct ? ` [with: ${attachedProduct.product_name}]` : "";
+    setAiHistory((prev) => [...prev, { role: "user", text: userMsg + productLabel }]);
     setAiPrompt("");
+    setAiAttachedProduct(null);
+    setAiProductPickerOpen(false);
     setAiSending(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
-        body: {
-          imageUrl: currentImageUrl,
-          mode: "freeform",
-          style,
-          userPrompt: userMsg,
-        },
-      });
+      const body: any = {
+        imageUrl: currentImageUrl,
+        style,
+      };
+
+      if (attachedProduct) {
+        // Use product_swap mode with single swap
+        body.mode = "product_swap";
+        body.swaps = [{ prompt: userMsg, imageUrl: attachedProduct.image_url }];
+      } else {
+        body.mode = "freeform";
+        body.userPrompt = userMsg;
+      }
+
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", { body });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
