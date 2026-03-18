@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { getAllTradeProducts, getAllBrands } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
