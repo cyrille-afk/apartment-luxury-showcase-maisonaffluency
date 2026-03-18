@@ -231,20 +231,40 @@ const TradeAxonometric = () => {
   const [saturation, setSaturation] = useState(100);
   const [warmth, setWarmth] = useState(0);
 
-  // Rate-limit cooldown timer
+  // Rate-limit cooldown timer + auto-retry queue
   const COOLDOWN_SECONDS = 45;
   const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const pendingRetryRef = useRef<(() => void) | null>(null);
+  const [hasPendingRetry, setHasPendingRetry] = useState(false);
 
-  const startCooldown = useCallback(() => {
-    setCooldownUntil(Date.now() + COOLDOWN_SECONDS * 1000);
+  const queueRetry = useCallback((fn: () => void) => {
+    pendingRetryRef.current = fn;
+    setHasPendingRetry(true);
   }, []);
+
+  const cancelRetry = useCallback(() => {
+    pendingRetryRef.current = null;
+    setHasPendingRetry(false);
+  }, []);
+
+  const startCooldown = useCallback((retryFn?: () => void) => {
+    setCooldownUntil(Date.now() + COOLDOWN_SECONDS * 1000);
+    if (retryFn) queueRetry(retryFn);
+  }, [queueRetry]);
 
   const isCoolingDown = cooldownRemaining > 0;
 
   useEffect(() => {
     if (!cooldownUntil) {
       setCooldownRemaining(0);
+      // Cooldown just ended — fire pending retry
+      if (pendingRetryRef.current) {
+        const fn = pendingRetryRef.current;
+        pendingRetryRef.current = null;
+        setHasPendingRetry(false);
+        fn();
+      }
       return;
     }
     const tick = () => {
