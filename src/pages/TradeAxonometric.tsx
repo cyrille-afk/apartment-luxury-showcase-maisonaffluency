@@ -586,15 +586,16 @@ const TradeAxonometric = () => {
       setTimeout(() => aiChatRef.current?.scrollTo({ top: aiChatRef.current.scrollHeight, behavior: "smooth" }), 100);
     } catch (e: any) {
       const message = e?.message || "AI edit failed";
-      if (isRateLimitedError(message)) startCooldown();
+      const rateLimited = isRateLimitedError(message);
+      if (rateLimited) startCooldown(() => handleAiEdit(userMsg));
       toast({
-        title: isRateLimitedError(message) ? "Backend is busy" : "AI edit failed",
-        description: isRateLimitedError(message)
-          ? "Cooldown timer started — retry when it reaches zero."
+        title: rateLimited ? "Backend is busy" : "AI edit failed",
+        description: rateLimited
+          ? "Auto-retry queued — will run when cooldown ends."
           : message,
         variant: "destructive",
       });
-      setAiHistory((prev) => [...prev, { role: "ai", text: `Error: ${message}` }]);
+      setAiHistory((prev) => [...prev, { role: "ai", text: rateLimited ? "⏳ Queued for auto-retry…" : `Error: ${message}` }]);
     } finally {
       setAiSending(false);
     }
