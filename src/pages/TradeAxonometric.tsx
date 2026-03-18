@@ -166,6 +166,8 @@ const TradeAxonometric = () => {
         imageUrl: data.imageUrl,
         storedUrl: data.storedUrl,
         text: data.text,
+        sourceProduct: selectedProduct,
+        mode,
       };
       setResult(gen);
       setHistory((prev) => [gen, ...prev]);
