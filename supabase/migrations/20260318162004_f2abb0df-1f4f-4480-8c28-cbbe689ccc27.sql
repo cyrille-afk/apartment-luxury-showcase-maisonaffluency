@@ -1,0 +1,1 @@
+UPDATE trade_documents SET brand_name = 'Jeremy Maxwell Wintrebert' WHERE id = '2a1d55f0-d73a-4a06-bede-d65672cf71ea'
