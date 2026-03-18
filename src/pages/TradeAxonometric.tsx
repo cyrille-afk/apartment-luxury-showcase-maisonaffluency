@@ -210,6 +210,9 @@ const TradeAxonometric = () => {
   const [savingToGallery, setSavingToGallery] = useState(false);
   const [showSceneEditor, setShowSceneEditor] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
+  const [showProposal, setShowProposal] = useState(false);
+  const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
+  const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
 
   // Turntable state
   const TURNTABLE_ANGLES = [0, 60, 120, 180, 240, 300];
