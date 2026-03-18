@@ -2,6 +2,12 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { getAllTradeProducts, getAllBrands } from "@/lib/tradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { supabase } from "@/integrations/supabase/client";
+
+const toAbsoluteUrl = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
+  return `${window.location.origin}${url.startsWith("/") ? "" : "/"}${url}`;
+};
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
