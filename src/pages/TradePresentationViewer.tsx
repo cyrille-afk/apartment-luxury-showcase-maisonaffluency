@@ -177,8 +177,8 @@ const TradePresentationViewer = () => {
                   </span>
                 )}
               </button>
-              {slide?.image_url && (
-                <a href={slide.image_url} download target="_blank" rel="noopener noreferrer" className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" title="Download">
+              {actualSlide?.image_url && (
+                <a href={actualSlide.image_url} download target="_blank" rel="noopener noreferrer" className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" title="Download">
                   <Download className="w-4 h-4" />
                 </a>
               )}
