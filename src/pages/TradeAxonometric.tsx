@@ -215,7 +215,39 @@ const TradeAxonometric = () => {
   const [saturation, setSaturation] = useState(100);
   const [warmth, setWarmth] = useState(0);
 
-  // Fetch pending requests
+  // Undo / Redo through generation history
+  const canUndo = history.length > 1 && historyIndex < history.length - 1;
+  const canRedo = historyIndex > 0;
+
+  const handleUndo = useCallback(() => {
+    if (!canUndo) return;
+    const nextIdx = historyIndex === -1 ? 1 : historyIndex + 1;
+    setHistoryIndex(nextIdx);
+    setResult(history[nextIdx]);
+  }, [canUndo, historyIndex, history]);
+
+  const handleRedo = useCallback(() => {
+    if (!canRedo) return;
+    const nextIdx = historyIndex - 1;
+    if (nextIdx <= 0) {
+      setHistoryIndex(-1);
+      setResult(history[0]);
+    } else {
+      setHistoryIndex(nextIdx);
+      setResult(history[nextIdx]);
+    }
+  }, [canRedo, historyIndex, history]);
+
+  // Helper: push a new result and reset undo position
+  const pushResult = useCallback((gen: GenerationResult) => {
+    // If we've undone some steps, trim the history before pushing
+    const trimmed = historyIndex > 0 ? history.slice(historyIndex) : history;
+    setHistory([gen, ...trimmed]);
+    setHistoryIndex(-1);
+    setResult(gen);
+  }, [history, historyIndex]);
+
+
   const { data: pendingRequests } = useQuery({
     queryKey: ["axonometric-requests-admin"],
     queryFn: async () => {
