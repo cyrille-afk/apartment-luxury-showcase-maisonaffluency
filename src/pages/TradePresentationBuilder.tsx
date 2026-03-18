@@ -233,6 +233,13 @@ const TradePresentationBuilder = () => {
             <h1 className="font-display text-2xl text-foreground">Edit Presentation</h1>
           </div>
           <button
+            onClick={() => setShowSharePanel(!showSharePanel)}
+            className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-full font-body text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            Share {shares.length > 0 && `(${shares.length})`}
+          </button>
+          <button
             onClick={() => navigate(`/trade/presentations/${id}/view`)}
             className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-full font-body text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
