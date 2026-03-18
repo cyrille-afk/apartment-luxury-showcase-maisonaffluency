@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight } from "lucide-react";
+import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
 type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite";
@@ -44,6 +45,9 @@ const TradeAxonometric = () => {
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [showQueue, setShowQueue] = useState(true);
+  const [galleryTitle, setGalleryTitle] = useState("");
+  const [galleryDesc, setGalleryDesc] = useState("");
+  const [savingToGallery, setSavingToGallery] = useState(false);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
@@ -144,6 +148,32 @@ const TradeAxonometric = () => {
       queryClient.invalidateQueries({ queryKey: ["axonometric-requests-admin"] });
     } catch (e: any) {
       toast({ title: "Failed to update request", description: e.message, variant: "destructive" });
+    }
+  };
+
+  const saveToGallery = async (publish: boolean) => {
+    if (!result) return;
+    const imageUrl = result.storedUrl || result.imageUrl;
+    setSavingToGallery(true);
+    try {
+      const { error } = await (supabase as any).from("axonometric_gallery").insert({
+        created_by: (await supabase.auth.getUser()).data.user?.id,
+        title: galleryTitle.trim().slice(0, 200),
+        description: galleryDesc.trim().slice(0, 500) || null,
+        image_url: imageUrl,
+        style_preset: STYLE_PRESETS.find(s => s.value === style)?.label || null,
+        project_name: activeRequestId ? (pendingRequests?.find((r: any) => r.id === activeRequestId)?.project_name || null) : null,
+        request_id: activeRequestId || null,
+        is_published: publish,
+      });
+      if (error) throw error;
+      toast({ title: publish ? "Saved & published to gallery" : "Saved as draft" });
+      setGalleryTitle("");
+      setGalleryDesc("");
+    } catch (e: any) {
+      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSavingToGallery(false);
     }
   };
 
@@ -448,6 +478,52 @@ const TradeAxonometric = () => {
                   <Button variant="outline" size="sm" onClick={downloadImage}>
                     <Download className="w-3.5 h-3.5" />
                   </Button>
+                </div>
+
+                {/* Save to Gallery */}
+                <div className="border border-border rounded-lg p-5 space-y-3">
+                  <h2 className="font-display text-sm text-foreground flex items-center gap-2">
+                    <Save className="w-3.5 h-3.5" />Save to Gallery
+                  </h2>
+                  <Input
+                    value={galleryTitle}
+                    onChange={(e) => setGalleryTitle(e.target.value)}
+                    placeholder="Title (e.g. Marina Bay Living Room)"
+                    maxLength={200}
+                    className="font-body text-xs"
+                  />
+                  <Textarea
+                    value={galleryDesc}
+                    onChange={(e) => setGalleryDesc(e.target.value)}
+                    placeholder="Description (optional)"
+                    maxLength={500}
+                    rows={2}
+                    className="font-body text-xs"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      disabled={savingToGallery || !galleryTitle.trim()}
+                      onClick={async () => {
+                        await saveToGallery(false);
+                      }}
+                    >
+                      <EyeOff className="w-3.5 h-3.5 mr-1.5" />Save Draft
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1"
+                      disabled={savingToGallery || !galleryTitle.trim()}
+                      onClick={async () => {
+                        await saveToGallery(true);
+                      }}
+                    >
+                      {savingToGallery ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Eye className="w-3.5 h-3.5 mr-1.5" />}
+                      Save & Publish
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Deliver to requester */}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import CloudUpload from "@/components/trade/CloudUpload";
@@ -9,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, Clock, CheckCircle2, Loader2, Image as ImageIcon } from "lucide-react";
+import { Plus, X, Clock, CheckCircle2, Loader2, Image as ImageIcon, GalleryHorizontalEnd } from "lucide-react";
 import { format } from "date-fns";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -86,19 +87,26 @@ const TradeAxonometricRequests = () => {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-display text-2xl text-foreground">Axonometric Requests</h1>
+            <h1 className="font-display text-2xl text-foreground">3D Studio</h1>
             <p className="font-body text-sm text-muted-foreground mt-1">
-              Submit elevation or section drawings to be transformed into 3D axonometric views
+              Submit drawings for 3D renders or browse the gallery
             </p>
           </div>
-          <Button
-            onClick={() => setShowForm(!showForm)}
-            variant={showForm ? "outline" : "default"}
-            size="sm"
-          >
-            {showForm ? <X className="w-4 h-4 mr-1.5" /> : <Plus className="w-4 h-4 mr-1.5" />}
-            {showForm ? "Cancel" : "New Request"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/trade/axonometric-gallery">
+                <GalleryHorizontalEnd className="w-4 h-4 mr-1.5" />View Gallery
+              </Link>
+            </Button>
+            <Button
+              onClick={() => setShowForm(!showForm)}
+              variant={showForm ? "outline" : "default"}
+              size="sm"
+            >
+              {showForm ? <X className="w-4 h-4 mr-1.5" /> : <Plus className="w-4 h-4 mr-1.5" />}
+              {showForm ? "Cancel" : "New Request"}
+            </Button>
+          </div>
         </div>
 
         {/* Submission Form */}

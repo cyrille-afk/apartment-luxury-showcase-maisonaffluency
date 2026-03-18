@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      axonometric_gallery: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          image_url: string
+          is_published: boolean
+          project_name: string | null
+          request_id: string | null
+          style_preset: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          image_url: string
+          is_published?: boolean
+          project_name?: string | null
+          request_id?: string | null
+          style_preset?: string | null
+          title?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          is_published?: boolean
+          project_name?: string | null
+          request_id?: string | null
+          style_preset?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "axonometric_gallery_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "axonometric_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       axonometric_requests: {
         Row: {
           admin_notes: string | null
@@ -677,6 +724,7 @@ export type Database = {
       }
       trade_quote_items: {
         Row: {
+          axonometric_image_url: string | null
           created_at: string
           id: string
           notes: string | null
@@ -686,6 +734,7 @@ export type Database = {
           unit_price_cents: number | null
         }
         Insert: {
+          axonometric_image_url?: string | null
           created_at?: string
           id?: string
           notes?: string | null
@@ -695,6 +744,7 @@ export type Database = {
           unit_price_cents?: number | null
         }
         Update: {
+          axonometric_image_url?: string | null
           created_at?: string
           id?: string
           notes?: string | null
