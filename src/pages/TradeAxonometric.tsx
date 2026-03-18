@@ -975,7 +975,7 @@ const TradeAxonometric = () => {
             {/* Generate Button */}
             <Button
               onClick={generate}
-              disabled={generating || !sourceImage || (mode === "product_swap" && (!swapProduct || !swapPrompt.trim()))}
+              disabled={generating || !sourceImage || (mode === "product_swap" && swapItems.length === 0)}
               className="w-full"
               size="lg"
             >
