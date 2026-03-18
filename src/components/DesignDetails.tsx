@@ -33,7 +33,7 @@ const DesignDetails = () => {
               loading="lazy"
               decoding="async"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
               <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] tracking-wide">
                 Trade Program
