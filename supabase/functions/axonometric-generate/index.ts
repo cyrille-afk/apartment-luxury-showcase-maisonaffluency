@@ -88,6 +88,14 @@ serve(async (req) => {
     } else if (mode === "turntable_angle") {
       const angle = turntableAngle ?? 0;
       prompt = `You are given a 3D axonometric architectural render. Rotate the entire scene ${angle} degrees clockwise around the vertical axis and re-render it from this new viewing angle. Maintain EXACTLY the same room geometry, furniture, materials, textures, lighting quality, and style. The scene content must be identical — only the camera orbit angle changes. Produce a single cohesive professional architectural rendering from the new angle.\n\nRotation: ${angle}° clockwise from the original view.\nStyle: ${defaultStyle}.`;
+    } else if (mode === "clean_room") {
+      prompt = `You are given a 3D axonometric architectural interior render. REMOVE ALL movable furniture, decorations, rugs, plants, artwork, and accessories from the scene. Keep ONLY the architectural shell: walls, floors, ceilings, windows, doors, built-in cabinetry, and fixed architectural elements. Fill the areas where furniture was removed with matching floor/wall textures so the room looks naturally empty and clean. The result should be a pristine, empty architectural space ready for new furniture placement.\n\nStyle: ${defaultStyle}.`;
+    } else if (mode === "proposal_render") {
+      const placementDesc = (placements || [])
+        .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name} — place at approximately (${p.x_percent}% from left, ${p.y_percent}% from top) of the image`)
+        .join("\n");
+      if (!placements || placements.length === 0) throw new Error("At least one product placement is required");
+      prompt = `You are given an EMPTY architectural 3D axonometric interior render (no furniture). Place the following products into this empty room at their specified approximate positions. Each product image is provided in order after the room image. Match the axonometric perspective, add realistic shadows and lighting, and ensure each product looks naturally integrated into the space.\n\nProduct placements:\n${placementDesc}\n\nCRITICAL: Keep ALL architectural elements (walls, floors, ceilings, windows, doors) EXACTLY as they are. Only ADD the specified products. The final result must look like a single cohesive professional architectural rendering.\n\nStyle: ${defaultStyle}.`;
     } else if (mode === "scene_edit") {
       const placementDesc = (placements || [])
         .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name} at position (${p.position?.x_percent ?? 50}% from left, ${p.position?.y_percent ?? 50}% from top), size ${p.size_percent ?? 15}% of image width, rotated ${p.rotation_degrees ?? 0}°`)
