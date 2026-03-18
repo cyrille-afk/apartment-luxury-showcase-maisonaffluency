@@ -478,7 +478,56 @@ const TradeAxonometric = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* My Drafts Panel */}
+        {showDrafts && galleryDrafts && galleryDrafts.length > 0 && (
+          <div className="border border-border rounded-lg divide-y divide-border">
+            <div className="px-5 py-3 bg-muted/30">
+              <h2 className="font-display text-sm text-foreground">Unpublished Drafts</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+              {galleryDrafts.map((draft: any) => (
+                <div key={draft.id} className="border border-border rounded-lg overflow-hidden group">
+                  <div className="aspect-[4/3] overflow-hidden bg-muted relative">
+                    <img src={draft.image_url} alt={draft.title} className="w-full h-full object-cover" />
+                    <span className="absolute top-2 left-2 font-body text-[10px] px-1.5 py-0.5 rounded bg-foreground/80 text-background">Draft</span>
+                  </div>
+                  <div className="p-3 space-y-2">
+                    <p className="font-display text-sm text-foreground line-clamp-1">{draft.title || "Untitled"}</p>
+                    <div className="flex items-center gap-1.5">
+                      {draft.style_preset && (
+                        <span className="font-body text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">{draft.style_preset}</span>
+                      )}
+                      <span className="font-body text-[10px] text-muted-foreground ml-auto">{format(new Date(draft.created_at), "d MMM yyyy")}</span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        setSourceImage(draft.image_url);
+                        setResult({ imageUrl: draft.image_url, storedUrl: draft.image_url, text: "", mode: "elevation_to_axo" });
+                        setGalleryTitle(draft.title || "");
+                        setGalleryDesc(draft.description || "");
+                        setShowDrafts(false);
+                      }}
+                    >
+                      <ArrowRight className="w-3.5 h-3.5 mr-1.5" />Resume Editing
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {showDrafts && (!galleryDrafts || galleryDrafts.length === 0) && (
+          <div className="border border-dashed border-border rounded-lg py-12 flex flex-col items-center justify-center gap-2">
+            <EyeOff className="w-6 h-6 text-muted-foreground/40" />
+            <p className="font-body text-sm text-muted-foreground">No drafts saved yet</p>
+          </div>
+        )}
+
+
           {/* Left: Controls */}
           <div className="space-y-6">
             {/* Source Upload */}
