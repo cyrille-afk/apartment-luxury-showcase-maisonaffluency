@@ -202,6 +202,12 @@ const TradeAxonometric = () => {
   const [swapProduct, setSwapProduct] = useState<SelectedProduct | null>(null);
   const [swapProductSearch, setSwapProductSearch] = useState("");
 
+  // AI dialogue state
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiSending, setAiSending] = useState(false);
+  const [aiHistory, setAiHistory] = useState<{ role: "user" | "ai"; text: string; imageUrl?: string }[]>([]);
+  const aiChatRef = useRef<HTMLDivElement>(null);
+
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
@@ -377,6 +383,45 @@ const TradeAxonometric = () => {
     if (result?.storedUrl || result?.imageUrl) {
       setSourceImage(result.storedUrl || result.imageUrl);
       setMode("composite");
+    }
+  };
+
+  const sendAiPrompt = async () => {
+    if (!aiPrompt.trim() || !result) return;
+    const currentImageUrl = result.storedUrl || result.imageUrl;
+    const userMsg = aiPrompt.trim();
+    setAiHistory((prev) => [...prev, { role: "user", text: userMsg }]);
+    setAiPrompt("");
+    setAiSending(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
+        body: {
+          imageUrl: currentImageUrl,
+          mode: "freeform",
+          style,
+          userPrompt: userMsg,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const gen: GenerationResult = {
+        imageUrl: data.imageUrl,
+        storedUrl: data.storedUrl,
+        text: data.text,
+        sourceProduct: result.sourceProduct,
+        mode: result.mode,
+      };
+      setResult(gen);
+      setHistory((prev) => [gen, ...prev]);
+      setAiHistory((prev) => [...prev, { role: "ai", text: userMsg, imageUrl: data.storedUrl || data.imageUrl }]);
+      setTimeout(() => aiChatRef.current?.scrollTo({ top: aiChatRef.current.scrollHeight, behavior: "smooth" }), 100);
+    } catch (e: any) {
+      toast({ title: "AI edit failed", description: e.message, variant: "destructive" });
+      setAiHistory((prev) => [...prev, { role: "ai", text: `Error: ${e.message}` }]);
+    } finally {
+      setAiSending(false);
     }
   };
 
@@ -913,6 +958,47 @@ const TradeAxonometric = () => {
                     className="w-full object-contain"
                     style={filterStyle}
                   />
+                </div>
+
+                {/* AI Dialogue Box */}
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <div className="px-4 py-2.5 bg-muted/30 border-b border-border flex items-center gap-2">
+                    <Wand2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    <h3 className="font-display text-xs text-foreground">AI Edit Prompt</h3>
+                    <span className="font-body text-[10px] text-muted-foreground ml-auto">Describe changes to apply</span>
+                  </div>
+
+                  {aiHistory.length > 0 && (
+                    <div ref={aiChatRef} className="max-h-48 overflow-y-auto divide-y divide-border/50">
+                      {aiHistory.map((msg, i) => (
+                        <div key={i} className={`px-4 py-2.5 text-xs font-body ${msg.role === "user" ? "bg-muted/10" : "bg-muted/30"}`}>
+                          <span className="font-medium text-muted-foreground mr-1.5">{msg.role === "user" ? "You:" : "AI:"}</span>
+                          {msg.role === "ai" && msg.imageUrl ? (
+                            <span className="text-foreground">Applied: {msg.text}</span>
+                          ) : msg.role === "ai" && msg.text.startsWith("Error:") ? (
+                            <span className="text-destructive">{msg.text}</span>
+                          ) : (
+                            <span className="text-foreground">{msg.text}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 p-3">
+                    <input
+                      type="text"
+                      value={aiPrompt}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendAiPrompt(); } }}
+                      placeholder='e.g. "Change the sofa to dark blue velvet" or "Add a plant in the corner"'
+                      disabled={aiSending}
+                      className="flex-1 border border-border rounded-md px-3 py-2 font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 disabled:opacity-50"
+                    />
+                    <Button size="sm" onClick={sendAiPrompt} disabled={aiSending || !aiPrompt.trim()}>
+                      {aiSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Source Product Link — click to view original 3D */}
