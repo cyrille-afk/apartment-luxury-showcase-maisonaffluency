@@ -1153,11 +1153,24 @@ const TradeAxonometric = () => {
               <div className="flex items-center gap-3 rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-4 py-3">
                 <Timer className="w-4 h-4 text-yellow-600 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-display text-xs text-foreground">Rate limit — cooldown active</p>
+                  <p className="font-display text-xs text-foreground">
+                    {hasPendingRetry ? "Auto-retry queued" : "Rate limit — cooldown active"}
+                  </p>
                   <p className="font-body text-[11px] text-muted-foreground">
-                    You can retry in <span className="font-display text-foreground">{cooldownRemaining}s</span>
+                    {hasPendingRetry
+                      ? <>Will auto-retry in <span className="font-display text-foreground">{cooldownRemaining}s</span></>
+                      : <>You can retry in <span className="font-display text-foreground">{cooldownRemaining}s</span></>
+                    }
                   </p>
                 </div>
+                {hasPendingRetry && (
+                  <button
+                    onClick={cancelRetry}
+                    className="text-[10px] font-body text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded border border-border"
+                  >
+                    Cancel
+                  </button>
+                )}
                 <div className="relative w-8 h-8 shrink-0">
                   <svg viewBox="0 0 36 36" className="w-8 h-8 -rotate-90">
                     <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
