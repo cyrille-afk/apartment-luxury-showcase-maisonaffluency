@@ -441,11 +441,12 @@ const TradeAxonometric = () => {
     } catch (e: any) {
       console.error(e);
       const message = e?.message || "Generation failed";
-      if (isRateLimitedError(message)) startCooldown();
+      const rateLimited = isRateLimitedError(message);
+      if (rateLimited) startCooldown(() => generate());
       toast({
-        title: isRateLimitedError(message) ? "Backend is busy" : "Generation failed",
-        description: isRateLimitedError(message)
-          ? "Cooldown timer started — retry when it reaches zero."
+        title: rateLimited ? "Backend is busy" : "Generation failed",
+        description: rateLimited
+          ? "Auto-retry queued — will run when cooldown ends."
           : message,
         variant: "destructive",
       });
