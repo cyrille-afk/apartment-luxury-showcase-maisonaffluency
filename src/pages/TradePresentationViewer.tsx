@@ -1,11 +1,13 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, MessageSquare, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, MessageSquare, Send, FileDown, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { pdf } from "@react-pdf/renderer";
+import PresentationPDF from "@/components/trade/PresentationPDF";
 
 interface Slide {
   id: string;
@@ -37,6 +39,7 @@ const TradePresentationViewer = () => {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
@@ -132,6 +135,32 @@ const TradePresentationViewer = () => {
     setFullscreen(!fullscreen);
   };
 
+  const handleExportPdf = useCallback(async () => {
+    if (!presentation || slides.length === 0) return;
+    setExportingPdf(true);
+    try {
+      const blob = await pdf(
+        <PresentationPDF
+          title={presentation.title || ""}
+          clientName={presentation.client_name || undefined}
+          projectName={presentation.project_name || undefined}
+          createdAt={presentation.created_at || new Date().toISOString()}
+          slides={slides}
+        />
+      ).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${(presentation.title || "Presentation").replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "-")}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PDF export failed:", err);
+    } finally {
+      setExportingPdf(false);
+    }
+  }, [presentation, slides]);
+
   if (loading) return null;
   if (!user) return <Navigate to="/trade/login" replace />;
 
@@ -178,6 +207,16 @@ const TradePresentationViewer = () => {
                   </span>
                 )}
               </button>
+              {isAdmin && slides.length > 0 && (
+                <button
+                  onClick={handleExportPdf}
+                  disabled={exportingPdf}
+                  className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+                  title="Export as PDF"
+                >
+                  {exportingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+                </button>
+              )}
               {actualSlide?.image_url && (
                 <a href={actualSlide.image_url} download target="_blank" rel="noopener noreferrer" className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" title="Download">
                   <Download className="w-4 h-4" />
