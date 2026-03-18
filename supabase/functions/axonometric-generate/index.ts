@@ -114,6 +114,28 @@ CRITICAL RULES:
 - The final result must look like a single cohesive professional architectural rendering
 
 Style: ${defaultStyle}.`;
+    } else if (mode === "proposal_refine") {
+      const productList = (placements || [])
+        .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name}`)
+        .join("\n");
+      const userInstruction = refinementPrompt || "Improve the placement and integration of furniture.";
+      prompt = `You are given TWO images:
+1. FIRST IMAGE: The ORIGINAL client layout — use this as the spatial reference for furniture positions and orientations.
+2. SECOND IMAGE: A previously generated proposal that needs refinement.
+
+The proposal contains these products:
+${productList}
+
+ADMIN'S REFINEMENT REQUEST: "${userInstruction}"
+
+Apply the requested changes while following these rules:
+- Keep ALL architectural elements (walls, floors, ceilings, windows, doors) EXACTLY as they are
+- Maintain the same products listed above — do NOT add or remove any
+- Respect the original client layout's spatial intent unless the refinement explicitly asks to change positions
+- Add realistic shadows, lighting, and perspective
+- The result must look like a single cohesive professional architectural rendering
+
+Style: ${defaultStyle}.`;
     } else if (mode === "scene_edit") {
       const placementDesc = (placements || [])
         .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name} at position (${p.position?.x_percent ?? 50}% from left, ${p.position?.y_percent ?? 50}% from top), size ${p.size_percent ?? 15}% of image width, rotated ${p.rotation_degrees ?? 0}°`)
