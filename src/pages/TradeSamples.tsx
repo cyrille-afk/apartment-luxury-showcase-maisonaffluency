@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Package, Plus, Clock, Truck, CheckCircle, RotateCcw, X, ImagePlus } from "lucide-react";
@@ -47,6 +48,7 @@ const formatDate = (d: string) =>
 
 const TradeSamples = () => {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [requests, setRequests] = useState<SampleRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -65,6 +67,22 @@ const TradeSamples = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Pre-fill from URL params (e.g. from curator picks "Request Sample" button)
+  useEffect(() => {
+    const product = searchParams.get("product");
+    const brand = searchParams.get("brand");
+    const image = searchParams.get("image");
+    if (product || brand) {
+      if (product) setProductName(product);
+      if (brand) setBrandName(brand);
+      if (image) setImagePreview(image);
+      setShowForm(true);
+      // Clean URL params after reading
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
+
   const fetchRequests = async () => {
     const { data } = await supabase
       .from("trade_sample_requests")
@@ -100,7 +118,7 @@ const TradeSamples = () => {
 
     let imageUrl: string | null = null;
 
-    // Upload image if provided
+    // Upload image if a file was selected, otherwise use pre-filled URL
     if (imageFile) {
       const ext = imageFile.name.split(".").pop() || "jpg";
       const path = `samples/${user.id}/${Date.now()}.${ext}`;
@@ -114,6 +132,9 @@ const TradeSamples = () => {
       }
       const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
       imageUrl = urlData.publicUrl;
+    } else if (imagePreview && !imageFile) {
+      // Pre-filled image URL from curator picks
+      imageUrl = imagePreview;
     }
 
     const { error } = await supabase.from("trade_sample_requests").insert({
