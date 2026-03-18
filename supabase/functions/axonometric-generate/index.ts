@@ -39,8 +39,9 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl } = await req.json();
-    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay"
+    const body = await req.json();
+    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements } = body;
+    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "scene_edit"
 
     if (!imageUrl) throw new Error("imageUrl is required");
 
