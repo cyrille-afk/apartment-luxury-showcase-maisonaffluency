@@ -11,6 +11,10 @@ const HERO_SECTIONS = [
   { key: "quotes", label: "Quote Builder", fallbackId: "v1773726568/AffluencySG_081_dk5rn7" },
   { key: "documents", label: "Brand Library", fallbackId: "home-office-desk_g0ywv2" },
   { key: "provenance", label: "Provenance & Certificates", fallbackId: "details-console_hk6uxt" },
+  { key: "dash-showroom", label: "Dashboard · Showroom", fallbackId: "living-room-hero_zxfcxl" },
+  { key: "dash-gallery", label: "Dashboard · Website Products", fallbackId: "v1773811405/IMG_6996_tfx4bp" },
+  { key: "dash-quotes", label: "Dashboard · Quote Builder", fallbackId: "v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg" },
+  { key: "dash-library", label: "Dashboard · Brand Library", fallbackId: "v1773790684/AffluencySG_086_2_1_2_xpvcnw" },
 ] as const;
 
 const GRAVITY_OPTIONS = [

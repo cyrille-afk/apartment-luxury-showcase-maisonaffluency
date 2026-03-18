@@ -24,16 +24,26 @@ interface ActivityItem {
   link?: string;
 }
 
-const thumb = (id: string) =>
-  cloudinaryUrl(id, { width: 600, height: 400, quality: "auto", crop: "fill", gravity: "auto" });
+const thumb = (id: string, gravity?: string) =>
+  cloudinaryUrl(id, { width: 600, height: 400, quality: "auto", crop: "fill", gravity: (gravity as any) || "auto" });
 
-const quickLinks = [
-  { title: "Browse Showroom", description: "Review items from the Maison Affluency gallery", icon: MapPin, to: "/trade/showroom", image: thumb("living-room-hero_zxfcxl") },
-  { title: "Browse Website Products", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery", image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1773811405/IMG_6996_tfx4bp.jpg", imagePosition: "object-bottom" },
-  { title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", image: "https://res.cloudinary.com/dif1oamtj/image/upload/e_contrast:20,e_saturation:15/v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg.png" },
-  { title: "Brand Library", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", image: thumb("v1773790684/AffluencySG_086_2_1_2_xpvcnw") },
-  { title: "Request Samples", description: "Order product samples for your projects", icon: Package, to: "/trade/samples", image: thumb("v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v") },
+// Dashboard card definitions – each has a section_heroes key for admin overrides
+const DASH_CARDS = [
+  { key: "dash-showroom", title: "Browse Showroom", description: "Review items from the Maison Affluency gallery", icon: MapPin, to: "/trade/showroom", fallbackId: "living-room-hero_zxfcxl", fallbackImage: null as string | null, defaultGravity: "auto" },
+  { key: "dash-gallery", title: "Browse Website Products", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/v1773811405/IMG_6996_tfx4bp.jpg", defaultGravity: "south" },
+  { key: "dash-quotes", title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/e_contrast:20,e_saturation:15/v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg.png", defaultGravity: "auto" },
+  { key: "dash-library", title: "Brand Library", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", fallbackId: "v1773790684/AffluencySG_086_2_1_2_xpvcnw", fallbackImage: null as string | null, defaultGravity: "auto" },
+  { key: "dash-samples", title: "Request Samples", description: "Order product samples for your projects", icon: Package, to: "/trade/samples", fallbackId: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v", fallbackImage: null as string | null, defaultGravity: "auto" },
 ];
+
+const GRAVITY_TO_POSITION: Record<string, string> = {
+  east: "object-right",
+  west: "object-left",
+  north: "object-top",
+  south: "object-bottom",
+  center: "object-center",
+  auto: "",
+};
 
 const typeLabels: Record<string, string> = {
   tearsheet: "Tearsheet",
@@ -61,9 +71,21 @@ const TradeDashboard = () => {
   const [brands, setBrands] = useState<BrandFolder[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
 
   useEffect(() => {
     const fetchData = async () => {
+      // Fetch dashboard hero overrides
+      const { data: heroes } = await supabase
+        .from("section_heroes")
+        .select("section_key, image_url, gravity")
+        .like("section_key", "dash-%");
+      if (heroes) {
+        const map: Record<string, { image_url: string; gravity: string }> = {};
+        heroes.forEach((h: any) => { map[h.section_key] = { image_url: h.image_url, gravity: h.gravity }; });
+        setHeroOverrides(map);
+      }
+
       // Fetch brands
       const { data: docs } = await supabase
         .from("trade_documents")
@@ -136,6 +158,20 @@ const TradeDashboard = () => {
     fetchData();
   }, []);
 
+  const getCardImage = (card: typeof DASH_CARDS[number]) => {
+    const override = heroOverrides[card.key];
+    if (override) return override.image_url;
+    if (card.fallbackImage) return card.fallbackImage;
+    if (card.fallbackId) return thumb(card.fallbackId);
+    return "";
+  };
+
+  const getCardPosition = (card: typeof DASH_CARDS[number]) => {
+    const override = heroOverrides[card.key];
+    const gravity = override ? override.gravity : card.defaultGravity;
+    return GRAVITY_TO_POSITION[gravity] || "";
+  };
+
   return (
     <>
       <Helmet><title>Dashboard — Trade Portal — Maison Affluency</title></Helmet>
@@ -151,24 +187,24 @@ const TradeDashboard = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        {quickLinks.map((link) => (
+        {DASH_CARDS.map((card) => (
           <Link
-            key={link.to}
-            to={link.to}
+            key={card.to}
+            to={card.to}
             className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all"
           >
             <div className="relative aspect-[3/2] overflow-hidden">
               <img
-                src={link.image}
-                alt={link.title}
+                src={getCardImage(card)}
+                alt={card.title}
                 loading="lazy"
-                className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${(link as any).imagePosition || ''}`}
+                className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${getCardPosition(card)}`}
               />
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
             </div>
             <div className="p-3 md:p-4">
-              <h3 className="font-display text-sm md:text-base text-foreground mb-0.5 md:mb-1">{link.title}</h3>
-              <p className="font-body text-[10px] md:text-xs text-muted-foreground leading-tight">{link.description}</p>
+              <h3 className="font-display text-sm md:text-base text-foreground mb-0.5 md:mb-1">{card.title}</h3>
+              <p className="font-body text-[10px] md:text-xs text-muted-foreground leading-tight">{card.description}</p>
             </div>
           </Link>
         ))}
