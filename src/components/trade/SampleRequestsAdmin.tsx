@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import {
   Package, Clock, CheckCircle, Truck, RotateCcw, X,
   ChevronDown, ImagePlus, Link as LinkIcon, Loader2, Trash2,
-  History,
+  History, FileDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
