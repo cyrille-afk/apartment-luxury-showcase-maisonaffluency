@@ -23,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Wand2, Paintbrush, Layers, RotateCcw, Download, ImagePlus, Inbox, CheckCircle2, Clock, ArrowRight, Save, Eye, EyeOff, PenTool, Search, FileInput, ExternalLink, Link2, X, Undo2, Redo2, Trash2, Upload, RotateCw, Timer } from "lucide-react";
 const AxonometricSceneEditor = lazy(() => import("@/components/trade/AxonometricSceneEditor"));
-const TurntableViewer = lazy(() => import("@/components/trade/TurntableViewer"));
+
 const ProposalBuilder = lazy(() => import("@/components/trade/ProposalBuilder"));
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
