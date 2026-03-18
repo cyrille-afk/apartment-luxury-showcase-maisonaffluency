@@ -231,20 +231,40 @@ const TradeAxonometric = () => {
   const [saturation, setSaturation] = useState(100);
   const [warmth, setWarmth] = useState(0);
 
-  // Rate-limit cooldown timer
+  // Rate-limit cooldown timer + auto-retry queue
   const COOLDOWN_SECONDS = 45;
   const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const pendingRetryRef = useRef<(() => void) | null>(null);
+  const [hasPendingRetry, setHasPendingRetry] = useState(false);
 
-  const startCooldown = useCallback(() => {
-    setCooldownUntil(Date.now() + COOLDOWN_SECONDS * 1000);
+  const queueRetry = useCallback((fn: () => void) => {
+    pendingRetryRef.current = fn;
+    setHasPendingRetry(true);
   }, []);
+
+  const cancelRetry = useCallback(() => {
+    pendingRetryRef.current = null;
+    setHasPendingRetry(false);
+  }, []);
+
+  const startCooldown = useCallback((retryFn?: () => void) => {
+    setCooldownUntil(Date.now() + COOLDOWN_SECONDS * 1000);
+    if (retryFn) queueRetry(retryFn);
+  }, [queueRetry]);
 
   const isCoolingDown = cooldownRemaining > 0;
 
   useEffect(() => {
     if (!cooldownUntil) {
       setCooldownRemaining(0);
+      // Cooldown just ended — fire pending retry
+      if (pendingRetryRef.current) {
+        const fn = pendingRetryRef.current;
+        pendingRetryRef.current = null;
+        setHasPendingRetry(false);
+        fn();
+      }
       return;
     }
     const tick = () => {
@@ -421,11 +441,12 @@ const TradeAxonometric = () => {
     } catch (e: any) {
       console.error(e);
       const message = e?.message || "Generation failed";
-      if (isRateLimitedError(message)) startCooldown();
+      const rateLimited = isRateLimitedError(message);
+      if (rateLimited) startCooldown(() => generate());
       toast({
-        title: isRateLimitedError(message) ? "Backend is busy" : "Generation failed",
-        description: isRateLimitedError(message)
-          ? "Cooldown timer started — retry when it reaches zero."
+        title: rateLimited ? "Backend is busy" : "Generation failed",
+        description: rateLimited
+          ? "Auto-retry queued — will run when cooldown ends."
           : message,
         variant: "destructive",
       });
@@ -565,15 +586,16 @@ const TradeAxonometric = () => {
       setTimeout(() => aiChatRef.current?.scrollTo({ top: aiChatRef.current.scrollHeight, behavior: "smooth" }), 100);
     } catch (e: any) {
       const message = e?.message || "AI edit failed";
-      if (isRateLimitedError(message)) startCooldown();
+      const rateLimited = isRateLimitedError(message);
+      if (rateLimited) startCooldown(() => sendAiPrompt());
       toast({
-        title: isRateLimitedError(message) ? "Backend is busy" : "AI edit failed",
-        description: isRateLimitedError(message)
-          ? "Cooldown timer started — retry when it reaches zero."
+        title: rateLimited ? "Backend is busy" : "AI edit failed",
+        description: rateLimited
+          ? "Auto-retry queued — will run when cooldown ends."
           : message,
         variant: "destructive",
       });
-      setAiHistory((prev) => [...prev, { role: "ai", text: `Error: ${message}` }]);
+      setAiHistory((prev) => [...prev, { role: "ai", text: rateLimited ? "⏳ Queued for auto-retry…" : `Error: ${message}` }]);
     } finally {
       setAiSending(false);
     }
@@ -623,10 +645,10 @@ const TradeAxonometric = () => {
 
           if (isRateLimitedError(message)) {
             pausedForRateLimit = true;
-            startCooldown();
+            startCooldown(() => generateTurntable());
             toast({
-              title: "Turntable paused",
-              description: "Cooldown timer started — retry when it reaches zero.",
+              title: "Turntable paused — auto-retry queued",
+              description: "Will resume when cooldown ends.",
               variant: "destructive",
             });
             break;
@@ -1131,11 +1153,24 @@ const TradeAxonometric = () => {
               <div className="flex items-center gap-3 rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-4 py-3">
                 <Timer className="w-4 h-4 text-yellow-600 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-display text-xs text-foreground">Rate limit — cooldown active</p>
+                  <p className="font-display text-xs text-foreground">
+                    {hasPendingRetry ? "Auto-retry queued" : "Rate limit — cooldown active"}
+                  </p>
                   <p className="font-body text-[11px] text-muted-foreground">
-                    You can retry in <span className="font-display text-foreground">{cooldownRemaining}s</span>
+                    {hasPendingRetry
+                      ? <>Will auto-retry in <span className="font-display text-foreground">{cooldownRemaining}s</span></>
+                      : <>You can retry in <span className="font-display text-foreground">{cooldownRemaining}s</span></>
+                    }
                   </p>
                 </div>
+                {hasPendingRetry && (
+                  <button
+                    onClick={cancelRetry}
+                    className="text-[10px] font-body text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded border border-border"
+                  >
+                    Cancel
+                  </button>
+                )}
                 <div className="relative w-8 h-8 shrink-0">
                   <svg viewBox="0 0 36 36" className="w-8 h-8 -rotate-90">
                     <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
