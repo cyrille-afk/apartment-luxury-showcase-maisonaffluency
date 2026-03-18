@@ -23,7 +23,7 @@ const DesignDetails = () => {
           {/* Compact teaser card */}
           <Link
             to="/trade/program"
-            className="group block overflow-hidden rounded-sm relative max-w-3xl mx-auto aspect-[16/7]"
+            className="group block overflow-hidden rounded-sm relative max-w-3xl mx-auto aspect-[4/3]"
           >
             <img
               src={cloudinaryUrl("v1773758590/Screen_Shot_2026-03-17_at_10.40.56_PM_mlwtop", { width: 1200, quality: "auto:good", crop: "limit" })}
