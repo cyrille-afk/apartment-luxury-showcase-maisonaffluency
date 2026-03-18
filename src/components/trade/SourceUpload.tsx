@@ -18,8 +18,6 @@ const MAX_UPLOAD_PIXELS = 12_000_000;
 const PDF_PARSE_TIMEOUT_MS = 30000;
 const PDF_RENDER_TIMEOUT_MS = 20000;
 
-type PdfModule = Awaited<ReturnType<typeof import("pdfjs-dist")>>;
-
 const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number, timeoutMessage: string): Promise<T> => {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
@@ -40,7 +38,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
   const [selectedPage, setSelectedPage] = useState(1);
   const [loadingPreviews, setLoadingPreviews] = useState(false);
 
-  const getPdfLib = async (): Promise<PdfModule> => {
+  const getPdfLib = async (): Promise<any> => {
     const pdfjsLib = await import("pdfjs-dist");
 
     try {
@@ -54,7 +52,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
   };
 
   const renderPagePreview = async (pdf: any, pageNum: number, scale: number): Promise<string> => {
-    const page = await withTimeout(
+    const page: any = await withTimeout<any>(
       pdf.getPage(pageNum),
       PDF_RENDER_TIMEOUT_MS,
       `PDF page ${pageNum} took too long to load`
@@ -77,7 +75,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
   };
 
   const renderPageForUpload = async (pdf: any, pageNum: number) => {
-    const page = await withTimeout(
+    const page: any = await withTimeout<any>(
       pdf.getPage(pageNum),
       PDF_RENDER_TIMEOUT_MS,
       `PDF page ${pageNum} took too long to load`
@@ -125,7 +123,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
     try {
       const pdfjsLib = await getPdfLib();
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await withTimeout(
+      const pdf: any = await withTimeout<any>(
         pdfjsLib.getDocument({ data: arrayBuffer }).promise,
         PDF_PARSE_TIMEOUT_MS,
         "PDF parsing timed out. Try a smaller or less complex PDF."
@@ -157,7 +155,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
     try {
       const pdfjsLib = await getPdfLib();
       const arrayBuffer = await pdfFile.arrayBuffer();
-      const pdf = await withTimeout(
+      const pdf: any = await withTimeout<any>(
         pdfjsLib.getDocument({ data: arrayBuffer }).promise,
         PDF_PARSE_TIMEOUT_MS,
         "PDF parsing timed out. Try a smaller or less complex PDF."
