@@ -1391,7 +1391,7 @@ const TradeAxonometric = () => {
                     variant="outline"
                     size="sm"
                     onClick={generateTurntable}
-                    disabled={turntableGenerating}
+                    disabled={turntableGenerating || isCoolingDown}
                   >
                     {turntableGenerating ? (
                       <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Generating Orbit…</>
