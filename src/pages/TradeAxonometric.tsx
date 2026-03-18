@@ -1269,8 +1269,7 @@ const TradeAxonometric = () => {
                 sourceProduct: result.sourceProduct,
                 mode: "composite",
               };
-              setResult(gen);
-              setHistory((prev) => [gen, ...prev]);
+              pushResult(gen);
               setShowSceneEditor(false);
             }}
           />
