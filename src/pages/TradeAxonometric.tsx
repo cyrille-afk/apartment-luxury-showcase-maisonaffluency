@@ -612,8 +612,16 @@ const TradeAxonometric = () => {
                     className="pl-9 font-body text-xs"
                   />
                 </div>
+                <CategoryFilterBar
+                  category={pickerCategory}
+                  subcategory={pickerSubcategory}
+                  onCategoryChange={setPickerCategory}
+                  onSubcategoryChange={setPickerSubcategory}
+                />
                 <ProductPicker
                   search={productSearch}
+                  category={pickerCategory || undefined}
+                  subcategory={pickerSubcategory || undefined}
                   onSelect={(product) => {
                     setSelectedProduct(product);
                     setSourceImage(product.image_url);
