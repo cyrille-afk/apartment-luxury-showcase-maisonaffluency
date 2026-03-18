@@ -17,10 +17,20 @@ import { format } from "date-fns";
 
 type Mode = "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay";
 
+interface SelectedProduct {
+  product_name: string;
+  brand_name: string;
+  image_url: string;
+  dimensions?: string;
+  materials?: string;
+}
+
 interface GenerationResult {
   imageUrl: string;
   storedUrl: string | null;
   text: string;
+  sourceProduct?: SelectedProduct | null;
+  mode: Mode;
 }
 
 const STYLE_PRESETS = [
