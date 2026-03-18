@@ -172,7 +172,11 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
       setPdfPreviews([]);
       setPdfPageCount(0);
     } catch (e: any) {
-      toast({ title: "Upload failed", description: e.message, variant: "destructive" });
+      const rawMessage = e?.message || "Upload failed";
+      const description = /row-level security|permission denied|jwt/i.test(rawMessage)
+        ? "Your account doesn’t currently have upload permission. Sign out/in and retry; if it still fails, ask an admin to approve your trade access."
+        : rawMessage;
+      toast({ title: "Upload failed", description, variant: "destructive" });
     } finally {
       setUploading(false);
     }
