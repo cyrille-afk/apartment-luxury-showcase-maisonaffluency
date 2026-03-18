@@ -403,6 +403,86 @@ const TradeAxonometric = () => {
               </div>
             )}
 
+            {/* 3D → CAD: Product Browser from platform */}
+            {mode === "3d_to_cad" && (
+              <div className="border border-border rounded-lg p-5 space-y-4">
+                <h2 className="font-display text-sm text-foreground">Select Product from Platform</h2>
+                <p className="font-body text-xs text-muted-foreground">
+                  Choose a 3D product image to convert into a 2D CAD vector block with estimated dimensions
+                </p>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    placeholder="Search products…"
+                    className="pl-9 font-body text-xs"
+                  />
+                </div>
+                <ProductPicker
+                  search={productSearch}
+                  onSelect={(imageUrl) => setSourceImage(imageUrl)}
+                  selectedUrl={sourceImage}
+                />
+              </div>
+            )}
+
+            {/* CAD Overlay: Technical drawing + CAD blocks */}
+            {mode === "cad_overlay" && (
+              <div className="border border-border rounded-lg p-5 space-y-4">
+                <h2 className="font-display text-sm text-foreground">Technical Drawing</h2>
+                <p className="font-body text-xs text-muted-foreground">
+                  Upload the technical drawing to overlay CAD blocks onto
+                </p>
+                {technicalDrawingUrl ? (
+                  <div className="relative group">
+                    <img src={technicalDrawingUrl} alt="Technical drawing" className="w-full max-h-40 object-contain rounded border border-border" />
+                    <button
+                      onClick={() => setTechnicalDrawingUrl(null)}
+                      className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <RotateCcw className="w-3 h-3 text-foreground" />
+                    </button>
+                  </div>
+                ) : (
+                  <CloudUpload
+                    folder="axonometric-technical"
+                    accept="image/*"
+                    label="Upload technical drawing"
+                    onUpload={(urls) => setTechnicalDrawingUrl(urls[0])}
+                  />
+                )}
+                <h3 className="font-display text-xs text-foreground pt-2">CAD Blocks to Insert</h3>
+                <p className="font-body text-[10px] text-muted-foreground">
+                  Use previously generated CAD blocks or upload custom ones
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {overlayImages.map((img, i) => (
+                    <div key={i} className="relative w-16 h-16 border border-border rounded overflow-hidden group">
+                      <img src={img} alt="" className="w-full h-full object-contain bg-white" />
+                      <button
+                        onClick={() => setOverlayImages((prev) => prev.filter((_, j) => j !== i))}
+                        className="absolute inset-0 bg-background/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <RotateCcw className="w-3 h-3 text-foreground" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {overlayImages.length < 5 && (
+                  <CloudUpload
+                    folder="axonometric-cad-blocks"
+                    accept="image/*"
+                    multiple
+                    label="Add CAD block images"
+                    onUpload={(urls) =>
+                      setOverlayImages((prev) => [...prev, ...urls].slice(0, 5))
+                    }
+                  />
+                )}
+              </div>
+            )}
+
             {/* Generate Button */}
             <Button
               onClick={generate}
