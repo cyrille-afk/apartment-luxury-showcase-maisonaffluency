@@ -350,8 +350,10 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       });
     }
 
-    // Flash model for ALL modes (speed), Pro only as final-attempt fallback
-    const selectedModel = "google/gemini-3.1-flash-image-preview";
+    // Pro for initial axo transforms (quality matters), Flash for everything else (speed)
+    const selectedModel = mode === "elevation_to_axo"
+      ? "google/gemini-3-pro-image-preview"
+      : "google/gemini-3.1-flash-image-preview";
 
     console.log(`[axo-gen] mode=${mode}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
 
