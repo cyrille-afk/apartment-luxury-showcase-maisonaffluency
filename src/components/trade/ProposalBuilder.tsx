@@ -204,6 +204,7 @@ export default function ProposalBuilder({
         product_name: p.product_name,
         brand_name: p.brand_name,
         image_url: toAbsoluteUrl(p.image_url),
+        rotation: p.rotation || 0,
       }));
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
