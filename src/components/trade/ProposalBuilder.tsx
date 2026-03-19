@@ -1033,6 +1033,8 @@ export default function ProposalBuilder({
                       image_url: p.image_url!,
                       dimensions: p.dimensions,
                       materials: p.materials,
+                      pdf_url: p.pdf_url,
+                      pdf_urls: p.pdf_urls,
                     })
                   }
                   className="rounded border border-border overflow-hidden text-left transition-all hover:border-foreground/30"
