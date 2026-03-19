@@ -129,6 +129,8 @@ const App = () => {
                     <Route path="presentations" element={<TradePresentations />} />
                     <Route path="presentations/:id" element={<TradePresentationBuilder />} />
                     <Route path="presentations/:id/view" element={<TradePresentationViewer />} />
+                    <Route path="favorites" element={<TradeFavorites />} />
+                    <Route path="insights" element={<TradeInsights />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 
