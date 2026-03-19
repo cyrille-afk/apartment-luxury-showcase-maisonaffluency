@@ -30,7 +30,9 @@ interface SelectedProduct {
   dimensions?: string;
   materials?: string;
   isExternal?: boolean;
-  rotation?: number; // degrees (0, 90, 180, 270)
+  rotation?: number;
+  pdf_url?: string;
+  pdf_urls?: { label: string; url: string; filename?: string }[];
 }
 
 interface ProposalBuilderProps {
