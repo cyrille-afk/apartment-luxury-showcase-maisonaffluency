@@ -167,6 +167,11 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, product_swap, freeform, apply_texture, scene_edit, turntable_angle");
     }
 
+    // If a style reference image is provided, append instruction to match its visual style
+    if (styleReferenceUrl) {
+      prompt += `\n\nIMPORTANT STYLE REFERENCE: A reference image is provided as the LAST image in this message. You MUST match its exact visual style, color grading, lighting, material quality, camera angle, and rendering technique as closely as possible. The output should look like it was generated in the same batch/session as the reference image.`;
+    }
+
     // Build message content
     const content: any[] = [{ type: "text", text: prompt }];
     content.push({
