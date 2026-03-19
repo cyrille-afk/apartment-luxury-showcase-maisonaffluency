@@ -76,6 +76,8 @@ export default function ProposalBuilder({
   const [externalBrand, setExternalBrand] = useState("");
   const [externalUploading, setExternalUploading] = useState(false);
   const [externalUrl, setExternalUrl] = useState("");
+  const [externalDimensions, setExternalDimensions] = useState("");
+  const [externalMaterials, setExternalMaterials] = useState("");
 
   // Product picker state
   const [pickerOpen, setPickerOpen] = useState(true);
@@ -148,10 +150,14 @@ export default function ProposalBuilder({
         product_name: externalName.trim(),
         brand_name: externalBrand.trim() || "External",
         image_url: urlData.publicUrl,
+        dimensions: externalDimensions.trim() || undefined,
+        materials: externalMaterials.trim() || undefined,
         isExternal: true,
       });
       setExternalName("");
       setExternalBrand("");
+      setExternalDimensions("");
+      setExternalMaterials("");
       setShowExternalDialog(false);
       toast({ title: "External product added" });
     } catch (err: any) {
@@ -182,10 +188,14 @@ export default function ProposalBuilder({
         product_name: externalName.trim(),
         brand_name: externalBrand.trim() || "External",
         image_url: data.publicUrl,
+        dimensions: externalDimensions.trim() || undefined,
+        materials: externalMaterials.trim() || undefined,
         isExternal: true,
       });
       setExternalName("");
       setExternalBrand("");
+      setExternalDimensions("");
+      setExternalMaterials("");
       setExternalUrl("");
       setShowExternalDialog(false);
       toast({ title: "Product imported from URL" });
@@ -1162,6 +1172,20 @@ export default function ProposalBuilder({
                 value={externalBrand}
                 onChange={(e) => setExternalBrand(e.target.value)}
                 placeholder="Brand (optional)"
+                className="font-body text-xs flex-1 min-w-[120px]"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Input
+                value={externalDimensions}
+                onChange={(e) => setExternalDimensions(e.target.value)}
+                placeholder="Dimensions — e.g. W65 × D58 × H79cm"
+                className="font-body text-xs flex-1 min-w-[180px]"
+              />
+              <Input
+                value={externalMaterials}
+                onChange={(e) => setExternalMaterials(e.target.value)}
+                placeholder="Materials (optional)"
                 className="font-body text-xs flex-1 min-w-[120px]"
               />
             </div>
