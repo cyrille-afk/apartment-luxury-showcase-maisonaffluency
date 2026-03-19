@@ -954,13 +954,33 @@ export default function ProposalBuilder({
           </div>
         )}
 
+        {/* Remove mode instructions */}
+        {removeMode && (
+          <div className="px-4 py-2 bg-destructive/10 border-b border-border flex items-center gap-4">
+            <span className="font-body text-xs text-foreground">
+              Click on each item you want removed ({removeMarkers.length} marked) — then send the prompt below
+            </span>
+            <Input
+              value={removeLabel}
+              onChange={(e) => setRemoveLabel(e.target.value)}
+              placeholder="What piece? e.g. 'the piano', 'the vase'… (optional)"
+              className="font-body text-xs max-w-xs h-7"
+            />
+            {removeMarkers.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearMarkers} className="gap-1 text-xs h-7">
+                <Trash2 className="w-3 h-3" />Clear markers
+              </Button>
+            )}
+          </div>
+        )}
+
         <div
           ref={imageContainerRef}
-          className={`flex-1 overflow-hidden flex items-center justify-center select-none ${moveMode ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
+          className={`flex-1 overflow-hidden flex items-center justify-center select-none ${(moveMode || removeMode) ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
           onWheel={handleWheel}
-          onPointerDown={moveMode ? undefined : handlePointerDown}
-          onPointerMove={moveMode ? undefined : handlePointerMove}
-          onPointerUp={moveMode ? undefined : handlePointerUp}
+          onPointerDown={(moveMode || removeMode) ? undefined : handlePointerDown}
+          onPointerMove={(moveMode || removeMode) ? undefined : handlePointerMove}
+          onPointerUp={(moveMode || removeMode) ? undefined : handlePointerUp}
         >
           <div
             className="relative"
