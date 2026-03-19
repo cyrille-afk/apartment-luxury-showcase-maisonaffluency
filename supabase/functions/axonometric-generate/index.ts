@@ -284,6 +284,14 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       }
     }
 
+    // Append style reference image as the LAST image so the AI sees it after all other inputs
+    if (styleReferenceUrl) {
+      content.push({
+        type: "image_url",
+        image_url: { url: styleReferenceUrl },
+      });
+    }
+
     // Pro model for initial heavy transformations, flash for iterative refinements to reduce wait
     const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay", "proposal_render"];
     const selectedModel = proModes.includes(mode)

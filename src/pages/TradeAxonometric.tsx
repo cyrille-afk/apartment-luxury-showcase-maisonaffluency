@@ -1593,6 +1593,34 @@ const TradeAxonometric = () => {
                   </div>
                 </div>
 
+                {/* Save as Reference Style */}
+                <div className="border border-border rounded-lg p-5 space-y-3">
+                  <h2 className="font-display text-sm text-foreground flex items-center gap-2">
+                    <Paintbrush className="w-3.5 h-3.5" />Reference Style
+                  </h2>
+                  <p className="font-body text-xs text-muted-foreground">
+                    Lock in this render as the style target for all future <span className="font-medium text-foreground">{mode.replace(/_/g, " ")}</span> generations.
+                  </p>
+                  {currentRefStyle && (
+                    <div className="flex items-center gap-2 p-2 rounded-md bg-muted/30 border border-border">
+                      <img src={currentRefStyle.image_url} alt="Current reference" className="w-10 h-10 rounded object-cover" />
+                      <span className="font-body text-[10px] text-muted-foreground flex-1">
+                        Current reference saved {new Date(currentRefStyle.updated_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled={!result || savingRefStyle}
+                    onClick={saveAsReferenceStyle}
+                  >
+                    {savingRefStyle ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Paintbrush className="w-3.5 h-3.5 mr-1.5" />}
+                    {currentRefStyle ? "Update Reference Style" : "Save as Reference Style"}
+                  </Button>
+                </div>
+
                 {/* Deliver to requester */}
                 {activeRequestId && (
                   <div className="border border-foreground/20 rounded-lg p-5 space-y-3 bg-muted/20">
