@@ -89,7 +89,10 @@ serve(async (req) => {
       prompt = `You are given a 3D axonometric architectural interior render. REMOVE ALL movable furniture, decorations, rugs, plants, artwork, and accessories from the scene. Keep ONLY the architectural shell: walls, floors, ceilings, windows, doors, built-in cabinetry, and fixed architectural elements. Fill the areas where furniture was removed with matching floor/wall textures so the room looks naturally empty and clean. The result should be a pristine, empty architectural space ready for new furniture placement.\n\nStyle: ${defaultStyle}.`;
     } else if (mode === "proposal_render") {
       const productList = (placements || [])
-        .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name}`)
+        .map((p: any, i: number) => {
+          const rotNote = p.rotation ? ` — ROTATE this product ${p.rotation}° clockwise from its original orientation in the product photo` : "";
+          return `${i + 1}. "${p.product_name}" by ${p.brand_name}${rotNote}`;
+        })
         .join("\n");
       if (!placements || placements.length === 0) throw new Error("At least one product placement is required");
       prompt = `You are given THREE types of images in order:

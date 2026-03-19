@@ -30,6 +30,7 @@ interface SelectedProduct {
   dimensions?: string;
   materials?: string;
   isExternal?: boolean;
+  rotation?: number; // degrees (0, 90, 180, 270)
 }
 
 interface ProposalBuilderProps {
@@ -114,6 +115,14 @@ export default function ProposalBuilder({
     setSelectedProducts((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
+  const rotateProduct = useCallback((id: string, direction: 1 | -1) => {
+    setSelectedProducts((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, rotation: ((p.rotation || 0) + direction * 90 + 360) % 360 } : p
+      )
+    );
+  }, []);
+
   // Handle external image upload
   const handleExternalFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -156,22 +165,19 @@ export default function ProposalBuilder({
 
     setExternalUploading(true);
     try {
-      // Fetch the image through our edge function proxy to avoid CORS
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Failed to fetch image (${response.status})`);
-      const blob = await response.blob();
-      if (!blob.type.startsWith("image/")) throw new Error("URL does not point to a valid image");
+      // Use proxy-image edge function to avoid CORS issues
+      const { data, error } = await supabase.functions.invoke("proxy-image", {
+        body: { url },
+      });
 
-      const ext = blob.type.split("/")[1]?.split("+")[0] || "jpg";
-      const path = `proposal-externals/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("assets").upload(path, blob, { contentType: blob.type });
-      if (uploadErr) throw uploadErr;
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      if (!data?.publicUrl) throw new Error("No image URL returned from proxy");
 
-      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
       addProduct({
         product_name: externalName.trim(),
         brand_name: externalBrand.trim() || "External",
-        image_url: urlData.publicUrl,
+        image_url: data.publicUrl,
         isExternal: true,
       });
       setExternalName("");
@@ -198,6 +204,7 @@ export default function ProposalBuilder({
         product_name: p.product_name,
         brand_name: p.brand_name,
         image_url: toAbsoluteUrl(p.image_url),
+        rotation: p.rotation || 0,
       }));
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
@@ -839,21 +846,46 @@ export default function ProposalBuilder({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {selectedProducts.map((p) => (
               <div key={p.id} className="flex items-center gap-2 bg-muted/30 rounded-md px-2.5 py-2 group">
-                <img src={p.image_url} alt="" className="w-9 h-9 rounded border border-border object-cover shrink-0" />
+                <img
+                  src={p.image_url}
+                  alt=""
+                  className="w-9 h-9 rounded border border-border object-cover shrink-0 transition-transform"
+                  style={{ transform: p.rotation ? `rotate(${p.rotation}deg)` : undefined }}
+                />
                 <div className="flex-1 min-w-0">
                   <p className="font-display text-[10px] text-foreground truncate">{p.product_name}</p>
                   <p className="font-body text-[9px] text-muted-foreground truncate">
                     {p.brand_name}
                     {p.isExternal && <span className="ml-1 text-muted-foreground/50">(ext)</span>}
                   </p>
-                  {p.dimensions && <p className="font-body text-[8px] text-muted-foreground/70 truncate">{p.dimensions}</p>}
+                  {p.rotation ? (
+                    <p className="font-body text-[8px] text-muted-foreground/70">{p.rotation}° rotated</p>
+                  ) : p.dimensions ? (
+                    <p className="font-body text-[8px] text-muted-foreground/70 truncate">{p.dimensions}</p>
+                  ) : null}
                 </div>
-                <button
-                  onClick={() => removeProduct(p.id)}
-                  className="shrink-0 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  <X className="w-3 h-3" />
-                </button>
+                <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => rotateProduct(p.id, -1)}
+                    className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                    title="Rotate left 90°"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => rotateProduct(p.id, 1)}
+                    className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                    title="Rotate right 90°"
+                  >
+                    <RotateCw className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => removeProduct(p.id)}
+                    className="text-muted-foreground hover:text-destructive transition-colors p-0.5"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
