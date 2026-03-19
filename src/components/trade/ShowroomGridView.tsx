@@ -137,6 +137,7 @@ const ShowroomGridView = ({
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { isFavorited, toggleFavorite } = useFavorites();
 
   const [products, setProducts] = useState<ShowroomProduct[]>([]);
   const [loading, setLoading] = useState(true);
