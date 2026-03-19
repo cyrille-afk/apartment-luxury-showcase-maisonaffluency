@@ -6,6 +6,7 @@ import {
   Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package, Box,
 } from "lucide-react";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
+import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -240,6 +241,9 @@ const TradeDashboard = () => {
           </Link>
         ))}
       </div>
+
+      {/* Most Popular */}
+      <MostPopularProducts />
 
       {/* Recent Activity */}
       <div className="mt-10">
