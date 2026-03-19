@@ -429,6 +429,10 @@ const TradeAxonometric = () => {
 
   const currentRefStyle = referenceStyles?.find((r) => r.mode === mode);
 
+  useEffect(() => {
+    setUseLockedRefStyle(true);
+  }, [mode]);
+
   const saveAsReferenceStyle = async () => {
     if (!result) return;
     const imageUrl = result.storedUrl || result.imageUrl;
@@ -507,7 +511,7 @@ const TradeAxonometric = () => {
         style,
         overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages.map(u => toAbsoluteUrl(u)).filter(Boolean) : undefined,
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
-        styleReferenceUrl: refStyle ? toAbsoluteUrl(refStyle.image_url) : undefined,
+        styleReferenceUrl: (useLockedRefStyle && refStyle) ? toAbsoluteUrl(refStyle.image_url) : undefined,
       };
 
       const data = await invokeAxonometricGenerate(body, undefined, 1);
