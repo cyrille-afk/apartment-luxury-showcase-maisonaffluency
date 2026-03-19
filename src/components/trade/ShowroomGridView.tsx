@@ -154,6 +154,17 @@ const ShowroomGridView = ({
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
   const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
+  const [highlightedId, setHighlightedId] = useState<string | null>(highlightProductId || null);
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to highlighted product once loaded
+  useEffect(() => {
+    if (!loading && highlightedId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      const timer = setTimeout(() => setHighlightedId(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, highlightedId]);
 
   // Fetch hotspot products
   useEffect(() => {
