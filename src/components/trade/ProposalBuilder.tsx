@@ -842,6 +842,11 @@ export default function ProposalBuilder({
             {proposalHistory.length > 1 && (
               <span className="font-body text-[10px] text-muted-foreground">Iteration {proposalHistory.length}</span>
             )}
+            {lockedIteration !== null && (
+              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-0.5 font-body text-[10px] font-medium">
+                <CheckCircle2 className="w-3 h-3" />Final Approved
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             {/* Move mode toggle */}
