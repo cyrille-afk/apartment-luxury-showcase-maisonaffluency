@@ -144,6 +144,12 @@ export default function ProposalBuilder({
     );
   }, []);
 
+  const updateRoomSection = useCallback((id: string, section: string) => {
+    setSelectedProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, room_section: section || undefined } : p))
+    );
+  }, []);
+
   // Handle external image upload
   const handleExternalFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
