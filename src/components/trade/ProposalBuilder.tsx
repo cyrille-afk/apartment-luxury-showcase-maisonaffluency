@@ -839,6 +839,7 @@ export default function ProposalBuilder({
               size="sm"
               onClick={() => {
                 setMoveMode((m) => !m);
+                setRemoveMode(false);
                 if (moveMode) clearMarkers();
               }}
               title={moveMode ? "Exit move mode" : "Click to reposition furniture"}
@@ -846,6 +847,22 @@ export default function ProposalBuilder({
             >
               <Crosshair className="w-3.5 h-3.5" />
               {moveMode ? "Exit Move" : "Move Furniture"}
+            </Button>
+
+            {/* Remove mode toggle */}
+            <Button
+              variant={removeMode ? "destructive" : "outline"}
+              size="sm"
+              onClick={() => {
+                setRemoveMode((m) => !m);
+                setMoveMode(false);
+                if (removeMode) clearMarkers();
+              }}
+              title={removeMode ? "Exit remove mode" : "Click to mark furniture for removal"}
+              className="gap-1.5"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              {removeMode ? "Exit Remove" : "Remove Furniture"}
             </Button>
 
             <div className="w-px h-5 bg-border mx-1" />
