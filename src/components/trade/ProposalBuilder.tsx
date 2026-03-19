@@ -883,6 +883,20 @@ export default function ProposalBuilder({
               {removeMode ? "Exit Remove" : "Remove Furniture"}
             </Button>
 
+            {/* Before/After compare */}
+            {proposalHistory.length > 1 && (
+              <Button
+                variant={compareMode ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCompareMode((c) => !c)}
+                className="gap-1.5"
+                title="Toggle before/after split view"
+              >
+                <SplitSquareHorizontal className="w-3.5 h-3.5" />
+                {compareMode ? "Exit Compare" : "Compare"}
+              </Button>
+            )}
+
             <div className="w-px h-5 bg-border mx-1" />
 
             {/* Transform controls */}
