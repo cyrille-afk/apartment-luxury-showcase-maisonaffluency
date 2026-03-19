@@ -1134,7 +1134,7 @@ export default function ProposalBuilder({
       <div className="border border-border rounded-lg p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-display text-xs text-foreground">
-            Add Products to Proposal {selectedProducts.length >= 5 && <span className="text-muted-foreground">(max reached)</span>}
+            Add Products to Proposal {selectedProducts.length >= 10 && <span className="text-muted-foreground">(max reached)</span>}
           </h3>
           <div className="flex items-center gap-3">
             {selectedProducts.length < 5 && (
