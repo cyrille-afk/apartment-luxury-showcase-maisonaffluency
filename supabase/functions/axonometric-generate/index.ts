@@ -91,7 +91,7 @@ Style: ${defaultStyle}. The result must be a faithful 3D translation of the sect
         : (singleImage && singlePrompt.trim()) ? [{ prompt: singlePrompt, imageUrl: singleImage }] : [];
 
       if (swapList.length === 0) throw new Error("At least one swap (prompt + replacement image) is required");
-      if (swapList.length > 5) throw new Error("Maximum 5 swaps per generation");
+      if (swapList.length > 10) throw new Error("Maximum 10 swaps per generation");
 
       const swapInstructions = swapList
         .map((s, i) => `${i + 1}. ${s.prompt}`)
