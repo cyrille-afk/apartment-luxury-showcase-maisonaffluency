@@ -188,10 +188,14 @@ export default function ProposalBuilder({
         product_name: externalName.trim(),
         brand_name: externalBrand.trim() || "External",
         image_url: data.publicUrl,
+        dimensions: externalDimensions.trim() || undefined,
+        materials: externalMaterials.trim() || undefined,
         isExternal: true,
       });
       setExternalName("");
       setExternalBrand("");
+      setExternalDimensions("");
+      setExternalMaterials("");
       setExternalUrl("");
       setShowExternalDialog(false);
       toast({ title: "Product imported from URL" });
