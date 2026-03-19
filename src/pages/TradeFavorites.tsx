@@ -147,7 +147,7 @@ export default function TradeFavorites() {
         <title>Favorites — Maison Affluency Trade</title>
       </Helmet>
 
-      <SectionHero sectionKey="favorites" fallbackTitle="Saved Products" fallbackSubtitle="Your curated shortlist of products across our portfolio." />
+      <SectionHero section="favorites" fallbackTitle="Saved Products" fallbackSubtitle="Your curated shortlist of products across our portfolio." />
 
       <div className="max-w-6xl mx-auto p-6 md:p-8 space-y-6">
         {/* Toolbar */}
