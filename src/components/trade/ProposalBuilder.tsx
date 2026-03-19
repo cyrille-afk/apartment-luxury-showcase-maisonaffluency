@@ -177,7 +177,7 @@ export default function ProposalBuilder({
     }
   };
 
-
+  const generateProposal = async () => {
     if (!emptyRoomUrl || selectedProducts.length === 0) return;
     setGenerating(true);
     try {
