@@ -601,6 +601,7 @@ const TradeAxonometric = () => {
     setAiPrompt("");
     setAiAttachedProduct(null);
     setAiTextureUrl(null);
+    setAiTextureLabel(null);
     setAiProductPickerOpen(false);
     setAiSending(true);
 
