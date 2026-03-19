@@ -280,7 +280,21 @@ export default function ProposalBuilder({
       const placements = selectedProducts.map((p) => ({
         product_name: p.product_name,
         brand_name: p.brand_name,
+        image_url: toAbsoluteUrl(p.image_url),
+        rotation: p.rotation || 0,
+        dimensions: p.dimensions || null,
+        materials: p.materials || null,
       }));
+
+      const markerHints = {
+        move_from: sourceMarker ? { x_percent: sourceMarker.x, y_percent: sourceMarker.y } : null,
+        move_to: targetMarker ? { x_percent: targetMarker.x, y_percent: targetMarker.y } : null,
+        remove_points: removeMarkers.map((m) => ({
+          x_percent: m.pos.x,
+          y_percent: m.pos.y,
+          label: m.label,
+        })),
+      };
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: {
@@ -290,6 +304,7 @@ export default function ProposalBuilder({
           style,
           placements,
           refinementPrompt: refinementPrompt.trim(),
+          markerHints,
         },
         headers: { Authorization: `Bearer ${accessToken}` },
       });
