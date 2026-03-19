@@ -280,7 +280,21 @@ export default function ProposalBuilder({
       const placements = selectedProducts.map((p) => ({
         product_name: p.product_name,
         brand_name: p.brand_name,
+        image_url: toAbsoluteUrl(p.image_url),
+        rotation: p.rotation || 0,
+        dimensions: p.dimensions || null,
+        materials: p.materials || null,
       }));
+
+      const markerHints = {
+        move_from: sourceMarker ? { x_percent: sourceMarker.x, y_percent: sourceMarker.y } : null,
+        move_to: targetMarker ? { x_percent: targetMarker.x, y_percent: targetMarker.y } : null,
+        remove_points: removeMarkers.map((m) => ({
+          x_percent: m.pos.x,
+          y_percent: m.pos.y,
+          label: m.label,
+        })),
+      };
 
       const { data, error } = await supabase.functions.invoke("axonometric-generate", {
         body: {
@@ -290,6 +304,7 @@ export default function ProposalBuilder({
           style,
           placements,
           refinementPrompt: refinementPrompt.trim(),
+          markerHints,
         },
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -593,9 +608,9 @@ export default function ProposalBuilder({
         console.warn("Could not create quote:", e);
       }
 
-      // For each proposal iteration: furnishing option → product grid cards (2/page by room) → quote summary
-      const proposals = proposalHistory.length > 0 ? proposalHistory : [proposalResult];
-      const productIds = selectedProducts.map(p => p.id);
+      // Build presentation from the latest approved proposal only (no mixed iterations)
+      const finalProposalImage = proposalResult;
+      const optionLabel = "Final Approved Option";
       const productDataForSlides = selectedProducts.map(p => ({
         id: p.id,
         product_name: p.product_name,
@@ -605,69 +620,64 @@ export default function ProposalBuilder({
         materials: p.materials || null,
       }));
 
-      for (let optIdx = 0; optIdx < proposals.length; optIdx++) {
-        const optionLabel = proposals.length === 1 ? "Proposal" : `Option ${optIdx + 1}`;
+      // Furnishing option slide
+      slides.push({
+        presentation_id: presId,
+        image_url: finalProposalImage,
+        title: optionLabel,
+        description: `AI-generated furniture proposal featuring ${productNames}.`,
+        sort_order: sortOrder++,
+        slide_type: "furnishing_option",
+        linked_product_ids: productDataForSlides,
+      });
 
-        // Furnishing option slide
-        slides.push({
-          presentation_id: presId,
-          image_url: proposals[optIdx],
-          title: optionLabel,
-          description: `AI-generated furniture proposal featuring ${productNames}.`,
-          sort_order: sortOrder++,
-          slide_type: "furnishing_option",
-          linked_product_ids: productDataForSlides,
-        });
-
-        // Product grid cards — max 2 per page, grouped by room section
-        // Infer room section from product category or default to "Featured Products"
-        const roomGroups = new Map<string, typeof selectedProducts>();
-        for (const p of selectedProducts) {
-          const section = p.room_section || "Featured Products";
-          if (!roomGroups.has(section)) roomGroups.set(section, []);
-          roomGroups.get(section)!.push(p);
-        }
-
-        for (const [section, sectionProducts] of roomGroups) {
-          for (let i = 0; i < sectionProducts.length; i += 2) {
-            const chunk = sectionProducts.slice(i, i + 2);
-            const chunkData = chunk.map(p => ({
-              id: p.id,
-              product_name: p.product_name,
-              brand_name: p.brand_name,
-              image_url: p.image_url,
-              dimensions: p.dimensions || null,
-              materials: p.materials || null,
-              pdf_url: p.pdf_url || null,
-            }));
-
-            slides.push({
-              presentation_id: presId,
-              image_url: chunk[0].image_url,
-              title: `${optionLabel} — Product Specifications`,
-              description: chunk.map(p => `${p.product_name} — ${p.brand_name}`).join("\n"),
-              sort_order: sortOrder++,
-              slide_type: "product_grid",
-              room_section: section,
-              linked_product_ids: chunkData,
-            });
-          }
-        }
-
-        // Quote summary slide
-        const quoteRef = quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : "Pending";
-        const quoteDesc = selectedProducts.map(p => `• ${p.product_name} — ${p.brand_name}`).join("\n");
-        slides.push({
-          presentation_id: presId,
-          image_url: proposals[optIdx],
-          title: `${optionLabel} — Quote Summary`,
-          description: `Products:\n${quoteDesc}\n\nQuote Ref: ${quoteRef}\nAvailable for review in your Quote Builder.\nPayment terms: 60% deposit · 40% balance before delivery.`,
-          sort_order: sortOrder++,
-          slide_type: "quote_summary",
-          linked_quote_id: quoteId || undefined,
-          linked_product_ids: productDataForSlides,
-        });
+      // Product grid cards — max 2 per page, grouped by room section
+      const roomGroups = new Map<string, typeof selectedProducts>();
+      for (const p of selectedProducts) {
+        const section = p.room_section || "Featured Products";
+        if (!roomGroups.has(section)) roomGroups.set(section, []);
+        roomGroups.get(section)!.push(p);
       }
+
+      for (const [section, sectionProducts] of roomGroups) {
+        for (let i = 0; i < sectionProducts.length; i += 2) {
+          const chunk = sectionProducts.slice(i, i + 2);
+          const chunkData = chunk.map(p => ({
+            id: p.id,
+            product_name: p.product_name,
+            brand_name: p.brand_name,
+            image_url: p.image_url,
+            dimensions: p.dimensions || null,
+            materials: p.materials || null,
+            pdf_url: p.pdf_url || null,
+          }));
+
+          slides.push({
+            presentation_id: presId,
+            image_url: chunk[0].image_url,
+            title: `${optionLabel} — Product Specifications`,
+            description: chunk.map(p => `${p.product_name} — ${p.brand_name}`).join("\n"),
+            sort_order: sortOrder++,
+            slide_type: "product_grid",
+            room_section: section,
+            linked_product_ids: chunkData,
+          });
+        }
+      }
+
+      // Quote summary slide
+      const quoteRef = quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : "Pending";
+      const quoteDesc = selectedProducts.map(p => `• ${p.product_name} — ${p.brand_name}`).join("\n");
+      slides.push({
+        presentation_id: presId,
+        image_url: finalProposalImage,
+        title: `${optionLabel} — Quote Summary`,
+        description: `Products:\n${quoteDesc}\n\nQuote Ref: ${quoteRef}\nAvailable for review in your Quote Builder.\nPayment terms: 60% deposit · 40% balance before delivery.`,
+        sort_order: sortOrder++,
+        slide_type: "quote_summary",
+        linked_quote_id: quoteId || undefined,
+        linked_product_ids: productDataForSlides,
+      });
 
       // Insert all slides
       const { error: slidesError } = await supabase.from("presentation_slides").insert(slides);
