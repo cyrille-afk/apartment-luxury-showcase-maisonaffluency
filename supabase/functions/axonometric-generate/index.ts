@@ -359,11 +359,17 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
 
     console.log(`[axo-gen] mode=${mode}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
 
-    const MAX_ATTEMPTS = 2;
+    const MAX_ATTEMPTS = 3;
     let generatedImage: string | undefined;
     let textResponse = "";
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      // On final attempt, try Pro model as fallback for better image generation
+      const attemptModel = attempt === MAX_ATTEMPTS ? "google/gemini-3-pro-image-preview" : selectedModel;
+      if (attempt > 1) {
+        console.log(`[axo-gen] Retry attempt ${attempt} with model=${attemptModel}`);
+      }
+
       const aiResponse = await fetch(
         "https://ai.gateway.lovable.dev/v1/chat/completions",
         {
@@ -373,10 +379,10 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: selectedModel,
+            model: attemptModel,
             messages: [{ role: "user", content }],
             modalities: ["image", "text"],
-            temperature: 0,
+            temperature: attempt > 1 ? 0.2 : 0, // slight temperature bump on retries
           }),
         }
       );
@@ -385,6 +391,12 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
         const status = aiResponse.status;
         const errBody = await aiResponse.text();
         if (status === 429) {
+          // On rate limit, wait briefly and retry instead of failing immediately
+          if (attempt < MAX_ATTEMPTS) {
+            console.warn(`[axo-gen] Rate limited on attempt ${attempt}, waiting 3s...`);
+            await new Promise(r => setTimeout(r, 3000));
+            continue;
+          }
           return new Response(
             JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }),
             { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
