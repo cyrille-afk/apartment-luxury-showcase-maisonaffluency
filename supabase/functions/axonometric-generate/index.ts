@@ -126,7 +126,7 @@ Style: ${defaultStyle}. The result must be a faithful 3D translation of the sect
         .join("\n");
       if (!placements || placements.length === 0) throw new Error("At least one product placement is required");
       prompt = `You are a PHOTOREALISTIC architectural interior renderer. You will receive images in this EXACT order:
-1. REFERENCE LAYOUT: The client's original furnished room — use this ONLY for spatial positioning (where each furniture piece sits, which direction it faces, distances from walls). IGNORE the appearance of furniture in this image entirely.
+1. REFERENCE LAYOUT: The client's original 3D axonometric furnished room — use this for BOTH spatial positioning AND as the MANDATORY camera/viewpoint reference.
 2. EMPTY ROOM: The same room with all furniture removed — this is your blank canvas.
 3-${placements.length + 2}. PRODUCT PHOTOS (${placements.length} images): Each image shows the EXACT product to place. These are real product photographs.
 
@@ -135,6 +135,13 @@ ${productList}
 
 YOUR TASK — STRICT RULES:
 Place each product from its PRODUCT PHOTO into the EMPTY ROOM at the position indicated by the REFERENCE LAYOUT.
+
+CAMERA & VIEWPOINT (HIGHEST PRIORITY):
+- The output MUST use the EXACT SAME camera angle, perspective, viewpoint, and field of view as the REFERENCE LAYOUT image
+- Match the identical axonometric projection angle — same tilt, same rotation, same zoom level
+- The architectural shell (walls, floor edges, windows, doors) in your output must align pixel-for-pixel with the REFERENCE LAYOUT
+- If the EMPTY ROOM image has a slightly different crop or angle, IGNORE it — always match the REFERENCE LAYOUT's viewpoint
+- The viewer should be able to overlay the reference and the output and see the room structure line up exactly
 
 SHAPE & APPEARANCE FIDELITY (MOST IMPORTANT):
 - You MUST reproduce the EXACT shape, silhouette, proportions, color, material, and design of each product AS IT APPEARS in its product photo
@@ -145,7 +152,8 @@ SHAPE & APPEARANCE FIDELITY (MOST IMPORTANT):
 - Think of each product photo as a manufacturing specification — the render must look like THAT EXACT product was photographed in the room
 
 POSITIONING & SCALE RULES:
-- Map each replacement product to its corresponding furniture TYPE in the reference layout (sofa→sofa position, side table→side table position, armchair→armchair position, etc.)
+- Place EVERY product listed above — do NOT skip any. There are ${placements.length} products and ALL ${placements.length} must appear in the output
+- Map each replacement product to its corresponding furniture TYPE in the reference layout (sofa→sofa position, dining table→dining table position, dining chairs→dining chair positions, armchair→armchair position, side table→side table position, etc.)
 - Place each product at the EXACT same position, facing the EXACT same direction as the furniture it replaces in the reference layout
 - Maintain the same distances from walls and between pieces as shown in the reference
 - Apply correct 3D axonometric perspective transformation to each product
@@ -156,10 +164,11 @@ ARCHITECTURAL PRESERVATION:
 - Add realistic shadows, reflections, and ambient lighting that match the room's existing lighting conditions
 
 ABSOLUTE PROHIBITIONS:
-- Do NOT reproduce or copy ANY furniture appearance from the REFERENCE LAYOUT — it is ONLY for spatial positioning
+- Do NOT reproduce or copy ANY furniture appearance from the REFERENCE LAYOUT — it is ONLY for spatial positioning and camera angle
 - Do NOT invent, add, or hallucinate any furniture not in the product photos
 - Do NOT change the shape, color, material, or design of any product from what is shown in its photo
 - Do NOT approximate — if the product photo shows a specific design, render that SPECIFIC design
+- Do NOT omit any product — all ${placements.length} products MUST be placed
 
 Style: ${defaultStyle}.`;
     } else if (mode === "proposal_refine") {
