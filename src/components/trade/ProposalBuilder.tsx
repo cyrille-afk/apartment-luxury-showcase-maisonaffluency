@@ -6,8 +6,15 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link,
+  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
   if (!url) return null;
@@ -46,7 +53,9 @@ export default function ProposalBuilder({
   onResult,
 }: ProposalBuilderProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const externalFileRef = useRef<HTMLInputElement>(null);
+  const [saving, setSaving] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [generating, setGenerating] = useState(false);
@@ -266,7 +275,100 @@ export default function ProposalBuilder({
     a.click();
   };
 
-  // Interactive transform state for expanded view
+  // Save proposal image to various destinations
+  const saveToGallery = async () => {
+    if (!proposalResult || !user) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("axonometric_gallery").insert({
+        created_by: user.id,
+        image_url: proposalResult,
+        title: `Proposal — ${new Date().toLocaleDateString()}`,
+        description: `Furniture proposal with ${selectedProducts.map(p => p.product_name).join(", ")}`,
+        is_published: false,
+        project_name: "",
+        style_preset: style,
+      });
+      if (error) throw error;
+      toast({ title: "Saved to Gallery", description: "Added as a draft in your gallery" });
+    } catch (e: any) {
+      toast({ title: "Save failed", description: e?.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveToMediaLibrary = async () => {
+    if (!proposalResult) return;
+    setSaving(true);
+    try {
+      // Fetch the image and upload to storage
+      const res = await fetch(proposalResult);
+      const blob = await res.blob();
+      const path = `products/proposal-${Date.now()}.png`;
+      const { error: uploadError } = await supabase.storage
+        .from("assets")
+        .upload(path, blob, { contentType: "image/png", upsert: false });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+      toast({ title: "Saved to Media Library", description: "Image uploaded to storage" });
+    } catch (e: any) {
+      toast({ title: "Save failed", description: e?.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveToPresentation = async () => {
+    if (!proposalResult || !user) return;
+    setSaving(true);
+    try {
+      // Find most recent presentation or create one
+      const { data: presentations } = await supabase
+        .from("presentations")
+        .select("id")
+        .eq("created_by", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(1);
+
+      let presentationId: string;
+      if (presentations && presentations.length > 0) {
+        presentationId = presentations[0].id;
+      } else {
+        const { data: newPres, error: presError } = await supabase
+          .from("presentations")
+          .insert({ created_by: user.id, title: "Proposals" })
+          .select("id")
+          .single();
+        if (presError || !newPres) throw presError || new Error("Failed to create presentation");
+        presentationId = newPres.id;
+      }
+
+      // Get current max sort order
+      const { data: slides } = await supabase
+        .from("presentation_slides")
+        .select("sort_order")
+        .eq("presentation_id", presentationId)
+        .order("sort_order", { ascending: false })
+        .limit(1);
+
+      const nextOrder = (slides?.[0]?.sort_order ?? -1) + 1;
+
+      const { error } = await supabase.from("presentation_slides").insert({
+        presentation_id: presentationId,
+        image_url: proposalResult,
+        title: `Proposal — ${selectedProducts.map(p => p.product_name).join(", ")}`,
+        sort_order: nextOrder,
+      });
+      if (error) throw error;
+      toast({ title: "Saved to Presentations", description: "Added as a new slide" });
+    } catch (e: any) {
+      toast({ title: "Save failed", description: e?.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const [rotation, setRotation] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -437,6 +539,25 @@ export default function ProposalBuilder({
             <Button variant="outline" size="sm" onClick={downloadProposal}>
               <Download className="w-3.5 h-3.5 mr-1.5" />Download
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={saving}>
+                  {saving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
+                  Save to…
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={saveToGallery} className="gap-2">
+                  <Image className="w-3.5 h-3.5" />Gallery (My Drafts)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={saveToPresentation} className="gap-2">
+                  <Layout className="w-3.5 h-3.5" />Presentations
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={saveToMediaLibrary} className="gap-2">
+                  <FolderOpen className="w-3.5 h-3.5" />Media Library
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="ghost" size="sm" onClick={() => { setExpanded(false); resetTransform(); clearMarkers(); setMoveMode(false); }}>
               <Minimize2 className="w-3.5 h-3.5 mr-1.5" />Collapse
             </Button>
@@ -600,6 +721,25 @@ export default function ProposalBuilder({
               <Button variant="outline" size="sm" onClick={downloadProposal}>
                 <Download className="w-3.5 h-3.5 mr-1.5" />Download
               </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={saving}>
+                    {saving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
+                    Save to…
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={saveToGallery} className="gap-2">
+                    <Image className="w-3.5 h-3.5" />Gallery (My Drafts)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={saveToPresentation} className="gap-2">
+                    <Layout className="w-3.5 h-3.5" />Presentations
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={saveToMediaLibrary} className="gap-2">
+                    <FolderOpen className="w-3.5 h-3.5" />Media Library
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           )}
         </div>
