@@ -953,6 +953,19 @@ export default function ProposalBuilder({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <Button
+                size="sm"
+                onClick={createProposalPresentation}
+                disabled={creatingPresentation || saving}
+                className="gap-1.5"
+              >
+                {creatingPresentation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                Create Presentation
+              </Button>
+              <label className="flex items-center gap-1.5 font-body text-[10px] text-muted-foreground cursor-pointer">
+                <input type="checkbox" checked={showPrices} onChange={(e) => setShowPrices(e.target.checked)} className="rounded border-border" />
+                Prices
+              </label>
             </>
           )}
         </div>
