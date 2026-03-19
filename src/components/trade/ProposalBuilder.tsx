@@ -728,12 +728,12 @@ export default function ProposalBuilder({
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    if (moveMode) return; // don't pan in move mode
+    if (moveMode || removeMode) return; // don't pan in interactive modes
     isPanning.current = true;
     panStart.current = { x: e.clientX, y: e.clientY };
     panOffset.current = { ...pan };
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  }, [pan, moveMode]);
+  }, [pan, moveMode, removeMode]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isPanning.current) return;
