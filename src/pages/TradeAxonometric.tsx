@@ -413,6 +413,51 @@ const TradeAxonometric = () => {
     enabled: isAdmin,
   });
 
+  // Fetch saved reference styles
+  const { data: referenceStyles } = useQuery({
+    queryKey: ["reference-styles"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("reference_styles")
+        .select("*");
+      if (error) throw error;
+      return data as { id: string; mode: string; image_url: string; updated_at: string }[];
+    },
+    enabled: isAdmin,
+  });
+
+  const currentRefStyle = referenceStyles?.find((r) => r.mode === mode);
+
+  const saveAsReferenceStyle = async () => {
+    if (!result) return;
+    const imageUrl = result.storedUrl || result.imageUrl;
+    setSavingRefStyle(true);
+    try {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      // Upsert by mode
+      const existing = referenceStyles?.find((r) => r.mode === mode);
+      if (existing) {
+        await (supabase as any).from("reference_styles").update({
+          image_url: imageUrl,
+          created_by: userId,
+          updated_at: new Date().toISOString(),
+        }).eq("id", existing.id);
+      } else {
+        await (supabase as any).from("reference_styles").insert({
+          mode,
+          image_url: imageUrl,
+          created_by: userId,
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ["reference-styles"] });
+      toast({ title: "Reference style saved", description: `Future "${mode.replace(/_/g, " ")}" generations will use this as a style guide.` });
+    } catch (e: any) {
+      toast({ title: "Failed to save reference style", description: e.message, variant: "destructive" });
+    } finally {
+      setSavingRefStyle(false);
+    }
+  };
+
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
   const generateEmptyRoom = async (imageUrl: string) => {
