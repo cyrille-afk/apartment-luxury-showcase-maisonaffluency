@@ -1222,7 +1222,7 @@ export default function ProposalBuilder({
           </div>
         )}
 
-        {pickerOpen && selectedProducts.length < 5 && (
+        {pickerOpen && selectedProducts.length < 10 && (
           <div className="space-y-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
