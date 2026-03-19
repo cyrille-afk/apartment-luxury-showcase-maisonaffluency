@@ -59,7 +59,10 @@ const ProductImageSearch = ({ onSelectImage }: ProductImageSearchProps) => {
     try {
       // Proxy the image through our edge function to avoid hotlink blocks
       const { data, error: fnError } = await supabase.functions.invoke("proxy-image", {
-        body: { url: result.link },
+        body: {
+          url: result.link,
+          fallbackUrl: result.thumbnail || null,
+        },
       });
 
       if (fnError) throw fnError;
