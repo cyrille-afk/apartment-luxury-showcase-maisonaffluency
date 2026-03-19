@@ -140,7 +140,44 @@ export default function ProposalBuilder({
     }
   };
 
-  const generateProposal = async () => {
+  // Handle importing image from a web URL
+  const handleExternalUrl = async () => {
+    const url = externalUrl.trim();
+    if (!url || !externalName.trim()) return;
+
+    setExternalUploading(true);
+    try {
+      // Fetch the image through our edge function proxy to avoid CORS
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Failed to fetch image (${response.status})`);
+      const blob = await response.blob();
+      if (!blob.type.startsWith("image/")) throw new Error("URL does not point to a valid image");
+
+      const ext = blob.type.split("/")[1]?.split("+")[0] || "jpg";
+      const path = `proposal-externals/${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("assets").upload(path, blob, { contentType: blob.type });
+      if (uploadErr) throw uploadErr;
+
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+      addProduct({
+        product_name: externalName.trim(),
+        brand_name: externalBrand.trim() || "External",
+        image_url: urlData.publicUrl,
+        isExternal: true,
+      });
+      setExternalName("");
+      setExternalBrand("");
+      setExternalUrl("");
+      setShowExternalDialog(false);
+      toast({ title: "Product imported from URL" });
+    } catch (err: any) {
+      toast({ title: "URL import failed", description: err?.message || "Could not fetch image from URL", variant: "destructive" });
+    } finally {
+      setExternalUploading(false);
+    }
+  };
+
+
     if (!emptyRoomUrl || selectedProducts.length === 0) return;
     setGenerating(true);
     try {
