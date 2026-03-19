@@ -427,8 +427,12 @@ export type Database = {
           gallery_item_id: string | null
           id: string
           image_url: string
+          linked_product_ids: Json | null
+          linked_quote_id: string | null
           presentation_id: string
           project_name: string | null
+          room_section: string | null
+          slide_type: string
           sort_order: number
           style_preset: string | null
           title: string
@@ -439,8 +443,12 @@ export type Database = {
           gallery_item_id?: string | null
           id?: string
           image_url: string
+          linked_product_ids?: Json | null
+          linked_quote_id?: string | null
           presentation_id: string
           project_name?: string | null
+          room_section?: string | null
+          slide_type?: string
           sort_order?: number
           style_preset?: string | null
           title?: string
@@ -451,8 +459,12 @@ export type Database = {
           gallery_item_id?: string | null
           id?: string
           image_url?: string
+          linked_product_ids?: Json | null
+          linked_quote_id?: string | null
           presentation_id?: string
           project_name?: string | null
+          room_section?: string | null
+          slide_type?: string
           sort_order?: number
           style_preset?: string | null
           title?: string

@@ -7,6 +7,9 @@ import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, MessageSquare, Send, FileDown, Loader2, Link2, Check } from "lucide-react";
 import { format } from "date-fns";
+import PresentationProductGrid from "@/components/trade/PresentationProductGrid";
+import PresentationQuoteSummary from "@/components/trade/PresentationQuoteSummary";
+import PresentationProductTooltip from "@/components/trade/PresentationProductTooltip";
 // Lazy-loaded to avoid crash on module init
 const loadPdfRenderer = () => import("@react-pdf/renderer");
 const loadPresentationPDF = () => import("@/components/trade/PresentationPDF");
@@ -19,6 +22,10 @@ interface Slide {
   project_name: string | null;
   style_preset: string | null;
   sort_order: number;
+  slide_type?: string;
+  room_section?: string | null;
+  linked_product_ids?: any;
+  linked_quote_id?: string | null;
 }
 
 interface Comment {
@@ -318,12 +325,41 @@ const TradePresentationViewer = () => {
                     </p>
                   </div>
                 ) : (
-                  /* Gallery slide */
-                  <img
-                    src={actualSlide?.image_url}
-                    alt={actualSlide?.title}
-                    className={`max-w-full ${fullscreen ? "max-h-[calc(100vh-180px)]" : "max-h-[60vh]"} object-contain rounded-lg`}
-                  />
+                  /* Typed slides */
+                  actualSlide?.slide_type === "product_grid" && actualSlide.linked_product_ids ? (
+                    <PresentationProductGrid
+                      products={Array.isArray(actualSlide.linked_product_ids) ? actualSlide.linked_product_ids : []}
+                      roomSection={actualSlide.room_section}
+                    />
+                  ) : actualSlide?.slide_type === "quote_summary" && actualSlide.linked_product_ids ? (
+                    <PresentationQuoteSummary
+                      optionLabel={actualSlide.title?.replace(" — Quote Summary", "") || "Proposal"}
+                      quoteRef={actualSlide.linked_quote_id ? `QU-${actualSlide.linked_quote_id.slice(0, 6).toUpperCase()}` : "Pending"}
+                      products={(Array.isArray(actualSlide.linked_product_ids) ? actualSlide.linked_product_ids : []).map((p: any) => ({
+                        product_name: p.product_name,
+                        brand_name: p.brand_name,
+                        price_label: p.price_label || null,
+                      }))}
+                      quoteId={actualSlide.linked_quote_id || undefined}
+                    />
+                  ) : actualSlide?.slide_type === "furnishing_option" && actualSlide.linked_product_ids ? (
+                    <PresentationProductTooltip
+                      products={Array.isArray(actualSlide.linked_product_ids) ? actualSlide.linked_product_ids : []}
+                    >
+                      <img
+                        src={actualSlide?.image_url}
+                        alt={actualSlide?.title}
+                        className={`max-w-full ${fullscreen ? "max-h-[calc(100vh-180px)]" : "max-h-[60vh]"} object-contain rounded-lg`}
+                      />
+                    </PresentationProductTooltip>
+                  ) : (
+                    /* Default image slide */
+                    <img
+                      src={actualSlide?.image_url}
+                      alt={actualSlide?.title}
+                      className={`max-w-full ${fullscreen ? "max-h-[calc(100vh-180px)]" : "max-h-[60vh]"} object-contain rounded-lg`}
+                    />
+                  )
                 )}
                 {/* Nav arrows */}
                 <button
