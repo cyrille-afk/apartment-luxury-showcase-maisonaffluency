@@ -150,10 +150,14 @@ export default function ProposalBuilder({
         product_name: externalName.trim(),
         brand_name: externalBrand.trim() || "External",
         image_url: urlData.publicUrl,
+        dimensions: externalDimensions.trim() || undefined,
+        materials: externalMaterials.trim() || undefined,
         isExternal: true,
       });
       setExternalName("");
       setExternalBrand("");
+      setExternalDimensions("");
+      setExternalMaterials("");
       setShowExternalDialog(false);
       toast({ title: "External product added" });
     } catch (err: any) {
