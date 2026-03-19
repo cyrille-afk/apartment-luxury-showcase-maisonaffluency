@@ -95,23 +95,26 @@ serve(async (req) => {
         })
         .join("\n");
       if (!placements || placements.length === 0) throw new Error("At least one product placement is required");
-      prompt = `You are given THREE types of images in order:
-1. FIRST IMAGE: The ORIGINAL furnished room — this is the client's layout showing their intended furniture arrangement, positions, and orientations. Study it carefully to understand WHERE each piece of furniture is placed, which DIRECTION it faces (left, right, toward camera, etc.), and the overall spatial composition.
-2. SECOND IMAGE: The same room EMPTIED of all furniture — this is the blank canvas.
-3. REMAINING IMAGES: Product photos of the replacement furniture pieces to place into the empty room.
+      prompt = `You are an architectural interior renderer. You will receive images in this order:
+1. REFERENCE LAYOUT: The client's original furnished room — study ONLY the positions and arrangement of furniture (where things are placed, which direction they face). Do NOT copy the appearance of any furniture from this image.
+2. EMPTY ROOM: The same room with all furniture removed — this is your canvas.
+3. PRODUCT PHOTOS (${placements.length} images): These are the EXACT replacement furniture pieces you MUST use. Each product photo corresponds to a product listed below.
 
-Your task: Place the following replacement products into the EMPTY room, matching the EXACT spatial layout, positions, and orientations from the ORIGINAL furnished image. Each product should go where the corresponding type of furniture was in the original — sofas replace sofas, tables replace tables, chairs replace chairs, etc. Match the facing direction (left/right/forward) as shown in the original.
-
-Products to place:
+REPLACEMENT PRODUCTS (match each photo to its entry):
 ${productList}
 
-CRITICAL RULES:
-- Analyze the original furnished image to understand the furniture layout intent
-- Place each product in the position that best matches where similar furniture existed in the original
-- Match the ORIENTATION and FACING DIRECTION of each piece as shown in the original layout
-- Keep ALL architectural elements (walls, floors, ceilings, windows, doors) from the empty room EXACTLY as they are
-- Add realistic shadows, lighting, and perspective matching the room's existing lighting
-- The final result must look like a single cohesive professional architectural rendering
+YOUR TASK:
+Generate a NEW interior render of the EMPTY ROOM with ONLY the replacement products from the PRODUCT PHOTOS placed inside. You must:
+- Use the EXACT visual appearance, shape, color, material, and design of each product AS SHOWN in its product photo — do NOT substitute, simplify, or alter any product
+- Position each product where the corresponding furniture type was in the REFERENCE LAYOUT (sofas replace sofas, tables replace tables, chairs replace chairs, etc.)
+- Match the facing direction and orientation from the reference layout
+- Render each product in the correct 3D perspective matching the room's camera angle
+- Keep ALL architectural elements (walls, floors, ceilings, windows, doors, lighting) from the EMPTY ROOM exactly as they are
+
+CRITICAL — DO NOT:
+- Do NOT reproduce or copy furniture from the REFERENCE LAYOUT image — it is ONLY for spatial positioning
+- Do NOT invent or add any furniture that isn't in the product photos
+- Do NOT ignore the product photos — every product MUST appear in the final render looking exactly as it does in its photo
 
 Style: ${defaultStyle}.`;
     } else if (mode === "proposal_refine") {
