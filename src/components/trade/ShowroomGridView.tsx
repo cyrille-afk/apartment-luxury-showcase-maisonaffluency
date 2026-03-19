@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
+import { useFavorites } from "@/hooks/useFavorites";
 
 interface ShowroomProduct {
   id: string;
