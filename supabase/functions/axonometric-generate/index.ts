@@ -356,14 +356,21 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       }
     }
 
-    // Proposal refine: original layout reference + previous proposal (imageUrl)
+    // Proposal refine: keep current proposal as base image, then provide layout + product refs
     if (mode === "proposal_refine") {
-      // content already has [text_prompt, previous_proposal_image]
-      // Insert original layout reference before the proposal
+      // content already has [text_prompt, current_proposal_image]
       if (referenceImageUrl) {
-        const proposalEntry = content[1];
-        content[1] = { type: "image_url", image_url: { url: referenceImageUrl } };
-        content.splice(2, 0, proposalEntry);
+        content.push({ type: "image_url", image_url: { url: referenceImageUrl } });
+      }
+      if (placements && Array.isArray(placements)) {
+        for (const p of placements.slice(0, 10)) {
+          if (p.image_url) {
+            content.push({
+              type: "image_url",
+              image_url: { url: p.image_url },
+            });
+          }
+        }
       }
     }
 
