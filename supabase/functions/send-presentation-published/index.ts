@@ -85,6 +85,36 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Mark linked axonometric requests as completed
+    const { data: slides } = await adminClient
+      .from("presentation_slides")
+      .select("gallery_item_id")
+      .eq("presentation_id", presentationId)
+      .not("gallery_item_id", "is", null);
+
+    if (slides && slides.length > 0) {
+      const galleryIds = slides.map((s: any) => s.gallery_item_id).filter(Boolean);
+      if (galleryIds.length > 0) {
+        const { data: galleryItems } = await adminClient
+          .from("axonometric_gallery")
+          .select("request_id")
+          .in("id", galleryIds)
+          .not("request_id", "is", null);
+
+        if (galleryItems && galleryItems.length > 0) {
+          const requestIds = [...new Set(galleryItems.map((g: any) => g.request_id).filter(Boolean))];
+          if (requestIds.length > 0) {
+            await adminClient
+              .from("axonometric_requests")
+              .update({ status: "completed", updated_at: new Date().toISOString() })
+              .in("id", requestIds)
+              .in("status", ["pending", "in_progress"]);
+            console.log(`Marked ${requestIds.length} axonometric request(s) as completed`);
+          }
+        }
+      }
+    }
+
     // Fetch shared users
     const { data: shares } = await adminClient
       .from("presentation_shares")
@@ -97,7 +127,6 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
-
     const viewLink = `${SITE_URL}/trade/presentations/${presentationId}/view`;
     const title = presentation.title || "Untitled Presentation";
     const clientName = presentation.client_name || "";
