@@ -165,14 +165,17 @@ const ShowroomGridView = ({
         const tradeProducts = getAllTradeProducts();
         const pdfLookup = new Map<string, string>();
         const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string; image_url?: string | null; category?: string; subcategory?: string }>();
+        const tradeProductIdLookup = new Map<string, string>();
         for (const tp of tradeProducts) {
           const tpKey = tp.product_name.trim().toLowerCase();
           const metaEntry = { materials: tp.materials, dimensions: tp.dimensions, brand: tp.brand_name, image_url: tp.image_url, category: tp.category, subcategory: tp.subcategory };
           if (tp.pdf_url) pdfLookup.set(tpKey, tp.pdf_url);
           metadataLookup.set(tpKey, metaEntry);
+          tradeProductIdLookup.set(tpKey, tp.id);
           if (tp.subtitle) {
             const comboKey = `${tpKey} ${tp.subtitle.trim().toLowerCase()}`;
             metadataLookup.set(comboKey, metaEntry);
+            tradeProductIdLookup.set(comboKey, tp.id);
             if (tp.pdf_url) pdfLookup.set(comboKey, tp.pdf_url);
           }
         }
