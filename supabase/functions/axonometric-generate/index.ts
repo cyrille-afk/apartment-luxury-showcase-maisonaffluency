@@ -112,26 +112,40 @@ Style: ${defaultStyle}. The result must be a faithful 3D translation of the sect
         })
         .join("\n");
       if (!placements || placements.length === 0) throw new Error("At least one product placement is required");
-      prompt = `You are an architectural interior renderer. You will receive images in this order:
-1. REFERENCE LAYOUT: The client's original furnished room — study ONLY the positions and arrangement of furniture (where things are placed, which direction they face). Do NOT copy the appearance of any furniture from this image.
-2. EMPTY ROOM: The same room with all furniture removed — this is your canvas.
-3. PRODUCT PHOTOS (${placements.length} images): These are the EXACT replacement furniture pieces you MUST use. Each product photo corresponds to a product listed below.
+      prompt = `You are a PHOTOREALISTIC architectural interior renderer. You will receive images in this EXACT order:
+1. REFERENCE LAYOUT: The client's original furnished room — use this ONLY for spatial positioning (where each furniture piece sits, which direction it faces, distances from walls). IGNORE the appearance of furniture in this image entirely.
+2. EMPTY ROOM: The same room with all furniture removed — this is your blank canvas.
+3-${placements.length + 2}. PRODUCT PHOTOS (${placements.length} images): Each image shows the EXACT product to place. These are real product photographs.
 
-REPLACEMENT PRODUCTS (match each photo to its entry):
+REPLACEMENT PRODUCTS (each numbered entry corresponds to the product photo in that position):
 ${productList}
 
-YOUR TASK:
-Generate a NEW interior render of the EMPTY ROOM with ONLY the replacement products from the PRODUCT PHOTOS placed inside. You must:
-- Use the EXACT visual appearance, shape, color, material, and design of each product AS SHOWN in its product photo — do NOT substitute, simplify, or alter any product
-- Position each product where the corresponding furniture type was in the REFERENCE LAYOUT (sofas replace sofas, tables replace tables, chairs replace chairs, etc.)
-- Match the facing direction and orientation from the reference layout
-- Render each product in the correct 3D perspective matching the room's camera angle
-- Keep ALL architectural elements (walls, floors, ceilings, windows, doors, lighting) from the EMPTY ROOM exactly as they are
+YOUR TASK — STRICT RULES:
+Place each product from its PRODUCT PHOTO into the EMPTY ROOM at the position indicated by the REFERENCE LAYOUT.
 
-CRITICAL — DO NOT:
-- Do NOT reproduce or copy furniture from the REFERENCE LAYOUT image — it is ONLY for spatial positioning
-- Do NOT invent or add any furniture that isn't in the product photos
-- Do NOT ignore the product photos — every product MUST appear in the final render looking exactly as it does in its photo
+SHAPE & APPEARANCE FIDELITY (MOST IMPORTANT):
+- You MUST reproduce the EXACT shape, silhouette, proportions, color, material, and design of each product AS IT APPEARS in its product photo
+- If a product photo shows a ROUND table, render a ROUND table — never change it to rectangular, oval, or any other shape
+- If a product photo shows a curved sofa, render a curved sofa — never straighten it
+- If a product photo shows a specific upholstery color or pattern, use that EXACT color and pattern
+- Every visible detail (legs, armrests, cushions, base shape, edge profiles) must match the product photo precisely
+- Think of each product photo as a manufacturing specification — the render must look like THAT EXACT product was photographed in the room
+
+POSITIONING RULES:
+- Map each replacement product to its corresponding furniture TYPE in the reference layout (sofa→sofa position, side table→side table position, armchair→armchair position, etc.)
+- Place each product at the EXACT same position, facing the EXACT same direction as the furniture it replaces in the reference layout
+- Maintain the same distances from walls and between pieces as shown in the reference
+- Apply correct 3D axonometric perspective transformation to each product
+
+ARCHITECTURAL PRESERVATION:
+- Keep ALL architectural elements (walls, floors, ceilings, windows, doors, built-ins, lighting) from the EMPTY ROOM exactly as they are
+- Add realistic shadows, reflections, and ambient lighting that match the room's existing lighting conditions
+
+ABSOLUTE PROHIBITIONS:
+- Do NOT reproduce or copy ANY furniture appearance from the REFERENCE LAYOUT — it is ONLY for spatial positioning
+- Do NOT invent, add, or hallucinate any furniture not in the product photos
+- Do NOT change the shape, color, material, or design of any product from what is shown in its photo
+- Do NOT approximate — if the product photo shows a specific design, render that SPECIFIC design
 
 Style: ${defaultStyle}.`;
     } else if (mode === "proposal_refine") {
