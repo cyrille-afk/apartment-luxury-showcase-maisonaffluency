@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2,
+  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link,
 } from "lucide-react";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -61,6 +61,7 @@ export default function ProposalBuilder({
   const [externalName, setExternalName] = useState("");
   const [externalBrand, setExternalBrand] = useState("");
   const [externalUploading, setExternalUploading] = useState(false);
+  const [externalUrl, setExternalUrl] = useState("");
 
   // Product picker state
   const [pickerOpen, setPickerOpen] = useState(true);
@@ -136,6 +137,43 @@ export default function ProposalBuilder({
     } finally {
       setExternalUploading(false);
       if (externalFileRef.current) externalFileRef.current.value = "";
+    }
+  };
+
+  // Handle importing image from a web URL
+  const handleExternalUrl = async () => {
+    const url = externalUrl.trim();
+    if (!url || !externalName.trim()) return;
+
+    setExternalUploading(true);
+    try {
+      // Fetch the image through our edge function proxy to avoid CORS
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Failed to fetch image (${response.status})`);
+      const blob = await response.blob();
+      if (!blob.type.startsWith("image/")) throw new Error("URL does not point to a valid image");
+
+      const ext = blob.type.split("/")[1]?.split("+")[0] || "jpg";
+      const path = `proposal-externals/${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("assets").upload(path, blob, { contentType: blob.type });
+      if (uploadErr) throw uploadErr;
+
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+      addProduct({
+        product_name: externalName.trim(),
+        brand_name: externalBrand.trim() || "External",
+        image_url: urlData.publicUrl,
+        isExternal: true,
+      });
+      setExternalName("");
+      setExternalBrand("");
+      setExternalUrl("");
+      setShowExternalDialog(false);
+      toast({ title: "Product imported from URL" });
+    } catch (err: any) {
+      toast({ title: "URL import failed", description: err?.message || "Could not fetch image from URL", variant: "destructive" });
+    } finally {
+      setExternalUploading(false);
     }
   };
 
@@ -692,7 +730,7 @@ export default function ProposalBuilder({
         {showExternalDialog && selectedProducts.length < 5 && (
           <div className="border border-dashed border-border rounded-md p-3 space-y-2 bg-muted/10">
             <p className="font-body text-[10px] text-muted-foreground">
-              Import a product image not in the platform library
+              Import a product image — upload from your device or paste a web URL
             </p>
             <div className="flex flex-wrap gap-2">
               <Input
@@ -707,17 +745,35 @@ export default function ProposalBuilder({
                 placeholder="Brand (optional)"
                 className="font-body text-xs flex-1 min-w-[120px]"
               />
+            </div>
+            <div className="flex flex-wrap gap-2 items-center">
+              <Input
+                value={externalUrl}
+                onChange={(e) => setExternalUrl(e.target.value)}
+                placeholder="Paste image URL from web…"
+                className="font-body text-xs flex-1 min-w-[180px]"
+                onKeyDown={(e) => e.key === "Enter" && !externalUploading && externalUrl.trim() && externalName.trim() && handleExternalUrl()}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!externalName.trim() || !externalUrl.trim() || externalUploading}
+                onClick={handleExternalUrl}
+              >
+                {externalUploading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <><Link className="w-3.5 h-3.5 mr-1.5" />Import URL</>
+                )}
+              </Button>
+              <span className="font-body text-[10px] text-muted-foreground">or</span>
               <Button
                 size="sm"
                 variant="outline"
                 disabled={!externalName.trim() || externalUploading}
                 onClick={() => externalFileRef.current?.click()}
               >
-                {externalUploading ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <><Upload className="w-3.5 h-3.5 mr-1.5" />Choose Image</>
-                )}
+                <Upload className="w-3.5 h-3.5 mr-1.5" />Upload File
               </Button>
             </div>
           </div>
