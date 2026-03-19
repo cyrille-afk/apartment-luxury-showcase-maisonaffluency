@@ -1048,7 +1048,7 @@ export default function ProposalBuilder({
             <Input
               value={refinementPrompt}
               onChange={(e) => setRefinementPrompt(e.target.value)}
-              placeholder={moveMode ? "Markers will auto-fill this prompt — or type manually" : "Refine: e.g. 'Move the sofa further left', 'Rotate the chair to face the window'…"}
+              placeholder={(moveMode || removeMode) ? "Markers will auto-fill this prompt — or type manually" : "Refine: e.g. 'Move the sofa further left', 'Remove the piano'…"}
               className="font-body text-xs flex-1"
               onKeyDown={(e) => e.key === "Enter" && !refining && refineProposal()}
               disabled={refining}
