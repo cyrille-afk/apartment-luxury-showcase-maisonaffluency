@@ -350,52 +350,70 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       });
     }
 
-    // Pro model for initial heavy transformations, flash for iterative refinements to reduce wait
-    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay", "proposal_render"];
+    // Pro model for initial heavy transformations, flash for speed-sensitive modes
+    // proposal_render uses flash to avoid timeouts with multiple product images
+    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay"];
     const selectedModel = proModes.includes(mode)
       ? "google/gemini-3-pro-image-preview"
       : "google/gemini-3.1-flash-image-preview";
 
-    const aiResponse = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: [{ role: "user", content }],
-          modalities: ["image", "text"],
-          temperature: 0,
-        }),
-      }
-    );
+    console.log(`[axo-gen] mode=${mode}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
 
-    if (!aiResponse.ok) {
-      const status = aiResponse.status;
-      const body = await aiResponse.text();
-      if (status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+    const MAX_ATTEMPTS = 2;
+    let generatedImage: string | undefined;
+    let textResponse = "";
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const aiResponse = await fetch(
+        "https://ai.gateway.lovable.dev/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: [{ role: "user", content }],
+            modalities: ["image", "text"],
+            temperature: 0,
+          }),
+        }
+      );
+
+      if (!aiResponse.ok) {
+        const status = aiResponse.status;
+        const errBody = await aiResponse.text();
+        if (status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        if (status === 402) {
+          return new Response(
+            JSON.stringify({ error: "AI credits exhausted. Please top up in workspace settings." }),
+            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        console.error(`AI gateway error (attempt ${attempt}):`, status, errBody);
+        if (attempt === MAX_ATTEMPTS) throw new Error(`AI generation failed [${status}]`);
+        continue;
       }
-      if (status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please top up in workspace settings." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+
+      const aiData = await aiResponse.json();
+      generatedImage = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      textResponse = aiData.choices?.[0]?.message?.content || "";
+
+      if (generatedImage) {
+        console.log(`[axo-gen] Image generated on attempt ${attempt}`);
+        break;
       }
-      console.error("AI gateway error:", status, body);
-      throw new Error(`AI generation failed [${status}]`);
+      console.warn(`[axo-gen] No image on attempt ${attempt}, textResponse length=${textResponse.length}`);
+      if (attempt === MAX_ATTEMPTS) {
+        throw new Error("No image was generated after retries. The AI may not have understood the input — try with fewer products or a simpler prompt.");
+      }
     }
-
-    const aiData = await aiResponse.json();
-    const generatedImage =
-      aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    const textResponse = aiData.choices?.[0]?.message?.content || "";
 
     if (!generatedImage) {
       throw new Error("No image was generated. The AI may not have understood the input.");
