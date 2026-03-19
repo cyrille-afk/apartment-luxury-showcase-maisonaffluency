@@ -59,6 +59,8 @@ export default function ProposalBuilder({
   const { user } = useAuth();
   const externalFileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
+  const [creatingPresentation, setCreatingPresentation] = useState(false);
+  const [showPrices, setShowPrices] = useState(true);
 
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [generating, setGenerating] = useState(false);
