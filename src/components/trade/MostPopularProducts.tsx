@@ -95,7 +95,7 @@ export function MostPopularProducts() {
           {products.map((p, i) => (
             <Link
               key={p.product_id}
-              to="/trade/showroom"
+              to={`/trade/showroom?tab=grid&highlight=${p.product_id}`}
               className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all"
             >
               <div className="relative aspect-square bg-muted overflow-hidden">

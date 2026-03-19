@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { ShoppingCart, MapPin, Grid3X3, Search } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +23,11 @@ const TradeShowroom = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const [activeTab, setActiveTab] = useState<ViewTab>("gallery");
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const highlightId = searchParams.get("highlight");
+
+  const [activeTab, setActiveTab] = useState<ViewTab>(tabParam === "grid" ? "grid" : tabParam === "search" ? "search" : "gallery");
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -191,6 +196,7 @@ const TradeShowroom = () => {
             drawerRefreshKey={drawerRefreshKey}
             onDrawerRefreshKeyChange={setDrawerRefreshKey}
             onDrawerOpen={() => setDrawerOpen(true)}
+            highlightProductId={highlightId}
           />
         ) : (
           <ProductImageSearch

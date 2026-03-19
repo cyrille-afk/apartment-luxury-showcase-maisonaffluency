@@ -2,7 +2,7 @@
  * Grid/list view of hotspot products from the gallery.
  * Extracted from the original TradeShowroom for use as a tab alongside the interactive Gallery.
  */
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart } from "lucide-react";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -41,6 +41,7 @@ interface ShowroomGridViewProps {
   drawerRefreshKey: number;
   onDrawerRefreshKeyChange: (fn: (k: number) => number) => void;
   onDrawerOpen: () => void;
+  highlightProductId?: string | null;
 }
 
 // Room → section mapping
@@ -134,6 +135,7 @@ const ShowroomGridView = ({
   onQuoteCreated,
   onDrawerRefreshKeyChange,
   onDrawerOpen,
+  highlightProductId,
 }: ShowroomGridViewProps) => {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
@@ -152,6 +154,17 @@ const ShowroomGridView = ({
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
   const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
+  const [highlightedId, setHighlightedId] = useState<string | null>(highlightProductId || null);
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to highlighted product once loaded
+  useEffect(() => {
+    if (!loading && highlightedId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      const timer = setTimeout(() => setHighlightedId(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, highlightedId]);
 
   // Fetch hotspot products
   useEffect(() => {
@@ -426,11 +439,21 @@ const ShowroomGridView = ({
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const pinned = isPinned(product.product_name, product.id);
+            const isHighlighted = !!(highlightedId && product.trade_product_id === highlightedId);
             const price = product.trade_price_cents && product.currency
               ? { cents: product.trade_price_cents, currency: product.currency }
               : null;
             return (
-              <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
+              <div
+                key={product.id}
+                ref={isHighlighted ? highlightRef : undefined}
+                className={cn(
+                  "group border rounded-lg overflow-hidden transition-all",
+                  isHighlighted
+                    ? "border-primary ring-2 ring-primary/30 shadow-md"
+                    : "border-border hover:border-foreground/20"
+                )}
+              >
                 <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.product_image_url ? (
                     <img src={product.product_image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
