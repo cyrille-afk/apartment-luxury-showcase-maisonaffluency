@@ -23,6 +23,19 @@ const toAbsoluteUrl = (url: string | null | undefined): string | null => {
   return `${window.location.origin}${url.startsWith("/") ? "" : "/"}${url}`;
 };
 
+const ROOM_SECTIONS = [
+  "Living Room",
+  "Dining Room",
+  "Bedroom",
+  "Study",
+  "Lounge Area",
+  "Entrance Hall",
+  "Kitchen",
+  "Bathroom",
+  "Terrace",
+  "Other",
+] as const;
+
 interface SelectedProduct {
   id: string;
   product_name: string;
@@ -32,6 +45,7 @@ interface SelectedProduct {
   materials?: string;
   isExternal?: boolean;
   rotation?: number;
+  room_section?: string;
   pdf_url?: string;
   pdf_urls?: { label: string; url: string; filename?: string }[];
 }
