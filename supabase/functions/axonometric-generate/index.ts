@@ -175,26 +175,51 @@ ABSOLUTE PROHIBITIONS:
 Style: ${defaultStyle}.`;
     } else if (mode === "proposal_refine") {
       const productList = (placements || [])
-        .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name}`)
+        .map((p: any, i: number) => {
+          const dimNote = p.dimensions ? ` [Dimensions: ${p.dimensions}]` : "";
+          const rotNote = typeof p.rotation === "number" && p.rotation !== 0
+            ? ` [Target rotation: ${p.rotation}°]`
+            : "";
+          return `${i + 1}. "${p.product_name}" by ${p.brand_name}${dimNote}${rotNote}`;
+        })
         .join("\n");
+
+      const removeHintLines = (markerHints?.remove_points || [])
+        .map((m: any, i: number) => `${i + 1}. (${m.x_percent}%, ${m.y_percent}%)${m.label ? ` — ${m.label}` : ""}`)
+        .join("\n");
+
+      const moveHintLine = markerHints?.move_from && markerHints?.move_to
+        ? `Move hint: from (${markerHints.move_from.x_percent}%, ${markerHints.move_from.y_percent}%) to (${markerHints.move_to.x_percent}%, ${markerHints.move_to.y_percent}%).`
+        : "";
+
       const userInstruction = refinementPrompt || "Improve the placement and integration of furniture.";
-      prompt = `You are given TWO images:
-1. FIRST IMAGE: The ORIGINAL client layout — use this as the spatial reference for furniture positions and orientations.
-2. SECOND IMAGE: A previously generated proposal that needs refinement.
 
-The proposal contains these products:
-${productList}
+      prompt = `You are performing a TARGETED edit on an already-generated proposal render.
 
-ADMIN'S REFINEMENT REQUEST: "${userInstruction}"
+IMAGE ORDER:
+1. CURRENT PROPOSAL (base image to preserve)
+2. ORIGINAL CLIENT LAYOUT (for room geometry and furniture zones only)
+3+ PRODUCT REFERENCE IMAGES (exact products that must appear)
 
-Apply the requested changes while following these rules:
-- Keep ALL architectural elements (walls, floors, ceilings, windows, doors) EXACTLY as they are
-- Maintain the same products listed above — do NOT add or remove any
-- Respect the original client layout's spatial intent unless the refinement explicitly asks to change positions
-- Add realistic shadows, lighting, and perspective
-- The result must look like a single cohesive professional architectural rendering
+PRODUCT REFERENCES:
+${productList || "No explicit product list provided."}
 
-Style: ${defaultStyle}.`;
+ADMIN REFINEMENT REQUEST:
+"${userInstruction}"
+
+${moveHintLine}
+${removeHintLines ? `Remove markers:\n${removeHintLines}` : ""}
+
+STRICT EDIT RULES:
+- Start from IMAGE 1 (CURRENT PROPOSAL) and keep it as the visual baseline.
+- Only change what the admin explicitly asked for.
+- Keep all untouched areas pixel-consistent with IMAGE 1 (same walls, floor, lighting, décor, and camera framing).
+- Do NOT copy furniture appearance from IMAGE 2; use IMAGE 2 only for spatial guidance.
+- For swaps/replacements, match products to the PRODUCT REFERENCE IMAGES exactly (shape, color, material, silhouette, and scale).
+- If remove markers are provided, remove objects at those coordinates and inpaint naturally with surrounding surfaces.
+- Do not introduce new furniture or alter unrelated objects.
+
+Style: ${defaultStyle}. Output one cohesive render with minimal collateral changes.`;
     } else if (mode === "apply_texture") {
       const wallDescription = body.wallDescription || "the most prominent wall";
       prompt = `You are given an interior architectural render AND a texture/wallpaper swatch image. Apply the provided texture/wallpaper to ${wallDescription} in the scene. The texture should be applied realistically — matching the wall's perspective, lighting, and scale. Tile or repeat the pattern naturally as a real wallpaper installation would look.
