@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, MessageSquare, Send, FileDown, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, MessageSquare, Send, FileDown, Loader2, Link2, Check } from "lucide-react";
 import { format } from "date-fns";
 // Lazy-loaded to avoid crash on module init
 const loadPdfRenderer = () => import("@react-pdf/renderer");
