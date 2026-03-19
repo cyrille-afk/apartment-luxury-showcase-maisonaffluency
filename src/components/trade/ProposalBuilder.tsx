@@ -988,7 +988,7 @@ export default function ProposalBuilder({
               transform: `translate(${pan.x}px, ${pan.y}px) rotate(${rotation}deg) scale(${zoom})`,
               transition: isPanning.current ? "none" : "transform 0.2s ease",
             }}
-            onClick={moveMode ? handleImageClick : undefined}
+            onClick={(moveMode || removeMode) ? handleImageClick : undefined}
           >
             <img
               ref={imageElRef}
@@ -998,16 +998,16 @@ export default function ProposalBuilder({
               draggable={false}
             />
             {/* Floating collapse button on image */}
-            {!moveMode && (
+            {!moveMode && !removeMode && (
               <button
-                onClick={(e) => { e.stopPropagation(); setExpanded(false); resetTransform(); clearMarkers(); setMoveMode(false); }}
+                onClick={(e) => { e.stopPropagation(); setExpanded(false); resetTransform(); clearMarkers(); setMoveMode(false); setRemoveMode(false); }}
                 className="absolute top-3 right-3 z-20 bg-background/80 backdrop-blur-sm border border-border rounded-full p-2 hover:bg-background transition-colors shadow-lg"
                 title="Collapse"
               >
                 <Minimize2 className="w-4 h-4 text-foreground" />
               </button>
             )}
-            {/* Render markers over image */}
+            {/* Render move markers over image */}
             {sourceMarker && renderMarker(sourceMarker, "source")}
             {targetMarker && renderMarker(targetMarker, "target")}
             {/* Draw line between markers */}
@@ -1026,6 +1026,21 @@ export default function ProposalBuilder({
                 />
               </svg>
             )}
+            {/* Render remove markers */}
+            {removeMarkers.map((rm, idx) => (
+              <div
+                key={idx}
+                className="absolute pointer-events-none z-10"
+                style={{ left: `${rm.pos.x}%`, top: `${rm.pos.y}%`, transform: "translate(-50%, -50%)" }}
+              >
+                <div className="w-6 h-6 rounded-full border-2 border-red-500 bg-red-500/30 flex items-center justify-center">
+                  <X className="w-3 h-3 text-red-500" />
+                </div>
+                <span className="absolute top-7 left-1/2 -translate-x-1/2 text-[9px] font-body font-medium whitespace-nowrap text-red-400">
+                  {rm.label.length > 20 ? rm.label.slice(0, 18) + "…" : rm.label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
         <div className="p-4 border-t border-border">
