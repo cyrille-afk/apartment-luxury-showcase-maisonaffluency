@@ -52,16 +52,22 @@ serve(async (req) => {
     const defaultStyle = style || "photorealistic architectural rendering with warm natural lighting, high-end interior finishes";
 
     if (mode === "elevation_to_axo") {
-      prompt = `You are an expert architectural visualization AI. Transform this 2D floor plan / elevation drawing into a professional 3D axonometric (isometric) cutaway architectural view.
+      prompt = `You are an expert architectural visualization AI. Transform this 2D floor plan / elevation drawing into a professional 3D axonometric (isometric) cutaway dollhouse-style interior view.
 
 CRITICAL ACCURACY RULES:
 1. FURNITURE PLACEMENT: Study the floor plan CAREFULLY. Every piece of furniture shown in the drawing (sofas, tables, chairs, beds, desks, shelving, rugs, plants) must appear in the 3D render at the EXACT same position, orientation, and relative scale as shown in the plan. Do NOT invent, add, remove, or reposition any furniture.
-2. ROOM GEOMETRY: Walls, doors, windows, columns, and openings must match the plan exactly — correct lengths, angles, and positions.
+2. ROOM GEOMETRY: Interior partition walls, doors, windows, columns, and openings must match the plan exactly — correct lengths, angles, and positions.
 3. SPATIAL RELATIONSHIPS: Maintain the exact distances between furniture pieces and between furniture and walls as shown in the plan.
 4. ORIENTATION: If a sofa faces north in the plan, it must face north in the 3D view. Preserve all rotations and facing directions.
 5. COUNT: The number of each furniture type must match exactly — if the plan shows 2 armchairs, render exactly 2, not 1 or 3.
 
-Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full room as a cutaway with no roof. Style: ${defaultStyle}. The result must be a faithful 3D translation of the 2D plan — not an artistic reinterpretation.`;
+WALL RENDERING RULES — VERY IMPORTANT:
+- Do NOT render thick external/building envelope walls. The exterior boundary of the space should be open or only subtly indicated with a thin edge or floor boundary.
+- Only render INTERIOR partition walls that divide rooms within the space.
+- The result should look like a dollhouse or architectural model with the exterior shell completely removed, exposing the interior directly.
+- Windows and doors on the perimeter should still be visible but without the thick structural wall surrounding them — show them as openings or thin frames at the floor plan boundary.
+
+Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway with no roof and no external walls. Style: ${defaultStyle}. The result must be a faithful 3D translation of the 2D plan — not an artistic reinterpretation.`;
     } else if (mode === "section_to_axo") {
       prompt = `You are an expert architectural visualization AI. Transform this 2D architectural section drawing into a detailed 3D axonometric (isometric) cutaway view.
 
