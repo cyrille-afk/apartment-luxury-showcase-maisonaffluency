@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText,
+  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText, Lock, Unlock, CheckCircle2,
 } from "lucide-react";
 
 import {
@@ -83,6 +83,7 @@ export default function ProposalBuilder({
   const [proposalHistory, setProposalHistory] = useState<string[]>([]);
   const [refinementPrompt, setRefinementPrompt] = useState("");
   const [refining, setRefining] = useState(false);
+  const [lockedIteration, setLockedIteration] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
 
   // External upload dialog state
@@ -841,6 +842,11 @@ export default function ProposalBuilder({
             {proposalHistory.length > 1 && (
               <span className="font-body text-[10px] text-muted-foreground">Iteration {proposalHistory.length}</span>
             )}
+            {lockedIteration !== null && (
+              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-0.5 font-body text-[10px] font-medium">
+                <CheckCircle2 className="w-3 h-3" />Final Approved
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             {/* Move mode toggle */}
@@ -897,12 +903,34 @@ export default function ProposalBuilder({
               {Math.round(zoom * 100)}% · {rotation}°
             </span>
             <div className="w-px h-5 bg-border mx-1" />
+
+            {/* Set as Final */}
+            <Button
+              variant={lockedIteration !== null ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                if (lockedIteration !== null) {
+                  setLockedIteration(null);
+                  toast({ title: "Final lock removed", description: "You can continue refining." });
+                } else {
+                  setLockedIteration(proposalHistory.length);
+                  toast({ title: "Iteration locked as final", description: "Save or create a presentation with this version." });
+                }
+              }}
+              className="gap-1.5"
+              title={lockedIteration !== null ? "Unlock to continue refining" : "Lock this iteration as the final approved version"}
+            >
+              {lockedIteration !== null ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+              {lockedIteration !== null ? "Final ✓" : "Set as Final"}
+            </Button>
+
+            <div className="w-px h-5 bg-border mx-1" />
             <Button variant="outline" size="sm" onClick={downloadProposal}>
               <Download className="w-3.5 h-3.5 mr-1.5" />Download
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={saving}>
+                <Button variant="outline" size="sm" disabled={saving || lockedIteration === null}>
                   {saving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
                   Save to…
                 </Button>
@@ -922,7 +950,7 @@ export default function ProposalBuilder({
             <Button
               size="sm"
               onClick={createProposalPresentation}
-              disabled={creatingPresentation || saving}
+              disabled={creatingPresentation || saving || lockedIteration === null}
               className="gap-1.5"
             >
               {creatingPresentation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
@@ -1127,12 +1155,30 @@ export default function ProposalBuilder({
               <Button variant="outline" size="sm" onClick={() => setExpanded(true)}>
                 <Maximize2 className="w-3.5 h-3.5 mr-1.5" />Expand
               </Button>
+              <Button
+                variant={lockedIteration !== null ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  if (lockedIteration !== null) {
+                    setLockedIteration(null);
+                    toast({ title: "Final lock removed" });
+                  } else {
+                    setLockedIteration(proposalHistory.length);
+                    toast({ title: "Iteration locked as final" });
+                  }
+                }}
+                className="gap-1.5"
+                title={lockedIteration !== null ? "Unlock to continue refining" : "Lock this iteration as final"}
+              >
+                {lockedIteration !== null ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                {lockedIteration !== null ? "Final ✓" : "Set as Final"}
+              </Button>
               <Button variant="outline" size="sm" onClick={downloadProposal}>
                 <Download className="w-3.5 h-3.5 mr-1.5" />Download
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" disabled={saving}>
+                  <Button variant="outline" size="sm" disabled={saving || lockedIteration === null}>
                     {saving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
                     Save to…
                   </Button>
@@ -1152,7 +1198,7 @@ export default function ProposalBuilder({
               <Button
                 size="sm"
                 onClick={createProposalPresentation}
-                disabled={creatingPresentation || saving}
+                disabled={creatingPresentation || saving || lockedIteration === null}
                 className="gap-1.5"
               >
                 {creatingPresentation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
