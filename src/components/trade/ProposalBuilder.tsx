@@ -165,22 +165,19 @@ export default function ProposalBuilder({
 
     setExternalUploading(true);
     try {
-      // Fetch the image through our edge function proxy to avoid CORS
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Failed to fetch image (${response.status})`);
-      const blob = await response.blob();
-      if (!blob.type.startsWith("image/")) throw new Error("URL does not point to a valid image");
+      // Use proxy-image edge function to avoid CORS issues
+      const { data, error } = await supabase.functions.invoke("proxy-image", {
+        body: { url },
+      });
 
-      const ext = blob.type.split("/")[1]?.split("+")[0] || "jpg";
-      const path = `proposal-externals/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("assets").upload(path, blob, { contentType: blob.type });
-      if (uploadErr) throw uploadErr;
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      if (!data?.publicUrl) throw new Error("No image URL returned from proxy");
 
-      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
       addProduct({
         product_name: externalName.trim(),
         brand_name: externalBrand.trim() || "External",
-        image_url: urlData.publicUrl,
+        image_url: data.publicUrl,
         isExternal: true,
       });
       setExternalName("");
