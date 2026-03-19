@@ -106,19 +106,10 @@ const TradeLanding = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
-  // Remove Pinterest save buttons injected by browser extension
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      document.querySelectorAll('[data-pin-log], [class*="PinIt"], [class*="pinterest"]').forEach(el => el.remove());
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <>
       <Helmet>
-        <meta name="pinterest" content="nopin" />
         <title>Trade Program — Maison Affluency</title>
         <meta
           name="description"
