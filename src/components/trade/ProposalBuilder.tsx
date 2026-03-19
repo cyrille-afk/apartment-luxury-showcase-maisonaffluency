@@ -30,6 +30,7 @@ interface SelectedProduct {
   dimensions?: string;
   materials?: string;
   isExternal?: boolean;
+  rotation?: number; // degrees (0, 90, 180, 270)
 }
 
 interface ProposalBuilderProps {
