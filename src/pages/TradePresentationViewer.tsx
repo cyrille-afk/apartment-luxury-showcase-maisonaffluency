@@ -7,6 +7,9 @@ import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, MessageSquare, Send, FileDown, Loader2, Link2, Check } from "lucide-react";
 import { format } from "date-fns";
+import PresentationProductGrid from "@/components/trade/PresentationProductGrid";
+import PresentationQuoteSummary from "@/components/trade/PresentationQuoteSummary";
+import PresentationProductTooltip from "@/components/trade/PresentationProductTooltip";
 // Lazy-loaded to avoid crash on module init
 const loadPdfRenderer = () => import("@react-pdf/renderer");
 const loadPresentationPDF = () => import("@/components/trade/PresentationPDF");
