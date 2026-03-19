@@ -219,6 +219,7 @@ const ShowroomGridView = ({
             const meta = metadataLookup.get(key);
             seenByName.set(key, {
               ...item,
+              trade_product_id: tradeProductIdLookup.get(key),
               materials: meta?.materials || item.materials,
               dimensions: meta?.dimensions || item.dimensions,
               designer_name: meta?.brand || item.designer_name,
