@@ -539,6 +539,25 @@ export default function ProposalBuilder({
             <Button variant="outline" size="sm" onClick={downloadProposal}>
               <Download className="w-3.5 h-3.5 mr-1.5" />Download
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={saving}>
+                  {saving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
+                  Save to…
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={saveToGallery} className="gap-2">
+                  <Image className="w-3.5 h-3.5" />Gallery (My Drafts)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={saveToPresentation} className="gap-2">
+                  <Layout className="w-3.5 h-3.5" />Presentations
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={saveToMediaLibrary} className="gap-2">
+                  <FolderOpen className="w-3.5 h-3.5" />Media Library
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="ghost" size="sm" onClick={() => { setExpanded(false); resetTransform(); clearMarkers(); setMoveMode(false); }}>
               <Minimize2 className="w-3.5 h-3.5 mr-1.5" />Collapse
             </Button>
