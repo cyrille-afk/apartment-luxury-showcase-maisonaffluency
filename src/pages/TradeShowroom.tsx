@@ -167,18 +167,42 @@ const TradeShowroom = () => {
             <Grid3X3 className="h-3.5 w-3.5" />
             Product Grid
           </button>
+          <button
+            onClick={() => setActiveTab("search")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 font-body text-xs uppercase tracking-[0.1em] transition-colors border-b-2 -mb-px",
+              activeTab === "search"
+                ? "border-foreground text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Search className="h-3.5 w-3.5" />
+            Visual Search
+          </button>
         </div>
 
         {/* Tab content */}
         {activeTab === "gallery" ? (
           <Gallery onHotspotAddToQuote={handleHotspotAddToQuote} hideIntro />
-        ) : (
+        ) : activeTab === "grid" ? (
           <ShowroomGridView
             activeQuoteId={activeQuoteId}
             onQuoteCreated={handleQuoteCreated}
             drawerRefreshKey={drawerRefreshKey}
             onDrawerRefreshKeyChange={setDrawerRefreshKey}
             onDrawerOpen={() => setDrawerOpen(true)}
+          />
+        ) : (
+          <ProductImageSearch
+            onSelectImage={(result) => {
+              handleHotspotAddToQuote({
+                product_name: result.title,
+                designer_name: null,
+                product_image_url: result.imageUrl,
+                materials: null,
+                dimensions: null,
+              });
+            }}
           />
         )}
       </div>
