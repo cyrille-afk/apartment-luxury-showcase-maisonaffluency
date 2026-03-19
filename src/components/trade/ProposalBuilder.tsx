@@ -1057,9 +1057,6 @@ export default function ProposalBuilder({
                 <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors flex items-center justify-center pointer-events-none">
                   <Maximize2 className="w-6 h-6 text-foreground/0 group-hover:text-foreground/50 transition-colors" />
                 </div>
-                <div onClick={(e) => e.stopPropagation()}>
-                  <ProductChecklist products={selectedProducts} />
-                </div>
               </div>
               {proposalHistory.length > 1 && (
                 <p className="font-body text-[10px] text-muted-foreground text-right">
