@@ -13,3 +13,5 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = false
   [functions.proxy-image]
     verify_jwt = false
+  [functions.send-weekly-digest]
+    verify_jwt = true
