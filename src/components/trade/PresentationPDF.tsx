@@ -25,6 +25,10 @@ try {
 // Disable hyphenation to avoid crash
 Font.registerHyphenationCallback((word) => [word]);
 
+// Use safe font families that fall back to Helvetica if custom fonts failed to load
+const fontBody = fontsRegistered ? "Inter" : "Helvetica";
+const fontDisplay = fontsRegistered ? "Cormorant" : "Helvetica";
+
 const s = StyleSheet.create({
   page: { backgroundColor: "#FFFFFF", position: "relative" },
   // Cover page
