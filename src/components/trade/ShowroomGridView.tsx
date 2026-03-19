@@ -450,6 +450,18 @@ const ShowroomGridView = ({
                   >
                     <Scale className="h-3.5 w-3.5" />
                   </button>
+                  {product.trade_product_id && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleFavorite(product.trade_product_id!); }}
+                      className={cn(
+                        "absolute top-2 left-2 z-10 p-1.5 rounded-full transition-all",
+                        isFavorited(product.trade_product_id) ? "bg-destructive text-destructive-foreground shadow-md" : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90",
+                      )}
+                      aria-label={isFavorited(product.trade_product_id) ? "Remove from favorites" : "Save to favorites"}
+                    >
+                      <Heart className={cn("h-3.5 w-3.5", isFavorited(product.trade_product_id) && "fill-current")} />
+                    </button>
+                  )}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleAddToQuote(product); }}
