@@ -20,6 +20,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 
 interface ShowroomProduct {
   id: string;
+  trade_product_id?: string;
   product_name: string;
   designer_name: string | null;
   materials: string | null;
