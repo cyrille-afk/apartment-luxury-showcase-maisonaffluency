@@ -213,6 +213,7 @@ const TradeAxonometric = () => {
   const [showProposal, setShowProposal] = useState(false);
   const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
+  const [savingRefStyle, setSavingRefStyle] = useState(false);
 
 
   // AI dialogue state
@@ -412,6 +413,51 @@ const TradeAxonometric = () => {
     enabled: isAdmin,
   });
 
+  // Fetch saved reference styles
+  const { data: referenceStyles } = useQuery({
+    queryKey: ["reference-styles"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("reference_styles")
+        .select("*");
+      if (error) throw error;
+      return data as { id: string; mode: string; image_url: string; updated_at: string }[];
+    },
+    enabled: isAdmin,
+  });
+
+  const currentRefStyle = referenceStyles?.find((r) => r.mode === mode);
+
+  const saveAsReferenceStyle = async () => {
+    if (!result) return;
+    const imageUrl = result.storedUrl || result.imageUrl;
+    setSavingRefStyle(true);
+    try {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      // Upsert by mode
+      const existing = referenceStyles?.find((r) => r.mode === mode);
+      if (existing) {
+        await (supabase as any).from("reference_styles").update({
+          image_url: imageUrl,
+          created_by: userId,
+          updated_at: new Date().toISOString(),
+        }).eq("id", existing.id);
+      } else {
+        await (supabase as any).from("reference_styles").insert({
+          mode,
+          image_url: imageUrl,
+          created_by: userId,
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ["reference-styles"] });
+      toast({ title: "Reference style saved", description: `Future "${mode.replace(/_/g, " ")}" generations will use this as a style guide.` });
+    } catch (e: any) {
+      toast({ title: "Failed to save reference style", description: e.message, variant: "destructive" });
+    } finally {
+      setSavingRefStyle(false);
+    }
+  };
+
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
   const generateEmptyRoom = async (imageUrl: string) => {
@@ -453,12 +499,14 @@ const TradeAxonometric = () => {
           .eq("id", activeRequestId);
       }
 
+      const refStyle = referenceStyles?.find((r) => r.mode === mode);
       const body: any = {
         imageUrl: toAbsoluteUrl(sourceImage),
         mode,
         style,
         overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages.map(u => toAbsoluteUrl(u)).filter(Boolean) : undefined,
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
+        styleReferenceUrl: refStyle ? toAbsoluteUrl(refStyle.image_url) : undefined,
       };
 
       const data = await invokeAxonometricGenerate(body, undefined, 1);
@@ -1543,6 +1591,34 @@ const TradeAxonometric = () => {
                       Save & Publish
                     </Button>
                   </div>
+                </div>
+
+                {/* Save as Reference Style */}
+                <div className="border border-border rounded-lg p-5 space-y-3">
+                  <h2 className="font-display text-sm text-foreground flex items-center gap-2">
+                    <Paintbrush className="w-3.5 h-3.5" />Reference Style
+                  </h2>
+                  <p className="font-body text-xs text-muted-foreground">
+                    Lock in this render as the style target for all future <span className="font-medium text-foreground">{mode.replace(/_/g, " ")}</span> generations.
+                  </p>
+                  {currentRefStyle && (
+                    <div className="flex items-center gap-2 p-2 rounded-md bg-muted/30 border border-border">
+                      <img src={currentRefStyle.image_url} alt="Current reference" className="w-10 h-10 rounded object-cover" />
+                      <span className="font-body text-[10px] text-muted-foreground flex-1">
+                        Current reference saved {new Date(currentRefStyle.updated_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled={!result || savingRefStyle}
+                    onClick={saveAsReferenceStyle}
+                  >
+                    {savingRefStyle ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Paintbrush className="w-3.5 h-3.5 mr-1.5" />}
+                    {currentRefStyle ? "Update Reference Style" : "Save as Reference Style"}
+                  </Button>
                 </div>
 
                 {/* Deliver to requester */}

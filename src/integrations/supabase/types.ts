@@ -611,6 +611,33 @@ export type Database = {
           },
         ]
       }
+      reference_styles: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          image_url: string
+          mode: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          image_url: string
+          mode: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_url?: string
+          mode?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       room_planner_projects: {
         Row: {
           created_at: string
