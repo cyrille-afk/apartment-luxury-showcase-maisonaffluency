@@ -223,6 +223,9 @@ const TradeAxonometric = () => {
   const [aiAttachedProduct, setAiAttachedProduct] = useState<SelectedProduct | null>(null);
   const [aiProductPickerOpen, setAiProductPickerOpen] = useState(false);
   const [aiProductSearch, setAiProductSearch] = useState("");
+  const [aiTextureUrl, setAiTextureUrl] = useState<string | null>(null);
+  const [aiTextureUploading, setAiTextureUploading] = useState(false);
+  const textureInputRef = useRef<HTMLInputElement>(null);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
