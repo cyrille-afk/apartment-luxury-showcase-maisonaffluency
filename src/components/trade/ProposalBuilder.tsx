@@ -228,7 +228,44 @@ export default function ProposalBuilder({
     a.click();
   };
 
-  // Expanded fullscreen overlay for proposal
+  // Interactive transform state for expanded view
+  const [rotation, setRotation] = useState(0);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const isPanning = useRef(false);
+  const panStart = useRef({ x: 0, y: 0 });
+  const panOffset = useRef({ x: 0, y: 0 });
+
+  const resetTransform = useCallback(() => {
+    setRotation(0);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, []);
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    setZoom((z) => Math.min(5, Math.max(0.2, z - e.deltaY * 0.001)));
+  }, []);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    isPanning.current = true;
+    panStart.current = { x: e.clientX, y: e.clientY };
+    panOffset.current = { ...pan };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }, [pan]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isPanning.current) return;
+    setPan({
+      x: panOffset.current.x + (e.clientX - panStart.current.x),
+      y: panOffset.current.y + (e.clientY - panStart.current.y),
+    });
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    isPanning.current = false;
+  }, []);
+
   if (expanded && proposalResult) {
     return (
       <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
@@ -239,20 +276,51 @@ export default function ProposalBuilder({
               <span className="font-body text-[10px] text-muted-foreground">Iteration {proposalHistory.length}</span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            {/* Transform controls */}
+            <Button variant="ghost" size="sm" onClick={() => setRotation((r) => r - 15)} title="Rotate left 15°">
+              <RotateCcw className="w-3.5 h-3.5" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setRotation((r) => r + 15)} title="Rotate right 15°">
+              <RotateCw className="w-3.5 h-3.5" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setZoom((z) => Math.min(5, z + 0.25))} title="Zoom in">
+              <ZoomIn className="w-3.5 h-3.5" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setZoom((z) => Math.max(0.2, z - 0.25))} title="Zoom out">
+              <ZoomOut className="w-3.5 h-3.5" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={resetTransform} title="Reset view">
+              <Move className="w-3.5 h-3.5" />
+            </Button>
+            <span className="text-[10px] text-muted-foreground font-body w-16 text-center tabular-nums">
+              {Math.round(zoom * 100)}% · {rotation}°
+            </span>
+            <div className="w-px h-5 bg-border mx-1" />
             <Button variant="outline" size="sm" onClick={downloadProposal}>
               <Download className="w-3.5 h-3.5 mr-1.5" />Download
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setExpanded(false)}>
+            <Button variant="ghost" size="sm" onClick={() => { setExpanded(false); resetTransform(); }}>
               <Minimize2 className="w-3.5 h-3.5 mr-1.5" />Collapse
             </Button>
           </div>
         </div>
-        <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
+        <div
+          className="flex-1 overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+          onWheel={handleWheel}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
           <img
             src={proposalResult}
             alt="Generated proposal"
-            className="max-w-full max-h-full object-contain rounded-lg"
+            className="max-w-[90vw] max-h-[80vh] object-contain rounded-lg pointer-events-none"
+            draggable={false}
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) rotate(${rotation}deg) scale(${zoom})`,
+              transition: isPanning.current ? "none" : "transform 0.2s ease",
+            }}
           />
         </div>
         <div className="p-4 border-t border-border">
