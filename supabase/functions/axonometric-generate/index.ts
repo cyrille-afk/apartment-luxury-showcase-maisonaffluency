@@ -108,7 +108,8 @@ Style: ${defaultStyle}. The result must be a faithful 3D translation of the sect
       const productList = (placements || [])
         .map((p: any, i: number) => {
           const rotNote = p.rotation ? ` — ROTATE this product ${p.rotation}° clockwise from its original orientation in the product photo` : "";
-          return `${i + 1}. "${p.product_name}" by ${p.brand_name}${rotNote}`;
+          const dimNote = p.dimensions ? ` [Dimensions: ${p.dimensions}]` : "";
+          return `${i + 1}. "${p.product_name}" by ${p.brand_name}${dimNote}${rotNote}`;
         })
         .join("\n");
       if (!placements || placements.length === 0) throw new Error("At least one product placement is required");
@@ -131,11 +132,12 @@ SHAPE & APPEARANCE FIDELITY (MOST IMPORTANT):
 - Every visible detail (legs, armrests, cushions, base shape, edge profiles) must match the product photo precisely
 - Think of each product photo as a manufacturing specification — the render must look like THAT EXACT product was photographed in the room
 
-POSITIONING RULES:
+POSITIONING & SCALE RULES:
 - Map each replacement product to its corresponding furniture TYPE in the reference layout (sofa→sofa position, side table→side table position, armchair→armchair position, etc.)
 - Place each product at the EXACT same position, facing the EXACT same direction as the furniture it replaces in the reference layout
 - Maintain the same distances from walls and between pieces as shown in the reference
 - Apply correct 3D axonometric perspective transformation to each product
+- When dimensions are provided (e.g. W65 × D58 × H79cm), use them to scale each product correctly RELATIVE to the room and to other furniture — a side table should be noticeably smaller than a sofa, a dining table taller than a coffee table, etc.
 
 ARCHITECTURAL PRESERVATION:
 - Keep ALL architectural elements (walls, floors, ceilings, windows, doors, built-ins, lighting) from the EMPTY ROOM exactly as they are
