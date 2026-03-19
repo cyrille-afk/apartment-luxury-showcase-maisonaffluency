@@ -108,7 +108,8 @@ Style: ${defaultStyle}. The result must be a faithful 3D translation of the sect
       const productList = (placements || [])
         .map((p: any, i: number) => {
           const rotNote = p.rotation ? ` — ROTATE this product ${p.rotation}° clockwise from its original orientation in the product photo` : "";
-          return `${i + 1}. "${p.product_name}" by ${p.brand_name}${rotNote}`;
+          const dimNote = p.dimensions ? ` [Dimensions: ${p.dimensions}]` : "";
+          return `${i + 1}. "${p.product_name}" by ${p.brand_name}${dimNote}${rotNote}`;
         })
         .join("\n");
       if (!placements || placements.length === 0) throw new Error("At least one product placement is required");
