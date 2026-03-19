@@ -1274,10 +1274,10 @@ const TradeAxonometric = () => {
                       <div className="flex items-center gap-2 bg-muted/40 rounded-md px-2.5 py-1.5 flex-1 min-w-0">
                         <img src={aiTextureUrl} alt="Texture swatch" className="w-8 h-8 rounded border border-border object-cover shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="font-display text-[10px] text-foreground truncate">Texture / Wallpaper Swatch</p>
+                          <p className="font-display text-[10px] text-foreground truncate">{aiTextureLabel || "Custom Texture Swatch"}</p>
                           <p className="font-body text-[9px] text-muted-foreground truncate">Describe which wall to apply it to</p>
                         </div>
-                        <button onClick={() => setAiTextureUrl(null)} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
+                        <button onClick={() => { setAiTextureUrl(null); setAiTextureLabel(null); }} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
                           <X className="w-3 h-3" />
                         </button>
                       </div>
