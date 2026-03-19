@@ -40,7 +40,7 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const body = await req.json();
-    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl, refinementPrompt, styleReferenceUrl } = body;
+    const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl, refinementPrompt, styleReferenceUrl, skipStyleReference } = body;
     // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "product_swap" | "scene_edit" | "freeform" | "turntable_angle"
 
     if (!imageUrl) throw new Error("imageUrl is required");
@@ -214,7 +214,9 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
 
     // If a style reference image is provided, append instruction to match its visual style
     if (styleReferenceUrl) {
-      prompt += `\n\nIMPORTANT STYLE REFERENCE: A reference image is provided as the LAST image in this message. You MUST match its exact visual style, color grading, lighting, material quality, camera angle, and rendering technique as closely as possible. The output should look like it was generated in the same batch/session as the reference image.`;
+      prompt += `\n\nIMPORTANT STYLE REFERENCE: A reference image is provided as the LAST image in this message. You MUST match its exact visual style, color grading, lighting, material quality, and rendering technique as closely as possible. The output should look like it was generated in the same batch/session as the reference image. However, choose your OWN optimal camera angle and viewpoint for this specific floor plan — do NOT copy the camera angle from the reference.`;
+    } else if (skipStyleReference) {
+      prompt += `\n\nIMPORTANT: Generate a FRESH, original interpretation of this drawing. Choose your own optimal camera angle, viewpoint, color palette, and lighting setup. Do NOT replicate any previously seen rendering style — produce a unique result.`;
     }
 
     // Build message content
