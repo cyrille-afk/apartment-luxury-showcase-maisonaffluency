@@ -104,10 +104,10 @@ const BrandTile = ({
             : "border-transparent hover:border-border"
         }`}
       >
-        <div className="w-12 h-12 rounded-md bg-muted/20 overflow-hidden relative">
+        <div className="w-16 h-16 rounded-md bg-muted/20 overflow-hidden relative">
           {isUploading ? (
             <div className="w-full h-full flex items-center justify-center">
-              <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
+              <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
             </div>
           ) : thumb ? (
             <img
@@ -118,13 +118,13 @@ const BrandTile = ({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <span className="font-display text-sm text-muted-foreground/40">
+              <span className="font-display text-base text-muted-foreground/40">
                 {brand.name.charAt(0)}
               </span>
             </div>
           )}
         </div>
-        <span className="font-body text-[10px] text-foreground whitespace-nowrap max-w-[72px] truncate">
+        <span className="font-body text-[11px] text-foreground whitespace-nowrap max-w-[80px] truncate">
           {brand.name}
         </span>
       </button>
@@ -273,10 +273,10 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false }: Br
                 : "border-border hover:border-foreground/20"
             }`}
           >
-            <div className="w-12 h-12 rounded-md bg-muted/30 flex items-center justify-center">
-              <FolderOpen className="w-5 h-5 text-muted-foreground" />
+            <div className="w-16 h-16 rounded-md bg-muted/30 flex items-center justify-center">
+              <FolderOpen className="w-6 h-6 text-muted-foreground" />
             </div>
-            <span className="font-body text-[10px] text-foreground whitespace-nowrap">All</span>
+            <span className="font-body text-[11px] text-foreground whitespace-nowrap">All</span>
           </button>
 
           {brands.map((brand) => (
