@@ -242,6 +242,9 @@ const TradeDashboard = () => {
         ))}
       </div>
 
+      {/* Most Popular */}
+      <MostPopularProducts />
+
       {/* Recent Activity */}
       <div className="mt-10">
         <h2 className="font-display text-lg text-foreground mb-4 flex items-center gap-2">
