@@ -350,12 +350,8 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       });
     }
 
-    // Pro model for initial heavy transformations, flash for speed-sensitive modes
-    // proposal_render uses flash to avoid timeouts with multiple product images
-    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay"];
-    const selectedModel = proModes.includes(mode)
-      ? "google/gemini-3-pro-image-preview"
-      : "google/gemini-3.1-flash-image-preview";
+    // Flash model for ALL modes (speed), Pro only as final-attempt fallback
+    const selectedModel = "google/gemini-3.1-flash-image-preview";
 
     console.log(`[axo-gen] mode=${mode}, model=${selectedModel}, images=${content.filter((c: any) => c.type === "image_url").length}`);
 
