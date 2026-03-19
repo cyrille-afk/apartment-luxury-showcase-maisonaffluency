@@ -3,7 +3,7 @@
  * Extracted from the original TradeShowroom for use as a tab alongside the interactive Gallery.
  */
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2 } from "lucide-react";
+import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart } from "lucide-react";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
@@ -16,9 +16,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
+import { useFavorites } from "@/hooks/useFavorites";
 
 interface ShowroomProduct {
   id: string;
+  trade_product_id?: string;
   product_name: string;
   designer_name: string | null;
   materials: string | null;
@@ -136,6 +138,7 @@ const ShowroomGridView = ({
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { isFavorited, toggleFavorite } = useFavorites();
 
   const [products, setProducts] = useState<ShowroomProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -162,14 +165,17 @@ const ShowroomGridView = ({
         const tradeProducts = getAllTradeProducts();
         const pdfLookup = new Map<string, string>();
         const metadataLookup = new Map<string, { materials?: string; dimensions?: string; brand?: string; image_url?: string | null; category?: string; subcategory?: string }>();
+        const tradeProductIdLookup = new Map<string, string>();
         for (const tp of tradeProducts) {
           const tpKey = tp.product_name.trim().toLowerCase();
           const metaEntry = { materials: tp.materials, dimensions: tp.dimensions, brand: tp.brand_name, image_url: tp.image_url, category: tp.category, subcategory: tp.subcategory };
           if (tp.pdf_url) pdfLookup.set(tpKey, tp.pdf_url);
           metadataLookup.set(tpKey, metaEntry);
+          tradeProductIdLookup.set(tpKey, tp.id);
           if (tp.subtitle) {
             const comboKey = `${tpKey} ${tp.subtitle.trim().toLowerCase()}`;
             metadataLookup.set(comboKey, metaEntry);
+            tradeProductIdLookup.set(comboKey, tp.id);
             if (tp.pdf_url) pdfLookup.set(comboKey, tp.pdf_url);
           }
         }
@@ -213,6 +219,7 @@ const ShowroomGridView = ({
             const meta = metadataLookup.get(key);
             seenByName.set(key, {
               ...item,
+              trade_product_id: tradeProductIdLookup.get(key),
               materials: meta?.materials || item.materials,
               dimensions: meta?.dimensions || item.dimensions,
               designer_name: meta?.brand || item.designer_name,
@@ -443,6 +450,18 @@ const ShowroomGridView = ({
                   >
                     <Scale className="h-3.5 w-3.5" />
                   </button>
+                  {product.trade_product_id && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleFavorite(product.trade_product_id!); }}
+                      className={cn(
+                        "absolute top-2 left-2 z-10 p-1.5 rounded-full transition-all",
+                        isFavorited(product.trade_product_id) ? "bg-destructive text-destructive-foreground shadow-md" : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90",
+                      )}
+                      aria-label={isFavorited(product.trade_product_id) ? "Remove from favorites" : "Save to favorites"}
+                    >
+                      <Heart className={cn("h-3.5 w-3.5", isFavorited(product.trade_product_id) && "fill-current")} />
+                    </button>
+                  )}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleAddToQuote(product); }}

@@ -898,6 +898,38 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_favorites_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_products: {
         Row: {
           brand_name: string

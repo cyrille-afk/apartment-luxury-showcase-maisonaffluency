@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign, AlertCircle, Package, Box, Presentation } from "lucide-react";
+import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign, AlertCircle, Package, Box, Presentation, Heart, BarChart3 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,6 +23,7 @@ const mainItems = [
   { title: "Gallery", url: "/trade/gallery", icon: Image },
   { title: "Brand Library", url: "/trade/documents", icon: FolderOpen },
   { title: "Sample Requests", url: "/trade/samples", icon: Package },
+  { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
   { title: "3D Studio", url: "/trade/axonometric-requests", icon: Box },
   { title: "Settings", url: "/trade/settings", icon: Settings },
@@ -130,6 +131,18 @@ export function TradeSidebar() {
                     >
                       <Shield className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>Admin</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/insights"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                      activeClassName="bg-muted text-foreground font-medium"
+                    >
+                      <BarChart3 className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Insights</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
