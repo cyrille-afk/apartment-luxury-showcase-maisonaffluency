@@ -214,6 +214,7 @@ const TradeAxonometric = () => {
   const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
   const [savingRefStyle, setSavingRefStyle] = useState(false);
+  const [useLockedRefStyle, setUseLockedRefStyle] = useState(true);
 
 
   // AI dialogue state
