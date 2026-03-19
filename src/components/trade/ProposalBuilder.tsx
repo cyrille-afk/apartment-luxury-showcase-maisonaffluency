@@ -1155,12 +1155,30 @@ export default function ProposalBuilder({
               <Button variant="outline" size="sm" onClick={() => setExpanded(true)}>
                 <Maximize2 className="w-3.5 h-3.5 mr-1.5" />Expand
               </Button>
+              <Button
+                variant={lockedIteration !== null ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  if (lockedIteration !== null) {
+                    setLockedIteration(null);
+                    toast({ title: "Final lock removed" });
+                  } else {
+                    setLockedIteration(proposalHistory.length);
+                    toast({ title: "Iteration locked as final" });
+                  }
+                }}
+                className="gap-1.5"
+                title={lockedIteration !== null ? "Unlock to continue refining" : "Lock this iteration as final"}
+              >
+                {lockedIteration !== null ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                {lockedIteration !== null ? "Final ✓" : "Set as Final"}
+              </Button>
               <Button variant="outline" size="sm" onClick={downloadProposal}>
                 <Download className="w-3.5 h-3.5 mr-1.5" />Download
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" disabled={saving}>
+                  <Button variant="outline" size="sm" disabled={saving || lockedIteration === null}>
                     {saving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
                     Save to…
                   </Button>
@@ -1180,7 +1198,7 @@ export default function ProposalBuilder({
               <Button
                 size="sm"
                 onClick={createProposalPresentation}
-                disabled={creatingPresentation || saving}
+                disabled={creatingPresentation || saving || lockedIteration === null}
                 className="gap-1.5"
               >
                 {creatingPresentation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
