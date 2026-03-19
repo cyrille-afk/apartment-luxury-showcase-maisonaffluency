@@ -550,6 +550,29 @@ const TradeAxonometric = () => {
   };
 
 
+  const handleTextureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast({ title: "Please upload an image file", variant: "destructive" }); return; }
+    setAiTextureUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const fileName = `textures/${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
+      const { error } = await supabase.storage.from("assets").upload(fileName, file, { contentType: file.type });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(fileName);
+      setAiTextureUrl(urlData.publicUrl);
+      setAiAttachedProduct(null);
+      setAiProductPickerOpen(false);
+      toast({ title: "Texture swatch attached" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setAiTextureUploading(false);
+      if (textureInputRef.current) textureInputRef.current.value = "";
+    }
+  };
+
   const sendAiPrompt = async () => {
     if (!aiPrompt.trim() || !result) return;
 
