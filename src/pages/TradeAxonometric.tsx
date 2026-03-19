@@ -1011,6 +1011,23 @@ const TradeAxonometric = () => {
                   ))}
                 </SelectContent>
               </Select>
+
+              {currentRefStyle && (
+                <div className="rounded-md border border-border bg-muted/30 p-2.5 space-y-2">
+                  <p className="font-body text-[11px] text-muted-foreground">
+                    Locked reference style is currently <span className="font-medium text-foreground">{useLockedRefStyle ? "ON" : "OFF"}</span> for this mode.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => setUseLockedRefStyle((prev) => !prev)}
+                  >
+                    {useLockedRefStyle ? "Generate Without Locked Style" : "Use Locked Style Again"}
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Product Overlay (composite mode) */}
