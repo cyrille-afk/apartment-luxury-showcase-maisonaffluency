@@ -1336,6 +1336,41 @@ const TradeAxonometric = () => {
                     </div>
                   )}
 
+                  {/* Wallcovering picker panel */}
+                  {aiTexturePickerOpen && !aiTextureUrl && !aiAttachedProduct && (
+                    <div className="px-3 pt-2.5 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="font-display text-[10px] text-foreground">Wallcoverings</p>
+                        <button
+                          onClick={() => textureInputRef.current?.click()}
+                          className="font-body text-[10px] text-muted-foreground hover:text-foreground underline transition-colors"
+                        >
+                          {aiTextureUploading ? "Uploading…" : "Upload custom swatch"}
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto pr-1">
+                        {wallcoveringProducts.map((wp) => (
+                          <button
+                            key={wp.id}
+                            onClick={() => {
+                              setAiTextureUrl(wp.image_url);
+                              setAiTextureLabel(`${wp.product_name} — ${wp.brand_name}`);
+                              setAiTexturePickerOpen(false);
+                            }}
+                            className="group relative rounded-md border border-border overflow-hidden hover:ring-1 hover:ring-foreground/30 transition-all aspect-square"
+                            title={`${wp.product_name} by ${wp.brand_name}`}
+                          >
+                            <img src={wp.image_url!} alt={wp.product_name} className="w-full h-full object-cover" />
+                            <div className="absolute inset-x-0 bottom-0 bg-background/80 backdrop-blur-sm px-1 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <p className="font-display text-[8px] text-foreground truncate">{wp.product_name}</p>
+                              <p className="font-body text-[7px] text-muted-foreground truncate">{wp.brand_name}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Hidden file input for texture upload */}
                   <input
                     ref={textureInputRef}
@@ -1347,7 +1382,7 @@ const TradeAxonometric = () => {
 
                   <div className="flex items-center gap-2 p-3">
                     <button
-                      onClick={() => setAiProductPickerOpen(!aiProductPickerOpen)}
+                      onClick={() => { setAiProductPickerOpen(!aiProductPickerOpen); setAiTexturePickerOpen(false); }}
                       disabled={aiSending || !!aiTextureUrl}
                       className={`shrink-0 rounded-md border p-2 transition-colors disabled:opacity-50 ${
                         aiAttachedProduct || aiProductPickerOpen
@@ -1359,14 +1394,14 @@ const TradeAxonometric = () => {
                       <ImagePlus className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => textureInputRef.current?.click()}
-                      disabled={aiSending || aiTextureUploading || !!aiAttachedProduct}
+                      onClick={() => { setAiTexturePickerOpen(!aiTexturePickerOpen); setAiProductPickerOpen(false); }}
+                      disabled={aiSending || !!aiAttachedProduct}
                       className={`shrink-0 rounded-md border p-2 transition-colors disabled:opacity-50 ${
-                        aiTextureUrl
+                        aiTextureUrl || aiTexturePickerOpen
                           ? "border-foreground bg-foreground text-background"
                           : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
                       }`}
-                      title="Upload a wallpaper / texture swatch"
+                      title="Apply wallpaper / texture to a wall"
                     >
                       {aiTextureUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Paintbrush className="w-3.5 h-3.5" />}
                     </button>
