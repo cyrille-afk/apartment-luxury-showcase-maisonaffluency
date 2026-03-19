@@ -562,11 +562,13 @@ const TradeAxonometric = () => {
     const currentImageUrl = result.storedUrl || result.imageUrl;
     const userMsg = aiPrompt.trim();
     const attachedProduct = aiAttachedProduct;
-    const productLabel = attachedProduct ? ` [with: ${attachedProduct.product_name}]` : "";
+    const attachedTexture = aiTextureUrl;
+    const productLabel = attachedProduct ? ` [with: ${attachedProduct.product_name}]` : attachedTexture ? " [with texture swatch]" : "";
 
     setAiHistory((prev) => [...prev, { role: "user", text: userMsg + productLabel }]);
     setAiPrompt("");
     setAiAttachedProduct(null);
+    setAiTextureUrl(null);
     setAiProductPickerOpen(false);
     setAiSending(true);
 
@@ -587,7 +589,15 @@ const TradeAxonometric = () => {
         style,
       };
 
-      if (attachedProduct) {
+      if (attachedTexture) {
+        const textureUrl = normalizeForGateway(attachedTexture);
+        if (!textureUrl) {
+          throw new Error("Texture image is invalid. Please re-upload.");
+        }
+        body.mode = "apply_texture";
+        body.textureImageUrl = textureUrl;
+        body.wallDescription = userMsg;
+      } else if (attachedProduct) {
         const replacementUrl = normalizeForGateway(attachedProduct.image_url);
         if (!replacementUrl) {
           throw new Error("Selected product image is invalid. Please pick another product image.");
