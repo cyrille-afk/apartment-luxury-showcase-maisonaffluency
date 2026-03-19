@@ -1137,7 +1137,7 @@ export default function ProposalBuilder({
             Add Products to Proposal {selectedProducts.length >= 10 && <span className="text-muted-foreground">(max reached)</span>}
           </h3>
           <div className="flex items-center gap-3">
-            {selectedProducts.length < 5 && (
+            {selectedProducts.length < 10 && (
               <button
                 onClick={() => setShowExternalDialog(!showExternalDialog)}
                 className="font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
