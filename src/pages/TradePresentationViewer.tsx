@@ -19,6 +19,10 @@ interface Slide {
   project_name: string | null;
   style_preset: string | null;
   sort_order: number;
+  slide_type?: string;
+  room_section?: string | null;
+  linked_product_ids?: any;
+  linked_quote_id?: string | null;
 }
 
 interface Comment {
