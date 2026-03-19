@@ -23,6 +23,19 @@ const toAbsoluteUrl = (url: string | null | undefined): string | null => {
   return `${window.location.origin}${url.startsWith("/") ? "" : "/"}${url}`;
 };
 
+const ROOM_SECTIONS = [
+  "Living Room",
+  "Dining Room",
+  "Bedroom",
+  "Study",
+  "Lounge Area",
+  "Entrance Hall",
+  "Kitchen",
+  "Bathroom",
+  "Terrace",
+  "Other",
+] as const;
+
 interface SelectedProduct {
   id: string;
   product_name: string;
@@ -32,6 +45,7 @@ interface SelectedProduct {
   materials?: string;
   isExternal?: boolean;
   rotation?: number;
+  room_section?: string;
   pdf_url?: string;
   pdf_urls?: { label: string; url: string; filename?: string }[];
 }
@@ -127,6 +141,12 @@ export default function ProposalBuilder({
       prev.map((p) =>
         p.id === id ? { ...p, rotation: ((p.rotation || 0) + direction * 90 + 360) % 360 } : p
       )
+    );
+  }, []);
+
+  const updateRoomSection = useCallback((id: string, section: string) => {
+    setSelectedProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, room_section: section || undefined } : p))
     );
   }, []);
 
@@ -603,8 +623,7 @@ export default function ProposalBuilder({
         // Infer room section from product category or default to "Featured Products"
         const roomGroups = new Map<string, typeof selectedProducts>();
         for (const p of selectedProducts) {
-          // Use tags or category as room section hint
-          const section = (p as any).category || "Featured Products";
+          const section = p.room_section || "Featured Products";
           if (!roomGroups.has(section)) roomGroups.set(section, []);
           roomGroups.get(section)!.push(p);
         }
@@ -1192,6 +1211,16 @@ export default function ProposalBuilder({
                     {p.isExternal && <span className="ml-1 text-muted-foreground/50">(ext)</span>}
                   </p>
                   {p.dimensions && <p className="font-body text-[8px] text-muted-foreground/70 truncate">{p.dimensions}</p>}
+                  <select
+                    value={p.room_section || ""}
+                    onChange={(e) => updateRoomSection(p.id, e.target.value)}
+                    className="mt-1 w-full bg-transparent border border-border rounded px-1 py-0.5 font-body text-[9px] text-muted-foreground outline-none focus:border-foreground transition-colors cursor-pointer"
+                  >
+                    <option value="">Room section…</option>
+                    {ROOM_SECTIONS.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
