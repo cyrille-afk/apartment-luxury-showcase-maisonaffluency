@@ -233,9 +233,9 @@ const TradeDashboard = () => {
                 </span>
               )}
             </div>
-            <div className="p-3 md:p-4">
-              <h3 className="font-display text-sm md:text-base text-foreground mb-0.5 md:mb-1">{card.title}</h3>
-              <p className="font-body text-[10px] md:text-xs text-muted-foreground leading-tight">{card.description}</p>
+            <div className={`p-3 md:p-4 ${card.key === "dash-3d-studio" ? "bg-foreground" : ""}`}>
+              <h3 className={`font-display text-sm md:text-base mb-0.5 md:mb-1 ${card.key === "dash-3d-studio" ? "text-background" : "text-foreground"}`}>{card.title}</h3>
+              <p className={`font-body text-[10px] md:text-xs leading-tight ${card.key === "dash-3d-studio" ? "text-background/70" : "text-muted-foreground"}`}>{card.description}</p>
             </div>
           </Link>
         ))}
