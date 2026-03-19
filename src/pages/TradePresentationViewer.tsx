@@ -325,12 +325,41 @@ const TradePresentationViewer = () => {
                     </p>
                   </div>
                 ) : (
-                  /* Gallery slide */
-                  <img
-                    src={actualSlide?.image_url}
-                    alt={actualSlide?.title}
-                    className={`max-w-full ${fullscreen ? "max-h-[calc(100vh-180px)]" : "max-h-[60vh]"} object-contain rounded-lg`}
-                  />
+                  /* Typed slides */
+                  actualSlide?.slide_type === "product_grid" && actualSlide.linked_product_ids ? (
+                    <PresentationProductGrid
+                      products={Array.isArray(actualSlide.linked_product_ids) ? actualSlide.linked_product_ids : []}
+                      roomSection={actualSlide.room_section}
+                    />
+                  ) : actualSlide?.slide_type === "quote_summary" && actualSlide.linked_product_ids ? (
+                    <PresentationQuoteSummary
+                      optionLabel={actualSlide.title?.replace(" — Quote Summary", "") || "Proposal"}
+                      quoteRef={actualSlide.linked_quote_id ? `QU-${actualSlide.linked_quote_id.slice(0, 6).toUpperCase()}` : "Pending"}
+                      products={(Array.isArray(actualSlide.linked_product_ids) ? actualSlide.linked_product_ids : []).map((p: any) => ({
+                        product_name: p.product_name,
+                        brand_name: p.brand_name,
+                        price_label: p.price_label || null,
+                      }))}
+                      quoteId={actualSlide.linked_quote_id || undefined}
+                    />
+                  ) : actualSlide?.slide_type === "furnishing_option" && actualSlide.linked_product_ids ? (
+                    <PresentationProductTooltip
+                      products={Array.isArray(actualSlide.linked_product_ids) ? actualSlide.linked_product_ids : []}
+                    >
+                      <img
+                        src={actualSlide?.image_url}
+                        alt={actualSlide?.title}
+                        className={`max-w-full ${fullscreen ? "max-h-[calc(100vh-180px)]" : "max-h-[60vh]"} object-contain rounded-lg`}
+                      />
+                    </PresentationProductTooltip>
+                  ) : (
+                    /* Default image slide */
+                    <img
+                      src={actualSlide?.image_url}
+                      alt={actualSlide?.title}
+                      className={`max-w-full ${fullscreen ? "max-h-[calc(100vh-180px)]" : "max-h-[60vh]"} object-contain rounded-lg`}
+                    />
+                  )
                 )}
                 {/* Nav arrows */}
                 <button
