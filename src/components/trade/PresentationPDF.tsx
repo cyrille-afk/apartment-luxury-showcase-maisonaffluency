@@ -1,6 +1,7 @@
 import { Document, Page, View, Text, Image, StyleSheet, Font } from "@react-pdf/renderer";
 
 // Register fonts with error handling — use try/catch so PDF still renders if fonts fail
+let fontsRegistered = false;
 try {
   Font.register({
     family: "Inter",
@@ -9,11 +10,6 @@ try {
       { src: "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZhrib2Bg-4.ttf", fontWeight: 300 },
     ],
   });
-} catch (e) {
-  console.warn("Failed to register Inter font:", e);
-}
-
-try {
   Font.register({
     family: "Cormorant",
     fonts: [
@@ -21,57 +17,62 @@ try {
       { src: "https://fonts.gstatic.com/s/cormorantgaramond/v16/co3YmX5slCNuHLi8bLeY9MK7whWMhyjYrEPjuw-NxBKL_y94.ttf", fontWeight: 300 },
     ],
   });
+  fontsRegistered = true;
 } catch (e) {
-  console.warn("Failed to register Cormorant font:", e);
+  console.warn("Failed to register fonts:", e);
 }
 
 // Disable hyphenation to avoid crash
 Font.registerHyphenationCallback((word) => [word]);
+
+// Use safe font families that fall back to Helvetica if custom fonts failed to load
+const fb = fontsRegistered ? "Inter" : "Helvetica";
+const fd = fontsRegistered ? "Cormorant" : "Helvetica";
 
 const s = StyleSheet.create({
   page: { backgroundColor: "#FFFFFF", position: "relative" },
   // Cover page
   coverPage: { backgroundColor: "#1a1a1a", flex: 1, justifyContent: "center", alignItems: "center", padding: 60 },
   coverBorder: { position: "absolute", top: 24, left: 24, right: 24, bottom: 24, borderWidth: 0.5, borderColor: "rgba(255,255,255,0.15)" },
-  coverPrepared: { fontFamily: "Inter", fontSize: 7, color: "rgba(255,255,255,0.35)", letterSpacing: 3, textTransform: "uppercase", marginBottom: 20 },
-  coverBrand: { fontFamily: "Cormorant", fontSize: 36, color: "#FFFFFF", letterSpacing: 2, marginBottom: 8 },
+  coverPrepared: { fontFamily: fb, fontSize: 7, color: "rgba(255,255,255,0.35)", letterSpacing: 3, textTransform: "uppercase", marginBottom: 20 },
+  coverBrand: { fontFamily: fd, fontSize: 36, color: "#FFFFFF", letterSpacing: 2, marginBottom: 8 },
   coverDivider: { width: 50, height: 0.5, backgroundColor: "rgba(255,255,255,0.25)", marginVertical: 24 },
-  coverTitle: { fontFamily: "Cormorant", fontSize: 20, color: "rgba(255,255,255,0.85)", marginBottom: 10, textAlign: "center" },
-  coverMeta: { fontFamily: "Inter", fontSize: 9, color: "rgba(255,255,255,0.5)", marginBottom: 4 },
-  coverDate: { fontFamily: "Inter", fontSize: 8, color: "rgba(255,255,255,0.3)", marginTop: 16 },
+  coverTitle: { fontFamily: fd, fontSize: 20, color: "rgba(255,255,255,0.85)", marginBottom: 10, textAlign: "center" },
+  coverMeta: { fontFamily: fb, fontSize: 9, color: "rgba(255,255,255,0.5)", marginBottom: 4 },
+  coverDate: { fontFamily: fb, fontSize: 8, color: "rgba(255,255,255,0.3)", marginTop: 16 },
   // Slide page
   slideContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: 30 },
   slideImage: { maxWidth: "100%", maxHeight: "85%", objectFit: "contain" },
   slideInfo: { position: "absolute", bottom: 30, left: 40, right: 40, textAlign: "center" },
-  slideTitle: { fontFamily: "Cormorant", fontSize: 14, color: "#1a1a1a", marginBottom: 3 },
-  slideDesc: { fontFamily: "Inter", fontSize: 8, color: "#888888" },
-  slideMeta: { fontFamily: "Inter", fontSize: 6.5, color: "#bbbbbb", marginTop: 4 },
+  slideTitle: { fontFamily: fd, fontSize: 14, color: "#1a1a1a", marginBottom: 3 },
+  slideDesc: { fontFamily: fb, fontSize: 8, color: "#888888" },
+  slideMeta: { fontFamily: fb, fontSize: 6.5, color: "#bbbbbb", marginTop: 4 },
   // Footer
-  footer: { position: "absolute", bottom: 12, right: 20, fontFamily: "Inter", fontSize: 6, color: "#cccccc" },
-  footerBrand: { position: "absolute", bottom: 12, left: 20, fontFamily: "Cormorant", fontSize: 7, color: "#cccccc", letterSpacing: 1 },
+  footer: { position: "absolute", bottom: 12, right: 20, fontFamily: fb, fontSize: 6, color: "#cccccc" },
+  footerBrand: { position: "absolute", bottom: 12, left: 20, fontFamily: fd, fontSize: 7, color: "#cccccc", letterSpacing: 1 },
   // Product grid
-  gridHeader: { fontFamily: "Cormorant", fontSize: 16, color: "#1a1a1a", marginBottom: 4, textAlign: "center" },
-  gridSection: { fontFamily: "Inter", fontSize: 8, color: "#888888", marginBottom: 16, textAlign: "center", textTransform: "uppercase", letterSpacing: 2 },
+  gridHeader: { fontFamily: fd, fontSize: 16, color: "#1a1a1a", marginBottom: 4, textAlign: "center" },
+  gridSection: { fontFamily: fb, fontSize: 8, color: "#888888", marginBottom: 16, textAlign: "center", textTransform: "uppercase", letterSpacing: 2 },
   gridRow: { flexDirection: "row", gap: 20, justifyContent: "center", alignItems: "flex-start", paddingHorizontal: 40 },
   gridCard: { width: "45%", borderWidth: 0.5, borderColor: "#e0e0e0", borderRadius: 4, overflow: "hidden" },
   gridCardImage: { width: "100%", height: 160, objectFit: "cover", backgroundColor: "#f5f5f5" },
   gridCardBody: { padding: 12 },
-  gridCardName: { fontFamily: "Cormorant", fontSize: 11, color: "#1a1a1a", marginBottom: 2 },
-  gridCardBrand: { fontFamily: "Inter", fontSize: 7, color: "#888888", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1.5 },
-  gridCardDetail: { fontFamily: "Inter", fontSize: 7, color: "#aaaaaa", marginBottom: 2 },
+  gridCardName: { fontFamily: fd, fontSize: 11, color: "#1a1a1a", marginBottom: 2 },
+  gridCardBrand: { fontFamily: fb, fontSize: 7, color: "#888888", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1.5 },
+  gridCardDetail: { fontFamily: fb, fontSize: 7, color: "#aaaaaa", marginBottom: 2 },
   // Quote summary
   quoteContainer: { flex: 1, justifyContent: "center", padding: 60 },
-  quoteHeader: { fontFamily: "Cormorant", fontSize: 22, color: "#1a1a1a", marginBottom: 6, textAlign: "center" },
-  quoteSub: { fontFamily: "Inter", fontSize: 8, color: "#888888", marginBottom: 24, textAlign: "center" },
+  quoteHeader: { fontFamily: fd, fontSize: 22, color: "#1a1a1a", marginBottom: 6, textAlign: "center" },
+  quoteSub: { fontFamily: fb, fontSize: 8, color: "#888888", marginBottom: 24, textAlign: "center" },
   quoteDivider: { width: "100%", height: 0.5, backgroundColor: "#e0e0e0", marginVertical: 12 },
   quoteRow: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 30, marginBottom: 6 },
-  quoteLabel: { fontFamily: "Inter", fontSize: 8, color: "#666666" },
-  quoteValue: { fontFamily: "Inter", fontSize: 8, color: "#1a1a1a" },
+  quoteLabel: { fontFamily: fb, fontSize: 8, color: "#666666" },
+  quoteValue: { fontFamily: fb, fontSize: 8, color: "#1a1a1a" },
   quoteTotalRow: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 30, marginTop: 8 },
-  quoteTotalLabel: { fontFamily: "Cormorant", fontSize: 14, color: "#1a1a1a" },
-  quoteTotalValue: { fontFamily: "Cormorant", fontSize: 14, color: "#1a1a1a" },
-  quoteTerms: { fontFamily: "Inter", fontSize: 7, color: "#aaaaaa", textAlign: "center", marginTop: 24, lineHeight: 1.6 },
-  quoteNote: { fontFamily: "Inter", fontSize: 7.5, color: "#666666", textAlign: "center", marginTop: 16, fontStyle: "italic" },
+  quoteTotalLabel: { fontFamily: fd, fontSize: 14, color: "#1a1a1a" },
+  quoteTotalValue: { fontFamily: fd, fontSize: 14, color: "#1a1a1a" },
+  quoteTerms: { fontFamily: fb, fontSize: 7, color: "#aaaaaa", textAlign: "center", marginTop: 24, lineHeight: 1.6 },
+  quoteNote: { fontFamily: fb, fontSize: 7.5, color: "#666666", textAlign: "center", marginTop: 16, fontStyle: "italic" },
 });
 
 interface ProductData {
