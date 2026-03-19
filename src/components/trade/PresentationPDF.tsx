@@ -1,6 +1,7 @@
 import { Document, Page, View, Text, Image, StyleSheet, Font } from "@react-pdf/renderer";
 
 // Register fonts with error handling — use try/catch so PDF still renders if fonts fail
+let fontsRegistered = false;
 try {
   Font.register({
     family: "Inter",
@@ -9,11 +10,6 @@ try {
       { src: "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZhrib2Bg-4.ttf", fontWeight: 300 },
     ],
   });
-} catch (e) {
-  console.warn("Failed to register Inter font:", e);
-}
-
-try {
   Font.register({
     family: "Cormorant",
     fonts: [
@@ -21,8 +17,9 @@ try {
       { src: "https://fonts.gstatic.com/s/cormorantgaramond/v16/co3YmX5slCNuHLi8bLeY9MK7whWMhyjYrEPjuw-NxBKL_y94.ttf", fontWeight: 300 },
     ],
   });
+  fontsRegistered = true;
 } catch (e) {
-  console.warn("Failed to register Cormorant font:", e);
+  console.warn("Failed to register fonts:", e);
 }
 
 // Disable hyphenation to avoid crash

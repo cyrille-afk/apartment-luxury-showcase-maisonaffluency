@@ -157,15 +157,17 @@ const TradePresentationViewer = () => {
           let image_url = slide.image_url;
           try {
             const res = await fetch(slide.image_url);
-            const blob = await res.blob();
-            image_url = await new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(blob);
-            });
-          } catch {
-            // keep original URL as fallback
+            if (res.ok) {
+              const blob = await res.blob();
+              image_url = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+              });
+            }
+          } catch (imgErr) {
+            console.warn("Failed to convert slide image to base64:", imgErr);
           }
 
           // Convert product images inside linked_product_ids to base64
@@ -176,6 +178,7 @@ const TradePresentationViewer = () => {
                 if (!p.image_url) return p;
                 try {
                   const res = await fetch(p.image_url);
+                  if (!res.ok) return p;
                   const blob = await res.blob();
                   const dataUrl = await new Promise<string>((resolve, reject) => {
                     const reader = new FileReader();
@@ -199,25 +202,32 @@ const TradePresentationViewer = () => {
         loadPdfRenderer(),
         loadPresentationPDF(),
       ]);
+
+      // Filter out slides with no valid image to prevent renderer crashes
+      const validSlides = slidesWithDataUrls.filter(s => s.image_url && s.image_url.length > 0);
+
       const blob = await pdf(
         <PresentationPDF
           title={presentation.title || ""}
           clientName={presentation.client_name || undefined}
           projectName={presentation.project_name || undefined}
           createdAt={presentation.created_at || new Date().toISOString()}
-          slides={slidesWithDataUrls}
+          slides={validSlides.length > 0 ? validSlides : slidesWithDataUrls}
         />
       ).toBlob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `${(presentation.title || "Presentation").replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "-")}.pdf`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
       toast.success("PDF downloaded successfully");
     } catch (err) {
       console.error("PDF export failed:", err);
-      toast.error("PDF export failed. Please try again.");
+      const message = err instanceof Error ? err.message : "Unknown error";
+      toast.error(`PDF export failed: ${message}`);
     } finally {
       setExportingPdf(false);
     }
