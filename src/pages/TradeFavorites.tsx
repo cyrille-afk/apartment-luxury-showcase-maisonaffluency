@@ -152,6 +152,8 @@ export default function TradeFavorites() {
           <p className="font-body text-xs text-muted-foreground mt-1">Your curated shortlist of products across our portfolio.</p>
         </div>
       </div>
+
+      <div className="max-w-6xl mx-auto p-6 md:p-8 space-y-6">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
