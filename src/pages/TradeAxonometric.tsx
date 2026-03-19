@@ -214,6 +214,7 @@ const TradeAxonometric = () => {
   const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
   const [savingRefStyle, setSavingRefStyle] = useState(false);
+  const [useLockedRefStyle, setUseLockedRefStyle] = useState(true);
 
 
   // AI dialogue state
@@ -428,6 +429,10 @@ const TradeAxonometric = () => {
 
   const currentRefStyle = referenceStyles?.find((r) => r.mode === mode);
 
+  useEffect(() => {
+    setUseLockedRefStyle(true);
+  }, [mode]);
+
   const saveAsReferenceStyle = async () => {
     if (!result) return;
     const imageUrl = result.storedUrl || result.imageUrl;
@@ -506,7 +511,7 @@ const TradeAxonometric = () => {
         style,
         overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages.map(u => toAbsoluteUrl(u)).filter(Boolean) : undefined,
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
-        styleReferenceUrl: refStyle ? toAbsoluteUrl(refStyle.image_url) : undefined,
+        styleReferenceUrl: (useLockedRefStyle && refStyle) ? toAbsoluteUrl(refStyle.image_url) : undefined,
       };
 
       const data = await invokeAxonometricGenerate(body, undefined, 1);
@@ -1006,6 +1011,23 @@ const TradeAxonometric = () => {
                   ))}
                 </SelectContent>
               </Select>
+
+              {currentRefStyle && (
+                <div className="rounded-md border border-border bg-muted/30 p-2.5 space-y-2">
+                  <p className="font-body text-[11px] text-muted-foreground">
+                    Locked reference style is currently <span className="font-medium text-foreground">{useLockedRefStyle ? "ON" : "OFF"}</span> for this mode.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => setUseLockedRefStyle((prev) => !prev)}
+                  >
+                    {useLockedRefStyle ? "Generate Without Locked Style" : "Use Locked Style Again"}
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Product Overlay (composite mode) */}
