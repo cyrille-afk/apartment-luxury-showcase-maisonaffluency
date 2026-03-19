@@ -273,8 +273,8 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       }
     }
 
-    // Pro model for heavy transformations, flash for iterative/turntable flows to reduce wait states
-    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay", "proposal_render", "proposal_refine"];
+    // Pro model for initial heavy transformations, flash for iterative refinements to reduce wait
+    const proModes = ["elevation_to_axo", "section_to_axo", "3d_to_cad", "cad_overlay", "proposal_render"];
     const selectedModel = proModes.includes(mode)
       ? "google/gemini-3-pro-image-preview"
       : "google/gemini-3.1-flash-image-preview";
