@@ -69,13 +69,19 @@ WALL RENDERING RULES — VERY IMPORTANT:
 
 Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway with no roof and no external walls. Style: ${defaultStyle}. The result must be a faithful 3D translation of the 2D plan — not an artistic reinterpretation.`;
     } else if (mode === "section_to_axo") {
-      prompt = `You are an expert architectural visualization AI. Transform this 2D architectural section drawing into a detailed 3D axonometric (isometric) cutaway view.
+      prompt = `You are an expert architectural visualization AI. Transform this 2D architectural section drawing into a detailed 3D axonometric (isometric) cutaway dollhouse-style interior view.
 
 CRITICAL ACCURACY RULES:
 1. FURNITURE & FIXTURES: Every piece of furniture, fixture, and object visible in the section must appear in the 3D render at the EXACT same position, height, and relative scale. Do NOT invent, add, remove, or reposition any element.
-2. SPATIAL VOLUME: Show the full spatial volume — walls, floors, ceilings, stairs, mezzanines, and openings — rendered in three dimensions from an elevated oblique angle.
+2. SPATIAL VOLUME: Show the full spatial volume — interior partition walls, floors, ceilings, stairs, mezzanines, and openings — rendered in three dimensions from an elevated oblique angle.
 3. PROPORTIONS: Wall heights, floor-to-ceiling distances, stair dimensions, and opening sizes must match the section exactly.
 4. DEPTH: Extrude the section into realistic room depth, maintaining all structural and spatial relationships from the original drawing.
+
+WALL RENDERING RULES — VERY IMPORTANT:
+- Do NOT render thick external/building envelope walls. The exterior boundary of the space should be open or only subtly indicated with a thin edge or floor boundary.
+- Only render INTERIOR partition walls that divide rooms within the space.
+- The result should look like a dollhouse or architectural model with the exterior shell completely removed, exposing the interior directly.
+- Windows and doors on the perimeter should still be visible but without the thick structural wall surrounding them — show them as openings or thin frames at the boundary.
 
 Style: ${defaultStyle}. The result must be a faithful 3D translation of the section — not an artistic reinterpretation.`;
     } else if (mode === "stylize") {
