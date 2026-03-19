@@ -903,12 +903,34 @@ export default function ProposalBuilder({
               {Math.round(zoom * 100)}% · {rotation}°
             </span>
             <div className="w-px h-5 bg-border mx-1" />
+
+            {/* Set as Final */}
+            <Button
+              variant={lockedIteration !== null ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                if (lockedIteration !== null) {
+                  setLockedIteration(null);
+                  toast({ title: "Final lock removed", description: "You can continue refining." });
+                } else {
+                  setLockedIteration(proposalHistory.length);
+                  toast({ title: "Iteration locked as final", description: "Save or create a presentation with this version." });
+                }
+              }}
+              className="gap-1.5"
+              title={lockedIteration !== null ? "Unlock to continue refining" : "Lock this iteration as the final approved version"}
+            >
+              {lockedIteration !== null ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+              {lockedIteration !== null ? "Final ✓" : "Set as Final"}
+            </Button>
+
+            <div className="w-px h-5 bg-border mx-1" />
             <Button variant="outline" size="sm" onClick={downloadProposal}>
               <Download className="w-3.5 h-3.5 mr-1.5" />Download
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={saving}>
+                <Button variant="outline" size="sm" disabled={saving || lockedIteration === null}>
                   {saving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
                   Save to…
                 </Button>
@@ -928,7 +950,7 @@ export default function ProposalBuilder({
             <Button
               size="sm"
               onClick={createProposalPresentation}
-              disabled={creatingPresentation || saving}
+              disabled={creatingPresentation || saving || lockedIteration === null}
               className="gap-1.5"
             >
               {creatingPresentation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
