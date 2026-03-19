@@ -747,43 +747,52 @@ export default function ProposalBuilder({
     isPanning.current = false;
   }, []);
 
-  // Handle click-to-place markers on the image
-  const handleImageClick = useCallback((e: React.MouseEvent) => {
-    if (!moveMode || !imageElRef.current) return;
-    e.stopPropagation();
-
-    // Use the image's natural dimensions and its bounding rect to calculate
-    // percentage coordinates that are correct regardless of CSS transforms.
+  // Compute percentage coordinates from a click on the image
+  const getImageCoords = useCallback((e: React.MouseEvent): MoveMarker | null => {
+    if (!imageElRef.current) return null;
     const rect = imageElRef.current.getBoundingClientRect();
-
-    // getBoundingClientRect already accounts for CSS transforms (scale, rotate, translate),
-    // so we can compute the click offset within the *rendered* image directly.
     const rawX = (e.clientX - rect.left) / rect.width;
     const rawY = (e.clientY - rect.top) / rect.height;
-
-    // When the image is rotated, the bounding-rect axes no longer align with the image axes.
-    // We need to "un-rotate" the coordinate so it maps back to the un-rotated image.
-    const rad = -(rotation * Math.PI) / 180; // negate to reverse rotation
-    const cx = 0.5, cy = 0.5; // center of image in [0..1]
+    const rad = -(rotation * Math.PI) / 180;
+    const cx = 0.5, cy = 0.5;
     const dx = rawX - cx;
     const dy = rawY - cy;
     const unrotatedX = cx + dx * Math.cos(rad) - dy * Math.sin(rad);
     const unrotatedY = cy + dx * Math.sin(rad) + dy * Math.cos(rad);
-
     const xPct = Math.round(Math.max(0, Math.min(100, unrotatedX * 100)));
     const yPct = Math.round(Math.max(0, Math.min(100, unrotatedY * 100)));
-    const clamped = { x: xPct, y: yPct };
+    return { x: xPct, y: yPct };
+  }, [rotation]);
 
+  // Handle click-to-place markers on the image
+  const handleImageClick = useCallback((e: React.MouseEvent) => {
+    if ((!moveMode && !removeMode) || !imageElRef.current) return;
+    e.stopPropagation();
+
+    const clamped = getImageCoords(e);
+    if (!clamped) return;
+
+    if (removeMode) {
+      const label = removeLabel.trim() || `item at (${clamped.x}%, ${clamped.y}%)`;
+      const updated = [...removeMarkers, { pos: clamped, label }];
+      setRemoveMarkers(updated);
+      // Auto-fill the refinement prompt
+      const descriptions = updated.map((m) => m.label).join(", ");
+      setRefinementPrompt(`Remove the following from the image: ${descriptions}. Fill the empty space with the surrounding room background. Keep everything else exactly the same.`);
+      setRemoveLabel("");
+      return;
+    }
+
+    // Move mode
     if (!sourceMarker) {
       setSourceMarker(clamped);
     } else if (!targetMarker) {
       setTargetMarker(clamped);
-      // Auto-fill the refinement prompt
       const label = moveLabel.trim() || "the furniture piece";
       const direction = describeDirection(sourceMarker, clamped);
       setRefinementPrompt(`Move ${label} at position (${sourceMarker.x}%, ${sourceMarker.y}%) to (${clamped.x}%, ${clamped.y}%) — move it ${direction}. Keep everything else exactly the same.`);
     }
-  }, [moveMode, sourceMarker, targetMarker, moveLabel, rotation]);
+  }, [moveMode, removeMode, sourceMarker, targetMarker, moveLabel, removeLabel, removeMarkers, rotation, getImageCoords]);
 
   // Describe direction in natural language
   const describeDirection = (from: MoveMarker, to: MoveMarker): string => {
