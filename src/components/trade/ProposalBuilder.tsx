@@ -323,10 +323,29 @@ export default function ProposalBuilder({
   // Handle click-to-place markers on the image
   const handleImageClick = useCallback((e: React.MouseEvent) => {
     if (!moveMode || !imageElRef.current) return;
+    e.stopPropagation();
+
+    // Use the image's natural dimensions and its bounding rect to calculate
+    // percentage coordinates that are correct regardless of CSS transforms.
     const rect = imageElRef.current.getBoundingClientRect();
-    const xPct = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-    const yPct = Math.round(((e.clientY - rect.top) / rect.height) * 100);
-    const clamped = { x: Math.max(0, Math.min(100, xPct)), y: Math.max(0, Math.min(100, yPct)) };
+
+    // getBoundingClientRect already accounts for CSS transforms (scale, rotate, translate),
+    // so we can compute the click offset within the *rendered* image directly.
+    const rawX = (e.clientX - rect.left) / rect.width;
+    const rawY = (e.clientY - rect.top) / rect.height;
+
+    // When the image is rotated, the bounding-rect axes no longer align with the image axes.
+    // We need to "un-rotate" the coordinate so it maps back to the un-rotated image.
+    const rad = -(rotation * Math.PI) / 180; // negate to reverse rotation
+    const cx = 0.5, cy = 0.5; // center of image in [0..1]
+    const dx = rawX - cx;
+    const dy = rawY - cy;
+    const unrotatedX = cx + dx * Math.cos(rad) - dy * Math.sin(rad);
+    const unrotatedY = cy + dx * Math.sin(rad) + dy * Math.cos(rad);
+
+    const xPct = Math.round(Math.max(0, Math.min(100, unrotatedX * 100)));
+    const yPct = Math.round(Math.max(0, Math.min(100, unrotatedY * 100)));
+    const clamped = { x: xPct, y: yPct };
 
     if (!sourceMarker) {
       setSourceMarker(clamped);
@@ -337,7 +356,7 @@ export default function ProposalBuilder({
       const direction = describeDirection(sourceMarker, clamped);
       setRefinementPrompt(`Move ${label} at position (${sourceMarker.x}%, ${sourceMarker.y}%) to (${clamped.x}%, ${clamped.y}%) — move it ${direction}. Keep everything else exactly the same.`);
     }
-  }, [moveMode, sourceMarker, targetMarker, moveLabel]);
+  }, [moveMode, sourceMarker, targetMarker, moveLabel, rotation]);
 
   // Describe direction in natural language
   const describeDirection = (from: MoveMarker, to: MoveMarker): string => {
