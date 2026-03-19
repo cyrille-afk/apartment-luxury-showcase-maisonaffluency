@@ -1156,7 +1156,7 @@ export default function ProposalBuilder({
         </div>
 
         {/* External image upload mini-form */}
-        {showExternalDialog && selectedProducts.length < 5 && (
+        {showExternalDialog && selectedProducts.length < 10 && (
           <div className="border border-dashed border-border rounded-md p-3 space-y-2 bg-muted/10">
             <p className="font-body text-[10px] text-muted-foreground">
               Import a product image — upload from your device or paste a web URL
