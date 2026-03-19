@@ -1259,6 +1259,22 @@ const TradeAxonometric = () => {
                     </div>
                   )}
 
+                  {/* Attached texture preview */}
+                  {aiTextureUrl && !aiAttachedProduct && (
+                    <div className="flex items-center gap-2 px-3 pt-2.5">
+                      <div className="flex items-center gap-2 bg-muted/40 rounded-md px-2.5 py-1.5 flex-1 min-w-0">
+                        <img src={aiTextureUrl} alt="Texture swatch" className="w-8 h-8 rounded border border-border object-cover shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-display text-[10px] text-foreground truncate">Texture / Wallpaper Swatch</p>
+                          <p className="font-body text-[9px] text-muted-foreground truncate">Describe which wall to apply it to</p>
+                        </div>
+                        <button onClick={() => setAiTextureUrl(null)} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Attached product preview */}
                   {aiAttachedProduct && (
                     <div className="flex items-center gap-2 px-3 pt-2.5">
@@ -1311,10 +1327,19 @@ const TradeAxonometric = () => {
                     </div>
                   )}
 
+                  {/* Hidden file input for texture upload */}
+                  <input
+                    ref={textureInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleTextureUpload}
+                  />
+
                   <div className="flex items-center gap-2 p-3">
                     <button
                       onClick={() => setAiProductPickerOpen(!aiProductPickerOpen)}
-                      disabled={aiSending}
+                      disabled={aiSending || !!aiTextureUrl}
                       className={`shrink-0 rounded-md border p-2 transition-colors disabled:opacity-50 ${
                         aiAttachedProduct || aiProductPickerOpen
                           ? "border-foreground bg-foreground text-background"
@@ -1324,12 +1349,24 @@ const TradeAxonometric = () => {
                     >
                       <ImagePlus className="w-3.5 h-3.5" />
                     </button>
+                    <button
+                      onClick={() => textureInputRef.current?.click()}
+                      disabled={aiSending || aiTextureUploading || !!aiAttachedProduct}
+                      className={`shrink-0 rounded-md border p-2 transition-colors disabled:opacity-50 ${
+                        aiTextureUrl
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                      }`}
+                      title="Upload a wallpaper / texture swatch"
+                    >
+                      {aiTextureUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Paintbrush className="w-3.5 h-3.5" />}
+                    </button>
                     <input
                       type="text"
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendAiPrompt(); } }}
-                      placeholder={aiAttachedProduct ? '"Replace the sofa with this product"' : '"Change the sofa to dark blue velvet"'}
+                      placeholder={aiTextureUrl ? '"Apply to the back wall" or "the wall behind the sofa"' : aiAttachedProduct ? '"Replace the sofa with this product"' : '"Change the sofa to dark blue velvet"'}
                       disabled={aiSending}
                       className="flex-1 border border-border rounded-md px-3 py-2 font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 disabled:opacity-50"
                     />
