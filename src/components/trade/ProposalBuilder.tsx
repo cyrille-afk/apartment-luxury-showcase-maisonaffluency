@@ -76,6 +76,8 @@ export default function ProposalBuilder({
   const [externalBrand, setExternalBrand] = useState("");
   const [externalUploading, setExternalUploading] = useState(false);
   const [externalUrl, setExternalUrl] = useState("");
+  const [externalDimensions, setExternalDimensions] = useState("");
+  const [externalMaterials, setExternalMaterials] = useState("");
 
   // Product picker state
   const [pickerOpen, setPickerOpen] = useState(true);
