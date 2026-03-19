@@ -1,21 +1,32 @@
 import { Document, Page, View, Text, Image, StyleSheet, Font } from "@react-pdf/renderer";
 
-// Register fonts to match the brand
-Font.register({
-  family: "Inter",
-  fonts: [
-    { src: "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf", fontWeight: 400 },
-    { src: "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZhrib2Bg-4.ttf", fontWeight: 300 },
-  ],
-});
+// Register fonts with error handling — use try/catch so PDF still renders if fonts fail
+try {
+  Font.register({
+    family: "Inter",
+    fonts: [
+      { src: "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf", fontWeight: 400 },
+      { src: "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZhrib2Bg-4.ttf", fontWeight: 300 },
+    ],
+  });
+} catch (e) {
+  console.warn("Failed to register Inter font:", e);
+}
 
-Font.register({
-  family: "Cormorant",
-  fonts: [
-    { src: "https://fonts.gstatic.com/s/cormorantgaramond/v16/co3bmX5slCNuHLi8bLeY9MK7whWMhyjQAllvuQWJ5heb_w.ttf", fontWeight: 400 },
-    { src: "https://fonts.gstatic.com/s/cormorantgaramond/v16/co3YmX5slCNuHLi8bLeY9MK7whWMhyjYrEPjuw-NxBKL_y94.ttf", fontWeight: 300 },
-  ],
-});
+try {
+  Font.register({
+    family: "Cormorant",
+    fonts: [
+      { src: "https://fonts.gstatic.com/s/cormorantgaramond/v16/co3bmX5slCNuHLi8bLeY9MK7whWMhyjQAllvuQWJ5heb_w.ttf", fontWeight: 400 },
+      { src: "https://fonts.gstatic.com/s/cormorantgaramond/v16/co3YmX5slCNuHLi8bLeY9MK7whWMhyjYrEPjuw-NxBKL_y94.ttf", fontWeight: 300 },
+    ],
+  });
+} catch (e) {
+  console.warn("Failed to register Cormorant font:", e);
+}
+
+// Disable hyphenation to avoid crash
+Font.registerHyphenationCallback((word) => [word]);
 
 const s = StyleSheet.create({
   page: { backgroundColor: "#FFFFFF", position: "relative" },
@@ -55,8 +66,12 @@ interface PresentationPDFProps {
 }
 
 const formatDate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  } catch {
+    return "";
+  }
 };
 
 const PresentationPDF = ({ title, clientName, projectName, createdAt, slides }: PresentationPDFProps) => (
@@ -79,7 +94,7 @@ const PresentationPDF = ({ title, clientName, projectName, createdAt, slides }: 
     {slides.map((slide, i) => (
       <Page key={i} size="A4" orientation="landscape" style={s.page}>
         <View style={s.slideContainer}>
-          <Image src={slide.image_url} style={s.slideImage} />
+          {slide.image_url && <Image src={slide.image_url} style={s.slideImage} />}
         </View>
         {(slide.title || slide.description) && (
           <View style={s.slideInfo}>
