@@ -846,23 +846,32 @@ export default function ProposalBuilder({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {selectedProducts.map((p) => (
               <div key={p.id} className="flex items-center gap-2 bg-muted/30 rounded-md px-2.5 py-2 group">
-                <img
-                  src={p.image_url}
-                  alt=""
-                  className="w-9 h-9 rounded border border-border object-cover shrink-0 transition-transform"
-                  style={{ transform: p.rotation ? `rotate(${p.rotation}deg)` : undefined }}
-                />
+                {/* Thumbnail with rotation overlay */}
+                <div className="relative w-11 h-11 shrink-0">
+                  <div
+                    className="w-11 h-11 rounded border border-border overflow-hidden bg-background"
+                  >
+                    <img
+                      src={p.image_url}
+                      alt=""
+                      className="w-full h-full object-cover transition-transform duration-300"
+                      style={{ transform: p.rotation ? `rotate(${p.rotation}deg) scale(0.85)` : undefined }}
+                    />
+                  </div>
+                  {/* Rotation badge */}
+                  {!!p.rotation && (
+                    <div className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                      <span className="text-[7px] font-display font-bold leading-none">{p.rotation}°</span>
+                    </div>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-display text-[10px] text-foreground truncate">{p.product_name}</p>
                   <p className="font-body text-[9px] text-muted-foreground truncate">
                     {p.brand_name}
                     {p.isExternal && <span className="ml-1 text-muted-foreground/50">(ext)</span>}
                   </p>
-                  {p.rotation ? (
-                    <p className="font-body text-[8px] text-muted-foreground/70">{p.rotation}° rotated</p>
-                  ) : p.dimensions ? (
-                    <p className="font-body text-[8px] text-muted-foreground/70 truncate">{p.dimensions}</p>
-                  ) : null}
+                  {p.dimensions && <p className="font-body text-[8px] text-muted-foreground/70 truncate">{p.dimensions}</p>}
                 </div>
                 <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
