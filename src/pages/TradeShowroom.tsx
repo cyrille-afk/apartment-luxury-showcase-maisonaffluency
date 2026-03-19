@@ -23,7 +23,11 @@ const TradeShowroom = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const [activeTab, setActiveTab] = useState<ViewTab>("gallery");
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const highlightId = searchParams.get("highlight");
+
+  const [activeTab, setActiveTab] = useState<ViewTab>(tabParam === "grid" ? "grid" : tabParam === "search" ? "search" : "gallery");
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
