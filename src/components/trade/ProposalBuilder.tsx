@@ -1071,7 +1071,7 @@ export default function ProposalBuilder({
       {/* Selected products summary */}
       {selectedProducts.length > 0 && (
         <div className="border border-border rounded-lg p-4">
-          <h3 className="font-display text-xs text-foreground mb-3">Selected Products ({selectedProducts.length}/5)</h3>
+          <h3 className="font-display text-xs text-foreground mb-3"><h3 className="font-display text-xs text-foreground mb-3">Selected Products ({selectedProducts.length}/10)</h3></h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {selectedProducts.map((p) => (
               <div key={p.id} className="flex items-center gap-2 bg-muted/30 rounded-md px-2.5 py-2 group">
@@ -1134,10 +1134,10 @@ export default function ProposalBuilder({
       <div className="border border-border rounded-lg p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-display text-xs text-foreground">
-            Add Products to Proposal {selectedProducts.length >= 5 && <span className="text-muted-foreground">(max reached)</span>}
+            Add Products to Proposal {selectedProducts.length >= 10 && <span className="text-muted-foreground">(max reached)</span>}
           </h3>
           <div className="flex items-center gap-3">
-            {selectedProducts.length < 5 && (
+            {selectedProducts.length < 10 && (
               <button
                 onClick={() => setShowExternalDialog(!showExternalDialog)}
                 className="font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
@@ -1156,7 +1156,7 @@ export default function ProposalBuilder({
         </div>
 
         {/* External image upload mini-form */}
-        {showExternalDialog && selectedProducts.length < 5 && (
+        {showExternalDialog && selectedProducts.length < 10 && (
           <div className="border border-dashed border-border rounded-md p-3 space-y-2 bg-muted/10">
             <p className="font-body text-[10px] text-muted-foreground">
               Import a product image — upload from your device or paste a web URL
@@ -1222,7 +1222,7 @@ export default function ProposalBuilder({
           </div>
         )}
 
-        {pickerOpen && selectedProducts.length < 5 && (
+        {pickerOpen && selectedProducts.length < 10 && (
           <div className="space-y-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
