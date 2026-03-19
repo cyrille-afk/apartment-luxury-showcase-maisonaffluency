@@ -16,7 +16,7 @@ interface DraftQuote {
   created_at: string;
 }
 
-type ViewTab = "gallery" | "grid";
+type ViewTab = "gallery" | "grid" | "search";
 
 const TradeShowroom = () => {
   const { user } = useAuth();
