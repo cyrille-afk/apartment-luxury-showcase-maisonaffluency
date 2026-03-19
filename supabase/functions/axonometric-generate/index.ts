@@ -193,6 +193,17 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
       }
     }
 
+    // Add texture/wallpaper swatch image for apply_texture mode
+    if (mode === "apply_texture") {
+      const textureUrl = body.textureImageUrl;
+      if (textureUrl) {
+        content.push({
+          type: "image_url",
+          image_url: { url: textureUrl },
+        });
+      }
+    }
+
     // Add CAD blocks + technical drawing for cad_overlay mode
     if (mode === "cad_overlay") {
       if (technicalDrawingUrl) {
