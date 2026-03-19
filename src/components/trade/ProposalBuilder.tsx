@@ -699,9 +699,12 @@ export default function ProposalBuilder({
   // Click-to-move marker state
   type MoveMarker = { x: number; y: number }; // percentage coords on image
   const [moveMode, setMoveMode] = useState(false);
+  const [removeMode, setRemoveMode] = useState(false);
   const [sourceMarker, setSourceMarker] = useState<MoveMarker | null>(null);
   const [targetMarker, setTargetMarker] = useState<MoveMarker | null>(null);
   const [moveLabel, setMoveLabel] = useState(""); // optional label for what's being moved
+  const [removeMarkers, setRemoveMarkers] = useState<{ pos: MoveMarker; label: string }[]>([]);
+  const [removeLabel, setRemoveLabel] = useState("");
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const imageElRef = useRef<HTMLImageElement>(null);
 
@@ -715,6 +718,8 @@ export default function ProposalBuilder({
     setSourceMarker(null);
     setTargetMarker(null);
     setMoveLabel("");
+    setRemoveMarkers([]);
+    setRemoveLabel("");
   }, []);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
