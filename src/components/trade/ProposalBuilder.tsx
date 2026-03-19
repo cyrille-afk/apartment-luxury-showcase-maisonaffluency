@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText,
 } from "lucide-react";
-import ProductChecklist from "./ProductChecklist";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1056,9 +1056,6 @@ export default function ProposalBuilder({
                 <img src={proposalResult} alt="Generated proposal" className="w-full object-contain" />
                 <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors flex items-center justify-center pointer-events-none">
                   <Maximize2 className="w-6 h-6 text-foreground/0 group-hover:text-foreground/50 transition-colors" />
-                </div>
-                <div onClick={(e) => e.stopPropagation()}>
-                  <ProductChecklist products={selectedProducts} />
                 </div>
               </div>
               {proposalHistory.length > 1 && (
