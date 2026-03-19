@@ -136,12 +136,14 @@ ${productList}
 YOUR TASK — STRICT RULES:
 Place each product from its PRODUCT PHOTO into the EMPTY ROOM at the position indicated by the REFERENCE LAYOUT.
 
-CAMERA & VIEWPOINT (HIGHEST PRIORITY):
-- The output MUST use the EXACT SAME camera angle, perspective, viewpoint, and field of view as the REFERENCE LAYOUT image
-- Match the identical axonometric projection angle — same tilt, same rotation, same zoom level
+CAMERA & VIEWPOINT (HIGHEST PRIORITY — NON-NEGOTIABLE):
+- Study the REFERENCE LAYOUT image and replicate its EXACT camera position: the same bird's-eye / top-down axonometric angle looking almost straight down at the floor plan
+- If the reference uses a steep top-down view (≈60-75° elevation, nearly overhead), your output MUST also use that SAME steep top-down view — do NOT lower the camera to a dramatic or cinematic perspective
+- Match the identical azimuth rotation (compass direction the camera faces), the identical tilt/elevation angle, and the identical zoom / field of view
 - The architectural shell (walls, floor edges, windows, doors) in your output must align pixel-for-pixel with the REFERENCE LAYOUT
 - If the EMPTY ROOM image has a slightly different crop or angle, IGNORE it — always match the REFERENCE LAYOUT's viewpoint
 - The viewer should be able to overlay the reference and the output and see the room structure line up exactly
+- ABSOLUTELY DO NOT use a low-angle, eye-level, or dramatic perspective — keep the same overhead dollhouse-style viewpoint as the reference
 
 SHAPE & APPEARANCE FIDELITY (MOST IMPORTANT):
 - You MUST reproduce the EXACT shape, silhouette, proportions, color, material, and design of each product AS IT APPEARS in its product photo
