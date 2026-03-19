@@ -115,6 +115,14 @@ export default function ProposalBuilder({
     setSelectedProducts((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
+  const rotateProduct = useCallback((id: string, direction: 1 | -1) => {
+    setSelectedProducts((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, rotation: ((p.rotation || 0) + direction * 90 + 360) % 360 } : p
+      )
+    );
+  }, []);
+
   // Handle external image upload
   const handleExternalFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
