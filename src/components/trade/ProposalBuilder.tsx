@@ -623,8 +623,7 @@ export default function ProposalBuilder({
         // Infer room section from product category or default to "Featured Products"
         const roomGroups = new Map<string, typeof selectedProducts>();
         for (const p of selectedProducts) {
-          // Use tags or category as room section hint
-          const section = (p as any).category || "Featured Products";
+          const section = p.room_section || "Featured Products";
           if (!roomGroups.has(section)) roomGroups.set(section, []);
           roomGroups.get(section)!.push(p);
         }
