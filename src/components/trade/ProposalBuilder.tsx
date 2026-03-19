@@ -846,21 +846,46 @@ export default function ProposalBuilder({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {selectedProducts.map((p) => (
               <div key={p.id} className="flex items-center gap-2 bg-muted/30 rounded-md px-2.5 py-2 group">
-                <img src={p.image_url} alt="" className="w-9 h-9 rounded border border-border object-cover shrink-0" />
+                <img
+                  src={p.image_url}
+                  alt=""
+                  className="w-9 h-9 rounded border border-border object-cover shrink-0 transition-transform"
+                  style={{ transform: p.rotation ? `rotate(${p.rotation}deg)` : undefined }}
+                />
                 <div className="flex-1 min-w-0">
                   <p className="font-display text-[10px] text-foreground truncate">{p.product_name}</p>
                   <p className="font-body text-[9px] text-muted-foreground truncate">
                     {p.brand_name}
                     {p.isExternal && <span className="ml-1 text-muted-foreground/50">(ext)</span>}
                   </p>
-                  {p.dimensions && <p className="font-body text-[8px] text-muted-foreground/70 truncate">{p.dimensions}</p>}
+                  {p.rotation ? (
+                    <p className="font-body text-[8px] text-muted-foreground/70">{p.rotation}° rotated</p>
+                  ) : p.dimensions ? (
+                    <p className="font-body text-[8px] text-muted-foreground/70 truncate">{p.dimensions}</p>
+                  ) : null}
                 </div>
-                <button
-                  onClick={() => removeProduct(p.id)}
-                  className="shrink-0 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  <X className="w-3 h-3" />
-                </button>
+                <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => rotateProduct(p.id, -1)}
+                    className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                    title="Rotate left 90°"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => rotateProduct(p.id, 1)}
+                    className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                    title="Rotate right 90°"
+                  >
+                    <RotateCw className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => removeProduct(p.id)}
+                    className="text-muted-foreground hover:text-destructive transition-colors p-0.5"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
