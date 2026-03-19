@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText,
 } from "lucide-react";
-import ProductChecklist from "./ProductChecklist";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
