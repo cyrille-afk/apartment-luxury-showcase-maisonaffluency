@@ -224,8 +224,17 @@ const TradeAxonometric = () => {
   const [aiProductPickerOpen, setAiProductPickerOpen] = useState(false);
   const [aiProductSearch, setAiProductSearch] = useState("");
   const [aiTextureUrl, setAiTextureUrl] = useState<string | null>(null);
+  const [aiTextureLabel, setAiTextureLabel] = useState<string | null>(null);
   const [aiTextureUploading, setAiTextureUploading] = useState(false);
+  const [aiTexturePickerOpen, setAiTexturePickerOpen] = useState(false);
   const textureInputRef = useRef<HTMLInputElement>(null);
+
+  // Wallcovering products from platform catalog
+  const wallcoveringProducts = useMemo(() => {
+    return getAllTradeProducts().filter(
+      (p) => p.subcategory === "Wallcoverings" && p.image
+    );
+  }, []);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
