@@ -297,6 +297,7 @@ Style: ${defaultStyle}. Produce a single cohesive professional architectural ren
           model: selectedModel,
           messages: [{ role: "user", content }],
           modalities: ["image", "text"],
+          temperature: 0,
         }),
       }
     );
