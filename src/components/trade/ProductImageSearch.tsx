@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import { Search, Loader2, ExternalLink, ChevronRight, ImageOff } from "lucide-react";
+import { Search, Loader2, ChevronRight, ImageOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface SearchResult {
   title: string;
@@ -20,9 +20,11 @@ const ProductImageSearch = ({ onSelectImage }: ProductImageSearchProps) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [importing, setImporting] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [nextStart, setNextStart] = useState<number | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const { toast } = useToast();
 
   const search = useCallback(async (searchQuery: string, start = 1) => {
     if (!searchQuery.trim()) return;
@@ -51,6 +53,36 @@ const ProductImageSearch = ({ onSelectImage }: ProductImageSearchProps) => {
       setLoading(false);
     }
   }, []);
+
+  const handleSelect = async (result: SearchResult, idx: number) => {
+    setImporting(idx);
+    try {
+      // Proxy the image through our edge function to avoid hotlink blocks
+      const { data, error: fnError } = await supabase.functions.invoke("proxy-image", {
+        body: { url: result.link },
+      });
+
+      if (fnError) throw fnError;
+      if (data?.error) throw new Error(data.error);
+
+      onSelectImage({
+        title: result.title,
+        imageUrl: data.publicUrl,
+        sourceUrl: result.contextLink,
+      });
+
+      toast({ title: "Image imported successfully" });
+    } catch (err: any) {
+      console.error("Image import error:", err);
+      toast({
+        title: "Import failed",
+        description: err.message || "Could not import this image. Try another.",
+        variant: "destructive",
+      });
+    } finally {
+      setImporting(null);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,13 +129,15 @@ const ProductImageSearch = ({ onSelectImage }: ProductImageSearchProps) => {
           {results.map((result, idx) => (
             <button
               key={`${result.link}-${idx}`}
-              onClick={() => onSelectImage({
-                title: result.title,
-                imageUrl: result.link,
-                sourceUrl: result.contextLink,
-              })}
-              className="group relative aspect-square bg-muted rounded-md overflow-hidden border border-border hover:border-primary/50 transition-all hover:shadow-md"
+              onClick={() => handleSelect(result, idx)}
+              disabled={importing !== null}
+              className="group relative aspect-square bg-muted rounded-md overflow-hidden border border-border hover:border-primary/50 transition-all hover:shadow-md disabled:opacity-60"
             >
+              {importing === idx && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/70">
+                  <Loader2 className="h-5 w-5 animate-spin text-foreground" />
+                </div>
+              )}
               <img
                 src={result.thumbnail || result.link}
                 alt={result.title}
