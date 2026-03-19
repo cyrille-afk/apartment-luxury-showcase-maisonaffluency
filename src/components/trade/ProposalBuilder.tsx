@@ -499,6 +499,10 @@ export default function ProposalBuilder({
         title: string;
         description?: string;
         sort_order: number;
+        slide_type: string;
+        room_section?: string;
+        linked_product_ids?: any;
+        linked_quote_id?: string;
       }> = [];
 
       // Slide 1: Cover — Maison Affluency branded with date
@@ -508,6 +512,7 @@ export default function ProposalBuilder({
         title: "Maison Affluency",
         description: `Furniture Proposal\n${dateLabel}`,
         sort_order: sortOrder++,
+        slide_type: "cover",
       });
 
       // Slide 2: Client's original 2D layout — source drawing
@@ -517,9 +522,10 @@ export default function ProposalBuilder({
         title: "Client's Original 2D Layout",
         description: "Source drawing provided by client — spatial reference for furniture positioning.",
         sort_order: sortOrder++,
+        slide_type: "source_drawing",
       });
 
-      // Slide 3: Client's 3D rendering (empty room / architectural shell)
+      // Slide 3: Generated axonometric / 3D architectural shell
       if (emptyRoomUrl) {
         slides.push({
           presentation_id: presId,
@@ -527,86 +533,130 @@ export default function ProposalBuilder({
           title: "3D Architectural Rendering",
           description: "Architectural shell with movable furniture removed — blank canvas for proposals.",
           sort_order: sortOrder++,
+          slide_type: "axonometric",
         });
       }
 
-      // For each proposal iteration: proposal slide → product cards (4/page) → quote
+      // Create a single grouped quote for all options
+      let quoteId: string | null = null;
+      try {
+        const { data: quote, error: quoteError } = await supabase
+          .from("trade_quotes")
+          .insert({
+            user_id: user.id,
+            status: "draft",
+            notes: `Auto-generated from Proposal Builder — ${dateLabel}`,
+            client_name: "",
+          })
+          .select("id")
+          .single();
+        if (!quoteError && quote) {
+          quoteId = quote.id;
+          for (const product of selectedProducts) {
+            try {
+              await supabase.rpc("add_gallery_product_to_quote", {
+                _user_id: user.id,
+                _quote_id: quote.id,
+                _product_name: product.product_name,
+                _brand_name: product.brand_name,
+                _image_url: product.image_url,
+                _dimensions: product.dimensions || null,
+                _materials: product.materials || null,
+                _quantity: 1,
+              });
+            } catch (e) {
+              console.warn("Failed to add product to quote:", product.product_name, e);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Could not create quote:", e);
+      }
+
+      // For each proposal iteration: furnishing option → product grid cards (2/page by room) → quote summary
       const proposals = proposalHistory.length > 0 ? proposalHistory : [proposalResult];
-      const quoteIds: string[] = [];
+      const productIds = selectedProducts.map(p => p.id);
+      const productDataForSlides = selectedProducts.map(p => ({
+        id: p.id,
+        product_name: p.product_name,
+        brand_name: p.brand_name,
+        image_url: p.image_url,
+        dimensions: p.dimensions || null,
+        materials: p.materials || null,
+      }));
 
       for (let optIdx = 0; optIdx < proposals.length; optIdx++) {
         const optionLabel = proposals.length === 1 ? "Proposal" : `Option ${optIdx + 1}`;
 
-        // Proposal slide
+        // Furnishing option slide
         slides.push({
           presentation_id: presId,
           image_url: proposals[optIdx],
           title: optionLabel,
           description: `AI-generated furniture proposal featuring ${productNames}.`,
           sort_order: sortOrder++,
+          slide_type: "furnishing_option",
+          linked_product_ids: productDataForSlides,
         });
 
-        // Product specification pages (4 per page)
-        const productPages = buildProductPageSlides(selectedProducts, presId, sortOrder, optionLabel);
-        slides.push(...productPages);
-        sortOrder += productPages.length;
+        // Product grid cards — max 2 per page, grouped by room section
+        // Infer room section from product category or default to "Featured Products"
+        const roomGroups = new Map<string, typeof selectedProducts>();
+        for (const p of selectedProducts) {
+          // Use tags or category as room section hint
+          const section = (p as any).category || "Featured Products";
+          if (!roomGroups.has(section)) roomGroups.set(section, []);
+          roomGroups.get(section)!.push(p);
+        }
 
-        // Create a separate quote for this option
-        try {
-          const { data: quote, error: quoteError } = await supabase
-            .from("trade_quotes")
-            .insert({
-              user_id: user.id,
-              status: "draft",
-              notes: `Auto-generated from Proposal Builder — ${optionLabel} — ${dateLabel}`,
-              client_name: "",
-            })
-            .select("id")
-            .single();
+        for (const [section, sectionProducts] of roomGroups) {
+          for (let i = 0; i < sectionProducts.length; i += 2) {
+            const chunk = sectionProducts.slice(i, i + 2);
+            const chunkData = chunk.map(p => ({
+              id: p.id,
+              product_name: p.product_name,
+              brand_name: p.brand_name,
+              image_url: p.image_url,
+              dimensions: p.dimensions || null,
+              materials: p.materials || null,
+              pdf_url: p.pdf_url || null,
+            }));
 
-          if (!quoteError && quote) {
-            quoteIds.push(quote.id);
-            for (const product of selectedProducts) {
-              try {
-                await supabase.rpc("add_gallery_product_to_quote", {
-                  _user_id: user.id,
-                  _quote_id: quote.id,
-                  _product_name: product.product_name,
-                  _brand_name: product.brand_name,
-                  _image_url: product.image_url,
-                  _dimensions: product.dimensions || null,
-                  _materials: product.materials || null,
-                  _quantity: 1,
-                });
-              } catch (e) {
-                console.warn("Failed to add product to quote:", product.product_name, e);
-              }
-            }
-
-            // Quote summary slide for this option
-            const quoteDesc = selectedProducts.map(p => `• ${p.product_name} — ${p.brand_name}`).join("\n");
             slides.push({
               presentation_id: presId,
-              image_url: proposals[optIdx],
-              title: `${optionLabel} — Quote Summary`,
-              description: `Products:\n${quoteDesc}\n\nQuote Ref: QU-${quote.id.slice(0, 6).toUpperCase()}\nPricing to be confirmed.`,
+              image_url: chunk[0].image_url,
+              title: `${optionLabel} — Product Specifications`,
+              description: chunk.map(p => `${p.product_name} — ${p.brand_name}`).join("\n"),
               sort_order: sortOrder++,
+              slide_type: "product_grid",
+              room_section: section,
+              linked_product_ids: chunkData,
             });
           }
-        } catch (e) {
-          console.warn("Could not create quote for option", optIdx + 1, e);
         }
+
+        // Quote summary slide
+        const quoteRef = quoteId ? `QU-${quoteId.slice(0, 6).toUpperCase()}` : "Pending";
+        const quoteDesc = selectedProducts.map(p => `• ${p.product_name} — ${p.brand_name}`).join("\n");
+        slides.push({
+          presentation_id: presId,
+          image_url: proposals[optIdx],
+          title: `${optionLabel} — Quote Summary`,
+          description: `Products:\n${quoteDesc}\n\nQuote Ref: ${quoteRef}\nAvailable for review in your Quote Builder.\nPayment terms: 60% deposit · 40% balance before delivery.`,
+          sort_order: sortOrder++,
+          slide_type: "quote_summary",
+          linked_quote_id: quoteId || undefined,
+          linked_product_ids: productDataForSlides,
+        });
       }
 
       // Insert all slides
       const { error: slidesError } = await supabase.from("presentation_slides").insert(slides);
       if (slidesError) throw slidesError;
 
-      const quoteLabel = quoteIds.length > 1
-        ? `${quoteIds.length} quotes created for comparison`
-        : quoteIds.length === 1
-          ? `Quote QU-${quoteIds[0].slice(0, 6).toUpperCase()} created`
-          : "No quote created";
+      const quoteLabel = quoteId
+        ? `Quote QU-${quoteId.slice(0, 6).toUpperCase()} created`
+        : "No quote created";
 
       toast({
         title: "Presentation created",
