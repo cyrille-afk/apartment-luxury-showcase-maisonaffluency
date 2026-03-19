@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move,
+  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2,
 } from "lucide-react";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
@@ -236,10 +236,25 @@ export default function ProposalBuilder({
   const panStart = useRef({ x: 0, y: 0 });
   const panOffset = useRef({ x: 0, y: 0 });
 
+  // Click-to-move marker state
+  type MoveMarker = { x: number; y: number }; // percentage coords on image
+  const [moveMode, setMoveMode] = useState(false);
+  const [sourceMarker, setSourceMarker] = useState<MoveMarker | null>(null);
+  const [targetMarker, setTargetMarker] = useState<MoveMarker | null>(null);
+  const [moveLabel, setMoveLabel] = useState(""); // optional label for what's being moved
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+  const imageElRef = useRef<HTMLImageElement>(null);
+
   const resetTransform = useCallback(() => {
     setRotation(0);
     setZoom(1);
     setPan({ x: 0, y: 0 });
+  }, []);
+
+  const clearMarkers = useCallback(() => {
+    setSourceMarker(null);
+    setTargetMarker(null);
+    setMoveLabel("");
   }, []);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -248,11 +263,12 @@ export default function ProposalBuilder({
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if (moveMode) return; // don't pan in move mode
     isPanning.current = true;
     panStart.current = { x: e.clientX, y: e.clientY };
     panOffset.current = { ...pan };
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  }, [pan]);
+  }, [pan, moveMode]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isPanning.current) return;
@@ -266,6 +282,53 @@ export default function ProposalBuilder({
     isPanning.current = false;
   }, []);
 
+  // Handle click-to-place markers on the image
+  const handleImageClick = useCallback((e: React.MouseEvent) => {
+    if (!moveMode || !imageElRef.current) return;
+    const rect = imageElRef.current.getBoundingClientRect();
+    const xPct = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+    const yPct = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+    const clamped = { x: Math.max(0, Math.min(100, xPct)), y: Math.max(0, Math.min(100, yPct)) };
+
+    if (!sourceMarker) {
+      setSourceMarker(clamped);
+    } else if (!targetMarker) {
+      setTargetMarker(clamped);
+      // Auto-fill the refinement prompt
+      const label = moveLabel.trim() || "the furniture piece";
+      const direction = describeDirection(sourceMarker, clamped);
+      setRefinementPrompt(`Move ${label} at position (${sourceMarker.x}%, ${sourceMarker.y}%) to (${clamped.x}%, ${clamped.y}%) — move it ${direction}. Keep everything else exactly the same.`);
+    }
+  }, [moveMode, sourceMarker, targetMarker, moveLabel]);
+
+  // Describe direction in natural language
+  const describeDirection = (from: MoveMarker, to: MoveMarker): string => {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const parts: string[] = [];
+    if (Math.abs(dx) > 5) parts.push(dx > 0 ? "to the right" : "to the left");
+    if (Math.abs(dy) > 5) parts.push(dy > 0 ? "downward" : "upward");
+    return parts.length > 0 ? parts.join(" and ") : "to the new position";
+  };
+
+  // Render a marker dot on the image
+  const renderMarker = (marker: MoveMarker, color: "source" | "target") => {
+    const isSource = color === "source";
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{ left: `${marker.x}%`, top: `${marker.y}%`, transform: "translate(-50%, -50%)" }}
+      >
+        <div className={`w-5 h-5 rounded-full border-2 ${isSource ? "border-red-500 bg-red-500/30" : "border-emerald-500 bg-emerald-500/30"} flex items-center justify-center`}>
+          <div className={`w-2 h-2 rounded-full ${isSource ? "bg-red-500" : "bg-emerald-500"}`} />
+        </div>
+        <span className={`absolute top-6 left-1/2 -translate-x-1/2 text-[9px] font-body font-medium whitespace-nowrap ${isSource ? "text-red-400" : "text-emerald-400"}`}>
+          {isSource ? "FROM" : "TO"}
+        </span>
+      </div>
+    );
+  };
+
   if (expanded && proposalResult) {
     return (
       <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
@@ -277,6 +340,23 @@ export default function ProposalBuilder({
             )}
           </div>
           <div className="flex items-center gap-1.5">
+            {/* Move mode toggle */}
+            <Button
+              variant={moveMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                setMoveMode((m) => !m);
+                if (moveMode) clearMarkers();
+              }}
+              title={moveMode ? "Exit move mode" : "Click to reposition furniture"}
+              className="gap-1.5"
+            >
+              <Crosshair className="w-3.5 h-3.5" />
+              {moveMode ? "Exit Move" : "Move Furniture"}
+            </Button>
+
+            <div className="w-px h-5 bg-border mx-1" />
+
             {/* Transform controls */}
             <Button variant="ghost" size="sm" onClick={() => setRotation((r) => r - 15)} title="Rotate left 15°">
               <RotateCcw className="w-3.5 h-3.5" />
@@ -300,35 +380,88 @@ export default function ProposalBuilder({
             <Button variant="outline" size="sm" onClick={downloadProposal}>
               <Download className="w-3.5 h-3.5 mr-1.5" />Download
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => { setExpanded(false); resetTransform(); }}>
+            <Button variant="ghost" size="sm" onClick={() => { setExpanded(false); resetTransform(); clearMarkers(); setMoveMode(false); }}>
               <Minimize2 className="w-3.5 h-3.5 mr-1.5" />Collapse
             </Button>
           </div>
         </div>
+
+        {/* Move mode instructions */}
+        {moveMode && (
+          <div className="px-4 py-2 bg-accent/10 border-b border-border flex items-center gap-4">
+            <span className="font-body text-xs text-foreground">
+              {!sourceMarker
+                ? "① Click on the furniture piece you want to move"
+                : !targetMarker
+                  ? "② Now click where you want it placed"
+                  : "✓ Markers set — review the prompt below and send"}
+            </span>
+            {!sourceMarker && (
+              <Input
+                value={moveLabel}
+                onChange={(e) => setMoveLabel(e.target.value)}
+                placeholder="What piece? e.g. 'the armchair', 'the coffee table'…"
+                className="font-body text-xs max-w-xs h-7"
+              />
+            )}
+            {(sourceMarker || targetMarker) && (
+              <Button variant="ghost" size="sm" onClick={clearMarkers} className="gap-1 text-xs h-7">
+                <Trash2 className="w-3 h-3" />Clear markers
+              </Button>
+            )}
+          </div>
+        )}
+
         <div
-          className="flex-1 overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+          ref={imageContainerRef}
+          className={`flex-1 overflow-hidden flex items-center justify-center select-none ${moveMode ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
           onWheel={handleWheel}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
+          onPointerDown={moveMode ? undefined : handlePointerDown}
+          onPointerMove={moveMode ? undefined : handlePointerMove}
+          onPointerUp={moveMode ? undefined : handlePointerUp}
         >
-          <img
-            src={proposalResult}
-            alt="Generated proposal"
-            className="max-w-[90vw] max-h-[80vh] object-contain rounded-lg pointer-events-none"
-            draggable={false}
+          <div
+            className="relative"
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) rotate(${rotation}deg) scale(${zoom})`,
               transition: isPanning.current ? "none" : "transform 0.2s ease",
             }}
-          />
+            onClick={moveMode ? handleImageClick : undefined}
+          >
+            <img
+              ref={imageElRef}
+              src={proposalResult}
+              alt="Generated proposal"
+              className="max-w-[90vw] max-h-[80vh] object-contain rounded-lg"
+              draggable={false}
+            />
+            {/* Render markers over image */}
+            {sourceMarker && renderMarker(sourceMarker, "source")}
+            {targetMarker && renderMarker(targetMarker, "target")}
+            {/* Draw line between markers */}
+            {sourceMarker && targetMarker && (
+              <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                <defs>
+                  <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="rgb(16 185 129)" />
+                  </marker>
+                </defs>
+                <line
+                  x1={`${sourceMarker.x}%`} y1={`${sourceMarker.y}%`}
+                  x2={`${targetMarker.x}%`} y2={`${targetMarker.y}%`}
+                  stroke="rgb(16 185 129)" strokeWidth="2" strokeDasharray="6 3"
+                  markerEnd="url(#arrowhead)"
+                />
+              </svg>
+            )}
+          </div>
         </div>
         <div className="p-4 border-t border-border">
           <div className="max-w-2xl mx-auto flex gap-2">
             <Input
               value={refinementPrompt}
               onChange={(e) => setRefinementPrompt(e.target.value)}
-              placeholder="Refine: e.g. 'Move the sofa further left', 'Rotate the chair to face the window'…"
+              placeholder={moveMode ? "Markers will auto-fill this prompt — or type manually" : "Refine: e.g. 'Move the sofa further left', 'Rotate the chair to face the window'…"}
               className="font-body text-xs flex-1"
               onKeyDown={(e) => e.key === "Enter" && !refining && refineProposal()}
               disabled={refining}
@@ -336,7 +469,7 @@ export default function ProposalBuilder({
             <Button
               size="sm"
               variant="outline"
-              onClick={refineProposal}
+              onClick={() => { refineProposal(); clearMarkers(); }}
               disabled={refining || !refinementPrompt.trim()}
             >
               {refining ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
