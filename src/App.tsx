@@ -59,6 +59,15 @@ const queryClient = new QueryClient();
 const App = () => {
   const [showDeferredUi, setShowDeferredUi] = useState(false);
 
+  // Block Pinterest browser extension globally
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      document.querySelectorAll('[data-pin-log], [class*="PinIt"], [class*="pinterest"]').forEach(el => el.remove());
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     const win = window as any;
 
