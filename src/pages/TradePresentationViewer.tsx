@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, MessageSquare, Send, FileDown, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, MessageSquare, Send, FileDown, Loader2, Link2, Check } from "lucide-react";
 import { format } from "date-fns";
 // Lazy-loaded to avoid crash on module init
 const loadPdfRenderer = () => import("@react-pdf/renderer");
@@ -42,6 +42,7 @@ const TradePresentationViewer = () => {
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
@@ -224,6 +225,19 @@ const TradePresentationViewer = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/trade/presentations/${id}/view`;
+                  navigator.clipboard.writeText(url);
+                  setLinkCopied(true);
+                  toast.success("Link copied to clipboard");
+                  setTimeout(() => setLinkCopied(false), 2000);
+                }}
+                className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                title="Copy link"
+              >
+                {linkCopied ? <Check className="w-4 h-4 text-primary" /> : <Link2 className="w-4 h-4" />}
+              </button>
               <button
                 onClick={() => setShowComments(!showComments)}
                 className={`p-2 rounded-md transition-colors relative ${showComments ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
