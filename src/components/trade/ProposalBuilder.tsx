@@ -1212,6 +1212,16 @@ export default function ProposalBuilder({
                     {p.isExternal && <span className="ml-1 text-muted-foreground/50">(ext)</span>}
                   </p>
                   {p.dimensions && <p className="font-body text-[8px] text-muted-foreground/70 truncate">{p.dimensions}</p>}
+                  <select
+                    value={p.room_section || ""}
+                    onChange={(e) => updateRoomSection(p.id, e.target.value)}
+                    className="mt-1 w-full bg-transparent border border-border rounded px-1 py-0.5 font-body text-[9px] text-muted-foreground outline-none focus:border-foreground transition-colors cursor-pointer"
+                  >
+                    <option value="">Room section…</option>
+                    {ROOM_SECTIONS.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
