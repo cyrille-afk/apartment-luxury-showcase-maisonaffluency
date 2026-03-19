@@ -289,12 +289,21 @@ export default function ProposalBuilder({
     }
   };
 
-  const downloadProposal = () => {
+  const downloadProposal = async () => {
     if (!proposalResult) return;
-    const a = document.createElement("a");
-    a.href = proposalResult;
-    a.download = `proposal-${Date.now()}.png`;
-    a.click();
+    try {
+      const response = await fetch(proposalResult);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `proposal-${Date.now()}.png`;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback: open in new tab
+      window.open(proposalResult, "_blank");
+    }
   };
 
   // Save proposal image to various destinations
