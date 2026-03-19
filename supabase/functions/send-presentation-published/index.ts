@@ -126,7 +126,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(JSON.stringify({ success: true, notified: 0, message: "No shared users to notify" }), {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
-
+    }
     const viewLink = `${SITE_URL}/trade/presentations/${presentationId}/view`;
     const title = presentation.title || "Untitled Presentation";
     const clientName = presentation.client_name || "";
