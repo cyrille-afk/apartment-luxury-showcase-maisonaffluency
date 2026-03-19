@@ -499,12 +499,14 @@ const TradeAxonometric = () => {
           .eq("id", activeRequestId);
       }
 
+      const refStyle = referenceStyles?.find((r) => r.mode === mode);
       const body: any = {
         imageUrl: toAbsoluteUrl(sourceImage),
         mode,
         style,
         overlayImages: (mode === "composite" || mode === "cad_overlay") ? overlayImages.map(u => toAbsoluteUrl(u)).filter(Boolean) : undefined,
         technicalDrawingUrl: mode === "cad_overlay" ? toAbsoluteUrl(technicalDrawingUrl) : undefined,
+        styleReferenceUrl: refStyle ? toAbsoluteUrl(refStyle.image_url) : undefined,
       };
 
       const data = await invokeAxonometricGenerate(body, undefined, 1);
