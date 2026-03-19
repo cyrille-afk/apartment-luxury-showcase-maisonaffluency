@@ -435,6 +435,16 @@ export default function ProposalBuilder({
               className="max-w-[90vw] max-h-[80vh] object-contain rounded-lg"
               draggable={false}
             />
+            {/* Floating collapse button on image */}
+            {!moveMode && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setExpanded(false); resetTransform(); clearMarkers(); setMoveMode(false); }}
+                className="absolute top-3 right-3 z-20 bg-background/80 backdrop-blur-sm border border-border rounded-full p-2 hover:bg-background transition-colors shadow-lg"
+                title="Collapse"
+              >
+                <Minimize2 className="w-4 h-4 text-foreground" />
+              </button>
+            )}
             {/* Render markers over image */}
             {sourceMarker && renderMarker(sourceMarker, "source")}
             {targetMarker && renderMarker(targetMarker, "target")}
