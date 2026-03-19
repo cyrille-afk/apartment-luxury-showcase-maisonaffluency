@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen,
+  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -30,7 +30,9 @@ interface SelectedProduct {
   dimensions?: string;
   materials?: string;
   isExternal?: boolean;
-  rotation?: number; // degrees (0, 90, 180, 270)
+  rotation?: number;
+  pdf_url?: string;
+  pdf_urls?: { label: string; url: string; filename?: string }[];
 }
 
 interface ProposalBuilderProps {
@@ -57,6 +59,8 @@ export default function ProposalBuilder({
   const { user } = useAuth();
   const externalFileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
+  const [creatingPresentation, setCreatingPresentation] = useState(false);
+  const [showPrices, setShowPrices] = useState(true);
 
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [generating, setGenerating] = useState(false);
@@ -100,7 +104,7 @@ export default function ProposalBuilder({
   const brands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
   const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
 
-  const addProduct = useCallback((product: { product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string; isExternal?: boolean }) => {
+  const addProduct = useCallback((product: { product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string; isExternal?: boolean; pdf_url?: string; pdf_urls?: { label: string; url: string; filename?: string }[] }) => {
     if (selectedProducts.length >= 10) {
       toast({ title: "Maximum 10 products per proposal", variant: "destructive" });
       return;
@@ -377,6 +381,194 @@ export default function ProposalBuilder({
     }
   };
 
+  // Auto-create full presentation deck from proposal
+  const createProposalPresentation = async () => {
+    if (!proposalResult || !user) return;
+    setCreatingPresentation(true);
+    try {
+      const dateLabel = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+      const productNames = selectedProducts.map(p => p.product_name).join(", ");
+
+      // 1. Create the presentation
+      const { data: pres, error: presError } = await supabase
+        .from("presentations")
+        .insert({
+          created_by: user.id,
+          title: `Proposal — ${dateLabel}`,
+          description: `Furniture proposal featuring ${productNames}`,
+          client_name: "",
+          project_name: "",
+          cover_style: "default",
+          is_published: false,
+        })
+        .select("id")
+        .single();
+      if (presError || !pres) throw presError || new Error("Failed to create presentation");
+      const presId = pres.id;
+
+      let sortOrder = 0;
+      const slides: Array<{
+        presentation_id: string;
+        image_url: string;
+        title: string;
+        description?: string;
+        sort_order: number;
+      }> = [];
+
+      // Slide 1: Cover — use a branded placeholder
+      slides.push({
+        presentation_id: presId,
+        image_url: furnishedImageUrl, // cover will be branded via presentation system
+        title: "Maison Affluency",
+        description: `Furniture Proposal\n${dateLabel}`,
+        sort_order: sortOrder++,
+      });
+
+      // Slide 2: Source 2D drawing (the original client layout)
+      slides.push({
+        presentation_id: presId,
+        image_url: furnishedImageUrl,
+        title: "Client's Original Layout",
+        description: "Source drawing provided by client — used as spatial reference for furniture positioning.",
+        sort_order: sortOrder++,
+      });
+
+      // Slide 3: Empty room template
+      if (emptyRoomUrl) {
+        slides.push({
+          presentation_id: presId,
+          image_url: emptyRoomUrl,
+          title: "Empty Room Template",
+          description: "Architectural shell with all movable furniture removed — blank canvas for proposals.",
+          sort_order: sortOrder++,
+        });
+      }
+
+      // Slides 4+: One slide per product card
+      // Look up pricing from trade_products
+      const productPrices: Record<string, { trade_price_cents: number | null; rrp_price_cents: number | null; currency: string; spec_sheet_url: string | null }> = {};
+      if (showPrices) {
+        const { data: dbProducts } = await supabase
+          .from("trade_products")
+          .select("product_name, brand_name, trade_price_cents, rrp_price_cents, currency, spec_sheet_url")
+          .in("brand_name", [...new Set(selectedProducts.map(p => p.brand_name))]);
+        if (dbProducts) {
+          for (const dbp of dbProducts) {
+            const key = `${dbp.product_name}|||${dbp.brand_name}`.toLowerCase();
+            productPrices[key] = {
+              trade_price_cents: dbp.trade_price_cents,
+              rrp_price_cents: dbp.rrp_price_cents,
+              currency: dbp.currency,
+              spec_sheet_url: dbp.spec_sheet_url,
+            };
+          }
+        }
+      }
+
+      for (const product of selectedProducts) {
+        const priceKey = `${product.product_name}|||${product.brand_name}`.toLowerCase();
+        const pricing = productPrices[priceKey];
+        const pdfLinks = product.pdf_urls?.map(p => p.label).join(", ") || product.pdf_url ? "PDF available" : "";
+
+        let desc = `Brand: ${product.brand_name}`;
+        if (product.dimensions) desc += `\nDimensions: ${product.dimensions}`;
+        if (product.materials) desc += `\nMaterials: ${product.materials}`;
+        if (pdfLinks) desc += `\nSpecifications: ${pdfLinks}`;
+
+        if (showPrices && pricing) {
+          const price = pricing.trade_price_cents ?? pricing.rrp_price_cents;
+          if (price) {
+            const formatted = new Intl.NumberFormat("en-SG", {
+              style: "currency",
+              currency: pricing.currency || "SGD",
+              minimumFractionDigits: 0,
+            }).format(price / 100);
+            desc += `\nPrice: ${formatted}${pricing.trade_price_cents ? " (Trade)" : " (RRP)"}`;
+          } else {
+            desc += `\nPrice on request`;
+          }
+        }
+
+        slides.push({
+          presentation_id: presId,
+          image_url: product.image_url,
+          title: product.product_name,
+          description: desc,
+          sort_order: sortOrder++,
+        });
+      }
+
+      // Proposal iteration slides
+      for (let i = 0; i < proposalHistory.length; i++) {
+        slides.push({
+          presentation_id: presId,
+          image_url: proposalHistory[i],
+          title: proposalHistory.length === 1 ? "Proposed Layout" : `Option ${i + 1}`,
+          description: `AI-generated furniture proposal featuring ${productNames}.`,
+          sort_order: sortOrder++,
+        });
+      }
+
+      // Quote summary slide — auto-create trade quote
+      const { data: quote, error: quoteError } = await supabase
+        .from("trade_quotes")
+        .insert({
+          user_id: user.id,
+          status: "draft",
+          notes: `Auto-generated from Proposal Builder — ${dateLabel}`,
+          client_name: "",
+        })
+        .select("id")
+        .single();
+
+      if (quoteError || !quote) {
+        console.warn("Could not auto-create quote:", quoteError);
+      } else {
+        // Add products to quote via RPC
+        for (const product of selectedProducts) {
+          try {
+            await supabase.rpc("add_gallery_product_to_quote", {
+              _user_id: user.id,
+              _quote_id: quote.id,
+              _product_name: product.product_name,
+              _brand_name: product.brand_name,
+              _image_url: product.image_url,
+              _dimensions: product.dimensions || null,
+              _materials: product.materials || null,
+              _quantity: 1,
+            });
+          } catch (e) {
+            console.warn("Failed to add product to quote:", product.product_name, e);
+          }
+        }
+
+        // Add a quote summary slide
+        const quoteDesc = selectedProducts.map(p => `• ${p.product_name} — ${p.brand_name}`).join("\n");
+        slides.push({
+          presentation_id: presId,
+          image_url: proposalResult,
+          title: "Quote Summary",
+          description: `Products in this proposal:\n${quoteDesc}\n\nQuote reference created — pricing will be confirmed separately.`,
+          sort_order: sortOrder++,
+        });
+      }
+
+      // Insert all slides
+      const { error: slidesError } = await supabase.from("presentation_slides").insert(slides);
+      if (slidesError) throw slidesError;
+
+      toast({
+        title: "Presentation created",
+        description: `${slides.length} slides with auto-generated quote. View in Presentations.`,
+      });
+    } catch (e: any) {
+      console.error(e);
+      toast({ title: "Failed to create presentation", description: e?.message, variant: "destructive" });
+    } finally {
+      setCreatingPresentation(false);
+    }
+  };
+
   const [rotation, setRotation] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -566,6 +758,19 @@ export default function ProposalBuilder({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <Button
+              size="sm"
+              onClick={createProposalPresentation}
+              disabled={creatingPresentation || saving}
+              className="gap-1.5"
+            >
+              {creatingPresentation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+              Create Presentation
+            </Button>
+            <label className="flex items-center gap-1.5 font-body text-[10px] text-muted-foreground cursor-pointer">
+              <input type="checkbox" checked={showPrices} onChange={(e) => setShowPrices(e.target.checked)} className="rounded border-border" />
+              Prices
+            </label>
             <Button variant="ghost" size="sm" onClick={() => { setExpanded(false); resetTransform(); clearMarkers(); setMoveMode(false); }}>
               <Minimize2 className="w-3.5 h-3.5 mr-1.5" />Collapse
             </Button>
@@ -748,6 +953,19 @@ export default function ProposalBuilder({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <Button
+                size="sm"
+                onClick={createProposalPresentation}
+                disabled={creatingPresentation || saving}
+                className="gap-1.5"
+              >
+                {creatingPresentation ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                Create Presentation
+              </Button>
+              <label className="flex items-center gap-1.5 font-body text-[10px] text-muted-foreground cursor-pointer">
+                <input type="checkbox" checked={showPrices} onChange={(e) => setShowPrices(e.target.checked)} className="rounded border-border" />
+                Prices
+              </label>
             </>
           )}
         </div>
@@ -1031,6 +1249,8 @@ export default function ProposalBuilder({
                       image_url: p.image_url!,
                       dimensions: p.dimensions,
                       materials: p.materials,
+                      pdf_url: p.pdf_url,
+                      pdf_urls: p.pdf_urls,
                     })
                   }
                   className="rounded border border-border overflow-hidden text-left transition-all hover:border-foreground/30"
