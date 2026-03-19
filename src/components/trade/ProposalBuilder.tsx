@@ -83,6 +83,7 @@ export default function ProposalBuilder({
   const [proposalHistory, setProposalHistory] = useState<string[]>([]);
   const [refinementPrompt, setRefinementPrompt] = useState("");
   const [refining, setRefining] = useState(false);
+  const [lockedIteration, setLockedIteration] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
 
   // External upload dialog state
