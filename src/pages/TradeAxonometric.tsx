@@ -232,7 +232,7 @@ const TradeAxonometric = () => {
   // Wallcovering products from platform catalog
   const wallcoveringProducts = useMemo(() => {
     return getAllTradeProducts().filter(
-      (p) => p.subcategory === "Wallcoverings" && p.image
+      (p) => p.subcategory === "Wallcoverings" && p.image_url
     );
   }, []);
 
