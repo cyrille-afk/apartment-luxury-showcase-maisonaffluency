@@ -3,23 +3,35 @@ import { Helmet } from "react-helmet-async";
 import Hero from "@/components/Hero";
 import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
 
+// Retry wrapper for dynamic imports — handles stale Vite chunks after HMR
+function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
+  return lazy(() =>
+    factory().catch((err) => {
+      // If a chunk fails to load, try once more after a short delay
+      console.warn("Dynamic import failed, retrying…", err);
+      return new Promise<{ default: React.ComponentType<any> }>((resolve) =>
+        setTimeout(() => resolve(factory()), 1500)
+      );
+    })
+  );
+}
 
 // Navigation is heavy (Radix Sheet, Tooltip, DropdownMenu) — lazy-load it
-const Navigation = lazy(() => import("@/components/Navigation"));
+const Navigation = lazyRetry(() => import("@/components/Navigation"));
 
 // Lazy-load everything below the fold to reduce initial JS
-const Overview = lazy(() => import("@/components/Overview"));
-const Gallery = lazy(() => import("@/components/Gallery"));
-const ScrollProgress = lazy(() => import("@/components/ScrollProgress"));
-const CuratingTeam = lazy(() => import("@/components/CuratingTeam"));
-const QuickJumpMenu = lazy(() => import("@/components/QuickJumpMenu"));
-const DesignDetails = lazy(() => import("@/components/DesignDetails"));
-const ContactInquiry = lazy(() => import("@/components/ContactInquiry"));
-const Footer = lazy(() => import("@/components/Footer"));
-const FeaturedDesigners = lazy(() => import("@/components/FeaturedDesigners"));
-const Collectibles = lazy(() => import("@/components/Collectibles"));
-const BrandsAteliers = lazy(() => import("@/components/BrandsAteliers"));
-const ProductGrid = lazy(() => import("@/components/ProductGrid"));
+const Overview = lazyRetry(() => import("@/components/Overview"));
+const Gallery = lazyRetry(() => import("@/components/Gallery"));
+const ScrollProgress = lazyRetry(() => import("@/components/ScrollProgress"));
+const CuratingTeam = lazyRetry(() => import("@/components/CuratingTeam"));
+const QuickJumpMenu = lazyRetry(() => import("@/components/QuickJumpMenu"));
+const DesignDetails = lazyRetry(() => import("@/components/DesignDetails"));
+const ContactInquiry = lazyRetry(() => import("@/components/ContactInquiry"));
+const Footer = lazyRetry(() => import("@/components/Footer"));
+const FeaturedDesigners = lazyRetry(() => import("@/components/FeaturedDesigners"));
+const Collectibles = lazyRetry(() => import("@/components/Collectibles"));
+const BrandsAteliers = lazyRetry(() => import("@/components/BrandsAteliers"));
+const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
 
 // ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
 // competing for bandwidth with LCP-critical resources on mobile.
