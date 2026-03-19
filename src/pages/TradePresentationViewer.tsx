@@ -236,7 +236,7 @@ const TradePresentationViewer = () => {
                   </span>
                 )}
               </button>
-              {isAdmin && slides.length > 0 && (
+              {slides.length > 0 && (
                 <button
                   onClick={handleExportPdf}
                   disabled={exportingPdf}
@@ -247,9 +247,26 @@ const TradePresentationViewer = () => {
                 </button>
               )}
               {actualSlide?.image_url && (
-                <a href={actualSlide.image_url} download target="_blank" rel="noopener noreferrer" className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" title="Download">
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(actualSlide.image_url);
+                      const blob = await res.blob();
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `${(actualSlide.title || "slide").replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "-")}.png`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    } catch {
+                      window.open(actualSlide.image_url, "_blank");
+                    }
+                  }}
+                  className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  title="Download image"
+                >
                   <Download className="w-4 h-4" />
-                </a>
+                </button>
               )}
               <button onClick={toggleFullscreen} className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
                 {fullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
