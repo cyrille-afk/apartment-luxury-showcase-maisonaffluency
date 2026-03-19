@@ -226,6 +226,19 @@ const TradePresentationViewer = () => {
             </div>
             <div className="flex items-center gap-2">
               <button
+                onClick={() => {
+                  const url = `${window.location.origin}/trade/presentations/${id}/view`;
+                  navigator.clipboard.writeText(url);
+                  setLinkCopied(true);
+                  toast.success("Link copied to clipboard");
+                  setTimeout(() => setLinkCopied(false), 2000);
+                }}
+                className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                title="Copy link"
+              >
+                {linkCopied ? <Check className="w-4 h-4 text-green-500" /> : <Link2 className="w-4 h-4" />}
+              </button>
+              <button
                 onClick={() => setShowComments(!showComments)}
                 className={`p-2 rounded-md transition-colors relative ${showComments ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
                 title="Comments"
