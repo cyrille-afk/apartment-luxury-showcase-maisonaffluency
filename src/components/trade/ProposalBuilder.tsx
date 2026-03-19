@@ -730,7 +730,7 @@ export default function ProposalBuilder({
         {showExternalDialog && selectedProducts.length < 5 && (
           <div className="border border-dashed border-border rounded-md p-3 space-y-2 bg-muted/10">
             <p className="font-body text-[10px] text-muted-foreground">
-              Import a product image not in the platform library
+              Import a product image — upload from your device or paste a web URL
             </p>
             <div className="flex flex-wrap gap-2">
               <Input
@@ -745,17 +745,35 @@ export default function ProposalBuilder({
                 placeholder="Brand (optional)"
                 className="font-body text-xs flex-1 min-w-[120px]"
               />
+            </div>
+            <div className="flex flex-wrap gap-2 items-center">
+              <Input
+                value={externalUrl}
+                onChange={(e) => setExternalUrl(e.target.value)}
+                placeholder="Paste image URL from web…"
+                className="font-body text-xs flex-1 min-w-[180px]"
+                onKeyDown={(e) => e.key === "Enter" && !externalUploading && externalUrl.trim() && externalName.trim() && handleExternalUrl()}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!externalName.trim() || !externalUrl.trim() || externalUploading}
+                onClick={handleExternalUrl}
+              >
+                {externalUploading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <><Link className="w-3.5 h-3.5 mr-1.5" />Import URL</>
+                )}
+              </Button>
+              <span className="font-body text-[10px] text-muted-foreground">or</span>
               <Button
                 size="sm"
                 variant="outline"
                 disabled={!externalName.trim() || externalUploading}
                 onClick={() => externalFileRef.current?.click()}
               >
-                {externalUploading ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <><Upload className="w-3.5 h-3.5 mr-1.5" />Choose Image</>
-                )}
+                <Upload className="w-3.5 h-3.5 mr-1.5" />Upload File
               </Button>
             </div>
           </div>
