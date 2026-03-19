@@ -70,9 +70,22 @@ const TradePresentations = () => {
   };
 
   const togglePublished = useCallback(async (p: PresentationRow) => {
-    await (supabase as any).from("presentations").update({ is_published: !p.is_published }).eq("id", p.id);
+    const newPublished = !p.is_published;
+    await (supabase as any).from("presentations").update({ is_published: newPublished }).eq("id", p.id);
     queryClient.invalidateQueries({ queryKey: ["presentations"] });
-    toast({ title: p.is_published ? "Unpublished" : "Published" });
+    toast({ title: newPublished ? "Published" : "Unpublished" });
+
+    // If publishing, notify shared users via email + in-app
+    if (newPublished) {
+      try {
+        await supabase.functions.invoke("send-presentation-published", {
+          body: { presentationId: p.id },
+        });
+        toast({ title: "Shared users have been notified" });
+      } catch (err) {
+        console.error("Notification error:", err);
+      }
+    }
   }, [queryClient, toast]);
 
   if (loading) return null;
