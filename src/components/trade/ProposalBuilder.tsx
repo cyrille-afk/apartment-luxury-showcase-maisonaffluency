@@ -1071,7 +1071,7 @@ export default function ProposalBuilder({
       {/* Selected products summary */}
       {selectedProducts.length > 0 && (
         <div className="border border-border rounded-lg p-4">
-          <h3 className="font-display text-xs text-foreground mb-3">Selected Products ({selectedProducts.length}/5)</h3>
+          <h3 className="font-display text-xs text-foreground mb-3"><h3 className="font-display text-xs text-foreground mb-3">Selected Products ({selectedProducts.length}/10)</h3></h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {selectedProducts.map((p) => (
               <div key={p.id} className="flex items-center gap-2 bg-muted/30 rounded-md px-2.5 py-2 group">
