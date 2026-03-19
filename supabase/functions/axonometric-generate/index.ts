@@ -52,9 +52,26 @@ serve(async (req) => {
     const defaultStyle = style || "photorealistic architectural rendering with warm natural lighting, high-end interior finishes";
 
     if (mode === "elevation_to_axo") {
-      prompt = `Transform this 2D room elevation drawing into a professional 3D axonometric (isometric) architectural view. Extrude the walls and elements shown in the elevation into a three-dimensional cutaway perspective. Show depth, volume, and spatial relationships. Style: ${defaultStyle}. Maintain all architectural proportions and details from the original elevation.`;
+      prompt = `You are an expert architectural visualization AI. Transform this 2D floor plan / elevation drawing into a professional 3D axonometric (isometric) cutaway architectural view.
+
+CRITICAL ACCURACY RULES:
+1. FURNITURE PLACEMENT: Study the floor plan CAREFULLY. Every piece of furniture shown in the drawing (sofas, tables, chairs, beds, desks, shelving, rugs, plants) must appear in the 3D render at the EXACT same position, orientation, and relative scale as shown in the plan. Do NOT invent, add, remove, or reposition any furniture.
+2. ROOM GEOMETRY: Walls, doors, windows, columns, and openings must match the plan exactly — correct lengths, angles, and positions.
+3. SPATIAL RELATIONSHIPS: Maintain the exact distances between furniture pieces and between furniture and walls as shown in the plan.
+4. ORIENTATION: If a sofa faces north in the plan, it must face north in the 3D view. Preserve all rotations and facing directions.
+5. COUNT: The number of each furniture type must match exactly — if the plan shows 2 armchairs, render exactly 2, not 1 or 3.
+
+Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full room as a cutaway with no roof. Style: ${defaultStyle}. The result must be a faithful 3D translation of the 2D plan — not an artistic reinterpretation.`;
     } else if (mode === "section_to_axo") {
-      prompt = `Transform this 2D architectural section drawing into a detailed 3D axonometric (isometric) cutaway view. Show the full spatial volume of the section — walls, floors, ceilings, stairs, and openings — rendered in three dimensions from an elevated oblique angle. Style: ${defaultStyle}. Preserve all structural and spatial relationships from the original section.`;
+      prompt = `You are an expert architectural visualization AI. Transform this 2D architectural section drawing into a detailed 3D axonometric (isometric) cutaway view.
+
+CRITICAL ACCURACY RULES:
+1. FURNITURE & FIXTURES: Every piece of furniture, fixture, and object visible in the section must appear in the 3D render at the EXACT same position, height, and relative scale. Do NOT invent, add, remove, or reposition any element.
+2. SPATIAL VOLUME: Show the full spatial volume — walls, floors, ceilings, stairs, mezzanines, and openings — rendered in three dimensions from an elevated oblique angle.
+3. PROPORTIONS: Wall heights, floor-to-ceiling distances, stair dimensions, and opening sizes must match the section exactly.
+4. DEPTH: Extrude the section into realistic room depth, maintaining all structural and spatial relationships from the original drawing.
+
+Style: ${defaultStyle}. The result must be a faithful 3D translation of the section — not an artistic reinterpretation.`;
     } else if (mode === "stylize") {
       prompt = `Enhance and stylize this architectural 3D axonometric view to give it a ${defaultStyle} feel. Add realistic textures, materials, shadows, and ambient lighting. Keep the geometry and spatial layout exactly the same but elevate the visual quality to a professional presentation rendering.`;
     } else if (mode === "composite") {
