@@ -61,9 +61,16 @@ const App = () => {
 
   // Block Pinterest browser extension globally
   useEffect(() => {
-    const observer = new MutationObserver(() => {
+    const blockPinterest = () => {
+      // Remove any Pinterest-injected elements
       document.querySelectorAll('[data-pin-log], [class*="PinIt"], [class*="pinterest"]').forEach(el => el.remove());
-    });
+      // Mark ALL images as non-pinnable so the extension never shows hover buttons
+      document.querySelectorAll('img:not([data-pin-nopin])').forEach(img => {
+        img.setAttribute('data-pin-nopin', 'true');
+      });
+    };
+    blockPinterest();
+    const observer = new MutationObserver(blockPinterest);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, []);
