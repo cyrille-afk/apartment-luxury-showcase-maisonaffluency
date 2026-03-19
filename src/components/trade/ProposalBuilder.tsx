@@ -1175,6 +1175,20 @@ export default function ProposalBuilder({
                 className="font-body text-xs flex-1 min-w-[120px]"
               />
             </div>
+            <div className="flex flex-wrap gap-2">
+              <Input
+                value={externalDimensions}
+                onChange={(e) => setExternalDimensions(e.target.value)}
+                placeholder="Dimensions — e.g. W65 × D58 × H79cm"
+                className="font-body text-xs flex-1 min-w-[180px]"
+              />
+              <Input
+                value={externalMaterials}
+                onChange={(e) => setExternalMaterials(e.target.value)}
+                placeholder="Materials (optional)"
+                className="font-body text-xs flex-1 min-w-[120px]"
+              />
+            </div>
             <div className="flex flex-wrap gap-2 items-center">
               <Input
                 value={externalUrl}
