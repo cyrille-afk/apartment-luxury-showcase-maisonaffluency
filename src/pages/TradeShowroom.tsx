@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
-import { ShoppingCart, MapPin, Grid3X3 } from "lucide-react";
+import { ShoppingCart, MapPin, Grid3X3, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +8,7 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import SectionHero from "@/components/trade/SectionHero";
 import Gallery from "@/components/Gallery";
 import ShowroomGridView from "@/components/trade/ShowroomGridView";
+import ProductImageSearch from "@/components/trade/ProductImageSearch";
 import { cn } from "@/lib/utils";
 
 interface DraftQuote {
