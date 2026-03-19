@@ -236,7 +236,7 @@ const TradePresentationViewer = () => {
                 className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 title="Copy link"
               >
-                {linkCopied ? <Check className="w-4 h-4 text-green-500" /> : <Link2 className="w-4 h-4" />}
+                {linkCopied ? <Check className="w-4 h-4 text-primary" /> : <Link2 className="w-4 h-4" />}
               </button>
               <button
                 onClick={() => setShowComments(!showComments)}
