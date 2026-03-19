@@ -35,11 +35,11 @@ const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
 
 // ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
 // competing for bandwidth with LCP-critical resources on mobile.
-const ExitIntentBanner = lazy(() => import("@/components/ExitIntentBanner"));
-const StickyBottomNav = lazy(() => import("@/components/StickyBottomNav"));
-const JournalTeaser = lazy(() => import("@/components/JournalTeaser"));
-const CompareFab = lazy(() => import("@/components/CompareFab"));
-const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
+const ExitIntentBanner = lazyRetry(() => import("@/components/ExitIntentBanner"));
+const StickyBottomNav = lazyRetry(() => import("@/components/StickyBottomNav"));
+const JournalTeaser = lazyRetry(() => import("@/components/JournalTeaser"));
+const CompareFab = lazyRetry(() => import("@/components/CompareFab"));
+const CompareDrawer = lazyRetry(() => import("@/components/CompareDrawer"));
 const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
 const ParallaxInterlude = lazy(() => import("@/components/ParallaxInterlude"));
 
