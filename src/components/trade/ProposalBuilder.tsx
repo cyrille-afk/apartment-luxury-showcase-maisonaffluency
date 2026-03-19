@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText, Lock, Unlock, CheckCircle2,
+  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText, Lock, Unlock, CheckCircle2, SplitSquareHorizontal,
 } from "lucide-react";
+import BeforeAfterSplit from "./BeforeAfterSplit";
 
 import {
   DropdownMenu,
@@ -84,6 +85,7 @@ export default function ProposalBuilder({
   const [refinementPrompt, setRefinementPrompt] = useState("");
   const [refining, setRefining] = useState(false);
   const [lockedIteration, setLockedIteration] = useState<number | null>(null);
+  const [compareMode, setCompareMode] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
   // External upload dialog state
@@ -881,6 +883,20 @@ export default function ProposalBuilder({
               {removeMode ? "Exit Remove" : "Remove Furniture"}
             </Button>
 
+            {/* Before/After compare */}
+            {proposalHistory.length > 1 && (
+              <Button
+                variant={compareMode ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCompareMode((c) => !c)}
+                className="gap-1.5"
+                title="Toggle before/after split view"
+              >
+                <SplitSquareHorizontal className="w-3.5 h-3.5" />
+                {compareMode ? "Exit Compare" : "Compare"}
+              </Button>
+            )}
+
             <div className="w-px h-5 bg-border mx-1" />
 
             {/* Transform controls */}
@@ -1012,6 +1028,18 @@ export default function ProposalBuilder({
           </div>
         )}
 
+        {compareMode && proposalHistory.length > 1 ? (
+          <div className="flex-1 overflow-hidden p-4 flex items-center justify-center">
+            <div className="max-w-[90vw] max-h-[80vh] w-full h-full">
+              <BeforeAfterSplit
+                beforeUrl={proposalHistory[proposalHistory.length - 2]}
+                afterUrl={proposalResult}
+                beforeLabel={`Iteration ${proposalHistory.length - 1}`}
+                afterLabel={`Iteration ${proposalHistory.length}`}
+              />
+            </div>
+          </div>
+        ) : (
         <div
           ref={imageContainerRef}
           className={`flex-1 overflow-hidden flex items-center justify-center select-none ${(moveMode || removeMode) ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
@@ -1035,7 +1063,6 @@ export default function ProposalBuilder({
               className="max-w-[90vw] max-h-[80vh] object-contain rounded-lg"
               draggable={false}
             />
-            {/* Floating collapse button on image */}
             {!moveMode && !removeMode && (
               <button
                 onClick={(e) => { e.stopPropagation(); setExpanded(false); resetTransform(); clearMarkers(); setMoveMode(false); setRemoveMode(false); }}
@@ -1045,10 +1072,8 @@ export default function ProposalBuilder({
                 <Minimize2 className="w-4 h-4 text-foreground" />
               </button>
             )}
-            {/* Render move markers over image */}
             {sourceMarker && renderMarker(sourceMarker, "source")}
             {targetMarker && renderMarker(targetMarker, "target")}
-            {/* Draw line between markers */}
             {sourceMarker && targetMarker && (
               <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
                 <defs>
@@ -1064,7 +1089,6 @@ export default function ProposalBuilder({
                 />
               </svg>
             )}
-            {/* Render remove markers */}
             {removeMarkers.map((rm, idx) => (
               <div
                 key={idx}
@@ -1081,6 +1105,7 @@ export default function ProposalBuilder({
             ))}
           </div>
         </div>
+        )}
         <div className="p-4 border-t border-border">
           <div className="max-w-2xl mx-auto flex gap-2">
             <Input
