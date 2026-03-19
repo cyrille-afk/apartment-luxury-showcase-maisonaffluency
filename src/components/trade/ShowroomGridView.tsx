@@ -439,11 +439,21 @@ const ShowroomGridView = ({
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const pinned = isPinned(product.product_name, product.id);
+            const isHighlighted = !!(highlightedId && product.trade_product_id === highlightedId);
             const price = product.trade_price_cents && product.currency
               ? { cents: product.trade_price_cents, currency: product.currency }
               : null;
             return (
-              <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
+              <div
+                key={product.id}
+                ref={isHighlighted ? highlightRef : undefined}
+                className={cn(
+                  "group border rounded-lg overflow-hidden transition-all",
+                  isHighlighted
+                    ? "border-primary ring-2 ring-primary/30 shadow-md"
+                    : "border-border hover:border-foreground/20"
+                )}
+              >
                 <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.product_image_url ? (
                     <img src={product.product_image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
