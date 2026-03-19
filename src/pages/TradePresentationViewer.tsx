@@ -140,7 +140,28 @@ const TradePresentationViewer = () => {
   const handleExportPdf = useCallback(async () => {
     if (!presentation || slides.length === 0) return;
     setExportingPdf(true);
+    toast.info("Preparing PDF export…");
     try {
+      // Convert all slide images to base64 to avoid CORS issues in @react-pdf/renderer
+      const slidesWithDataUrls = await Promise.all(
+        slides.map(async (slide) => {
+          try {
+            const res = await fetch(slide.image_url);
+            const blob = await res.blob();
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+            return { ...slide, image_url: dataUrl };
+          } catch {
+            // If fetch fails, keep original URL as fallback
+            return slide;
+          }
+        })
+      );
+
       const [{ pdf }, { default: PresentationPDF }] = await Promise.all([
         loadPdfRenderer(),
         loadPresentationPDF(),
@@ -151,7 +172,7 @@ const TradePresentationViewer = () => {
           clientName={presentation.client_name || undefined}
           projectName={presentation.project_name || undefined}
           createdAt={presentation.created_at || new Date().toISOString()}
-          slides={slides}
+          slides={slidesWithDataUrls}
         />
       ).toBlob();
       const url = URL.createObjectURL(blob);
@@ -160,8 +181,10 @@ const TradePresentationViewer = () => {
       a.download = `${(presentation.title || "Presentation").replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "-")}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
+      toast.success("PDF downloaded successfully");
     } catch (err) {
       console.error("PDF export failed:", err);
+      toast.error("PDF export failed. Please try again.");
     } finally {
       setExportingPdf(false);
     }
