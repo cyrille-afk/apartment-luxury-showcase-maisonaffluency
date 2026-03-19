@@ -62,9 +62,6 @@ const TradeLayout = () => {
 
   return (
     <SidebarProvider>
-      <Helmet>
-        <meta name="pinterest" content="nopin" />
-      </Helmet>
       <div className="min-h-screen flex w-full bg-background">
         <div data-trade-sidebar><TradeSidebar /></div>
         <div className="flex-1 flex flex-col min-w-0">
