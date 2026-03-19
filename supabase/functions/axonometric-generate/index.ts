@@ -133,6 +133,13 @@ Apply the requested changes while following these rules:
 - The result must look like a single cohesive professional architectural rendering
 
 Style: ${defaultStyle}.`;
+    } else if (mode === "apply_texture") {
+      const wallDescription = body.wallDescription || "the most prominent wall";
+      prompt = `You are given an interior architectural render AND a texture/wallpaper swatch image. Apply the provided texture/wallpaper to ${wallDescription} in the scene. The texture should be applied realistically — matching the wall's perspective, lighting, and scale. Tile or repeat the pattern naturally as a real wallpaper installation would look.
+
+CRITICAL: You MUST preserve EVERY other element in the scene EXACTLY as they are — all furniture, other walls, flooring, ceiling, decorations, lighting fixtures, plants, artwork, windows, rugs, and architectural details must remain completely unchanged and in their exact original positions. The output should be identical to the input except for the specified wall surface.
+
+Style: ${defaultStyle}. Produce a single cohesive professional architectural rendering as output.`;
     } else if (mode === "scene_edit") {
       const placementDesc = (placements || [])
         .map((p: any, i: number) => `${i + 1}. "${p.product_name}" by ${p.brand_name} at position (${p.position?.x_percent ?? 50}% from left, ${p.position?.y_percent ?? 50}% from top), size ${p.size_percent ?? 15}% of image width, rotated ${p.rotation_degrees ?? 0}°`)
@@ -151,7 +158,7 @@ Style: ${defaultStyle}.`;
         throw new Error("Scene edit requires either a mask (erase areas) or product placements");
       }
     } else {
-      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, product_swap, freeform, scene_edit, turntable_angle");
+      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, product_swap, freeform, apply_texture, scene_edit, turntable_angle");
     }
 
     // Build message content
@@ -182,6 +189,17 @@ Style: ${defaultStyle}.`;
         content.push({
           type: "image_url",
           image_url: { url: img },
+        });
+      }
+    }
+
+    // Add texture/wallpaper swatch image for apply_texture mode
+    if (mode === "apply_texture") {
+      const textureUrl = body.textureImageUrl;
+      if (textureUrl) {
+        content.push({
+          type: "image_url",
+          image_url: { url: textureUrl },
         });
       }
     }

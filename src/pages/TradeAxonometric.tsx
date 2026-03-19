@@ -223,6 +223,9 @@ const TradeAxonometric = () => {
   const [aiAttachedProduct, setAiAttachedProduct] = useState<SelectedProduct | null>(null);
   const [aiProductPickerOpen, setAiProductPickerOpen] = useState(false);
   const [aiProductSearch, setAiProductSearch] = useState("");
+  const [aiTextureUrl, setAiTextureUrl] = useState<string | null>(null);
+  const [aiTextureUploading, setAiTextureUploading] = useState(false);
+  const textureInputRef = useRef<HTMLInputElement>(null);
 
   // CSS filter state
   const [brightness, setBrightness] = useState(100);
@@ -547,6 +550,29 @@ const TradeAxonometric = () => {
   };
 
 
+  const handleTextureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast({ title: "Please upload an image file", variant: "destructive" }); return; }
+    setAiTextureUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const fileName = `textures/${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
+      const { error } = await supabase.storage.from("assets").upload(fileName, file, { contentType: file.type });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(fileName);
+      setAiTextureUrl(urlData.publicUrl);
+      setAiAttachedProduct(null);
+      setAiProductPickerOpen(false);
+      toast({ title: "Texture swatch attached" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setAiTextureUploading(false);
+      if (textureInputRef.current) textureInputRef.current.value = "";
+    }
+  };
+
   const sendAiPrompt = async () => {
     if (!aiPrompt.trim() || !result) return;
 
@@ -559,11 +585,13 @@ const TradeAxonometric = () => {
     const currentImageUrl = result.storedUrl || result.imageUrl;
     const userMsg = aiPrompt.trim();
     const attachedProduct = aiAttachedProduct;
-    const productLabel = attachedProduct ? ` [with: ${attachedProduct.product_name}]` : "";
+    const attachedTexture = aiTextureUrl;
+    const productLabel = attachedProduct ? ` [with: ${attachedProduct.product_name}]` : attachedTexture ? " [with texture swatch]" : "";
 
     setAiHistory((prev) => [...prev, { role: "user", text: userMsg + productLabel }]);
     setAiPrompt("");
     setAiAttachedProduct(null);
+    setAiTextureUrl(null);
     setAiProductPickerOpen(false);
     setAiSending(true);
 
@@ -584,7 +612,15 @@ const TradeAxonometric = () => {
         style,
       };
 
-      if (attachedProduct) {
+      if (attachedTexture) {
+        const textureUrl = normalizeForGateway(attachedTexture);
+        if (!textureUrl) {
+          throw new Error("Texture image is invalid. Please re-upload.");
+        }
+        body.mode = "apply_texture";
+        body.textureImageUrl = textureUrl;
+        body.wallDescription = userMsg;
+      } else if (attachedProduct) {
         const replacementUrl = normalizeForGateway(attachedProduct.image_url);
         if (!replacementUrl) {
           throw new Error("Selected product image is invalid. Please pick another product image.");
@@ -1223,6 +1259,22 @@ const TradeAxonometric = () => {
                     </div>
                   )}
 
+                  {/* Attached texture preview */}
+                  {aiTextureUrl && !aiAttachedProduct && (
+                    <div className="flex items-center gap-2 px-3 pt-2.5">
+                      <div className="flex items-center gap-2 bg-muted/40 rounded-md px-2.5 py-1.5 flex-1 min-w-0">
+                        <img src={aiTextureUrl} alt="Texture swatch" className="w-8 h-8 rounded border border-border object-cover shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-display text-[10px] text-foreground truncate">Texture / Wallpaper Swatch</p>
+                          <p className="font-body text-[9px] text-muted-foreground truncate">Describe which wall to apply it to</p>
+                        </div>
+                        <button onClick={() => setAiTextureUrl(null)} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Attached product preview */}
                   {aiAttachedProduct && (
                     <div className="flex items-center gap-2 px-3 pt-2.5">
@@ -1275,10 +1327,19 @@ const TradeAxonometric = () => {
                     </div>
                   )}
 
+                  {/* Hidden file input for texture upload */}
+                  <input
+                    ref={textureInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleTextureUpload}
+                  />
+
                   <div className="flex items-center gap-2 p-3">
                     <button
                       onClick={() => setAiProductPickerOpen(!aiProductPickerOpen)}
-                      disabled={aiSending}
+                      disabled={aiSending || !!aiTextureUrl}
                       className={`shrink-0 rounded-md border p-2 transition-colors disabled:opacity-50 ${
                         aiAttachedProduct || aiProductPickerOpen
                           ? "border-foreground bg-foreground text-background"
@@ -1288,12 +1349,24 @@ const TradeAxonometric = () => {
                     >
                       <ImagePlus className="w-3.5 h-3.5" />
                     </button>
+                    <button
+                      onClick={() => textureInputRef.current?.click()}
+                      disabled={aiSending || aiTextureUploading || !!aiAttachedProduct}
+                      className={`shrink-0 rounded-md border p-2 transition-colors disabled:opacity-50 ${
+                        aiTextureUrl
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                      }`}
+                      title="Upload a wallpaper / texture swatch"
+                    >
+                      {aiTextureUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Paintbrush className="w-3.5 h-3.5" />}
+                    </button>
                     <input
                       type="text"
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendAiPrompt(); } }}
-                      placeholder={aiAttachedProduct ? '"Replace the sofa with this product"' : '"Change the sofa to dark blue velvet"'}
+                      placeholder={aiTextureUrl ? '"Apply to the back wall" or "the wall behind the sofa"' : aiAttachedProduct ? '"Replace the sofa with this product"' : '"Change the sofa to dark blue velvet"'}
                       disabled={aiSending}
                       className="flex-1 border border-border rounded-md px-3 py-2 font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 disabled:opacity-50"
                     />
