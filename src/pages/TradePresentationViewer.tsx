@@ -153,20 +153,45 @@ const TradePresentationViewer = () => {
       // Convert all slide images to base64 to avoid CORS issues in @react-pdf/renderer
       const slidesWithDataUrls = await Promise.all(
         slides.map(async (slide) => {
+          // Convert main image to base64
+          let image_url = slide.image_url;
           try {
             const res = await fetch(slide.image_url);
             const blob = await res.blob();
-            const dataUrl = await new Promise<string>((resolve, reject) => {
+            image_url = await new Promise<string>((resolve, reject) => {
               const reader = new FileReader();
               reader.onloadend = () => resolve(reader.result as string);
               reader.onerror = reject;
               reader.readAsDataURL(blob);
             });
-            return { ...slide, image_url: dataUrl };
           } catch {
-            // If fetch fails, keep original URL as fallback
-            return slide;
+            // keep original URL as fallback
           }
+
+          // Convert product images inside linked_product_ids to base64
+          let linked_product_ids = slide.linked_product_ids;
+          if (linked_product_ids && Array.isArray(linked_product_ids)) {
+            linked_product_ids = await Promise.all(
+              linked_product_ids.map(async (p: any) => {
+                if (!p.image_url) return p;
+                try {
+                  const res = await fetch(p.image_url);
+                  const blob = await res.blob();
+                  const dataUrl = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                  });
+                  return { ...p, image_url: dataUrl };
+                } catch {
+                  return p;
+                }
+              })
+            );
+          }
+
+          return { ...slide, image_url, linked_product_ids };
         })
       );
 
