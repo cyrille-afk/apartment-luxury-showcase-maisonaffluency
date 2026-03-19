@@ -1028,6 +1028,18 @@ export default function ProposalBuilder({
           </div>
         )}
 
+        {compareMode && proposalHistory.length > 1 ? (
+          <div className="flex-1 overflow-hidden p-4 flex items-center justify-center">
+            <div className="max-w-[90vw] max-h-[80vh] w-full h-full">
+              <BeforeAfterSplit
+                beforeUrl={proposalHistory[proposalHistory.length - 2]}
+                afterUrl={proposalResult}
+                beforeLabel={`Iteration ${proposalHistory.length - 1}`}
+                afterLabel={`Iteration ${proposalHistory.length}`}
+              />
+            </div>
+          </div>
+        ) : (
         <div
           ref={imageContainerRef}
           className={`flex-1 overflow-hidden flex items-center justify-center select-none ${(moveMode || removeMode) ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
@@ -1051,7 +1063,6 @@ export default function ProposalBuilder({
               className="max-w-[90vw] max-h-[80vh] object-contain rounded-lg"
               draggable={false}
             />
-            {/* Floating collapse button on image */}
             {!moveMode && !removeMode && (
               <button
                 onClick={(e) => { e.stopPropagation(); setExpanded(false); resetTransform(); clearMarkers(); setMoveMode(false); setRemoveMode(false); }}
@@ -1061,10 +1072,8 @@ export default function ProposalBuilder({
                 <Minimize2 className="w-4 h-4 text-foreground" />
               </button>
             )}
-            {/* Render move markers over image */}
             {sourceMarker && renderMarker(sourceMarker, "source")}
             {targetMarker && renderMarker(targetMarker, "target")}
-            {/* Draw line between markers */}
             {sourceMarker && targetMarker && (
               <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
                 <defs>
@@ -1080,7 +1089,6 @@ export default function ProposalBuilder({
                 />
               </svg>
             )}
-            {/* Render remove markers */}
             {removeMarkers.map((rm, idx) => (
               <div
                 key={idx}
@@ -1097,6 +1105,7 @@ export default function ProposalBuilder({
             ))}
           </div>
         </div>
+        )}
         <div className="p-4 border-t border-border">
           <div className="max-w-2xl mx-auto flex gap-2">
             <Input
