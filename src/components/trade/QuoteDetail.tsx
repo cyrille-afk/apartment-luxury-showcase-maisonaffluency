@@ -64,6 +64,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [tradeDiscount, setTradeDiscount] = useState(false);
+  const [gstEnabled, setGstEnabled] = useState(true);
+  const [gstRate, setGstRate] = useState(9);
+  const [editingGstRate, setEditingGstRate] = useState(false);
   const [payingStripe, setPayingStripe] = useState(false);
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
