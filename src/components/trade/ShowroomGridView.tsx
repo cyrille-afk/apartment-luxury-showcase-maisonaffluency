@@ -195,18 +195,22 @@ const ShowroomGridView = ({
 
         const { data: pricedProducts } = await supabase
           .from("trade_products")
-          .select("product_name, trade_price_cents, rrp_price_cents, currency");
+          .select("id, product_name, trade_price_cents, rrp_price_cents, currency");
 
         const priceLookup = new Map<string, PriceMatch>();
         const priceEntries: PriceMatch[] = [];
+        const dbIdLookup = new Map<string, string>();
         if (pricedProducts) {
           for (const pp of pricedProducts) {
+            const ppKey = pp.product_name.trim().toLowerCase();
+            dbIdLookup.set(ppKey, pp.id);
+            const normalizedName = normalizeProductName(pp.product_name);
+            if (normalizedName) dbIdLookup.set(normalizedName, pp.id);
             const cents = pp.trade_price_cents ?? pp.rrp_price_cents;
             if (!cents) continue;
             const entry: PriceMatch = { name: pp.product_name, cents, currency: pp.currency };
             priceEntries.push(entry);
-            priceLookup.set(pp.product_name.trim().toLowerCase(), entry);
-            const normalizedName = normalizeProductName(pp.product_name);
+            priceLookup.set(ppKey, entry);
             if (normalizedName) priceLookup.set(normalizedName, entry);
           }
         }
