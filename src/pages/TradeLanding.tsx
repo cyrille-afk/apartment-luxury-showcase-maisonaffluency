@@ -776,7 +776,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
               <button
-                onClick={scrollToForm}
+                onClick={() => { setMobileFormExpanded(false); setMobileEmail(""); scrollToForm(); }}
                 className="inline-flex items-center px-8 py-3 bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[160px] justify-center"
               >
                 Apply Now
