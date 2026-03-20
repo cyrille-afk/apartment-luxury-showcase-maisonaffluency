@@ -322,20 +322,21 @@ const TradeLanding = () => {
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                       className="overflow-hidden"
                     >
-                      <div className="pb-5">
-                        <div className="w-full aspect-[4/3] rounded-sm overflow-hidden mb-4">
-                          <img
-                            src={benefit.image}
-                            alt={benefit.title}
-                            className="w-full h-full object-cover object-bottom"
-                            loading="lazy"
-                            decoding="async"
-                            data-pin-nopin="true"
-                          />
-                        </div>
-                        <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify">
-                          {benefit.description}
-                        </p>
+                        <div className="pb-5">
+                          <p className="font-body text-[9px] tracking-[0.2em] uppercase text-primary mb-3">Trade Program Benefits</p>
+                          <div className="w-full aspect-[4/3] rounded-sm overflow-hidden mb-4">
+                            <img
+                              src={benefit.image}
+                              alt={benefit.title}
+                              className="w-full h-full object-cover object-bottom"
+                              loading="lazy"
+                              decoding="async"
+                              data-pin-nopin="true"
+                            />
+                          </div>
+                          <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify">
+                            {benefit.description}
+                          </p>
                       </div>
                     </motion.div>
                   )}
@@ -371,6 +372,7 @@ const TradeLanding = () => {
                   transition={{ duration: 0.8 }}
                   className="w-1/2 flex flex-col justify-center items-center text-center px-10 lg:px-16 py-12"
                 >
+                  <p className="font-body text-[10px] tracking-[0.2em] uppercase text-primary mb-4">Trade Program Benefits</p>
                   <h2 className="font-display text-xl lg:text-2xl text-foreground mb-4">
                     {benefit.title}
                   </h2>
