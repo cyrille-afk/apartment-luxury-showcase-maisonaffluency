@@ -62,6 +62,12 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
     message: "",
   });
 
+  useEffect(() => {
+    if (prefillEmail && !form.email) {
+      setForm((prev) => ({ ...prev, email: prefillEmail }));
+    }
+  }, [prefillEmail]);
+
   const update = (field: string, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
