@@ -151,9 +151,9 @@ const TradeBoards = () => {
           </div>
         ) : boards.length === 0 ? (
           <div className="text-center py-20">
-            <p className="font-body text-sm text-muted-foreground mb-4">No client boards yet</p>
+            <p className="font-body text-sm text-muted-foreground mb-4">No project folders yet</p>
             <Button variant="outline" onClick={() => setCreateOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" /> Create Your First Board
+              <Plus className="h-4 w-4" /> Create Your First Folder
             </Button>
           </div>
         ) : (
