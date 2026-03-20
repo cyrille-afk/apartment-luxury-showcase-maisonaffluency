@@ -516,7 +516,7 @@ const TradeLanding = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
               <button
                 onClick={scrollToForm}
-                className="inline-flex items-center px-8 py-3 bg-background hover:bg-background/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 min-w-[160px] justify-center"
+                className="inline-flex items-center px-8 py-3 bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[160px] justify-center"
               >
                 Apply Now
               </button>
