@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, Layers, Clock, Calendar, Briefcase } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, Layers, Clock, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
@@ -21,6 +21,7 @@ interface Product {
   dimensions: string | null;
   lead_time: string | null;
   is_active: boolean;
+  isInShowroom?: boolean;
 }
 
 const SITE_URL = "https://maisonaffluency.com";
@@ -34,7 +35,7 @@ const ProductPage = () => {
 
   useEffect(() => {
     if (!id) return;
-    const fetch = async () => {
+    const fetchProduct = async () => {
       const { data, error } = await supabase
         .from("trade_products")
         .select("id, product_name, brand_name, category, subcategory, description, image_url, gallery_images, materials, dimensions, lead_time, is_active")
@@ -44,11 +45,16 @@ const ProductPage = () => {
       if (error || !data) {
         setNotFound(true);
       } else {
-        setProduct(data as Product);
+        // Check if product appears in showroom gallery hotspots
+        const { count } = await supabase
+          .from("gallery_hotspots")
+          .select("id", { count: "exact", head: true })
+          .ilike("product_name", data.product_name);
+        setProduct({ ...(data as Product), isInShowroom: (count ?? 0) > 0 });
       }
       setLoading(false);
     };
-    fetch();
+    fetchProduct();
   }, [id]);
 
   if (loading) {
@@ -119,7 +125,7 @@ const ProductPage = () => {
     ],
   };
 
-  const bookingMailto = `mailto:concierge@myaffluency.com?subject=${encodeURIComponent(`Viewing Request: ${product.product_name} by ${product.brand_name}`)}&body=${encodeURIComponent(`Hi,\n\nI'd like to book a private viewing to see the ${product.product_name} by ${product.brand_name} at your showroom.\n\nPlease let me know your available times.\n\nThank you.`)}`;
+  const enquiryMailto = `mailto:concierge@myaffluency.com?subject=${encodeURIComponent(`Enquiry: ${product.product_name} by ${product.brand_name}`)}&body=${encodeURIComponent(`Hi,\n\nI'm interested in the ${product.product_name} by ${product.brand_name}.\n\nCould you please provide more information?\n\nThank you.`)}`;
 
   return (
     <>
@@ -144,8 +150,8 @@ const ProductPage = () => {
             <Link to="/" className="flex items-center gap-2">
               <span className="font-display text-sm text-foreground tracking-wide">Maison Affluency</span>
             </Link>
-            <a href={bookingMailto} className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
-              <Calendar className="h-3 w-3" /> Book a Viewing
+            <a href={enquiryMailto} className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
+              <Mail className="h-3 w-3" /> Enquire
             </a>
           </div>
         </header>
@@ -262,19 +268,16 @@ const ProductPage = () => {
 
               {/* CTA */}
               <div className="mt-8 space-y-3">
-                <p className="font-body text-xs text-muted-foreground">
-                  Visit our Singapore showroom to experience this piece in person
-                </p>
+                {product.isInShowroom && (
+                  <p className="font-body text-xs text-muted-foreground">
+                    Visit our Singapore showroom to experience this piece in person
+                  </p>
+                )}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button asChild className="flex-1">
-                    <a href={bookingMailto}>
-                      <Calendar className="h-4 w-4 mr-2" /> Book a Viewing
+                    <a href={enquiryMailto}>
+                      <Mail className="h-4 w-4 mr-2" /> Enquire About This Piece
                     </a>
-                  </Button>
-                  <Button variant="outline" asChild className="flex-1">
-                    <Link to="/trade/program">
-                      <Briefcase className="h-4 w-4 mr-2" /> Trade Program
-                    </Link>
                   </Button>
                 </div>
                 <WhatsAppShareButton
