@@ -831,7 +831,6 @@ const TradeAxonometric = () => {
                     <p className="font-body text-xs text-muted-foreground">
                       {userName}{profile?.company ? ` · ${profile.company}` : ""} · {req.request_type === "3d_model" ? "3D Model" : req.request_type} · {format(new Date(req.created_at), "d MMM yyyy")}
                     </p>
-                    </p>
                     {req.notes && <p className="font-body text-xs text-muted-foreground/70 line-clamp-1 mt-0.5">{req.notes}</p>}
                   </div>
                   <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${req.status === "in_progress" ? "bg-blue-500/10 text-blue-700" : "bg-yellow-500/10 text-yellow-700"}`}>
