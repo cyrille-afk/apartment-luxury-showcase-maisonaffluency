@@ -43,6 +43,7 @@ interface ShowroomGridViewProps {
   onDrawerRefreshKeyChange: (fn: (k: number) => number) => void;
   onDrawerOpen: () => void;
   highlightProductId?: string | null;
+  initialDesigner?: string | null;
 }
 
 // Room → section mapping
