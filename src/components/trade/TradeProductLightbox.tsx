@@ -3,8 +3,9 @@ import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Packag
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAllTradeProducts } from "@/lib/tradeProducts";
 
 export interface TradeProductLightboxItem {
   id: string;
@@ -27,16 +28,34 @@ interface TradeProductLightboxProps {
   onAddToQuote: (product: TradeProductLightboxItem) => void;
   isAdding?: boolean;
   isAdded?: boolean;
+  onSelectRelated?: (product: TradeProductLightboxItem) => void;
 }
 
-const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdded }: TradeProductLightboxProps) => {
+const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdded, onSelectRelated }: TradeProductLightboxProps) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const [showHoverImage, setShowHoverImage] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setShowHoverImage(false);
-  }, [product?.id]);
+  // Related products from same brand
+  const relatedProducts = useMemo(() => {
+    if (!product) return [];
+    const all = getAllTradeProducts();
+    return all
+      .filter(p => p.brand_name === product.brand_name && p.id !== product.id && p.image_url)
+      .slice(0, 4)
+      .map(p => ({
+        id: p.id,
+        product_name: p.product_name,
+        subtitle: p.subtitle,
+        image_url: p.image_url,
+        hover_image_url: p.hover_image_url,
+        brand_name: p.brand_name,
+        materials: p.materials,
+        dimensions: p.dimensions,
+        category: p.category,
+        subcategory: p.subcategory,
+      } as TradeProductLightboxItem));
+  }, [product?.id, product?.brand_name]);
 
   if (!product) return null;
 
@@ -231,6 +250,36 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 <Package size={14} />
                 Request Sample
               </button>
+
+              {/* More from this brand */}
+              {relatedProducts.length > 0 && (
+                <div className="pt-4 border-t border-border">
+                  <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-3">
+                    More from {designerDisplay}
+                  </p>
+                  <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                    {relatedProducts.map(rp => (
+                      <button
+                        key={rp.id}
+                        onClick={() => onSelectRelated?.(rp)}
+                        className="shrink-0 w-20 group"
+                      >
+                        <div className="aspect-square rounded-md overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors">
+                          <img
+                            src={rp.image_url!}
+                            alt={rp.product_name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                        <p className="font-body text-[9px] text-muted-foreground mt-1 truncate group-hover:text-foreground transition-colors">
+                          {rp.product_name}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>

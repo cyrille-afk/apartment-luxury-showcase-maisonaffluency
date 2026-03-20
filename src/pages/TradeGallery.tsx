@@ -547,6 +547,7 @@ const TradeGallery = () => {
         onAddToQuote={handleLightboxAddToQuote}
         isAdding={!!addingProductId}
         isAdded={lightboxProduct ? addedProductIds.has(lightboxProduct.id) : false}
+        onSelectRelated={(rp) => setLightboxProduct(rp)}
       />
     </>
   );
