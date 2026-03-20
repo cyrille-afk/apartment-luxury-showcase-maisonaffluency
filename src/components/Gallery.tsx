@@ -293,6 +293,22 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     return () => clearTimeout(timer);
   }, [hintVisible]);
 
+  // ── Hotspot piece counts per image ──
+  const [hotspotCounts, setHotspotCounts] = useState<Record<string, number>>({});
+  useEffect(() => {
+    const fetchCounts = async () => {
+      const { data } = await supabase.from("gallery_hotspots").select("image_identifier");
+      if (data) {
+        const counts: Record<string, number> = {};
+        for (const row of data) {
+          counts[row.image_identifier] = (counts[row.image_identifier] || 0) + 1;
+        }
+        setHotspotCounts(counts);
+      }
+    };
+    fetchCounts();
+  }, []);
+
   // Embla carousel for mobile lightbox
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, startIndex: currentItemIndex });
 
