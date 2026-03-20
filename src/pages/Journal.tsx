@@ -121,18 +121,29 @@ const Journal = () => {
           </div>
         </div>
 
-        {/* Articles grid */}
+        {/* Articles */}
         <div className="max-w-6xl mx-auto px-6 pb-20">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="aspect-[4/3] bg-muted rounded-sm mb-4" />
-                  <div className="h-3 bg-muted rounded w-1/3 mb-3" />
-                  <div className="h-5 bg-muted rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-muted rounded w-full" />
+            <div className="space-y-12">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-6 animate-pulse">
+                <div className="md:col-span-3">
+                  <div className="aspect-[16/10] bg-muted rounded-sm mb-4" />
+                  <div className="h-3 bg-muted rounded w-1/4 mb-3" />
+                  <div className="h-6 bg-muted rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-muted rounded w-full" />
                 </div>
-              ))}
+                <div className="md:col-span-2 flex flex-col gap-6">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="flex gap-4">
+                      <div className="w-28 h-20 bg-muted rounded-sm shrink-0" />
+                      <div className="flex-1">
+                        <div className="h-3 bg-muted rounded w-1/3 mb-2" />
+                        <div className="h-4 bg-muted rounded w-full" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-20">
@@ -142,20 +153,21 @@ const Journal = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-              {filtered.map((article, i) => (
+            <div className="space-y-16">
+              {/* Hero — first article */}
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
                 <motion.article
-                  key={article.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.08 }}
+                  className="md:col-span-3"
+                  initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <Link to={`/journal/${article.slug}`} className="group block">
-                    {article.cover_image_url && (
-                      <div className="aspect-[4/3] overflow-hidden rounded-sm mb-4">
+                  <Link to={`/journal/${filtered[0].slug}`} className="group block">
+                    {filtered[0].cover_image_url && (
+                      <div className="aspect-[16/10] overflow-hidden rounded-sm mb-4">
                         <img
-                          src={article.cover_image_url}
-                          alt={article.title}
+                          src={filtered[0].cover_image_url}
+                          alt={filtered[0].title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           loading="lazy"
                         />
@@ -163,28 +175,118 @@ const Journal = () => {
                     )}
                     <div className="flex items-center gap-3 mb-2">
                       <span className="font-body text-[10px] uppercase tracking-[0.15em] text-primary">
-                        {CATEGORY_LABELS[article.category]}
+                        {CATEGORY_LABELS[filtered[0].category]}
                       </span>
-                      {article.read_time_minutes && (
+                      {filtered[0].read_time_minutes && (
                         <span className="font-body text-[10px] text-muted-foreground">
-                          {article.read_time_minutes} min read
+                          {filtered[0].read_time_minutes} min read
                         </span>
                       )}
                     </div>
-                    <h2 className="font-display text-lg md:text-xl text-foreground group-hover:text-primary transition-colors mb-2 leading-snug">
-                      {article.title}
+                    <h2 className="font-display text-xl md:text-2xl text-foreground group-hover:text-primary transition-colors mb-2 leading-snug">
+                      {filtered[0].title}
                     </h2>
-                    <p className="font-body text-sm text-muted-foreground line-clamp-2">
-                      {article.excerpt}
+                    <p className="font-body text-sm text-muted-foreground line-clamp-3 max-w-lg">
+                      {filtered[0].excerpt}
                     </p>
                     <div className="flex items-center gap-2 mt-3">
-                      <span className="font-body text-[10px] text-muted-foreground">{article.author}</span>
+                      <span className="font-body text-[10px] text-muted-foreground">{filtered[0].author}</span>
                       <span className="text-border">·</span>
-                      <span className="font-body text-[10px] text-muted-foreground">{formatDate(article.published_at)}</span>
+                      <span className="font-body text-[10px] text-muted-foreground">{formatDate(filtered[0].published_at)}</span>
                     </div>
                   </Link>
                 </motion.article>
-              ))}
+
+                {/* Side stack — articles 2 & 3 */}
+                {filtered.length > 1 && (
+                  <div className="md:col-span-2 flex flex-col gap-6">
+                    {filtered.slice(1, 3).map((article, i) => (
+                      <motion.article
+                        key={article.id}
+                        initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        transition={{ duration: 0.5, delay: 0.15 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                      >
+                        <Link to={`/journal/${article.slug}`} className="group flex gap-4">
+                          {article.cover_image_url && (
+                            <div className="w-28 md:w-36 aspect-[4/3] overflow-hidden rounded-sm shrink-0">
+                              <img
+                                src={article.cover_image_url}
+                                alt={article.title}
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <span className="font-body text-[10px] uppercase tracking-[0.15em] text-primary">
+                              {CATEGORY_LABELS[article.category]}
+                            </span>
+                            <h3 className="font-display text-sm md:text-base text-foreground group-hover:text-primary transition-colors mt-1 mb-1 leading-snug line-clamp-2">
+                              {article.title}
+                            </h3>
+                            <p className="font-body text-xs text-muted-foreground line-clamp-2 hidden md:block">
+                              {article.excerpt}
+                            </p>
+                            <span className="font-body text-[10px] text-muted-foreground mt-1.5 block">
+                              {formatDate(article.published_at)}
+                            </span>
+                          </div>
+                        </Link>
+                      </motion.article>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Remaining articles — standard grid */}
+              {filtered.length > 3 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                  {filtered.slice(3).map((article, i) => (
+                    <motion.article
+                      key={article.id}
+                      initial={{ opacity: 0, y: 24, filter: "blur(4px)" }}
+                      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{ duration: 0.5, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <Link to={`/journal/${article.slug}`} className="group block">
+                        {article.cover_image_url && (
+                          <div className="aspect-[4/3] overflow-hidden rounded-sm mb-4">
+                            <img
+                              src={article.cover_image_url}
+                              alt={article.title}
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="font-body text-[10px] uppercase tracking-[0.15em] text-primary">
+                            {CATEGORY_LABELS[article.category]}
+                          </span>
+                          {article.read_time_minutes && (
+                            <span className="font-body text-[10px] text-muted-foreground">
+                              {article.read_time_minutes} min read
+                            </span>
+                          )}
+                        </div>
+                        <h2 className="font-display text-lg md:text-xl text-foreground group-hover:text-primary transition-colors mb-2 leading-snug">
+                          {article.title}
+                        </h2>
+                        <p className="font-body text-sm text-muted-foreground line-clamp-2">
+                          {article.excerpt}
+                        </p>
+                        <div className="flex items-center gap-2 mt-3">
+                          <span className="font-body text-[10px] text-muted-foreground">{article.author}</span>
+                          <span className="text-border">·</span>
+                          <span className="font-body text-[10px] text-muted-foreground">{formatDate(article.published_at)}</span>
+                        </div>
+                      </Link>
+                    </motion.article>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
