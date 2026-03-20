@@ -1,13 +1,19 @@
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { motion } from "framer-motion";
+import { motion, type Transition } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote } from "lucide-react";
 import { getDesignerBySlug } from "@/lib/designerProfiles";
-import { formatDesignerName } from "@/lib/nameFormat";
-import { cloudinaryUrl } from "@/lib/cloudinary";
-import { cn } from "@/lib/utils";
 
-const ease = [0.16, 1, 0.3, 1];
+const transition: Transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] };
+const reveal: Transition = { ...transition, delay: 0.15 };
+
+function displayName(name: string): string {
+  if (name.includes(" - ")) {
+    const [brand, ...rest] = name.split(" - ");
+    return `${brand.trim()} — ${rest.join(" - ").trim()}`;
+  }
+  return name;
+}
 
 const DesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -28,16 +34,13 @@ const DesignerProfile = () => {
 
   const instagramLink = designer.links.find((l) => l.type === "Instagram")?.url;
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
-  const displayName = formatDesignerName(designer.name);
+  const name = displayName(designer.name);
 
   return (
     <>
       <Helmet>
-        <title>{displayName} — Maison Affluency</title>
-        <meta
-          name="description"
-          content={designer.biography.slice(0, 155)}
-        />
+        <title>{name} — Maison Affluency</title>
+        <meta name="description" content={designer.biography.slice(0, 155)} />
       </Helmet>
 
       <div className="min-h-screen bg-background text-foreground">
@@ -45,7 +48,7 @@ const DesignerProfile = () => {
         <motion.div
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease }}
+          transition={transition}
           className="fixed top-6 left-6 z-50"
         >
           <Link
@@ -60,47 +63,44 @@ const DesignerProfile = () => {
         {/* ── Hero: portrait + intro ───────────────────────────── */}
         <section className="relative">
           <div className="grid lg:grid-cols-2 min-h-[85vh]">
-            {/* Portrait */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, ease }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="relative overflow-hidden bg-muted"
             >
               <img
                 src={designer.image}
-                alt={displayName}
+                alt={name}
                 className="w-full h-full object-cover"
                 loading="eager"
               />
               {designer.logoUrl && (
                 <img
                   src={designer.logoUrl}
-                  alt={`${displayName} logo`}
+                  alt={`${name} logo`}
                   className="absolute bottom-6 left-6 h-8 w-auto opacity-70"
                 />
               )}
             </motion.div>
 
-            {/* Bio panel */}
             <div className="flex flex-col justify-center px-8 lg:px-16 py-16 lg:py-24">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.15, ease }}
+                transition={reveal}
                 className="max-w-lg"
               >
                 <p className="text-xs tracking-[0.25em] uppercase text-muted-foreground mb-4">
                   {designer.specialty}
                 </p>
                 <h1 className="text-4xl lg:text-5xl font-light leading-[1.1] mb-8 tracking-tight">
-                  {displayName}
+                  {name}
                 </h1>
                 <p className="text-base leading-relaxed text-muted-foreground mb-8 max-w-prose">
                   {designer.biography}
                 </p>
 
-                {/* Social links */}
                 <div className="flex items-center gap-4">
                   {instagramLink && (
                     <a
@@ -136,16 +136,16 @@ const DesignerProfile = () => {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6, ease }}
+            transition={transition}
             className="py-24 lg:py-32 px-8 lg:px-16 bg-card"
           >
             <div className="max-w-3xl mx-auto text-center">
               <Quote className="w-6 h-6 text-accent mx-auto mb-6 opacity-60" />
               <blockquote className="text-xl lg:text-2xl font-light leading-relaxed italic text-card-foreground">
-                "{designer.philosophy}"
+                &ldquo;{designer.philosophy}&rdquo;
               </blockquote>
               <p className="mt-6 text-sm text-muted-foreground tracking-wide">
-                — {displayName}
+                — {name}
               </p>
             </div>
           </motion.section>
@@ -157,7 +157,7 @@ const DesignerProfile = () => {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6, ease }}
+            transition={transition}
             className="py-20 px-8 lg:px-16"
           >
             <div className="max-w-4xl mx-auto">
@@ -171,7 +171,7 @@ const DesignerProfile = () => {
           </motion.section>
         )}
 
-        {/* ── Pieces / Curator Picks ──────────────────────────── */}
+        {/* ── Selected Pieces ─────────────────────────────────── */}
         {designer.curatorPicks.length > 0 && (
           <section className="py-20 lg:py-28 px-8 lg:px-16 bg-card">
             <div className="max-w-7xl mx-auto">
@@ -179,7 +179,7 @@ const DesignerProfile = () => {
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, ease }}
+                transition={transition}
                 className="text-xs tracking-[0.25em] uppercase text-muted-foreground mb-12"
               >
                 Selected Pieces
@@ -195,7 +195,7 @@ const DesignerProfile = () => {
                     transition={{
                       duration: 0.6,
                       delay: Math.min(idx * 0.08, 0.4),
-                      ease,
+                      ease: [0.16, 1, 0.3, 1] as any,
                     }}
                     className="group"
                   >
@@ -239,14 +239,14 @@ const DesignerProfile = () => {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, ease }}
+          transition={transition}
           className="py-20 px-8 lg:px-16 text-center"
         >
           <p className="text-muted-foreground text-sm mb-4">
-            Interested in {displayName}?
+            Interested in {name}?
           </p>
           <a
-            href={`https://wa.me/6591393850?text=${encodeURIComponent(`Hi, I'd like to enquire about pieces by ${displayName}`)}`}
+            href={`https://wa.me/6591393850?text=${encodeURIComponent(`Hi, I'd like to enquire about pieces by ${name}`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 text-sm tracking-wide hover:opacity-90 transition-opacity active:scale-[0.97]"
