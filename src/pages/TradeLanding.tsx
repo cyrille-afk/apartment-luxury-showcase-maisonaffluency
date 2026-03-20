@@ -425,7 +425,7 @@ const TradeLanding = () => {
               transition={{ duration: 0.7 }}
               className="text-center mb-12 md:mb-16"
             >
-              <p className="font-body text-xs tracking-[0.25em] uppercase text-accent mb-6">Exclusive Tool</p>
+              <p className="font-body text-sm md:text-base tracking-[0.3em] uppercase text-[hsl(var(--gold))] mb-6 font-bold drop-shadow-[0_0_12px_hsl(var(--gold)/0.5)]">Exclusive Tool</p>
               <h2 className="font-display text-2xl md:text-4xl lg:text-5xl text-background mb-5">
                 From Floor Plan to Furnished
               </h2>
