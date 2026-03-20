@@ -102,6 +102,13 @@ const testimonials = [
 
 const TradeLanding = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
+  const prefillEmail = searchParams.get("email") || "";
+
+  const scrollToForm = () => {
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const toggleAccordion = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
