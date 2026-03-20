@@ -270,10 +270,18 @@ All colors MUST be HSL.
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: hsl(var(--muted-foreground));
-  margin-top: 4rem;
-  margin-bottom: 2rem;
-  padding-top: 3rem;
+  margin-top: 2rem;
+  margin-bottom: 1.25rem;
+  padding-top: 1.5rem;
   border-top: 1px solid hsl(var(--border));
+}
+
+@media (min-width: 768px) {
+  .journal-article h2 {
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+    padding-top: 3rem;
+  }
 }
 
 .journal-article h2:first-child {
@@ -284,13 +292,21 @@ All colors MUST be HSL.
 
 .journal-article blockquote {
   border-left: 3px solid hsl(var(--primary));
-  margin: 3rem 0;
-  padding: 1.5rem 0 1.5rem 2rem;
+  margin: 1.5rem 0;
+  padding: 1rem 0 1rem 1.25rem;
   font-family: var(--font-display, Georgia, serif);
   font-style: italic;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   line-height: 1.6;
   color: hsl(var(--foreground) / 0.65);
+}
+
+@media (min-width: 768px) {
+  .journal-article blockquote {
+    margin: 3rem 0;
+    padding: 1.5rem 0 1.5rem 2rem;
+    font-size: 1.25rem;
+  }
 }
 
 .journal-article blockquote p {
@@ -298,14 +314,27 @@ All colors MUST be HSL.
 }
 
 .journal-article figure {
-  margin: 3.5rem 0;
+  margin: 2rem 0;
+}
+
+@media (min-width: 768px) {
+  .journal-article figure {
+    margin: 3.5rem 0;
+  }
 }
 
 .journal-article p strong {
   display: block;
   font-weight: 600;
   color: hsl(var(--foreground));
-  margin-top: 2.5rem;
-  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
   line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  .journal-article p strong {
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
 }
