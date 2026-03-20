@@ -440,7 +440,7 @@ const TradeLanding = () => {
                 transition={{ duration: 0.7, delay: 0.1 }}
                 className="relative"
               >
-                <p className="font-body text-[10px] tracking-[0.2em] uppercase text-accent mb-3">Your Drawing</p>
+                <p className="font-body text-[10px] tracking-[0.2em] uppercase text-background mb-3">Your Drawing</p>
                 <div className="aspect-[4/3] rounded-sm overflow-hidden border border-background/10">
                   <img
                     src={studioBeforeImg}
