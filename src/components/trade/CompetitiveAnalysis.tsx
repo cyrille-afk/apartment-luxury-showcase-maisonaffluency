@@ -924,6 +924,7 @@ export default function CompetitiveAnalysis() {
           <p className="font-body text-[11px] text-muted-foreground">
             Recent auction results from Phillips, Christie's, Piasa & Sotheby's
           </p>
+          <AuctionTrendCharts auctions={auctions} />
           <div className="space-y-2">
             {auctions.slice(0, 15).map((lot) => (
               <div key={lot.id} className="flex items-center justify-between py-2 border-b border-border last:border-0 gap-4">
