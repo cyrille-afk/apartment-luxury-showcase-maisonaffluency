@@ -785,9 +785,17 @@ const TradeAxonometric = () => {
               )}
             </Button>
             <Button
+              variant={show3dSubmit ? "default" : "outline"}
+              size="sm"
+              onClick={() => { setShow3dSubmit(!show3dSubmit); if (!show3dSubmit) { setShowQueue(false); setShowDrafts(false); } }}
+            >
+              <Upload className="w-3.5 h-3.5 mr-1.5" />
+              Submit 3D Model
+            </Button>
+            <Button
               variant={showQueue ? "default" : "outline"}
               size="sm"
-              onClick={() => { setShowQueue(!showQueue); if (!showQueue) setShowDrafts(false); }}
+              onClick={() => { setShowQueue(!showQueue); if (!showQueue) { setShowDrafts(false); setShow3dSubmit(false); } }}
             >
               <Inbox className="w-3.5 h-3.5 mr-1.5" />
               Queue
