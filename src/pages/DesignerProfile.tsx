@@ -2,7 +2,8 @@ import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, type Transition } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote } from "lucide-react";
-import { getDesignerBySlug } from "@/lib/designerProfiles";
+import { getDesignerBySlug, getRelatedDesigners } from "@/lib/designerProfiles";
+import { useMemo } from "react";
 
 const transition: Transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] };
 const reveal: Transition = { ...transition, delay: 0.15 };
