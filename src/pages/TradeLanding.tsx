@@ -469,7 +469,7 @@ const TradeLanding = () => {
 
         {/* ─── FAQ + Registration Side by Side ─── */}
         <div ref={formRef} id="apply" className="w-full border-y border-border bg-muted/10">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 py-14 md:py-20 flex flex-col lg:flex-row lg:items-stretch gap-0">
+          <div className="max-w-7xl mx-auto px-6 md:px-12 py-14 md:py-20 flex flex-col lg:flex-row lg:items-stretch gap-10 lg:gap-16">
             
             {/* Left — FAQ */}
             <div className="flex-1 lg:pr-12">
@@ -480,7 +480,7 @@ const TradeLanding = () => {
                 transition={{ duration: 0.7 }}
                 className="mb-8 md:mb-10"
               >
-                <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
+                <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3 text-center">
                   Frequently Asked Questions
                 </h2>
               </motion.div>
@@ -513,7 +513,7 @@ const TradeLanding = () => {
                 transition={{ duration: 0.8 }}
               >
                 <div className="mb-8">
-                  <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
+                  <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3 text-center">
                     Apply to the Trade Program
                   </h2>
                   <p className="font-body text-sm text-muted-foreground">
