@@ -32,11 +32,18 @@ function supabaseAdmin() {
   );
 }
 
-/** Resolve a Cloudinary URL to 1200×630 OG dimensions */
-function ogCloudinary(url: string): string {
+/** Resolve an image URL to an absolute, 1200×630 OG-ready URL */
+function ogImage(url: string): string {
   if (!url) return DEFAULT_IMAGE;
+  // Make relative paths absolute
+  if (url.startsWith("/")) {
+    return `${SITE_URL}${url}`;
+  }
+  // For Cloudinary URLs, strip existing transforms and apply OG-optimised ones
   if (url.includes("cloudinary.com") && url.includes("/upload/")) {
-    return url.replace("/upload/", "/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/");
+    // Remove any existing transformation chain between /upload/ and /v{timestamp}
+    const cleaned = url.replace(/\/upload\/[^v][^/]*(?:\/[^v][^/]*)*\//, "/upload/");
+    return cleaned.replace("/upload/", "/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/");
   }
   return url;
 }
