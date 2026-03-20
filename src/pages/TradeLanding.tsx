@@ -323,7 +323,7 @@ const TradeLanding = () => {
                       className="overflow-hidden"
                     >
                         <div className="pb-5">
-                          <p className="font-body text-[9px] tracking-[0.2em] uppercase text-accent mb-3">Trade Program Benefits</p>
+                          <p className="font-body text-[11px] tracking-[0.25em] uppercase text-accent mb-5">Trade Program Benefits</p>
                           <div className="w-full aspect-[4/3] rounded-sm overflow-hidden mb-4">
                             <img
                               src={benefit.image}
