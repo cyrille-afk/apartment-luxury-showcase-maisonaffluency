@@ -361,9 +361,6 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               <p className="font-display text-2xl sm:text-3xl lg:text-5xl text-white mt-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light">
                 Trade Program
               </p>
-              <p className="hidden md:block font-body text-sm text-white/80 leading-relaxed max-w-md mx-auto mt-6 drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
-                Exclusive benefits for architects and interior designers. Join our trade community for dedicated support, bespoke pricing, and curated sourcing.
-              </p>
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
