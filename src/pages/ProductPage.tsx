@@ -287,6 +287,7 @@ const ProductPage = () => {
                   }}
                   label="Share on WhatsApp"
                   variant="branded"
+                  className="md:!text-sm md:!px-4 md:!py-2"
                 />
               </div>
 
