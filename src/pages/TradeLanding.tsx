@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronDown, Quote } from "lucide-react";
+import { ArrowLeft, ChevronDown, Quote, Share2, Check } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -10,6 +10,7 @@ const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/uplo
 const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773975478/Screen_Shot_2026-03-20_at_10.57.13_AM_yiqv4q.png";
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
+import { buildOgUrl } from "@/lib/whatsapp-share";
 
 const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
   const [open, setOpen] = useState(false);
@@ -117,6 +118,7 @@ const TradeLanding = () => {
   const prefillEmail = searchParams.get("email") || "";
   const [mobileFormExpanded, setMobileFormExpanded] = useState(false);
   const [mobileEmail, setMobileEmail] = useState("");
+  const [shareCopied, setShareCopied] = useState(false);
 
   // Overridable 3D Studio images from HeroManager
   const [studioBeforeImg, setStudioBeforeImg] = useState(studioBeforeImgFallback);
@@ -320,6 +322,20 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               <ArrowLeft className="w-4 h-4" />
               Back to Maison Affluency
             </Link>
+            <button
+              onClick={() => {
+                const ogUrl = buildOgUrl("/trade/program");
+                navigator.clipboard.writeText(ogUrl).then(() => {
+                  setShareCopied(true);
+                  setTimeout(() => setShareCopied(false), 2000);
+                });
+              }}
+              className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors uppercase tracking-[0.1em]"
+              title="Copy shareable link with preview"
+            >
+              {shareCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+              {shareCopied ? "Copied!" : "Share"}
+            </button>
           </div>
         </div>
 
