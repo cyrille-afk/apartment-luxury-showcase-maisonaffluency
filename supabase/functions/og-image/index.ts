@@ -10,7 +10,13 @@
  *   https://<project>.supabase.co/functions/v1/og-image?path=/trade/program
  */
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+
 const SITE_URL = "https://maisonaffluency.com";
+const DEFAULT_IMAGE =
+  "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg";
+const TRADE_IMAGE =
+  "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex";
 
 interface OgData {
   title: string;
@@ -19,18 +25,34 @@ interface OgData {
   url: string;
 }
 
-/** Route → OG metadata map. Add new routes here. */
-function getOgData(path: string): OgData {
+function supabaseAdmin() {
+  return createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+}
+
+/** Resolve a Cloudinary URL to 1200×630 OG dimensions */
+function ogCloudinary(url: string): string {
+  if (!url) return DEFAULT_IMAGE;
+  if (url.includes("cloudinary.com") && url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/");
+  }
+  return url;
+}
+
+/** Route → OG metadata map. Static routes first, then dynamic DB lookups. */
+async function getOgData(path: string): Promise<OgData> {
   const clean = path.replace(/\/+$/, "") || "/";
 
+  // ── Static routes ──────────────────────────────────────────────
   switch (clean) {
     case "/trade/program":
       return {
         title: "Trade Program — Maison Affluency",
         description:
           "Exclusive benefits for architects and interior designers — trade pricing, dedicated client advisors, custom requests, material libraries, and consolidated insured shipping.",
-        image:
-          "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex",
+        image: TRADE_IMAGE,
         url: `${SITE_URL}/trade/program`,
       };
 
@@ -39,8 +61,7 @@ function getOgData(path: string): OgData {
         title: "Apply to Trade Program — Maison Affluency",
         description:
           "Register as a trade professional to access exclusive pricing, curated collections, and dedicated design support from Maison Affluency.",
-        image:
-          "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772600100/IMG_3387_1_p1mhex",
+        image: TRADE_IMAGE,
         url: `${SITE_URL}/trade/register`,
       };
 
@@ -49,22 +70,66 @@ function getOgData(path: string): OgData {
         title: "Journal — Maison Affluency",
         description:
           "Stories, interviews, and insights from the world of collectible design and luxury furniture.",
-        image:
-          "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg",
+        image: DEFAULT_IMAGE,
         url: `${SITE_URL}/journal`,
       };
-
-    default:
-      // Fallback: homepage
-      return {
-        title: "Maison Affluency | Luxury Furniture & Collectible Design",
-        description:
-          "From Couture Furniture to Collectible Designs Items, Discover Emerging Talents and Design Masters In Our Gallery or Through the Best Ateliers and Designer Works",
-        image:
-          "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg",
-        url: SITE_URL,
-      };
   }
+
+  // ── Dynamic: Journal article /journal/:slug ────────────────────
+  const journalMatch = clean.match(/^\/journal\/([^/]+)$/);
+  if (journalMatch) {
+    const slug = journalMatch[1];
+    const sb = supabaseAdmin();
+    const { data } = await sb
+      .from("journal_articles")
+      .select("title, excerpt, cover_image_url")
+      .eq("slug", slug)
+      .eq("is_published", true)
+      .single();
+
+    if (data) {
+      return {
+        title: `${data.title} — Maison Affluency Journal`,
+        description: data.excerpt || "Read more on the Maison Affluency Journal.",
+        image: ogCloudinary(data.cover_image_url || ""),
+        url: `${SITE_URL}/journal/${slug}`,
+      };
+    }
+  }
+
+  // ── Dynamic: Product page /product/:id ─────────────────────────
+  const productMatch = clean.match(/^\/product\/([^/]+)$/);
+  if (productMatch) {
+    const id = productMatch[1];
+    const sb = supabaseAdmin();
+    const { data } = await sb
+      .from("trade_products")
+      .select("product_name, brand_name, description, image_url, category")
+      .eq("id", id)
+      .eq("is_active", true)
+      .single();
+
+    if (data) {
+      const desc =
+        data.description ||
+        `${data.product_name} by ${data.brand_name} — discover this ${data.category} piece at Maison Affluency.`;
+      return {
+        title: `${data.product_name} by ${data.brand_name} — Maison Affluency`,
+        description: desc.length > 160 ? desc.slice(0, 157) + "…" : desc,
+        image: ogCloudinary(data.image_url || ""),
+        url: `${SITE_URL}/product/${id}`,
+      };
+    }
+  }
+
+  // ── Fallback: homepage ─────────────────────────────────────────
+  return {
+    title: "Maison Affluency | Luxury Furniture & Collectible Design",
+    description:
+      "From Couture Furniture to Collectible Designs Items, Discover Emerging Talents and Design Masters In Our Gallery or Through the Best Ateliers and Designer Works",
+    image: DEFAULT_IMAGE,
+    url: SITE_URL,
+  };
 }
 
 function escapeHtml(str: string): string {
@@ -88,9 +153,8 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url);
   const path = url.searchParams.get("path") || "/";
-  const og = getOgData(path);
+  const og = await getOgData(path);
 
-  // The redirect target — real browsers will follow this
   const redirectUrl = og.url;
 
   const html = `<!DOCTYPE html>
