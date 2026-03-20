@@ -116,4 +116,10 @@ export function invalidateHeroCache() {
   heroCachePromise = null;
 }
 
+// Expose the cache loader + lookup for non-SectionHero consumers (e.g. landing page)
+export { loadHeroOverrides, heroDefaults };
+export function getHeroCacheEntry(key: string) {
+  return heroCache?.[key] ?? null;
+}
+
 export default SectionHero;
