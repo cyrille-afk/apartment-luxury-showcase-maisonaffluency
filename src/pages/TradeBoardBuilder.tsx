@@ -188,7 +188,7 @@ const TradeBoardBuilder = () => {
 
   return (
     <>
-      <Helmet><title>{board.title} — Client Board — Maison Affluency</title></Helmet>
+      <Helmet><title>{board.title} — Project Folder — Maison Affluency</title></Helmet>
       <div className="max-w-5xl">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">

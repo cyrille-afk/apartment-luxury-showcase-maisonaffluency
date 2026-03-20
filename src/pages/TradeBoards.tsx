@@ -111,9 +111,9 @@ const TradeBoards = () => {
 
   return (
     <>
-      <Helmet><title>Client Boards — Trade Portal — Maison Affluency</title></Helmet>
+      <Helmet><title>Project Folders — Trade Portal — Maison Affluency</title></Helmet>
       <div className="max-w-7xl">
-        <SectionHero section="boards" title="Client Boards" subtitle="Create curated collections for your clients to review and approve">
+        <SectionHero section="boards" title="Project Folders" subtitle="Create curated collections for your clients to review and approve">
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="gap-2">
@@ -122,7 +122,7 @@ const TradeBoards = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle className="font-display">Create Client Board</DialogTitle>
+                <DialogTitle className="font-display">Create Project Folder</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-2">
                 <div>
@@ -151,9 +151,9 @@ const TradeBoards = () => {
           </div>
         ) : boards.length === 0 ? (
           <div className="text-center py-20">
-            <p className="font-body text-sm text-muted-foreground mb-4">No client boards yet</p>
+            <p className="font-body text-sm text-muted-foreground mb-4">No project folders yet</p>
             <Button variant="outline" onClick={() => setCreateOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" /> Create Your First Board
+              <Plus className="h-4 w-4" /> Create Your First Folder
             </Button>
           </div>
         ) : (
