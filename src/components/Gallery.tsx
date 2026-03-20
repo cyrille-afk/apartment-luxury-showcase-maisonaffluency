@@ -667,33 +667,23 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           {!isHotspotSection && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                           )}
-                          {/* Pulsing hotspot hint — all images of hotspot sections on mobile */}
-                          {isHotspotSection && showHotspotHint && (
-                            <div ref={index === 0 ? hotspotHintRef : undefined} className="absolute inset-0 z-20 pointer-events-none flex flex-col items-center justify-center gap-2.5">
-                              {/* Ripple rings — white on mobile */}
-                              <div className="relative flex items-center justify-center">
-                                <span className="absolute w-16 h-16 rounded-full border border-white/35 animate-ping" style={{ animationDuration: "2s", animationDelay: "0s" }} />
-                                <span className="absolute w-12 h-12 rounded-full border border-white/40 animate-ping" style={{ animationDuration: "2s", animationDelay: "0.5s" }} />
-                                <span className="absolute w-8 h-8 rounded-full border border-white/50 animate-ping" style={{ animationDuration: "2s", animationDelay: "1s" }} />
-                                <span className="relative block w-3 h-3 rounded-full bg-white/55 shadow-[0_0_10px_rgba(255,255,255,0.35)]" />
-                              </div>
-                              <AnimatePresence>
-                                <motion.span
-                                  initial={{ opacity: 0, y: 6 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  exit={{ opacity: 0, y: -4 }}
-                                  transition={{ duration: 0.5, delay: 0.8 }}
-                                  className="bg-black/60 backdrop-blur-sm text-white font-body text-[11px] px-3 py-1.5 rounded-full shadow-lg"
-                                >
-                                  Tap the dots to explore pieces
-                                </motion.span>
-                              </AnimatePresence>
+                          {/* Subtle hotspot hint — mobile: first image only */}
+                          {isHotspotSection && showHotspotHint && index === 0 && (
+                            <div ref={hotspotHintRef} className="absolute bottom-12 left-3 z-20 pointer-events-none">
+                              <motion.span
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 0.8 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 1, delay: 1.2 }}
+                                className="font-body text-[10px] text-white/80 tracking-wide"
+                              >
+                                Tap image to explore pieces
+                              </motion.span>
                             </div>
                           )}
-                          {/* Piece count badge — mobile */}
-                          {isHotspotSection && hotspotCounts[item.title] > 0 && !showHotspotHint && (
-                            <span className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white font-body text-[10px] px-2 py-1 rounded-full">
-                              <Sparkles className="w-3 h-3" />
+                          {/* Piece count — subtle bottom-right text */}
+                          {isHotspotSection && hotspotCounts[item.title] > 0 && (
+                            <span className="absolute bottom-3 right-3 z-10 font-body text-[9px] text-white/50">
                               {hotspotCounts[item.title]} {hotspotCounts[item.title] === 1 ? "piece" : "pieces"}
                             </span>
                           )}
