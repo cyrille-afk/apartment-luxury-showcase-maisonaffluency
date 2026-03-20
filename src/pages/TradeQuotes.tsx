@@ -51,6 +51,19 @@ const TradeQuotes = () => {
       query = query.eq("user_id", user.id);
     }
 
+    const { data: quotesData } = await query;
+
+    // Fetch profiles for super admin view
+    let profileMap: Record<string, any> = {};
+    if (showAll && isSuperAdmin && quotesData && quotesData.length > 0) {
+      const userIds = [...new Set(quotesData.map((q: any) => q.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, company, email")
+        .in("id", userIds);
+      (profiles || []).forEach((p: any) => { profileMap[p.id] = p; });
+    }
+
     // Get item counts
     const quoteIds = (quotesData || []).map((q: any) => q.id);
     let itemCounts: Record<string, number> = {};
@@ -65,14 +78,18 @@ const TradeQuotes = () => {
     }
 
     setQuotes(
-      (quotesData || []).map((q: any) => ({ ...q, item_count: itemCounts[q.id] || 0 }))
+      (quotesData || []).map((q: any) => ({
+        ...q,
+        item_count: itemCounts[q.id] || 0,
+        profiles: profileMap[q.user_id] || null,
+      }))
     );
     setLoading(false);
   };
 
   useEffect(() => {
     fetchQuotes();
-  }, [user]);
+  }, [user, showAll]);
 
   const handleCreateQuote = async () => {
     if (!user) return;
