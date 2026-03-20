@@ -115,6 +115,8 @@ const TradeLanding = () => {
   const formRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
+  const [mobileFormExpanded, setMobileFormExpanded] = useState(false);
+  const [mobileEmail, setMobileEmail] = useState("");
 
   // Overridable 3D Studio images from HeroManager
   const [studioBeforeImg, setStudioBeforeImg] = useState(studioBeforeImgFallback);
@@ -340,8 +342,10 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 const formData = new FormData(e.currentTarget);
                 const email = formData.get("email") as string;
                 if (email) {
-                  // Pre-fill the inline form's email and scroll to it
-                  const emailInput = formRef.current?.querySelector<HTMLInputElement>('input[type="email"]');
+                  setMobileEmail(email);
+                  setMobileFormExpanded(true);
+                  // Pre-fill the desktop form's email too
+                  const emailInput = formRef.current?.querySelector<HTMLInputElement>('.hidden.lg\\:block input[type="email"]');
                   if (emailInput) {
                     const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
                     nativeInputValueSetter?.call(emailInput, email);
@@ -677,16 +681,73 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   </h2>
                   <div className="border-t border-border mt-4" />
                 </div>
-                <p className="font-body text-sm text-muted-foreground mb-6">
-                  Complete the form below to get started. We'll review your application within 1–2 business days.
-                </p>
-                <TradeRegistrationForm prefillEmail={prefillEmail} />
-                <p className="mt-6 font-body text-sm text-muted-foreground">
-                  Already a member?{" "}
-                  <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80 transition-colors">
-                    Sign in
-                  </Link>
-                </p>
+
+                {/* Mobile: collapsed email-first CTA */}
+                {!mobileFormExpanded && (
+                  <div className="lg:hidden">
+                    <p className="font-body text-sm text-muted-foreground mb-4">
+                      Enter your work email to get started.
+                    </p>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        setMobileFormExpanded(true);
+                      }}
+                      className="flex items-center gap-3"
+                    >
+                      <input
+                        type="email"
+                        value={mobileEmail}
+                        onChange={(e) => setMobileEmail(e.target.value)}
+                        placeholder="Your work email"
+                        required
+                        className="flex-1 bg-transparent border-b border-border focus:border-foreground text-foreground placeholder:text-muted-foreground/50 pb-2 font-body text-sm outline-none transition-colors text-[16px]"
+                      />
+                      <button
+                        type="submit"
+                        className="px-5 py-2 bg-[hsl(var(--gold))] text-white font-body text-xs uppercase tracking-[0.15em] rounded-full font-bold whitespace-nowrap"
+                      >
+                        Join Now
+                      </button>
+                    </form>
+                    <p className="mt-4 font-body text-xs text-muted-foreground">
+                      Already a member?{" "}
+                      <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80 transition-colors">
+                        Sign in
+                      </Link>
+                    </p>
+                  </div>
+                )}
+
+                {/* Mobile: expanded full form (after email entry) */}
+                {mobileFormExpanded && (
+                  <div className="lg:hidden">
+                    <p className="font-body text-sm text-muted-foreground mb-6">
+                      Complete the form below to get started. We'll review your application within 1–2 business days.
+                    </p>
+                    <TradeRegistrationForm prefillEmail={mobileEmail || prefillEmail} />
+                    <p className="mt-6 font-body text-sm text-muted-foreground">
+                      Already a member?{" "}
+                      <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80 transition-colors">
+                        Sign in
+                      </Link>
+                    </p>
+                  </div>
+                )}
+
+                {/* Desktop: always show full form */}
+                <div className="hidden lg:block">
+                  <p className="font-body text-sm text-muted-foreground mb-6">
+                    Complete the form below to get started. We'll review your application within 1–2 business days.
+                  </p>
+                  <TradeRegistrationForm prefillEmail={prefillEmail} />
+                  <p className="mt-6 font-body text-sm text-muted-foreground">
+                    Already a member?{" "}
+                    <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80 transition-colors">
+                      Sign in
+                    </Link>
+                  </p>
+                </div>
               </motion.div>
             </div>
 
