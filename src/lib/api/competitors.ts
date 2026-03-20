@@ -27,6 +27,35 @@ export async function fetchAuctionBenchmarks() {
   return data || [];
 }
 
+export async function fetchCompetitorTraffic() {
+  const { data, error } = await supabase
+    .from("competitor_traffic" as any)
+    .select("*, competitor_galleries(name)")
+    .order("month", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function upsertTrafficEntry(entry: {
+  gallery_id: string;
+  month: string;
+  monthly_visits: number | null;
+  bounce_rate: number | null;
+  avg_duration_seconds: number | null;
+  source?: string;
+}) {
+  const { data, error } = await supabase
+    .from("competitor_traffic" as any)
+    .upsert(
+      { ...entry, source: entry.source || "manual" },
+      { onConflict: "gallery_id,month" }
+    )
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function triggerCompetitorScrape() {
   const { data, error } = await supabase.functions.invoke("scrape-competitors");
   if (error) throw error;
