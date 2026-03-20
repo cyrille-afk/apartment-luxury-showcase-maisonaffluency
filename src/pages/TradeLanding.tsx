@@ -458,7 +458,7 @@ const TradeLanding = () => {
                 transition={{ duration: 0.7, delay: 0.3 }}
                 className="relative"
               >
-                <p className="font-body text-[10px] tracking-[0.2em] uppercase text-accent mb-3">3D Studio Result</p>
+                <p className="font-body text-[10px] tracking-[0.2em] uppercase text-background mb-3">3D Studio Result</p>
                 <div className="aspect-[4/3] rounded-sm overflow-hidden border border-background/10">
                   <img
                     src={studioAfterImg}
