@@ -212,7 +212,7 @@ const TradeLanding = () => {
                 name="email"
                 required
                 placeholder="Your work email"
-                className="flex-1 bg-white/15 backdrop-blur-sm border border-white/30 focus:border-white/60 text-white placeholder:text-white/50 px-5 py-3 font-body text-xs uppercase tracking-[0.15em] rounded-full transition-all duration-300 outline-none focus:ring-1 focus:ring-white/30"
+                className="flex-1 bg-white border border-border/30 focus:border-border/60 text-foreground placeholder:text-muted-foreground/60 px-5 py-3 font-body text-xs uppercase tracking-[0.15em] rounded-full transition-all duration-300 outline-none focus:ring-1 focus:ring-border/30"
               />
               <button
                 type="submit"
