@@ -549,7 +549,7 @@ const TradeLanding = () => {
               </button>
               <Link
                 to="/trade/login"
-                className="font-body text-sm text-background/50 underline underline-offset-4 hover:text-background transition-colors"
+                className="font-body text-sm text-white/70 underline underline-offset-4 hover:text-white transition-colors"
               >
                 Already a member? Sign in
               </Link>
