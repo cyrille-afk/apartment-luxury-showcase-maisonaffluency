@@ -5,6 +5,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
+import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
 
 const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
