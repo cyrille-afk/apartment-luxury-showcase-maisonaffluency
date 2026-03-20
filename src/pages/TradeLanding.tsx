@@ -130,7 +130,10 @@ const TradeLanding = () => {
   }, []);
 
   const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const el = formRef.current;
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top: y, behavior: "smooth" });
   };
 
   const toggleAccordion = (index: number) => {
