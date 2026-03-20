@@ -201,12 +201,19 @@ const ShowroomGridView = ({
         const priceLookup = new Map<string, PriceMatch>();
         const priceEntries: PriceMatch[] = [];
         const dbProductIdLookup = new Map<string, string>();
+        const hoverImageLookup = new Map<string, string>();
         if (pricedProducts) {
           for (const pp of pricedProducts) {
             const ppKey = pp.product_name.trim().toLowerCase();
             dbProductIdLookup.set(ppKey, pp.id);
             const normalizedName = normalizeProductName(pp.product_name);
             if (normalizedName) dbProductIdLookup.set(normalizedName, pp.id);
+            // Build hover image lookup from gallery_images
+            const gallery = pp.gallery_images as string[] | null;
+            if (gallery && gallery.length > 0) {
+              hoverImageLookup.set(ppKey, gallery[0]);
+              if (normalizedName) hoverImageLookup.set(normalizedName, gallery[0]);
+            }
             const cents = pp.trade_price_cents ?? pp.rrp_price_cents;
             if (!cents) continue;
             const entry: PriceMatch = { name: pp.product_name, cents, currency: pp.currency };
