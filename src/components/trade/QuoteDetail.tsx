@@ -849,7 +849,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </button>
                   {subtotalCents > 0 && (
                     <span className="font-body text-[10px] text-muted-foreground">
-                      Stripe charge: {currencySymbol(currency)}{formatPriceRaw(chargeTotal, currency)} {currency} (incl.{currency === "SGD" ? " GST +" : ""} processing fee)
+                      Stripe charge: {currencySymbol(currency)}{formatPriceRaw(chargeTotal, currency)} {currency} (incl.{gstEnabled ? ` ${gstRate}% GST +` : ""} processing fee)
                     </span>
                   )}
                 </div>
