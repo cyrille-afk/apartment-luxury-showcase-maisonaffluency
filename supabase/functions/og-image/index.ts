@@ -59,8 +59,7 @@ async function getOgData(path: string): Promise<OgData> {
         title: "Catalogue — Maison Affluency | Luxury Furniture & Collectible Design",
         description:
           "Browse our curated selection of luxury furniture, lighting, and collectible design by world-renowned designers and ateliers. Price on request.",
-        image:
-          "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg,g_auto/v1/living-room-hero_zxfcxl",
+        image: DEFAULT_IMAGE,
         url: `${SITE_URL}/catalogue`,
       };
 
