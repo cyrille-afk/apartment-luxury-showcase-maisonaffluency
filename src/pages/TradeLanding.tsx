@@ -330,51 +330,101 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             transition={{ duration: 1 }}
             className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
           >
-            <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] tracking-wide">
-              Welcome To Maison Affluency
-            </h1>
-            <p className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white mt-3 sm:mt-5 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light max-w-2xl">
-              Trade Program
-            </p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                const email = formData.get("email") as string;
-                if (email) {
-                  setMobileEmail(email);
-                  setMobileFormExpanded(true);
-                  // Pre-fill the desktop form's email too
-                  const emailInput = formRef.current?.querySelector<HTMLInputElement>('.hidden.lg\\:block input[type="email"]');
-                  if (emailInput) {
-                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-                    nativeInputValueSetter?.call(emailInput, email);
-                    emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+            {/* Mobile: text directly on image */}
+            <div className="md:hidden flex flex-col items-center">
+              <h1 className="font-display text-2xl sm:text-3xl text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] tracking-wide">
+                Welcome To Maison Affluency
+              </h1>
+              <p className="font-display text-2xl sm:text-3xl text-white mt-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light">
+                Trade Program
+              </p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const email = formData.get("email") as string;
+                  if (email) {
+                    setMobileEmail(email);
+                    setMobileFormExpanded(true);
                   }
-                }
-                scrollToForm();
-              }}
-              className="flex items-center gap-3 mt-10 sm:mt-14 w-full max-w-lg px-4"
-            >
-              <input
-                type="email"
-                name="email"
-                placeholder="Your work email"
-                className="flex-1 bg-white border border-border/30 focus:border-border/60 text-foreground placeholder:text-muted-foreground/60 px-5 py-3 font-body text-xs uppercase tracking-[0.15em] rounded-full transition-all duration-300 outline-none focus:ring-1 focus:ring-border/30"
-              />
-              <button
-                type="submit"
-                className="bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[120px] text-center whitespace-nowrap"
+                  scrollToForm();
+                }}
+                className="flex items-center gap-3 mt-10 w-full max-w-lg px-4"
               >
-                Join Now
-              </button>
-            </form>
-            <p className="mt-5 font-body text-xs text-white/70 tracking-wide">
-              Already registered?{" "}
-              <Link to="/trade/login" className="text-white underline underline-offset-2 hover:text-white/90 transition-colors">
-                Sign in
-              </Link>
-            </p>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Your work email"
+                  className="flex-1 bg-white border border-border/30 focus:border-border/60 text-foreground placeholder:text-muted-foreground/60 px-5 py-3 font-body text-xs uppercase tracking-[0.15em] rounded-full transition-all duration-300 outline-none focus:ring-1 focus:ring-border/30"
+                />
+                <button
+                  type="submit"
+                  className="bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[120px] text-center whitespace-nowrap"
+                >
+                  Join Now
+                </button>
+              </form>
+              <p className="mt-5 font-body text-xs text-white/70 tracking-wide">
+                Already registered?{" "}
+                <Link to="/trade/login" className="text-white underline underline-offset-2 hover:text-white/90 transition-colors">
+                  Sign in
+                </Link>
+              </p>
+            </div>
+
+            {/* Desktop: frosted glass card overlay */}
+            <div className="hidden md:flex flex-col items-center">
+              <div className="bg-background/80 backdrop-blur-xl border border-border/30 rounded-2xl px-12 py-10 shadow-2xl max-w-xl w-full">
+                <h1 className="font-display text-3xl lg:text-4xl text-foreground tracking-wide">
+                  Welcome To Maison Affluency
+                </h1>
+                <p className="font-display text-3xl lg:text-4xl text-foreground mt-3 tracking-widest font-light">
+                  Trade Program
+                </p>
+                <div className="w-12 h-px bg-accent mx-auto mt-6 mb-5" />
+                <p className="font-body text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+                  Exclusive benefits for architects and interior designers. Join our trade community for dedicated support, bespoke pricing, and curated sourcing.
+                </p>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const email = formData.get("email") as string;
+                    if (email) {
+                      setMobileEmail(email);
+                      setMobileFormExpanded(true);
+                      const emailInput = formRef.current?.querySelector<HTMLInputElement>('.hidden.lg\\:block input[type="email"]');
+                      if (emailInput) {
+                        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                        nativeInputValueSetter?.call(emailInput, email);
+                        emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                      }
+                    }
+                    scrollToForm();
+                  }}
+                  className="flex items-center gap-3 mt-8 w-full"
+                >
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Your work email"
+                    className="flex-1 bg-background border border-border focus:border-foreground/40 text-foreground placeholder:text-muted-foreground/50 px-5 py-3 font-body text-xs uppercase tracking-[0.15em] rounded-full transition-all duration-300 outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[120px] text-center whitespace-nowrap"
+                  >
+                    Join Now
+                  </button>
+                </form>
+                <p className="mt-5 font-body text-xs text-muted-foreground tracking-wide">
+                  Already registered?{" "}
+                  <Link to="/trade/login" className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors">
+                    Sign in
+                  </Link>
+                </p>
+              </div>
+            </div>
           </motion.div>
         </div>
 
