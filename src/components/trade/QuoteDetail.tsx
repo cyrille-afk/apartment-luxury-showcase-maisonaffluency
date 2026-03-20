@@ -609,12 +609,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <span>-{formatPriceRaw(Math.round(subtotalCents * 0.08), currency)}</span>
                       </div>
                     )}
-                    {currency === "SGD" && subtotalCents > 0 && (() => {
+                    {gstEnabled && subtotalCents > 0 && (() => {
                       const afterDiscount = tradeDiscount ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
                       return (
                         <div className="flex justify-between font-body text-xs text-muted-foreground">
-                          <span>GST (9%)</span>
-                          <span>{formatPriceRaw(Math.round(afterDiscount * 0.09), currency)}</span>
+                          <span>GST ({gstRate}%)</span>
+                          <span>{formatPriceRaw(Math.round(afterDiscount * gstRate / 100), currency)}</span>
                         </div>
                       );
                     })()}
