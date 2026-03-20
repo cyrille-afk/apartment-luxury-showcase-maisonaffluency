@@ -1,6 +1,8 @@
 import { Helmet } from "react-helmet-async";
 import { Link, useSearchParams } from "react-router-dom";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
+import WhatsAppShareButton from "@/components/WhatsAppShareButton";
+import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 
 const TradeRegister = () => {
   const [searchParams] = useSearchParams();
