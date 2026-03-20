@@ -721,8 +721,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                     >
                       <input
                         type="email"
-                        value={mobileEmail}
-                        onChange={(e) => setMobileEmail(e.target.value)}
+                        value={heroEmail}
+                        onChange={(e) => setHeroEmail(e.target.value)}
                         placeholder="Your work email"
                         required
                         className="flex-1 bg-transparent border-b border-border focus:border-foreground text-foreground placeholder:text-muted-foreground/50 pb-2 font-body text-sm outline-none transition-colors text-[16px]"
