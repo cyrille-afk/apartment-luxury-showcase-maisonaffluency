@@ -321,6 +321,20 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               <ArrowLeft className="w-4 h-4" />
               Back to Maison Affluency
             </Link>
+            <button
+              onClick={() => {
+                const ogUrl = buildOgUrl("/trade/program");
+                navigator.clipboard.writeText(ogUrl).then(() => {
+                  setShareCopied(true);
+                  setTimeout(() => setShareCopied(false), 2000);
+                });
+              }}
+              className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors uppercase tracking-[0.1em]"
+              title="Copy shareable link with preview"
+            >
+              {shareCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+              {shareCopied ? "Copied!" : "Share"}
+            </button>
           </div>
         </div>
 
