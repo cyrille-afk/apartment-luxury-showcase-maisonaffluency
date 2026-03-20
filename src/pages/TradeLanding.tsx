@@ -117,7 +117,7 @@ const TradeLanding = () => {
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
   const [mobileFormExpanded, setMobileFormExpanded] = useState(false);
-  const [mobileEmail, setMobileEmail] = useState("");
+  const [heroEmail, setHeroEmail] = useState("");
   const [shareCopied, setShareCopied] = useState(false);
 
   // Overridable 3D Studio images from HeroManager
@@ -367,14 +367,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   const formData = new FormData(e.currentTarget);
                   const email = formData.get("email") as string;
                   if (email) {
-                    setMobileEmail(email);
+                    setHeroEmail(email);
                     setMobileFormExpanded(true);
-                    const emailInput = formRef.current?.querySelector<HTMLInputElement>('input[type="email"]');
-                    if (emailInput) {
-                      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-                      nativeInputValueSetter?.call(emailInput, email);
-                      emailInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
                   }
                   scrollToForm();
                 }}
@@ -727,8 +721,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                     >
                       <input
                         type="email"
-                        value={mobileEmail}
-                        onChange={(e) => setMobileEmail(e.target.value)}
+                        value={heroEmail}
+                        onChange={(e) => setHeroEmail(e.target.value)}
                         placeholder="Your work email"
                         required
                         className="flex-1 bg-transparent border-b border-border focus:border-foreground text-foreground placeholder:text-muted-foreground/50 pb-2 font-body text-sm outline-none transition-colors text-[16px]"
@@ -755,7 +749,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                     <p className="font-body text-sm text-muted-foreground mb-6">
                       Complete the form below to get started. We'll review your application within 1–2 business days.
                     </p>
-                    <TradeRegistrationForm prefillEmail={mobileEmail || prefillEmail} />
+                    <TradeRegistrationForm prefillEmail={heroEmail || prefillEmail} />
                     <p className="mt-6 font-body text-sm text-muted-foreground">
                       Already a member?{" "}
                       <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80 transition-colors">
@@ -770,7 +764,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   <p className="font-body text-sm text-muted-foreground mb-6">
                     Complete the form below to get started. We'll review your application within 1–2 business days.
                   </p>
-                  <TradeRegistrationForm prefillEmail={prefillEmail} />
+                  <TradeRegistrationForm prefillEmail={heroEmail || prefillEmail} />
                   <p className="mt-6 font-body text-sm text-muted-foreground">
                     Already a member?{" "}
                     <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80 transition-colors">
@@ -806,7 +800,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
               <button
-                onClick={() => { setMobileFormExpanded(false); setMobileEmail(""); scrollToForm(); }}
+                onClick={() => { setMobileFormExpanded(false); setHeroEmail(""); scrollToForm(); }}
                 className="inline-flex items-center px-8 py-3 bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[160px] justify-center"
               >
                 Apply Now

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -61,6 +61,12 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
     certificationDetails: "",
     message: "",
   });
+
+  useEffect(() => {
+    if (prefillEmail && !form.email) {
+      setForm((prev) => ({ ...prev, email: prefillEmail }));
+    }
+  }, [prefillEmail]);
 
   const update = (field: string, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
