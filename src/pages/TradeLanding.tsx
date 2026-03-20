@@ -477,13 +477,10 @@ const TradeLanding = () => {
               transition={{ duration: 0.5, delay: 0.5 }}
               className="text-center mt-10 md:mt-14"
             >
-              <div className="flex flex-wrap justify-center gap-6 md:gap-10">
-                {["AI-Powered Rendering", "Up to 10 Products", "Before / After Comparison", "Wallcovering Application"].map((feature) => (
-                  <span key={feature} className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-accent/40 bg-foreground/40 backdrop-blur-sm font-body text-[11px] md:text-xs tracking-wider uppercase text-background">
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                    {feature}
-                  </span>
-                ))}
+              <div className="flex flex-wrap justify-center gap-8 md:gap-14 font-body text-xs tracking-wider uppercase text-background">
+                <span>AI-Powered Rendering</span>
+                <span>Up to 10 Products</span>
+                <span>Before / After Comparison</span>
               </div>
             </motion.div>
             </div>
