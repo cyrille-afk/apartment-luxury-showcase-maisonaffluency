@@ -449,7 +449,7 @@ const TradeLanding = () => {
                 className="relative"
               >
                 <p className="font-body text-[10px] tracking-[0.2em] uppercase text-accent mb-3">3D Studio Result</p>
-                <div className="aspect-[4/3] rounded-sm overflow-hidden border border-background/10">
+                <div className="aspect-[4/3] rounded-sm overflow-hidden border border-border">
                   <img
                     src={studioAfterImg}
                     alt="3D furnished room visualization"
