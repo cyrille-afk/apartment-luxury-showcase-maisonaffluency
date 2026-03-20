@@ -122,7 +122,7 @@ const TradeBoards = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle className="font-display">Create Client Board</DialogTitle>
+                <DialogTitle className="font-display">Create Project Folder</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-2">
                 <div>
