@@ -78,3 +78,30 @@ export function getAllDesignerProfiles(): DesignerProfile[] {
 export function getDesignerBySlug(slug: string): DesignerProfile | undefined {
   return getAllDesignerProfiles().find((d) => d.slug === slug);
 }
+
+/**
+ * Returns up to `count` related designers, prioritising same source/specialty,
+ * then falling back to random others. Excludes the current designer.
+ */
+export function getRelatedDesigners(
+  current: DesignerProfile,
+  count = 3
+): DesignerProfile[] {
+  const all = getAllDesignerProfiles().filter((d) => d.slug !== current.slug);
+
+  // Score by overlap: same source > shared specialty keywords
+  const currentKeywords = current.specialty.toLowerCase().split(/[\s&,·]+/).filter(Boolean);
+
+  const scored = all.map((d) => {
+    let score = 0;
+    if (d.source === current.source) score += 2;
+    const dKeywords = d.specialty.toLowerCase().split(/[\s&,·]+/).filter(Boolean);
+    for (const kw of dKeywords) {
+      if (currentKeywords.includes(kw)) score += 1;
+    }
+    return { designer: d, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score || Math.random() - 0.5);
+  return scored.slice(0, count).map((s) => s.designer);
+}
