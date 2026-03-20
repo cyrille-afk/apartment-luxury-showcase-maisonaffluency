@@ -109,7 +109,7 @@ const JournalArticlePage = () => {
 
         {/* Cover image */}
         {article.cover_image_url && (
-          <div className="w-full flex flex-col items-center bg-muted/10">
+          <div className="w-full flex flex-col items-center bg-muted/10 px-4 md:px-0">
             <img
               src={article.cover_image_url}
               alt={article.title}
