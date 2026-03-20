@@ -402,8 +402,9 @@ const TradeLanding = () => {
         </div>
 
         {/* ─── 3D Studio Showcase ─── */}
-        <div className="w-full bg-foreground text-background">
-          <div className="max-w-6xl mx-auto px-6 md:px-12 py-16 md:py-24">
+        <div className="w-full py-8 md:py-12">
+          <div className="max-w-6xl mx-auto px-6 md:px-12">
+            <div className="border-2 border-accent/40 rounded-sm bg-background px-6 md:px-12 py-16 md:py-24">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
