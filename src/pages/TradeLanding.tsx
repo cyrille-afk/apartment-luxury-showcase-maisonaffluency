@@ -441,7 +441,7 @@ const TradeLanding = () => {
                 className="relative"
               >
                 <p className="font-body text-[10px] tracking-[0.2em] uppercase text-accent mb-3">Your Drawing</p>
-                <div className="aspect-[4/3] rounded-sm overflow-hidden border border-border">
+                <div className="aspect-[4/3] rounded-sm overflow-hidden border border-background/10">
                   <img
                     src={studioBeforeImg}
                     alt="Architectural floor plan sketch"
