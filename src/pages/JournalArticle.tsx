@@ -101,7 +101,7 @@ const JournalArticlePage = () => {
                 trackCTA.whatsapp(`JournalArticle_Share_${article.slug}`);
               }}
               label="Share on WhatsApp"
-              variant="branded"
+              variant="prominent"
               className="md:!text-sm md:!px-4 md:!py-2"
             />
           </div>
