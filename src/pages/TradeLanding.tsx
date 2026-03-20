@@ -140,6 +140,110 @@ const TradeLanding = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
+/* ─── Mobile Benefits Carousel ─── */
+const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./TradeLanding").default extends never ? any : { title: string; description: string; image: string }[] }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollLeft = el.scrollLeft;
+    const cardWidth = el.offsetWidth * 0.85;
+    setActiveIndex(Math.round(scrollLeft / cardWidth));
+  }, []);
+
+  return (
+    <div className="md:hidden pb-8">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-5"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
+        {benefits.map((benefit: any, index: number) => (
+          <div
+            key={index}
+            className="snap-center shrink-0 w-[85%] rounded-sm overflow-hidden border border-border bg-background"
+          >
+            <div className="aspect-[4/3] overflow-hidden">
+              <img
+                src={benefit.image}
+                alt={benefit.title}
+                className="w-full h-full object-cover object-bottom"
+                loading="lazy"
+              />
+            </div>
+            <div className="p-5">
+              <p className="font-body text-[10px] tracking-[0.25em] uppercase text-accent mb-3">Trade Program Benefits</p>
+              <h3 className="font-display text-base text-foreground mb-2">{benefit.title}</h3>
+              <p className="font-body text-sm leading-relaxed text-muted-foreground">{benefit.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Dots */}
+      <div className="flex justify-center gap-2 mt-4">
+        {benefits.map((_: any, i: number) => (
+          <span key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === activeIndex ? "bg-accent" : "bg-border"}`} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Mobile Testimonials (truncated) ─── */
+const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; name: string; title: string; location: string }[] }) => {
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? testimonials : testimonials.slice(0, 1);
+
+  return (
+    <>
+      {/* Desktop: full grid */}
+      <div className="hidden md:grid grid-cols-3 gap-8">
+        {testimonials.map((t, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.6, delay: i * 0.15 }}
+            className="relative bg-background border border-border rounded-sm p-8 flex flex-col"
+          >
+            <Quote className="w-5 h-5 text-accent/50 mb-4 shrink-0" />
+            <p className="font-body text-sm leading-relaxed text-muted-foreground flex-1 text-justify">"{t.quote}"</p>
+            <div className="mt-6 pt-4 border-t border-border">
+              <p className="font-display text-sm text-foreground">{t.name}</p>
+              <p className="font-body text-xs text-muted-foreground mt-0.5">{t.title} · {t.location}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Mobile: truncated */}
+      <div className="md:hidden space-y-4">
+        {visible.map((t, i) => (
+          <div key={i} className="bg-background border border-border rounded-sm p-6 flex flex-col">
+            <Quote className="w-5 h-5 text-accent/50 mb-4 shrink-0" />
+            <p className="font-body text-sm leading-relaxed text-muted-foreground flex-1">"{t.quote}"</p>
+            <div className="mt-4 pt-3 border-t border-border">
+              <p className="font-display text-sm text-foreground">{t.name}</p>
+              <p className="font-body text-xs text-muted-foreground mt-0.5">{t.title} · {t.location}</p>
+            </div>
+          </div>
+        ))}
+        {!showAll && testimonials.length > 1 && (
+          <button
+            onClick={() => setShowAll(true)}
+            className="w-full py-3 font-body text-xs tracking-[0.15em] uppercase text-accent border border-accent/30 rounded-sm hover:bg-accent/5 transition-colors"
+          >
+            Show {testimonials.length - 1} more reviews
+          </button>
+        )}
+      </div>
+    </>
+  );
+};
 
   return (
     <>
