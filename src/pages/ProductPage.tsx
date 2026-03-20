@@ -268,19 +268,16 @@ const ProductPage = () => {
 
               {/* CTA */}
               <div className="mt-8 space-y-3">
-                <p className="font-body text-xs text-muted-foreground">
-                  Visit our Singapore showroom to experience this piece in person
-                </p>
+                {product.isInShowroom && (
+                  <p className="font-body text-xs text-muted-foreground">
+                    Visit our Singapore showroom to experience this piece in person
+                  </p>
+                )}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button asChild className="flex-1">
-                    <a href={bookingMailto}>
-                      <Calendar className="h-4 w-4 mr-2" /> Book a Viewing
+                    <a href={enquiryMailto}>
+                      <Mail className="h-4 w-4 mr-2" /> Enquire About This Piece
                     </a>
-                  </Button>
-                  <Button variant="outline" asChild className="flex-1">
-                    <Link to="/trade/program">
-                      <Briefcase className="h-4 w-4 mr-2" /> Trade Program
-                    </Link>
                   </Button>
                 </div>
                 <WhatsAppShareButton
