@@ -323,7 +323,7 @@ const TradeLanding = () => {
                       className="overflow-hidden"
                     >
                         <div className="pb-5">
-                          <p className="font-body text-[9px] tracking-[0.2em] uppercase text-primary mb-3">Trade Program Benefits</p>
+                          <p className="font-body text-[9px] tracking-[0.2em] uppercase text-accent mb-3">Trade Program Benefits</p>
                           <div className="w-full aspect-[4/3] rounded-sm overflow-hidden mb-4">
                             <img
                               src={benefit.image}
@@ -372,7 +372,7 @@ const TradeLanding = () => {
                   transition={{ duration: 0.8 }}
                   className="w-1/2 flex flex-col justify-center items-center text-center px-10 lg:px-16 py-12"
                 >
-                  <p className="font-body text-[10px] tracking-[0.2em] uppercase text-primary mb-4">Trade Program Benefits</p>
+                  <p className="font-body text-[10px] tracking-[0.2em] uppercase text-accent mb-4">Trade Program Benefits</p>
                   <h2 className="font-display text-xl lg:text-2xl text-foreground mb-4">
                     {benefit.title}
                   </h2>
