@@ -617,6 +617,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             ))}
           </div>
         </div>
+        </div>
 
         {/* ─── FAQ + Registration Side by Side ─── */}
         <div ref={formRef} id="apply" className="w-full border-y border-border bg-muted/10">
