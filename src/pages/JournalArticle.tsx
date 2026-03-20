@@ -116,16 +116,8 @@ const JournalArticlePage = () => {
               className="w-full max-h-[80vh] object-contain"
             />
             {article.slug === "thierry-lemaire-radical-simplicity" && (
-              <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground py-3">
-                Photography by Hosanna Swee —{" "}
-                <a
-                  href="https://www.instagram.com/hforhozzie/?hl=en"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline underline-offset-2 hover:text-foreground transition-colors"
-                >
-                  @hforhozzie
-                </a>
+            <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground py-3">
+                Photography by Hosanna Swee · Shot on location at Maison Affluency, Singapore
               </p>
             )}
           </div>
