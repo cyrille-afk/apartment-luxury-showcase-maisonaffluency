@@ -28,9 +28,10 @@ interface TradeProductLightboxProps {
   onAddToQuote: (product: TradeProductLightboxItem) => void;
   isAdding?: boolean;
   isAdded?: boolean;
+  onSelectRelated?: (product: TradeProductLightboxItem) => void;
 }
 
-const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdded }: TradeProductLightboxProps) => {
+const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdded, onSelectRelated }: TradeProductLightboxProps) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const [showHoverImage, setShowHoverImage] = useState(false);
   const navigate = useNavigate();
