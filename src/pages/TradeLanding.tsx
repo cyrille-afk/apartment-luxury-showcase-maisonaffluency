@@ -411,7 +411,7 @@ const TradeLanding = () => {
               className="w-full h-full object-cover"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-foreground/50" />
+            <div className="absolute inset-0 bg-foreground/30" />
           </div>
           <div className="relative max-w-6xl mx-auto px-6 md:px-12 py-16 md:py-24">
             <div className="border border-accent/30 rounded-sm bg-foreground/20 backdrop-blur-md px-6 md:px-12 py-12 md:py-16">
