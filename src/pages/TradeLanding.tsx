@@ -41,12 +41,6 @@ const FaqItem = ({ question, answer }: { question: string; answer: string }) => 
 
 const benefits = [
   {
-    title: "Trade Pricing & Bespoke Quotations",
-    description:
-      "View pricing instantly when you sign in with your trade account and save time with our bespoke quotations, a comprehensive multi-product document listing all prices at a glance.",
-    image: cloudinaryUrl("v1773730098/Screen_Shot_2026-03-17_at_2.47.21_PM_lg1da3", { width: 1400, height: 1050, quality: "auto:good", crop: "fill", gravity: "north" }),
-  },
-  {
     title: "Dedicated Client Advisor",
     description:
       "Maison Affluency nurture one-on-one relationships with its clients offering personalised and tailored advice on each project. From access to confidential sourcing, design collaborations and curation of artworks, our curating team offers a solid partnership.",
@@ -57,6 +51,12 @@ const benefits = [
     description:
       "Let us use our global connections to specialist workshops and renowned designers to help you find the best solutions. From inspiration to customisation, we help find the solutions for a seamless experience.",
     image: cloudinaryUrl("v1773758590/Screen_Shot_2026-03-17_at_10.40.56_PM_mlwtop", { width: 1400, quality: "auto:good", crop: "fill" }),
+  },
+  {
+    title: "Trade Pricing & Bespoke Quotations",
+    description:
+      "View pricing instantly when you sign in with your trade account and save time with our bespoke quotations, a comprehensive multi-product document listing all prices at a glance.",
+    image: cloudinaryUrl("v1773730098/Screen_Shot_2026-03-17_at_2.47.21_PM_lg1da3", { width: 1400, height: 1050, quality: "auto:good", crop: "fill", gravity: "north" }),
   },
   {
     title: "Samples & Swatches",
