@@ -521,7 +521,14 @@ const TradeLanding = () => {
         </div>
 
         {/* ─── Final CTA ─── */}
-        <div className="w-full bg-foreground">
+        <div className="relative w-full overflow-hidden">
+          <img
+            src="https://res.cloudinary.com/dif1oamtj/image/upload/v1773968016/ImgWeb_S25_PDW_Newsletter001_Article_03_1120x600_image002_Factory-_C2_A9GregSevaz_0_m5hi1i.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-foreground/70" />
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
