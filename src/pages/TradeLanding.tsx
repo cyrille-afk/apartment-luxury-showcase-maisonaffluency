@@ -10,7 +10,7 @@ const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/uplo
 const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773975478/Screen_Shot_2026-03-20_at_10.57.13_AM_yiqv4q.png";
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
-import { buildOgUrl } from "@/lib/whatsapp-share";
+const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program-share.html?v=20260320d";
 
 const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
   const [open, setOpen] = useState(false);
