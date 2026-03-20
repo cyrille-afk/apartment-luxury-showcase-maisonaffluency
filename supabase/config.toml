@@ -19,3 +19,5 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = false
   [functions.scrape-competitors]
     verify_jwt = false
+  [functions.scrape-similarweb]
+    verify_jwt = false
