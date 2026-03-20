@@ -275,7 +275,7 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
       </div>
 
       <button type="submit" disabled={loading}
-        className="w-full py-3 bg-[hsl(var(--gold))] text-white font-body text-sm uppercase tracking-[0.2em] rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 font-bold">
+        className="w-full py-3 bg-foreground text-background font-body text-sm uppercase tracking-[0.2em] rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
         {loading ? "Submitting..." : "Submit Application"}
       </button>
     </form>
