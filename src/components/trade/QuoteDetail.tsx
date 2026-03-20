@@ -424,15 +424,50 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </div>
             </div>
 
-            <button
-              onClick={() => setTradeDiscount(!tradeDiscount)}
-              className="flex items-center gap-2"
-            >
-              <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
-                <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
+            <div className="flex items-center gap-4 flex-wrap">
+              <button
+                onClick={() => setTradeDiscount(!tradeDiscount)}
+                className="flex items-center gap-2"
+              >
+                <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
+                  <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
+                </div>
+                <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">8% Discount</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setGstEnabled(!gstEnabled)}
+                  className="flex items-center gap-2"
+                >
+                  <div className={`relative w-8 h-[18px] rounded-full transition-colors ${gstEnabled ? "bg-foreground" : "bg-border"}`}>
+                    <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${gstEnabled ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
+                  </div>
+                  <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">GST</span>
+                </button>
+                {gstEnabled && (
+                  editingGstRate ? (
+                    <input
+                      type="number"
+                      value={gstRate}
+                      onChange={(e) => setGstRate(Math.max(0, Math.min(100, Number(e.target.value))))}
+                      onBlur={() => setEditingGstRate(false)}
+                      onKeyDown={(e) => e.key === "Enter" && setEditingGstRate(false)}
+                      autoFocus
+                      className="w-12 font-body text-[10px] text-foreground bg-transparent border-b border-foreground outline-none text-center"
+                    />
+                  ) : (
+                    <button
+                      onClick={() => setEditingGstRate(true)}
+                      className="font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                      title="Click to edit tax rate"
+                    >
+                      ({gstRate}%)
+                    </button>
+                  )
+                )}
               </div>
-              <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">8% Discount</span>
-            </button>
+            </div>
           </div>
         )}
 
