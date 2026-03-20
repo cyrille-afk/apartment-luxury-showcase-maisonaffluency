@@ -660,8 +660,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             </div>
 
             {/* Divider */}
-            <div className="hidden lg:block w-px bg-border shrink-0" />
-            <div className="block lg:hidden h-px bg-border my-10" />
+            <div className="hidden lg:block w-px bg-border shrink-0 order-2" />
+            <div className="block lg:hidden h-px bg-border my-10 order-2" />
 
             {/* Right — Registration Form */}
             <div className="flex-1 lg:pl-12">
