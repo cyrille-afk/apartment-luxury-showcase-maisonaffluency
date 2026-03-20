@@ -402,9 +402,19 @@ const TradeLanding = () => {
         </div>
 
         {/* ─── 3D Studio Showcase ─── */}
-        <div className="w-full py-8 md:py-12">
-          <div className="max-w-6xl mx-auto px-6 md:px-12">
-            <div className="border-2 border-accent/40 rounded-sm bg-background px-6 md:px-12 py-16 md:py-24">
+        <div className="w-full relative overflow-hidden">
+          {/* Full-bleed background image */}
+          <div className="absolute inset-0">
+            <img
+              src={studioAfterImg}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-foreground/80 backdrop-blur-sm" />
+          </div>
+          <div className="relative max-w-6xl mx-auto px-6 md:px-12 py-16 md:py-24">
+            <div className="border border-accent/30 rounded-sm bg-foreground/20 backdrop-blur-md px-6 md:px-12 py-12 md:py-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -413,10 +423,10 @@ const TradeLanding = () => {
               className="text-center mb-12 md:mb-16"
             >
               <p className="font-body text-xs tracking-[0.25em] uppercase text-accent mb-6">Exclusive Tool</p>
-              <h2 className="font-display text-2xl md:text-4xl lg:text-5xl text-foreground mb-5">
+              <h2 className="font-display text-2xl md:text-4xl lg:text-5xl text-background mb-5">
                 From Floor Plan to Furnished
               </h2>
-              <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground max-w-2xl mx-auto">
+              <p className="font-body text-sm md:text-base leading-relaxed text-background/70 max-w-2xl mx-auto">
                 Upload your architectural drawings and watch them transform into fully furnished 3D visualisations, 
                 featuring products from our curated portfolio. A first-of-its-kind tool for design professionals.
               </p>
@@ -431,7 +441,7 @@ const TradeLanding = () => {
                 className="relative"
               >
                 <p className="font-body text-[10px] tracking-[0.2em] uppercase text-accent mb-3">Your Drawing</p>
-                <div className="aspect-[4/3] rounded-sm overflow-hidden border border-border">
+                <div className="aspect-[4/3] rounded-sm overflow-hidden border border-background/10">
                   <img
                     src={studioBeforeImg}
                     alt="Architectural floor plan sketch"
@@ -449,7 +459,7 @@ const TradeLanding = () => {
                 className="relative"
               >
                 <p className="font-body text-[10px] tracking-[0.2em] uppercase text-accent mb-3">3D Studio Result</p>
-                <div className="aspect-[4/3] rounded-sm overflow-hidden border border-border">
+                <div className="aspect-[4/3] rounded-sm overflow-hidden border border-background/10">
                   <img
                     src={studioAfterImg}
                     alt="3D furnished room visualization"
@@ -467,7 +477,7 @@ const TradeLanding = () => {
               transition={{ duration: 0.5, delay: 0.5 }}
               className="text-center mt-10 md:mt-14"
             >
-              <div className="flex flex-wrap justify-center gap-8 md:gap-14 font-body text-xs tracking-wider uppercase text-muted-foreground">
+              <div className="flex flex-wrap justify-center gap-8 md:gap-14 font-body text-xs tracking-wider uppercase text-background/50">
                 <span>AI-Powered Rendering</span>
                 <span>Up to 10 Products</span>
                 <span>Before / After Comparison</span>
