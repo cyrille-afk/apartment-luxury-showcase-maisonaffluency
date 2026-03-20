@@ -15,3 +15,5 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = false
   [functions.send-weekly-digest]
     verify_jwt = true
+  [functions.og-image]
+    verify_jwt = false

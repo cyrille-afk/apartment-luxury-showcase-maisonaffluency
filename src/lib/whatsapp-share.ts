@@ -1,10 +1,24 @@
 /**
  * WhatsApp share utility with deep-link support and mobile compatibility.
+ *
+ * For pages that need rich OG previews (trade/program, journal, etc.) we route
+ * through the `og-image` edge function which serves static HTML with the correct
+ * OG tags and then redirects the browser to the real SPA page.
  */
 
 const SITE_URL = "https://maisonaffluency.com";
 
+const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
+const OG_FUNCTION_BASE = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image`;
+
 type ShareSection = "designer" | "collectible" | "atelier";
+
+/**
+ * Build an OG-friendly URL for a specific SPA route.
+ * Crawlers see proper OG tags; real browsers are redirected to the SPA.
+ */
+export const buildOgUrl = (path: string) =>
+  `${OG_FUNCTION_BASE}?path=${encodeURIComponent(path)}`;
 
 /**
  * Build a deep-link URL for a specific designer/brand profile.
@@ -24,6 +38,23 @@ export const shareOnWhatsApp = (message: string) => {
   } else {
     window.open(waUrl, "_blank");
   }
+};
+
+/**
+ * Share a specific SPA page on WhatsApp with proper OG preview support.
+ * The shared URL goes through the og-image edge function so crawlers
+ * see the correct title, description, and image.
+ */
+export const sharePageOnWhatsApp = (
+  path: string,
+  title: string,
+  subtitle?: string
+) => {
+  const url = buildOgUrl(path);
+  const message = subtitle
+    ? `${title} – ${subtitle}: ${url}`
+    : `${title}: ${url}`;
+  shareOnWhatsApp(message);
 };
 
 /**
