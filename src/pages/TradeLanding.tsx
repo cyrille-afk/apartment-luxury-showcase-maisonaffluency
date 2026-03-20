@@ -315,55 +315,7 @@ const TradeLanding = () => {
         {/* ─── Mobile: Accordion | Desktop: 50/50 split ─── */}
 
         {/* Mobile accordion */}
-        <div className="md:hidden px-5 pb-8">
-          <div className="border-t border-border">
-            {benefits.map((benefit, index) => (
-              <div key={index} className="border-b border-border">
-                <button
-                  onClick={() => toggleAccordion(index)}
-                  className="w-full flex items-center justify-between py-4 text-left"
-                >
-                  <h2 className="font-display text-base text-foreground pr-4">
-                    {benefit.title}
-                  </h2>
-                  <ChevronDown
-                    className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 ${
-                      openIndex === index ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                <AnimatePresence>
-                  {openIndex === index && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="overflow-hidden"
-                    >
-                        <div className="pb-5">
-                          <p className="font-body text-[11px] tracking-[0.25em] uppercase text-accent mb-5">Trade Program Benefits</p>
-                          <div className="w-full aspect-[4/3] rounded-sm overflow-hidden mb-4">
-                            <img
-                              src={benefit.image}
-                              alt={benefit.title}
-                              className="w-full h-full object-cover object-bottom"
-                              loading="lazy"
-                              decoding="async"
-                              data-pin-nopin="true"
-                            />
-                          </div>
-                          <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify">
-                            {benefit.description}
-                          </p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-        </div>
+        <MobileBenefitsCarousel benefits={benefits} />
 
         {/* Desktop: alternating 50/50 split — narrower container */}
         <div className="hidden md:block max-w-6xl mx-auto px-8 lg:px-12 py-8">
