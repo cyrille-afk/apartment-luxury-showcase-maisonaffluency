@@ -6,8 +6,9 @@ import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
-import studioBeforeImg from "@/assets/studio-before-floorplan.jpg";
-import studioAfterImg from "@/assets/studio-after-render.jpg";
+import studioBeforeImgFallback from "@/assets/studio-before-floorplan.jpg";
+import studioAfterImgFallback from "@/assets/studio-after-render.jpg";
+import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
 
 const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
@@ -114,6 +115,19 @@ const TradeLanding = () => {
   const formRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
+
+  // Overridable 3D Studio images from HeroManager
+  const [studioBeforeImg, setStudioBeforeImg] = useState(studioBeforeImgFallback);
+  const [studioAfterImg, setStudioAfterImg] = useState(studioAfterImgFallback);
+
+  useEffect(() => {
+    loadHeroOverrides().then(() => {
+      const before = getHeroCacheEntry("landing-3d-before");
+      const after = getHeroCacheEntry("landing-3d-after");
+      if (before) setStudioBeforeImg(before.image_url);
+      if (after) setStudioAfterImg(after.image_url);
+    });
+  }, []);
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });

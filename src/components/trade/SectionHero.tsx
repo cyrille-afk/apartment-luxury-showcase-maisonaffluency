@@ -12,6 +12,7 @@ const heroDefaults: Record<string, { id: string; gravity?: "auto" | "face" | "ce
   samples: { id: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v" },
   "3d-studio": { id: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v" },
   axonometric: { id: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v" },
+  boards: { id: "v1773726568/AffluencySG_081_dk5rn7" },
 };
 
 interface SectionHeroProps {
@@ -113,6 +114,12 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
 export function invalidateHeroCache() {
   heroCache = null;
   heroCachePromise = null;
+}
+
+// Expose the cache loader + lookup for non-SectionHero consumers (e.g. landing page)
+export { loadHeroOverrides, heroDefaults };
+export function getHeroCacheEntry(key: string) {
+  return heroCache?.[key] ?? null;
 }
 
 export default SectionHero;
