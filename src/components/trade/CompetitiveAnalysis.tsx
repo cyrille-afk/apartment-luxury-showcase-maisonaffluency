@@ -23,6 +23,7 @@ import {
   fetchCompetitorTraffic,
   upsertTrafficEntry,
   triggerCompetitorScrape,
+  triggerSimilarWebScrape,
 } from "@/lib/api/competitors";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
