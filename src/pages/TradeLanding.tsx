@@ -117,7 +117,7 @@ const TradeLanding = () => {
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
   const [mobileFormExpanded, setMobileFormExpanded] = useState(false);
-  const [mobileEmail, setMobileEmail] = useState("");
+  const [heroEmail, setHeroEmail] = useState("");
   const [shareCopied, setShareCopied] = useState(false);
 
   // Overridable 3D Studio images from HeroManager
