@@ -72,7 +72,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const isConfirmed = quoteStatus === "confirmed" || quoteStatus === "deposit_paid" || quoteStatus === "paid";
   const isDepositPaid = quoteStatus === "deposit_paid";
   const isFullyPaid = quoteStatus === "paid";
-  const isReadOnly = !isDraft;
+  const isReadOnly = !isDraft && !isSuperAdmin;
 
   const createdDate = new Date(quoteCreatedAt);
   const expiryDate = new Date(createdDate);
