@@ -819,11 +819,18 @@ const TradeAxonometric = () => {
               const userName = profile ? `${profile.first_name} ${profile.last_name}`.trim() : "Unknown";
               return (
                 <div key={req.id} className="flex items-center gap-4 px-5 py-3 hover:bg-muted/20 transition-colors">
-                  <img src={req.image_url} alt="" className="w-16 h-16 object-cover rounded border border-border shrink-0" />
+                  {req.request_type === "3d_model" ? (
+                    <div className="w-16 h-16 rounded border border-border shrink-0 flex items-center justify-center bg-muted/30">
+                      <Upload className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <img src={req.image_url} alt="" className="w-16 h-16 object-cover rounded border border-border shrink-0" />
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="font-display text-sm text-foreground">{req.project_name || "Untitled"}</p>
                     <p className="font-body text-xs text-muted-foreground">
-                      {userName}{profile?.company ? ` · ${profile.company}` : ""} · {req.request_type} · {format(new Date(req.created_at), "d MMM yyyy")}
+                      {userName}{profile?.company ? ` · ${profile.company}` : ""} · {req.request_type === "3d_model" ? "3D Model" : req.request_type} · {format(new Date(req.created_at), "d MMM yyyy")}
+                    </p>
                     </p>
                     {req.notes && <p className="font-body text-xs text-muted-foreground/70 line-clamp-1 mt-0.5">{req.notes}</p>}
                   </div>
