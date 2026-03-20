@@ -204,15 +204,37 @@ const TradeLanding = () => {
             <p className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white mt-3 sm:mt-5 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light max-w-2xl">
               Trade Program
             </p>
-            <div className="flex items-center gap-3 mt-10 sm:mt-14 w-full max-w-lg px-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const email = formData.get("email") as string;
+                if (email) {
+                  // Pre-fill the inline form's email and scroll to it
+                  const emailInput = formRef.current?.querySelector<HTMLInputElement>('input[type="email"]');
+                  if (emailInput) {
+                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                    nativeInputValueSetter?.call(emailInput, email);
+                    emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  }
+                }
+                scrollToForm();
+              }}
+              className="flex items-center gap-3 mt-10 sm:mt-14 w-full max-w-lg px-4"
+            >
+              <input
+                type="email"
+                name="email"
+                placeholder="Your work email"
+                className="flex-1 bg-white border border-border/30 focus:border-border/60 text-foreground placeholder:text-muted-foreground/60 px-5 py-3 font-body text-xs uppercase tracking-[0.15em] rounded-full transition-all duration-300 outline-none focus:ring-1 focus:ring-border/30"
+              />
               <button
-                type="button"
-                onClick={scrollToForm}
-                className="mx-auto bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] px-8 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[160px] text-center whitespace-nowrap"
+                type="submit"
+                className="bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[120px] text-center whitespace-nowrap"
               >
-                Apply Now
+                Join Now
               </button>
-            </div>
+            </form>
             <p className="mt-5 font-body text-xs text-white/70 tracking-wide">
               Already registered?{" "}
               <Link to="/trade/login" className="text-white underline underline-offset-2 hover:text-white/90 transition-colors">
