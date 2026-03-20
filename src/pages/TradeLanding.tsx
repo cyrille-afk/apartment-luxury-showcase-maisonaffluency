@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown, Quote } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -140,6 +140,110 @@ const TradeLanding = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
+/* ─── Mobile Benefits Carousel ─── */
+const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./TradeLanding").default extends never ? any : { title: string; description: string; image: string }[] }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollLeft = el.scrollLeft;
+    const cardWidth = el.offsetWidth * 0.85;
+    setActiveIndex(Math.round(scrollLeft / cardWidth));
+  }, []);
+
+  return (
+    <div className="md:hidden pb-8">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-5"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
+        {benefits.map((benefit: any, index: number) => (
+          <div
+            key={index}
+            className="snap-center shrink-0 w-[85%] rounded-sm overflow-hidden border border-border bg-background"
+          >
+            <div className="aspect-[4/3] overflow-hidden">
+              <img
+                src={benefit.image}
+                alt={benefit.title}
+                className="w-full h-full object-cover object-bottom"
+                loading="lazy"
+              />
+            </div>
+            <div className="p-5">
+              <p className="font-body text-[10px] tracking-[0.25em] uppercase text-accent mb-3">Trade Program Benefits</p>
+              <h3 className="font-display text-base text-foreground mb-2">{benefit.title}</h3>
+              <p className="font-body text-sm leading-relaxed text-muted-foreground">{benefit.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Dots */}
+      <div className="flex justify-center gap-2 mt-4">
+        {benefits.map((_: any, i: number) => (
+          <span key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === activeIndex ? "bg-accent" : "bg-border"}`} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Mobile Testimonials (truncated) ─── */
+const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; name: string; title: string; location: string }[] }) => {
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? testimonials : testimonials.slice(0, 1);
+
+  return (
+    <>
+      {/* Desktop: full grid */}
+      <div className="hidden md:grid grid-cols-3 gap-8">
+        {testimonials.map((t, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.6, delay: i * 0.15 }}
+            className="relative bg-background border border-border rounded-sm p-8 flex flex-col"
+          >
+            <Quote className="w-5 h-5 text-accent/50 mb-4 shrink-0" />
+            <p className="font-body text-sm leading-relaxed text-muted-foreground flex-1 text-justify">"{t.quote}"</p>
+            <div className="mt-6 pt-4 border-t border-border">
+              <p className="font-display text-sm text-foreground">{t.name}</p>
+              <p className="font-body text-xs text-muted-foreground mt-0.5">{t.title} · {t.location}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Mobile: truncated */}
+      <div className="md:hidden space-y-4">
+        {visible.map((t, i) => (
+          <div key={i} className="bg-background border border-border rounded-sm p-6 flex flex-col">
+            <Quote className="w-5 h-5 text-accent/50 mb-4 shrink-0" />
+            <p className="font-body text-sm leading-relaxed text-muted-foreground flex-1">"{t.quote}"</p>
+            <div className="mt-4 pt-3 border-t border-border">
+              <p className="font-display text-sm text-foreground">{t.name}</p>
+              <p className="font-body text-xs text-muted-foreground mt-0.5">{t.title} · {t.location}</p>
+            </div>
+          </div>
+        ))}
+        {!showAll && testimonials.length > 1 && (
+          <button
+            onClick={() => setShowAll(true)}
+            className="w-full py-3 font-body text-xs tracking-[0.15em] uppercase text-accent border border-accent/30 rounded-sm hover:bg-accent/5 transition-colors"
+          >
+            Show {testimonials.length - 1} more reviews
+          </button>
+        )}
+      </div>
+    </>
+  );
+};
 
   return (
     <>
@@ -315,55 +419,7 @@ const TradeLanding = () => {
         {/* ─── Mobile: Accordion | Desktop: 50/50 split ─── */}
 
         {/* Mobile accordion */}
-        <div className="md:hidden px-5 pb-8">
-          <div className="border-t border-border">
-            {benefits.map((benefit, index) => (
-              <div key={index} className="border-b border-border">
-                <button
-                  onClick={() => toggleAccordion(index)}
-                  className="w-full flex items-center justify-between py-4 text-left"
-                >
-                  <h2 className="font-display text-base text-foreground pr-4">
-                    {benefit.title}
-                  </h2>
-                  <ChevronDown
-                    className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-300 ${
-                      openIndex === index ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                <AnimatePresence>
-                  {openIndex === index && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="overflow-hidden"
-                    >
-                        <div className="pb-5">
-                          <p className="font-body text-[11px] tracking-[0.25em] uppercase text-accent mb-5">Trade Program Benefits</p>
-                          <div className="w-full aspect-[4/3] rounded-sm overflow-hidden mb-4">
-                            <img
-                              src={benefit.image}
-                              alt={benefit.title}
-                              className="w-full h-full object-cover object-bottom"
-                              loading="lazy"
-                              decoding="async"
-                              data-pin-nopin="true"
-                            />
-                          </div>
-                          <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify">
-                            {benefit.description}
-                          </p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-        </div>
+        <MobileBenefitsCarousel benefits={benefits} />
 
         {/* Desktop: alternating 50/50 split — narrower container */}
         <div className="hidden md:block max-w-6xl mx-auto px-8 lg:px-12 py-8">
@@ -508,29 +564,7 @@ const TradeLanding = () => {
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-              {testimonials.map((t, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.6, delay: i * 0.15 }}
-                  className="relative bg-background border border-border rounded-sm p-6 md:p-8 flex flex-col"
-                >
-                  <Quote className="w-5 h-5 text-accent/50 mb-4 shrink-0" />
-                  <p className="font-body text-sm leading-relaxed text-muted-foreground flex-1 text-justify">
-                    "{t.quote}"
-                  </p>
-                  <div className="mt-6 pt-4 border-t border-border">
-                    <p className="font-display text-sm text-foreground">{t.name}</p>
-                    <p className="font-body text-xs text-muted-foreground mt-0.5">
-                      {t.title} · {t.location}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            <MobileTestimonials testimonials={testimonials} />
           </div>
         </div>
 
