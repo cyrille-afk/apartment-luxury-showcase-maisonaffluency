@@ -46,10 +46,6 @@ const leftNavItems = [{
 }];
 
 const rightNavItems = [{
-  label: "Catalogue",
-  href: "/catalogue",
-  icon: LayoutGrid,
-}, {
   label: "Trade Program",
   href: "/trade/program",
   icon: Briefcase,
