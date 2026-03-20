@@ -720,9 +720,9 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               >
                 Apply Now
               </button>
-              <p className="font-body text-sm text-white/70">
+              <p className="font-body text-sm text-white font-medium">
                 Already a member?{" "}
-                <Link to="/trade/login" className="text-white underline underline-offset-4 hover:text-white/80 transition-colors">
+                <Link to="/trade/login" className="text-white underline underline-offset-4 hover:text-white/90 transition-colors font-bold">
                   Sign in
                 </Link>
               </p>
