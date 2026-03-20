@@ -49,14 +49,17 @@ export async function fetchPublishedArticles(limit?: number) {
   return (data || []) as JournalArticle[];
 }
 
-export async function fetchArticleBySlug(slug: string) {
-  const { data, error } = await supabase
+export async function fetchArticleBySlug(slug: string, allowDraft = false) {
+  let query = supabase
     .from("journal_articles")
     .select("*")
-    .eq("slug", slug)
-    .eq("is_published", true)
-    .single();
+    .eq("slug", slug);
 
+  if (!allowDraft) {
+    query = query.eq("is_published", true);
+  }
+
+  const { data, error } = await query.single();
   if (error) throw error;
   return data as JournalArticle;
 }
