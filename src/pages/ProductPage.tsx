@@ -119,7 +119,7 @@ const ProductPage = () => {
     ],
   };
 
-  const inquiryMailto = `mailto:concierge@myaffluency.com?subject=${encodeURIComponent(`Inquiry: ${product.product_name} by ${product.brand_name}`)}&body=${encodeURIComponent(`Hi,\n\nI'd like to inquire about the ${product.product_name} by ${product.brand_name}.\n\nPlease share pricing and availability details.\n\nThank you.`)}`;
+  const bookingMailto = `mailto:concierge@myaffluency.com?subject=${encodeURIComponent(`Viewing Request: ${product.product_name} by ${product.brand_name}`)}&body=${encodeURIComponent(`Hi,\n\nI'd like to book a private viewing to see the ${product.product_name} by ${product.brand_name} at your showroom.\n\nPlease let me know your available times.\n\nThank you.`)}`;
 
   return (
     <>
