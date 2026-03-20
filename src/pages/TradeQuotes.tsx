@@ -207,6 +207,13 @@ const TradeQuotes = () => {
                       )}
                     </div>
                     <p className="font-body text-[10px] text-muted-foreground">
+                      {showAll && quote.profiles && (
+                        <span className="font-medium text-foreground mr-1">
+                          {[quote.profiles.first_name, quote.profiles.last_name].filter(Boolean).join(" ") || quote.profiles.email}
+                          {quote.profiles.company ? ` · ${quote.profiles.company}` : ""}
+                          {" · "}
+                        </span>
+                      )}
                       Created {new Date(quote.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                       {quote.submitted_at && ` · Submitted ${new Date(quote.submitted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
                     </p>
