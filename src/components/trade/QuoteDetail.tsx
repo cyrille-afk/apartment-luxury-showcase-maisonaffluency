@@ -52,7 +52,7 @@ const currencySymbol = (c: string) => {
 };
 
 const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack, onStatusChange }: QuoteDetailProps) => {
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   const [items, setItems] = useState<QuoteItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
