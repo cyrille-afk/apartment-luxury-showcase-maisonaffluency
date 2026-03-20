@@ -36,9 +36,26 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const [showHoverImage, setShowHoverImage] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setShowHoverImage(false);
-  }, [product?.id]);
+  // Related products from same brand
+  const relatedProducts = useMemo(() => {
+    if (!product) return [];
+    const all = getAllTradeProducts();
+    return all
+      .filter(p => p.brand_name === product.brand_name && p.id !== product.id && p.image_url)
+      .slice(0, 4)
+      .map(p => ({
+        id: p.id,
+        product_name: p.product_name,
+        subtitle: p.subtitle,
+        image_url: p.image_url,
+        hover_image_url: p.hover_image_url,
+        brand_name: p.brand_name,
+        materials: p.materials,
+        dimensions: p.dimensions,
+        category: p.category,
+        subcategory: p.subcategory,
+      } as TradeProductLightboxItem));
+  }, [product?.id, product?.brand_name]);
 
   if (!product) return null;
 
