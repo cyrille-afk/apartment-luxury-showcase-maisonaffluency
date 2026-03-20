@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText, Lock, Unlock, CheckCircle2, SplitSquareHorizontal,
+  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText, Lock, Unlock, CheckCircle2, SplitSquareHorizontal, Undo2,
 } from "lucide-react";
 import BeforeAfterSplit from "./BeforeAfterSplit";
 
@@ -1021,9 +1021,23 @@ export default function ProposalBuilder({
               className="font-body text-xs max-w-xs h-7"
             />
             {removeMarkers.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearMarkers} className="gap-1 text-xs h-7">
-                <Trash2 className="w-3 h-3" />Clear markers
-              </Button>
+              <>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  const updated = removeMarkers.slice(0, -1);
+                  setRemoveMarkers(updated);
+                  if (updated.length > 0) {
+                    const descriptions = updated.map((m) => m.label).join(", ");
+                    setRefinementPrompt(`Remove the following items: ${descriptions}. Keep everything else exactly the same.`);
+                  } else {
+                    setRefinementPrompt("");
+                  }
+                }} className="gap-1 text-xs h-7">
+                  <Undo2 className="w-3 h-3" />Undo last
+                </Button>
+                <Button variant="ghost" size="sm" onClick={clearMarkers} className="gap-1 text-xs h-7">
+                  <Trash2 className="w-3 h-3" />Clear all
+                </Button>
+              </>
             )}
           </div>
         )}
