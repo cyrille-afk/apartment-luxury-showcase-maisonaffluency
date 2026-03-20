@@ -1021,9 +1021,23 @@ export default function ProposalBuilder({
               className="font-body text-xs max-w-xs h-7"
             />
             {removeMarkers.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearMarkers} className="gap-1 text-xs h-7">
-                <Trash2 className="w-3 h-3" />Clear markers
-              </Button>
+              <>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  const updated = removeMarkers.slice(0, -1);
+                  setRemoveMarkers(updated);
+                  if (updated.length > 0) {
+                    const descriptions = updated.map((m) => m.label).join(", ");
+                    setRefinementPrompt(`Remove the following items: ${descriptions}. Keep everything else exactly the same.`);
+                  } else {
+                    setRefinementPrompt("");
+                  }
+                }} className="gap-1 text-xs h-7">
+                  <Undo2 className="w-3 h-3" />Undo last
+                </Button>
+                <Button variant="ghost" size="sm" onClick={clearMarkers} className="gap-1 text-xs h-7">
+                  <Trash2 className="w-3 h-3" />Clear all
+                </Button>
+              </>
             )}
           </div>
         )}
