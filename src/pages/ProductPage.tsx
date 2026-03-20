@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, Layers, Clock, Mail } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, Layers, Clock, Calendar, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
