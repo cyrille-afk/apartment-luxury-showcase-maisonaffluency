@@ -44,10 +44,21 @@ serve(async () => {
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
+  // Fetch active products for individual product pages
+  const { data: products } = await supabase
+    .from("trade_products")
+    .select("id, updated_at")
+    .eq("is_active", true)
+    .order("updated_at", { ascending: false });
+
   const staticEntries = STATIC_URLS.map((u) => urlEntry(u.loc, today, u.changefreq, u.priority));
 
   const articleEntries = (articles || []).map((a: { slug: string; updated_at: string }) =>
     urlEntry(`/journal/${a.slug}`, a.updated_at.split("T")[0], "monthly", "0.7")
+  );
+
+  const productEntries = (products || []).map((p: { id: string; updated_at: string }) =>
+    urlEntry(`/product/${p.id}`, p.updated_at.split("T")[0], "weekly", "0.6")
   );
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
