@@ -214,7 +214,7 @@ const TradeLanding = () => {
             className="w-full h-full object-cover"
             data-pin-nopin="true"
           />
-          <div className="absolute inset-0 bg-foreground/30" />
+          <div className="absolute inset-0 bg-foreground/20" />
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -411,7 +411,7 @@ const TradeLanding = () => {
               className="w-full h-full object-cover"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-foreground/30" />
+            <div className="absolute inset-0 bg-foreground/20" />
           </div>
           <div className="relative max-w-6xl mx-auto px-6 md:px-12 py-16 md:py-24">
             <div className="border border-accent/30 rounded-sm bg-foreground/20 backdrop-blur-md px-6 md:px-12 py-12 md:py-16">
@@ -653,7 +653,7 @@ const TradeLanding = () => {
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url('https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto,c_fill,g_auto/v1773968016/ImgWeb_S25_PDW_Newsletter001_Article_03_1120x600_image002_Factory-_C2_A9GregSevaz_0_m5hi1i')" }}
           />
-          <div className="absolute inset-0 bg-foreground/30" />
+          <div className="absolute inset-0 bg-foreground/20" />
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
