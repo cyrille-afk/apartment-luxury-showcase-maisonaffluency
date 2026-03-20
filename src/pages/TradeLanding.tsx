@@ -547,12 +547,12 @@ const TradeLanding = () => {
               >
                 Apply Now
               </button>
-              <Link
-                to="/trade/login"
-                className="font-body text-sm text-white/70 underline underline-offset-4 hover:text-white transition-colors"
-              >
-                Already a member? Sign in
-              </Link>
+              <p className="font-body text-sm text-white/70">
+                Already a member?{" "}
+                <Link to="/trade/login" className="text-white underline underline-offset-4 hover:text-white/80 transition-colors">
+                  Sign in
+                </Link>
+              </p>
             </div>
           </motion.div>
         </div>
