@@ -54,6 +54,12 @@ const benefits = [
     image: cloudinaryUrl("v1773758590/Screen_Shot_2026-03-17_at_10.40.56_PM_mlwtop", { width: 1400, quality: "auto:good", crop: "fill" }),
   },
   {
+    title: "Project Folders",
+    description:
+      "Maison Affluency Trade Program gives you access to smart professional tools — save your favourite items and easily organise them in project folders, with sharable links to colleagues and clients.",
+    image: projectFoldersImg,
+  },
+  {
     title: "Trade Pricing & Bespoke Quotations",
     description:
       "View pricing instantly when you sign in with your trade account and save time with our bespoke quotations, a comprehensive multi-product document listing all prices at a glance.",
@@ -64,12 +70,6 @@ const benefits = [
     description:
       "Every material speaks to authenticity and craftsmanship. Access the most comprehensive material library featuring a vast, curated selection of items or request the ones you truly desire.",
     image: cloudinaryUrl("v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v", { width: 1400, quality: "auto:good", crop: "fill" }),
-  },
-  {
-    title: "Project Folders",
-    description:
-      "Maison Affluency Trade Program gives you access to smart professional tools — save your favourite items and easily organise them in project folders, with sharable links to colleagues and clients.",
-    image: projectFoldersImg,
   },
   {
     title: "Consolidated Insured Shipping",
