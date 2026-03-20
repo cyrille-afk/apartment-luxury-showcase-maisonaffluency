@@ -210,6 +210,87 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Send admin email summary
+    const totalDesigners = results.reduce((sum: number, r: any) => sum + (r.designers_found || 0), 0);
+    const successfulGalleries = results.filter((r: any) => r.status === "success");
+    const failedGalleries = results.filter((r: any) => r.status === "error");
+
+    const ADMIN_EMAILS = [
+      "cyrille@maisonaffluency.com",
+      "gregoire@maisonaffluency.com",
+    ];
+
+    const galleryRows = results
+      .map((r: any) => `<tr><td style="padding:8px 12px;border-bottom:1px solid #e5e5e5;">${r.gallery}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e5e5;text-align:center;">${r.designers_found ?? "—"}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e5e5;text-align:center;color:${r.status === "success" ? "#2d6a4f" : "#c1121f"};">${r.status}</td></tr>`)
+      .join("");
+
+    const emailHtml = `
+      <div style="font-family: Georgia, serif; max-width: 640px; margin: 0 auto; padding: 32px; background: #faf9f6;">
+        <h2 style="font-size: 20px; color: #1a1a1a; margin-bottom: 4px;">Competitive Intelligence — Weekly Scrape Complete</h2>
+        <p style="font-size: 13px; color: #888; margin-top: 0;">${new Date().toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
+        <div style="display: flex; gap: 16px; margin: 24px 0;">
+          <div style="background: #fff; border-radius: 8px; padding: 16px 20px; flex: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+            <div style="font-size: 28px; font-weight: 700; color: #1a1a1a;">${totalDesigners}</div>
+            <div style="font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Designers Found</div>
+          </div>
+          <div style="background: #fff; border-radius: 8px; padding: 16px 20px; flex: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+            <div style="font-size: 28px; font-weight: 700; color: #1a1a1a;">${auctionResults.length}</div>
+            <div style="font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Auction Lots</div>
+          </div>
+          <div style="background: #fff; border-radius: 8px; padding: 16px 20px; flex: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+            <div style="font-size: 28px; font-weight: 700; color: ${failedGalleries.length > 0 ? "#c1121f" : "#2d6a4f"};">${successfulGalleries.length}/${results.length}</div>
+            <div style="font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Galleries Scraped</div>
+          </div>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+          <thead><tr style="background: #1a1a1a; color: #fff;">
+            <th style="padding: 10px 12px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Gallery</th>
+            <th style="padding: 10px 12px; text-align: center; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Designers</th>
+            <th style="padding: 10px 12px; text-align: center; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Status</th>
+          </tr></thead>
+          <tbody>${galleryRows}</tbody>
+        </table>
+        <p style="font-size: 13px; color: #555; margin-top: 24px; line-height: 1.6;">
+          View the full analysis in <a href="https://www.maisonaffluency.com/trade/insights" style="color: #b8860b;">Trade Insights → Competitive Intelligence</a>.
+        </p>
+        <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 24px 0;" />
+        <p style="font-size: 11px; color: #999;">Maison Affluency · Automated Competitive Intelligence Report</p>
+      </div>
+    `;
+
+    for (const email of ADMIN_EMAILS) {
+      try {
+        await serviceClient.rpc("enqueue_email", {
+          queue_name: "transactional_emails",
+          payload: {
+            to: email,
+            subject: `Competitive Intel: ${totalDesigners} designers, ${auctionResults.length} auction lots collected`,
+            html: emailHtml,
+            from_name: "Maison Affluency Intelligence",
+          },
+        });
+      } catch (e) {
+        console.error(`Failed to enqueue scrape summary to ${email}:`, e);
+      }
+    }
+
+    // Also send in-app notifications
+    const { data: adminRoles } = await serviceClient
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin");
+
+    if (adminRoles && adminRoles.length > 0) {
+      const notifications = adminRoles.map((r: any) => ({
+        user_id: r.user_id,
+        type: "competitor_scrape",
+        title: "Weekly competitive scrape complete",
+        message: `Found ${totalDesigners} designers across ${successfulGalleries.length} galleries and ${auctionResults.length} auction lots.`,
+        link: "/trade/insights",
+      }));
+      await serviceClient.from("notifications").insert(notifications);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
