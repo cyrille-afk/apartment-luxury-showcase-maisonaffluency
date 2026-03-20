@@ -282,9 +282,7 @@ const TradeLanding = () => {
             Channeling the essence of high-end European craftsmanship and design, Maison Affluency is proud to work with the world's leading design professionals, including architects, interior designers, and real estate developers across the Middle East and Asia Pacific regions.
           </p>
           <p className="w-[70rem] max-w-full font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify mt-4">
-            Our trade program is tailored for a community of professionals who value time, quality, and commitment. 
-            In addition to special rates, we offer the full assistance of a dedicated team to swiftly and efficiently 
-            manage custom requests. We oversee every aspect of design, sourcing, production, and delivery.
+            Tailored for a community of professionals who value time, quality, and commitment, Maison Affluency Trade Program unlocks a suite of exclusive benefits, specifically conceived to meet design professionals' needs and bring your creative visions to life. Whether it is creating a one-off bespoke piece or supporting you on larger-scale projects, Maison Affluency dedicated Trade Team provides customised support to deliver seamless luxury residential projects, from first contact to post-sale assistance.
           </p>
         </motion.div>
 
