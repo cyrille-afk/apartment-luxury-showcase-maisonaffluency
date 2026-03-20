@@ -20,11 +20,11 @@ import {
 const mainItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard },
   { title: "Showroom", url: "/trade/showroom", icon: MapPin },
+  { title: "Favorites", url: "/trade/favorites", icon: Heart },
+  { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
   { title: "Gallery", url: "/trade/gallery", icon: Image },
   { title: "Brand Library", url: "/trade/documents", icon: FolderOpen },
   { title: "Sample Requests", url: "/trade/samples", icon: Package },
-  { title: "Favorites", url: "/trade/favorites", icon: Heart },
-  { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
   { title: "3D Studio", url: "/trade/axonometric-requests", icon: Box },
   { title: "Settings", url: "/trade/settings", icon: Settings },
