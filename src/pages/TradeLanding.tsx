@@ -467,13 +467,14 @@ const TradeLanding = () => {
               transition={{ duration: 0.5, delay: 0.5 }}
               className="text-center mt-10 md:mt-14"
             >
-              <div className="flex flex-wrap justify-center gap-8 md:gap-14 font-body text-xs tracking-wider uppercase text-background/50">
+              <div className="flex flex-wrap justify-center gap-8 md:gap-14 font-body text-xs tracking-wider uppercase text-muted-foreground">
                 <span>AI-Powered Rendering</span>
                 <span>Up to 10 Products</span>
                 <span>Before / After Comparison</span>
                 <span>Wallcovering Application</span>
               </div>
             </motion.div>
+            </div>
           </div>
         </div>
 
