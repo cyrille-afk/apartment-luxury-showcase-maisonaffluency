@@ -210,6 +210,11 @@ const TradeAxonometric = () => {
   const [savingToGallery, setSavingToGallery] = useState(false);
   const [showSceneEditor, setShowSceneEditor] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
+  const [show3dSubmit, setShow3dSubmit] = useState(false);
+  const [model3dUrl, setModel3dUrl] = useState<string | null>(null);
+  const [model3dProjectName, setModel3dProjectName] = useState("");
+  const [model3dNotes, setModel3dNotes] = useState("");
+  const [submitting3dModel, setSubmitting3dModel] = useState(false);
   const [showProposal, setShowProposal] = useState(false);
   const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
@@ -769,7 +774,7 @@ const TradeAxonometric = () => {
             <Button
               variant={showDrafts ? "default" : "outline"}
               size="sm"
-              onClick={() => { setShowDrafts(!showDrafts); if (!showDrafts) setShowQueue(false); }}
+              onClick={() => { setShowDrafts(!showDrafts); if (!showDrafts) { setShowQueue(false); setShow3dSubmit(false); } }}
             >
               <EyeOff className="w-3.5 h-3.5 mr-1.5" />
               My Drafts
@@ -780,9 +785,17 @@ const TradeAxonometric = () => {
               )}
             </Button>
             <Button
+              variant={show3dSubmit ? "default" : "outline"}
+              size="sm"
+              onClick={() => { setShow3dSubmit(!show3dSubmit); if (!show3dSubmit) { setShowQueue(false); setShowDrafts(false); } }}
+            >
+              <Upload className="w-3.5 h-3.5 mr-1.5" />
+              Submit 3D Model
+            </Button>
+            <Button
               variant={showQueue ? "default" : "outline"}
               size="sm"
-              onClick={() => { setShowQueue(!showQueue); if (!showQueue) setShowDrafts(false); }}
+              onClick={() => { setShowQueue(!showQueue); if (!showQueue) { setShowDrafts(false); setShow3dSubmit(false); } }}
             >
               <Inbox className="w-3.5 h-3.5 mr-1.5" />
               Queue
@@ -806,20 +819,34 @@ const TradeAxonometric = () => {
               const userName = profile ? `${profile.first_name} ${profile.last_name}`.trim() : "Unknown";
               return (
                 <div key={req.id} className="flex items-center gap-4 px-5 py-3 hover:bg-muted/20 transition-colors">
-                  <img src={req.image_url} alt="" className="w-16 h-16 object-cover rounded border border-border shrink-0" />
+                  {req.request_type === "3d_model" ? (
+                    <div className="w-16 h-16 rounded border border-border shrink-0 flex items-center justify-center bg-muted/30">
+                      <Upload className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <img src={req.image_url} alt="" className="w-16 h-16 object-cover rounded border border-border shrink-0" />
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="font-display text-sm text-foreground">{req.project_name || "Untitled"}</p>
                     <p className="font-body text-xs text-muted-foreground">
-                      {userName}{profile?.company ? ` · ${profile.company}` : ""} · {req.request_type} · {format(new Date(req.created_at), "d MMM yyyy")}
+                      {userName}{profile?.company ? ` · ${profile.company}` : ""} · {req.request_type === "3d_model" ? "3D Model" : req.request_type} · {format(new Date(req.created_at), "d MMM yyyy")}
                     </p>
                     {req.notes && <p className="font-body text-xs text-muted-foreground/70 line-clamp-1 mt-0.5">{req.notes}</p>}
                   </div>
                   <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${req.status === "in_progress" ? "bg-blue-500/10 text-blue-700" : "bg-yellow-500/10 text-yellow-700"}`}>
                     {req.status === "in_progress" ? "In Progress" : "Pending"}
                   </span>
-                  <Button variant="outline" size="sm" onClick={() => loadFromQueue(req)}>
-                    <ArrowRight className="w-3.5 h-3.5 mr-1" />Process
-                  </Button>
+                  {req.request_type === "3d_model" ? (
+                    <a href={req.image_url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="sm">
+                        <Download className="w-3.5 h-3.5 mr-1" />Download
+                      </Button>
+                    </a>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => loadFromQueue(req)}>
+                      <ArrowRight className="w-3.5 h-3.5 mr-1" />Process
+                    </Button>
+                  )}
                 </div>
               );
             })}
@@ -968,31 +995,128 @@ const TradeAxonometric = () => {
                 <div className="space-y-3">
                   <SourceUpload onSourceReady={(url) => setSourceImage(url)} />
 
-                  <div className="border-t border-border pt-3 space-y-2">
+        {/* Submit 3D Model Panel */}
+        {show3dSubmit && (
+          <div className="border border-border rounded-lg p-6 space-y-5">
+            <div>
+              <h2 className="font-display text-base text-foreground mb-1">Submit 3D Model</h2>
+              <p className="font-body text-xs text-muted-foreground">
+                Upload a SketchUp (.skp) or FBX file for the team to process in 3ds Max. This creates a request in the queue — distinct from AI-powered floor plan transformations.
+              </p>
+            </div>
+
+            <div className="space-y-4 max-w-lg">
+              <div className="space-y-1.5">
+                <label className="font-body text-xs text-foreground font-medium">Project Name *</label>
+                <Input
+                  value={model3dProjectName}
+                  onChange={(e) => setModel3dProjectName(e.target.value)}
+                  placeholder="e.g. Marina Bay Residence — Living Room"
+                  maxLength={200}
+                  className="font-body text-xs"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-body text-xs text-foreground font-medium">3D Model File *</label>
+                {model3dUrl ? (
+                  <div className="flex items-center gap-3 bg-muted/30 rounded-md px-3 py-2.5 border border-border">
+                    <Upload className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-body text-xs text-foreground truncate">{model3dUrl.split('/').pop()}</p>
+                      <p className="font-body text-[10px] text-muted-foreground">File uploaded successfully</p>
+                    </div>
+                    <button onClick={() => setModel3dUrl(null)} className="text-muted-foreground hover:text-foreground transition-colors">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
                     <p className="font-body text-[11px] text-muted-foreground">
-                      Have a <strong>Revit</strong> or <strong>SketchUp</strong> model? Export as <strong>.fbx</strong> (Revit: File → Export → FBX) or upload your <strong>.skp</strong> file directly. Both formats preserve geometry, materials, cameras & lights for 3ds Max rendering.
+                      Revit users: export as FBX (File → Export → FBX) to preserve geometry, materials & lights.
                     </p>
                     <CloudUpload
                       folder="axonometric-sources"
                       accept=".fbx,.skp,application/octet-stream"
-                      label="Upload .fbx or .skp file"
-                      onUpload={async (urls) => {
-                        if (urls.length > 0) {
-                          setSourceImage(urls[0]);
-                          const ext = urls[0].split('.').pop()?.toLowerCase() || 'fbx';
-                          toast({ title: `${ext === 'skp' ? 'SketchUp' : 'FBX'} file uploaded`, description: "File stored — select a generation mode to proceed." });
-                          // Notify admins
-                          try {
-                            await supabase.functions.invoke("notify-3d-upload", {
-                              body: { fileUrl: urls[0], fileType: ext },
-                            });
-                          } catch (e) {
-                            console.error("Failed to notify admins:", e);
-                          }
-                        }
+                      label="Upload .skp or .fbx file"
+                      onUpload={(urls) => {
+                        if (urls.length > 0) setModel3dUrl(urls[0]);
                       }}
                     />
                   </div>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-body text-xs text-foreground font-medium">Notes (optional)</label>
+                <Textarea
+                  value={model3dNotes}
+                  onChange={(e) => setModel3dNotes(e.target.value)}
+                  placeholder="Any specific instructions, preferred style, room details…"
+                  maxLength={500}
+                  rows={3}
+                  className="font-body text-xs"
+                />
+              </div>
+
+              <Button
+                onClick={async () => {
+                  if (!model3dUrl || !model3dProjectName.trim()) {
+                    toast({ title: "Please provide a project name and upload a file", variant: "destructive" });
+                    return;
+                  }
+                  setSubmitting3dModel(true);
+                  try {
+                    const userId = (await supabase.auth.getUser()).data.user?.id;
+                    if (!userId) throw new Error("Not authenticated");
+
+                    const { error } = await (supabase as any).from("axonometric_requests").insert({
+                      user_id: userId,
+                      image_url: model3dUrl,
+                      project_name: model3dProjectName.trim(),
+                      notes: model3dNotes.trim() || null,
+                      request_type: "3d_model",
+                      status: "pending",
+                    });
+                    if (error) throw error;
+
+                    // Notify admins
+                    const ext = model3dUrl.split('.').pop()?.toLowerCase() || 'fbx';
+                    try {
+                      await supabase.functions.invoke("notify-3d-upload", {
+                        body: { fileUrl: model3dUrl, fileType: ext },
+                      });
+                    } catch (e) {
+                      console.error("Failed to notify admins:", e);
+                    }
+
+                    toast({ title: "3D model submitted", description: "Your file has been submitted for processing. You'll be notified when it's ready." });
+                    setModel3dUrl(null);
+                    setModel3dProjectName("");
+                    setModel3dNotes("");
+                    setShow3dSubmit(false);
+                    setShowQueue(true);
+                    queryClient.invalidateQueries({ queryKey: ["axonometric-requests-admin"] });
+                  } catch (e: any) {
+                    toast({ title: "Submission failed", description: e.message, variant: "destructive" });
+                  } finally {
+                    setSubmitting3dModel(false);
+                  }
+                }}
+                disabled={submitting3dModel || !model3dUrl || !model3dProjectName.trim()}
+                className="w-full"
+              >
+                {submitting3dModel ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting…</>
+                ) : (
+                  <><Upload className="w-4 h-4 mr-2" />Submit 3D Model for Processing</>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
+
                 </div>
               )}
             </div>
