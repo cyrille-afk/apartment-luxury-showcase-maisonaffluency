@@ -400,7 +400,7 @@ export default function CompetitiveAnalysis() {
       setGalleries(g as Gallery[]);
       setDesigners(d as Designer[]);
       setAuctions(a as AuctionLot[]);
-      setTraffic(t as TrafficRow[]);
+      setTraffic(t as unknown as TrafficRow[]);
     } catch (err) {
       console.error("Failed to load competitive data:", err);
     } finally {
