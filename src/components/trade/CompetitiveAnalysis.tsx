@@ -566,7 +566,7 @@ export default function CompetitiveAnalysis() {
               {showForm ? "Hide Form" : "Add Data"}
             </Button>
           </div>
-        <p className="font-body text-[11px] text-muted-foreground">
+        </div>
           Monthly traffic estimates from SimilarWeb or manual entry — compare
           visits, bounce rate, and session duration across galleries.
         </p>
