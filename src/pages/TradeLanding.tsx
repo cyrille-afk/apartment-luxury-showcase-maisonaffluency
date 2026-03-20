@@ -402,9 +402,19 @@ const TradeLanding = () => {
         </div>
 
         {/* ─── 3D Studio Showcase ─── */}
-        <div className="w-full py-8 md:py-12">
-          <div className="max-w-6xl mx-auto px-6 md:px-12">
-            <div className="border-2 border-accent/40 rounded-sm bg-background px-6 md:px-12 py-16 md:py-24">
+        <div className="w-full relative overflow-hidden">
+          {/* Full-bleed background image */}
+          <div className="absolute inset-0">
+            <img
+              src={studioAfterImg}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-foreground/80 backdrop-blur-sm" />
+          </div>
+          <div className="relative max-w-6xl mx-auto px-6 md:px-12 py-16 md:py-24">
+            <div className="border border-accent/30 rounded-sm bg-foreground/20 backdrop-blur-md px-6 md:px-12 py-12 md:py-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
