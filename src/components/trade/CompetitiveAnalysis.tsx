@@ -388,6 +388,7 @@ export default function CompetitiveAnalysis() {
   const [traffic, setTraffic] = useState<TrafficRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [scraping, setScraping] = useState(false);
+  const [scrapingSW, setScrapingSW] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
   const loadData = async () => {
