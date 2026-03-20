@@ -40,6 +40,17 @@ const TradeRegister = () => {
               <h1 className="font-display text-xl md:text-2xl text-foreground tracking-wide">Maison Affluency</h1>
             </Link>
             <p className="font-body text-xs text-muted-foreground mt-1">Trade Account Application</p>
+            <div className="mt-2">
+              <WhatsAppShareButton
+                onClick={(e) => {
+                  e.preventDefault();
+                  sharePageOnWhatsApp("/trade/register", "Apply to Trade Program — Maison Affluency", "Exclusive access for design professionals");
+                }}
+                label="Share trade registration on WhatsApp"
+                size="sm"
+                variant="branded"
+              />
+            </div>
           </div>
 
           <div className="mb-6 grid grid-cols-2 gap-2">
