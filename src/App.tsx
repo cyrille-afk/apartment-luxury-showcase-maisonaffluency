@@ -46,6 +46,7 @@ const JournalArticle = lazy(() => import("./pages/JournalArticle"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const ProductPage = lazy(() => import("./pages/ProductPage"));
+const Catalogue = lazy(() => import("./pages/Catalogue"));
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -113,6 +114,7 @@ const App = () => {
                   <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
                   <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
                   <Route path="/product/:id" element={<Suspense fallback={null}><ProductPage /></Suspense>} />
+                  <Route path="/catalogue" element={<Suspense fallback={null}><Catalogue /></Suspense>} />
                   <Route path="/board/:token" element={<Suspense fallback={null}><ClientBoardViewer /></Suspense>} />
                   <Route path="/journal" element={<Suspense fallback={null}><Journal /></Suspense>} />
                   <Route path="/journal/:slug" element={<Suspense fallback={null}><JournalArticle /></Suspense>} />

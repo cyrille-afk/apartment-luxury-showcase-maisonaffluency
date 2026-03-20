@@ -54,6 +54,15 @@ async function getOgData(path: string): Promise<OgData> {
 
   // ── Static routes ──────────────────────────────────────────────
   switch (clean) {
+    case "/catalogue":
+      return {
+        title: "Catalogue — Maison Affluency | Luxury Furniture & Collectible Design",
+        description:
+          "Browse our curated selection of luxury furniture, lighting, and collectible design by world-renowned designers and ateliers. Price on request.",
+        image: DEFAULT_IMAGE,
+        url: `${SITE_URL}/catalogue`,
+      };
+
     case "/trade/program":
       return {
         title: "Trade Program — Maison Affluency",
