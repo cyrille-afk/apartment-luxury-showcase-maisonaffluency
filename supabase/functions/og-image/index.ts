@@ -195,12 +195,11 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
-  return new Response(html, {
-    status: 200,
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, s-maxage=86400",
-    },
-  });
+  const headers = new Headers();
+  headers.set("Content-Type", "text/html; charset=utf-8");
+  headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
+  headers.set("Access-Control-Allow-Origin", "*");
+  headers.set("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
+
+  return new Response(html, { status: 200, headers });
 });
