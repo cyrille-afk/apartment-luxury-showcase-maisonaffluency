@@ -78,7 +78,7 @@ const FeaturedReadBanner = () => {
   };
 
   const inner = (
-    <div className="max-w-7xl mx-auto px-4 md:px-12 lg:px-20 lg:pl-[calc(5rem+100px)] py-2 flex items-center justify-between gap-4">
+    <div className="max-w-7xl mx-auto px-4 md:px-12 lg:px-20 lg:pl-[calc(5rem+130px)] py-2 flex items-center justify-between gap-4">
       <Link
         to={`/journal/${article?.slug}`}
         className="flex items-center gap-3 min-w-0 group"
