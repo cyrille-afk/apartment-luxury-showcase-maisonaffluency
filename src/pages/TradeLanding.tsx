@@ -471,6 +471,33 @@ const TradeLanding = () => {
           </div>
         </div>
 
+        {/* ─── Inline Registration Form ─── */}
+        <div ref={formRef} id="apply" className="w-full bg-muted/10 border-y border-border">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="max-w-2xl mx-auto px-6 md:px-8 py-14 md:py-20"
+          >
+            <div className="text-center mb-8">
+              <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
+                Apply to the Trade Program
+              </h2>
+              <p className="font-body text-sm text-muted-foreground max-w-lg mx-auto">
+                Complete the form below to get started. We'll review your application within 1–2 business days.
+              </p>
+            </div>
+            <TradeRegistrationForm prefillEmail={prefillEmail} />
+            <p className="mt-6 text-center font-body text-sm text-muted-foreground">
+              Already a member?{" "}
+              <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80 transition-colors">
+                Sign in
+              </Link>
+            </p>
+          </motion.div>
+        </div>
+
         {/* ─── Final CTA ─── */}
         <div className="w-full bg-foreground">
           <motion.div
@@ -481,18 +508,18 @@ const TradeLanding = () => {
             className="max-w-3xl mx-auto px-6 py-14 md:py-24 text-center"
           >
             <h2 className="font-display text-2xl md:text-3xl text-background mb-4">
-              Join The Trade Program
+              Ready to Get Started?
             </h2>
             <p className="font-body text-sm md:text-base text-background/60 mb-10 max-w-xl mx-auto leading-relaxed">
-              Apply today and unlock exclusive pricing, a dedicated advisor, and bespoke services designed for architects and interior designers.
+              Join a community of architects and interior designers who trust Maison Affluency for their most ambitious projects.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
-              <Link
-                to="/trade/register"
+              <button
+                onClick={scrollToForm}
                 className="inline-flex items-center px-8 py-3 bg-background hover:bg-background/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 min-w-[160px] justify-center"
               >
                 Apply Now
-              </Link>
+              </button>
               <Link
                 to="/trade/login"
                 className="font-body text-sm text-background/50 underline underline-offset-4 hover:text-background transition-colors"
