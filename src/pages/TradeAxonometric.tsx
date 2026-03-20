@@ -970,16 +970,17 @@ const TradeAxonometric = () => {
 
                   <div className="border-t border-border pt-3 space-y-2">
                     <p className="font-body text-[11px] text-muted-foreground">
-                      Have a Revit model? Export as <strong>.fbx</strong> (File → Export → FBX) to preserve geometry, materials, cameras & lights, then upload here.
+                      Have a <strong>Revit</strong> or <strong>SketchUp</strong> model? Export as <strong>.fbx</strong> (Revit: File → Export → FBX) or upload your <strong>.skp</strong> file directly. Both formats preserve geometry, materials, cameras & lights for 3ds Max rendering.
                     </p>
                     <CloudUpload
                       folder="axonometric-sources"
-                      accept=".fbx,application/octet-stream"
-                      label="Upload .fbx file"
+                      accept=".fbx,.skp,application/octet-stream"
+                      label="Upload .fbx or .skp file"
                       onUpload={(urls) => {
                         if (urls.length > 0) {
                           setSourceImage(urls[0]);
-                          toast({ title: "FBX uploaded", description: "File stored — select a generation mode to proceed." });
+                          const ext = urls[0].split('.').pop()?.toLowerCase();
+                          toast({ title: `${ext === 'skp' ? 'SketchUp' : 'FBX'} file uploaded`, description: "File stored — select a generation mode to proceed." });
                         }
                       }}
                     />
