@@ -20,6 +20,7 @@ export interface JournalArticle {
   author: string;
   tags: string[];
   is_published: boolean;
+  is_featured: boolean;
   published_at: string | null;
   read_time_minutes: number | null;
   created_at: string;
