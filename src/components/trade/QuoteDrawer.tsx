@@ -58,6 +58,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
         const mapped: QuoteItem[] = (data as any[]).map((d) => ({
           id: d.id,
           quantity: d.quantity,
+          unit_price_cents: d.unit_price_cents,
           product: Array.isArray(d.product) ? d.product[0] : d.product,
         }));
 
