@@ -213,7 +213,9 @@ const JournalArticlePage = () => {
                 prose-p:leading-relaxed prose-p:text-foreground/80
                 prose-a:text-primary prose-a:underline prose-a:underline-offset-4
                 prose-img:rounded-sm prose-img:my-8
-                prose-blockquote:border-l-primary prose-blockquote:font-display prose-blockquote:italic prose-blockquote:text-foreground/70"
+                prose-blockquote:border-l-4 prose-blockquote:border-l-primary prose-blockquote:pl-6 prose-blockquote:my-10 prose-blockquote:font-display prose-blockquote:italic prose-blockquote:text-foreground/70 prose-blockquote:not-italic prose-blockquote:text-lg
+                prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:text-muted-foreground prose-figcaption:mt-3 prose-figcaption:font-body
+                prose-figure:my-12"
               dangerouslySetInnerHTML={{ __html: article.content.replace(/(\d+)\.\s/g, '<br /><br />$1. ') .replace(/^<br \/><br \/>/, '') }}
             />
           </motion.div>
