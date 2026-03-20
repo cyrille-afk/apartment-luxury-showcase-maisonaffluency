@@ -250,6 +250,36 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 <Package size={14} />
                 Request Sample
               </button>
+
+              {/* More from this brand */}
+              {relatedProducts.length > 0 && (
+                <div className="pt-4 border-t border-border">
+                  <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-3">
+                    More from {designerDisplay}
+                  </p>
+                  <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                    {relatedProducts.map(rp => (
+                      <button
+                        key={rp.id}
+                        onClick={() => onSelectRelated?.(rp)}
+                        className="shrink-0 w-20 group"
+                      >
+                        <div className="aspect-square rounded-md overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors">
+                          <img
+                            src={rp.image_url!}
+                            alt={rp.product_name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                        <p className="font-body text-[9px] text-muted-foreground mt-1 truncate group-hover:text-foreground transition-colors">
+                          {rp.product_name}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
