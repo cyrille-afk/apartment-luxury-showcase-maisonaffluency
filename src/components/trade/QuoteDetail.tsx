@@ -810,8 +810,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {isConfirmed && !isFullyPaid && (() => {
           const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
-          const withGst = currency === "SGD" && afterDiscount > 0
-            ? afterDiscount + Math.round(afterDiscount * 0.09)
+          const withGst = gstEnabled && afterDiscount > 0
+            ? afterDiscount + Math.round(afterDiscount * gstRate / 100)
             : afterDiscount;
 
           const isPayingDeposit = quoteStatus === "confirmed";
