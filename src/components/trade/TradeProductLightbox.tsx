@@ -3,8 +3,9 @@ import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Packag
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAllTradeProducts } from "@/lib/tradeProducts";
 
 export interface TradeProductLightboxItem {
   id: string;
