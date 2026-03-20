@@ -97,9 +97,6 @@ const ProductPage = () => {
     offers: {
       "@type": "Offer",
       availability: "https://schema.org/InStock",
-      priceCurrency: "SGD",
-      price: "0",
-      priceValidUntil: new Date(Date.now() + 365 * 86400000).toISOString().split("T")[0],
       seller: {
         "@type": "Organization",
         name: "Maison Affluency",
