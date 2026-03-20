@@ -112,6 +112,7 @@ const App = () => {
                   <Route path="/trade/program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
                   <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
                   <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
+                  <Route path="/product/:id" element={<Suspense fallback={null}><ProductPage /></Suspense>} />
                   <Route path="/board/:token" element={<Suspense fallback={null}><ClientBoardViewer /></Suspense>} />
                   <Route path="/journal" element={<Suspense fallback={null}><Journal /></Suspense>} />
                   <Route path="/journal/:slug" element={<Suspense fallback={null}><JournalArticle /></Suspense>} />
