@@ -1,20 +1,8 @@
 import { Instagram } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
-import { cloudinaryUrl } from "@/lib/cloudinary";
 import { scrollToSection } from "@/lib/scrollToSection";
-const affluencyLogo = cloudinaryUrl("affluency-footer-logo_gvpt4u", { width: 800, quality: "auto", crop: "fill" });
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 const Footer = () => {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <>
       <div className="border-t border-accent/20 bg-foreground/95 backdrop-blur-sm px-6 py-3 text-center">
@@ -28,23 +16,6 @@ const Footer = () => {
       <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-center gap-6">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button onClick={scrollToTop} className="group cursor-pointer" aria-label="Scroll to top">
-                  <img 
-                    alt="Affluency - Unique by Design" 
-                    className="h-14 md:h-16 w-auto transition-all duration-300 group-hover:scale-105 group-hover:[filter:drop-shadow(0_0_8px_hsl(var(--primary)/0.4))_drop-shadow(0_0_20px_hsl(var(--primary)/0.2))]" 
-                    src={affluencyLogo} 
-                  />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Back to top</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
           <div className="flex gap-8 items-center">
             <button onClick={() => scrollToSection("curating-team")} className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
               About Us
