@@ -35,7 +35,7 @@ const ProductPage = () => {
 
   useEffect(() => {
     if (!id) return;
-    const fetch = async () => {
+    const fetchProduct = async () => {
       const { data, error } = await supabase
         .from("trade_products")
         .select("id, product_name, brand_name, category, subcategory, description, image_url, gallery_images, materials, dimensions, lead_time, is_active")
@@ -45,11 +45,16 @@ const ProductPage = () => {
       if (error || !data) {
         setNotFound(true);
       } else {
-        setProduct(data as Product);
+        // Check if product appears in showroom gallery hotspots
+        const { count } = await supabase
+          .from("gallery_hotspots")
+          .select("id", { count: "exact", head: true })
+          .ilike("product_name", data.product_name);
+        setProduct({ ...(data as Product), isInShowroom: (count ?? 0) > 0 });
       }
       setLoading(false);
     };
-    fetch();
+    fetchProduct();
   }, [id]);
 
   if (loading) {
