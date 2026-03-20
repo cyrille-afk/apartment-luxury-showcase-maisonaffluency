@@ -286,7 +286,7 @@ const ProductPage = () => {
                     trackCTA.whatsapp(`ProductPage_Share_${product.product_name}`);
                   }}
                   label="Share on WhatsApp"
-                  variant="branded"
+                  variant="prominent"
                   className="md:!text-sm md:!px-4 md:!py-2"
                 />
               </div>

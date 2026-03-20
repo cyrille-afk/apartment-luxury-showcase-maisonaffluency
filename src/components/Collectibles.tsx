@@ -1070,7 +1070,7 @@ const Collectibles = () => {
                               trackCTA.whatsapp(`Collectibles_Share_${designer.name}`);
                             }}
                             label={`Share ${designer.name} on WhatsApp`}
-                            variant="branded"
+                            variant="prominent"
                             className="md:!text-sm md:!px-4 md:!py-2"
                           />
                         </div>

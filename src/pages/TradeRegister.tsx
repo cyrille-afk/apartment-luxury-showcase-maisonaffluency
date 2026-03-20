@@ -48,7 +48,7 @@ const TradeRegister = () => {
                 }}
                 label="Share trade registration on WhatsApp"
                 size="sm"
-                variant="branded"
+                variant="prominent"
                 className="md:!text-sm md:!px-4 md:!py-2"
               />
             </div>
