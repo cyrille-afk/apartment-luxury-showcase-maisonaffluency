@@ -232,25 +232,31 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                       Qty: {item.quantity}
                     </span>
                     {(() => {
-                      const cents = item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
-                      if (item.sgdPriceCents) {
+                      const adminPriced = item.unit_price_cents != null;
+                      const displayCents = adminPriced
+                        ? item.unit_price_cents!
+                        : item.sgdPriceCents ?? item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
+                      const displayCurrency = adminPriced ? "SGD" : (item.sgdPriceCents ? "SGD" : item.product?.currency);
+                      const showCatalogRef = adminPriced && item.product?.currency && item.product.currency !== "SGD" && item.product.trade_price_cents;
+                      const showFxRef = !adminPriced && item.catalogPriceCents && item.catalogCurrency;
+
+                      if (displayCents) {
                         return (
                           <div className="flex flex-col">
                             <span className="font-body text-[10px] text-primary font-medium">
-                              {formatPrice(item.sgdPriceCents, "SGD")}
+                              {formatPrice(displayCents, displayCurrency || "SGD")}
                             </span>
-                            {item.catalogPriceCents && item.catalogCurrency && (
+                            {showCatalogRef && (
                               <span className="font-body text-[8px] text-muted-foreground/60">
-                                Catalog: {formatPrice(item.catalogPriceCents, item.catalogCurrency)}
+                                Catalog: {formatPrice(item.product.trade_price_cents!, item.product.currency)}
+                              </span>
+                            )}
+                            {showFxRef && (
+                              <span className="font-body text-[8px] text-muted-foreground/60">
+                                Catalog: {formatPrice(item.catalogPriceCents!, item.catalogCurrency!)}
                               </span>
                             )}
                           </div>
-                        );
-                      } else if (cents) {
-                        return (
-                          <span className="font-body text-[10px] text-primary font-medium">
-                            {formatPrice(cents, item.product.currency)}
-                          </span>
                         );
                       } else {
                         return (
