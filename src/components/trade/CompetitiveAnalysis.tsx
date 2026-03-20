@@ -23,6 +23,7 @@ import {
   fetchCompetitorTraffic,
   upsertTrafficEntry,
   triggerCompetitorScrape,
+  triggerSimilarWebScrape,
 } from "@/lib/api/competitors";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -387,6 +388,7 @@ export default function CompetitiveAnalysis() {
   const [traffic, setTraffic] = useState<TrafficRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [scraping, setScraping] = useState(false);
+  const [scrapingSW, setScrapingSW] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
   const loadData = async () => {
@@ -425,6 +427,23 @@ export default function CompetitiveAnalysis() {
       toast.error("Scraping failed — check Firecrawl connection");
     } finally {
       setScraping(false);
+    }
+  };
+
+  const handleSimilarWebScrape = async () => {
+    setScrapingSW(true);
+    try {
+      const result = await triggerSimilarWebScrape();
+      const successes = result?.results?.filter((r: any) => r.status === "success") || [];
+      toast.success(
+        `SimilarWeb scrape done: ${successes.length} galleries with traffic data`
+      );
+      await loadData();
+    } catch (err) {
+      console.error("SimilarWeb scrape failed:", err);
+      toast.error("SimilarWeb scrape failed — check Firecrawl connection");
+    } finally {
+      setScrapingSW(false);
     }
   };
 
@@ -526,15 +545,27 @@ export default function CompetitiveAnalysis() {
               Traffic Benchmarks
             </h3>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setShowForm(!showForm)}
-            className="gap-1.5 text-xs font-body"
-          >
-            <Plus className="w-3 h-3" />
-            {showForm ? "Hide Form" : "Add Data"}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleSimilarWebScrape}
+              disabled={scrapingSW}
+              className="gap-1.5 text-xs font-body"
+            >
+              <RefreshCw className={`w-3 h-3 ${scrapingSW ? "animate-spin" : ""}`} />
+              {scrapingSW ? "Scraping…" : "Auto-Scrape SimilarWeb"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowForm(!showForm)}
+              className="gap-1.5 text-xs font-body"
+            >
+              <Plus className="w-3 h-3" />
+              {showForm ? "Hide Form" : "Add Data"}
+            </Button>
+          </div>
         </div>
         <p className="font-body text-[11px] text-muted-foreground">
           Monthly traffic estimates from SimilarWeb or manual entry — compare

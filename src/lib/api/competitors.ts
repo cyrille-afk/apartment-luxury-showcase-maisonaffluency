@@ -61,3 +61,9 @@ export async function triggerCompetitorScrape() {
   if (error) throw error;
   return data;
 }
+
+export async function triggerSimilarWebScrape() {
+  const { data, error } = await supabase.functions.invoke("scrape-similarweb");
+  if (error) throw error;
+  return data;
+}
