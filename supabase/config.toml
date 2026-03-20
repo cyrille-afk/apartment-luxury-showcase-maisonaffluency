@@ -17,3 +17,5 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = true
   [functions.og-image]
     verify_jwt = false
+  [functions.scrape-competitors]
+    verify_jwt = false

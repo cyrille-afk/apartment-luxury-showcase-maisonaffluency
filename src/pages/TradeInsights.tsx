@@ -8,6 +8,8 @@ import {
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CompetitiveAnalysis from "@/components/trade/CompetitiveAnalysis";
 
 interface PlatformStats {
   totalProducts: number;
@@ -231,13 +233,25 @@ export default function TradeInsights() {
         <title>Platform Insights — Maison Affluency Trade</title>
       </Helmet>
       <div className="max-w-6xl mx-auto p-6 md:p-8 space-y-8">
-        {/* Header */}
+      {/* Header */}
         <div>
           <h1 className="font-display text-lg text-foreground">Platform Insights</h1>
           <p className="font-body text-xs text-muted-foreground mt-1">
             Overview of trade portal health, feature adoption, and actionable recommendations.
           </p>
         </div>
+
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="font-body">
+            <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
+            <TabsTrigger value="competitive" className="text-xs">Competitive Intelligence</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="competitive">
+            <CompetitiveAnalysis />
+          </TabsContent>
+
+          <TabsContent value="overview" className="space-y-8">
 
         {/* Key Metrics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -294,6 +308,8 @@ export default function TradeInsights() {
             </div>
           </Card>
         )}
+          </TabsContent>
+        </Tabs>
       </div>
     </>
   );
