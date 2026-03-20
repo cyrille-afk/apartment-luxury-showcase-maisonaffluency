@@ -774,7 +774,7 @@ const TradeAxonometric = () => {
             <Button
               variant={showDrafts ? "default" : "outline"}
               size="sm"
-              onClick={() => { setShowDrafts(!showDrafts); if (!showDrafts) setShowQueue(false); }}
+              onClick={() => { setShowDrafts(!showDrafts); if (!showDrafts) { setShowQueue(false); setShow3dSubmit(false); } }}
             >
               <EyeOff className="w-3.5 h-3.5 mr-1.5" />
               My Drafts
