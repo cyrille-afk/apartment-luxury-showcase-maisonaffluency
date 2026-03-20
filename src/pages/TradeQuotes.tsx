@@ -10,12 +10,14 @@ import SectionHero from "@/components/trade/SectionHero";
 
 interface Quote {
   id: string;
+  user_id: string;
   status: string;
   notes: string | null;
   submitted_at: string | null;
   created_at: string;
   updated_at: string;
   item_count: number;
+  profiles?: { first_name: string; last_name: string; company: string; email: string } | null;
 }
 
 const statusConfig: Record<string, { label: string; icon: typeof Clock; className: string }> = {
