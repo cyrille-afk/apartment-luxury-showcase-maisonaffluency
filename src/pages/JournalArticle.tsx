@@ -117,7 +117,7 @@ const JournalArticlePage = () => {
             />
             {article.slug === "thierry-lemaire-radical-simplicity" && (
             <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground py-3">
-                Photography by Hosanna Swee · Shot on location at Maison Affluency, Singapore
+                Unveiling master pieces, Maison Affluency, Singapore. Photography by Hosanna Swee
               </p>
             )}
           </div>
