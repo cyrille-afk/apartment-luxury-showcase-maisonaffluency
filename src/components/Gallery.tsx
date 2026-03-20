@@ -672,18 +672,18 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             <div ref={hotspotHintRef} className="absolute bottom-12 left-3 z-20 pointer-events-none">
                               <motion.span
                                 initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.8 }}
+                                animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 1, delay: 1.2 }}
-                                className="font-body text-[10px] text-white/80 tracking-wide"
+                                className="bg-black/30 backdrop-blur-md font-body text-[10px] text-white/80 tracking-wide px-2.5 py-1 rounded-full"
                               >
                                 Tap image to explore pieces
                               </motion.span>
                             </div>
                           )}
-                          {/* Piece count — subtle bottom-right text */}
+                          {/* Piece count — subtle frosted bottom-right */}
                           {isHotspotSection && hotspotCounts[item.title] > 0 && (
-                            <span className="absolute bottom-3 right-3 z-10 font-body text-[9px] text-white/50">
+                            <span className="absolute bottom-3 right-3 z-10 bg-black/25 backdrop-blur-md font-body text-[9px] text-white/70 px-2 py-0.5 rounded-full">
                               {hotspotCounts[item.title]} {hotspotCounts[item.title] === 1 ? "piece" : "pieces"}
                             </span>
                           )}
