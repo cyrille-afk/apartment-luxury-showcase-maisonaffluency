@@ -36,6 +36,9 @@ const TradePresentations = lazy(() => import("./pages/TradePresentations"));
 const TradePresentationBuilder = lazy(() => import("./pages/TradePresentationBuilder"));
 const TradePresentationViewer = lazy(() => import("./pages/TradePresentationViewer"));
 const TradeFavorites = lazy(() => import("./pages/TradeFavorites"));
+const TradeBoards = lazy(() => import("./pages/TradeBoards"));
+const TradeBoardBuilder = lazy(() => import("./pages/TradeBoardBuilder"));
+const ClientBoardViewer = lazy(() => import("./pages/ClientBoardViewer"));
 const TradeInsights = lazy(() => import("./pages/TradeInsights"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Journal = lazy(() => import("./pages/Journal"));
@@ -108,6 +111,7 @@ const App = () => {
                   <Route path="/trade/program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
                   <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
                   <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
+                  <Route path="/board/:token" element={<Suspense fallback={null}><ClientBoardViewer /></Suspense>} />
                   <Route path="/journal" element={<Suspense fallback={null}><Journal /></Suspense>} />
                   <Route path="/journal/:slug" element={<Suspense fallback={null}><JournalArticle /></Suspense>} />
                   <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
@@ -131,6 +135,8 @@ const App = () => {
                     <Route path="presentations/:id/view" element={<TradePresentationViewer />} />
                     <Route path="favorites" element={<TradeFavorites />} />
                     <Route path="insights" element={<TradeInsights />} />
+                    <Route path="boards" element={<TradeBoards />} />
+                    <Route path="boards/:id" element={<TradeBoardBuilder />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 

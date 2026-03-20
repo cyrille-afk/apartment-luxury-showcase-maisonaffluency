@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign, AlertCircle, Package, Box, Presentation, Heart, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign, AlertCircle, Package, Box, Presentation, Heart, BarChart3, ClipboardList } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,6 +24,7 @@ const mainItems = [
   { title: "Brand Library", url: "/trade/documents", icon: FolderOpen },
   { title: "Sample Requests", url: "/trade/samples", icon: Package },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
+  { title: "Client Boards", url: "/trade/boards", icon: ClipboardList },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
   { title: "3D Studio", url: "/trade/axonometric-requests", icon: Box },
   { title: "Settings", url: "/trade/settings", icon: Settings },

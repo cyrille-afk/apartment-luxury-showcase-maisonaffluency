@@ -124,6 +124,132 @@ export type Database = {
         }
         Relationships: []
       }
+      client_board_comments: {
+        Row: {
+          author_name: string
+          board_id: string
+          content: string
+          created_at: string
+          id: string
+          is_client: boolean
+          item_id: string | null
+        }
+        Insert: {
+          author_name?: string
+          board_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_client?: boolean
+          item_id?: string | null
+        }
+        Update: {
+          author_name?: string
+          board_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_client?: boolean
+          item_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_board_comments_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "client_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_board_comments_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "client_board_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_board_items: {
+        Row: {
+          approval_status: string
+          board_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string
+          sort_order: number
+        }
+        Insert: {
+          approval_status?: string
+          board_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          sort_order?: number
+        }
+        Update: {
+          approval_status?: string
+          board_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_board_items_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "client_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_board_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_boards: {
+        Row: {
+          client_email: string | null
+          client_name: string
+          created_at: string
+          id: string
+          share_token: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          id?: string
+          share_token?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          id?: string
+          share_token?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
