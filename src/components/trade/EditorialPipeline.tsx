@@ -492,6 +492,14 @@ const EditorialPipeline = () => {
                                 {formatDate(item.target_date)}
                               </span>
                             )}
+                            {item.status === "ready" && !item.article_id && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); convertToDraft(item); }}
+                                className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-body text-[9px] uppercase tracking-wider hover:bg-emerald-500/20 transition-colors"
+                              >
+                                <FileUp className="w-2.5 h-2.5" /> Draft
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}
