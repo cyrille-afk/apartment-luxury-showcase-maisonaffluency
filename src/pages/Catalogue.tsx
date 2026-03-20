@@ -56,15 +56,46 @@ const Catalogue = () => {
     fetchProducts();
   }, []);
 
-  // Deduplicate by normalised brand+product name
+  /** Normalise a string for comparison: collapse whitespace, trim, lowercase */
+  const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
+
+  // Deduplicate: exact brand+product match, AND near-duplicates where one product
+  // name is a prefix/substring of another by the same brand (e.g. "Corteza Console"
+  // vs "Corteza Console Table") — keep the shorter, more canonical name.
   const deduped = useMemo(() => {
-    const seen = new Set<string>();
-    return products.filter(p => {
-      const key = `${p.brand_name.trim().toLowerCase()}::${p.product_name.trim().toLowerCase()}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    // First pass: group by normalised brand
+    const byBrand = new Map<string, CatalogueProduct[]>();
+    for (const p of products) {
+      const bk = norm(p.brand_name);
+      const arr = byBrand.get(bk) || [];
+      arr.push(p);
+      byBrand.set(bk, arr);
+    }
+
+    const result: CatalogueProduct[] = [];
+    for (const [, brandItems] of byBrand) {
+      // Sort by product name length so shorter (canonical) names come first
+      const sorted = [...brandItems].sort(
+        (a, b) => a.product_name.length - b.product_name.length
+      );
+      const kept: CatalogueProduct[] = [];
+      const seenNames = new Set<string>();
+
+      for (const p of sorted) {
+        const pn = norm(p.product_name);
+        // Skip if exact duplicate
+        if (seenNames.has(pn)) continue;
+        // Skip if this name starts with an already-kept name (near-duplicate)
+        const isDupe = [...seenNames].some(
+          (existing) => pn.startsWith(existing) && pn.length - existing.length <= 12
+        );
+        if (isDupe) continue;
+        seenNames.add(pn);
+        kept.push(p);
+      }
+      result.push(...kept);
+    }
+    return result;
   }, [products]);
 
   const subcategories = activeCategory ? (SUBCATEGORY_MAP[activeCategory] || []) : [];
