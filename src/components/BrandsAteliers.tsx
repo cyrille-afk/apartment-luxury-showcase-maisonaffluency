@@ -2139,8 +2139,8 @@ function AlphaStrip({
                   }}
                   label={`Share ${brand.name} on WhatsApp`}
                   size="sm"
-                  variant={hasBg ? "glass" : "solid"}
-                  className="md:order-2"
+                  variant="prominent"
+                  className="md:order-2 md:!text-sm md:!px-4 md:!py-2"
                 />
               </div>
             </div>
