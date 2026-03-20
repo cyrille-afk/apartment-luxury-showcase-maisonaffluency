@@ -513,7 +513,7 @@ const TradeLanding = () => {
                 transition={{ duration: 0.8 }}
               >
                 <div className="mb-8">
-                  <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
+                  <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3 text-center">
                     Apply to the Trade Program
                   </h2>
                   <p className="font-body text-sm text-muted-foreground">
