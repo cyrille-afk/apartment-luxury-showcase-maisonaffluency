@@ -481,8 +481,8 @@ const ShowroomGridView = ({
                     <button
                       onClick={(e) => { e.stopPropagation(); toggleFavorite(product.trade_product_id!); }}
                       className={cn(
-                        "absolute top-2 left-2 z-10 p-1.5 rounded-full transition-all",
-                        isFavorited(product.trade_product_id) ? "bg-destructive text-destructive-foreground shadow-md" : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90",
+                        "absolute top-2 left-2 z-10 p-1.5 rounded-full transition-all border",
+                        isFavorited(product.trade_product_id) ? "bg-destructive text-destructive-foreground shadow-md border-destructive" : "bg-background/80 text-foreground/60 border-border/50 shadow-sm opacity-0 group-hover:opacity-100 hover:bg-background hover:text-foreground",
                       )}
                       aria-label={isFavorited(product.trade_product_id) ? "Remove from favorites" : "Save to favorites"}
                     >
