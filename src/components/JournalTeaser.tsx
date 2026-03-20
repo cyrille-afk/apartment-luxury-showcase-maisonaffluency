@@ -90,9 +90,16 @@ const JournalTeaser = () => {
                       />
                     </div>
                   )}
-                  <span className="font-body text-[10px] uppercase tracking-[0.15em] text-primary">
-                    {CATEGORY_LABELS[articles[0].category]}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {(articles[0] as any).is_featured && (
+                      <span className="font-body text-[9px] uppercase tracking-[0.18em] text-white bg-primary px-2 py-0.5 rounded-sm font-semibold">
+                        Editor's Pick
+                      </span>
+                    )}
+                    <span className="font-body text-[10px] uppercase tracking-[0.15em] text-primary">
+                      {CATEGORY_LABELS[articles[0].category]}
+                    </span>
+                  </div>
                   <h3 className="font-display text-xl md:text-2xl text-foreground group-hover:text-primary transition-colors mt-1.5 mb-1.5 leading-snug">
                     {articles[0].title}
                   </h3>
