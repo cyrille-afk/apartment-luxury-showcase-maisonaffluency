@@ -214,7 +214,7 @@ const TradeLanding = () => {
             className="w-full h-full object-cover"
             data-pin-nopin="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent" />
+          <div className="absolute inset-0 bg-foreground/30" />
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
