@@ -276,7 +276,7 @@ const TradeLanding = () => {
           className="max-w-3xl mx-auto px-6 py-10 md:py-16 text-center"
         >
           <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6">
-            Discover Your Exclusive Benefits and Bespoke Services
+            Discover Your Exclusive Benefits and Bespoke&nbsp;Services
           </h2>
           <p className="font-body text-base md:text-lg leading-relaxed text-muted-foreground text-justify">
             Our trade program is tailored for a community of professionals who value time, quality, and commitment. 
