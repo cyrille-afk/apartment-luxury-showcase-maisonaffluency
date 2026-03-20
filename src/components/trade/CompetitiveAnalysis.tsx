@@ -545,16 +545,27 @@ export default function CompetitiveAnalysis() {
               Traffic Benchmarks
             </h3>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setShowForm(!showForm)}
-            className="gap-1.5 text-xs font-body"
-          >
-            <Plus className="w-3 h-3" />
-            {showForm ? "Hide Form" : "Add Data"}
-          </Button>
-        </div>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleSimilarWebScrape}
+              disabled={scrapingSW}
+              className="gap-1.5 text-xs font-body"
+            >
+              <RefreshCw className={`w-3 h-3 ${scrapingSW ? "animate-spin" : ""}`} />
+              {scrapingSW ? "Scraping…" : "Auto-Scrape SimilarWeb"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowForm(!showForm)}
+              className="gap-1.5 text-xs font-body"
+            >
+              <Plus className="w-3 h-3" />
+              {showForm ? "Hide Form" : "Add Data"}
+            </Button>
+          </div>
         <p className="font-body text-[11px] text-muted-foreground">
           Monthly traffic estimates from SimilarWeb or manual entry — compare
           visits, bounce rate, and session duration across galleries.
