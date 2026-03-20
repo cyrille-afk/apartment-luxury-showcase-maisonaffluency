@@ -25,8 +25,6 @@ const FeaturedReadBanner = () => {
   const isHomepage = location.pathname === "/";
 
   useEffect(() => {
-    const dismissed = sessionStorage.getItem(DISMISS_KEY);
-    if (dismissed) return;
 
     supabase
       .from("journal_articles")
