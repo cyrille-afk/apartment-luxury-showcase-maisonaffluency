@@ -308,6 +308,8 @@ export default function TradeInsights() {
             </div>
           </Card>
         )}
+          </TabsContent>
+        </Tabs>
       </div>
     </>
   );
