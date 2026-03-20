@@ -6,6 +6,8 @@ import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
+import studioBeforeImg from "@/assets/studio-before-floorplan.jpg";
+import studioAfterImg from "@/assets/studio-after-render.jpg";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
 
 const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
