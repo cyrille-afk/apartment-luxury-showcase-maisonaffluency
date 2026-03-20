@@ -340,7 +340,7 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Maison Affluency — Asia's Premier Luxury Collectible Furniture</title>
+        <title>Maison Affluency | Luxury Furniture &amp; Collectible Design</title>
         <meta name="description" content="Singapore's destination for museum-grade, investment-worthy collectible furniture from world-class European designers. Private showroom in District 9." />
         <link rel="canonical" href="https://maisonaffluency.com" />
         <meta property="og:title" content="Maison Affluency — Collectible Luxury Furniture" />
