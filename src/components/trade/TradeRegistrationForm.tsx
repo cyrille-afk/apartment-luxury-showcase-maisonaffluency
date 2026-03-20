@@ -172,7 +172,7 @@ const TradeRegistrationForm = ({ prefillEmail = "" }: TradeRegistrationFormProps
           <div>
             <label className="font-body text-sm text-foreground">Email<span className="text-destructive">*</span></label>
             <input type="email" value={form.email} onChange={(e) => update("email", e.target.value)}
-              className={fieldClass("email")} />
+              autoComplete="off" className={fieldClass("email")} />
             <FieldError field="email" />
           </div>
           <div>
