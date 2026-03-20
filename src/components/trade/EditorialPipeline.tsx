@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_LABELS, type JournalCategory } from "@/lib/journal";
 import { useToast } from "@/hooks/use-toast";
 import {
   CalendarDays, ChevronDown, ChevronUp, Pencil, Plus, X, Check,
-  Lightbulb, FileEdit, Eye, Sparkles, BookOpen, Ban,
+  Lightbulb, FileEdit, Eye, Sparkles, BookOpen, Ban, FileUp,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -51,6 +52,7 @@ const emptyItem = (): Partial<PipelineItem> => ({
 });
 
 const EditorialPipeline = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [items, setItems] = useState<PipelineItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -152,6 +154,46 @@ const EditorialPipeline = () => {
     setSaving(false);
     cancelEdit();
     fetchPipeline();
+  };
+
+  const convertToDraft = async (item: PipelineItem) => {
+    const slug = item.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 80);
+
+    const { data: article, error } = await supabase
+      .from("journal_articles")
+      .insert({
+        title: item.title,
+        slug,
+        category: item.category,
+        excerpt: item.angle || "",
+        content: "",
+        author: item.author || "Maison Affluency",
+        tags: item.seo_keywords ? item.seo_keywords.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
+        is_published: false,
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      toast({ title: "Error creating draft", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    // Link pipeline item to the new article and mark as published
+    await supabase
+      .from("journal_pipeline")
+      .update({ article_id: article.id, status: "published" as PipelineStatus, updated_at: new Date().toISOString() })
+      .eq("id", item.id);
+
+    toast({ title: "Draft article created", description: "Redirecting to editor…" });
+    fetchPipeline();
+
+    // Navigate to journal admin — the article editor
+    navigate("/trade/journal");
   };
 
   const formatDate = (d: string | null) =>
@@ -394,6 +436,17 @@ const EditorialPipeline = () => {
                             </span>
                           )}
 
+                          {/* Convert to Draft button (ready items only) */}
+                          {item.status === "ready" && !item.article_id && (
+                            <button
+                              onClick={() => convertToDraft(item)}
+                              title="Convert to journal draft"
+                              className="p-1.5 rounded-md text-emerald-600 opacity-0 group-hover:opacity-100 hover:bg-emerald-500/10 transition-all"
+                            >
+                              <FileUp className="w-3 h-3" />
+                            </button>
+                          )}
+
                           {/* Edit button */}
                           <button
                             onClick={() => startEdit(item)}
@@ -438,6 +491,14 @@ const EditorialPipeline = () => {
                               <span className="font-body text-[9px] text-muted-foreground">
                                 {formatDate(item.target_date)}
                               </span>
+                            )}
+                            {item.status === "ready" && !item.article_id && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); convertToDraft(item); }}
+                                className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-body text-[9px] uppercase tracking-wider hover:bg-emerald-500/20 transition-colors"
+                              >
+                                <FileUp className="w-2.5 h-2.5" /> Draft
+                              </button>
                             )}
                           </div>
                         </div>
