@@ -64,6 +64,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [tradeDiscount, setTradeDiscount] = useState(false);
+  const [gstEnabled, setGstEnabled] = useState(true);
+  const [gstRate, setGstRate] = useState(9);
+  const [editingGstRate, setEditingGstRate] = useState(false);
   const [payingStripe, setPayingStripe] = useState(false);
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
@@ -421,15 +424,50 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </div>
             </div>
 
-            <button
-              onClick={() => setTradeDiscount(!tradeDiscount)}
-              className="flex items-center gap-2"
-            >
-              <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
-                <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
+            <div className="flex items-center gap-4 flex-wrap">
+              <button
+                onClick={() => setTradeDiscount(!tradeDiscount)}
+                className="flex items-center gap-2"
+              >
+                <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
+                  <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
+                </div>
+                <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">8% Discount</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setGstEnabled(!gstEnabled)}
+                  className="flex items-center gap-2"
+                >
+                  <div className={`relative w-8 h-[18px] rounded-full transition-colors ${gstEnabled ? "bg-foreground" : "bg-border"}`}>
+                    <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${gstEnabled ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
+                  </div>
+                  <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">GST</span>
+                </button>
+                {gstEnabled && (
+                  editingGstRate ? (
+                    <input
+                      type="number"
+                      value={gstRate}
+                      onChange={(e) => setGstRate(Math.max(0, Math.min(100, Number(e.target.value))))}
+                      onBlur={() => setEditingGstRate(false)}
+                      onKeyDown={(e) => e.key === "Enter" && setEditingGstRate(false)}
+                      autoFocus
+                      className="w-12 font-body text-[10px] text-foreground bg-transparent border-b border-foreground outline-none text-center"
+                    />
+                  ) : (
+                    <button
+                      onClick={() => setEditingGstRate(true)}
+                      className="font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                      title="Click to edit tax rate"
+                    >
+                      ({gstRate}%)
+                    </button>
+                  )
+                )}
               </div>
-              <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">8% Discount</span>
-            </button>
+            </div>
           </div>
         )}
 
@@ -571,19 +609,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <span>-{formatPriceRaw(Math.round(subtotalCents * 0.08), currency)}</span>
                       </div>
                     )}
-                    {currency === "SGD" && subtotalCents > 0 && (() => {
+                    {gstEnabled && subtotalCents > 0 && (() => {
                       const afterDiscount = tradeDiscount ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
                       return (
                         <div className="flex justify-between font-body text-xs text-muted-foreground">
-                          <span>GST (9%)</span>
-                          <span>{formatPriceRaw(Math.round(afterDiscount * 0.09), currency)}</span>
+                          <span>GST ({gstRate}%)</span>
+                          <span>{formatPriceRaw(Math.round(afterDiscount * gstRate / 100), currency)}</span>
                         </div>
                       );
                     })()}
                     {(() => {
                       const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
-                      const total = currency === "SGD" && afterDiscount > 0
-                        ? afterDiscount + Math.round(afterDiscount * 0.09)
+                      const total = gstEnabled && afterDiscount > 0
+                        ? afterDiscount + Math.round(afterDiscount * gstRate / 100)
                         : afterDiscount;
                       const depositCents = Math.round(total * 0.6);
                       const balanceCents = total - depositCents;
@@ -772,8 +810,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {isConfirmed && !isFullyPaid && (() => {
           const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
-          const withGst = currency === "SGD" && afterDiscount > 0
-            ? afterDiscount + Math.round(afterDiscount * 0.09)
+          const withGst = gstEnabled && afterDiscount > 0
+            ? afterDiscount + Math.round(afterDiscount * gstRate / 100)
             : afterDiscount;
 
           const isPayingDeposit = quoteStatus === "confirmed";
@@ -811,7 +849,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </button>
                   {subtotalCents > 0 && (
                     <span className="font-body text-[10px] text-muted-foreground">
-                      Stripe charge: {currencySymbol(currency)}{formatPriceRaw(chargeTotal, currency)} {currency} (incl.{currency === "SGD" ? " GST +" : ""} processing fee)
+                      Stripe charge: {currencySymbol(currency)}{formatPriceRaw(chargeTotal, currency)} {currency} (incl.{gstEnabled ? ` ${gstRate}% GST +` : ""} processing fee)
                     </span>
                   )}
                 </div>
@@ -823,7 +861,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <ul className="font-body text-[10px] text-muted-foreground space-y-1 list-disc list-inside">
                     <li>You are paying the <span className="font-medium text-foreground/70">{isPayingDeposit ? "60% deposit" : "40% balance"}</span> of {currencySymbol(currency)}{formatPriceRaw(portionCents, currency)} {currency}.</li>
                     <li>A processing fee of 3.4% + {feeDisplay} is included in the Stripe charge above.</li>
-                    {currency === "SGD" && <li>9% GST is included.</li>}
+                    {gstEnabled && <li>{gstRate}% GST is included.</li>}
                     <li>
                       If your card is denominated in a different currency, your bank may apply a foreign transaction fee of approximately <span className="font-medium text-foreground/70">1–2%</span>.
                     </li>
