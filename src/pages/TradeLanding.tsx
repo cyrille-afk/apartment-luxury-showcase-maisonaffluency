@@ -278,7 +278,10 @@ const TradeLanding = () => {
           <h2 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground mb-6 whitespace-nowrap">
             Discover Your Exclusive Trade Benefits and Bespoke Services
           </h2>
-          <p className="font-body text-base md:text-lg leading-relaxed text-muted-foreground text-justify">
+          <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify w-full" style={{ maxWidth: "fit-content" }}>
+            Channeling the essence of high-end French and Italian craftsmanship and design, Maison Affluency is proud to work with the world's leading design professionals, including architects, interior designers, and real estate developers across the Middle East and Asia Pacific regions.
+          </p>
+          <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify w-full mt-4" style={{ maxWidth: "fit-content" }}>
             Our trade program is tailored for a community of professionals who value time, quality, and commitment. 
             In addition to special rates, we offer the full assistance of a dedicated team to swiftly and efficiently 
             manage custom requests. We oversee every aspect of design, sourcing, production, and delivery.
