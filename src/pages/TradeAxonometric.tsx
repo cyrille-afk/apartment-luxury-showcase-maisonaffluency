@@ -976,11 +976,19 @@ const TradeAxonometric = () => {
                       folder="axonometric-sources"
                       accept=".fbx,.skp,application/octet-stream"
                       label="Upload .fbx or .skp file"
-                      onUpload={(urls) => {
+                      onUpload={async (urls) => {
                         if (urls.length > 0) {
                           setSourceImage(urls[0]);
-                          const ext = urls[0].split('.').pop()?.toLowerCase();
+                          const ext = urls[0].split('.').pop()?.toLowerCase() || 'fbx';
                           toast({ title: `${ext === 'skp' ? 'SketchUp' : 'FBX'} file uploaded`, description: "File stored — select a generation mode to proceed." });
+                          // Notify admins
+                          try {
+                            await supabase.functions.invoke("notify-3d-upload", {
+                              body: { fileUrl: urls[0], fileType: ext },
+                            });
+                          } catch (e) {
+                            console.error("Failed to notify admins:", e);
+                          }
                         }
                       }}
                     />
