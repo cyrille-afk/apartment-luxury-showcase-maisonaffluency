@@ -367,14 +367,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   const formData = new FormData(e.currentTarget);
                   const email = formData.get("email") as string;
                   if (email) {
-                    setMobileEmail(email);
+                    setHeroEmail(email);
                     setMobileFormExpanded(true);
-                    const emailInput = formRef.current?.querySelector<HTMLInputElement>('input[type="email"]');
-                    if (emailInput) {
-                      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-                      nativeInputValueSetter?.call(emailInput, email);
-                      emailInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
                   }
                   scrollToForm();
                 }}
