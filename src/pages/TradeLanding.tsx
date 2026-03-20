@@ -273,21 +273,19 @@ const TradeLanding = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.8 }}
-          className="mx-auto px-6 py-10 md:py-16 flex flex-col items-center"
+          className="max-w-3xl mx-auto px-6 py-10 md:py-16"
         >
-          <div className="inline-flex flex-col items-center">
-            <h2 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground mb-6 whitespace-nowrap text-center">
-              Discover Your Exclusive Trade Benefits and Bespoke Services
-            </h2>
-            <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify w-full">
-              Channeling the essence of high-end French and Italian craftsmanship and design, Maison Affluency is proud to work with the world's leading design professionals, including architects, interior designers, and real estate developers across the Middle East and Asia Pacific regions.
-            </p>
-            <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify w-full mt-4">
-              Our trade program is tailored for a community of professionals who value time, quality, and commitment. 
-              In addition to special rates, we offer the full assistance of a dedicated team to swiftly and efficiently 
-              manage custom requests. We oversee every aspect of design, sourcing, production, and delivery.
-            </p>
-          </div>
+          <h2 className="font-display text-xl md:text-2xl lg:text-3xl text-foreground mb-6 text-center">
+            Discover Your Exclusive Trade Benefits and Bespoke Services
+          </h2>
+          <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify">
+            Channeling the essence of high-end French and Italian craftsmanship and design, Maison Affluency is proud to work with the world's leading design professionals, including architects, interior designers, and real estate developers across the Middle East and Asia Pacific regions.
+          </p>
+          <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify mt-4">
+            Our trade program is tailored for a community of professionals who value time, quality, and commitment. 
+            In addition to special rates, we offer the full assistance of a dedicated team to swiftly and efficiently 
+            manage custom requests. We oversee every aspect of design, sourcing, production, and delivery.
+          </p>
         </motion.div>
 
         {/* ─── Mobile: Accordion | Desktop: 50/50 split ─── */}
