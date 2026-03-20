@@ -115,7 +115,7 @@ const FeaturedReadBanner = () => {
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className={
             isHomepage
-              ? "fixed left-0 right-0 z-40 border-b border-border bg-[hsl(var(--primary)/0.04)] backdrop-blur-none"
+              ? "fixed left-0 right-0 z-40 border-b border-border bg-background"
               : "border-b border-border bg-primary/[0.04]"
           }
           style={isHomepage ? { top: navHeight } : undefined}
