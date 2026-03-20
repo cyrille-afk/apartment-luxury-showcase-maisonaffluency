@@ -274,11 +274,11 @@ const Catalogue = () => {
           )}
 
           {/* Product Grid grouped by designer */}
-          {!loading && grouped.map(([brandName, brandProducts]) => (
-            <section key={brandName} className="mb-12">
+          {!loading && grouped.map(({ displayName, products: brandProducts }) => (
+            <section key={displayName} className="mb-12">
               <div className="flex items-baseline gap-3 mb-4 border-b border-border pb-2">
                 <h2 className="font-display text-base md:text-lg text-foreground tracking-wide">
-                  {brandName}
+                  {displayName}
                 </h2>
                 <span className="font-body text-[11px] text-muted-foreground">
                   {brandProducts.length} piece{brandProducts.length !== 1 ? "s" : ""}
