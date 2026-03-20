@@ -25,9 +25,6 @@ const FeaturedReadBanner = () => {
   const isHomepage = location.pathname === "/";
   const isJournal = location.pathname.startsWith("/journal");
 
-  // Don't show on journal pages — the articles are already visible there
-  if (isJournal) return null;
-
   useEffect(() => {
 
     supabase
