@@ -279,7 +279,7 @@ const TradeLanding = () => {
             Discover Your Exclusive Trade Benefits and Bespoke Services
           </h2>
           <p className="w-[70rem] max-w-full font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify">
-            Channeling the essence of high-end French and Italian craftsmanship and design, Maison Affluency is proud to work with the world's leading design professionals, including architects, interior designers, and real estate developers across the Middle East and Asia Pacific regions.
+            Channeling the essence of high-end European craftsmanship and design, Maison Affluency is proud to work with the world's leading design professionals, including architects, interior designers, and real estate developers across the Middle East and Asia Pacific regions.
           </p>
           <p className="w-[70rem] max-w-full font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify mt-4">
             Our trade program is tailored for a community of professionals who value time, quality, and commitment. 
