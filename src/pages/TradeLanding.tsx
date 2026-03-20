@@ -116,6 +116,19 @@ const TradeLanding = () => {
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
 
+  // Overridable 3D Studio images from HeroManager
+  const [studioBeforeImg, setStudioBeforeImg] = useState(studioBeforeImgFallback);
+  const [studioAfterImg, setStudioAfterImg] = useState(studioAfterImgFallback);
+
+  useEffect(() => {
+    loadHeroOverrides().then(() => {
+      const before = getHeroCacheEntry("landing-3d-before");
+      const after = getHeroCacheEntry("landing-3d-after");
+      if (before) setStudioBeforeImg(before.image_url);
+      if (after) setStudioAfterImg(after.image_url);
+    });
+  }, []);
+
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
