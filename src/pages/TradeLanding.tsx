@@ -467,60 +467,70 @@ const TradeLanding = () => {
           </div>
         </div>
 
-        {/* ─── FAQ ─── */}
-        <div className="max-w-3xl mx-auto px-6 md:px-12 py-14 md:py-20">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="text-center mb-10 md:mb-14"
-          >
-            <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
-              Frequently Asked Questions
-            </h2>
-          </motion.div>
+        {/* ─── FAQ + Registration Side by Side ─── */}
+        <div ref={formRef} id="apply" className="w-full border-y border-border bg-muted/10">
+          <div className="max-w-7xl mx-auto px-6 md:px-12 py-14 md:py-20 flex flex-col lg:flex-row gap-0">
+            
+            {/* Left — FAQ */}
+            <div className="flex-1 lg:pr-12">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7 }}
+                className="mb-8 md:mb-10"
+              >
+                <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
+                  Frequently Asked Questions
+                </h2>
+              </motion.div>
 
-          <div className="border-t border-border">
-            {[
-              { q: "Who is eligible to join the Trade Program?", a: "The program is designed for architects, interior designers, decorators, and luxury hospitality professionals. We review each application based on company credentials and professional background." },
-              { q: "Is there a minimum order or annual spend requirement?", a: "No. There is no minimum purchase or annual commitment required. You can place orders of any size through your trade account." },
-              { q: "How does trade pricing work?", a: "Once approved, you'll see exclusive trade pricing when signed in. You can also request bespoke multi-product quotations with all prices listed at a glance, including GST where applicable." },
-              { q: "How quickly will I receive a quotation?", a: "Our team responds to quotation requests within 24 hours. Complex or multi-brand projects may take slightly longer as we coordinate with our workshops." },
-              { q: "Do you ship internationally?", a: "Yes. We arrange consolidated, fully insured shipping to most countries. Our logistics team will recommend the most appropriate freight partners for your project location." },
-              { q: "Can I request custom or bespoke pieces?", a: "Absolutely. We work directly with specialist workshops and renowned designers worldwide to fulfil custom requirements — from material modifications to entirely bespoke commissions." },
-              { q: "How long does the application review take?", a: "Applications are typically reviewed within 1–2 business days. You'll receive an email notification once your account has been approved." },
-            ].map((faq, i) => (
-              <FaqItem key={i} question={faq.q} answer={faq.a} />
-            ))}
-          </div>
-        </div>
-
-        {/* ─── Inline Registration Form ─── */}
-        <div ref={formRef} id="apply" className="w-full bg-muted/10 border-y border-border">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="max-w-2xl mx-auto px-6 md:px-8 py-14 md:py-20"
-          >
-            <div className="text-center mb-8">
-              <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
-                Apply to the Trade Program
-              </h2>
-              <p className="font-body text-sm text-muted-foreground max-w-lg mx-auto">
-                Complete the form below to get started. We'll review your application within 1–2 business days.
-              </p>
+              <div className="border-t border-border">
+                {[
+                  { q: "Who is eligible to join the Trade Program?", a: "The program is designed for architects, interior designers, decorators, and luxury hospitality professionals. We review each application based on company credentials and professional background." },
+                  { q: "Is there a minimum order or annual spend requirement?", a: "No. There is no minimum purchase or annual commitment required. You can place orders of any size through your trade account." },
+                  { q: "How does trade pricing work?", a: "Once approved, you'll see exclusive trade pricing when signed in. You can also request bespoke multi-product quotations with all prices listed at a glance, including GST where applicable." },
+                  { q: "How quickly will I receive a quotation?", a: "Our team responds to quotation requests within 24 hours. Complex or multi-brand projects may take slightly longer as we coordinate with our workshops." },
+                  { q: "Do you ship internationally?", a: "Yes. We arrange consolidated, fully insured shipping to most countries. Our logistics team will recommend the most appropriate freight partners for your project location." },
+                  { q: "Can I request custom or bespoke pieces?", a: "Absolutely. We work directly with specialist workshops and renowned designers worldwide to fulfil custom requirements — from material modifications to entirely bespoke commissions." },
+                  { q: "How long does the application review take?", a: "Applications are typically reviewed within 1–2 business days. You'll receive an email notification once your account has been approved." },
+                ].map((faq, i) => (
+                  <FaqItem key={i} question={faq.q} answer={faq.a} />
+                ))}
+              </div>
             </div>
-            <TradeRegistrationForm prefillEmail={prefillEmail} />
-            <p className="mt-6 text-center font-body text-sm text-muted-foreground">
-              Already a member?{" "}
-              <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80 transition-colors">
-                Sign in
-              </Link>
-            </p>
-          </motion.div>
+
+            {/* Divider */}
+            <div className="hidden lg:block w-px bg-border shrink-0" />
+            <div className="block lg:hidden h-px bg-border my-10" />
+
+            {/* Right — Registration Form */}
+            <div className="flex-1 lg:pl-12">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+              >
+                <div className="mb-8">
+                  <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
+                    Apply to the Trade Program
+                  </h2>
+                  <p className="font-body text-sm text-muted-foreground">
+                    Complete the form below to get started. We'll review your application within 1–2 business days.
+                  </p>
+                </div>
+                <TradeRegistrationForm prefillEmail={prefillEmail} />
+                <p className="mt-6 font-body text-sm text-muted-foreground">
+                  Already a member?{" "}
+                  <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80 transition-colors">
+                    Sign in
+                  </Link>
+                </p>
+              </motion.div>
+            </div>
+
+          </div>
         </div>
 
         {/* ─── Final CTA ─── */}
