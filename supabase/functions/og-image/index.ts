@@ -256,7 +256,7 @@ Deno.serve(async (req) => {
   <meta name="twitter:description" content="${escapeHtml(og.description)}" />
   <meta name="twitter:image" content="${escapeHtml(og.image)}" />
   <meta name="twitter:url" content="${escapeHtml(shareUrl)}" />
-</head>
+  <meta http-equiv="refresh" content="0;url=${escapeHtml(redirectUrl)}" />
 <body>
   <p>Redirecting to <a href="${escapeHtml(redirectUrl)}">${escapeHtml(og.title)}</a>…</p>
   <script>
@@ -270,8 +270,7 @@ Deno.serve(async (req) => {
 
   const headers = new Headers();
   headers.set("Content-Type", "text/html; charset=utf-8");
-  headers.set("Cache-Control", "no-store, max-age=0");
-  headers.set("Pragma", "no-cache");
+  headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
   headers.set("Access-Control-Allow-Origin", "*");
   headers.set("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
 
