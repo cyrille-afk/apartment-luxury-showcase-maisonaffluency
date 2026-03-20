@@ -620,8 +620,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     })()}
                     {(() => {
                       const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * 0.08) : subtotalCents;
-                      const total = currency === "SGD" && afterDiscount > 0
-                        ? afterDiscount + Math.round(afterDiscount * 0.09)
+                      const total = gstEnabled && afterDiscount > 0
+                        ? afterDiscount + Math.round(afterDiscount * gstRate / 100)
                         : afterDiscount;
                       const depositCents = Math.round(total * 0.6);
                       const balanceCents = total - depositCents;
