@@ -56,10 +56,21 @@ const Catalogue = () => {
     fetchProducts();
   }, []);
 
+  // Deduplicate by normalised brand+product name
+  const deduped = useMemo(() => {
+    const seen = new Set<string>();
+    return products.filter(p => {
+      const key = `${p.brand_name.trim().toLowerCase()}::${p.product_name.trim().toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [products]);
+
   const subcategories = activeCategory ? (SUBCATEGORY_MAP[activeCategory] || []) : [];
 
   const filtered = useMemo(() => {
-    let list = products;
+    let list = deduped;
     if (activeCategory) list = list.filter(p => p.category === activeCategory);
     if (activeSubcategory) list = list.filter(p => p.subcategory === activeSubcategory);
     if (search) {
@@ -71,17 +82,22 @@ const Catalogue = () => {
       );
     }
     return list;
-  }, [products, activeCategory, activeSubcategory, search]);
+  }, [deduped, activeCategory, activeSubcategory, search]);
 
-  // Group by brand
+  // Group by brand (case-insensitive merge)
   const grouped = useMemo(() => {
-    const map = new Map<string, CatalogueProduct[]>();
+    const map = new Map<string, { displayName: string; products: CatalogueProduct[] }>();
     for (const p of filtered) {
-      const arr = map.get(p.brand_name) || [];
-      arr.push(p);
-      map.set(p.brand_name, arr);
+      const key = p.brand_name.trim().toLowerCase();
+      const existing = map.get(key);
+      if (existing) {
+        existing.products.push(p);
+      } else {
+        map.set(key, { displayName: p.brand_name.trim(), products: [p] });
+      }
     }
-    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+    return [...map.values()]
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
   }, [filtered]);
 
   const clearFilters = () => {
