@@ -98,7 +98,7 @@ async function getOgData(path: string): Promise<OgData> {
       return {
         title: `${data.title} — Maison Affluency Journal`,
         description: data.excerpt || "Read more on the Maison Affluency Journal.",
-        image: ogCloudinary(data.cover_image_url || ""),
+        image: ogImage(data.cover_image_url || ""),
         url: `${SITE_URL}/journal/${slug}`,
       };
     }
@@ -123,7 +123,7 @@ async function getOgData(path: string): Promise<OgData> {
       return {
         title: `${data.product_name} by ${data.brand_name} — Maison Affluency`,
         description: desc.length > 160 ? desc.slice(0, 157) + "…" : desc,
-        image: ogCloudinary(data.image_url || ""),
+        image: ogImage(data.image_url || ""),
         url: `${SITE_URL}/product/${id}`,
       };
     }
