@@ -4,6 +4,9 @@ import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, Layers, Clock, Calendar, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
+import { trackCTA } from "@/lib/analytics";
+import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 
 interface Product {
   id: string;
@@ -274,6 +277,14 @@ const ProductPage = () => {
                     </Link>
                   </Button>
                 </div>
+                <WhatsAppShareButton
+                  onClick={() => {
+                    sharePageOnWhatsApp(`/product/${id}`, `${product.product_name} by ${product.brand_name}`, product.category);
+                    trackCTA.whatsapp(`ProductPage_Share_${product.product_name}`);
+                  }}
+                  label="Share on WhatsApp"
+                  variant="branded"
+                />
               </div>
 
               {/* noscript fallback for SEO */}

@@ -2,6 +2,9 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, X } from "lucide-react";
+import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
+import { trackCTA } from "@/lib/analytics";
+import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchArticleBySlug, CATEGORY_LABELS, type JournalArticle as Article } from "@/lib/journal";
 
@@ -92,6 +95,15 @@ const JournalArticlePage = () => {
               <ArrowLeft className="w-4 h-4" />
               Back to Journal
             </Link>
+            <WhatsAppShareButton
+              onClick={() => {
+                sharePageOnWhatsApp(`/journal/${slug}`, article.title, article.excerpt?.slice(0, 60));
+                trackCTA.whatsapp(`JournalArticle_Share_${article.slug}`);
+              }}
+              label="Share on WhatsApp"
+              variant="branded"
+              className="!text-xs !px-3 !py-1.5"
+            />
           </div>
         </div>
 
