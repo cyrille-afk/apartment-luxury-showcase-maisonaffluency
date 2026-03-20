@@ -480,7 +480,7 @@ const TradeLanding = () => {
                 transition={{ duration: 0.7 }}
                 className="mb-8 md:mb-10"
               >
-                <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
+                <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3 text-center">
                   Frequently Asked Questions
                 </h2>
               </motion.div>
