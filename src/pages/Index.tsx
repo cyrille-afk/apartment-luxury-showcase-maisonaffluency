@@ -362,6 +362,7 @@ const Index = () => {
       {showNavigation && (
         <Suspense fallback={null}>
           <Navigation />
+          <FeaturedReadBanner />
         </Suspense>
       )}
 

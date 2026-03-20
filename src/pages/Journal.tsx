@@ -71,6 +71,7 @@ const Journal = () => {
             <span className="font-display text-sm tracking-widest text-muted-foreground">Journal</span>
           </div>
         </div>
+        <FeaturedReadBanner />
 
         {/* Hero */}
         <div className="max-w-4xl mx-auto px-6 pt-14 pb-8 md:pt-20 md:pb-12 text-center">
