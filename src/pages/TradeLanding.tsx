@@ -460,29 +460,7 @@ const TradeLanding = () => {
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-              {testimonials.map((t, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.6, delay: i * 0.15 }}
-                  className="relative bg-background border border-border rounded-sm p-6 md:p-8 flex flex-col"
-                >
-                  <Quote className="w-5 h-5 text-accent/50 mb-4 shrink-0" />
-                  <p className="font-body text-sm leading-relaxed text-muted-foreground flex-1 text-justify">
-                    "{t.quote}"
-                  </p>
-                  <div className="mt-6 pt-4 border-t border-border">
-                    <p className="font-display text-sm text-foreground">{t.name}</p>
-                    <p className="font-body text-xs text-muted-foreground mt-0.5">
-                      {t.title} · {t.location}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            <MobileTestimonials testimonials={testimonials} />
           </div>
         </div>
 
