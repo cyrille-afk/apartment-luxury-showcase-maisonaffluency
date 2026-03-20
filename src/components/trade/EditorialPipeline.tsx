@@ -436,6 +436,17 @@ const EditorialPipeline = () => {
                             </span>
                           )}
 
+                          {/* Convert to Draft button (ready items only) */}
+                          {item.status === "ready" && !item.article_id && (
+                            <button
+                              onClick={() => convertToDraft(item)}
+                              title="Convert to journal draft"
+                              className="p-1.5 rounded-md text-emerald-600 opacity-0 group-hover:opacity-100 hover:bg-emerald-500/10 transition-all"
+                            >
+                              <FileUp className="w-3 h-3" />
+                            </button>
+                          )}
+
                           {/* Edit button */}
                           <button
                             onClick={() => startEdit(item)}
