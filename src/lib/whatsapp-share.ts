@@ -19,7 +19,7 @@ type ShareSection = "designer" | "collectible" | "atelier";
  * Crawlers see proper OG tags; real browsers are redirected to the SPA.
  */
 export const buildOgUrl = (path: string) =>
-  `${OG_FUNCTION_BASE}?path=${encodeURIComponent(path)}&v=${OG_SHARE_VERSION}`;
+  `${OG_FUNCTION_BASE}?path=${encodeURIComponent(path)}&v=${OG_SHARE_VERSION}&t=${Date.now()}`;
 
 /**
  * Build a deep-link URL for a specific designer/brand profile.
