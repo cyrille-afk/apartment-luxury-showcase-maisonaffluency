@@ -103,6 +103,8 @@ const FeaturedReadBanner = () => {
     </div>
   );
 
+  if (isJournal) return null;
+
   return (
     <AnimatePresence>
       {visible && article && (
