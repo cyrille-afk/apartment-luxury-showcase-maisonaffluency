@@ -428,8 +428,11 @@ const TradeJournal = () => {
   return (
     <>
       <Helmet><title>Journal — Admin — Maison Affluency</title></Helmet>
-      <div className="max-w-5xl">
-        <div className="flex items-center justify-between mb-6">
+      <div className="max-w-5xl space-y-8">
+        {/* Editorial Pipeline Widget */}
+        <EditorialPipeline />
+
+        <div className="flex items-center justify-between">
           <h1 className="font-display text-2xl text-foreground">Journal Articles</h1>
           <button
             onClick={startNew}
