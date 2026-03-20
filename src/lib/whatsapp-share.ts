@@ -10,7 +10,7 @@ const SITE_URL = "https://maisonaffluency.com";
 
 const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
 const OG_FUNCTION_BASE = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image`;
-const OG_SHARE_VERSION = "20260320b";
+const OG_SHARE_VERSION = "20260320c";
 
 type ShareSection = "designer" | "collectible" | "atelier";
 
