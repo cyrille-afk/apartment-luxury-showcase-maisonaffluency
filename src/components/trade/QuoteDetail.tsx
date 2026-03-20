@@ -517,6 +517,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <span className="font-body text-xs text-foreground font-medium">
                             {currencySymbol(currency)} {formatPriceRaw(lineTotal, currency) || "TBD"}
                           </span>
+                          {item.unit_price_cents != null && product?.currency && product.currency !== currency && product.trade_price_cents && (
+                            <p className="font-body text-[8px] text-muted-foreground/60 mt-0.5">
+                              Catalog: {currencySymbol(product.currency)} {formatPriceRaw(product.trade_price_cents, product.currency)}
+                            </p>
+                          )}
                         </div>
                       </div>
                       {/* Desktop: standard columns */}
