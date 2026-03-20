@@ -102,7 +102,7 @@ const JournalArticlePage = () => {
               }}
               label="Share on WhatsApp"
               variant="branded"
-              className="!text-xs !px-3 !py-1.5"
+              className="md:!text-sm md:!px-4 md:!py-2"
             />
           </div>
         </div>
