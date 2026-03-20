@@ -413,10 +413,10 @@ const TradeLanding = () => {
               className="text-center mb-12 md:mb-16"
             >
               <p className="font-body text-xs tracking-[0.25em] uppercase text-accent mb-6">Exclusive Tool</p>
-              <h2 className="font-display text-2xl md:text-4xl lg:text-5xl mb-5">
+              <h2 className="font-display text-2xl md:text-4xl lg:text-5xl text-foreground mb-5">
                 From Floor Plan to Furnished
               </h2>
-              <p className="font-body text-sm md:text-base leading-relaxed text-background/70 max-w-2xl mx-auto">
+              <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground max-w-2xl mx-auto">
                 Upload your architectural drawings and watch them transform into fully furnished 3D visualisations, 
                 featuring products from our curated portfolio. A first-of-its-kind tool for design professionals.
               </p>
