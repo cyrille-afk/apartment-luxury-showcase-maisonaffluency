@@ -23,6 +23,7 @@ const FeaturedReadBanner = () => {
   // On the homepage the nav is position:fixed, so we need position:fixed too.
   // On journal/article pages the nav is position:sticky in normal flow, so we stay in flow.
   const isHomepage = location.pathname === "/";
+  const isJournal = location.pathname.startsWith("/journal");
 
   useEffect(() => {
 
@@ -101,6 +102,8 @@ const FeaturedReadBanner = () => {
       </button>
     </div>
   );
+
+  if (isJournal) return null;
 
   return (
     <AnimatePresence>
