@@ -836,9 +836,17 @@ const TradeAxonometric = () => {
                   <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${req.status === "in_progress" ? "bg-blue-500/10 text-blue-700" : "bg-yellow-500/10 text-yellow-700"}`}>
                     {req.status === "in_progress" ? "In Progress" : "Pending"}
                   </span>
-                  <Button variant="outline" size="sm" onClick={() => loadFromQueue(req)}>
-                    <ArrowRight className="w-3.5 h-3.5 mr-1" />Process
-                  </Button>
+                  {req.request_type === "3d_model" ? (
+                    <a href={req.image_url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="sm">
+                        <Download className="w-3.5 h-3.5 mr-1" />Download
+                      </Button>
+                    </a>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => loadFromQueue(req)}>
+                      <ArrowRight className="w-3.5 h-3.5 mr-1" />Process
+                    </Button>
+                  )}
                 </div>
               );
             })}
