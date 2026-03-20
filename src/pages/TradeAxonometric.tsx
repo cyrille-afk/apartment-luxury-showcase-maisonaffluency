@@ -965,7 +965,26 @@ const TradeAxonometric = () => {
                   )}
                 </div>
               ) : (
-                <SourceUpload onSourceReady={(url) => setSourceImage(url)} />
+                <div className="space-y-3">
+                  <SourceUpload onSourceReady={(url) => setSourceImage(url)} />
+
+                  <div className="border-t border-border pt-3 space-y-2">
+                    <p className="font-body text-[11px] text-muted-foreground">
+                      Have a Revit model? Export as <strong>.fbx</strong> (File → Export → FBX) to preserve geometry, materials, cameras & lights, then upload here.
+                    </p>
+                    <CloudUpload
+                      folder="axonometric-sources"
+                      accept=".fbx,application/octet-stream"
+                      label="Upload .fbx file"
+                      onUpload={(urls) => {
+                        if (urls.length > 0) {
+                          setSourceImage(urls[0]);
+                          toast({ title: "FBX uploaded", description: "File stored — select a generation mode to proceed." });
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
               )}
             </div>
 
