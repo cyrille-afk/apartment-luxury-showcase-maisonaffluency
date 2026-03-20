@@ -210,7 +210,7 @@ const JournalArticlePage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="max-w-3xl mx-auto px-6 py-10 md:py-14"
+            className="max-w-3xl mx-auto px-6 py-6 md:py-14"
           >
             <div
               className="journal-article prose prose-lg max-w-none font-body text-foreground/90
