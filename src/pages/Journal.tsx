@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { fetchPublishedArticles, CATEGORY_LABELS, type JournalArticle, type JournalCategory } from "@/lib/journal";
+import FeaturedReadBanner from "@/components/FeaturedReadBanner";
 
 const ALL_CATEGORIES: JournalCategory[] = [
   "designer_interview",

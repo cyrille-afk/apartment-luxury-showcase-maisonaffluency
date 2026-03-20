@@ -18,6 +18,7 @@ function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>
 
 // Navigation is heavy (Radix Sheet, Tooltip, DropdownMenu) — lazy-load it
 const Navigation = lazyRetry(() => import("@/components/Navigation"));
+const FeaturedReadBanner = lazyRetry(() => import("@/components/FeaturedReadBanner"));
 
 // Lazy-load everything below the fold to reduce initial JS
 const Overview = lazyRetry(() => import("@/components/Overview"));
