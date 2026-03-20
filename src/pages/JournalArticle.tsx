@@ -97,7 +97,14 @@ const JournalArticlePage = () => {
             </Link>
             <WhatsAppShareButton
               onClick={() => {
-                sharePageOnWhatsApp(`/journal/${slug}`, article.title, article.excerpt?.slice(0, 60));
+                sharePageOnWhatsApp(
+                  `/journal/${slug}`,
+                  article.title,
+                  article.excerpt?.slice(0, 60),
+                  article.slug === "thierry-lemaire-radical-simplicity"
+                    ? { directUrlPath: "/thierry-lemaire-share.html" }
+                    : undefined
+                );
                 trackCTA.whatsapp(`JournalArticle_Share_${article.slug}`);
               }}
               label="Share on WhatsApp"

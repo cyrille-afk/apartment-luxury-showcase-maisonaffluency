@@ -46,12 +46,24 @@ export const shareOnWhatsApp = (message: string) => {
  * The shared URL goes through the og-image edge function so crawlers
  * see the correct title, description, and image.
  */
+type SharePageOptions = {
+  directUrlPath?: string;
+};
+
+const buildSiteShareUrl = (path: string) => {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${SITE_URL}${path}${separator}v=${OG_SHARE_VERSION}&t=${Date.now()}`;
+};
+
 export const sharePageOnWhatsApp = (
   path: string,
   title: string,
-  subtitle?: string
+  subtitle?: string,
+  options?: SharePageOptions
 ) => {
-  const url = buildOgUrl(path);
+  const url = options?.directUrlPath
+    ? buildSiteShareUrl(options.directUrlPath)
+    : buildOgUrl(path);
   const message = subtitle
     ? `${title} – ${subtitle}: ${url}`
     : `${title}: ${url}`;
