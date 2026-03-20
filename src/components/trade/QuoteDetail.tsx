@@ -861,7 +861,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <ul className="font-body text-[10px] text-muted-foreground space-y-1 list-disc list-inside">
                     <li>You are paying the <span className="font-medium text-foreground/70">{isPayingDeposit ? "60% deposit" : "40% balance"}</span> of {currencySymbol(currency)}{formatPriceRaw(portionCents, currency)} {currency}.</li>
                     <li>A processing fee of 3.4% + {feeDisplay} is included in the Stripe charge above.</li>
-                    {currency === "SGD" && <li>9% GST is included.</li>}
+                    {gstEnabled && <li>{gstRate}% GST is included.</li>}
                     <li>
                       If your card is denominated in a different currency, your bank may apply a foreign transaction fee of approximately <span className="font-medium text-foreground/70">1–2%</span>.
                     </li>
