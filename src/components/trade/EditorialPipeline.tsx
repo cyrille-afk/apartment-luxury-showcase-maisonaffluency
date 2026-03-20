@@ -52,6 +52,7 @@ const emptyItem = (): Partial<PipelineItem> => ({
 });
 
 const EditorialPipeline = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [items, setItems] = useState<PipelineItem[]>([]);
   const [loading, setLoading] = useState(true);
