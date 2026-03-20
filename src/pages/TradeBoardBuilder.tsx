@@ -123,13 +123,31 @@ const TradeBoardBuilder = () => {
 
   const shareBoard = async () => {
     if (!board) return;
-    if (board.status === "draft") {
+    const wasDraft = board.status === "draft";
+    if (wasDraft) {
       await supabase.from("client_boards").update({ status: "shared" }).eq("id", board.id);
       setBoard({ ...board, status: "shared" });
     }
     const url = `${window.location.origin}/board/${board.share_token}`;
     navigator.clipboard.writeText(url);
-    toast({ title: "Link copied!", description: "Board is now shared. Send the link to your client." });
+
+    // Send email notification to client if sharing for the first time and email exists
+    if (wasDraft) {
+      try {
+        await supabase.functions.invoke("send-board-shared", {
+          body: { boardId: board.id },
+        });
+      } catch (e) {
+        console.error("Failed to send board notification email:", e);
+      }
+    }
+
+    toast({
+      title: "Link copied!",
+      description: wasDraft
+        ? "Board shared. Your client will receive an email notification."
+        : "Share link copied to clipboard.",
+    });
   };
 
   const convertToQuote = async () => {
