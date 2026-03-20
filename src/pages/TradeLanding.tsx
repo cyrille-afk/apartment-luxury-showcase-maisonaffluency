@@ -387,6 +387,81 @@ const TradeLanding = () => {
           })}
         </div>
 
+        {/* ─── 3D Studio Showcase ─── */}
+        <div className="w-full bg-foreground text-background">
+          <div className="max-w-6xl mx-auto px-6 md:px-12 py-16 md:py-24">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="text-center mb-12 md:mb-16"
+            >
+              <p className="font-body text-xs tracking-[0.25em] uppercase text-accent mb-6">Exclusive Tool</p>
+              <h2 className="font-display text-2xl md:text-4xl lg:text-5xl mb-5">
+                From Floor Plan to Furnished
+              </h2>
+              <p className="font-body text-sm md:text-base leading-relaxed text-background/70 max-w-2xl mx-auto">
+                Upload your architectural drawings and watch them transform into fully furnished 3D visualisations, 
+                featuring products from our curated portfolio. A first-of-its-kind tool for design professionals.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+                className="relative"
+              >
+                <p className="font-body text-[10px] tracking-[0.2em] uppercase text-accent mb-3">Your Drawing</p>
+                <div className="aspect-[4/3] rounded-sm overflow-hidden border border-background/10">
+                  <img
+                    src={studioBeforeImg}
+                    alt="Architectural floor plan sketch"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="relative"
+              >
+                <p className="font-body text-[10px] tracking-[0.2em] uppercase text-accent mb-3">3D Studio Result</p>
+                <div className="aspect-[4/3] rounded-sm overflow-hidden border border-background/10">
+                  <img
+                    src={studioAfterImg}
+                    alt="3D furnished room visualization"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </motion.div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="text-center mt-10 md:mt-14"
+            >
+              <div className="flex flex-wrap justify-center gap-8 md:gap-14 font-body text-xs tracking-wider uppercase text-background/50">
+                <span>AI-Powered Rendering</span>
+                <span>Up to 10 Products</span>
+                <span>Before / After Comparison</span>
+                <span>Wallcovering Application</span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
         {/* ─── Testimonials ─── */}
         <div className="w-full bg-muted/20 border-y border-border">
           <div className="max-w-6xl mx-auto px-6 md:px-12 py-14 md:py-20">
