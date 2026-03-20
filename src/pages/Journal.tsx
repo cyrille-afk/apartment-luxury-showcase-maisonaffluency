@@ -276,6 +276,11 @@ const Journal = () => {
                           </div>
                         )}
                         <div className="flex items-center gap-3 mb-2">
+                          {(article as any).is_featured && (
+                            <span className="font-body text-[9px] uppercase tracking-[0.18em] text-white bg-primary px-2 py-0.5 rounded-sm font-semibold">
+                              Editor's Pick
+                            </span>
+                          )}
                           <span className="font-body text-[10px] uppercase tracking-[0.15em] text-primary">
                             {CATEGORY_LABELS[article.category]}
                           </span>

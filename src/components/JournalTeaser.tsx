@@ -136,9 +136,16 @@ const JournalTeaser = () => {
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <span className="font-body text-[10px] uppercase tracking-[0.15em] text-primary">
-                          {CATEGORY_LABELS[article.category]}
-                        </span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {(article as any).is_featured && (
+                            <span className="font-body text-[9px] uppercase tracking-[0.18em] text-white bg-primary px-1.5 py-0.5 rounded-sm font-semibold">
+                              Editor's Pick
+                            </span>
+                          )}
+                          <span className="font-body text-[10px] uppercase tracking-[0.15em] text-primary">
+                            {CATEGORY_LABELS[article.category]}
+                          </span>
+                        </div>
                         <h3 className="font-display text-sm md:text-base text-foreground group-hover:text-primary transition-colors mt-1 mb-1 leading-snug line-clamp-2">
                           {article.title}
                         </h3>
