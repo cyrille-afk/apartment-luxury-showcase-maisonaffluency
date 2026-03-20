@@ -198,6 +198,7 @@ const TradeShowroom = () => {
             onDrawerRefreshKeyChange={setDrawerRefreshKey}
             onDrawerOpen={() => setDrawerOpen(true)}
             highlightProductId={highlightId}
+            initialDesigner={designerParam}
           />
         ) : (
           <ProductImageSearch
