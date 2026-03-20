@@ -1,0 +1,1 @@
+ALTER TABLE journal_articles ADD COLUMN is_featured boolean NOT NULL DEFAULT false
