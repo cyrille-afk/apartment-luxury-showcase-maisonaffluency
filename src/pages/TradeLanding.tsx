@@ -69,7 +69,7 @@ const benefits = [
     title: "Project Folders",
     description:
       "Maison Affluency Trade Program gives you access to smart professional tools — save your favourite items and easily organise them in project folders, with sharable links to colleagues and clients.",
-    image: cloudinaryUrl("v1773473193/quality-control_dvxvmb", { width: 1400, quality: "auto:good", crop: "fill" }),
+    image: projectFoldersImg,
   },
   {
     title: "Consolidated Insured Shipping",
