@@ -4,7 +4,7 @@
  * Social-media crawlers (WhatsApp, Facebook, Twitter, LinkedIn, Telegram, etc.)
  * don't execute JavaScript, so they never see react-helmet-async tags.
  * This function serves a tiny HTML page with the correct OG tags for a given
- * route, then redirects real browsers to the SPA via <meta http-equiv="refresh">.
+ * route, then redirects real browsers to the SPA via JavaScript.
  *
  * Usage:
  *   https://<project>.supabase.co/functions/v1/og-image?path=/trade/program
@@ -32,19 +32,36 @@ function supabaseAdmin() {
   );
 }
 
+function ensureCloudinaryImageExtension(url: string): string {
+  if (
+    url.includes("cloudinary.com") &&
+    !/\.(jpg|jpeg|png|webp|gif)(?:[?#]|$)/i.test(url)
+  ) {
+    return `${url}.jpg`;
+  }
+  return url;
+}
+
 /** Resolve an image URL to an absolute, 1200×630 OG-ready URL */
 function ogImage(url: string): string {
   if (!url) return DEFAULT_IMAGE;
+
   // Make relative paths absolute
   if (url.startsWith("/")) {
     return `${SITE_URL}${url}`;
   }
+
   // For Cloudinary URLs, strip existing transforms and apply OG-optimised ones
   if (url.includes("cloudinary.com") && url.includes("/upload/")) {
     // Remove any existing transformation chain between /upload/ and /v{timestamp}
     const cleaned = url.replace(/\/upload\/[^v][^/]*(?:\/[^v][^/]*)*\//, "/upload/");
-    return cleaned.replace("/upload/", "/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/");
+    const transformed = cleaned.replace(
+      "/upload/",
+      "/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/"
+    );
+    return ensureCloudinaryImageExtension(transformed);
   }
+
   return url;
 }
 
@@ -65,10 +82,12 @@ async function getOgData(path: string): Promise<OgData> {
 
     case "/trade/program":
       return {
-        title: "Welcome to Maison Affluency Trade Program — Discover Your Exclusive Trade Benefits and Bespoke Services",
+        title:
+          "Welcome to Maison Affluency Trade Program — Discover Your Exclusive Trade Benefits and Bespoke Services",
         description:
           "Exclusive benefits for architects and interior designers — trade pricing, dedicated client advisors, custom requests, material libraries, and consolidated insured shipping.",
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg,g_auto/v1772085848/intimate-dining_ux4pee",
+        image:
+          "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg,g_auto/v1772085848/intimate-dining_ux4pee.jpg",
         url: `${SITE_URL}/trade/program`,
       };
 
@@ -173,10 +192,13 @@ async function getOgData(path: string): Promise<OgData> {
       .single();
 
     if (data) {
-      const subtitle = [data.client_name, data.project_name].filter(Boolean).join(" · ");
+      const subtitle = [data.client_name, data.project_name]
+        .filter(Boolean)
+        .join(" · ");
       const desc =
         data.description ||
         `Design presentation${subtitle ? ` — ${subtitle}` : ""} by Maison Affluency.`;
+
       // Try to get the first slide image as the preview
       const { data: slide } = await sb
         .from("presentation_slides")
@@ -229,9 +251,12 @@ Deno.serve(async (req) => {
   const og = await getOgData(path);
 
   const redirectUrl = og.url;
-  const functionBase = `${Deno.env.get("SUPABASE_URL") || `${url.protocol}//${url.host}`}/functions/v1/og-image`;
+  const functionBase = `${
+    Deno.env.get("SUPABASE_URL") || `${url.protocol}//${url.host}`
+  }/functions/v1/og-image`;
   const shareVersion = url.searchParams.get("v");
-  const shareUrl = `${functionBase}?path=${encodeURIComponent(path)}${
+  const sharePath = encodeURI(path);
+  const shareUrl = `${functionBase}?path=${sharePath}${
     shareVersion ? `&v=${encodeURIComponent(shareVersion)}` : ""
   }`;
 
@@ -245,10 +270,14 @@ Deno.serve(async (req) => {
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
+  <meta property="og:locale" content="en_US" />
   <meta property="og:url" content="${escapeHtml(shareUrl)}" />
   <meta property="og:title" content="${escapeHtml(og.title)}" />
   <meta property="og:description" content="${escapeHtml(og.description)}" />
   <meta property="og:image" content="${escapeHtml(og.image)}" />
+  <meta property="og:image:secure_url" content="${escapeHtml(og.image)}" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:alt" content="${escapeHtml(og.title)}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:site_name" content="Maison Affluency" />
@@ -258,10 +287,13 @@ Deno.serve(async (req) => {
   <meta name="twitter:title" content="${escapeHtml(og.title)}" />
   <meta name="twitter:description" content="${escapeHtml(og.description)}" />
   <meta name="twitter:image" content="${escapeHtml(og.image)}" />
+  <meta name="twitter:image:alt" content="${escapeHtml(og.title)}" />
   <meta name="twitter:url" content="${escapeHtml(shareUrl)}" />
 </head>
 <body>
-  <p>Redirecting to <a href="${escapeHtml(redirectUrl)}">${escapeHtml(og.title)}</a>…</p>
+  <p>Redirecting to <a href="${escapeHtml(redirectUrl)}">${escapeHtml(
+    og.title
+  )}</a>…</p>
   <script>
     window.location.replace(${JSON.stringify(redirectUrl)});
   </script>
@@ -273,9 +305,12 @@ Deno.serve(async (req) => {
 
   const headers = new Headers();
   headers.set("Content-Type", "text/html; charset=utf-8");
-  headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
+  headers.set("Cache-Control", "no-store, max-age=0");
   headers.set("Access-Control-Allow-Origin", "*");
-  headers.set("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
+  headers.set(
+    "Access-Control-Allow-Headers",
+    "authorization, x-client-info, apikey, content-type"
+  );
 
   return new Response(html, { status: 200, headers });
 });
