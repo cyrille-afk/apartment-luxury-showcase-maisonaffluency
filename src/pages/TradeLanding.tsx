@@ -598,7 +598,7 @@ const TradeLanding = () => {
                 <div className="border-t border-border mt-4" />
               </motion.div>
 
-              <div className="space-y-6">
+              <div className="space-y-0 divide-y divide-border">
                 {[
                   { q: "Who is eligible to join the Trade Program?", a: "The program is designed for architects, interior designers, decorators, and luxury hospitality professionals. We review each application based on company credentials and professional background." },
                   { q: "Is there a minimum order or annual spend requirement?", a: "No. There is no minimum purchase or annual commitment required. You can place orders of any size through your trade account." },
@@ -608,9 +608,18 @@ const TradeLanding = () => {
                   { q: "Can I request custom or bespoke pieces?", a: "Absolutely. We work directly with specialist workshops and renowned designers worldwide to fulfil custom requirements — from material modifications to entirely bespoke commissions." },
                   { q: "How long does the application review take?", a: "Applications are typically reviewed within 1–2 business days. You'll receive an email notification once your account has been approved." },
                 ].map((faq, i) => (
-                  <div key={i}>
-                    <h3 className="font-display text-sm md:text-base text-foreground mb-1.5">{faq.q}</h3>
-                    <p className="font-body text-sm leading-relaxed text-muted-foreground">{faq.a}</p>
+                  <div key={i} className="py-4">
+                    <button
+                      type="button"
+                      className="w-full flex items-center justify-between text-left lg:pointer-events-none"
+                      onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                    >
+                      <h3 className="font-display text-sm md:text-base text-foreground">{faq.q}</h3>
+                      <span className="lg:hidden ml-3 text-muted-foreground shrink-0 transition-transform duration-200" style={{ transform: openIndex === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</span>
+                    </button>
+                    <div className={`overflow-hidden transition-all duration-200 ${openIndex === i ? 'max-h-40 mt-2' : 'max-h-0 lg:max-h-40 lg:mt-2'}`}>
+                      <p className="font-body text-sm leading-relaxed text-muted-foreground">{faq.a}</p>
+                    </div>
                   </div>
                 ))}
               </div>
