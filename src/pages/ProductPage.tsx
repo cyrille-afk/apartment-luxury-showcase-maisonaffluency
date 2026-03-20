@@ -144,8 +144,8 @@ const ProductPage = () => {
             <Link to="/" className="flex items-center gap-2">
               <span className="font-display text-sm text-foreground tracking-wide">Maison Affluency</span>
             </Link>
-            <a href={inquiryMailto} className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
-              <Mail className="h-3 w-3" /> Inquire
+            <a href={bookingMailto} className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
+              <Calendar className="h-3 w-3" /> Book a Viewing
             </a>
           </div>
         </header>
