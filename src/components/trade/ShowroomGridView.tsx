@@ -26,6 +26,7 @@ interface ShowroomProduct {
   materials: string | null;
   dimensions: string | null;
   product_image_url: string | null;
+  hover_image_url?: string | null;
   link_url: string | null;
   image_identifier: string;
   category?: string | null;
@@ -195,17 +196,24 @@ const ShowroomGridView = ({
 
         const { data: pricedProducts } = await supabase
           .from("trade_products")
-          .select("id, product_name, trade_price_cents, rrp_price_cents, currency");
+          .select("id, product_name, trade_price_cents, rrp_price_cents, currency, gallery_images");
 
         const priceLookup = new Map<string, PriceMatch>();
         const priceEntries: PriceMatch[] = [];
         const dbProductIdLookup = new Map<string, string>();
+        const hoverImageLookup = new Map<string, string>();
         if (pricedProducts) {
           for (const pp of pricedProducts) {
             const ppKey = pp.product_name.trim().toLowerCase();
             dbProductIdLookup.set(ppKey, pp.id);
             const normalizedName = normalizeProductName(pp.product_name);
             if (normalizedName) dbProductIdLookup.set(normalizedName, pp.id);
+            // Build hover image lookup from gallery_images
+            const gallery = pp.gallery_images as string[] | null;
+            if (gallery && gallery.length > 0) {
+              hoverImageLookup.set(ppKey, gallery[0]);
+              if (normalizedName) hoverImageLookup.set(normalizedName, gallery[0]);
+            }
             const cents = pp.trade_price_cents ?? pp.rrp_price_cents;
             if (!cents) continue;
             const entry: PriceMatch = { name: pp.product_name, cents, currency: pp.currency };
@@ -241,6 +249,7 @@ const ShowroomGridView = ({
               dimensions: meta?.dimensions || item.dimensions,
               designer_name: meta?.brand || item.designer_name,
               product_image_url: meta?.image_url || item.product_image_url || null,
+              hover_image_url: hoverImageLookup.get(key) || hoverImageLookup.get(normalizeProductName(item.product_name)) || null,
               category: meta?.category || inferCategory(item.product_name),
               subcategory: meta?.subcategory || null,
               pdf_url: pdfLookup.get(key),
@@ -460,7 +469,12 @@ const ShowroomGridView = ({
               >
                 <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => setLightboxProduct(toLightboxItem(product))}>
                   {product.product_image_url ? (
-                    <img src={product.product_image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
+                    <>
+                      <img src={product.product_image_url} alt={product.product_name} className={cn("w-full h-full object-cover transition-opacity duration-500", product.hover_image_url ? "group-hover:opacity-0" : "")} loading="lazy" />
+                      {product.hover_image_url && (
+                        <img src={product.hover_image_url} alt={`${product.product_name} - in context`} className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500" loading="lazy" />
+                      )}
+                    </>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Package className="h-6 w-6 text-muted-foreground/30" />
