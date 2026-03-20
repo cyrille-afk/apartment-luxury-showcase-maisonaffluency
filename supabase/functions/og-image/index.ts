@@ -129,6 +129,63 @@ async function getOgData(path: string): Promise<OgData> {
     }
   }
 
+  // ── Dynamic: Shared client board /board/:token ─────────────────
+  const boardMatch = clean.match(/^\/board\/([^/]+)$/);
+  if (boardMatch) {
+    const token = boardMatch[1];
+    const sb = supabaseAdmin();
+    const { data } = await sb
+      .from("client_boards")
+      .select("title, client_name, status")
+      .eq("share_token", token)
+      .neq("status", "draft")
+      .single();
+
+    if (data) {
+      const clientLabel = data.client_name ? ` for ${data.client_name}` : "";
+      return {
+        title: `${data.title}${clientLabel} — Maison Affluency`,
+        description: `Curated furniture selection${clientLabel} — review and approve pieces from Maison Affluency's collection.`,
+        image: TRADE_IMAGE,
+        url: `${SITE_URL}/board/${token}`,
+      };
+    }
+  }
+
+  // ── Dynamic: Presentation viewer /trade/presentations/:id/view ─
+  const presMatch = clean.match(/^\/trade\/presentations\/([^/]+)\/view$/);
+  if (presMatch) {
+    const id = presMatch[1];
+    const sb = supabaseAdmin();
+    const { data } = await sb
+      .from("presentations")
+      .select("title, description, client_name, project_name, is_published")
+      .eq("id", id)
+      .single();
+
+    if (data) {
+      const subtitle = [data.client_name, data.project_name].filter(Boolean).join(" · ");
+      const desc =
+        data.description ||
+        `Design presentation${subtitle ? ` — ${subtitle}` : ""} by Maison Affluency.`;
+      // Try to get the first slide image as the preview
+      const { data: slide } = await sb
+        .from("presentation_slides")
+        .select("image_url")
+        .eq("presentation_id", id)
+        .order("sort_order", { ascending: true })
+        .limit(1)
+        .single();
+
+      return {
+        title: `${data.title}${subtitle ? ` — ${subtitle}` : ""} — Maison Affluency`,
+        description: desc.length > 160 ? desc.slice(0, 157) + "…" : desc,
+        image: slide ? ogImage(slide.image_url) : TRADE_IMAGE,
+        url: `${SITE_URL}/trade/presentations/${id}/view`,
+      };
+    }
+  }
+
   // ── Fallback: homepage ─────────────────────────────────────────
   return {
     title: "Maison Affluency | Luxury Furniture & Collectible Design",
