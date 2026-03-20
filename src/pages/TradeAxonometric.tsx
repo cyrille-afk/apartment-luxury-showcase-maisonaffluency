@@ -210,6 +210,11 @@ const TradeAxonometric = () => {
   const [savingToGallery, setSavingToGallery] = useState(false);
   const [showSceneEditor, setShowSceneEditor] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
+  const [show3dSubmit, setShow3dSubmit] = useState(false);
+  const [model3dUrl, setModel3dUrl] = useState<string | null>(null);
+  const [model3dProjectName, setModel3dProjectName] = useState("");
+  const [model3dNotes, setModel3dNotes] = useState("");
+  const [submitting3dModel, setSubmitting3dModel] = useState(false);
   const [showProposal, setShowProposal] = useState(false);
   const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
