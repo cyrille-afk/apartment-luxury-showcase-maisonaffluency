@@ -190,26 +190,43 @@ const TradeLanding = () => {
             transition={{ duration: 1 }}
             className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
           >
-            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] tracking-wide">
-              Trade Program
+            <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] tracking-wide">
+              Welcome To Maison Affluency
             </h1>
             <p className="font-display text-base sm:text-lg md:text-2xl text-white mt-3 sm:mt-5 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light max-w-2xl">
-              Join &amp; Enjoy Exclusive Benefits
+              Trade Program
             </p>
-            <div className="flex items-center gap-4 mt-10 sm:mt-14">
-              <Link
-                to="/trade/register"
-                className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[140px] text-center"
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const email = formData.get("email") as string;
+                if (email) {
+                  window.location.href = `/trade/register?email=${encodeURIComponent(email)}`;
+                }
+              }}
+              className="flex items-center gap-3 mt-10 sm:mt-14 w-full max-w-lg px-4"
+            >
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder="Your work email"
+                className="flex-1 bg-white/15 backdrop-blur-sm border border-white/30 focus:border-white/60 text-white placeholder:text-white/50 px-5 py-3 font-body text-xs uppercase tracking-[0.15em] rounded-full transition-all duration-300 outline-none focus:ring-1 focus:ring-white/30"
+              />
+              <button
+                type="submit"
+                className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[120px] text-center whitespace-nowrap"
               >
                 Join Now
+              </button>
+            </form>
+            <p className="mt-5 font-body text-xs text-white/70 tracking-wide">
+              Already registered?{" "}
+              <Link to="/trade/login" className="text-white underline underline-offset-2 hover:text-white/90 transition-colors">
+                Sign in
               </Link>
-              <Link
-                to="/trade/login"
-                className="bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white px-6 py-3 font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold min-w-[140px] text-center"
-              >
-                Log In
-              </Link>
-            </div>
+            </p>
           </motion.div>
         </div>
 
