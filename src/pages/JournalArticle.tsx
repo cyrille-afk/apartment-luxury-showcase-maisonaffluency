@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, X } from "lucide-react";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
@@ -13,17 +13,19 @@ const PdfViewer = lazy(() => import("@/components/journal/PdfViewer"));
 const JournalArticlePage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isPreview = searchParams.get("preview") === "true";
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!slug) return;
-    fetchArticleBySlug(slug)
+    fetchArticleBySlug(slug, isPreview)
       .then(setArticle)
       .catch(() => navigate("/journal", { replace: true }))
       .finally(() => setLoading(false));
-  }, [slug, navigate]);
+  }, [slug, navigate, isPreview]);
 
   const formatDate = (d: string | null) =>
     d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "";
