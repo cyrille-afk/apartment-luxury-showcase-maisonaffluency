@@ -369,6 +369,47 @@ export type Database = {
         }
         Relationships: []
       }
+      competitor_traffic: {
+        Row: {
+          avg_duration_seconds: number | null
+          bounce_rate: number | null
+          created_at: string
+          gallery_id: string
+          id: string
+          month: string
+          monthly_visits: number | null
+          source: string
+        }
+        Insert: {
+          avg_duration_seconds?: number | null
+          bounce_rate?: number | null
+          created_at?: string
+          gallery_id: string
+          id?: string
+          month: string
+          monthly_visits?: number | null
+          source?: string
+        }
+        Update: {
+          avg_duration_seconds?: number | null
+          bounce_rate?: number | null
+          created_at?: string
+          gallery_id?: string
+          id?: string
+          month?: string
+          monthly_visits?: number | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_traffic_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "competitor_galleries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
