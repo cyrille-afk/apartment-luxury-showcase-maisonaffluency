@@ -57,6 +57,7 @@ interface AuctionLot {
   sold_price_usd: number | null;
   estimate_low_usd: number | null;
   estimate_high_usd: number | null;
+  sale_date: string | null;
   lot_url: string | null;
 }
 
