@@ -22,7 +22,7 @@ export async function fetchAuctionBenchmarks() {
   const { data, error } = await supabase
     .from("auction_benchmarks")
     .select("*")
-    .order("sold_price_usd", { ascending: false });
+    .order("sale_date", { ascending: true });
   if (error) throw error;
   return data || [];
 }

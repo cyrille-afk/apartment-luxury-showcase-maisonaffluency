@@ -27,6 +27,7 @@ import {
 } from "@/lib/api/competitors";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  ScatterChart, Scatter, ZAxis,
 } from "recharts";
 
 interface Gallery {
@@ -57,6 +58,7 @@ interface AuctionLot {
   sold_price_usd: number | null;
   estimate_low_usd: number | null;
   estimate_high_usd: number | null;
+  sale_date: string | null;
   lot_url: string | null;
 }
 
@@ -86,6 +88,20 @@ const CHART_COLORS = [
   "hsl(160, 60%, 40%)",
   "hsl(280, 50%, 55%)",
   "hsl(45, 85%, 50%)",
+  "hsl(340, 60%, 50%)",
+  "hsl(200, 70%, 45%)",
+  "hsl(100, 50%, 40%)",
+];
+
+const AUCTION_COLORS = [
+  "hsl(var(--primary))",
+  "hsl(24, 80%, 55%)",
+  "hsl(160, 60%, 40%)",
+  "hsl(280, 50%, 55%)",
+  "hsl(45, 85%, 50%)",
+  "hsl(340, 60%, 50%)",
+  "hsl(200, 70%, 45%)",
+  "hsl(100, 50%, 40%)",
 ];
 
 // ── Traffic Entry Form ──────────────────────────────────────────────
@@ -380,7 +396,216 @@ function TrafficTable({
   );
 }
 
-// ── Main Component ──────────────────────────────────────────────────
+// ── Auction Price Trend Charts ───────────────────────────────────────
+function AuctionTrendCharts({ auctions }: { auctions: AuctionLot[] }) {
+  const withDates = useMemo(
+    () => auctions.filter((a) => a.sale_date && a.sold_price_usd),
+    [auctions]
+  );
+
+  // Top designers by number of lots
+  const designerNames = useMemo(() => {
+    const counts: Record<string, number> = {};
+    withDates.forEach((a) => {
+      counts[a.designer_name] = (counts[a.designer_name] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([name]) => name);
+  }, [withDates]);
+
+  const [selectedDesigner, setSelectedDesigner] = useState<string>("all");
+
+  // Line chart: average sold price per sale_date grouped by designer
+  const trendData = useMemo(() => {
+    const filtered =
+      selectedDesigner === "all"
+        ? withDates
+        : withDates.filter((a) => a.designer_name === selectedDesigner);
+
+    // Group by sale_date (typically YYYY-MM or YYYY)
+    const byDate: Record<string, { total: number; count: number }> = {};
+    filtered.forEach((a) => {
+      const date = a.sale_date!;
+      if (!byDate[date]) byDate[date] = { total: 0, count: 0 };
+      byDate[date].total += a.sold_price_usd!;
+      byDate[date].count += 1;
+    });
+
+    return Object.entries(byDate)
+      .map(([date, { total, count }]) => ({
+        date,
+        avg_price: Math.round(total / count),
+        lots: count,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [withDates, selectedDesigner]);
+
+  // Scatter data: individual lots for the selected designer(s)
+  const scatterData = useMemo(() => {
+    const filtered =
+      selectedDesigner === "all"
+        ? withDates.filter((a) => designerNames.includes(a.designer_name))
+        : withDates.filter((a) => a.designer_name === selectedDesigner);
+
+    return filtered.map((a) => ({
+      date: a.sale_date!,
+      price: a.sold_price_usd!,
+      title: a.piece_title.substring(0, 60),
+      designer: a.designer_name,
+      house: a.auction_house,
+    }));
+  }, [withDates, selectedDesigner, designerNames]);
+
+  // Per-designer trend lines
+  const designerTrends = useMemo(() => {
+    if (selectedDesigner !== "all") return null;
+    const byDesigner: Record<string, Record<string, number[]>> = {};
+    withDates.forEach((a) => {
+      if (!designerNames.includes(a.designer_name)) return;
+      if (!byDesigner[a.designer_name]) byDesigner[a.designer_name] = {};
+      if (!byDesigner[a.designer_name][a.sale_date!])
+        byDesigner[a.designer_name][a.sale_date!] = [];
+      byDesigner[a.designer_name][a.sale_date!].push(a.sold_price_usd!);
+    });
+
+    // Pivot: { date, Designer1: avg, Designer2: avg, … }
+    const allDates = [...new Set(withDates.filter(a => designerNames.includes(a.designer_name)).map((a) => a.sale_date!))].sort();
+    return allDates.map((date) => {
+      const row: Record<string, any> = { date };
+      designerNames.forEach((name) => {
+        const vals = byDesigner[name]?.[date];
+        if (vals && vals.length > 0) {
+          row[name] = Math.round(vals.reduce((s, v) => s + v, 0) / vals.length);
+        }
+      });
+      return row;
+    });
+  }, [withDates, selectedDesigner, designerNames]);
+
+  if (withDates.length < 2) {
+    return (
+      <p className="font-body text-[11px] text-muted-foreground text-center py-4">
+        Need at least 2 auction results with dates to show trend charts
+      </p>
+    );
+  }
+
+  const formatPrice = (v: number) =>
+    v >= 1_000_000 ? `$${(v / 1_000_000).toFixed(1)}M` : `$${(v / 1_000).toFixed(0)}K`;
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (!active || !payload?.[0]) return null;
+    const d = payload[0].payload;
+    return (
+      <div className="bg-card border border-border rounded-lg p-2.5 shadow-md max-w-[240px]">
+        {d.title && (
+          <p className="font-body text-[10px] text-foreground mb-1 line-clamp-2">{d.title}</p>
+        )}
+        {d.designer && (
+          <p className="font-body text-[10px] text-muted-foreground">{d.designer}</p>
+        )}
+        {d.house && (
+          <p className="font-body text-[10px] text-muted-foreground">{d.house}</p>
+        )}
+        <p className="font-display text-xs text-foreground mt-1">
+          {d.price ? `$${d.price.toLocaleString()}` : d.avg_price ? `Avg $${d.avg_price.toLocaleString()}` : ""}
+        </p>
+        {d.lots && (
+          <p className="font-body text-[10px] text-muted-foreground">{d.lots} lot{d.lots > 1 ? "s" : ""}</p>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Designer filter */}
+      <div className="flex items-center gap-3">
+        <label className="font-body text-[10px] text-muted-foreground">Filter by designer</label>
+        <Select value={selectedDesigner} onValueChange={setSelectedDesigner}>
+          <SelectTrigger className="h-7 text-xs w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" className="text-xs">All Top Designers</SelectItem>
+            {designerNames.map((name) => (
+              <SelectItem key={name} value={name} className="text-xs">{name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Average price trend */}
+        <div className="space-y-2">
+          <h4 className="font-display text-xs text-foreground">
+            {selectedDesigner === "all" ? "Avg Sold Price by Designer" : `${selectedDesigner} — Price Trend`}
+          </h4>
+          <ResponsiveContainer width="100%" height={260}>
+            {selectedDesigner === "all" && designerTrends ? (
+              <LineChart data={designerTrends}>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis dataKey="date" tick={{ fontSize: 9 }} angle={-30} textAnchor="end" height={50} />
+                <YAxis tickFormatter={formatPrice} tick={{ fontSize: 9 }} />
+                <Tooltip contentStyle={{ fontSize: 11 }} formatter={(v: number) => `$${v.toLocaleString()}`} />
+                <Legend wrapperStyle={{ fontSize: 9 }} />
+                {designerNames.map((name, i) => (
+                  <Line
+                    key={name}
+                    type="monotone"
+                    dataKey={name}
+                    stroke={AUCTION_COLORS[i % AUCTION_COLORS.length]}
+                    strokeWidth={2}
+                    dot={{ r: 2.5 }}
+                    connectNulls
+                  />
+                ))}
+              </LineChart>
+            ) : (
+              <LineChart data={trendData}>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis dataKey="date" tick={{ fontSize: 9 }} angle={-30} textAnchor="end" height={50} />
+                <YAxis tickFormatter={formatPrice} tick={{ fontSize: 9 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="avg_price"
+                  name="Avg Sold Price"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                />
+              </LineChart>
+            )}
+          </ResponsiveContainer>
+        </div>
+
+        {/* Individual lots scatter */}
+        <div className="space-y-2">
+          <h4 className="font-display text-xs text-foreground">Individual Lots</h4>
+          <ResponsiveContainer width="100%" height={260}>
+            <ScatterChart>
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <XAxis dataKey="date" name="Date" tick={{ fontSize: 9 }} angle={-30} textAnchor="end" height={50} />
+              <YAxis dataKey="price" name="Sold Price" tickFormatter={formatPrice} tick={{ fontSize: 9 }} />
+              <ZAxis range={[30, 30]} />
+              <Tooltip content={<CustomTooltip />} />
+              <Scatter
+                data={scatterData}
+                fill="hsl(var(--primary))"
+                fillOpacity={0.6}
+              />
+            </ScatterChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 export default function CompetitiveAnalysis() {
   const [galleries, setGalleries] = useState<Gallery[]>([]);
   const [designers, setDesigners] = useState<Designer[]>([]);
@@ -699,6 +924,7 @@ export default function CompetitiveAnalysis() {
           <p className="font-body text-[11px] text-muted-foreground">
             Recent auction results from Phillips, Christie's, Piasa & Sotheby's
           </p>
+          <AuctionTrendCharts auctions={auctions} />
           <div className="space-y-2">
             {auctions.slice(0, 15).map((lot) => (
               <div key={lot.id} className="flex items-center justify-between py-2 border-b border-border last:border-0 gap-4">
