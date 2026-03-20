@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      auction_benchmarks: {
+        Row: {
+          auction_house: string
+          created_at: string
+          currency: string
+          designer_name: string
+          estimate_high_usd: number | null
+          estimate_low_usd: number | null
+          id: string
+          lot_url: string | null
+          piece_title: string
+          sale_date: string | null
+          sold_price_usd: number | null
+        }
+        Insert: {
+          auction_house: string
+          created_at?: string
+          currency?: string
+          designer_name: string
+          estimate_high_usd?: number | null
+          estimate_low_usd?: number | null
+          id?: string
+          lot_url?: string | null
+          piece_title: string
+          sale_date?: string | null
+          sold_price_usd?: number | null
+        }
+        Update: {
+          auction_house?: string
+          created_at?: string
+          currency?: string
+          designer_name?: string
+          estimate_high_usd?: number | null
+          estimate_low_usd?: number | null
+          id?: string
+          lot_url?: string | null
+          piece_title?: string
+          sale_date?: string | null
+          sold_price_usd?: number | null
+        }
+        Relationships: []
+      }
       axonometric_gallery: {
         Row: {
           created_at: string
@@ -247,6 +289,83 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      competitor_designers: {
+        Row: {
+          created_at: string
+          designer_name: string
+          gallery_id: string
+          id: string
+          is_overlap: boolean
+          profile_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          designer_name: string
+          gallery_id: string
+          id?: string
+          is_overlap?: boolean
+          profile_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          designer_name?: string
+          gallery_id?: string
+          id?: string
+          is_overlap?: boolean
+          profile_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_designers_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "competitor_galleries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitor_galleries: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          last_scraped_at: string | null
+          location: string
+          logo_url: string | null
+          name: string
+          region: string
+          scrape_status: string
+          updated_at: string
+          website_url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_scraped_at?: string | null
+          location?: string
+          logo_url?: string | null
+          name: string
+          region?: string
+          scrape_status?: string
+          updated_at?: string
+          website_url: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_scraped_at?: string | null
+          location?: string
+          logo_url?: string | null
+          name?: string
+          region?: string
+          scrape_status?: string
+          updated_at?: string
+          website_url?: string
         }
         Relationships: []
       }
