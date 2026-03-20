@@ -30,7 +30,7 @@ export async function fetchAuctionBenchmarks() {
 export async function fetchCompetitorTraffic() {
   const { data, error } = await supabase
     .from("competitor_traffic" as any)
-    .select("*, competitor_galleries(name)")
+    .select("*")
     .order("month", { ascending: false });
   if (error) throw error;
   return data || [];
