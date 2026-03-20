@@ -193,7 +193,7 @@ const TradeLanding = () => {
             <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] tracking-wide">
               Welcome To Maison Affluency
             </h1>
-            <p className="font-display text-base sm:text-lg md:text-2xl text-white mt-3 sm:mt-5 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light max-w-2xl">
+            <p className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white mt-3 sm:mt-5 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light max-w-2xl">
               Trade Program
             </p>
             <form
