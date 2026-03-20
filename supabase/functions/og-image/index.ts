@@ -256,7 +256,7 @@ Deno.serve(async (req) => {
   <meta name="twitter:description" content="${escapeHtml(og.description)}" />
   <meta name="twitter:image" content="${escapeHtml(og.image)}" />
   <meta name="twitter:url" content="${escapeHtml(shareUrl)}" />
-</head>
+  <meta http-equiv="refresh" content="0;url=${escapeHtml(redirectUrl)}" />
 <body>
   <p>Redirecting to <a href="${escapeHtml(redirectUrl)}">${escapeHtml(og.title)}</a>…</p>
   <script>
