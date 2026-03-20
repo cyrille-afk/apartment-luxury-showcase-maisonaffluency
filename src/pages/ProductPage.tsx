@@ -283,7 +283,7 @@ const ProductPage = () => {
                   <p>Brand: {product.brand_name}</p>
                   {product.materials && <p>Materials: {product.materials}</p>}
                   {product.dimensions && <p>Dimensions: {product.dimensions}</p>}
-                  <p>Contact concierge@myaffluency.com for pricing</p>
+                  <p>Book a private viewing at our Singapore showroom — concierge@myaffluency.com</p>
                 </div>
               </noscript>
             </div>
