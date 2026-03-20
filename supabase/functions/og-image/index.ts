@@ -230,7 +230,10 @@ Deno.serve(async (req) => {
 
   const redirectUrl = og.url;
   const functionBase = `${Deno.env.get("SUPABASE_URL") || `${url.protocol}//${url.host}`}/functions/v1/og-image`;
-  const shareUrl = `${functionBase}?path=${encodeURIComponent(path)}`;
+  const shareVersion = url.searchParams.get("v");
+  const shareUrl = `${functionBase}?path=${encodeURIComponent(path)}${
+    shareVersion ? `&v=${encodeURIComponent(shareVersion)}` : ""
+  }`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -256,7 +259,7 @@ Deno.serve(async (req) => {
   <meta name="twitter:description" content="${escapeHtml(og.description)}" />
   <meta name="twitter:image" content="${escapeHtml(og.image)}" />
   <meta name="twitter:url" content="${escapeHtml(shareUrl)}" />
-  
+</head>
 <body>
   <p>Redirecting to <a href="${escapeHtml(redirectUrl)}">${escapeHtml(og.title)}</a>…</p>
   <script>

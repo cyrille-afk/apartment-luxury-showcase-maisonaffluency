@@ -10,6 +10,7 @@ const SITE_URL = "https://maisonaffluency.com";
 
 const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
 const OG_FUNCTION_BASE = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image`;
+const OG_SHARE_VERSION = "20260320";
 
 type ShareSection = "designer" | "collectible" | "atelier";
 
@@ -18,7 +19,7 @@ type ShareSection = "designer" | "collectible" | "atelier";
  * Crawlers see proper OG tags; real browsers are redirected to the SPA.
  */
 export const buildOgUrl = (path: string) =>
-  `${OG_FUNCTION_BASE}?path=${encodeURIComponent(path)}`;
+  `${OG_FUNCTION_BASE}?path=${encodeURIComponent(path)}&v=${OG_SHARE_VERSION}`;
 
 /**
  * Build a deep-link URL for a specific designer/brand profile.
