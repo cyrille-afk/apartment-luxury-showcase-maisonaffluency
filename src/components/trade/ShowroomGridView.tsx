@@ -43,6 +43,7 @@ interface ShowroomGridViewProps {
   onDrawerRefreshKeyChange: (fn: (k: number) => number) => void;
   onDrawerOpen: () => void;
   highlightProductId?: string | null;
+  initialDesigner?: string | null;
 }
 
 // Room → section mapping
@@ -137,6 +138,7 @@ const ShowroomGridView = ({
   onDrawerRefreshKeyChange,
   onDrawerOpen,
   highlightProductId,
+  initialDesigner,
 }: ShowroomGridViewProps) => {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
@@ -146,7 +148,7 @@ const ShowroomGridView = ({
   const [products, setProducts] = useState<ShowroomProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedDesigner, setSelectedDesigner] = useState("all");
+  const [selectedDesigner, setSelectedDesigner] = useState(initialDesigner || "all");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedSection, setSelectedSection] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");

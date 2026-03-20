@@ -26,6 +26,7 @@ const TradeShowroom = () => {
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
   const highlightId = searchParams.get("highlight");
+  const designerParam = searchParams.get("designer");
 
   const [activeTab, setActiveTab] = useState<ViewTab>(tabParam === "grid" ? "grid" : tabParam === "search" ? "search" : "gallery");
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
@@ -197,6 +198,7 @@ const TradeShowroom = () => {
             onDrawerRefreshKeyChange={setDrawerRefreshKey}
             onDrawerOpen={() => setDrawerOpen(true)}
             highlightProductId={highlightId}
+            initialDesigner={designerParam}
           />
         ) : (
           <ProductImageSearch
