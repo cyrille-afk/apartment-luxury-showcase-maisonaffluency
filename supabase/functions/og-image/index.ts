@@ -220,6 +220,7 @@ Deno.serve(async (req) => {
   const og = await getOgData(path);
 
   const redirectUrl = og.url;
+  const shareUrl = `${url.origin}${url.pathname}?path=${encodeURIComponent(path)}`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -227,10 +228,11 @@ Deno.serve(async (req) => {
   <meta charset="utf-8" />
   <title>${escapeHtml(og.title)}</title>
   <meta name="description" content="${escapeHtml(og.description)}" />
+  <link rel="canonical" href="${escapeHtml(og.url)}" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="${escapeHtml(og.url)}" />
+  <meta property="og:url" content="${escapeHtml(shareUrl)}" />
   <meta property="og:title" content="${escapeHtml(og.title)}" />
   <meta property="og:description" content="${escapeHtml(og.description)}" />
   <meta property="og:image" content="${escapeHtml(og.image)}" />
@@ -243,6 +245,7 @@ Deno.serve(async (req) => {
   <meta name="twitter:title" content="${escapeHtml(og.title)}" />
   <meta name="twitter:description" content="${escapeHtml(og.description)}" />
   <meta name="twitter:image" content="${escapeHtml(og.image)}" />
+  <meta name="twitter:url" content="${escapeHtml(shareUrl)}" />
 
   <!-- Redirect real browsers to the SPA -->
   <meta http-equiv="refresh" content="0;url=${escapeHtml(redirectUrl)}" />
