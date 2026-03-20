@@ -17,7 +17,7 @@ const DISMISS_KEY = "featured-read-dismissed";
 const FeaturedReadBanner = () => {
   const [article, setArticle] = useState<FeaturedArticle | null>(null);
   const [visible, setVisible] = useState(false);
-  const [navHeight, setNavHeight] = useState(0);
+  const [navHeight, setNavHeight] = useState(96);
   const location = useLocation();
 
   // On the homepage the nav is position:fixed, so we need position:fixed too.
@@ -46,21 +46,28 @@ const FeaturedReadBanner = () => {
   // Measure the fixed nav height (homepage only)
   const measureNav = useCallback(() => {
     const nav = document.querySelector("nav");
-    if (nav) setNavHeight(nav.getBoundingClientRect().height);
+    if (!nav) return false;
+    const measured = nav.getBoundingClientRect().height;
+    if (measured > 0) {
+      setNavHeight(measured);
+      return true;
+    }
+    return false;
   }, []);
 
   useEffect(() => {
     if (!isHomepage) return;
-    measureNav();
-    // Retry measurement until we get a value (nav lazy-loads on homepage)
-    const interval = setInterval(() => {
-      measureNav();
-    }, 300);
-    const timeout = setTimeout(() => clearInterval(interval), 3000);
+
+    const hasMeasuredImmediately = measureNav();
+    const interval = window.setInterval(() => {
+      const measured = measureNav();
+      if (measured) window.clearInterval(interval);
+    }, hasMeasuredImmediately ? 600 : 150);
+
     window.addEventListener("resize", measureNav);
+
     return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
+      window.clearInterval(interval);
       window.removeEventListener("resize", measureNav);
     };
   }, [isHomepage, measureNav]);
