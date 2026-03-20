@@ -618,7 +618,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           <div className="max-w-7xl mx-auto px-6 md:px-12 py-14 md:py-20 flex flex-col lg:flex-row lg:items-stretch gap-10 lg:gap-16">
             
             {/* Left — FAQ */}
-            <div className="flex-1 lg:pr-12">
+            <div className="flex-1 lg:pr-12 order-3 lg:order-1">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -660,11 +660,11 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             </div>
 
             {/* Divider */}
-            <div className="hidden lg:block w-px bg-border shrink-0" />
-            <div className="block lg:hidden h-px bg-border my-10" />
+            <div className="hidden lg:block w-px bg-border shrink-0 order-2" />
+            <div className="block lg:hidden h-px bg-border my-10 order-2" />
 
             {/* Right — Registration Form */}
-            <div className="flex-1 lg:pl-12">
+            <div className="flex-1 lg:pl-12 order-1 lg:order-3">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
