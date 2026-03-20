@@ -256,18 +256,22 @@ Deno.serve(async (req) => {
   <meta name="twitter:description" content="${escapeHtml(og.description)}" />
   <meta name="twitter:image" content="${escapeHtml(og.image)}" />
   <meta name="twitter:url" content="${escapeHtml(shareUrl)}" />
-
-  <!-- Redirect real browsers to the SPA -->
-  <meta http-equiv="refresh" content="0;url=${escapeHtml(redirectUrl)}" />
 </head>
 <body>
   <p>Redirecting to <a href="${escapeHtml(redirectUrl)}">${escapeHtml(og.title)}</a>…</p>
+  <script>
+    window.location.replace(${JSON.stringify(redirectUrl)});
+  </script>
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=${escapeHtml(redirectUrl)}" />
+  </noscript>
 </body>
 </html>`;
 
   const headers = new Headers();
   headers.set("Content-Type", "text/html; charset=utf-8");
-  headers.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
+  headers.set("Cache-Control", "no-store, max-age=0");
+  headers.set("Pragma", "no-cache");
   headers.set("Access-Control-Allow-Origin", "*");
   headers.set("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
 
