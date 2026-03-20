@@ -176,7 +176,7 @@ const Journal = () => {
                       </div>
                     )}
                     <div className="flex items-center gap-3 mb-2">
-                      {(filtered[0] as any).is_featured && (
+                      {filtered[0].is_featured && (
                         <span className="font-body text-[9px] uppercase tracking-[0.18em] text-white bg-primary px-2 py-0.5 rounded-sm font-semibold">
                           Editor's Pick
                         </span>
@@ -227,7 +227,7 @@ const Journal = () => {
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              {(article as any).is_featured && (
+                              {article.is_featured && (
                                 <span className="font-body text-[9px] uppercase tracking-[0.18em] text-white bg-primary px-1.5 py-0.5 rounded-sm font-semibold">
                                   Editor's Pick
                                 </span>
@@ -276,7 +276,7 @@ const Journal = () => {
                           </div>
                         )}
                         <div className="flex items-center gap-3 mb-2">
-                          {(article as any).is_featured && (
+                          {article.is_featured && (
                             <span className="font-body text-[9px] uppercase tracking-[0.18em] text-white bg-primary px-2 py-0.5 rounded-sm font-semibold">
                               Editor's Pick
                             </span>
