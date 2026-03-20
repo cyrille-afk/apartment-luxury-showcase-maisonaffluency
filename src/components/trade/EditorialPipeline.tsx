@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_LABELS, type JournalCategory } from "@/lib/journal";
 import { useToast } from "@/hooks/use-toast";
 import {
   CalendarDays, ChevronDown, ChevronUp, Pencil, Plus, X, Check,
-  Lightbulb, FileEdit, Eye, Sparkles, BookOpen, Ban,
+  Lightbulb, FileEdit, Eye, Sparkles, BookOpen, Ban, FileUp,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
