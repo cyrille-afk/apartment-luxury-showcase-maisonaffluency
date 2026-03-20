@@ -65,10 +65,10 @@ async function getOgData(path: string): Promise<OgData> {
 
     case "/trade/program":
       return {
-        title: "Trade Program — Maison Affluency",
+        title: "Welcome to Maison Affluency Trade Program — Discover Your Exclusive Trade Benefits and Bespoke Services",
         description:
           "Exclusive benefits for architects and interior designers — trade pricing, dedicated client advisors, custom requests, material libraries, and consolidated insured shipping.",
-        image: TRADE_IMAGE,
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg,g_auto/v1772085848/intimate-dining_ux4pee",
         url: `${SITE_URL}/trade/program`,
       };
 
