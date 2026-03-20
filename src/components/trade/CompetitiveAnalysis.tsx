@@ -567,6 +567,7 @@ export default function CompetitiveAnalysis() {
             </Button>
           </div>
         </div>
+        <p className="font-body text-[11px] text-muted-foreground">
           Monthly traffic estimates from SimilarWeb or manual entry — compare
           visits, bounce rate, and session duration across galleries.
         </p>
