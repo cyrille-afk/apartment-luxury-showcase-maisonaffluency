@@ -56,10 +56,21 @@ const Catalogue = () => {
     fetchProducts();
   }, []);
 
+  // Deduplicate by normalised brand+product name
+  const deduped = useMemo(() => {
+    const seen = new Set<string>();
+    return products.filter(p => {
+      const key = `${p.brand_name.trim().toLowerCase()}::${p.product_name.trim().toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [products]);
+
   const subcategories = activeCategory ? (SUBCATEGORY_MAP[activeCategory] || []) : [];
 
   const filtered = useMemo(() => {
-    let list = products;
+    let list = deduped;
     if (activeCategory) list = list.filter(p => p.category === activeCategory);
     if (activeSubcategory) list = list.filter(p => p.subcategory === activeSubcategory);
     if (search) {
@@ -71,17 +82,22 @@ const Catalogue = () => {
       );
     }
     return list;
-  }, [products, activeCategory, activeSubcategory, search]);
+  }, [deduped, activeCategory, activeSubcategory, search]);
 
-  // Group by brand
+  // Group by brand (case-insensitive merge)
   const grouped = useMemo(() => {
-    const map = new Map<string, CatalogueProduct[]>();
+    const map = new Map<string, { displayName: string; products: CatalogueProduct[] }>();
     for (const p of filtered) {
-      const arr = map.get(p.brand_name) || [];
-      arr.push(p);
-      map.set(p.brand_name, arr);
+      const key = p.brand_name.trim().toLowerCase();
+      const existing = map.get(key);
+      if (existing) {
+        existing.products.push(p);
+      } else {
+        map.set(key, { displayName: p.brand_name.trim(), products: [p] });
+      }
     }
-    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+    return [...map.values()]
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
   }, [filtered]);
 
   const clearFilters = () => {
@@ -258,11 +274,11 @@ const Catalogue = () => {
           )}
 
           {/* Product Grid grouped by designer */}
-          {!loading && grouped.map(([brandName, brandProducts]) => (
-            <section key={brandName} className="mb-12">
+          {!loading && grouped.map(({ displayName, products: brandProducts }) => (
+            <section key={displayName} className="mb-12">
               <div className="flex items-baseline gap-3 mb-4 border-b border-border pb-2">
                 <h2 className="font-display text-base md:text-lg text-foreground tracking-wide">
-                  {brandName}
+                  {displayName}
                 </h2>
                 <span className="font-body text-[11px] text-muted-foreground">
                   {brandProducts.length} piece{brandProducts.length !== 1 ? "s" : ""}
