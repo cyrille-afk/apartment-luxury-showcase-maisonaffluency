@@ -263,4 +263,65 @@ const DesignerProfile = () => {
   );
 };
 
+/* ── Related Designers component ──────────────────────────── */
+import type { DesignerProfile as DesignerProfileType } from "@/lib/designerProfiles";
+
+function RelatedDesigners({ current }: { current: DesignerProfileType }) {
+  const related = useMemo(() => getRelatedDesigners(current, 3), [current]);
+
+  if (related.length === 0) return null;
+
+  return (
+    <section className="py-20 lg:py-28 px-8 lg:px-16 border-t border-border">
+      <div className="max-w-7xl mx-auto">
+        <motion.h2
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={transition}
+          className="text-xs tracking-[0.25em] uppercase text-muted-foreground mb-12"
+        >
+          You May Also Like
+        </motion.h2>
+
+        <div className="grid sm:grid-cols-3 gap-6 lg:gap-8">
+          {related.map((d, idx) => (
+            <motion.div
+              key={d.slug}
+              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{
+                duration: 0.6,
+                delay: idx * 0.1,
+                ease: [0.16, 1, 0.3, 1] as any,
+              }}
+            >
+              <Link
+                to={`/designer/${d.slug}`}
+                className="group block"
+              >
+                <div className="aspect-[3/4] overflow-hidden bg-muted mb-4">
+                  <img
+                    src={d.image}
+                    alt={d.name}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                    loading="lazy"
+                  />
+                </div>
+                <h3 className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                  {displayName(d.name)}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {d.specialty}
+                </p>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default DesignerProfile;
