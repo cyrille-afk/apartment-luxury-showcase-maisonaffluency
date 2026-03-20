@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface QuoteItem {
   id: string;
   quantity: number;
+  unit_price_cents: number | null;
   product: {
     product_name: string;
     brand_name: string;
