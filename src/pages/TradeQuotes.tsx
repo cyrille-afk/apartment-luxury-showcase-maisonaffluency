@@ -138,6 +138,17 @@ const TradeQuotes = () => {
         title="Quote Builder"
         subtitle="Create and manage product quotes for your projects."
       >
+        {isSuperAdmin && (
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className={`inline-flex items-center gap-2 px-4 py-2.5 font-body text-xs uppercase tracking-[0.1em] rounded-md transition-colors ${
+              showAll ? "bg-foreground text-background" : "border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+            }`}
+          >
+            <Users className="h-3.5 w-3.5" />
+            {showAll ? "All Quotes" : "My Quotes"}
+          </button>
+        )}
         <button
           onClick={handleCreateQuote}
           disabled={creating}
