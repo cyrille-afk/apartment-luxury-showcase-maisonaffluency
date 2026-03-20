@@ -156,6 +156,46 @@ const EditorialPipeline = () => {
     fetchPipeline();
   };
 
+  const convertToDraft = async (item: PipelineItem) => {
+    const slug = item.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 80);
+
+    const { data: article, error } = await supabase
+      .from("journal_articles")
+      .insert({
+        title: item.title,
+        slug,
+        category: item.category,
+        excerpt: item.angle || "",
+        content: "",
+        author: item.author || "Maison Affluency",
+        tags: item.seo_keywords ? item.seo_keywords.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
+        is_published: false,
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      toast({ title: "Error creating draft", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    // Link pipeline item to the new article and mark as published
+    await supabase
+      .from("journal_pipeline")
+      .update({ article_id: article.id, status: "published" as PipelineStatus, updated_at: new Date().toISOString() })
+      .eq("id", item.id);
+
+    toast({ title: "Draft article created", description: "Redirecting to editor…" });
+    fetchPipeline();
+
+    // Navigate to journal admin — the article editor
+    navigate("/trade/journal");
+  };
+
   const formatDate = (d: string | null) =>
     d ? new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
 
