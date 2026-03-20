@@ -775,32 +775,23 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       >
                         <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 4 ? "(max-width: 1024px) 50vw, 25vw" : "(max-width: 1024px) 50vw, 33vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                        {/* Pulsing hotspot hint — desktop: first image of each hotspot section */}
+                        {/* Subtle hotspot hint — desktop: bottom-left of first image only */}
                         {!section.items.some(i => i.description) && showHotspotHint && index === 0 && (
-                          <div ref={hotspotHintRef} className="absolute inset-0 z-20 pointer-events-none flex flex-col items-center justify-center gap-3">
-                            <div className="relative flex items-center justify-center">
-                              <span className="absolute w-16 h-16 rounded-full border border-primary/15 animate-ping" style={{ animationDuration: "2.2s", animationDelay: "0s" }} />
-                              <span className="absolute w-12 h-12 rounded-full border border-primary/20 animate-ping" style={{ animationDuration: "2.2s", animationDelay: "0.55s" }} />
-                              <span className="absolute w-8 h-8 rounded-full border border-primary/25 animate-ping" style={{ animationDuration: "2.2s", animationDelay: "1.1s" }} />
-                              <span className="relative block w-3 h-3 rounded-full bg-primary/30 shadow-[0_0_8px_hsl(var(--primary)/0.2)]" />
-                            </div>
-                            <AnimatePresence>
-                              <motion.span
-                                initial={{ opacity: 0, y: 6 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -4 }}
-                                transition={{ duration: 0.5, delay: 0.8 }}
-                                className="bg-background/85 backdrop-blur-sm text-foreground font-body text-[11px] px-3 py-1.5 rounded-full shadow-lg border border-border"
-                              >
-                                Tap the dots to explore pieces
-                              </motion.span>
-                            </AnimatePresence>
+                          <div ref={hotspotHintRef} className="absolute bottom-12 left-3 z-20 pointer-events-none">
+                            <motion.span
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 0.7 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 1, delay: 1.2 }}
+                              className="font-body text-[10px] text-white/80 tracking-wide"
+                            >
+                              Click image to explore pieces
+                            </motion.span>
                           </div>
                         )}
-                        {/* Piece count badge — hotspot sections */}
+                        {/* Piece count — subtle, only on hover */}
                         {!section.items.some(i => i.description) && hotspotCounts[item.title] > 0 && (
-                          <span className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-background/80 backdrop-blur-sm text-foreground font-body text-[10px] px-2 py-1 rounded-full border border-border shadow-sm">
-                            <Sparkles className="w-3 h-3 text-primary" />
+                          <span className="absolute top-3 right-3 z-10 font-body text-[10px] text-white/0 group-hover:text-white/70 transition-colors duration-300">
                             {hotspotCounts[item.title]} {hotspotCounts[item.title] === 1 ? "piece" : "pieces"}
                           </span>
                         )}
