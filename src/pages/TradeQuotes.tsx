@@ -30,21 +30,26 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; classNam
 };
 
 const TradeQuotes = () => {
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   const fetchQuotes = async () => {
     if (!user) return;
     setLoading(true);
-    const { data: quotesData } = await supabase
+    let query = supabase
       .from("trade_quotes")
       .select("*")
-      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
+    
+    // Super admins can toggle between own quotes and all quotes
+    if (!showAll || !isSuperAdmin) {
+      query = query.eq("user_id", user.id);
+    }
 
     // Get item counts
     const quoteIds = (quotesData || []).map((q: any) => q.id);
