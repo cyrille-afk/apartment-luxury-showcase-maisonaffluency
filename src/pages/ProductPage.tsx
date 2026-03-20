@@ -277,6 +277,14 @@ const ProductPage = () => {
                     </Link>
                   </Button>
                 </div>
+                <WhatsAppShareButton
+                  onClick={() => {
+                    sharePageOnWhatsApp(`/product/${id}`, `${product.product_name} by ${product.brand_name}`, product.category);
+                    trackCTA.whatsapp(`ProductPage_Share_${product.product_name}`);
+                  }}
+                  label="Share on WhatsApp"
+                  variant="branded"
+                />
               </div>
 
               {/* noscript fallback for SEO */}
