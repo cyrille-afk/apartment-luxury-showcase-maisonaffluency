@@ -32,11 +32,18 @@ function supabaseAdmin() {
   );
 }
 
-/** Resolve a Cloudinary URL to 1200×630 OG dimensions */
-function ogCloudinary(url: string): string {
+/** Resolve an image URL to an absolute, 1200×630 OG-ready URL */
+function ogImage(url: string): string {
   if (!url) return DEFAULT_IMAGE;
+  // Make relative paths absolute
+  if (url.startsWith("/")) {
+    return `${SITE_URL}${url}`;
+  }
+  // For Cloudinary URLs, strip existing transforms and apply OG-optimised ones
   if (url.includes("cloudinary.com") && url.includes("/upload/")) {
-    return url.replace("/upload/", "/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/");
+    // Remove any existing transformation chain between /upload/ and /v{timestamp}
+    const cleaned = url.replace(/\/upload\/[^v][^/]*(?:\/[^v][^/]*)*\//, "/upload/");
+    return cleaned.replace("/upload/", "/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/");
   }
   return url;
 }
@@ -91,7 +98,7 @@ async function getOgData(path: string): Promise<OgData> {
       return {
         title: `${data.title} — Maison Affluency Journal`,
         description: data.excerpt || "Read more on the Maison Affluency Journal.",
-        image: ogCloudinary(data.cover_image_url || ""),
+        image: ogImage(data.cover_image_url || ""),
         url: `${SITE_URL}/journal/${slug}`,
       };
     }
@@ -116,7 +123,7 @@ async function getOgData(path: string): Promise<OgData> {
       return {
         title: `${data.product_name} by ${data.brand_name} — Maison Affluency`,
         description: desc.length > 160 ? desc.slice(0, 157) + "…" : desc,
-        image: ogCloudinary(data.image_url || ""),
+        image: ogImage(data.image_url || ""),
         url: `${SITE_URL}/product/${id}`,
       };
     }
