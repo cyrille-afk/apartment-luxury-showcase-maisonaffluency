@@ -497,17 +497,15 @@ const TradeJournal = () => {
 
                 {/* Actions */}
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {a.is_published && (
-                    <a
-                      href={`/journal/${a.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                      title="View"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  )}
+                  <a
+                    href={`/journal/${a.slug}${a.is_published ? '' : '?preview=true'}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    title={a.is_published ? "View" : "Preview draft"}
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
                   <button
                     onClick={() => togglePublish(a)}
                     className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
