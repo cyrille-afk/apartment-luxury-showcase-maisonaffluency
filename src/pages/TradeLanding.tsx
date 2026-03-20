@@ -342,8 +342,10 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 const formData = new FormData(e.currentTarget);
                 const email = formData.get("email") as string;
                 if (email) {
-                  // Pre-fill the inline form's email and scroll to it
-                  const emailInput = formRef.current?.querySelector<HTMLInputElement>('input[type="email"]');
+                  setMobileEmail(email);
+                  setMobileFormExpanded(true);
+                  // Pre-fill the desktop form's email too
+                  const emailInput = formRef.current?.querySelector<HTMLInputElement>('.hidden.lg\\:block input[type="email"]');
                   if (emailInput) {
                     const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
                     nativeInputValueSetter?.call(emailInput, email);
