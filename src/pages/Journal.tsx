@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { fetchPublishedArticles, CATEGORY_LABELS, type JournalArticle, type JournalCategory } from "@/lib/journal";
+import FeaturedReadBanner from "@/components/FeaturedReadBanner";
 
 const ALL_CATEGORIES: JournalCategory[] = [
   "designer_interview",
@@ -71,6 +72,7 @@ const Journal = () => {
             <span className="font-display text-sm tracking-widest text-muted-foreground">Journal</span>
           </div>
         </div>
+        <FeaturedReadBanner />
 
         {/* Hero */}
         <div className="max-w-4xl mx-auto px-6 pt-14 pb-8 md:pt-20 md:pb-12 text-center">
