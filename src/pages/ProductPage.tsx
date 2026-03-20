@@ -21,6 +21,7 @@ interface Product {
   dimensions: string | null;
   lead_time: string | null;
   is_active: boolean;
+  isInShowroom?: boolean;
 }
 
 const SITE_URL = "https://maisonaffluency.com";
