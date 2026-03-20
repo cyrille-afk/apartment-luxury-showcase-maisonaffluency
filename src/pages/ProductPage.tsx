@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, Layers, Clock, Mail } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, Layers, Clock, Calendar, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
@@ -97,9 +97,6 @@ const ProductPage = () => {
     offers: {
       "@type": "Offer",
       availability: "https://schema.org/InStock",
-      priceCurrency: "SGD",
-      price: "0",
-      priceValidUntil: new Date(Date.now() + 365 * 86400000).toISOString().split("T")[0],
       seller: {
         "@type": "Organization",
         name: "Maison Affluency",
@@ -119,7 +116,7 @@ const ProductPage = () => {
     ],
   };
 
-  const inquiryMailto = `mailto:concierge@myaffluency.com?subject=${encodeURIComponent(`Inquiry: ${product.product_name} by ${product.brand_name}`)}&body=${encodeURIComponent(`Hi,\n\nI'd like to inquire about the ${product.product_name} by ${product.brand_name}.\n\nPlease share pricing and availability details.\n\nThank you.`)}`;
+  const bookingMailto = `mailto:concierge@myaffluency.com?subject=${encodeURIComponent(`Viewing Request: ${product.product_name} by ${product.brand_name}`)}&body=${encodeURIComponent(`Hi,\n\nI'd like to book a private viewing to see the ${product.product_name} by ${product.brand_name} at your showroom.\n\nPlease let me know your available times.\n\nThank you.`)}`;
 
   return (
     <>
@@ -144,8 +141,8 @@ const ProductPage = () => {
             <Link to="/" className="flex items-center gap-2">
               <span className="font-display text-sm text-foreground tracking-wide">Maison Affluency</span>
             </Link>
-            <a href={inquiryMailto} className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
-              <Mail className="h-3 w-3" /> Inquire
+            <a href={bookingMailto} className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
+              <Calendar className="h-3 w-3" /> Book a Viewing
             </a>
           </div>
         </header>
@@ -263,16 +260,18 @@ const ProductPage = () => {
               {/* CTA */}
               <div className="mt-8 space-y-3">
                 <p className="font-body text-xs text-muted-foreground">
-                  Pricing available for trade professionals
+                  Visit our Singapore showroom to experience this piece in person
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button asChild className="flex-1">
-                    <a href={inquiryMailto}>
-                      <Mail className="h-4 w-4 mr-2" /> Request Price
+                    <a href={bookingMailto}>
+                      <Calendar className="h-4 w-4 mr-2" /> Book a Viewing
                     </a>
                   </Button>
                   <Button variant="outline" asChild className="flex-1">
-                    <Link to="/trade/register">Apply for Trade Access</Link>
+                    <Link to="/trade/program">
+                      <Briefcase className="h-4 w-4 mr-2" /> Trade Program
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -284,7 +283,7 @@ const ProductPage = () => {
                   <p>Brand: {product.brand_name}</p>
                   {product.materials && <p>Materials: {product.materials}</p>}
                   {product.dimensions && <p>Dimensions: {product.dimensions}</p>}
-                  <p>Contact concierge@myaffluency.com for pricing</p>
+                  <p>Book a private viewing at our Singapore showroom — concierge@myaffluency.com</p>
                 </div>
               </noscript>
             </div>
