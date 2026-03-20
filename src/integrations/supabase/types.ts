@@ -599,6 +599,62 @@ export type Database = {
         }
         Relationships: []
       }
+      journal_pipeline: {
+        Row: {
+          angle: string | null
+          article_id: string | null
+          author: string
+          category: Database["public"]["Enums"]["journal_category"]
+          created_at: string
+          designer_or_brand: string | null
+          id: string
+          notes: string | null
+          seo_keywords: string | null
+          status: Database["public"]["Enums"]["pipeline_status"]
+          target_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          angle?: string | null
+          article_id?: string | null
+          author?: string
+          category?: Database["public"]["Enums"]["journal_category"]
+          created_at?: string
+          designer_or_brand?: string | null
+          id?: string
+          notes?: string | null
+          seo_keywords?: string | null
+          status?: Database["public"]["Enums"]["pipeline_status"]
+          target_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          angle?: string | null
+          article_id?: string | null
+          author?: string
+          category?: Database["public"]["Enums"]["journal_category"]
+          created_at?: string
+          designer_or_brand?: string | null
+          id?: string
+          notes?: string | null
+          seo_keywords?: string | null
+          status?: Database["public"]["Enums"]["pipeline_status"]
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_pipeline_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "journal_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -1524,6 +1580,14 @@ export type Database = {
         | "design_trend"
         | "project_showcase"
         | "international_editorial"
+      pipeline_status:
+        | "idea"
+        | "planning"
+        | "drafting"
+        | "review"
+        | "ready"
+        | "published"
+        | "killed"
       sample_request_status:
         | "requested"
         | "approved"
@@ -1672,6 +1736,15 @@ export const Constants = {
         "design_trend",
         "project_showcase",
         "international_editorial",
+      ],
+      pipeline_status: [
+        "idea",
+        "planning",
+        "drafting",
+        "review",
+        "ready",
+        "published",
+        "killed",
       ],
       sample_request_status: [
         "requested",
