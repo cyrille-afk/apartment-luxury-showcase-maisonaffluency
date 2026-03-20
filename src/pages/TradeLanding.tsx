@@ -316,7 +316,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         </div>
 
         {/* ─── Full-width Hero ─── */}
-        <div className="relative w-full h-[45vh] md:h-[65vh] overflow-hidden">
+        <div className="relative w-full h-[45svh] md:h-[65vh] overflow-hidden">
           <img
             src={cloudinaryUrl("v1772085848/intimate-dining_ux4pee", { width: 1920, height: 1080, quality: "auto:good", crop: "fill", gravity: "auto" })}
             alt="Maison Affluency Trade Program"
