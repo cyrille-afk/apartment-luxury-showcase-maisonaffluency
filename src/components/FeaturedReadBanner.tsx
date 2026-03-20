@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { X, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +17,8 @@ const DISMISS_KEY = "featured-read-dismissed";
 const FeaturedReadBanner = () => {
   const [article, setArticle] = useState<FeaturedArticle | null>(null);
   const [visible, setVisible] = useState(false);
+  const [navHeight, setNavHeight] = useState(0);
+  const rafRef = useRef<number>();
 
   useEffect(() => {
     const dismissed = sessionStorage.getItem(DISMISS_KEY);
@@ -37,6 +39,24 @@ const FeaturedReadBanner = () => {
       });
   }, []);
 
+  // Measure the fixed nav height
+  useEffect(() => {
+    const measure = () => {
+      const nav = document.querySelector("nav");
+      if (nav) setNavHeight(nav.getBoundingClientRect().height);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    // Re-measure after a short delay for lazy-loaded nav
+    rafRef.current = requestAnimationFrame(() => {
+      setTimeout(measure, 500);
+    });
+    return () => {
+      window.removeEventListener("resize", measure);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
   const dismiss = () => {
     setVisible(false);
     sessionStorage.setItem(DISMISS_KEY, "1");
@@ -46,13 +66,14 @@ const FeaturedReadBanner = () => {
     <AnimatePresence>
       {visible && article && (
         <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="overflow-hidden border-b border-border bg-primary/[0.04]"
+          className="fixed left-0 right-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm"
+          style={{ top: navHeight }}
         >
-          <div className="max-w-7xl mx-auto px-4 md:px-12 py-2.5 flex items-center justify-between gap-4">
+          <div className="max-w-7xl mx-auto px-4 md:px-12 py-2 flex items-center justify-between gap-4">
             <Link
               to={`/journal/${article.slug}`}
               className="flex items-center gap-3 min-w-0 group"
