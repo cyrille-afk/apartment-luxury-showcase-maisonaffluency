@@ -483,9 +483,10 @@ const TradeLanding = () => {
                 <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3 text-center">
                   Frequently Asked Questions
                 </h2>
+                <div className="border-t border-border mt-4" />
               </motion.div>
 
-              <div className="border-t border-border">
+              <div className="space-y-6">
                 {[
                   { q: "Who is eligible to join the Trade Program?", a: "The program is designed for architects, interior designers, decorators, and luxury hospitality professionals. We review each application based on company credentials and professional background." },
                   { q: "Is there a minimum order or annual spend requirement?", a: "No. There is no minimum purchase or annual commitment required. You can place orders of any size through your trade account." },
@@ -495,7 +496,10 @@ const TradeLanding = () => {
                   { q: "Can I request custom or bespoke pieces?", a: "Absolutely. We work directly with specialist workshops and renowned designers worldwide to fulfil custom requirements — from material modifications to entirely bespoke commissions." },
                   { q: "How long does the application review take?", a: "Applications are typically reviewed within 1–2 business days. You'll receive an email notification once your account has been approved." },
                 ].map((faq, i) => (
-                  <FaqItem key={i} question={faq.q} answer={faq.a} />
+                  <div key={i}>
+                    <h3 className="font-display text-sm md:text-base text-foreground mb-1.5">{faq.q}</h3>
+                    <p className="font-body text-sm leading-relaxed text-muted-foreground">{faq.a}</p>
+                  </div>
                 ))}
               </div>
             </div>
@@ -516,10 +520,11 @@ const TradeLanding = () => {
                   <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3 text-center">
                     Apply to the Trade Program
                   </h2>
-                  <p className="font-body text-sm text-muted-foreground">
-                    Complete the form below to get started. We'll review your application within 1–2 business days.
-                  </p>
+                  <div className="border-t border-border mt-4" />
                 </div>
+                <p className="font-body text-sm text-muted-foreground mb-6">
+                  Complete the form below to get started. We'll review your application within 1–2 business days.
+                </p>
                 <TradeRegistrationForm prefillEmail={prefillEmail} />
                 <p className="mt-6 font-body text-sm text-muted-foreground">
                   Already a member?{" "}
