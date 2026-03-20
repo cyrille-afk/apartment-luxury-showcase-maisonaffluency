@@ -410,7 +410,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           className="mx-auto px-6 py-10 md:py-16 flex flex-col items-center"
         >
           <h2 className="w-[70rem] max-w-full font-display text-xl md:text-2xl lg:text-3xl text-foreground mb-6 text-center md:whitespace-nowrap">
-            Discover Your Exclusive Trade Benefits and Bespoke Services
+            Discover Your Exclusive Trade Benefits<br className="md:hidden" /> and Bespoke Services
           </h2>
           <p className="w-[70rem] max-w-full font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify">
             Channeling the essence of high-end European craftsmanship and design, Maison Affluency is proud to work with leading design professionals, including architects, interior designers, and real estate developers across the Middle East and Asia Pacific regions.
