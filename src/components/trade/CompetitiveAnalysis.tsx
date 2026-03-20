@@ -430,6 +430,23 @@ export default function CompetitiveAnalysis() {
     }
   };
 
+  const handleSimilarWebScrape = async () => {
+    setScrapingSW(true);
+    try {
+      const result = await triggerSimilarWebScrape();
+      const successes = result?.results?.filter((r: any) => r.status === "success") || [];
+      toast.success(
+        `SimilarWeb scrape done: ${successes.length} galleries with traffic data`
+      );
+      await loadData();
+    } catch (err) {
+      console.error("SimilarWeb scrape failed:", err);
+      toast.error("SimilarWeb scrape failed — check Firecrawl connection");
+    } finally {
+      setScrapingSW(false);
+    }
+  };
+
   const overlapDesigners = designers.filter((d) => d.is_overlap);
   const totalDesigners = designers.length;
   const overlapRate =
