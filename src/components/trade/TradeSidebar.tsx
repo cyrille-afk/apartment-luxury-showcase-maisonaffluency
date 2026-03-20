@@ -17,11 +17,17 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const mainItems = [
+const browseItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard },
   { title: "Showroom", url: "/trade/showroom", icon: MapPin },
+];
+
+const collectionItems = [
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
+];
+
+const toolItems = [
   { title: "Gallery", url: "/trade/gallery", icon: Image },
   { title: "Brand Library", url: "/trade/documents", icon: FolderOpen },
   { title: "Sample Requests", url: "/trade/samples", icon: Package },
