@@ -235,6 +235,9 @@ const DesignerProfile = () => {
           </section>
         )}
 
+        {/* ── Related Designers ─────────────────────────────── */}
+        <RelatedDesigners current={designer} />
+
         {/* ── Footer CTA ──────────────────────────────────────── */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
