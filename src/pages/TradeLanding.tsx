@@ -551,7 +551,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         </div>
 
         {/* ─── Testimonials ─── */}
-        <div className="w-full bg-muted/20 border-y border-border">
+        <div className="w-full bg-muted/30 border-y border-border">
           <div className="max-w-6xl mx-auto px-6 md:px-12 py-14 md:py-20">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
