@@ -220,7 +220,8 @@ Deno.serve(async (req) => {
   const og = await getOgData(path);
 
   const redirectUrl = og.url;
-  const shareUrl = `${url.origin}${url.pathname}?path=${encodeURIComponent(path)}`;
+  const functionBase = `${Deno.env.get("SUPABASE_URL") || `${url.protocol}//${url.host}`}/functions/v1/og-image`;
+  const shareUrl = `${functionBase}?path=${encodeURIComponent(path)}`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
