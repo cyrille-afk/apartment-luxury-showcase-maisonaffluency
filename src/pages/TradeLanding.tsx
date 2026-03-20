@@ -49,7 +49,7 @@ const benefits = [
   {
     title: "Custom Requests",
     description:
-      "Let us use our global connections to specialist workshops and renowned designers to help you find the best solutions. From inspiration to customisation, we help find the solutions for a seamless experience.",
+      "Collaborating with an established network of manufacturers and specialist workshops, Maison Affluency Trade Program provides you with endless customisation possibilities and bespoke solutions specifically tailored to your creative needs.",
     image: cloudinaryUrl("v1773758590/Screen_Shot_2026-03-17_at_10.40.56_PM_mlwtop", { width: 1400, quality: "auto:good", crop: "fill" }),
   },
   {
