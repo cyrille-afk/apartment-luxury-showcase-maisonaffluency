@@ -749,7 +749,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                     <p className="font-body text-sm text-muted-foreground mb-6">
                       Complete the form below to get started. We'll review your application within 1–2 business days.
                     </p>
-                    <TradeRegistrationForm prefillEmail={mobileEmail || prefillEmail} />
+                    <TradeRegistrationForm prefillEmail={heroEmail || prefillEmail} />
                     <p className="mt-6 font-body text-sm text-muted-foreground">
                       Already a member?{" "}
                       <Link to="/trade/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80 transition-colors">
