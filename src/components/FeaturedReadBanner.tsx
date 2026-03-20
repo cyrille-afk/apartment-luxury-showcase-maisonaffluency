@@ -72,7 +72,6 @@ const FeaturedReadBanner = () => {
 
   const dismiss = () => {
     setVisible(false);
-    sessionStorage.setItem(DISMISS_KEY, "1");
   };
 
   const inner = (
