@@ -111,9 +111,9 @@ const TradeBoards = () => {
 
   return (
     <>
-      <Helmet><title>Client Boards — Trade Portal — Maison Affluency</title></Helmet>
+      <Helmet><title>Project Folders — Trade Portal — Maison Affluency</title></Helmet>
       <div className="max-w-7xl">
-        <SectionHero section="boards" title="Client Boards" subtitle="Create curated collections for your clients to review and approve">
+        <SectionHero section="boards" title="Project Folders" subtitle="Create curated collections for your clients to review and approve">
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="gap-2">
