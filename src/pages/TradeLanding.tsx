@@ -537,7 +537,7 @@ const TradeLanding = () => {
             <h2 className="font-display text-2xl md:text-3xl text-background mb-4">
               Ready to Get Started?
             </h2>
-            <p className="font-body text-sm md:text-base text-background/60 mb-10 max-w-xl mx-auto leading-relaxed">
+            <p className="font-body text-sm md:text-base text-white/80 mb-10 max-w-xl mx-auto leading-relaxed">
               Join a community of architects and interior designers who trust Maison Affluency for their most ambitious projects.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
