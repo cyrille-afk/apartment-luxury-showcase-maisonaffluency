@@ -138,6 +138,7 @@ const ShowroomGridView = ({
   onDrawerRefreshKeyChange,
   onDrawerOpen,
   highlightProductId,
+  initialDesigner,
 }: ShowroomGridViewProps) => {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
