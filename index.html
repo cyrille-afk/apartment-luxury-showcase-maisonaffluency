@@ -204,14 +204,14 @@
         if (localStorage.getItem('ga_optout') === '1') return;
         setTimeout(function() {
           var s = document.createElement('script');
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-H79D6NNBLF';
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-HQEFDZDGTT';
           s.async = true;
           document.head.appendChild(s);
           s.onload = function() {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-H79D6NNBLF');
+            gtag('config', 'G-HQEFDZDGTT');
           };
         }, 3000);
       });
