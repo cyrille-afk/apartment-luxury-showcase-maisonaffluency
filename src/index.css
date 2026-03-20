@@ -261,3 +261,51 @@ All colors MUST be HSL.
     break-inside: avoid;
   }
 }
+
+/* Journal article editorial styling */
+.journal-article h2 {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  margin-top: 4rem;
+  margin-bottom: 2rem;
+  padding-top: 3rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.journal-article h2:first-child {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.journal-article blockquote {
+  border-left: 3px solid hsl(var(--primary));
+  margin: 3rem 0;
+  padding: 1.5rem 0 1.5rem 2rem;
+  font-family: var(--font-display, Georgia, serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: hsl(var(--foreground) / 0.65);
+}
+
+.journal-article blockquote p {
+  margin: 0;
+}
+
+.journal-article figure {
+  margin: 3.5rem 0;
+}
+
+.journal-article p strong {
+  display: block;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}

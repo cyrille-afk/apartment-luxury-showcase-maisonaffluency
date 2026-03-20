@@ -208,14 +208,11 @@ const JournalArticlePage = () => {
             className="max-w-3xl mx-auto px-6 py-10 md:py-14"
           >
             <div
-              className="prose prose-lg max-w-none font-body text-foreground/90 text-justify
-                prose-headings:font-display prose-headings:text-foreground prose-headings:tracking-wide
-                prose-p:leading-relaxed prose-p:text-foreground/80
+              className="journal-article prose prose-lg max-w-none font-body text-foreground/90
+                prose-p:leading-[1.85] prose-p:text-foreground/80 prose-p:my-6
                 prose-a:text-primary prose-a:underline prose-a:underline-offset-4
-                prose-img:rounded-sm
-                prose-blockquote:border-l-4 prose-blockquote:border-l-primary prose-blockquote:pl-6 prose-blockquote:my-10 prose-blockquote:font-display prose-blockquote:italic prose-blockquote:text-foreground/70 prose-blockquote:not-italic prose-blockquote:text-lg
-                prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:text-muted-foreground prose-figcaption:mt-3 prose-figcaption:font-body
-                prose-figure:my-16 prose-figure:py-4"
+                prose-img:rounded-sm prose-img:w-full
+                prose-figcaption:text-center prose-figcaption:text-[13px] prose-figcaption:text-muted-foreground prose-figcaption:mt-4 prose-figcaption:font-body prose-figcaption:tracking-wide prose-figcaption:uppercase"
               dangerouslySetInnerHTML={{ __html: article.content.replace(/(\d+)\.\s/g, '<br /><br />$1. ') .replace(/^<br \/><br \/>/, '') }}
             />
           </motion.div>
