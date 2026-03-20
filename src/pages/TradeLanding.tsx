@@ -174,10 +174,10 @@ const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./Trade
                 loading="lazy"
               />
             </div>
-            <div className="p-5">
-              <p className="font-body text-[10px] tracking-[0.25em] uppercase text-accent mb-3">Trade Program Benefits</p>
-              <h3 className="font-display text-base text-foreground mb-2">{benefit.title}</h3>
-              <p className="font-body text-sm leading-relaxed text-muted-foreground">{benefit.description}</p>
+            <div className="p-4">
+              <p className="font-body text-[9px] tracking-[0.25em] uppercase text-accent mb-2">Trade Program Benefits</p>
+              <h3 className="font-display text-sm text-foreground mb-1.5">{benefit.title}</h3>
+              <p className="font-body text-xs leading-relaxed text-muted-foreground text-justify">{benefit.description}</p>
             </div>
           </div>
         ))}
