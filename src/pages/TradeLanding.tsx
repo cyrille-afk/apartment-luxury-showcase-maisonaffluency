@@ -242,6 +242,14 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             Show {testimonials.length - 1} more reviews
           </button>
         )}
+        {showAll && testimonials.length > 1 && (
+          <button
+            onClick={() => setShowAll(false)}
+            className="w-full py-3 font-body text-xs tracking-[0.15em] uppercase text-muted-foreground border border-border rounded-sm hover:bg-muted/30 transition-colors"
+          >
+            Show less
+          </button>
+        )}
       </div>
     </>
   );
