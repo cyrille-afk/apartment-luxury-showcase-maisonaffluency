@@ -27,6 +27,7 @@ import {
 } from "@/lib/api/competitors";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  ScatterChart, Scatter, ZAxis,
 } from "recharts";
 
 interface Gallery {
