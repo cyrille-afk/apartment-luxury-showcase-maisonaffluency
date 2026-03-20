@@ -461,7 +461,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 {items.map((item) => {
                   const product = item.trade_products;
                   const rawUnitPrice = item.unit_price_cents ?? product?.trade_price_cents ?? null;
-                  const prodCurrency = product?.currency || currency;
+                  // unit_price_cents is already in the quote currency (admin converts before saving)
+                  const prodCurrency = item.unit_price_cents != null ? currency : (product?.currency || currency);
                   const unitPrice = convertCents(rawUnitPrice, prodCurrency, currency);
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
 
