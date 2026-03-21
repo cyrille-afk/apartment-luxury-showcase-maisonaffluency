@@ -165,6 +165,7 @@ const TradeDesigners = () => {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState("all");
+  const [carouselMode, setCarouselMode] = useState<"ateliers" | "designers">("ateliers");
   const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set());
   const [showBackToTop, setShowBackToTop] = useState(false);
 
