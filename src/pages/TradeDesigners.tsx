@@ -341,7 +341,7 @@ const TradeDesigners = () => {
         <title>Designers Library — Maison Affluency Trade</title>
       </Helmet>
       <div id="designers-carousel-top" className="space-y-6">
-        {brandEntries.length > 0 && (
+        {(atelierEntries.length > 0 || designerEntries.length > 0) && (
           <BrandCarousel
             brands={brandEntries}
             selectedBrand={selectedBrand}
