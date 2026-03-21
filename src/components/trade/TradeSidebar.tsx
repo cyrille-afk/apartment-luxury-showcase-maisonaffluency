@@ -20,7 +20,7 @@ import {
 const browseItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard },
   { title: "Showroom", url: "/trade/showroom", icon: MapPin },
-  { title: "Designers", url: "/trade/designers", icon: Users },
+  { title: "Designers Library", url: "/trade/designers", icon: Users },
 ];
 
 const collectionItems = [
