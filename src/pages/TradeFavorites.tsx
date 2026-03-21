@@ -42,6 +42,61 @@ export default function TradeFavorites() {
   const rates = useFxRates();
   const [removing, setRemoving] = useState<string | null>(null);
   const [selectedFor3D, setSelectedFor3D] = useState<Set<string>>(new Set());
+  const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
+  const [addingToQuote, setAddingToQuote] = useState(false);
+  const [addedToQuote, setAddedToQuote] = useState(false);
+
+  const favToLightboxItem = (fav: FavoritedProduct): TradeProductLightboxItem => ({
+    id: fav.productId,
+    product_name: fav.product_name,
+    image_url: fav.image_url,
+    brand_name: fav.brand_name,
+    materials: fav.materials,
+    dimensions: fav.dimensions,
+    category: fav.category || undefined,
+    subcategory: fav.subcategory || undefined,
+    price: fav.trade_price_cents ? `€${(fav.trade_price_cents / 100).toLocaleString()}` : undefined,
+  });
+
+  const handleLightboxAddToQuote = useCallback(async (product: TradeProductLightboxItem) => {
+    if (!user) return;
+    setAddingToQuote(true);
+    try {
+      let { data: drafts } = await supabase
+        .from("trade_quotes")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "draft")
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      let quoteId: string;
+      if (drafts && drafts.length > 0) {
+        quoteId = drafts[0].id;
+      } else {
+        const { data: newQuote, error } = await supabase
+          .from("trade_quotes")
+          .insert({ user_id: user.id })
+          .select("id")
+          .single();
+        if (error || !newQuote) throw error || new Error("Failed");
+        quoteId = newQuote.id;
+      }
+
+      await supabase.from("trade_quote_items").insert({
+        quote_id: quoteId,
+        product_id: product.id,
+        quantity: 1,
+      });
+
+      setAddedToQuote(true);
+      toast({ title: "Added to quote", description: product.product_name });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setAddingToQuote(false);
+    }
+  }, [user, toast]);
 
   const fetchFavorites = useCallback(async () => {
     if (!user) return;
