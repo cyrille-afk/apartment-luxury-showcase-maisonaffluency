@@ -91,64 +91,45 @@ const TradeAtelierProfile = () => {
           All Ateliers
         </button>
 
-        {/* Hero */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={transition}
-          className="relative rounded-xl overflow-hidden"
-        >
-          <div className="aspect-[21/9] md:aspect-[3/1]">
-            {designer.image_url && (
-              <img
-                src={designer.image_url}
-                alt={name}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
-              <div className="flex items-start gap-4">
-                {!heroHasEmbeddedName && designer.logo_url && (
-                  <img src={designer.logo_url} alt="" className="h-10 opacity-80 shrink-0" />
-                )}
-                <div>
-                  {!heroHasEmbeddedName && (
-                    <h1 className="font-display text-2xl md:text-4xl tracking-wide text-foreground">
-                      {name}
-                    </h1>
-                  )}
-                   {designer.specialty && (
-                    <p className="font-body text-base md:text-lg text-foreground/80 mt-1.5 hidden md:block font-medium tracking-wide">{designer.specialty}</p>
-                  )}
-                </div>
-              </div>
-              {/* Mobile-only specialty at bottom of hero */}
-              {designer.specialty && (
-                <p className="font-body text-sm text-foreground/75 mt-3 md:hidden font-medium">{designer.specialty}</p>
+        {/* Hero + About — side by side on desktop */}
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Hero image */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={transition}
+            className="relative rounded-xl overflow-hidden md:w-1/2 shrink-0"
+          >
+            <div className="aspect-[3/4]">
+              {designer.image_url && (
+                <img
+                  src={designer.image_url}
+                  alt={name}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="eager"
+                />
               )}
-              {/* Stats */}
-              <div className="flex items-center gap-6 mt-4">
-                {brandProducts.length > 0 && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Package className="w-4 h-4" />
-                    <span className="font-body text-xs">
-                      {brandProducts.length} {brandProducts.length === 1 ? "piece" : "pieces"}
-                    </span>
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
+                <div className="flex items-start gap-4">
+                  {!heroHasEmbeddedName && designer.logo_url && (
+                    <img src={designer.logo_url} alt="" className="h-10 opacity-80 shrink-0" />
+                  )}
+                  <div>
+                    {!heroHasEmbeddedName && (
+                      <h1 className="font-display text-2xl md:text-3xl tracking-wide text-foreground">
+                        {name}
+                      </h1>
+                    )}
+                    {designer.specialty && (
+                      <p className="font-body text-sm md:text-base text-foreground/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
+                    )}
                   </div>
-                )}
-                {categories.length > 0 && (
-                  <div className="flex items-center gap-1.5">
-                    {categories.slice(0, 4).map((cat) => (
-                      <Badge key={cat} variant="secondary" className="text-[9px] uppercase tracking-wider">
-                        {cat}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-                <div className="flex items-center gap-3 ml-auto">
+                </div>
+                {/* Social links */}
+                <div className="flex items-center gap-3 mt-4">
                   {instagramLink && (
                     <a href={instagramLink} target="_blank" rel="noopener noreferrer"
                       className="text-muted-foreground hover:text-foreground transition-colors">
@@ -162,26 +143,27 @@ const TradeAtelierProfile = () => {
                     </a>
                   )}
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* Biography — full width, justified */}
-        {designer.biography && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transition, delay: 0.2 }}
-          >
-            <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
-              About
-            </h2>
-            <p className="font-body text-sm leading-relaxed text-foreground/85 text-justify whitespace-pre-line">
-              {designer.biography}
-            </p>
+              </motion.div>
+            </div>
           </motion.div>
-        )}
+
+          {/* Biography — beside hero on desktop */}
+          {designer.biography && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ ...transition, delay: 0.2 }}
+              className="md:w-1/2 flex flex-col justify-center"
+            >
+              <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+                About
+              </h2>
+              <p className="font-body text-sm leading-relaxed text-foreground/85 text-justify whitespace-pre-line">
+                {designer.biography}
+              </p>
+            </motion.div>
+          )}
+        </div>
 
         {/* Philosophy quote — full width */}
         {designer.philosophy && (
