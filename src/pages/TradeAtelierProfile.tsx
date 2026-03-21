@@ -51,6 +51,7 @@ function displayName(name: string): string {
 }
 
 const TradeAtelierProfile = () => {
+  const { isTradeUser, isAdmin } = useAuth();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { data: designer, isLoading } = useDesigner(slug);
