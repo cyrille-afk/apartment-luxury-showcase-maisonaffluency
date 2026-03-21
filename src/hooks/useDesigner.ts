@@ -74,7 +74,10 @@ export function useDesignerPicks(designerId: string | undefined) {
         .eq("designer_id", designerId)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return (data || []) as DesignerCuratorPick[];
+      return (data || []).map((d) => ({
+        ...d,
+        pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
+      })) as DesignerCuratorPick[];
     },
     enabled: !!designerId,
   });
