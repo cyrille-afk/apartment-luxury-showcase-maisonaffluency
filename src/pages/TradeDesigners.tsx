@@ -228,7 +228,7 @@ const TradeDesigners = () => {
 
     for (const d of filtered) {
       // For atelier members, use founder as sort prefix so atelier card comes first
-      const sortName = d.isAtelierCard ? d.name : (d.founder && d.founder !== d.name ? `${d.founder}\0${d.name}` : d.name);
+      const sortName = d.isAtelierCard ? `${d.name}\0\0` : (d.founder && d.founder !== d.name ? `${d.founder}\0\x01${d.name}` : d.name);
       entries.push({ type: "solo", designer: d, sortName });
     }
 
