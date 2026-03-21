@@ -22,6 +22,11 @@ const TradeAtelierProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { data: designer, isLoading } = useDesigner(slug);
+
+  // Scroll to top when profile loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [slug]);
   const { data: picks = [] } = useDesignerPicks(designer?.id);
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
 
