@@ -347,24 +347,7 @@ const TradeAtelierProfile = () => {
 
         {/* Curator's Picks */}
         {picks.length > 0 && (() => {
-          // Group picks by designer for parent brands
           const isGrouped = groupedPicks.length > 0;
-          const designerGroups: { name: string; slug: string; items: typeof picks }[] = [];
-
-          if (isGrouped) {
-            const groupMap = new Map<string, { name: string; slug: string; items: typeof picks }>();
-            for (const pick of picks) {
-              const ap = pick as AttributedCuratorPick;
-              const key = ap.designer_slug || 'unknown';
-              if (!groupMap.has(key)) {
-                groupMap.set(key, { name: ap.designer_name, slug: ap.designer_slug, items: [] });
-              }
-              groupMap.get(key)!.items.push(pick);
-            }
-            designerGroups.push(...groupMap.values());
-          } else {
-            designerGroups.push({ name: designer.name, slug: slug || '', items: picks });
-          }
 
           return (
           <motion.div
@@ -379,30 +362,18 @@ const TradeAtelierProfile = () => {
               <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
             </div>
 
-            {designerGroups.map((group) => (
-              <div key={group.slug} className="mb-8 last:mb-0">
-                {isGrouped && (
-                  <Link
-                    to={`/trade/designers/${group.slug}`}
-                    className="inline-flex items-center gap-2 mb-3 group/link"
-                  >
-                    <h3 className="font-display text-[11px] md:text-sm tracking-[0.15em] uppercase text-muted-foreground group-hover/link:text-foreground transition-colors">
-                      {group.name}
-                    </h3>
-                    <span className="text-[10px] text-muted-foreground/40 font-body">
-                      ({group.items.length})
-                    </span>
-                  </Link>
-                )}
                 <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:grid-cols-3 lg:grid-cols-4 md:gap-4">
-                  {group.items.map((pick) => {
+                  {picks.map((pick) => {
                     const isAdding = addingProductId === pick.id;
                     const isAdded = addedProductIds.has(pick.id);
+                    const ap = pick as AttributedCuratorPick;
+                    const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name
+                      ? ap.designer_name : undefined;
                     return (
                     <div
                       key={pick.id}
                       className="group cursor-pointer"
-                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, group.name))}
+                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name))}
                     >
                       <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
                         <img
@@ -418,7 +389,7 @@ const TradeAtelierProfile = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleAddToQuote(pickToLightboxItem(pick, group.name));
+                                handleAddToQuote(pickToLightboxItem(pick, designerLabel || designer.name));
                               }}
                               className={cn(
                                 "p-2 rounded-md text-white transition-colors",
@@ -433,7 +404,7 @@ const TradeAtelierProfile = () => {
                           )}
                           {pick.pdf_url && (
                             <a
-                              href={buildSpecSheetUrl(pick.pdf_url, group.name, pick.title)}
+                              href={buildSpecSheetUrl(pick.pdf_url, designerLabel || designer.name, pick.title)}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
@@ -445,7 +416,14 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                      <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{pick.title}</h3>
+                      <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">
+                        {pick.title}
+                        {designerLabel && (
+                          <span className="font-body text-[9px] md:text-[10px] text-muted-foreground ml-1.5">
+                            — {designerLabel}
+                          </span>
+                        )}
+                      </h3>
                       {pick.subtitle && (
                         <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>
                       )}
@@ -475,8 +453,6 @@ const TradeAtelierProfile = () => {
                     );
                   })}
                 </div>
-              </div>
-            ))}
           </motion.div>
           );
         })()}

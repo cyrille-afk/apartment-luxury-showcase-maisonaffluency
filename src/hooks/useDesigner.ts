@@ -105,10 +105,13 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined) {
         .eq("founder", designer.name)
         .neq("id", designer.id);
 
-      const allDesigners = [
-        { id: designer.id, name: designer.name, slug: designer.slug },
-        ...(subDesigners || []),
-      ];
+      // Only fetch sub-designers (not the parent brand itself to avoid duplicates)
+      const subOnly = (subDesigners || []).filter(d => d.id !== designer.id);
+
+      // If no sub-designers, return empty (caller will use ownPicks)
+      if (subOnly.length === 0) return [];
+
+      const allDesigners = subOnly;
 
       const designerIds = allDesigners.map((d) => d.id);
       const nameMap = Object.fromEntries(allDesigners.map((d) => [d.id, { name: d.name, slug: d.slug }]));
