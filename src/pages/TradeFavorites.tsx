@@ -284,7 +284,11 @@ export default function TradeFavorites() {
         ) : view === "grid" ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filtered.map((fav) => (
-              <Card key={fav.favoriteId} className={cn("group overflow-hidden", selectedFor3D.has(fav.productId) && "ring-2 ring-[hsl(var(--gold))]")}>
+              <Card
+                key={fav.favoriteId}
+                className={cn("group overflow-hidden cursor-pointer", selectedFor3D.has(fav.productId) && "ring-2 ring-[hsl(var(--gold))]")}
+                onClick={() => { setAddedToQuote(false); setLightboxProduct(favToLightboxItem(fav)); }}
+              >
                 <div className="relative aspect-square bg-muted">
                   {fav.image_url ? (
                     <img src={fav.image_url} alt={fav.product_name} className="w-full h-full object-cover" loading="lazy" />
@@ -293,9 +297,8 @@ export default function TradeFavorites() {
                       <Heart className="w-8 h-8" />
                     </div>
                   )}
-                  {/* 3D Studio select */}
                   <button
-                    onClick={() => toggle3D(fav.productId)}
+                    onClick={(e) => { e.stopPropagation(); toggle3D(fav.productId); }}
                     className={cn(
                       "absolute top-2 left-2 w-7 h-7 rounded-full flex items-center justify-center transition-all",
                       selectedFor3D.has(fav.productId)
@@ -307,7 +310,7 @@ export default function TradeFavorites() {
                     <Wand2 className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={() => removeFavorite(fav.favoriteId)}
+                    onClick={(e) => { e.stopPropagation(); removeFavorite(fav.favoriteId); }}
                     disabled={removing === fav.favoriteId}
                     className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
                   >
@@ -332,7 +335,11 @@ export default function TradeFavorites() {
         ) : (
           <div className="space-y-2">
             {filtered.map((fav) => (
-              <Card key={fav.favoriteId} className="flex items-center gap-4 p-3 group">
+              <Card
+                key={fav.favoriteId}
+                className="flex items-center gap-4 p-3 group cursor-pointer"
+                onClick={() => { setAddedToQuote(false); setLightboxProduct(favToLightboxItem(fav)); }}
+              >
                 <div className="w-16 h-16 rounded-md overflow-hidden bg-muted shrink-0">
                   {fav.image_url && <img src={fav.image_url} alt={fav.product_name} className="w-full h-full object-cover" />}
                 </div>
@@ -352,7 +359,7 @@ export default function TradeFavorites() {
                   )}
                 </div>
                 <button
-                  onClick={() => removeFavorite(fav.favoriteId)}
+                  onClick={(e) => { e.stopPropagation(); removeFavorite(fav.favoriteId); }}
                   disabled={removing === fav.favoriteId}
                   className="p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
                 >
@@ -363,6 +370,15 @@ export default function TradeFavorites() {
           </div>
         )}
       </div>
+
+      <TradeProductLightbox
+        product={lightboxProduct}
+        onClose={() => setLightboxProduct(null)}
+        onAddToQuote={handleLightboxAddToQuote}
+        isAdding={addingToQuote}
+        isAdded={addedToQuote}
+        onSelectRelated={(rp) => setLightboxProduct(rp)}
+      />
     </>
   );
 }
