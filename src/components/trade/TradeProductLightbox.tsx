@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Package } from "lucide-react";
+import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Package, Heart } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
+import { useFavorites } from "@/hooks/useFavorites";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useEffect, useState, useMemo } from "react";
@@ -34,6 +35,7 @@ interface TradeProductLightboxProps {
 
 const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdded, onSelectRelated }: TradeProductLightboxProps) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { isFavorited, toggleFavorite } = useFavorites();
   const [showHoverImage, setShowHoverImage] = useState(false);
   const navigate = useNavigate();
 
@@ -208,6 +210,21 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               </button>
 
               <div className="flex gap-2">
+                {/* Favorite */}
+                <button
+                  onClick={() => product && toggleFavorite(product.id)}
+                  className={cn(
+                    "flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
+                    product && isFavorited(product.id)
+                      ? "border-red-500/30 text-red-500 bg-red-500/10"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                  )}
+                >
+                  <Heart size={14} className={cn(product && isFavorited(product.id) && "fill-current")} />
+                  {product && isFavorited(product.id) ? "Favorited" : "Favorite"}
+                </button>
+
+                {/* Pin to Selection */}
                 <button
                   onClick={() => togglePin(compareItem)}
                   className={cn(

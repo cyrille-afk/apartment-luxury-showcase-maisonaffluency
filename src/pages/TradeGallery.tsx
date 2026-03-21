@@ -1,5 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
+import { Heart } from "lucide-react";
+import { useFavorites } from "@/hooks/useFavorites";
 import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -24,6 +26,7 @@ interface DraftQuote {
 const TradeGallery = () => {
   const { user, isAdmin } = useAuth();
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
   const allProducts = useMemo(() => getAllTradeProducts(), []);
   const brands = useMemo(() => getAllBrands(allProducts), [allProducts]);
@@ -372,20 +375,33 @@ const TradeGallery = () => {
                       <Package className="h-6 w-6 text-muted-foreground/30" />
                     </div>
                   )}
-                  {/* Pin button */}
-                  <button
-                    onClick={() => togglePin(toCompareItem(product))}
-                    className={cn(
-                      "absolute top-2 right-2 z-10 p-1.5 rounded-full transition-all",
-                      pinned
-                        ? "bg-[hsl(var(--gold))] text-foreground shadow-md"
-                        : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90",
-                      compareItems.length >= 3 && !pinned && "pointer-events-none"
-                    )}
-                    aria-label={pinned ? "Remove from selection" : "Pin to selection"}
-                  >
-                    <Scale className="h-3.5 w-3.5" />
-                  </button>
+                   {/* Favorite button */}
+                   <button
+                     onClick={(e) => { e.stopPropagation(); toggleFavorite(product.id); }}
+                     className={cn(
+                       "absolute top-2 left-2 z-10 p-1.5 rounded-full transition-all",
+                       isFavorited(product.id)
+                         ? "bg-background/90 text-red-500 shadow-md"
+                         : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90"
+                     )}
+                     aria-label={isFavorited(product.id) ? "Remove from favorites" : "Add to favorites"}
+                   >
+                     <Heart className={cn("h-3.5 w-3.5", isFavorited(product.id) && "fill-current")} />
+                   </button>
+                   {/* Pin button */}
+                   <button
+                     onClick={(e) => { e.stopPropagation(); togglePin(toCompareItem(product)); }}
+                     className={cn(
+                       "absolute top-2 right-2 z-10 p-1.5 rounded-full transition-all",
+                       pinned
+                         ? "bg-[hsl(var(--gold))] text-foreground shadow-md"
+                         : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90",
+                       compareItems.length >= 3 && !pinned && "pointer-events-none"
+                     )}
+                     aria-label={pinned ? "Remove from selection" : "Pin to selection"}
+                   >
+                     <Scale className="h-3.5 w-3.5" />
+                   </button>
                   {/* Overlay actions */}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
@@ -518,6 +534,16 @@ const TradeGallery = () => {
                     <FileDown className="h-4 w-4" />
                   </a>
                 )}
+                <button
+                  onClick={() => toggleFavorite(product.id)}
+                  className={cn(
+                    "p-2 rounded-full transition-all shrink-0",
+                    isFavorited(product.id) ? "text-red-500" : "text-muted-foreground hover:text-foreground"
+                  )}
+                  aria-label={isFavorited(product.id) ? "Remove from favorites" : "Favorite"}
+                >
+                  <Heart className={cn("h-3.5 w-3.5", isFavorited(product.id) && "fill-current")} />
+                </button>
                 <button
                   onClick={() => togglePin(toCompareItem(product))}
                   className={cn(
