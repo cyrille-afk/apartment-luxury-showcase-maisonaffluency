@@ -166,23 +166,8 @@ const TradeDesigners = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [carouselMode, setCarouselMode] = useState<"ateliers" | "designers">("ateliers");
-  const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set());
+  const [expandedBrands] = useState<Set<string>>(new Set());
   const [showBackToTop, setShowBackToTop] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setShowBackToTop(window.scrollY > 600);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const toggleBrandExpand = (brandName: string) => {
-    setExpandedBrands((prev) => {
-      const next = new Set(prev);
-      if (next.has(brandName)) next.delete(brandName);
-      else next.add(brandName);
-      return next;
-    });
-  };
 
   const allProducts = useMemo(() => getAllTradeProducts(), []);
   const productCountMap = useMemo(() => {
