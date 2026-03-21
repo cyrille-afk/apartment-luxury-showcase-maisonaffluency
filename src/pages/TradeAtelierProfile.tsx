@@ -214,9 +214,12 @@ const TradeAtelierProfile = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transition, delay: 0.25 }}
           >
-            <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-6">
-              Curator's Picks
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground">
+                Curator's Picks
+              </h2>
+              <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {picks.map((pick) => (
                 <div key={pick.id} className="group">
