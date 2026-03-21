@@ -6,6 +6,8 @@ import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText } from "lu
 import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useDesigner";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
+import WhatsAppShareButton from "@/components/WhatsAppShareButton";
+import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import { Badge } from "@/components/ui/badge";
 import CurrencyToggle, { DisplayCurrency, useFxRates, formatPriceConverted } from "@/components/trade/CurrencyToggle";
 
