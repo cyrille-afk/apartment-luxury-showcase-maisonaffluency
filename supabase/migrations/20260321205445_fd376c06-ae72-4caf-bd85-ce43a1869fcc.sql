@@ -1,0 +1,1 @@
+UPDATE designers SET founder = 'Ecart' WHERE id = '1623338d-5883-48c4-93a9-5f13dcb7a54b';
