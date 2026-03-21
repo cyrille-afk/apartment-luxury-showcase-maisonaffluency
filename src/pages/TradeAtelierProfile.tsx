@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useDesigner";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { Badge } from "@/components/ui/badge";
