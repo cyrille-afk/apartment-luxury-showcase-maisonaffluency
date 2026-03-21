@@ -77,11 +77,6 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
           )}
           <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">More Info</span>
         </div>
-        {brand.productCount > 0 && (
-          <span className="absolute top-2.5 right-2.5 bg-background/90 backdrop-blur-sm text-foreground font-body text-[10px] px-2 py-0.5 rounded-full border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
-            {brand.productCount} {brand.productCount === 1 ? "piece" : "pieces"}
-          </span>
-        )}
         {brand.source === "collectible" && (
           <span className="absolute top-2.5 left-2.5 bg-primary/90 backdrop-blur-sm text-primary-foreground font-body text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full">Collectible</span>
         )}
