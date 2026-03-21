@@ -235,6 +235,26 @@ const TradeAxonometricRequests = () => {
               )}
             </div>
 
+            {/* Favorites Picker */}
+            <div className="space-y-1.5">
+              <label className="font-body text-xs text-muted-foreground flex items-center gap-1.5">
+                <Heart className="w-3 h-3" />
+                Attach Favorites (optional)
+              </label>
+              <p className="font-body text-[10px] text-muted-foreground/70">
+                Select products from your favorites to include in the 3D render
+              </p>
+              <FavoritesPicker
+                selectedIds={selectedFavoriteIds}
+                onSelectionChange={setSelectedFavoriteIds}
+              />
+              {selectedFavoriteIds.length > 0 && (
+                <p className="font-body text-[10px] text-[hsl(var(--gold))]">
+                  {selectedFavoriteIds.length} product{selectedFavoriteIds.length !== 1 ? "s" : ""} selected
+                </p>
+              )}
+            </div>
+
             <div className="space-y-1.5">
               <label className="font-body text-xs text-muted-foreground">Notes (optional)</label>
               <Textarea
