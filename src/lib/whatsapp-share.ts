@@ -50,10 +50,7 @@ type SharePageOptions = {
   directUrlPath?: string;
 };
 
-const buildSiteShareUrl = (path: string) => {
-  const separator = path.includes("?") ? "&" : "?";
-  return `${SITE_URL}${path}${separator}v=${OG_SHARE_VERSION}&t=${Date.now()}`;
-};
+const buildSiteShareUrl = (path: string) => `${SITE_URL}${path}`;
 
 export const sharePageOnWhatsApp = (
   path: string,
