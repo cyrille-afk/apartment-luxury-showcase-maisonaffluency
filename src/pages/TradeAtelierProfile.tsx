@@ -138,7 +138,6 @@ const TradeAtelierProfile = () => {
             }}
             label="Share on WhatsApp"
             variant="prominent"
-            hideOn="desktop"
           />
         </div>
 
