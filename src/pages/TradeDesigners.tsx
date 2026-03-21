@@ -190,16 +190,32 @@ const TradeDesigners = () => {
     });
   }, [designers, productCountMap]);
 
+  // Build carousel: multi-designer brands (founder groups) + all solo designers
   const brandEntries = useMemo(() => {
-    const map = new Map<string, number>();
+    const founderMap = new Map<string, number>();
+    const soloNames: string[] = [];
+
     for (const d of enriched) {
       if (d.founder) {
-        map.set(d.founder, (map.get(d.founder) || 0) + 1);
+        founderMap.set(d.founder, (founderMap.get(d.founder) || 0) + 1);
+      } else {
+        soloNames.push(d.name);
       }
     }
-    return [...map.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([name, count]) => ({ name, docCount: count }));
+
+    const entries: { name: string; docCount: number }[] = [];
+
+    // Multi-designer brands with count
+    for (const [name, count] of founderMap) {
+      entries.push({ name, docCount: count });
+    }
+
+    // Solo designers (docCount = 0 means solo, no expand)
+    for (const name of soloNames) {
+      entries.push({ name, docCount: 0 });
+    }
+
+    return entries.sort((a, b) => a.name.localeCompare(b.name));
   }, [enriched]);
 
   // IMPORTANT: carousel selection should NOT lock/filter the A-Z library
@@ -304,8 +320,13 @@ const TradeDesigners = () => {
                 return;
               }
 
-              setExpandedBrands(new Set([b]));
+              // If it's a multi-designer brand, expand it
+              const entry = brandEntries.find((e) => e.name === b);
+              if (entry && entry.docCount > 0) {
+                setExpandedBrands(new Set([b]));
+              }
 
+              // Scroll to the letter
               const letter = b.charAt(0).toUpperCase();
               requestAnimationFrame(() => {
                 const el = document.getElementById(`designer-letter-${letter}`);
@@ -315,10 +336,10 @@ const TradeDesigners = () => {
             label={
               <div className="mb-2">
                 <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
-                  Browse by brand · {brandEntries.length} multi-designer brands
+                  Browse designers & ateliers · {brandEntries.length} entries
                 </p>
                 <p className="font-body text-[10px] text-muted-foreground/60 mt-0.5 normal-case tracking-normal">
-                  Many brands collaborate with multiple designers — select one to explore its roster.
+                  Scroll to jump to a designer. Multi-designer brands expand to reveal their roster.
                 </p>
               </div>
             }
