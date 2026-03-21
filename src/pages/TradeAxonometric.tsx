@@ -220,7 +220,7 @@ const TradeAxonometric = () => {
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
   const [savingRefStyle, setSavingRefStyle] = useState(false);
   const [useLockedRefStyle, setUseLockedRefStyle] = useState(true);
-
+  const [preloadedFavoriteProductIds, setPreloadedFavoriteProductIds] = useState<string[]>([]);
 
   // AI dialogue state
   const [aiPrompt, setAiPrompt] = useState("");
@@ -558,6 +558,9 @@ const TradeAxonometric = () => {
     setMode(req.request_type === "section" ? "section_to_axo" : "elevation_to_axo");
     setShowQueue(false);
     setResult(null);
+    // Pre-load attached favorite product IDs for proposal builder
+    const linkedIds = Array.isArray(req.linked_favorite_product_ids) ? req.linked_favorite_product_ids : [];
+    setPreloadedFavoriteProductIds(linkedIds);
   };
 
   const completeRequest = async () => {
@@ -832,6 +835,11 @@ const TradeAxonometric = () => {
                       {userName}{profile?.company ? ` · ${profile.company}` : ""} · {req.request_type === "3d_model" ? "3D Model" : req.request_type} · {format(new Date(req.created_at), "d MMM yyyy")}
                     </p>
                     {req.notes && <p className="font-body text-xs text-muted-foreground/70 line-clamp-1 mt-0.5">{req.notes}</p>}
+                    {Array.isArray(req.linked_favorite_product_ids) && req.linked_favorite_product_ids.length > 0 && (
+                      <p className="font-body text-[10px] text-[hsl(var(--gold))] mt-0.5">
+                        ♥ {req.linked_favorite_product_ids.length} favorite{req.linked_favorite_product_ids.length !== 1 ? "s" : ""} attached
+                      </p>
+                    )}
                   </div>
                   <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${req.status === "in_progress" ? "bg-blue-500/10 text-blue-700" : "bg-yellow-500/10 text-yellow-700"}`}>
                     {req.status === "in_progress" ? "In Progress" : "Pending"}
@@ -1886,6 +1894,7 @@ const TradeAxonometric = () => {
                 emptyRoomUrl={emptyRoomUrl}
                 emptyRoomGenerating={emptyRoomGenerating}
                 style={style}
+                preloadedProductIds={preloadedFavoriteProductIds}
                 onClose={() => setShowProposal(false)}
                 onResult={(res) => {
                   // Proposal stays in the builder's side-by-side view;

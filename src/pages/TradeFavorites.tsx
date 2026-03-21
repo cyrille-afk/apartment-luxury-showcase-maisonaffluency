@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
-import { Heart, Trash2, ShoppingCart, Search, Grid3X3, List, Loader2 } from "lucide-react";
+import { Heart, Trash2, ShoppingCart, Search, Grid3X3, List, Loader2, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -31,6 +32,7 @@ interface FavoritedProduct {
 export default function TradeFavorites() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [favorites, setFavorites] = useState<FavoritedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -38,6 +40,7 @@ export default function TradeFavorites() {
   const [currency, setCurrency] = useState<DisplayCurrency>("SGD");
   const rates = useFxRates();
   const [removing, setRemoving] = useState<string | null>(null);
+  const [selectedFor3D, setSelectedFor3D] = useState<Set<string>>(new Set());
 
   const fetchFavorites = useCallback(async () => {
     if (!user) return;
@@ -133,6 +136,20 @@ export default function TradeFavorites() {
     }
   }, [user, favorites, toast]);
 
+  const toggle3D = useCallback((productId: string) => {
+    setSelectedFor3D((prev) => {
+      const next = new Set(prev);
+      if (next.has(productId)) next.delete(productId); else next.add(productId);
+      return next;
+    });
+  }, []);
+
+  const sendTo3DStudio = useCallback(() => {
+    if (selectedFor3D.size === 0) return;
+    const ids = Array.from(selectedFor3D).join(",");
+    navigate(`/trade/axonometric-requests?favorites=${ids}`);
+  }, [selectedFor3D, navigate]);
+
   const filtered = search.trim()
     ? favorites.filter((f) => {
         const q = search.toLowerCase();
@@ -180,6 +197,12 @@ export default function TradeFavorites() {
               Add All to Quote
             </Button>
           )}
+          {selectedFor3D.size > 0 && (
+            <Button size="sm" onClick={sendTo3DStudio} className="gap-1.5 bg-[hsl(var(--gold))] text-white hover:bg-[hsl(var(--gold))]/90">
+              <Wand2 className="w-3.5 h-3.5" />
+              Send {selectedFor3D.size} to 3D Studio
+            </Button>
+          )}
           <Badge variant="secondary" className="text-[10px]">
             <Heart className="w-3 h-3 mr-1 fill-current" />{favorites.length} saved
           </Badge>
@@ -205,7 +228,7 @@ export default function TradeFavorites() {
         ) : view === "grid" ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filtered.map((fav) => (
-              <Card key={fav.favoriteId} className="group overflow-hidden">
+              <Card key={fav.favoriteId} className={cn("group overflow-hidden", selectedFor3D.has(fav.productId) && "ring-2 ring-[hsl(var(--gold))]")}>
                 <div className="relative aspect-square bg-muted">
                   {fav.image_url ? (
                     <img src={fav.image_url} alt={fav.product_name} className="w-full h-full object-cover" loading="lazy" />
@@ -214,6 +237,19 @@ export default function TradeFavorites() {
                       <Heart className="w-8 h-8" />
                     </div>
                   )}
+                  {/* 3D Studio select */}
+                  <button
+                    onClick={() => toggle3D(fav.productId)}
+                    className={cn(
+                      "absolute top-2 left-2 w-7 h-7 rounded-full flex items-center justify-center transition-all",
+                      selectedFor3D.has(fav.productId)
+                        ? "bg-[hsl(var(--gold))] text-white"
+                        : "bg-background/80 backdrop-blur-sm text-muted-foreground opacity-0 group-hover:opacity-100"
+                    )}
+                    title="Select for 3D Studio"
+                  >
+                    <Wand2 className="w-3.5 h-3.5" />
+                  </button>
                   <button
                     onClick={() => removeFavorite(fav.favoriteId)}
                     disabled={removing === fav.favoriteId}

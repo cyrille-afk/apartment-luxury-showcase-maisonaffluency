@@ -56,6 +56,7 @@ interface ProposalBuilderProps {
   emptyRoomUrl: string | null;
   emptyRoomGenerating: boolean;
   style: string;
+  preloadedProductIds?: string[];
   onClose: () => void;
   onResult?: (result: { imageUrl: string; storedUrl: string | null; text: string; pinnedProducts: SelectedProduct[] }) => void;
 }
@@ -68,6 +69,7 @@ export default function ProposalBuilder({
   emptyRoomUrl,
   emptyRoomGenerating,
   style,
+  preloadedProductIds,
   onClose,
   onResult,
 }: ProposalBuilderProps) {
@@ -123,6 +125,37 @@ export default function ProposalBuilder({
 
   const brands = useMemo(() => getAllBrands(getAllTradeProducts()), []);
   const subcategories = category ? (SUBCATEGORY_MAP[category] || []) : [];
+
+  // Auto-load products from preloaded favorite IDs
+  useEffect(() => {
+    if (!preloadedProductIds || preloadedProductIds.length === 0) return;
+    const loadPreloaded = async () => {
+      const { data } = await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name, image_url, dimensions, materials, spec_sheet_url")
+        .in("id", preloadedProductIds);
+      if (data && data.length > 0) {
+        const loaded: SelectedProduct[] = data
+          .filter((p: any) => p.image_url)
+          .map((p: any) => ({
+            id: nextPinId(),
+            product_name: p.product_name,
+            brand_name: p.brand_name,
+            image_url: p.image_url,
+            dimensions: p.dimensions,
+            materials: p.materials,
+            pdf_url: p.spec_sheet_url,
+          }));
+        setSelectedProducts((prev) => {
+          // Avoid duplicates
+          const existingNames = new Set(prev.map((x) => x.product_name));
+          const newOnes = loaded.filter((l) => !existingNames.has(l.product_name));
+          return [...prev, ...newOnes].slice(0, 10);
+        });
+      }
+    };
+    loadPreloaded();
+  }, [preloadedProductIds]);
 
   const addProduct = useCallback((product: { product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string; isExternal?: boolean; pdf_url?: string; pdf_urls?: { label: string; url: string; filename?: string }[] }) => {
     if (selectedProducts.length >= 10) {

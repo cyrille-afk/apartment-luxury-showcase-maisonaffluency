@@ -109,6 +109,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string
+          linked_favorite_product_ids: Json | null
           notes: string | null
           project_name: string
           request_type: string
@@ -122,6 +123,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url: string
+          linked_favorite_product_ids?: Json | null
           notes?: string | null
           project_name?: string
           request_type?: string
@@ -135,6 +137,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string
+          linked_favorite_product_ids?: Json | null
           notes?: string | null
           project_name?: string
           request_type?: string

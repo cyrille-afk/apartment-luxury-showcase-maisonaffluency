@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SectionHero from "@/components/trade/SectionHero";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import CloudUpload from "@/components/trade/CloudUpload";
@@ -12,9 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, Clock, CheckCircle2, Loader2, Image as ImageIcon, GalleryHorizontalEnd, Pencil, Trash2 } from "lucide-react";
+import { Plus, X, Clock, CheckCircle2, Loader2, Image as ImageIcon, GalleryHorizontalEnd, Pencil, Trash2, Heart } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
+import FavoritesPicker from "@/components/trade/FavoritesPicker";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending: { label: "Pending", color: "bg-yellow-500/10 text-yellow-700" },
@@ -26,6 +27,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 const TradeAxonometricRequests = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -34,6 +36,16 @@ const TradeAxonometricRequests = () => {
   const [notes, setNotes] = useState("");
   const [editingRequest, setEditingRequest] = useState<any | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [selectedFavoriteIds, setSelectedFavoriteIds] = useState<string[]>(() => {
+    const prefilled = searchParams.get("favorites");
+    if (prefilled) return prefilled.split(",").filter(Boolean);
+    return [];
+  });
+
+  // Auto-open form if favorites were prefilled from the Favorites page
+  useEffect(() => {
+    if (searchParams.get("favorites")) setShowForm(true);
+  }, []);
 
   const { data: requests, refetch } = useQuery({
     queryKey: ["axonometric-requests", user?.id],
@@ -67,6 +79,7 @@ const TradeAxonometricRequests = () => {
         request_type: requestType,
         project_name: projectName.trim().slice(0, 200),
         notes: notes.trim().slice(0, 1000) || null,
+        linked_favorite_product_ids: selectedFavoriteIds.length > 0 ? selectedFavoriteIds : [],
       });
       if (error) throw error;
 
@@ -75,6 +88,7 @@ const TradeAxonometricRequests = () => {
       setImageUrl(null);
       setProjectName("");
       setNotes("");
+      setSelectedFavoriteIds([]);
       refetch();
     } catch (e: any) {
       toast({ title: "Submission failed", description: e.message, variant: "destructive" });
@@ -221,6 +235,26 @@ const TradeAxonometricRequests = () => {
               )}
             </div>
 
+            {/* Favorites Picker */}
+            <div className="space-y-1.5">
+              <label className="font-body text-xs text-muted-foreground flex items-center gap-1.5">
+                <Heart className="w-3 h-3" />
+                Attach Favorites (optional)
+              </label>
+              <p className="font-body text-[10px] text-muted-foreground/70">
+                Select products from your favorites to include in the 3D render
+              </p>
+              <FavoritesPicker
+                selectedIds={selectedFavoriteIds}
+                onSelectionChange={setSelectedFavoriteIds}
+              />
+              {selectedFavoriteIds.length > 0 && (
+                <p className="font-body text-[10px] text-[hsl(var(--gold))]">
+                  {selectedFavoriteIds.length} product{selectedFavoriteIds.length !== 1 ? "s" : ""} selected
+                </p>
+              )}
+            </div>
+
             <div className="space-y-1.5">
               <label className="font-body text-xs text-muted-foreground">Notes (optional)</label>
               <Textarea
@@ -298,9 +332,16 @@ const TradeAxonometricRequests = () => {
                   {req.notes && (
                     <p className="font-body text-xs text-muted-foreground line-clamp-2">{req.notes}</p>
                   )}
-                  <p className="font-body text-[10px] text-muted-foreground">
-                    Submitted {format(new Date(req.created_at), "d MMM yyyy")}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-body text-[10px] text-muted-foreground">
+                      Submitted {format(new Date(req.created_at), "d MMM yyyy")}
+                    </p>
+                    {Array.isArray(req.linked_favorite_product_ids) && req.linked_favorite_product_ids.length > 0 && (
+                      <span className="font-body text-[10px] text-[hsl(var(--gold))]">
+                        ♥ {req.linked_favorite_product_ids.length} favorite{req.linked_favorite_product_ids.length !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
                   {req.admin_notes && (
                     <p className="font-body text-xs text-muted-foreground/80 italic border-t border-border pt-1.5 mt-1.5">
                       Admin: {req.admin_notes}
