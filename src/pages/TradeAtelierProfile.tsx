@@ -11,6 +11,15 @@ import CurrencyToggle, { DisplayCurrency, useFxRates, formatPriceConverted } fro
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
 
+/** Known life dates for historical designers */
+const DESIGNER_DATES: Record<string, string> = {
+  "jean-michel-frank": "1895–1941",
+  "eileen-gray": "1878–1976",
+  "pierre-chareau": "1883–1950",
+  "robert-mallet-stevens": "1886–1945",
+  "mariano-fortuny": "1871–1949",
+};
+
 function displayName(name: string): string {
   if (name.includes(" - ")) {
     const [brand, ...rest] = name.split(" - ");
