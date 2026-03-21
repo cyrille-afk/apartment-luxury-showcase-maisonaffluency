@@ -88,6 +88,7 @@ const TradeAxonometricRequests = () => {
       setImageUrl(null);
       setProjectName("");
       setNotes("");
+      setSelectedFavoriteIds([]);
       refetch();
     } catch (e: any) {
       toast({ title: "Submission failed", description: e.message, variant: "destructive" });
