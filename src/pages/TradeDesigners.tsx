@@ -368,11 +368,39 @@ const TradeDesigners = () => {
             }}
             label={
               <div className="mb-2">
-                <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
-                  Browse designers & ateliers · {brandEntries.length} entries
-                </p>
-                <p className="font-body text-[10px] text-muted-foreground/60 mt-0.5 normal-case tracking-normal">
-                  Scroll to jump to a designer. Multi-designer brands expand to reveal their roster.
+                <div className="flex items-center gap-3 mb-1.5">
+                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
+                    Browse by
+                  </p>
+                  <div className="flex items-center gap-1 bg-muted/40 rounded-full p-0.5">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setCarouselMode("ateliers"); setSelectedBrand("all"); }}
+                      className={cn(
+                        "px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] transition-all",
+                        carouselMode === "ateliers"
+                          ? "bg-foreground text-background shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      Ateliers · {atelierEntries.length}
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setCarouselMode("designers"); setSelectedBrand("all"); }}
+                      className={cn(
+                        "px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] transition-all",
+                        carouselMode === "designers"
+                          ? "bg-foreground text-background shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      Designers · {designerEntries.length}
+                    </button>
+                  </div>
+                </div>
+                <p className="font-body text-[10px] text-muted-foreground/60 normal-case tracking-normal">
+                  {carouselMode === "ateliers"
+                    ? "Multi-designer brands — click to expand their roster."
+                    : "Independent designers & studios."}
                 </p>
               </div>
             }
