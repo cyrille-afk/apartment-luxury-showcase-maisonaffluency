@@ -1894,6 +1894,7 @@ const TradeAxonometric = () => {
                 emptyRoomUrl={emptyRoomUrl}
                 emptyRoomGenerating={emptyRoomGenerating}
                 style={style}
+                preloadedProductIds={preloadedFavoriteProductIds}
                 onClose={() => setShowProposal(false)}
                 onResult={(res) => {
                   // Proposal stays in the builder's side-by-side view;
