@@ -139,15 +139,26 @@ const TradeDesigners = () => {
       }
     }
 
-    const ateliers: { name: string; docCount: number }[] = [];
-    const solos: { name: string; docCount: number }[] = [];
+    const ateliers: { name: string; docCount: number; imageUrl?: string }[] = [];
+    const solos: { name: string; docCount: number; imageUrl?: string }[] = [];
     const seen = new Set<string>();
 
     for (const [name, count] of founderMap) {
-      if (!seen.has(name)) { seen.add(name); ateliers.push({ name, docCount: count }); }
+      if (!seen.has(name)) {
+        seen.add(name);
+        // Use the atelier's own record image, or first collaborator's image
+        const atelierRecord = enriched.find((d) => d.name === name && !d.founder);
+        const firstCollab = enriched.find((d) => d.founder === name);
+        const imageUrl = atelierRecord?.image_url || firstCollab?.image_url || undefined;
+        ateliers.push({ name, docCount: count, imageUrl });
+      }
     }
     for (const name of soloNames) {
-      if (!seen.has(name)) { seen.add(name); solos.push({ name, docCount: 0 }); }
+      if (!seen.has(name)) {
+        seen.add(name);
+        const designer = enriched.find((d) => d.name === name);
+        solos.push({ name, docCount: 0, imageUrl: designer?.image_url || undefined });
+      }
     }
 
     return {

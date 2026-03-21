@@ -7,6 +7,8 @@ interface BrandEntry {
   name: string;
   /** URL to the first PDF for this brand (used for auto-thumbnail) */
   pdfUrl?: string | null;
+  /** Designer portrait / image to use as thumbnail */
+  imageUrl?: string | null;
   docCount: number;
 }
 
@@ -93,8 +95,8 @@ const BrandTile = ({
   onUpload: (file: File) => void;
   onRemove: () => void;
 }) => {
-  const pdfThumb = usePdfThumbnail(!thumbnailUrl ? brand.pdfUrl : null);
-  const thumb = thumbnailUrl || pdfThumb;
+  const pdfThumb = usePdfThumbnail(!thumbnailUrl && !brand.imageUrl ? brand.pdfUrl : null);
+  const thumb = thumbnailUrl || brand.imageUrl || pdfThumb;
 
   return (
     <div className="shrink-0 relative group/brand">
