@@ -1,6 +1,6 @@
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect, useMemo } from "react";
 import { LayoutDashboard } from "lucide-react";
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -14,10 +14,38 @@ const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
 const TradeBottomNav = lazy(() => import("@/components/trade/TradeBottomNav"));
 
+const ROUTE_TITLES: Record<string, string> = {
+  "/trade": "Dashboard",
+  "/trade/showroom": "Showroom",
+  "/trade/favorites": "Favorites",
+  "/trade/gallery": "Gallery",
+  "/trade/quotes": "Quotes",
+  "/trade/designers": "Designers",
+  "/trade/documents": "Documents",
+  "/trade/samples": "Samples",
+  "/trade/settings": "Settings",
+  "/trade/journal": "Journal",
+  "/trade/insights": "Insights",
+  "/trade/provenance": "Provenance",
+  "/trade/presentations": "Presentations",
+  "/trade/boards": "Boards",
+  "/trade/media": "Media Library",
+};
+
 const TradeLayout = () => {
   const { user, loading, applicationStatus, isAdmin } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
+  const location = useLocation();
+
+  const pageTitle = useMemo(() => {
+    const path = location.pathname;
+    // Exact match first
+    if (ROUTE_TITLES[path]) return ROUTE_TITLES[path];
+    // Try parent path for nested routes like /trade/designers/ecart
+    const parentPath = path.split("/").slice(0, 3).join("/");
+    return ROUTE_TITLES[parentPath] || "Trade Portal";
+  }, [location.pathname]);
 
   // Fetch submitted quotes count for admin badge (shared between sidebar & mobile menu)
   useEffect(() => {
@@ -94,9 +122,9 @@ const TradeLayout = () => {
         </div>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 md:h-14 flex items-center justify-between border-b border-border px-3 md:px-4 bg-background sticky top-0 z-10 print:hidden">
-            <div className="flex items-center gap-2">
-              {/* Mobile: full-screen burger menu */}
+          <header className="h-14 md:h-14 flex items-center border-b border-border px-3 md:px-4 bg-background sticky top-0 z-10 print:hidden relative">
+            {/* Mobile: burger left */}
+            <div className="flex items-center gap-2 md:flex-1">
               <TradeMobileMenu
                 open={mobileMenuOpen}
                 onOpenChange={setMobileMenuOpen}
@@ -104,12 +132,20 @@ const TradeLayout = () => {
               />
               {/* Desktop: sidebar collapse trigger */}
               <SidebarTrigger className="hidden md:inline-flex mr-2 md:mr-3" />
-              <div className="flex items-center gap-2">
-                <LayoutDashboard className="h-4 w-4 md:h-[18px] md:w-[18px] text-muted-foreground" />
-                <span className="font-display text-xs md:text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span>
+              {/* Desktop: Trade Portal branding */}
+              <div className="hidden md:flex items-center gap-2">
+                <LayoutDashboard className="h-[18px] w-[18px] text-muted-foreground" />
+                <span className="font-display text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span>
               </div>
             </div>
-            <NotificationBell />
+            {/* Mobile: centered page title */}
+            <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
+              <span className="font-display text-xs text-foreground uppercase tracking-[0.15em]">{pageTitle}</span>
+            </div>
+            {/* Right: notification bell */}
+            <div className="ml-auto">
+              <NotificationBell />
+            </div>
           </header>
           <main className="flex-1 p-4 md:p-6 lg:p-8 pb-24 md:pb-6 lg:pb-8">
             <Suspense fallback={
