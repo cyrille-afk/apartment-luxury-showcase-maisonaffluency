@@ -113,10 +113,15 @@ const TradeAtelierProfile = () => {
                   <h1 className="font-display text-2xl md:text-4xl tracking-wide text-foreground">
                     {name}
                   </h1>
-                  {designer.specialty && (
-                    <p className="font-body text-sm text-muted-foreground mt-1">{designer.specialty}</p>
+                   {designer.specialty && (
+                    <p className="font-body text-sm text-muted-foreground mt-1 hidden md:block">{designer.specialty}</p>
                   )}
                 </div>
+              </div>
+              {/* Mobile-only specialty at bottom of hero */}
+              {designer.specialty && (
+                <p className="font-body text-xs text-muted-foreground mt-3 md:hidden">{designer.specialty}</p>
+              )}
               </div>
               {/* Stats */}
               <div className="flex items-center gap-6 mt-4">
