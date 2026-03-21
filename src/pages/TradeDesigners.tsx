@@ -66,17 +66,11 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
             )}>{brand.name.charAt(0)}</span>
           </div>
         )}
-        <div className={cn(
-          "absolute inset-x-0 bottom-0 px-4 pt-10 pb-4",
-          isAtelier
-            ? "bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"
-            : "bg-gradient-to-t from-black/70 via-black/30 to-transparent"
-        )}>
-          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">{brand.name}</p>
-          {isAtelier && (
-            <p className="font-body text-[9px] text-white/70 uppercase tracking-[0.15em] mt-1">Atelier</p>
-          )}
-        </div>
+        {!isAtelier && (
+          <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+            <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">{brand.name}</p>
+          </div>
+        )}
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
           {brand.specialty && (
             <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">{brand.specialty}</p>

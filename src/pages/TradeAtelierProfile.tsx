@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
@@ -22,6 +22,11 @@ const TradeAtelierProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { data: designer, isLoading } = useDesigner(slug);
+
+  // Scroll to top when profile loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [slug]);
   const { data: picks = [] } = useDesignerPicks(designer?.id);
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
 
@@ -108,11 +113,15 @@ const TradeAtelierProfile = () => {
                   <h1 className="font-display text-2xl md:text-4xl tracking-wide text-foreground">
                     {name}
                   </h1>
-                  {designer.specialty && (
-                    <p className="font-body text-sm text-muted-foreground mt-1">{designer.specialty}</p>
+                   {designer.specialty && (
+                    <p className="font-body text-sm text-muted-foreground mt-1 hidden md:block">{designer.specialty}</p>
                   )}
                 </div>
               </div>
+              {/* Mobile-only specialty at bottom of hero */}
+              {designer.specialty && (
+                <p className="font-body text-xs text-muted-foreground mt-3 md:hidden">{designer.specialty}</p>
+              )}
               {/* Stats */}
               <div className="flex items-center gap-6 mt-4">
                 {brandProducts.length > 0 && (
