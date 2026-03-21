@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useDesigner";
+import { useAuth } from "@/hooks/useAuth";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
