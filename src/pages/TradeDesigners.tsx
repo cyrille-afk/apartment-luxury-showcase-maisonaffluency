@@ -349,7 +349,7 @@ const TradeDesigners = () => {
                   {items.map((brand) => (
                     <button
                       key={brand.id}
-                      onClick={() => handleBrandClick(brand.brand_name)}
+                      onClick={() => handleBrandClick(brand)}
                       className="group text-left rounded-lg overflow-hidden border border-border hover:border-foreground/20 transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
                     >
                       {/* Thumbnail */}
