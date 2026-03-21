@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText } from "lucide-react";
+import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
@@ -312,7 +313,7 @@ const TradeAtelierProfile = () => {
                   )}
                   {pick.pdf_url && (
                     <a
-                      href={pick.pdf_url}
+                      href={buildSpecSheetUrl(pick.pdf_url, designer?.name || '', pick.title)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 mt-1 text-[9px] text-primary hover:underline"

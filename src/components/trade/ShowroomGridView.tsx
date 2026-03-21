@@ -4,6 +4,7 @@
  */
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart } from "lucide-react";
+import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
@@ -524,7 +525,7 @@ const ShowroomGridView = ({
                     </button>
                     {product.pdf_url && (
                       <a
-                        href={product.pdf_url}
+                        href={buildSpecSheetUrl(product.pdf_url, product.designer_name || product.product_name, product.product_name)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
@@ -624,7 +625,7 @@ const ShowroomGridView = ({
                   {isAdded ? "Added" : "Add"}
                 </button>
                 {product.pdf_url && (
-                  <a href={product.pdf_url} target="_blank" rel="noopener noreferrer"
+                  <a href={buildSpecSheetUrl(product.pdf_url, product.designer_name || product.product_name, product.product_name)} target="_blank" rel="noopener noreferrer"
                     className="p-2 text-[hsl(var(--pdf-red))] hover:text-[hsl(var(--pdf-red))]/80 transition-colors" title="Spec sheet">
                     <FileDown className="h-4 w-4" />
                   </a>

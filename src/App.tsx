@@ -49,6 +49,7 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const ProductPage = lazy(() => import("./pages/ProductPage"));
 const DesignerProfile = lazy(() => import("./pages/DesignerProfile"));
+const TradeSpecSheet = lazy(() => import("./pages/TradeSpecSheet"));
 
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
@@ -147,6 +148,7 @@ const App = () => {
                     <Route path="designers/:slug" element={<TradeAtelierProfile />} />
                     <Route path="boards" element={<TradeBoards />} />
                     <Route path="boards/:id" element={<TradeBoardBuilder />} />
+                    <Route path="spec-sheet" element={<TradeSpecSheet />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 
