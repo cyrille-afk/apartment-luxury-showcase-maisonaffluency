@@ -1,17 +1,39 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { Outlet, Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TradeSidebar } from "@/components/trade/TradeSidebar";
+import { TradeMobileMenu } from "@/components/trade/TradeMobileMenu";
 import { NotificationBell } from "@/components/trade/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
 
 const TradeLayout = () => {
   const { user, loading, applicationStatus, isAdmin } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [submittedCount, setSubmittedCount] = useState(0);
+
+  // Fetch submitted quotes count for admin badge (shared between sidebar & mobile menu)
+  useEffect(() => {
+    if (!isAdmin) return;
+    const fetchCount = async () => {
+      const { count } = await supabase
+        .from("trade_quotes")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "submitted");
+      setSubmittedCount(count || 0);
+    };
+    fetchCount();
+    const channel = supabase
+      .channel("trade-quotes-badge-layout")
+      .on("postgres_changes", { event: "*", schema: "public", table: "trade_quotes" }, () => fetchCount())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [isAdmin]);
 
   if (loading) {
     return (
@@ -64,11 +86,22 @@ const TradeLayout = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <div data-trade-sidebar><TradeSidebar /></div>
+        {/* Sidebar — desktop only */}
+        <div className="hidden md:block" data-trade-sidebar>
+          <TradeSidebar />
+        </div>
+
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-12 md:h-14 flex items-center justify-between border-b border-border px-3 md:px-4 bg-background sticky top-0 z-10 print:hidden">
             <div className="flex items-center">
-              <SidebarTrigger className="mr-3 md:mr-4" />
+              {/* Mobile: full-screen burger menu */}
+              <TradeMobileMenu
+                open={mobileMenuOpen}
+                onOpenChange={setMobileMenuOpen}
+                submittedCount={submittedCount}
+              />
+              {/* Desktop: sidebar collapse trigger */}
+              <SidebarTrigger className="hidden md:inline-flex mr-3 md:mr-4" />
               <span className="font-body text-[10px] md:text-xs text-muted-foreground uppercase tracking-[0.15em]">Trade Portal</span>
             </div>
             <NotificationBell />
