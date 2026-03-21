@@ -18,11 +18,37 @@ const TradeLogin = () => {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/trade",
-    });
-    if (error) {
-      toast({ title: "Google Sign-In Failed", description: String(error), variant: "destructive" });
+
+    try {
+      const oauthPromise = lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}/trade`,
+      });
+
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        window.setTimeout(() => {
+          reject(new Error("Google sign-in timed out. Please allow pop-ups and try again."));
+        }, 15000);
+      });
+
+      const result = await Promise.race([oauthPromise, timeoutPromise]);
+
+      if (result.error) {
+        toast({ title: "Google Sign-In Failed", description: String(result.error), variant: "destructive" });
+        return;
+      }
+
+      // In some environments OAuth returns tokens without doing a full-page redirect.
+      // Ensure users still enter the trade portal immediately.
+      if (!result.redirected) {
+        navigate("/trade", { replace: true });
+      }
+    } catch (err) {
+      toast({
+        title: "Google Sign-In Failed",
+        description: err instanceof Error ? err.message : "Unexpected OAuth error",
+        variant: "destructive",
+      });
+    } finally {
       setGoogleLoading(false);
     }
   };
