@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText } from "lucide-react";
-import { getDesignerBySlug, getRelatedDesigners } from "@/lib/designerProfiles";
+import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useDesigner";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { Badge } from "@/components/ui/badge";
 
@@ -21,7 +21,9 @@ function displayName(name: string): string {
 const TradeAtelierProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const designer = slug ? getDesignerBySlug(slug) : undefined;
+  const { data: designer, isLoading } = useDesigner(slug);
+  const { data: picks = [] } = useDesignerPicks(designer?.id);
+  const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
 
   const allProducts = useMemo(() => getAllTradeProducts(), []);
 
@@ -37,10 +39,13 @@ const TradeAtelierProfile = () => {
     return [...set];
   }, [brandProducts]);
 
-  const related = useMemo(
-    () => (designer ? getRelatedDesigners(designer, 3) : []),
-    [designer]
-  );
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!designer) {
     return (
@@ -63,292 +68,246 @@ const TradeAtelierProfile = () => {
   return (
     <>
       <Helmet>
-        <title>{name} — Maison Affluency Trade</title>
-        <meta name="description" content={designer.biography.slice(0, 155)} />
+        <title>{name} — Ateliers & Partners</title>
       </Helmet>
 
-      <div className="space-y-0">
-        {/* Back nav */}
-        <motion.div
-          initial={{ opacity: 0, x: -12 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={transition}
-          className="mb-6"
+      <div className="space-y-8">
+        {/* Back */}
+        <button
+          onClick={() => navigate("/trade/designers")}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <button
-            onClick={() => navigate("/trade/designers")}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            All Ateliers
-          </button>
-        </motion.div>
+          <ArrowLeft className="w-4 h-4" />
+          All Ateliers
+        </button>
 
-        {/* Hero section */}
-        <section className="grid lg:grid-cols-2 gap-0 rounded-lg overflow-hidden border border-border bg-background">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="relative aspect-[4/3] lg:aspect-auto overflow-hidden bg-muted"
-          >
-            <img
-              src={designer.image}
-              alt={name}
-              className="w-full h-full object-cover"
-              loading="eager"
-            />
-            {designer.logoUrl && (
+        {/* Hero */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={transition}
+          className="relative rounded-xl overflow-hidden"
+        >
+          <div className="aspect-[21/9] md:aspect-[3/1]">
+            {designer.image_url && (
               <img
-                src={designer.logoUrl}
-                alt={`${name} logo`}
-                className="absolute bottom-4 left-4 h-7 w-auto opacity-70"
+                src={designer.image_url}
+                alt={name}
+                className="absolute inset-0 w-full h-full object-cover"
               />
             )}
-            {designer.source === "collectible" && (
-              <span className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-primary-foreground font-body text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full">
-                Collectible Design
-              </span>
-            )}
-          </motion.div>
-
-          <div className="flex flex-col justify-center p-6 lg:p-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={reveal}
-            >
-              <p className="text-[10px] tracking-[0.25em] uppercase text-muted-foreground mb-3">
-                {designer.specialty}
-              </p>
-              <h1 className="font-display text-2xl lg:text-3xl text-foreground tracking-wide mb-4">
-                {name}
-              </h1>
-              <p className="font-body text-sm leading-relaxed text-muted-foreground mb-5 max-w-prose">
-                {designer.biography}
-              </p>
-
-              {/* Stats row */}
-              <div className="flex items-center gap-4 mb-5">
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
+              <div className="flex items-start gap-4">
+                {designer.logo_url && (
+                  <img src={designer.logo_url} alt="" className="h-10 opacity-80 shrink-0" />
+                )}
+                <div>
+                  <h1 className="font-display text-2xl md:text-4xl tracking-wide text-foreground">
+                    {name}
+                  </h1>
+                  {designer.specialty && (
+                    <p className="font-body text-sm text-muted-foreground mt-1">{designer.specialty}</p>
+                  )}
+                </div>
+              </div>
+              {/* Stats */}
+              <div className="flex items-center gap-6 mt-4">
                 {brandProducts.length > 0 && (
                   <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Package className="w-3.5 h-3.5" />
+                    <Package className="w-4 h-4" />
                     <span className="font-body text-xs">
                       {brandProducts.length} {brandProducts.length === 1 ? "piece" : "pieces"}
                     </span>
                   </div>
                 )}
                 {categories.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex items-center gap-1.5">
                     {categories.slice(0, 4).map((cat) => (
-                      <Badge
-                        key={cat}
-                        variant="outline"
-                        className="text-[9px] uppercase tracking-wider px-1.5 py-0"
-                      >
+                      <Badge key={cat} variant="secondary" className="text-[9px] uppercase tracking-wider">
                         {cat}
                       </Badge>
                     ))}
                   </div>
                 )}
-              </div>
-
-              {/* Links */}
-              <div className="flex items-center gap-4">
-                {instagramLink && (
-                  <a
-                    href={instagramLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <Instagram className="w-3.5 h-3.5" />
-                    Instagram
-                  </a>
-                )}
-                {websiteLink && (
-                  <a
-                    href={websiteLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    Website
-                  </a>
-                )}
-                <button
-                  onClick={() =>
-                    navigate(
-                      `/trade/showroom?tab=grid&designer=${encodeURIComponent(designer.name)}`
-                    )
-                  }
-                  className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-medium"
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  View in Showroom
-                </button>
+                <div className="flex items-center gap-3 ml-auto">
+                  {instagramLink && (
+                    <a href={instagramLink} target="_blank" rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-foreground transition-colors">
+                      <Instagram className="w-4 h-4" />
+                    </a>
+                  )}
+                  {websiteLink && (
+                    <a href={websiteLink} target="_blank" rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-foreground transition-colors">
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
               </div>
             </motion.div>
           </div>
-        </section>
+        </motion.div>
 
-        {/* Philosophy */}
-        {designer.philosophy && (
-          <motion.section
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={transition}
-            className="py-12 px-6 lg:px-10 bg-card rounded-lg border border-border mt-6"
-          >
-            <div className="max-w-2xl mx-auto text-center">
-              <Quote className="w-5 h-5 text-accent mx-auto mb-4 opacity-60" />
-              <blockquote className="font-display text-lg lg:text-xl font-light leading-relaxed italic text-card-foreground">
-                &ldquo;{designer.philosophy}&rdquo;
-              </blockquote>
-              <p className="mt-4 font-body text-[10px] text-muted-foreground tracking-wider uppercase">
-                — {name}
-              </p>
-            </div>
-          </motion.section>
-        )}
+        {/* Content grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {/* Left: Bio + Philosophy */}
+          <div className="lg:col-span-1 space-y-8">
+            {designer.biography && (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...transition, delay: 0.2 }}
+              >
+                <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+                  About
+                </h2>
+                <p className="font-body text-sm leading-relaxed text-foreground/85">
+                  {designer.biography}
+                </p>
+              </motion.div>
+            )}
 
-        {/* Notable Works */}
-        {designer.notableWorks && (
-          <motion.section
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={transition}
-            className="py-10 mt-6"
-          >
-            <h2 className="font-body text-[10px] tracking-[0.25em] uppercase text-muted-foreground mb-4">
-              Notable Works
-            </h2>
-            <p className="font-body text-sm text-foreground leading-relaxed max-w-3xl">
-              {designer.notableWorks}
-            </p>
-          </motion.section>
-        )}
+            {designer.philosophy && (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...transition, delay: 0.3 }}
+                className="border-l-2 border-primary/30 pl-5 py-2"
+              >
+                <Quote className="w-4 h-4 text-primary/40 mb-2" />
+                <blockquote className="font-display text-sm italic leading-relaxed text-foreground/70">
+                  "{designer.philosophy}"
+                </blockquote>
+              </motion.div>
+            )}
 
-        {/* Curator's Picks grid */}
-        {designer.curatorPicks.length > 0 && (
-          <section className="py-10 mt-2">
-            <motion.h2
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={transition}
-              className="font-body text-[10px] tracking-[0.25em] uppercase text-muted-foreground mb-8"
-            >
-              Curator's Selection · {designer.curatorPicks.length} pieces
-            </motion.h2>
+            {designer.notable_works && (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...transition, delay: 0.4 }}
+              >
+                <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+                  Notable Works
+                </h2>
+                <p className="font-body text-sm text-foreground/70">{designer.notable_works}</p>
+              </motion.div>
+            )}
+          </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-              {designer.curatorPicks.map((pick, idx) => (
-                <motion.div
-                  key={pick.title + idx}
-                  initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  viewport={{ once: true, amount: 0.15 }}
-                  transition={{
-                    duration: 0.6,
-                    delay: Math.min(idx * 0.06, 0.3),
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  className="group"
-                >
-                  {pick.image && (
-                    <div className="aspect-[4/5] overflow-hidden bg-muted rounded-md mb-3">
-                      <img
-                        src={pick.image}
-                        alt={pick.title}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                        loading="lazy"
-                      />
+          {/* Right: Curator's Picks */}
+          <div className="lg:col-span-2">
+            {picks.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...transition, delay: 0.25 }}
+              >
+                <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-6">
+                  Curator's Picks
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {picks.map((pick) => (
+                    <div key={pick.id} className="group">
+                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2">
+                        <img
+                          src={pick.image_url}
+                          alt={pick.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      </div>
+                      <h3 className="font-display text-xs tracking-wide">{pick.title}</h3>
+                      {pick.subtitle && (
+                        <p className="font-body text-[10px] text-muted-foreground">{pick.subtitle}</p>
+                      )}
+                      {pick.materials && (
+                        <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2">
+                          {pick.materials}
+                        </p>
+                      )}
+                      {pick.dimensions && (
+                        <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
+                          {pick.dimensions}
+                        </p>
+                      )}
+                      {pick.edition && (
+                        <p className="font-body text-[9px] text-primary/70 mt-0.5 italic">
+                          {pick.edition}
+                        </p>
+                      )}
+                      {pick.pdf_url && (
+                        <a
+                          href={pick.pdf_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 mt-1 text-[9px] text-primary hover:underline"
+                        >
+                          <FileText className="w-3 h-3" />
+                          Spec Sheet
+                        </a>
+                      )}
                     </div>
-                  )}
-                  <h3 className="font-display text-xs text-foreground text-center tracking-wide">
-                    {pick.title}
-                  </h3>
-                  {pick.subtitle && (
-                    <p className="font-body text-[10px] text-muted-foreground text-center mt-0.5">
-                      {pick.subtitle}
-                    </p>
-                  )}
-                  {pick.materials && (
-                    <p className="font-body text-[10px] text-muted-foreground/70 text-center mt-0.5 line-clamp-1">
-                      {pick.materials}
-                    </p>
-                  )}
-                  {pick.dimensions && (
-                    <p className="font-body text-[9px] text-muted-foreground/50 text-center mt-0.5">
-                      {pick.dimensions}
-                    </p>
-                  )}
-                  {pick.edition && (
-                    <p className="font-body text-[9px] text-primary/70 text-center mt-0.5 uppercase tracking-wider">
-                      {pick.edition}
-                    </p>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          </section>
-        )}
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {picks.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/10 rounded-xl">
+                <Package className="w-8 h-8 text-muted-foreground/30 mb-3" />
+                <p className="font-body text-sm text-muted-foreground">
+                  Curator's picks coming soon
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Related Ateliers */}
         {related.length > 0 && (
-          <section className="py-10 mt-4 border-t border-border">
-            <motion.h2
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={transition}
-              className="font-body text-[10px] tracking-[0.25em] uppercase text-muted-foreground mb-8"
-            >
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={transition}
+            className="pt-10 border-t border-border"
+          >
+            <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-6">
               Related Ateliers
-            </motion.h2>
-
-            <div className="grid sm:grid-cols-3 gap-4 lg:gap-6">
-              {related.map((d, idx) => (
-                <motion.div
-                  key={d.slug}
-                  initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{
-                    duration: 0.6,
-                    delay: idx * 0.1,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {related.map((r) => (
+                <button
+                  key={r.slug}
+                  onClick={() => navigate(`/trade/designers/${r.slug}`)}
+                  className="group text-left rounded-lg overflow-hidden border border-border hover:border-foreground/20 transition-all bg-background"
                 >
-                  <Link
-                    to={`/trade/designers/${d.slug}`}
-                    className="group block rounded-lg overflow-hidden border border-border hover:border-foreground/20 transition-all hover:shadow-lg bg-background"
-                  >
-                    <div className="aspect-[3/4] overflow-hidden bg-muted">
+                  <div className="aspect-[3/2] bg-muted/20 overflow-hidden">
+                    {r.image_url && (
                       <img
-                        src={d.image}
-                        alt={d.name}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                        src={r.image_url}
+                        alt={r.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"
                       />
-                    </div>
-                    <div className="p-3 text-center">
-                      <h3 className="font-display text-sm text-foreground group-hover:text-primary transition-colors tracking-wide">
-                        {displayName(d.name)}
-                      </h3>
-                      <p className="font-body text-[10px] text-muted-foreground mt-0.5">
-                        {d.specialty}
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="font-display text-sm tracking-wide">{displayName(r.name)}</p>
+                    {r.specialty && (
+                      <p className="font-body text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
+                        {r.specialty}
                       </p>
-                    </div>
-                  </Link>
-                </motion.div>
+                    )}
+                  </div>
+                </button>
               ))}
             </div>
-          </section>
+          </motion.div>
         )}
       </div>
     </>
