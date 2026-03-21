@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Search, Users, SlidersHorizontal, X, Layers, ArrowUp } from "lucide-react";
@@ -94,11 +95,13 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
 
 const TradeDesigners = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { data: designers = [], isLoading } = useAllDesigners();
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState("all");
+  const initialBrand = searchParams.get("brand") || "all";
+  const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [carouselMode, setCarouselMode] = useState<"ateliers" | "designers">("ateliers");
   const [showBackToTop, setShowBackToTop] = useState(false);
 
