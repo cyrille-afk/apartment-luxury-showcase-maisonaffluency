@@ -29,7 +29,7 @@ const collectionItems = [
 
 const toolItems = [
   { title: "Gallery", url: "/trade/gallery", icon: Image },
-  { title: "Designers & Ateliers", url: "/trade/designers", icon: Users },
+  { title: "Designers & Ateliers Library", url: "/trade/designers", icon: Users },
   { title: "Brand Library", url: "/trade/documents", icon: FolderOpen },
   { title: "Sample Requests", url: "/trade/samples", icon: Package },
   { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
