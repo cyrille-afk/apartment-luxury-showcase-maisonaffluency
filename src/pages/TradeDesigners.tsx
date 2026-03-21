@@ -5,6 +5,7 @@ import { Search, Users, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
+import BrandCarousel from "@/components/trade/BrandCarousel";
 
 /** Extract short discipline tags from a specialty string */
 function extractTags(specialty: string): string[] {
