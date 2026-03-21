@@ -254,51 +254,62 @@ const TradeDesigners = () => {
                     <button
                       key={brand.id}
                       onClick={() => navigate(`/trade/designers/${brand.slug}`)}
-                      className="group text-left rounded-lg overflow-hidden border border-border hover:border-foreground/20 transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
+                      className="group text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
                     >
-                      <div className="aspect-square bg-muted/20 overflow-hidden relative">
+                      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                         {brand.image_url ? (
                           <img
                             src={brand.image_url}
                             alt={brand.name}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
                             loading="lazy"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted/10">
-                            <span className="font-display text-2xl text-muted-foreground/20">
+                          <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+                            <span className="font-display text-3xl text-muted-foreground/20">
                               {brand.name.charAt(0)}
                             </span>
                           </div>
                         )}
+
+                        {/* Always-visible name overlay at bottom */}
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pt-10 pb-4">
+                          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+                            {brand.name}
+                          </p>
+                        </div>
+
+                        {/* Hover overlay: specialty + More Info button */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+                          {brand.specialty && (
+                            <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">
+                              {brand.specialty}
+                            </p>
+                          )}
+                          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+                            More Info
+                          </span>
+                          {brand.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 justify-center mt-3">
+                              {brand.tags.slice(0, 3).map((tag) => (
+                                <span key={tag} className="font-body text-[8px] uppercase tracking-[0.12em] text-white/70 bg-white/10 px-2 py-0.5 rounded-full">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Badges (visible on hover) */}
                         {brand.productCount > 0 && (
-                          <span className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm text-foreground font-body text-[10px] px-2 py-0.5 rounded-full border border-border/50">
+                          <span className="absolute top-2.5 right-2.5 bg-background/90 backdrop-blur-sm text-foreground font-body text-[10px] px-2 py-0.5 rounded-full border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
                             {brand.productCount} {brand.productCount === 1 ? "piece" : "pieces"}
                           </span>
                         )}
                         {brand.source === "collectible" && (
-                          <span className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-primary-foreground font-body text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full">
+                          <span className="absolute top-2.5 left-2.5 bg-primary/90 backdrop-blur-sm text-primary-foreground font-body text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full">
                             Collectible
                           </span>
-                        )}
-                      </div>
-                      <div className="p-3 space-y-2">
-                        <p className="font-display text-sm text-foreground tracking-wide leading-tight text-center">
-                          {brand.name}
-                        </p>
-                        {brand.specialty && (
-                          <p className="font-body text-[10px] text-muted-foreground text-center leading-snug line-clamp-1">
-                            {brand.specialty}
-                          </p>
-                        )}
-                        {brand.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 justify-center">
-                            {brand.tags.slice(0, 3).map((tag) => (
-                              <span key={tag} className="font-body text-[8px] uppercase tracking-[0.12em] text-primary/80 bg-primary/5 px-1.5 py-0.5 rounded">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
                         )}
                       </div>
                     </button>
