@@ -408,7 +408,7 @@ const TradeGallery = () => {
                     </button>
                     {product.pdf_url && (
                       <a
-                        href={product.pdf_url}
+                        href={buildSpecSheetUrl(product.pdf_url, product.brand_name, product.product_name)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
