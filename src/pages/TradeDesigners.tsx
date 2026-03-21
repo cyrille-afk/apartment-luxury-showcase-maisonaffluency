@@ -124,7 +124,6 @@ const TradeDesigners = () => {
   // Build carousel: split into ateliers (multi-designer brands) and solo designers
   const { atelierEntries, designerEntries } = useMemo(() => {
     const founderMap = new Map<string, number>();
-    const soloNames: string[] = [];
     const founderNames = new Set<string>();
 
     for (const d of enriched) {
@@ -134,36 +133,39 @@ const TradeDesigners = () => {
     for (const d of enriched) {
       if (d.founder) {
         founderMap.set(d.founder, (founderMap.get(d.founder) || 0) + 1);
-      } else if (!founderNames.has(d.name)) {
-        soloNames.push(d.name);
       }
     }
 
     const ateliers: { name: string; docCount: number; imageUrl?: string }[] = [];
-    const solos: { name: string; docCount: number; imageUrl?: string }[] = [];
-    const seen = new Set<string>();
+    const individualDesigners: { name: string; docCount: number; imageUrl?: string }[] = [];
+    const seenAteliers = new Set<string>();
+    const seenDesigners = new Set<string>();
 
+    // Build ateliers list from unique founder values
     for (const [name, count] of founderMap) {
-      if (!seen.has(name)) {
-        seen.add(name);
-        // Use the atelier's own record image, or first collaborator's image
-        const atelierRecord = enriched.find((d) => d.name === name && !d.founder);
-        const firstCollab = enriched.find((d) => d.founder === name);
+      if (!seenAteliers.has(name)) {
+        seenAteliers.add(name);
+        // Use the atelier's own record image (even if self-referencing), or first collaborator's image
+        const atelierRecord = enriched.find((d) => d.name === name);
+        const firstCollab = enriched.find((d) => d.founder === name && d.name !== name);
         const imageUrl = atelierRecord?.image_url || firstCollab?.image_url || undefined;
         ateliers.push({ name, docCount: count, imageUrl });
       }
     }
-    for (const name of soloNames) {
-      if (!seen.has(name)) {
-        seen.add(name);
-        const designer = enriched.find((d) => d.name === name);
-        solos.push({ name, docCount: 0, imageUrl: designer?.image_url || undefined });
+
+    // Build designers list: all individual designers (collaborators + independent solos)
+    for (const d of enriched) {
+      // Skip atelier records (self-referencing or records that serve as atelier headers)
+      if (founderNames.has(d.name) && (!d.founder || d.founder === d.name)) continue;
+      if (!seenDesigners.has(d.name)) {
+        seenDesigners.add(d.name);
+        individualDesigners.push({ name: d.name, docCount: 0, imageUrl: d.image_url || undefined });
       }
     }
 
     return {
       atelierEntries: ateliers.sort((a, b) => a.name.localeCompare(b.name)),
-      designerEntries: solos.sort((a, b) => a.name.localeCompare(b.name)),
+      designerEntries: individualDesigners.sort((a, b) => a.name.localeCompare(b.name)),
     };
   }, [enriched]);
 
