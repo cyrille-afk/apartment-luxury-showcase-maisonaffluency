@@ -72,6 +72,8 @@ const TradeAtelierProfile = () => {
   const name = displayName(designer.name);
   const instagramLink = designer.links.find((l) => l.type === "Instagram")?.url;
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
+  // Ecart's hero image already contains the brand name — skip text overlay
+  const heroHasEmbeddedName = slug === "ecart";
 
   return (
     <>
