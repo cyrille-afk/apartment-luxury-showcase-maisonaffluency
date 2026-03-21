@@ -93,8 +93,8 @@ const TradeLayout = () => {
         </div>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 md:h-14 flex items-center justify-between border-b border-border px-3 md:px-4 bg-background sticky top-0 z-10 print:hidden">
-            <div className="flex items-center">
+          <header className="h-14 md:h-14 flex items-center justify-between border-b border-border px-3 md:px-4 bg-background sticky top-0 z-10 print:hidden">
+            <div className="flex items-center gap-2">
               {/* Mobile: full-screen burger menu */}
               <TradeMobileMenu
                 open={mobileMenuOpen}
@@ -102,8 +102,11 @@ const TradeLayout = () => {
                 submittedCount={submittedCount}
               />
               {/* Desktop: sidebar collapse trigger */}
-              <SidebarTrigger className="hidden md:inline-flex mr-3 md:mr-4" />
-              <span className="font-body text-[10px] md:text-xs text-muted-foreground uppercase tracking-[0.15em]">Trade Portal</span>
+              <SidebarTrigger className="hidden md:inline-flex mr-2 md:mr-3" />
+              <div className="flex items-center gap-2">
+                <LayoutDashboard className="h-4 w-4 md:h-[18px] md:w-[18px] text-muted-foreground" />
+                <span className="font-display text-xs md:text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span>
+              </div>
             </div>
             <NotificationBell />
           </header>
