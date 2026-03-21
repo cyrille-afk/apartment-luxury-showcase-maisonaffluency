@@ -3,7 +3,7 @@ import SectionHero from "@/components/trade/SectionHero";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import CloudUpload from "@/components/trade/CloudUpload";
@@ -12,9 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, Clock, CheckCircle2, Loader2, Image as ImageIcon, GalleryHorizontalEnd, Pencil, Trash2 } from "lucide-react";
+import { Plus, X, Clock, CheckCircle2, Loader2, Image as ImageIcon, GalleryHorizontalEnd, Pencil, Trash2, Heart } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
+import FavoritesPicker from "@/components/trade/FavoritesPicker";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending: { label: "Pending", color: "bg-yellow-500/10 text-yellow-700" },
