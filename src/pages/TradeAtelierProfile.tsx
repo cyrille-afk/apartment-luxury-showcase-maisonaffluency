@@ -230,6 +230,11 @@ const TradeAtelierProfile = () => {
                       {pick.dimensions}
                     </p>
                   )}
+                  {pick.trade_price_cents != null && (
+                    <p className="font-display text-xs text-foreground mt-1">
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: pick.currency || 'EUR', minimumFractionDigits: 0 }).format(pick.trade_price_cents / 100)}
+                    </p>
+                  )}
                   {pick.edition && (
                     <p className="font-body text-[9px] text-primary/70 mt-0.5 italic">
                       {pick.edition}
