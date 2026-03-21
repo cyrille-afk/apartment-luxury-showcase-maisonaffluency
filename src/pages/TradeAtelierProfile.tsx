@@ -172,13 +172,13 @@ const TradeAtelierProfile = () => {
             </div>
           </motion.div>
 
-          {/* Biography — beside hero on desktop */}
+          {/* Biography — beside hero for designers, below for ateliers */}
           {designer.biography && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.2 }}
-              className="md:w-1/2 flex flex-col justify-center"
+              className={cn(isDesignerProfile ? "md:w-1/2 flex flex-col justify-center" : "flex flex-col")}
             >
               {/* Philosophy quote — above biography, bold black */}
               {designer.philosophy && (
@@ -186,15 +186,19 @@ const TradeAtelierProfile = () => {
                   "{designer.philosophy}"
                 </blockquote>
               )}
-              <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3 sr-only">
-                About
-              </h2>
+              {!isDesignerProfile && (
+                <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+                  About
+                </h2>
+              )}
               <p className="font-body text-sm leading-relaxed text-foreground/85 text-justify whitespace-pre-line">
                 {designer.biography}
               </p>
             </motion.div>
           )}
         </div>
+          );
+        })()}
 
 
 
