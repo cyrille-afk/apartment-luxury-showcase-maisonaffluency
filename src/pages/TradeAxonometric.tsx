@@ -558,6 +558,9 @@ const TradeAxonometric = () => {
     setMode(req.request_type === "section" ? "section_to_axo" : "elevation_to_axo");
     setShowQueue(false);
     setResult(null);
+    // Pre-load attached favorite product IDs for proposal builder
+    const linkedIds = Array.isArray(req.linked_favorite_product_ids) ? req.linked_favorite_product_ids : [];
+    setPreloadedFavoriteProductIds(linkedIds);
   };
 
   const completeRequest = async () => {
