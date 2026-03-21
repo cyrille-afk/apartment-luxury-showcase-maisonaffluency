@@ -166,8 +166,13 @@ const TradeDesigners = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [carouselMode, setCarouselMode] = useState<"ateliers" | "designers">("ateliers");
-  const [expandedBrands] = useState<Set<string>>(new Set());
   const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShowBackToTop(window.scrollY > 600);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const allProducts = useMemo(() => getAllTradeProducts(), []);
   const productCountMap = useMemo(() => {
