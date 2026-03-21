@@ -220,7 +220,7 @@ const TradeAxonometric = () => {
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
   const [savingRefStyle, setSavingRefStyle] = useState(false);
   const [useLockedRefStyle, setUseLockedRefStyle] = useState(true);
-
+  const [preloadedFavoriteProductIds, setPreloadedFavoriteProductIds] = useState<string[]>([]);
 
   // AI dialogue state
   const [aiPrompt, setAiPrompt] = useState("");
