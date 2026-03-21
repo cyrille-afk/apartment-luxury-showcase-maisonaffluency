@@ -182,7 +182,7 @@ const TradeAtelierProfile = () => {
                   "{designer.philosophy}"
                 </blockquote>
               )}
-              <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+              <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3 sr-only">
                 About
               </h2>
               <p className="font-body text-sm leading-relaxed text-foreground/85 text-justify whitespace-pre-line">
