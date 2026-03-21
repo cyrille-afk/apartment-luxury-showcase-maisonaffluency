@@ -320,8 +320,13 @@ const TradeDesigners = () => {
                 return;
               }
 
-              setExpandedBrands(new Set([b]));
+              // If it's a multi-designer brand, expand it
+              const entry = brandEntries.find((e) => e.name === b);
+              if (entry && entry.docCount > 0) {
+                setExpandedBrands(new Set([b]));
+              }
 
+              // Scroll to the letter
               const letter = b.charAt(0).toUpperCase();
               requestAnimationFrame(() => {
                 const el = document.getElementById(`designer-letter-${letter}`);
@@ -331,10 +336,10 @@ const TradeDesigners = () => {
             label={
               <div className="mb-2">
                 <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
-                  Browse by brand · {brandEntries.length} multi-designer brands
+                  Browse designers & ateliers · {brandEntries.length} entries
                 </p>
                 <p className="font-body text-[10px] text-muted-foreground/60 mt-0.5 normal-case tracking-normal">
-                  Many brands collaborate with multiple designers — select one to explore its roster.
+                  Scroll to jump to a designer. Multi-designer brands expand to reveal their roster.
                 </p>
               </div>
             }
