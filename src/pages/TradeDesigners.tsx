@@ -176,14 +176,19 @@ const TradeDesigners = () => {
     // Exclude self-referencing atelier records (they only serve as carousel headers)
     let result = enriched.filter((d) => !(d.founder && d.founder === d.name));
 
-    // If a specific brand is selected from the carousel, filter to that brand's roster
+    // Filter by carousel mode: ateliers show atelier members, designers show independents
     if (selectedBrand !== "all") {
       if (carouselMode === "ateliers") {
-        // Show only designers belonging to this atelier
         result = result.filter((d) => d.founder === selectedBrand);
       } else {
-        // Show only the selected solo designer
         result = result.filter((d) => d.name === selectedBrand);
+      }
+    } else {
+      // "All" within current mode: filter by category
+      if (carouselMode === "ateliers") {
+        result = result.filter((d) => d.founder);
+      } else {
+        result = result.filter((d) => !d.founder);
       }
     }
 
