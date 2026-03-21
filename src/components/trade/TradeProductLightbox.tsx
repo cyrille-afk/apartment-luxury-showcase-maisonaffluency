@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Package, Heart } from "lucide-react";
+import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Package, Heart, FolderOpen } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useFavorites } from "@/hooks/useFavorites";
+import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useEffect, useState, useMemo } from "react";
