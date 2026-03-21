@@ -5,6 +5,7 @@ import { Search, Users, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
+import BrandCarousel from "@/components/trade/BrandCarousel";
 
 /** Extract short discipline tags from a specialty string */
 function extractTags(specialty: string): string[] {
@@ -85,6 +86,7 @@ const TradeDesigners = () => {
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState("all");
 
   const allProducts = useMemo(() => getAllTradeProducts(), []);
   const productCountMap = useMemo(() => {
@@ -104,8 +106,24 @@ const TradeDesigners = () => {
     });
   }, [designers, productCountMap]);
 
+  // Build brand carousel entries from founder groups
+  const brandEntries = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const d of enriched) {
+      if (d.founder) {
+        map.set(d.founder, (map.get(d.founder) || 0) + 1);
+      }
+    }
+    return [...map.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, count]) => ({ name, docCount: count }));
+  }, [enriched]);
+
   const filtered = useMemo(() => {
     let result = enriched;
+    if (selectedBrand !== "all") {
+      result = result.filter((b) => b.founder === selectedBrand);
+    }
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -119,7 +137,7 @@ const TradeDesigners = () => {
       result = result.filter((b) => activeFilters.some((f) => b.tags.includes(f)));
     }
     return result;
-  }, [enriched, search, activeFilters]);
+  }, [enriched, search, activeFilters, selectedBrand]);
 
   // Group: independent designers + brand groups (designers sharing a founder)
   const grouped = useMemo(() => {
@@ -189,18 +207,25 @@ const TradeDesigners = () => {
   return (
     <>
       <Helmet>
-        <title>Ateliers & Partners — Maison Affluency Trade</title>
+        <title>Designers Library — Maison Affluency Trade</title>
       </Helmet>
 
       <div className="space-y-6">
-        {/* Header */}
+        {/* Brand Carousel */}
+        {brandEntries.length > 0 && (
+          <BrandCarousel
+            brands={brandEntries}
+            selectedBrand={selectedBrand}
+            onSelect={setSelectedBrand}
+          />
+        )}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="font-display text-2xl text-foreground tracking-wide">Ateliers & Partners</h1>
+              <h1 className="font-display text-2xl text-foreground tracking-wide">Designers Library</h1>
               <p className="font-body text-sm text-muted-foreground mt-1">
                 {enriched.length} designers & ateliers
-                {activeFilters.length > 0 && (
+                {(activeFilters.length > 0 || selectedBrand !== "all") && (
                   <span className="text-primary ml-1">· {filtered.length} showing</span>
                 )}
               </p>
