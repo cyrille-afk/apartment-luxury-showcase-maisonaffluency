@@ -211,20 +211,41 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 {isAdded ? "Added to Quote" : "Add to Quote"}
               </button>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {/* Favorite */}
                 <button
-                  onClick={() => product && toggleFavorite(product.id)}
+                  onClick={async () => {
+                    if (!product) return;
+                    const realId = await toggleFavorite(product.id, {
+                      product_name: product.product_name,
+                      brand_name: product.brand_name,
+                      category: product.category,
+                      image_url: product.image_url,
+                      dimensions: product.dimensions,
+                      materials: product.materials,
+                    });
+                    setLastFavRealId(realId);
+                  }}
                   className={cn(
                     "flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
                     product && isFavorited(product.id)
-                      ? "border-red-500/30 text-red-500 bg-red-500/10"
+                      ? "border-destructive/30 text-destructive bg-destructive/10"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                   )}
                 >
                   <Heart size={14} className={cn(product && isFavorited(product.id) && "fill-current")} />
                   {product && isFavorited(product.id) ? "Favorited" : "Favorite"}
                 </button>
+
+                {/* Add to Project */}
+                {product && isFavorited(product.id) && lastFavRealId && (
+                  <AddToProjectPopover productId={lastFavRealId} productName={product.product_name}>
+                    <button className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30">
+                      <FolderOpen size={14} />
+                      Add to Project
+                    </button>
+                  </AddToProjectPopover>
+                )}
 
                 {/* Pin to Selection */}
                 <button
