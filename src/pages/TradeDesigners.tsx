@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
-import { Search, Users, SlidersHorizontal, X } from "lucide-react";
+import { Search, Users, SlidersHorizontal, X, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
