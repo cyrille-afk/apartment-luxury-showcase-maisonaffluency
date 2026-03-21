@@ -38,6 +38,8 @@ export interface DesignerCuratorPick {
   pdf_filename: string | null;
   pdf_urls: { label: string; url: string; filename?: string }[] | null;
   sort_order: number;
+  trade_price_cents: number | null;
+  currency: string;
 }
 
 /** Fetch a single designer by slug */
