@@ -369,6 +369,7 @@ const TradeAtelierProfile = () => {
                     const ap = pick as AttributedCuratorPick;
                     const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name
                       ? ap.designer_name : undefined;
+                    const designerSlug = isGrouped && ap.designer_slug ? ap.designer_slug : undefined;
                     return (
                     <div
                       key={pick.id}
