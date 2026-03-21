@@ -217,7 +217,7 @@ const TradeAtelierProfile = () => {
               </h2>
               <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 lg:grid-cols-4 md:overflow-visible md:pb-0">
               {picks.map((pick) => (
                 <div key={pick.id} className="group">
                   <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2">
