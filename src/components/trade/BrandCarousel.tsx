@@ -16,6 +16,8 @@ interface BrandCarouselProps {
   onSelect: (brand: string) => void;
   /** Enable thumbnail upload on each brand (admin mode) */
   editable?: boolean;
+  /** Custom label line; defaults to "Browse by brand · N brands A–Z" */
+  label?: React.ReactNode;
 }
 
 /** Simple hash for cache key */
