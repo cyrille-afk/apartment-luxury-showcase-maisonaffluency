@@ -266,7 +266,7 @@ const TradeAtelierProfile = () => {
             transition={{ ...transition, delay: 0.25 }}
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground">
+              <h2 className="font-display text-xs tracking-[0.2em] uppercase text-foreground">
                 Curator's Picks
               </h2>
               <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
