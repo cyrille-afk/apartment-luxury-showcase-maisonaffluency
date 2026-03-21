@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
-import { Heart } from "lucide-react";
+import { Heart, FolderOpen } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
+import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -46,6 +47,8 @@ const TradeGallery = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
+  const [lastFavoritedRealId, setLastFavoritedRealId] = useState<string | null>(null);
+  const [lastFavoritedName, setLastFavoritedName] = useState<string>("");
 
   // Price lookup from trade_products table
   const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string }>>(new Map());
@@ -246,6 +249,25 @@ const TradeGallery = () => {
     if (product) handleAddToQuote(product);
   };
 
+  const handleFavorite = async (product: TradeProduct) => {
+    const realId = await toggleFavorite(product.id, {
+      product_name: product.product_name,
+      brand_name: product.brand_name,
+      category: product.category,
+      image_url: product.image_url,
+      dimensions: product.dimensions,
+      materials: product.materials,
+    });
+    if (realId) {
+      setLastFavoritedRealId(realId);
+      setLastFavoritedName(product.product_name);
+      toast({ title: "Added to favorites", description: product.product_name });
+    } else {
+      setLastFavoritedRealId(null);
+      toast({ title: "Removed from favorites", description: product.product_name });
+    }
+  };
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
@@ -377,11 +399,11 @@ const TradeGallery = () => {
                   )}
                    {/* Favorite button */}
                    <button
-                     onClick={(e) => { e.stopPropagation(); toggleFavorite(product.id); }}
+                     onClick={(e) => { e.stopPropagation(); handleFavorite(product); }}
                      className={cn(
                        "absolute top-2 left-2 z-10 p-1.5 rounded-full transition-all",
                        isFavorited(product.id)
-                         ? "bg-background/90 text-red-500 shadow-md"
+                         ? "bg-background/90 text-destructive shadow-md"
                          : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90"
                      )}
                      aria-label={isFavorited(product.id) ? "Remove from favorites" : "Add to favorites"}
@@ -535,10 +557,10 @@ const TradeGallery = () => {
                   </a>
                 )}
                 <button
-                  onClick={() => toggleFavorite(product.id)}
+                  onClick={() => handleFavorite(product)}
                   className={cn(
                     "p-2 rounded-full transition-all shrink-0",
-                    isFavorited(product.id) ? "text-red-500" : "text-muted-foreground hover:text-foreground"
+                    isFavorited(product.id) ? "text-destructive" : "text-muted-foreground hover:text-foreground"
                   )}
                   aria-label={isFavorited(product.id) ? "Remove from favorites" : "Favorite"}
                 >

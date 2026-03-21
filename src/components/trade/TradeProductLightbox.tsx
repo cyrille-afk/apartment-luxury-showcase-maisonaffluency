@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Package, Heart } from "lucide-react";
+import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Package, Heart, FolderOpen } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useFavorites } from "@/hooks/useFavorites";
+import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useEffect, useState, useMemo } from "react";
@@ -37,6 +38,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const [showHoverImage, setShowHoverImage] = useState(false);
+  const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Related products from same brand
@@ -209,20 +211,41 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 {isAdded ? "Added to Quote" : "Add to Quote"}
               </button>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {/* Favorite */}
                 <button
-                  onClick={() => product && toggleFavorite(product.id)}
+                  onClick={async () => {
+                    if (!product) return;
+                    const realId = await toggleFavorite(product.id, {
+                      product_name: product.product_name,
+                      brand_name: product.brand_name,
+                      category: product.category,
+                      image_url: product.image_url,
+                      dimensions: product.dimensions,
+                      materials: product.materials,
+                    });
+                    setLastFavRealId(realId);
+                  }}
                   className={cn(
                     "flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
                     product && isFavorited(product.id)
-                      ? "border-red-500/30 text-red-500 bg-red-500/10"
+                      ? "border-destructive/30 text-destructive bg-destructive/10"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                   )}
                 >
                   <Heart size={14} className={cn(product && isFavorited(product.id) && "fill-current")} />
                   {product && isFavorited(product.id) ? "Favorited" : "Favorite"}
                 </button>
+
+                {/* Add to Project */}
+                {product && isFavorited(product.id) && lastFavRealId && (
+                  <AddToProjectPopover productId={lastFavRealId} productName={product.product_name}>
+                    <button className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30">
+                      <FolderOpen size={14} />
+                      Add to Project
+                    </button>
+                  </AddToProjectPopover>
+                )}
 
                 {/* Pin to Selection */}
                 <button
