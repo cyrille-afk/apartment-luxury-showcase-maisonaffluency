@@ -1,0 +1,1 @@
+UPDATE designers SET image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,g_auto,q_auto:good,f_auto/maison-wecraft-bg_nsa7fm' WHERE id = 'cfa06847-f707-47e7-83bf-fe1a938430e5';
