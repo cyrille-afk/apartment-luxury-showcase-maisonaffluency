@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Scale, ShoppingCart, Check, FileDown, Layers, Ruler, Loader2, Package } from "lucide-react";
+import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
