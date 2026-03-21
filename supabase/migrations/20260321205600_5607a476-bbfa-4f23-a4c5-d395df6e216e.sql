@@ -1,0 +1,1 @@
+UPDATE designers SET image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,g_auto,f_auto/jean-michel-frank-new_toifde' WHERE slug = 'jean-michel-frank';
