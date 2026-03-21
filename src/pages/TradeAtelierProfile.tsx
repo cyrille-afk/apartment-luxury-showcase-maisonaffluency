@@ -219,7 +219,7 @@ const TradeAtelierProfile = () => {
             </div>
             <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 lg:grid-cols-4 md:overflow-visible md:pb-0">
               {picks.map((pick) => (
-                <div key={pick.id} className="group">
+                <div key={pick.id} className="group min-w-[60vw] snap-start shrink-0 md:min-w-0 md:shrink">
                   <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2">
                     <img
                       src={pick.image_url}
