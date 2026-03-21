@@ -95,11 +95,13 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
 
 const TradeDesigners = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { data: designers = [], isLoading } = useAllDesigners();
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState("all");
+  const initialBrand = searchParams.get("brand") || "all";
+  const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [carouselMode, setCarouselMode] = useState<"ateliers" | "designers">("ateliers");
   const [showBackToTop, setShowBackToTop] = useState(false);
 
