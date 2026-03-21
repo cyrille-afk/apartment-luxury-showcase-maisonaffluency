@@ -1,5 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
+import { Heart } from "lucide-react";
+import { useFavorites } from "@/hooks/useFavorites";
 import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
