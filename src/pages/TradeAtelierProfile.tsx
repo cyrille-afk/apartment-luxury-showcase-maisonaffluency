@@ -369,6 +369,7 @@ const TradeAtelierProfile = () => {
                     const ap = pick as AttributedCuratorPick;
                     const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name
                       ? ap.designer_name : undefined;
+                    const designerSlug = isGrouped && ap.designer_slug ? ap.designer_slug : undefined;
                     return (
                     <div
                       key={pick.id}
@@ -418,11 +419,19 @@ const TradeAtelierProfile = () => {
                       </div>
                       <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">
                         {pick.title}
-                        {designerLabel && (
+                        {designerLabel && designerSlug ? (
+                          <Link
+                            to={`/trade/designers/${designerSlug}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-body text-[9px] md:text-[10px] text-primary/70 hover:text-primary ml-1.5 underline underline-offset-2"
+                          >
+                            — {designerLabel}
+                          </Link>
+                        ) : designerLabel ? (
                           <span className="font-body text-[9px] md:text-[10px] text-muted-foreground ml-1.5">
                             — {designerLabel}
                           </span>
-                        )}
+                        ) : null}
                       </h3>
                       {pick.subtitle && (
                         <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>
