@@ -240,7 +240,9 @@ const TradeAtelierProfile = () => {
                 <div key={pick.id} className="group">
                   <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2">
                     <img
-                      src={pick.image_url}
+                      src={responsiveCloudinaryUrl(pick.image_url, 600)}
+                      srcSet={pickSrcSet(pick.image_url)}
+                      sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                       alt={pick.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
