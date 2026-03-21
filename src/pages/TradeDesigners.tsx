@@ -93,14 +93,16 @@ const BrandGroupCard = ({
   navigate,
   isExpanded,
   onToggle,
+  heroImage,
 }: {
   brandName: string;
   children: EnrichedDesigner[];
   navigate: (path: string) => void;
   isExpanded: boolean;
   onToggle: () => void;
+  heroImage?: string;
 }) => {
-  const previewImage = children.find((c) => c.image_url)?.image_url || "";
+  const previewImage = heroImage || children.find((c) => c.image_url)?.image_url || "";
 
   return (
     <div className="col-span-1">
