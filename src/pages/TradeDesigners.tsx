@@ -76,6 +76,12 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
       {brand.source === "collectible" && (
         <span className="absolute top-2.5 left-2.5 bg-primary/90 backdrop-blur-sm text-primary-foreground font-body text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full">Collectible</span>
       )}
+      {brand.founder && !brand.source?.includes("collectible") && (
+        <span className="absolute top-2.5 left-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full flex items-center gap-1">
+          <Layers className="h-2.5 w-2.5" />
+          {brand.founder}
+        </span>
+      )}
     </div>
   </button>
 );
