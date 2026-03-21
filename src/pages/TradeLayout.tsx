@@ -111,7 +111,7 @@ const TradeLayout = () => {
             </div>
             <NotificationBell />
           </header>
-          <main className="flex-1 p-4 md:p-6 lg:p-8">
+          <main className="flex-1 p-4 md:p-6 lg:p-8 pb-24 md:pb-6 lg:pb-8">
             <Suspense fallback={
               <div className="flex items-center justify-center py-20">
                 <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
@@ -120,6 +120,9 @@ const TradeLayout = () => {
               <Outlet />
             </Suspense>
           </main>
+          <Suspense fallback={null}>
+            <TradeBottomNav />
+          </Suspense>
         </div>
       </div>
       <Suspense fallback={null}>
