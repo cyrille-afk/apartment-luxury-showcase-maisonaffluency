@@ -165,6 +165,7 @@ const TradeDesigners = () => {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState("all");
+  const [carouselMode, setCarouselMode] = useState<"ateliers" | "designers">("ateliers");
   const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set());
   const [showBackToTop, setShowBackToTop] = useState(false);
 
@@ -201,13 +202,12 @@ const TradeDesigners = () => {
     });
   }, [designers, productCountMap]);
 
-  // Build carousel: multi-designer brands (founder groups) + all solo designers
-  const brandEntries = useMemo(() => {
+  // Build carousel: split into ateliers (multi-designer brands) and solo designers
+  const { atelierEntries, designerEntries } = useMemo(() => {
     const founderMap = new Map<string, number>();
     const soloNames: string[] = [];
     const founderNames = new Set<string>();
 
-    // First pass: collect all founder names
     for (const d of enriched) {
       if (d.founder) founderNames.add(d.founder);
     }
@@ -216,23 +216,28 @@ const TradeDesigners = () => {
       if (d.founder) {
         founderMap.set(d.founder, (founderMap.get(d.founder) || 0) + 1);
       } else if (!founderNames.has(d.name)) {
-        // Only add as solo if their name doesn't match a brand (avoids duplicate Pouenat etc.)
         soloNames.push(d.name);
       }
     }
 
+    const ateliers: { name: string; docCount: number }[] = [];
+    const solos: { name: string; docCount: number }[] = [];
     const seen = new Set<string>();
-    const entries: { name: string; docCount: number }[] = [];
 
     for (const [name, count] of founderMap) {
-      if (!seen.has(name)) { seen.add(name); entries.push({ name, docCount: count }); }
+      if (!seen.has(name)) { seen.add(name); ateliers.push({ name, docCount: count }); }
     }
     for (const name of soloNames) {
-      if (!seen.has(name)) { seen.add(name); entries.push({ name, docCount: 0 }); }
+      if (!seen.has(name)) { seen.add(name); solos.push({ name, docCount: 0 }); }
     }
 
-    return entries.sort((a, b) => a.name.localeCompare(b.name));
+    return {
+      atelierEntries: ateliers.sort((a, b) => a.name.localeCompare(b.name)),
+      designerEntries: solos.sort((a, b) => a.name.localeCompare(b.name)),
+    };
   }, [enriched]);
+
+  const brandEntries = carouselMode === "ateliers" ? atelierEntries : designerEntries;
 
   // IMPORTANT: carousel selection should NOT lock/filter the A-Z library
   const filtered = useMemo(() => {
@@ -336,7 +341,7 @@ const TradeDesigners = () => {
         <title>Designers Library — Maison Affluency Trade</title>
       </Helmet>
       <div id="designers-carousel-top" className="space-y-6">
-        {brandEntries.length > 0 && (
+        {(atelierEntries.length > 0 || designerEntries.length > 0) && (
           <BrandCarousel
             brands={brandEntries}
             selectedBrand={selectedBrand}
@@ -363,11 +368,39 @@ const TradeDesigners = () => {
             }}
             label={
               <div className="mb-2">
-                <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
-                  Browse designers & ateliers · {brandEntries.length} entries
-                </p>
-                <p className="font-body text-[10px] text-muted-foreground/60 mt-0.5 normal-case tracking-normal">
-                  Scroll to jump to a designer. Multi-designer brands expand to reveal their roster.
+                <div className="flex items-center gap-3 mb-1.5">
+                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
+                    Browse by
+                  </p>
+                  <div className="flex items-center gap-1 bg-muted/40 rounded-full p-0.5">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setCarouselMode("ateliers"); setSelectedBrand("all"); }}
+                      className={cn(
+                        "px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] transition-all",
+                        carouselMode === "ateliers"
+                          ? "bg-foreground text-background shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      Ateliers · {atelierEntries.length}
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setCarouselMode("designers"); setSelectedBrand("all"); }}
+                      className={cn(
+                        "px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] transition-all",
+                        carouselMode === "designers"
+                          ? "bg-foreground text-background shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      Designers · {designerEntries.length}
+                    </button>
+                  </div>
+                </div>
+                <p className="font-body text-[10px] text-muted-foreground/60 normal-case tracking-normal">
+                  {carouselMode === "ateliers"
+                    ? "Multi-designer brands — click to expand their roster."
+                    : "Independent designers & studios."}
                 </p>
               </div>
             }
