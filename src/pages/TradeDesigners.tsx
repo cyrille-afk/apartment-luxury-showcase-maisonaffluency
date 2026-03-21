@@ -311,16 +311,7 @@ const TradeDesigners = () => {
             onSelect={(b) => {
               setSelectedBrand(b);
 
-              if (b === "all") {
-                setExpandedBrands(new Set());
-                return;
-              }
-
-              // If it's a multi-designer brand, expand it
-              const entry = brandEntries.find((e) => e.name === b);
-              if (entry && entry.docCount > 0) {
-                setExpandedBrands(new Set([b]));
-              }
+              if (b === "all") return;
 
               // Scroll to the letter
               const letter = b.charAt(0).toUpperCase();
