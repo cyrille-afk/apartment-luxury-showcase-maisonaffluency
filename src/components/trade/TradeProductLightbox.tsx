@@ -224,7 +224,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
 
                 {product.pdf_url && (
                   <a
-                    href={product.pdf_url}
+                    href={buildSpecSheetUrl(product.pdf_url, designerDisplay, product.product_name)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"

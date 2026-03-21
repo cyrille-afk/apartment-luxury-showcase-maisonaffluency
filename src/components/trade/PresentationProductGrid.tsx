@@ -41,7 +41,7 @@ export default function PresentationProductGrid({ products, roomSection }: Props
               )}
               {p.pdf_url && (
                 <a
-                  href={p.pdf_url}
+                  href={buildSpecSheetUrl(p.pdf_url, p.brand_name, p.product_name)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="absolute bottom-2 right-2 p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors opacity-0 group-hover:opacity-100"
