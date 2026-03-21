@@ -346,7 +346,27 @@ const TradeAtelierProfile = () => {
         })()}
 
         {/* Curator's Picks */}
-        {picks.length > 0 && (
+        {picks.length > 0 && (() => {
+          // Group picks by designer for parent brands
+          const isGrouped = groupedPicks.length > 0;
+          const designerGroups: { name: string; slug: string; items: typeof picks }[] = [];
+
+          if (isGrouped) {
+            const groupMap = new Map<string, { name: string; slug: string; items: typeof picks }>();
+            for (const pick of picks) {
+              const ap = pick as AttributedCuratorPick;
+              const key = ap.designer_slug || 'unknown';
+              if (!groupMap.has(key)) {
+                groupMap.set(key, { name: ap.designer_name, slug: ap.designer_slug, items: [] });
+              }
+              groupMap.get(key)!.items.push(pick);
+            }
+            designerGroups.push(...groupMap.values());
+          } else {
+            designerGroups.push({ name: designer.name, slug: slug || '', items: picks });
+          }
+
+          return (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -358,90 +378,108 @@ const TradeAtelierProfile = () => {
               </h2>
               <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
             </div>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:grid-cols-3 lg:grid-cols-4 md:gap-4">
-              {picks.map((pick) => {
-                const isAdding = addingProductId === pick.id;
-                const isAdded = addedProductIds.has(pick.id);
-                return (
-                <div
-                  key={pick.id}
-                  className="group cursor-pointer"
-                  onClick={() => setLightboxProduct(pickToLightboxItem(pick, designer.name))}
-                >
-                  <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
-                    <img
-                      src={responsiveCloudinaryUrl(pick.image_url, 600)}
-                      srcSet={pickSrcSet(pick.image_url)}
-                      sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
-                      alt={pick.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    {/* Quick action overlay */}
-                    <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {(isTradeUser || isAdmin) && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddToQuote(pickToLightboxItem(pick, designer.name));
-                          }}
-                          className={cn(
-                            "p-2 rounded-md text-white transition-colors",
-                            isAdded ? "bg-emerald-600" : "bg-foreground/80 hover:bg-foreground"
+
+            {designerGroups.map((group) => (
+              <div key={group.slug} className="mb-8 last:mb-0">
+                {isGrouped && (
+                  <Link
+                    to={`/trade/designers/${group.slug}`}
+                    className="inline-flex items-center gap-2 mb-3 group/link"
+                  >
+                    <h3 className="font-display text-[11px] md:text-sm tracking-[0.15em] uppercase text-muted-foreground group-hover/link:text-foreground transition-colors">
+                      {group.name}
+                    </h3>
+                    <span className="text-[10px] text-muted-foreground/40 font-body">
+                      ({group.items.length})
+                    </span>
+                  </Link>
+                )}
+                <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:grid-cols-3 lg:grid-cols-4 md:gap-4">
+                  {group.items.map((pick) => {
+                    const isAdding = addingProductId === pick.id;
+                    const isAdded = addedProductIds.has(pick.id);
+                    return (
+                    <div
+                      key={pick.id}
+                      className="group cursor-pointer"
+                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, group.name))}
+                    >
+                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
+                        <img
+                          src={responsiveCloudinaryUrl(pick.image_url, 600)}
+                          srcSet={pickSrcSet(pick.image_url)}
+                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                          alt={pick.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {(isTradeUser || isAdmin) && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToQuote(pickToLightboxItem(pick, group.name));
+                              }}
+                              className={cn(
+                                "p-2 rounded-md text-white transition-colors",
+                                isAdded ? "bg-emerald-600" : "bg-foreground/80 hover:bg-foreground"
+                              )}
+                              title={isAdded ? "Added to quote" : "Add to quote"}
+                            >
+                              {isAdding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> :
+                               isAdded ? <Check className="h-3.5 w-3.5" /> :
+                               <ShoppingCart className="h-3.5 w-3.5" />}
+                            </button>
                           )}
-                          title={isAdded ? "Added to quote" : "Add to quote"}
-                        >
-                          {isAdding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> :
-                           isAdded ? <Check className="h-3.5 w-3.5" /> :
-                           <ShoppingCart className="h-3.5 w-3.5" />}
-                        </button>
+                          {pick.pdf_url && (
+                            <a
+                              href={buildSpecSheetUrl(pick.pdf_url, group.name, pick.title)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
+                              title="Spec sheet"
+                            >
+                              <FileText className="h-3.5 w-3.5" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{pick.title}</h3>
+                      {pick.subtitle && (
+                        <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>
                       )}
-                      {pick.pdf_url && (
-                        <a
-                          href={buildSpecSheetUrl(pick.pdf_url, designer.name, pick.title)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
-                          title="Spec sheet"
-                        >
-                          <FileText className="h-3.5 w-3.5" />
-                        </a>
+                      {pick.materials && (
+                        <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2 leading-relaxed">
+                          {pick.materials}
+                        </p>
+                      )}
+                      {pick.dimensions && (
+                        <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
+                          {pick.dimensions.split('\n').filter(line => !line.toLowerCase().includes(' in')).join('\n')}
+                        </p>
+                      )}
+                      {pick.trade_price_cents != null && (
+                        <p className="font-display text-[11px] md:text-xs text-foreground mt-1">
+                          {(isTradeUser || isAdmin)
+                            ? formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)
+                            : "Price on request"}
+                        </p>
+                      )}
+                      {pick.edition && (
+                        <p className="font-body text-[9px] text-primary/70 mt-0.5 italic">
+                          {pick.edition}
+                        </p>
                       )}
                     </div>
-                  </div>
-                  <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{pick.title}</h3>
-                  {pick.subtitle && (
-                    <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>
-                  )}
-                  {pick.materials && (
-                    <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2 leading-relaxed">
-                      {pick.materials}
-                    </p>
-                  )}
-                  {pick.dimensions && (
-                    <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
-                      {pick.dimensions.split('\n').filter(line => !line.toLowerCase().includes(' in')).join('\n')}
-                    </p>
-                  )}
-                  {pick.trade_price_cents != null && (
-                    <p className="font-display text-[11px] md:text-xs text-foreground mt-1">
-                      {(isTradeUser || isAdmin)
-                        ? formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)
-                        : "Price on request"}
-                    </p>
-                  )}
-                  {pick.edition && (
-                    <p className="font-body text-[9px] text-primary/70 mt-0.5 italic">
-                      {pick.edition}
-                    </p>
-                  )}
+                    );
+                  })}
                 </div>
-                );
-              })}
-            </div>
+              </div>
+            ))}
           </motion.div>
-        )}
+          );
+        })()}
 
         {picks.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/10 rounded-xl">
