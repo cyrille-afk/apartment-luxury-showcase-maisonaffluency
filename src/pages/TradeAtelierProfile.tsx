@@ -189,18 +189,8 @@ const TradeAtelierProfile = () => {
           )}
         </div>
 
-        {designer.notable_works && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transition, delay: 0.4 }}
-          >
-            <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
-              Notable Works
-            </h2>
-            <p className="font-body text-sm text-foreground/70">{designer.notable_works}</p>
-          </motion.div>
-        )}
+
+
 
         {/* Curator's Picks — full width */}
         {picks.length > 0 && (
