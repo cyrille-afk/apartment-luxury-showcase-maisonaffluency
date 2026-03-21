@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
+const TradeBottomNav = lazy(() => import("@/components/trade/TradeBottomNav"));
 
 const TradeLayout = () => {
   const { user, loading, applicationStatus, isAdmin } = useAuth();
