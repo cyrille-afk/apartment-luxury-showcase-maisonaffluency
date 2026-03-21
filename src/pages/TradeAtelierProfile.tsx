@@ -103,16 +103,20 @@ const TradeAtelierProfile = () => {
           {designer.founder ? `Back to ${designer.founder}` : "All Ateliers"}
         </button>
 
-        {/* Hero + About — side by side on desktop */}
-        <div className="flex flex-col md:flex-row gap-6">
+        {/* Hero + About — side by side on desktop for designers (vertical hero), stacked for ateliers (horizontal hero) */}
+        {(() => {
+          const isDesignerProfile = designer.founder && designer.founder !== designer.name;
+          const heroAspect = isDesignerProfile ? "aspect-[3/4]" : "aspect-[16/9]";
+          return (
+        <div className={cn("flex flex-col gap-6", isDesignerProfile && "md:flex-row")}>
           {/* Hero image */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={transition}
-            className="relative rounded-xl overflow-hidden md:w-1/2 shrink-0"
+            className={cn("relative rounded-xl overflow-hidden shrink-0", isDesignerProfile && "md:w-1/2")}
           >
-            <div className="aspect-[3/4]">
+            <div className={heroAspect}>
               {designer.image_url && (
                 <img
                   src={designer.image_url}
