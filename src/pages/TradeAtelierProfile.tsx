@@ -173,6 +173,12 @@ const TradeAtelierProfile = () => {
               transition={{ ...transition, delay: 0.2 }}
               className="md:w-1/2 flex flex-col justify-center"
             >
+              {/* Philosophy quote — above biography, bold black */}
+              {designer.philosophy && (
+                <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6">
+                  "{designer.philosophy}"
+                </blockquote>
+              )}
               <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
                 About
               </h2>
@@ -182,21 +188,6 @@ const TradeAtelierProfile = () => {
             </motion.div>
           )}
         </div>
-
-        {/* Philosophy quote — full width */}
-        {designer.philosophy && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transition, delay: 0.3 }}
-            className="border-l-2 border-primary/30 pl-5 py-2"
-          >
-            <Quote className="w-4 h-4 text-primary/40 mb-2" />
-            <blockquote className="font-display text-sm italic leading-relaxed text-foreground/70">
-              "{designer.philosophy}"
-            </blockquote>
-          </motion.div>
-        )}
 
         {designer.notable_works && (
           <motion.div
