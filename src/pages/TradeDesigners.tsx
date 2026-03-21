@@ -203,25 +203,30 @@ const TradeDesigners = () => {
   const brandEntries = useMemo(() => {
     const founderMap = new Map<string, number>();
     const soloNames: string[] = [];
+    const founderNames = new Set<string>();
+
+    // First pass: collect all founder names
+    for (const d of enriched) {
+      if (d.founder) founderNames.add(d.founder);
+    }
 
     for (const d of enriched) {
       if (d.founder) {
         founderMap.set(d.founder, (founderMap.get(d.founder) || 0) + 1);
-      } else {
+      } else if (!founderNames.has(d.name)) {
+        // Only add as solo if their name doesn't match a brand (avoids duplicate Pouenat etc.)
         soloNames.push(d.name);
       }
     }
 
+    const seen = new Set<string>();
     const entries: { name: string; docCount: number }[] = [];
 
-    // Multi-designer brands with count
     for (const [name, count] of founderMap) {
-      entries.push({ name, docCount: count });
+      if (!seen.has(name)) { seen.add(name); entries.push({ name, docCount: count }); }
     }
-
-    // Solo designers (docCount = 0 means solo, no expand)
     for (const name of soloNames) {
-      entries.push({ name, docCount: 0 });
+      if (!seen.has(name)) { seen.add(name); entries.push({ name, docCount: 0 }); }
     }
 
     return entries.sort((a, b) => a.name.localeCompare(b.name));
