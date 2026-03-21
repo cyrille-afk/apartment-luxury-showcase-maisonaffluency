@@ -510,6 +510,7 @@ const TradeDesigners = () => {
                         navigate={navigate}
                         isExpanded={expandedBrands.has(entry.brandName)}
                         onToggle={() => toggleBrandExpand(entry.brandName)}
+                        heroImage={entry.heroImage}
                       />
                     )
                   )}
