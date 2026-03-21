@@ -207,11 +207,18 @@ const TradeDesigners = () => {
   return (
     <>
       <Helmet>
-        <title>Ateliers & Partners — Maison Affluency Trade</title>
+        <title>Designers Library — Maison Affluency Trade</title>
       </Helmet>
 
       <div className="space-y-6">
-        {/* Header */}
+        {/* Brand Carousel */}
+        {brandEntries.length > 0 && (
+          <BrandCarousel
+            brands={brandEntries}
+            selectedBrand={selectedBrand}
+            onSelect={setSelectedBrand}
+          />
+        )}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
