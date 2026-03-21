@@ -43,9 +43,9 @@ const TradeAxonometricRequests = () => {
   });
 
   // Auto-open form if favorites were prefilled from the Favorites page
-  useState(() => {
+  useEffect(() => {
     if (searchParams.get("favorites")) setShowForm(true);
-  });
+  }, []);
 
   const { data: requests, refetch } = useQuery({
     queryKey: ["axonometric-requests", user?.id],
