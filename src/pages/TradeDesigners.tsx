@@ -60,13 +60,6 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
           <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">{brand.specialty}</p>
         )}
         <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">More Info</span>
-        {brand.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 justify-center mt-3">
-            {brand.tags.slice(0, 3).map((tag) => (
-              <span key={tag} className="font-body text-[8px] uppercase tracking-[0.12em] text-white/70 bg-white/10 px-2 py-0.5 rounded-full">{tag}</span>
-            ))}
-          </div>
-        )}
       </div>
       {brand.productCount > 0 && (
         <span className="absolute top-2.5 right-2.5 bg-background/90 backdrop-blur-sm text-foreground font-body text-[10px] px-2 py-0.5 rounded-full border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
