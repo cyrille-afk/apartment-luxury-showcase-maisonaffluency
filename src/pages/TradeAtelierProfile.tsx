@@ -21,6 +21,7 @@ const DESIGNER_DATES: Record<string, string> = {
   "mariano-fortuny": "1871–1949",
   "paul-laszlo": "1900–1993",
   "jacques-henri-lartigue": "1894–1986",
+  "felix-aublet": "1903–1978",
 };
 
 function displayName(name: string): string {
