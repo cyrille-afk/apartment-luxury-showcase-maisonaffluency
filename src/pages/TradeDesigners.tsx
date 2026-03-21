@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
-import { Search, Users, SlidersHorizontal, X, Layers, ChevronDown, ArrowUp } from "lucide-react";
+import { Search, Users, SlidersHorizontal, X, Layers, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
@@ -86,77 +86,6 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
   </button>
 );
 
-/** A card representing a multi-designer brand, expandable to show children */
-const BrandGroupCard = ({
-  brandName,
-  children,
-  navigate,
-  isExpanded,
-  onToggle,
-  heroImage,
-}: {
-  brandName: string;
-  children: EnrichedDesigner[];
-  navigate: (path: string) => void;
-  isExpanded: boolean;
-  onToggle: () => void;
-  heroImage?: string;
-}) => {
-  const previewImage = heroImage || "";
-
-  return (
-    <>
-      <div className="col-span-1">
-        <button
-          onClick={onToggle}
-          className={cn(
-            "group text-left rounded-xl overflow-hidden border transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background w-full",
-            isExpanded ? "border-primary shadow-xl" : "border-border hover:border-foreground/30 hover:shadow-xl"
-          )}
-        >
-          <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
-            {previewImage ? (
-              <img src={previewImage} alt={brandName} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-muted/10">
-                <span className="font-display text-3xl text-muted-foreground/20">{brandName.charAt(0)}</span>
-              </div>
-            )}
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pt-10 pb-4">
-              <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">{brandName}</p>
-            </div>
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
-              <p className="font-body text-[11px] text-white/85 text-center leading-relaxed mb-4">
-                {children.length} designer{children.length !== 1 ? "s" : ""} under this brand
-              </p>
-              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em]">
-                <ChevronDown className={cn("h-3 w-3 transition-transform", isExpanded && "rotate-180")} />
-                {isExpanded ? "Collapse" : "Expand"}
-              </span>
-            </div>
-            <span className="absolute top-2.5 left-2.5 bg-primary/90 backdrop-blur-sm text-primary-foreground font-body text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1">
-              <Layers className="h-2.5 w-2.5" />
-              {children.length} designers
-            </span>
-          </div>
-        </button>
-      </div>
-
-      {isExpanded && (
-        <div className="col-span-2 sm:col-span-3 lg:col-span-4 xl:col-span-5 border-l-2 border-primary/30 pl-4 py-2">
-          <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.12em] mb-3">
-            {brandName} · {children.length} designers
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {children.map((designer) => (
-              <DesignerCard key={designer.id} brand={designer} navigate={navigate} />
-            ))}
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
 
 const TradeDesigners = () => {
   const navigate = useNavigate();
@@ -166,7 +95,6 @@ const TradeDesigners = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [carouselMode, setCarouselMode] = useState<"ateliers" | "designers">("ateliers");
-  const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set());
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
@@ -174,15 +102,6 @@ const TradeDesigners = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const toggleBrandExpand = (brandName: string) => {
-    setExpandedBrands((prev) => {
-      const next = new Set(prev);
-      if (next.has(brandName)) next.delete(brandName);
-      else next.add(brandName);
-      return next;
-    });
-  };
 
   const allProducts = useMemo(() => getAllTradeProducts(), []);
   const productCountMap = useMemo(() => {
@@ -268,50 +187,16 @@ const TradeDesigners = () => {
     }
     return result;
   }, [enriched, search, activeFilters, selectedBrand, carouselMode]);
-
-  // Group into a flat A-Z list where brand groups appear as single entries
-  type GridEntry =
-    | { type: "solo"; designer: EnrichedDesigner; sortName: string }
-    | { type: "brand"; brandName: string; children: EnrichedDesigner[]; sortName: string; heroImage?: string };
+  type GridEntry = { type: "solo"; designer: EnrichedDesigner; sortName: string };
 
   const grouped = useMemo(() => {
-    const brandChildren = new Map<string, EnrichedDesigner[]>();
-    const independents: EnrichedDesigner[] = [];
-    // Track solo designers whose name matches a brand (founder) – merge into brand group
-    const brandSoloCards = new Map<string, EnrichedDesigner>();
-
-    // First pass: identify all founder brand names
-    const founderNames = new Set<string>();
-    for (const d of filtered) {
-      if (d.founder) founderNames.add(d.founder);
-    }
-
-    for (const d of filtered) {
-      if (d.founder) {
-        if (!brandChildren.has(d.founder)) brandChildren.set(d.founder, []);
-        brandChildren.get(d.founder)!.push(d);
-      } else if (founderNames.has(d.name)) {
-        // This solo entry IS the brand itself (e.g. "Pouenat") – absorb it
-        brandSoloCards.set(d.name, d);
-        if (!brandChildren.has(d.name)) brandChildren.set(d.name, []);
-      } else {
-        independents.push(d);
-      }
-    }
-
     const entries: GridEntry[] = [];
-    for (const d of independents) {
+
+    for (const d of filtered) {
       entries.push({ type: "solo", designer: d, sortName: d.name });
     }
-    for (const [brandName, children] of brandChildren) {
-      entries.push({
-        type: "brand",
-        brandName,
-        children: children.sort((a, b) => a.name.localeCompare(b.name)),
-        sortName: brandName,
-        heroImage: brandSoloCards.get(brandName)?.image_url || undefined,
-      });
-    }
+
+    entries.sort((a, b) => a.sortName.localeCompare(b.sortName));
     entries.sort((a, b) => a.sortName.localeCompare(b.sortName));
 
     const letterMap = new Map<string, GridEntry[]>();
@@ -360,16 +245,7 @@ const TradeDesigners = () => {
             onSelect={(b) => {
               setSelectedBrand(b);
 
-              if (b === "all") {
-                setExpandedBrands(new Set());
-                return;
-              }
-
-              // If it's a multi-designer brand, expand it
-              const entry = brandEntries.find((e) => e.name === b);
-              if (entry && entry.docCount > 0) {
-                setExpandedBrands(new Set([b]));
-              }
+              if (b === "all") return;
 
               // Scroll to the letter
               const letter = b.charAt(0).toUpperCase();
@@ -557,21 +433,9 @@ const TradeDesigners = () => {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {entries.map((entry) =>
-                    entry.type === "solo" ? (
-                      <DesignerCard key={entry.designer.id} brand={entry.designer} navigate={navigate} />
-                    ) : (
-                      <BrandGroupCard
-                        key={entry.brandName}
-                        brandName={entry.brandName}
-                        children={entry.children}
-                        navigate={navigate}
-                        isExpanded={expandedBrands.has(entry.brandName)}
-                        onToggle={() => toggleBrandExpand(entry.brandName)}
-                        heroImage={entry.heroImage}
-                      />
-                    )
-                  )}
+                  {entries.map((entry) => (
+                    <DesignerCard key={entry.designer.id} brand={entry.designer} navigate={navigate} />
+                  ))}
                 </div>
               </div>
             ))}
