@@ -241,9 +241,11 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, labe
 
   return (
     <div className="relative mb-6">
-      <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
-        Browse by brand · {brands.length} brands A–Z
-      </p>
+      {label || (
+        <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
+          Browse by brand · {brands.length} brands A–Z
+        </p>
+      )}
 
       <div className="relative group">
         <button
