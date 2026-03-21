@@ -79,6 +79,7 @@ const TradeAxonometricRequests = () => {
         request_type: requestType,
         project_name: projectName.trim().slice(0, 200),
         notes: notes.trim().slice(0, 1000) || null,
+        linked_favorite_product_ids: selectedFavoriteIds.length > 0 ? selectedFavoriteIds : [],
       });
       if (error) throw error;
 
