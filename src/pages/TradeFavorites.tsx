@@ -136,6 +136,20 @@ export default function TradeFavorites() {
     }
   }, [user, favorites, toast]);
 
+  const toggle3D = useCallback((productId: string) => {
+    setSelectedFor3D((prev) => {
+      const next = new Set(prev);
+      if (next.has(productId)) next.delete(productId); else next.add(productId);
+      return next;
+    });
+  }, []);
+
+  const sendTo3DStudio = useCallback(() => {
+    if (selectedFor3D.size === 0) return;
+    const ids = Array.from(selectedFor3D).join(",");
+    navigate(`/trade/axonometric-requests?favorites=${ids}`);
+  }, [selectedFor3D, navigate]);
+
   const filtered = search.trim()
     ? favorites.filter((f) => {
         const q = search.toLowerCase();
