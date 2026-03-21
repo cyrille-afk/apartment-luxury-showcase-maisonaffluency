@@ -374,29 +374,32 @@ const TradeDesigners = () => {
                   </span>
                 </div>
                 <div className="space-y-6">
-                  {entries.map((entry) => {
-                    if (entry.type === "brand") {
-                      return (
-                        <div key={entry.brandName}>
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="font-display text-xs uppercase tracking-[0.15em] text-primary">{entry.brandName}</span>
-                            <div className="flex-1 h-px bg-primary/20" />
-                            <span className="font-body text-[10px] text-muted-foreground">{entry.children.length} designers</span>
-                          </div>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                            {entry.children.map((brand) => (
-                              <DesignerCard key={brand.id} brand={brand} navigate={navigate} />
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    }
+                  {/* Brand groups */}
+                  {entries.filter(e => e.type === "brand").map((entry) => {
+                    if (entry.type !== "brand") return null;
                     return (
-                      <div key={entry.designer.id} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        <DesignerCard brand={entry.designer} navigate={navigate} />
+                      <div key={entry.brandName}>
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="font-display text-xs uppercase tracking-[0.15em] text-primary">{entry.brandName}</span>
+                          <div className="flex-1 h-px bg-primary/20" />
+                          <span className="font-body text-[10px] text-muted-foreground">{entry.children.length} designers</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                          {entry.children.map((brand) => (
+                            <DesignerCard key={brand.id} brand={brand} navigate={navigate} />
+                          ))}
+                        </div>
                       </div>
                     );
                   })}
+                  {/* Solo designers in a single shared grid */}
+                  {entries.some(e => e.type === "solo") && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                      {entries.filter(e => e.type === "solo").map((entry) => (
+                        entry.type === "solo" && <DesignerCard key={entry.designer.id} brand={entry.designer} navigate={navigate} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
