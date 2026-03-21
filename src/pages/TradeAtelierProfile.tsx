@@ -294,7 +294,7 @@ const TradeAtelierProfile = () => {
                   )}
                   {pick.dimensions && (
                     <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
-                      {pick.dimensions}
+                      {pick.dimensions.split('\n').filter(line => !line.toLowerCase().includes(' in')).join('\n')}
                     </p>
                   )}
                   {pick.trade_price_cents != null && (
