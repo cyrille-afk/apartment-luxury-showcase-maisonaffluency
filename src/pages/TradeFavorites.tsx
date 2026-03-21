@@ -228,7 +228,7 @@ export default function TradeFavorites() {
         ) : view === "grid" ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filtered.map((fav) => (
-              <Card key={fav.favoriteId} className="group overflow-hidden">
+              <Card key={fav.favoriteId} className={cn("group overflow-hidden", selectedFor3D.has(fav.productId) && "ring-2 ring-[hsl(var(--gold))]")}>
                 <div className="relative aspect-square bg-muted">
                   {fav.image_url ? (
                     <img src={fav.image_url} alt={fav.product_name} className="w-full h-full object-cover" loading="lazy" />
@@ -237,6 +237,19 @@ export default function TradeFavorites() {
                       <Heart className="w-8 h-8" />
                     </div>
                   )}
+                  {/* 3D Studio select */}
+                  <button
+                    onClick={() => toggle3D(fav.productId)}
+                    className={cn(
+                      "absolute top-2 left-2 w-7 h-7 rounded-full flex items-center justify-center transition-all",
+                      selectedFor3D.has(fav.productId)
+                        ? "bg-[hsl(var(--gold))] text-white"
+                        : "bg-background/80 backdrop-blur-sm text-muted-foreground opacity-0 group-hover:opacity-100"
+                    )}
+                    title="Select for 3D Studio"
+                  >
+                    <Wand2 className="w-3.5 h-3.5" />
+                  </button>
                   <button
                     onClick={() => removeFavorite(fav.favoriteId)}
                     disabled={removing === fav.favoriteId}
