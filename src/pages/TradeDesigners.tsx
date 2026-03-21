@@ -32,6 +32,53 @@ const ALL_FILTER_TAGS = [
   "Crystal", "Architecture",
 ];
 
+type EnrichedDesigner = {
+  id: string; slug: string; name: string; founder: string | null; specialty: string;
+  image_url: string; source: string; tags: string[]; productCount: number;
+  [key: string]: unknown;
+};
+
+const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: (path: string) => void }) => (
+  <button
+    onClick={() => navigate(`/trade/designers/${brand.slug}`)}
+    className="group text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
+  >
+    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+      {brand.image_url ? (
+        <img src={brand.image_url} alt={brand.name} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+          <span className="font-display text-3xl text-muted-foreground/20">{brand.name.charAt(0)}</span>
+        </div>
+      )}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pt-10 pb-4">
+        <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">{brand.name}</p>
+      </div>
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+        {brand.specialty && (
+          <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">{brand.specialty}</p>
+        )}
+        <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">More Info</span>
+        {brand.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 justify-center mt-3">
+            {brand.tags.slice(0, 3).map((tag) => (
+              <span key={tag} className="font-body text-[8px] uppercase tracking-[0.12em] text-white/70 bg-white/10 px-2 py-0.5 rounded-full">{tag}</span>
+            ))}
+          </div>
+        )}
+      </div>
+      {brand.productCount > 0 && (
+        <span className="absolute top-2.5 right-2.5 bg-background/90 backdrop-blur-sm text-foreground font-body text-[10px] px-2 py-0.5 rounded-full border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
+          {brand.productCount} {brand.productCount === 1 ? "piece" : "pieces"}
+        </span>
+      )}
+      {brand.source === "collectible" && (
+        <span className="absolute top-2.5 left-2.5 bg-primary/90 backdrop-blur-sm text-primary-foreground font-body text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full">Collectible</span>
+      )}
+    </div>
+  </button>
+);
+
 const TradeDesigners = () => {
   const navigate = useNavigate();
   const { data: designers = [], isLoading } = useAllDesigners();
@@ -74,14 +121,50 @@ const TradeDesigners = () => {
     return result;
   }, [enriched, search, activeFilters]);
 
+  // Group: independent designers + brand groups (designers sharing a founder)
   const grouped = useMemo(() => {
-    const map = new Map<string, typeof filtered>();
-    for (const b of filtered) {
-      const letter = b.name.charAt(0).toUpperCase();
-      if (!map.has(letter)) map.set(letter, []);
-      map.get(letter)!.push(b);
+    // Separate designers with a founder (brand children) from independents
+    const brandChildren = new Map<string, typeof filtered>();
+    const independents: typeof filtered = [];
+
+    for (const d of filtered) {
+      if (d.founder) {
+        const key = d.founder;
+        if (!brandChildren.has(key)) brandChildren.set(key, []);
+        brandChildren.get(key)!.push(d);
+      } else {
+        independents.push(d);
+      }
     }
-    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+
+    // Build a unified list of items: either a solo designer or a brand group header
+    type LetterEntry = { type: "solo"; designer: (typeof filtered)[0] } | { type: "brand"; brandName: string; children: typeof filtered };
+    const entries: LetterEntry[] = [];
+
+    for (const d of independents) {
+      entries.push({ type: "solo", designer: d });
+    }
+    for (const [brandName, children] of brandChildren) {
+      entries.push({ type: "brand", brandName, children: children.sort((a, b) => a.name.localeCompare(b.name)) });
+    }
+
+    // Sort all entries by their display name (brand name or designer name)
+    entries.sort((a, b) => {
+      const nameA = a.type === "solo" ? a.designer.name : a.brandName;
+      const nameB = b.type === "solo" ? b.designer.name : b.brandName;
+      return nameA.localeCompare(nameB);
+    });
+
+    // Group by first letter
+    const letterMap = new Map<string, LetterEntry[]>();
+    for (const entry of entries) {
+      const name = entry.type === "solo" ? entry.designer.name : entry.brandName;
+      const letter = name.charAt(0).toUpperCase();
+      if (!letterMap.has(letter)) letterMap.set(letter, []);
+      letterMap.get(letter)!.push(entry);
+    }
+
+    return [...letterMap.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [filtered]);
 
   const allLetters = useMemo(() => {
@@ -240,80 +323,39 @@ const TradeDesigners = () => {
           </div>
         ) : (
           <div className="space-y-10">
-            {grouped.map(([letter, items]) => (
+            {grouped.map(([letter, entries]) => (
               <div key={letter} id={`designer-letter-${letter}`} className="scroll-mt-20">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="font-display text-2xl text-foreground/20 tracking-widest">{letter}</span>
                   <div className="flex-1 h-px bg-border" />
                   <span className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
-                    {items.length} {items.length === 1 ? "atelier" : "ateliers"}
+                    {entries.length} {entries.length === 1 ? "entry" : "entries"}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {items.map((brand) => (
-                    <button
-                      key={brand.id}
-                      onClick={() => navigate(`/trade/designers/${brand.slug}`)}
-                      className="group text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
-                    >
-                      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
-                        {brand.image_url ? (
-                          <img
-                            src={brand.image_url}
-                            alt={brand.name}
-                            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
-                            <span className="font-display text-3xl text-muted-foreground/20">
-                              {brand.name.charAt(0)}
-                            </span>
+                <div className="space-y-6">
+                  {entries.map((entry) => {
+                    if (entry.type === "brand") {
+                      return (
+                        <div key={entry.brandName}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="font-display text-xs uppercase tracking-[0.15em] text-primary">{entry.brandName}</span>
+                            <div className="flex-1 h-px bg-primary/20" />
+                            <span className="font-body text-[10px] text-muted-foreground">{entry.children.length} designers</span>
                           </div>
-                        )}
-
-                        {/* Always-visible name overlay at bottom */}
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pt-10 pb-4">
-                          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
-                            {brand.name}
-                          </p>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                            {entry.children.map((brand) => (
+                              <DesignerCard key={brand.id} brand={brand} navigate={navigate} />
+                            ))}
+                          </div>
                         </div>
-
-                        {/* Hover overlay: specialty + More Info button */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
-                          {brand.specialty && (
-                            <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">
-                              {brand.specialty}
-                            </p>
-                          )}
-                          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-                            More Info
-                          </span>
-                          {brand.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 justify-center mt-3">
-                              {brand.tags.slice(0, 3).map((tag) => (
-                                <span key={tag} className="font-body text-[8px] uppercase tracking-[0.12em] text-white/70 bg-white/10 px-2 py-0.5 rounded-full">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Badges (visible on hover) */}
-                        {brand.productCount > 0 && (
-                          <span className="absolute top-2.5 right-2.5 bg-background/90 backdrop-blur-sm text-foreground font-body text-[10px] px-2 py-0.5 rounded-full border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {brand.productCount} {brand.productCount === 1 ? "piece" : "pieces"}
-                          </span>
-                        )}
-                        {brand.source === "collectible" && (
-                          <span className="absolute top-2.5 left-2.5 bg-primary/90 backdrop-blur-sm text-primary-foreground font-body text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full">
-                            Collectible
-                          </span>
-                        )}
+                      );
+                    }
+                    return (
+                      <div key={entry.designer.id} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        <DesignerCard brand={entry.designer} navigate={navigate} />
                       </div>
-                    </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
