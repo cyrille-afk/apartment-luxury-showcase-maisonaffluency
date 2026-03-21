@@ -399,11 +399,11 @@ const TradeGallery = () => {
                   )}
                    {/* Favorite button */}
                    <button
-                     onClick={(e) => { e.stopPropagation(); toggleFavorite(product.id); }}
+                     onClick={(e) => { e.stopPropagation(); handleFavorite(product); }}
                      className={cn(
                        "absolute top-2 left-2 z-10 p-1.5 rounded-full transition-all",
                        isFavorited(product.id)
-                         ? "bg-background/90 text-red-500 shadow-md"
+                         ? "bg-background/90 text-destructive shadow-md"
                          : "bg-background/70 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background/90"
                      )}
                      aria-label={isFavorited(product.id) ? "Remove from favorites" : "Add to favorites"}
