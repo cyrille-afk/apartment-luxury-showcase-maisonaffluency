@@ -311,7 +311,7 @@ const TradeDesigners = () => {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="font-display text-2xl text-foreground tracking-wide">Designers & Ateliers</h1>
+              <h1 className="font-display text-2xl text-foreground tracking-wide">Designers & Ateliers Library</h1>
               <p className="font-body text-sm text-muted-foreground mt-1">
                 {enriched.length} designers & ateliers
                 {(activeFilters.length > 0 || search) && (
