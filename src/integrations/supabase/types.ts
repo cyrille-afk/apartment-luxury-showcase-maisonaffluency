@@ -414,6 +414,7 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
+          currency: string
           description: string | null
           designer_id: string
           dimensions: string | null
@@ -431,10 +432,12 @@ export type Database = {
           subtitle: string | null
           tags: string[] | null
           title: string
+          trade_price_cents: number | null
         }
         Insert: {
           category?: string | null
           created_at?: string
+          currency?: string
           description?: string | null
           designer_id: string
           dimensions?: string | null
@@ -452,10 +455,12 @@ export type Database = {
           subtitle?: string | null
           tags?: string[] | null
           title?: string
+          trade_price_cents?: number | null
         }
         Update: {
           category?: string | null
           created_at?: string
+          currency?: string
           description?: string | null
           designer_id?: string
           dimensions?: string | null
@@ -473,6 +478,7 @@ export type Database = {
           subtitle?: string | null
           tags?: string[] | null
           title?: string
+          trade_price_cents?: number | null
         }
         Relationships: [
           {
