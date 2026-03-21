@@ -138,9 +138,10 @@ const TradeLayout = () => {
                 <span className="font-display text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span>
               </div>
             </div>
-            {/* Mobile: centered page title */}
-            <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
-              <span className="font-display text-xs text-foreground uppercase tracking-[0.15em]">{pageTitle}</span>
+            {/* Mobile: centered Trade Portal */}
+            <div className="absolute left-1/2 -translate-x-1/2 md:hidden flex items-center gap-1.5">
+              <LayoutDashboard className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="font-display text-xs text-foreground uppercase tracking-[0.15em]">Trade Portal</span>
             </div>
             {/* Right: notification bell */}
             <div className="ml-auto">
