@@ -7,6 +7,8 @@ interface BrandEntry {
   name: string;
   /** URL to the first PDF for this brand (used for auto-thumbnail) */
   pdfUrl?: string | null;
+  /** Designer portrait / image to use as thumbnail */
+  imageUrl?: string | null;
   docCount: number;
 }
 
