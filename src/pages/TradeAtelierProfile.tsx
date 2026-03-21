@@ -404,7 +404,7 @@ const TradeAtelierProfile = () => {
                           )}
                           {pick.pdf_url && (
                             <a
-                              href={buildSpecSheetUrl(pick.pdf_url, group.name, pick.title)}
+                              href={buildSpecSheetUrl(pick.pdf_url, designerLabel || designer.name, pick.title)}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
