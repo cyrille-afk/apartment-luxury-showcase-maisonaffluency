@@ -85,7 +85,15 @@ const TradeAtelierProfile = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [slug]);
-  const { data: picks = [] } = useDesignerPicks(designer?.id);
+  // For parent brands (founder === name), fetch picks from all sub-designers
+  const isParentBrand = designer?.founder === designer?.name || (!designer?.founder && designer?.name);
+  const { data: groupedPicks = [] } = useGroupedDesignerPicks(
+    isParentBrand && designer?.founder === designer?.name ? designer : undefined
+  );
+  const { data: ownPicks = [] } = useDesignerPicks(
+    isParentBrand && designer?.founder === designer?.name ? undefined : designer?.id
+  );
+  const picks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const fxRates = useFxRates();
