@@ -36,6 +36,7 @@ const ALL_FILTER_TAGS = [
 type EnrichedDesigner = {
   id: string; slug: string; name: string; founder: string | null; specialty: string;
   image_url: string; source: string; tags: string[]; productCount: number;
+  isAtelierCard?: boolean;
   [key: string]: unknown;
 };
 
