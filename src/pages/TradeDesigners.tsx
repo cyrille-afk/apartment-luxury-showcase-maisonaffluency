@@ -102,7 +102,7 @@ const BrandGroupCard = ({
   onToggle: () => void;
   heroImage?: string;
 }) => {
-  const previewImage = heroImage || children.find((c) => c.image_url)?.image_url || "";
+  const previewImage = heroImage || "";
 
   return (
     <>
