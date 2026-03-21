@@ -416,7 +416,14 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                      <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{pick.title}</h3>
+                      <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">
+                        {pick.title}
+                        {designerLabel && (
+                          <span className="font-body text-[9px] md:text-[10px] text-muted-foreground ml-1.5">
+                            — {designerLabel}
+                          </span>
+                        )}
+                      </h3>
                       {pick.subtitle && (
                         <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>
                       )}
@@ -446,8 +453,6 @@ const TradeAtelierProfile = () => {
                     );
                   })}
                 </div>
-              </div>
-            ))}
           </motion.div>
           );
         })()}
