@@ -261,49 +261,6 @@ const TradeAtelierProfile = () => {
           </div>
         )}
 
-        {/* Related Ateliers */}
-        {related.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={transition}
-            className="pt-10 border-t border-border"
-          >
-            <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">Portraits</p>
-            <h2 className="font-display text-lg tracking-wide text-foreground mb-6">
-              Our Featured Designers
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {related.map((r) => (
-                <button
-                  key={r.slug}
-                  onClick={() => navigate(`/trade/designers/${r.slug}`)}
-                  className="group text-left rounded-lg overflow-hidden border border-border hover:border-foreground/20 transition-all bg-background"
-                >
-                  <div className="aspect-[3/2] bg-muted/20 overflow-hidden">
-                    {r.image_url && (
-                      <img
-                        src={r.image_url}
-                        alt={r.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <p className="font-display text-sm tracking-wide">{displayName(r.name)}</p>
-                    {r.specialty && (
-                      <p className="font-body text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
-                        {r.specialty}
-                      </p>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
       </div>
     </>
   );
