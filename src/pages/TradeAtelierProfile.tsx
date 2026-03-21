@@ -151,121 +151,115 @@ const TradeAtelierProfile = () => {
           </div>
         </motion.div>
 
-        {/* Content grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* Left: Bio + Philosophy */}
-          <div className="lg:col-span-1 space-y-8">
-            {designer.biography && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...transition, delay: 0.2 }}
-              >
-                <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
-                  About
-                </h2>
-                <p className="font-body text-sm leading-relaxed text-foreground/85">
-                  {designer.biography}
-                </p>
-              </motion.div>
-            )}
+        {/* Biography — full width, justified */}
+        {designer.biography && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...transition, delay: 0.2 }}
+          >
+            <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+              About
+            </h2>
+            <p className="font-body text-sm leading-relaxed text-foreground/85 text-justify whitespace-pre-line">
+              {designer.biography}
+            </p>
+          </motion.div>
+        )}
 
-            {designer.philosophy && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...transition, delay: 0.3 }}
-                className="border-l-2 border-primary/30 pl-5 py-2"
-              >
-                <Quote className="w-4 h-4 text-primary/40 mb-2" />
-                <blockquote className="font-display text-sm italic leading-relaxed text-foreground/70">
-                  "{designer.philosophy}"
-                </blockquote>
-              </motion.div>
-            )}
+        {/* Philosophy quote — full width */}
+        {designer.philosophy && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...transition, delay: 0.3 }}
+            className="border-l-2 border-primary/30 pl-5 py-2"
+          >
+            <Quote className="w-4 h-4 text-primary/40 mb-2" />
+            <blockquote className="font-display text-sm italic leading-relaxed text-foreground/70">
+              "{designer.philosophy}"
+            </blockquote>
+          </motion.div>
+        )}
 
-            {designer.notable_works && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...transition, delay: 0.4 }}
-              >
-                <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
-                  Notable Works
-                </h2>
-                <p className="font-body text-sm text-foreground/70">{designer.notable_works}</p>
-              </motion.div>
-            )}
-          </div>
+        {designer.notable_works && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...transition, delay: 0.4 }}
+          >
+            <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+              Notable Works
+            </h2>
+            <p className="font-body text-sm text-foreground/70">{designer.notable_works}</p>
+          </motion.div>
+        )}
 
-          {/* Right: Curator's Picks */}
-          <div className="lg:col-span-2">
-            {picks.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...transition, delay: 0.25 }}
-              >
-                <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-6">
-                  Curator's Picks
-                </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {picks.map((pick) => (
-                    <div key={pick.id} className="group">
-                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2">
-                        <img
-                          src={pick.image_url}
-                          alt={pick.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      </div>
-                      <h3 className="font-display text-xs tracking-wide">{pick.title}</h3>
-                      {pick.subtitle && (
-                        <p className="font-body text-[10px] text-muted-foreground">{pick.subtitle}</p>
-                      )}
-                      {pick.materials && (
-                        <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2">
-                          {pick.materials}
-                        </p>
-                      )}
-                      {pick.dimensions && (
-                        <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
-                          {pick.dimensions}
-                        </p>
-                      )}
-                      {pick.edition && (
-                        <p className="font-body text-[9px] text-primary/70 mt-0.5 italic">
-                          {pick.edition}
-                        </p>
-                      )}
-                      {pick.pdf_url && (
-                        <a
-                          href={pick.pdf_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 mt-1 text-[9px] text-primary hover:underline"
-                        >
-                          <FileText className="w-3 h-3" />
-                          Spec Sheet
-                        </a>
-                      )}
-                    </div>
-                  ))}
+        {/* Curator's Picks — full width */}
+        {picks.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...transition, delay: 0.25 }}
+          >
+            <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-6">
+              Curator's Picks
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {picks.map((pick) => (
+                <div key={pick.id} className="group">
+                  <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2">
+                    <img
+                      src={pick.image_url}
+                      alt={pick.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  </div>
+                  <h3 className="font-display text-xs tracking-wide">{pick.title}</h3>
+                  {pick.subtitle && (
+                    <p className="font-body text-[10px] text-muted-foreground">{pick.subtitle}</p>
+                  )}
+                  {pick.materials && (
+                    <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2">
+                      {pick.materials}
+                    </p>
+                  )}
+                  {pick.dimensions && (
+                    <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
+                      {pick.dimensions}
+                    </p>
+                  )}
+                  {pick.edition && (
+                    <p className="font-body text-[9px] text-primary/70 mt-0.5 italic">
+                      {pick.edition}
+                    </p>
+                  )}
+                  {pick.pdf_url && (
+                    <a
+                      href={pick.pdf_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 mt-1 text-[9px] text-primary hover:underline"
+                    >
+                      <FileText className="w-3 h-3" />
+                      Spec Sheet
+                    </a>
+                  )}
                 </div>
-              </motion.div>
-            )}
+              ))}
+            </div>
+          </motion.div>
+        )}
 
-            {picks.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/10 rounded-xl">
-                <Package className="w-8 h-8 text-muted-foreground/30 mb-3" />
-                <p className="font-body text-sm text-muted-foreground">
-                  Curator's picks coming soon
-                </p>
-              </div>
-            )}
+        {picks.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/10 rounded-xl">
+            <Package className="w-8 h-8 text-muted-foreground/30 mb-3" />
+            <p className="font-body text-sm text-muted-foreground">
+              Curator's picks coming soon
+            </p>
           </div>
-        </div>
+        )}
 
         {/* Related Ateliers */}
         {related.length > 0 && (
