@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
@@ -8,6 +8,20 @@ import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useD
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { Badge } from "@/components/ui/badge";
 import CurrencyToggle, { DisplayCurrency, useFxRates, formatPriceConverted } from "@/components/trade/CurrencyToggle";
+
+/** Replace a Cloudinary URL's width transform for responsive loading */
+function responsiveCloudinaryUrl(url: string, width: number): string {
+  if (!url.includes("res.cloudinary.com")) return url;
+  // Replace existing w_XXXX or insert width transform
+  const replaced = url.replace(/w_\d+/, `w_${width}`);
+  if (replaced !== url) return replaced;
+  // No existing width — insert after /upload/
+  return url.replace("/upload/", `/upload/w_${width},c_fill,q_auto,f_auto/`);
+}
+
+function pickSrcSet(url: string): string {
+  return [300, 400, 600, 800].map(w => `${responsiveCloudinaryUrl(url, w)} ${w}w`).join(", ");
+}
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
