@@ -27,6 +27,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 const TradeAxonometricRequests = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -35,6 +36,16 @@ const TradeAxonometricRequests = () => {
   const [notes, setNotes] = useState("");
   const [editingRequest, setEditingRequest] = useState<any | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [selectedFavoriteIds, setSelectedFavoriteIds] = useState<string[]>(() => {
+    const prefilled = searchParams.get("favorites");
+    if (prefilled) return prefilled.split(",").filter(Boolean);
+    return [];
+  });
+
+  // Auto-open form if favorites were prefilled from the Favorites page
+  useState(() => {
+    if (searchParams.get("favorites")) setShowForm(true);
+  });
 
   const { data: requests, refetch } = useQuery({
     queryKey: ["axonometric-requests", user?.id],
