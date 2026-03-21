@@ -1,10 +1,9 @@
 /**
- * Build an in-app spec sheet viewer URL so the browser address bar
- * shows our domain instead of a storage provider URL.
+ * Build a clean in-app spec sheet viewer URL.
+ * Only brand + product appear in the address bar.
  */
-export function buildSpecSheetUrl(pdfUrl: string, brand: string, product: string): string {
+export function buildSpecSheetUrl(_pdfUrl: string, brand: string, product: string): string {
   const params = new URLSearchParams();
-  params.set("url", pdfUrl);
   params.set("brand", brand);
   params.set("product", product);
   return `/trade/spec-sheet?${params.toString()}`;
