@@ -247,7 +247,9 @@ const TradeAtelierProfile = () => {
                   )}
                   {pick.trade_price_cents != null && (
                     <p className="font-display text-xs text-foreground mt-1">
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: pick.currency || 'EUR', minimumFractionDigits: 0 }).format(pick.trade_price_cents / 100)}
+                      {formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}
+                    </p>
+                  )}
                     </p>
                   )}
                   {pick.edition && (
