@@ -74,14 +74,50 @@ const TradeDesigners = () => {
     return result;
   }, [enriched, search, activeFilters]);
 
+  // Group: independent designers + brand groups (designers sharing a founder)
   const grouped = useMemo(() => {
-    const map = new Map<string, typeof filtered>();
-    for (const b of filtered) {
-      const letter = b.name.charAt(0).toUpperCase();
-      if (!map.has(letter)) map.set(letter, []);
-      map.get(letter)!.push(b);
+    // Separate designers with a founder (brand children) from independents
+    const brandChildren = new Map<string, typeof filtered>();
+    const independents: typeof filtered = [];
+
+    for (const d of filtered) {
+      if (d.founder) {
+        const key = d.founder;
+        if (!brandChildren.has(key)) brandChildren.set(key, []);
+        brandChildren.get(key)!.push(d);
+      } else {
+        independents.push(d);
+      }
     }
-    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+
+    // Build a unified list of items: either a solo designer or a brand group header
+    type LetterEntry = { type: "solo"; designer: (typeof filtered)[0] } | { type: "brand"; brandName: string; children: typeof filtered };
+    const entries: LetterEntry[] = [];
+
+    for (const d of independents) {
+      entries.push({ type: "solo", designer: d });
+    }
+    for (const [brandName, children] of brandChildren) {
+      entries.push({ type: "brand", brandName, children: children.sort((a, b) => a.name.localeCompare(b.name)) });
+    }
+
+    // Sort all entries by their display name (brand name or designer name)
+    entries.sort((a, b) => {
+      const nameA = a.type === "solo" ? a.designer.name : a.brandName;
+      const nameB = b.type === "solo" ? b.designer.name : b.brandName;
+      return nameA.localeCompare(nameB);
+    });
+
+    // Group by first letter
+    const letterMap = new Map<string, LetterEntry[]>();
+    for (const entry of entries) {
+      const name = entry.type === "solo" ? entry.designer.name : entry.brandName;
+      const letter = name.charAt(0).toUpperCase();
+      if (!letterMap.has(letter)) letterMap.set(letter, []);
+      letterMap.get(letter)!.push(entry);
+    }
+
+    return [...letterMap.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [filtered]);
 
   const allLetters = useMemo(() => {
