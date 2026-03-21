@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
@@ -6,6 +6,7 @@ import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText } from "lu
 import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useDesigner";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { Badge } from "@/components/ui/badge";
+import CurrencyToggle, { DisplayCurrency, useFxRates, formatPriceConverted } from "@/components/trade/CurrencyToggle";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
@@ -29,6 +30,8 @@ const TradeAtelierProfile = () => {
   }, [slug]);
   const { data: picks = [] } = useDesignerPicks(designer?.id);
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
+  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const fxRates = useFxRates();
 
   const allProducts = useMemo(() => getAllTradeProducts(), []);
 
@@ -211,9 +214,12 @@ const TradeAtelierProfile = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transition, delay: 0.25 }}
           >
-            <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-6">
-              Curator's Picks
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground">
+                Curator's Picks
+              </h2>
+              <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {picks.map((pick) => (
                 <div key={pick.id} className="group">
@@ -241,7 +247,7 @@ const TradeAtelierProfile = () => {
                   )}
                   {pick.trade_price_cents != null && (
                     <p className="font-display text-xs text-foreground mt-1">
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: pick.currency || 'EUR', minimumFractionDigits: 0 }).format(pick.trade_price_cents / 100)}
+                      {formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}
                     </p>
                   )}
                   {pick.edition && (
