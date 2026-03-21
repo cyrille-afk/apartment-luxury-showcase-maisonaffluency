@@ -93,11 +93,14 @@ const TradeAtelierProfile = () => {
       <div className="space-y-8">
         {/* Back */}
         <button
-          onClick={() => navigate("/trade/designers")}
+          onClick={() => {
+            const atelierName = designer.founder || designer.name;
+            navigate(`/trade/designers?brand=${encodeURIComponent(atelierName)}`);
+          }}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          All Ateliers
+          {designer.founder ? `Back to ${designer.founder}` : "All Ateliers"}
         </button>
 
         {/* Hero + About — side by side on desktop */}
