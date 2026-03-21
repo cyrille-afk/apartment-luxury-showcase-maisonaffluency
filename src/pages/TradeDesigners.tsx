@@ -523,21 +523,9 @@ const TradeDesigners = () => {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {entries.map((entry) =>
-                    entry.type === "solo" ? (
-                      <DesignerCard key={entry.designer.id} brand={entry.designer} navigate={navigate} />
-                    ) : (
-                      <BrandGroupCard
-                        key={entry.brandName}
-                        brandName={entry.brandName}
-                        children={entry.children}
-                        navigate={navigate}
-                        isExpanded={expandedBrands.has(entry.brandName)}
-                        onToggle={() => toggleBrandExpand(entry.brandName)}
-                        heroImage={entry.heroImage}
-                      />
-                    )
-                  )}
+                  {entries.map((entry) => (
+                    <DesignerCard key={entry.designer.id} brand={entry.designer} navigate={navigate} />
+                  ))}
                 </div>
               </div>
             ))}
