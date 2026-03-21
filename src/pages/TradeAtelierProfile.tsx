@@ -301,7 +301,9 @@ const TradeAtelierProfile = () => {
                   )}
                   {pick.trade_price_cents != null && (
                     <p className="font-display text-[11px] md:text-xs text-foreground mt-1">
-                      {formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}
+                      {(isTradeUser || isAdmin)
+                        ? formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)
+                        : "Price on request"}
                     </p>
                   )}
                   {pick.edition && (
