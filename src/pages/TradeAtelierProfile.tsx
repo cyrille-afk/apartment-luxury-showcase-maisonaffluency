@@ -30,6 +30,8 @@ const TradeAtelierProfile = () => {
   }, [slug]);
   const { data: picks = [] } = useDesignerPicks(designer?.id);
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
+  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const fxRates = useFxRates();
 
   const allProducts = useMemo(() => getAllTradeProducts(), []);
 
