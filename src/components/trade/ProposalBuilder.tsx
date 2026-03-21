@@ -69,6 +69,7 @@ export default function ProposalBuilder({
   emptyRoomUrl,
   emptyRoomGenerating,
   style,
+  preloadedProductIds,
   onClose,
   onResult,
 }: ProposalBuilderProps) {
