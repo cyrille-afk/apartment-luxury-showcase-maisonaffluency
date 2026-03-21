@@ -410,6 +410,140 @@ export type Database = {
           },
         ]
       }
+      designer_curator_picks: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          designer_id: string
+          dimensions: string | null
+          edition: string | null
+          hover_image_url: string | null
+          id: string
+          image_url: string
+          materials: string | null
+          pdf_filename: string | null
+          pdf_url: string | null
+          pdf_urls: Json | null
+          photo_credit: string | null
+          sort_order: number
+          subcategory: string | null
+          subtitle: string | null
+          tags: string[] | null
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          designer_id: string
+          dimensions?: string | null
+          edition?: string | null
+          hover_image_url?: string | null
+          id?: string
+          image_url?: string
+          materials?: string | null
+          pdf_filename?: string | null
+          pdf_url?: string | null
+          pdf_urls?: Json | null
+          photo_credit?: string | null
+          sort_order?: number
+          subcategory?: string | null
+          subtitle?: string | null
+          tags?: string[] | null
+          title?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          designer_id?: string
+          dimensions?: string | null
+          edition?: string | null
+          hover_image_url?: string | null
+          id?: string
+          image_url?: string
+          materials?: string | null
+          pdf_filename?: string | null
+          pdf_url?: string | null
+          pdf_urls?: Json | null
+          photo_credit?: string | null
+          sort_order?: number
+          subcategory?: string | null
+          subtitle?: string | null
+          tags?: string[] | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "designer_curator_picks_designer_id_fkey"
+            columns: ["designer_id"]
+            isOneToOne: false
+            referencedRelation: "designers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      designers: {
+        Row: {
+          biography: string
+          created_at: string
+          display_name: string | null
+          founder: string | null
+          id: string
+          image_url: string
+          is_published: boolean
+          links: Json | null
+          logo_url: string | null
+          name: string
+          notable_works: string
+          philosophy: string
+          slug: string
+          sort_order: number
+          source: string
+          specialty: string
+          updated_at: string
+        }
+        Insert: {
+          biography?: string
+          created_at?: string
+          display_name?: string | null
+          founder?: string | null
+          id?: string
+          image_url?: string
+          is_published?: boolean
+          links?: Json | null
+          logo_url?: string | null
+          name: string
+          notable_works?: string
+          philosophy?: string
+          slug: string
+          sort_order?: number
+          source?: string
+          specialty?: string
+          updated_at?: string
+        }
+        Update: {
+          biography?: string
+          created_at?: string
+          display_name?: string | null
+          founder?: string | null
+          id?: string
+          image_url?: string
+          is_published?: boolean
+          links?: Json | null
+          logo_url?: string | null
+          name?: string
+          notable_works?: string
+          philosophy?: string
+          slug?: string
+          sort_order?: number
+          source?: string
+          specialty?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
