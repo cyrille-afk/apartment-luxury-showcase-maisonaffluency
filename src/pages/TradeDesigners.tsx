@@ -189,22 +189,29 @@ const TradeDesigners = () => {
 
   // Carousel selection filters the A-Z library when a specific brand/designer is selected
   const filtered = useMemo(() => {
-    // Exclude self-referencing atelier records (they only serve as carousel headers)
-    let result = enriched.filter((d) => !(d.founder && d.founder === d.name));
+    let result: EnrichedDesigner[] = [];
 
-    // Filter by carousel mode: ateliers show atelier members, designers show independents
-    if (selectedBrand !== "all") {
-      if (carouselMode === "ateliers") {
-        result = result.filter((d) => d.founder === selectedBrand);
+    if (carouselMode === "ateliers") {
+      // Include atelier header cards (self-referencing) marked distinctly
+      const atelierHeaders = enriched
+        .filter((d) => d.founder && d.founder === d.name)
+        .map((d) => ({ ...d, isAtelierCard: true }));
+      const atelierMembers = enriched.filter((d) => d.founder && d.founder !== d.name);
+
+      if (selectedBrand !== "all") {
+        // Show the atelier header + its members
+        result = [
+          ...atelierHeaders.filter((d) => d.name === selectedBrand),
+          ...atelierMembers.filter((d) => d.founder === selectedBrand),
+        ];
       } else {
-        result = result.filter((d) => d.name === selectedBrand);
+        result = [...atelierHeaders, ...atelierMembers];
       }
     } else {
-      // "All" within current mode: filter by category
-      if (carouselMode === "ateliers") {
-        result = result.filter((d) => d.founder);
-      } else {
-        result = result.filter((d) => !d.founder);
+      // Designers mode: only independents (no founder)
+      result = enriched.filter((d) => !d.founder);
+      if (selectedBrand !== "all") {
+        result = result.filter((d) => d.name === selectedBrand);
       }
     }
 
