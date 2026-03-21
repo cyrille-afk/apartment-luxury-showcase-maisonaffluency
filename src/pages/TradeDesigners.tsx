@@ -272,46 +272,16 @@ const TradeDesigners = () => {
   // Group into a flat A-Z list where brand groups appear as single entries
   type GridEntry =
     | { type: "solo"; designer: EnrichedDesigner; sortName: string }
-    | { type: "brand"; brandName: string; children: EnrichedDesigner[]; sortName: string; heroImage?: string };
+  type GridEntry = { type: "solo"; designer: EnrichedDesigner; sortName: string };
 
   const grouped = useMemo(() => {
-    const brandChildren = new Map<string, EnrichedDesigner[]>();
-    const independents: EnrichedDesigner[] = [];
-    // Track solo designers whose name matches a brand (founder) – merge into brand group
-    const brandSoloCards = new Map<string, EnrichedDesigner>();
-
-    // First pass: identify all founder brand names
-    const founderNames = new Set<string>();
-    for (const d of filtered) {
-      if (d.founder) founderNames.add(d.founder);
-    }
-
-    for (const d of filtered) {
-      if (d.founder) {
-        if (!brandChildren.has(d.founder)) brandChildren.set(d.founder, []);
-        brandChildren.get(d.founder)!.push(d);
-      } else if (founderNames.has(d.name)) {
-        // This solo entry IS the brand itself (e.g. "Pouenat") – absorb it
-        brandSoloCards.set(d.name, d);
-        if (!brandChildren.has(d.name)) brandChildren.set(d.name, []);
-      } else {
-        independents.push(d);
-      }
-    }
-
     const entries: GridEntry[] = [];
-    for (const d of independents) {
+
+    for (const d of filtered) {
       entries.push({ type: "solo", designer: d, sortName: d.name });
     }
-    for (const [brandName, children] of brandChildren) {
-      entries.push({
-        type: "brand",
-        brandName,
-        children: children.sort((a, b) => a.name.localeCompare(b.name)),
-        sortName: brandName,
-        heroImage: brandSoloCards.get(brandName)?.image_url || undefined,
-      });
-    }
+
+    entries.sort((a, b) => a.sortName.localeCompare(b.sortName));
     entries.sort((a, b) => a.sortName.localeCompare(b.sortName));
 
     const letterMap = new Map<string, GridEntry[]>();
