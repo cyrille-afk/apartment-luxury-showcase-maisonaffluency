@@ -244,7 +244,10 @@ const TradeDesigners = () => {
 
     const letterMap = new Map<string, GridEntry[]>();
     for (const entry of entries) {
-      const letter = entry.sortName.charAt(0).toUpperCase();
+      // Group atelier members under their atelier's letter
+      const d = entry.designer;
+      const groupName = d.isAtelierCard ? d.name : (d.founder && d.founder !== d.name ? d.founder : d.name);
+      const letter = groupName.charAt(0).toUpperCase();
       if (!letterMap.has(letter)) letterMap.set(letter, []);
       letterMap.get(letter)!.push(entry);
     }
