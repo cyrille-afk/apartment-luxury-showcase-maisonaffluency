@@ -535,6 +535,16 @@ const TradeGallery = () => {
                   </a>
                 )}
                 <button
+                  onClick={() => toggleFavorite(product.id)}
+                  className={cn(
+                    "p-2 rounded-full transition-all shrink-0",
+                    isFavorited(product.id) ? "text-red-500" : "text-muted-foreground hover:text-foreground"
+                  )}
+                  aria-label={isFavorited(product.id) ? "Remove from favorites" : "Favorite"}
+                >
+                  <Heart className={cn("h-3.5 w-3.5", isFavorited(product.id) && "fill-current")} />
+                </button>
+                <button
                   onClick={() => togglePin(toCompareItem(product))}
                   className={cn(
                     "p-2 rounded-full transition-all shrink-0",
