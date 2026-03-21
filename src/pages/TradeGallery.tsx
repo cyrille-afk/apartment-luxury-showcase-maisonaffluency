@@ -557,10 +557,10 @@ const TradeGallery = () => {
                   </a>
                 )}
                 <button
-                  onClick={() => toggleFavorite(product.id)}
+                  onClick={() => handleFavorite(product)}
                   className={cn(
                     "p-2 rounded-full transition-all shrink-0",
-                    isFavorited(product.id) ? "text-red-500" : "text-muted-foreground hover:text-foreground"
+                    isFavorited(product.id) ? "text-destructive" : "text-muted-foreground hover:text-foreground"
                   )}
                   aria-label={isFavorited(product.id) ? "Remove from favorites" : "Favorite"}
                 >
