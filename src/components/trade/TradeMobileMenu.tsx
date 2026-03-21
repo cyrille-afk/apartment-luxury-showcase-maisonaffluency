@@ -1,0 +1,205 @@
+import { Fragment } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ChevronRight, LogOut, Menu, X,
+  LayoutDashboard, Image, Heart, FolderArchive, MapPin,
+  Users, FolderOpen, Package, FileText, Box, Settings,
+  Shield, BarChart3, Newspaper, Award, Upload, DollarSign,
+  Presentation, AlertCircle,
+} from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
+
+const navGroups = [
+  {
+    label: "Navigation",
+    items: [
+      { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
+      { title: "Showroom", url: "/trade/showroom", icon: MapPin },
+    ],
+  },
+  {
+    label: "My Collections",
+    items: [
+      { title: "Favorites", url: "/trade/favorites", icon: Heart },
+      { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
+    ],
+  },
+  {
+    label: "Tools",
+    items: [
+      { title: "Gallery", url: "/trade/gallery", icon: Image },
+      { title: "Designers & Ateliers", url: "/trade/designers", icon: Users },
+      { title: "Brand Library", url: "/trade/documents", icon: FolderOpen },
+      { title: "Sample Requests", url: "/trade/samples", icon: Package },
+      { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
+      { title: "3D Studio", url: "/trade/axonometric-requests", icon: Box },
+      { title: "Settings", url: "/trade/settings", icon: Settings },
+    ],
+  },
+];
+
+const adminItems = [
+  { title: "Admin", url: "/trade/admin", icon: Shield },
+  { title: "Insights", url: "/trade/insights", icon: BarChart3 },
+  { title: "Journal", url: "/trade/journal", icon: Newspaper },
+  { title: "Provenance", url: "/trade/provenance", icon: Award },
+  { title: "Documents", url: "/trade/documents-admin", icon: Upload },
+  { title: "Quote Mgmt", url: "/trade/quotes-admin", icon: DollarSign },
+  { title: "Media Library", url: "/trade/media", icon: FolderArchive },
+  { title: "Axonometric Studio", url: "/trade/axonometric", icon: Box },
+  { title: "Presentations", url: "/trade/presentations", icon: Presentation },
+];
+
+interface TradeMobileMenuProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  submittedCount?: number;
+}
+
+export function TradeMobileMenu({ open, onOpenChange, submittedCount = 0 }: TradeMobileMenuProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAdmin, signOut, profile } = useAuth();
+
+  const isActive = (url: string, end?: boolean) =>
+    end ? location.pathname === url : location.pathname.startsWith(url);
+
+  const handleNav = (url: string) => {
+    onOpenChange(false);
+    // Small delay to let Sheet close animation start
+    setTimeout(() => navigate(url), 150);
+  };
+
+  const handleSignOut = async () => {
+    onOpenChange(false);
+    await signOut();
+    navigate("/trade/login");
+  };
+
+  let itemIndex = 0;
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-10 w-10 md:hidden" aria-label="Toggle menu">
+          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
+      </SheetTrigger>
+
+      <SheetContent side="left" className="w-full overflow-y-auto p-0" aria-describedby={undefined}>
+        <div className="sr-only"><h2>Trade Portal Menu</h2></div>
+
+        {/* Brand header */}
+        <div className="flex flex-col items-center pt-6 pb-4 border-b border-border/30 mb-2 px-6">
+          <button onClick={() => handleNav("/trade")} className="group cursor-pointer">
+            <span className="font-display text-base text-foreground tracking-wide block text-center">
+              Maison Affluency
+            </span>
+            <span className="font-body text-[9px] text-muted-foreground uppercase tracking-[0.2em] block text-center">
+              Trade Portal
+            </span>
+          </button>
+        </div>
+
+        {/* Navigation groups */}
+        <div className="flex flex-col px-6 pb-32">
+          {navGroups.map((group, gi) => (
+            <Fragment key={group.label}>
+              {gi > 0 && <div className="border-t border-border/30 my-3" />}
+              <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-1 mt-2">
+                {group.label}
+              </span>
+              {group.items.map((item) => {
+                const idx = itemIndex++;
+                const active = isActive(item.url, item.end);
+                return (
+                  <button
+                    key={item.url}
+                    onClick={() => handleNav(item.url)}
+                    className={cn(
+                      "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
+                      active
+                        ? "text-foreground font-semibold"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                    style={{ animationDelay: `${idx * 60}ms`, animationFillMode: "forwards" }}
+                  >
+                    <span className="flex items-center gap-3">
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {item.title}
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                  </button>
+                );
+              })}
+            </Fragment>
+          ))}
+
+          {/* Admin group */}
+          {isAdmin && (
+            <>
+              <div className="border-t border-border/30 my-3" />
+              <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-1 mt-2">
+                Admin
+              </span>
+              {adminItems.map((item) => {
+                const idx = itemIndex++;
+                const active = isActive(item.url);
+                return (
+                  <button
+                    key={item.url}
+                    onClick={() => handleNav(item.url)}
+                    className={cn(
+                      "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
+                      active
+                        ? "text-foreground font-semibold"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                    style={{ animationDelay: `${idx * 60}ms`, animationFillMode: "forwards" }}
+                  >
+                    <span className="flex items-center gap-3">
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {item.title}
+                      {item.url === "/trade/quotes-admin" && submittedCount > 0 && (
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-medium leading-none">
+                          <AlertCircle className="h-2.5 w-2.5" />
+                          {submittedCount}
+                        </span>
+                      )}
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                  </button>
+                );
+              })}
+            </>
+          )}
+
+          {/* User + Sign Out */}
+          <div className="border-t border-border/30 mt-6 pt-4">
+            {profile && (
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center shrink-0">
+                  <span className="font-display text-[10px] text-muted-foreground">
+                    {(profile.first_name?.[0] || "")}{(profile.last_name?.[0] || "")}
+                  </span>
+                </div>
+                <p className="font-body text-sm text-muted-foreground">
+                  {profile.first_name} {profile.last_name}
+                </p>
+              </div>
+            )}
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-3 w-full py-3 font-body text-[15px] tracking-wide text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
