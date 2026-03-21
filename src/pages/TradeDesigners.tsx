@@ -315,7 +315,7 @@ const TradeDesigners = () => {
             label={
               <div className="mb-2">
                 <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
-                  Browse by brand · {brandEntries.length} ateliers
+                  Browse by brand · {brandEntries.length} multi-designer brands
                 </p>
                 <p className="font-body text-[10px] text-muted-foreground/60 mt-0.5 normal-case tracking-normal">
                   Many brands collaborate with multiple designers — select one to explore its roster.
