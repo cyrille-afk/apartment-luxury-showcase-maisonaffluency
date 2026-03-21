@@ -249,7 +249,7 @@ const TradeDesigners = () => {
   return (
     <>
       <Helmet>
-        <title>Designers Library — Maison Affluency Trade</title>
+        <title>Designers & Ateliers — Maison Affluency Trade</title>
       </Helmet>
       <div id="designers-carousel-top" className="space-y-6">
         {(atelierEntries.length > 0 || designerEntries.length > 0) && (
