@@ -526,6 +526,21 @@ const TradeDesigners = () => {
           </div>
         )}
       </div>
+
+      {/* Back to top FAB */}
+      {showBackToTop && (
+        <button
+          onClick={() => {
+            const el = document.getElementById("designers-carousel-top");
+            el?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-foreground text-background shadow-lg hover:bg-foreground/90 transition-all font-body text-[11px] uppercase tracking-[0.1em]"
+          aria-label="Back to top"
+        >
+          <ArrowUp className="h-3.5 w-3.5" />
+          Back to top
+        </button>
+      )}
     </>
   );
 };
