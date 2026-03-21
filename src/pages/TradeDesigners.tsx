@@ -421,6 +421,25 @@ const TradeDesigners = () => {
               </button>
             )}
           </div>
+        ) : selectedBrand !== "all" ? (
+          /* Flat alphabetical grid when a specific atelier/designer is selected */
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="font-display text-sm text-foreground tracking-wide">{selectedBrand}</span>
+              <div className="flex-1 h-px bg-border" />
+              <span className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
+                {filtered.length} {filtered.length === 1 ? "designer" : "designers"}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {filtered
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((d) => (
+                  <DesignerCard key={d.id} brand={d} navigate={navigate} />
+                ))}
+            </div>
+          </div>
         ) : (
           <div className="space-y-10">
             {grouped.map(([letter, entries]) => (
