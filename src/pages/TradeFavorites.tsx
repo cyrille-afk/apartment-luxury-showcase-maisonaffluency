@@ -32,6 +32,7 @@ interface FavoritedProduct {
 export default function TradeFavorites() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [favorites, setFavorites] = useState<FavoritedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -39,6 +40,7 @@ export default function TradeFavorites() {
   const [currency, setCurrency] = useState<DisplayCurrency>("SGD");
   const rates = useFxRates();
   const [removing, setRemoving] = useState<string | null>(null);
+  const [selectedFor3D, setSelectedFor3D] = useState<Set<string>>(new Set());
 
   const fetchFavorites = useCallback(async () => {
     if (!user) return;
