@@ -276,8 +276,9 @@ const TradeAtelierProfile = () => {
             transition={transition}
             className="pt-10 border-t border-border"
           >
-            <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-6">
-              Related Ateliers
+            <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">Portraits</p>
+            <h2 className="font-display text-lg tracking-wide text-foreground mb-6">
+              Our Featured Designers
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {related.map((r) => (
