@@ -124,7 +124,7 @@ const TradeAtelierProfile = () => {
             {designer.founder && designer.founder !== designer.name && (
               <Link
                 to={`/trade/designers/${designer.founder.toLowerCase().replace(/\s+/g, '-')}`}
-                className="absolute top-4 left-4 md:top-6 md:left-6 z-10 px-4 py-3 md:px-5 md:py-4 bg-black text-white font-display text-xs md:text-sm tracking-[0.2em] uppercase hover:bg-black/80 transition-colors shadow-lg"
+                className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[10px] md:text-xs tracking-[0.15em] uppercase hover:bg-black/80 transition-colors shadow-lg flex items-center justify-center text-center"
               >
                 {designer.founder}
               </Link>
