@@ -239,7 +239,7 @@ const TradeDesigners = () => {
   // Group into a flat A-Z list where brand groups appear as single entries
   type GridEntry =
     | { type: "solo"; designer: EnrichedDesigner; sortName: string }
-    | { type: "brand"; brandName: string; children: EnrichedDesigner[]; sortName: string };
+    | { type: "brand"; brandName: string; children: EnrichedDesigner[]; sortName: string; heroImage?: string };
 
   const grouped = useMemo(() => {
     const brandChildren = new Map<string, EnrichedDesigner[]>();
