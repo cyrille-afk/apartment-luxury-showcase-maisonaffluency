@@ -86,6 +86,7 @@ const TradeDesigners = () => {
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState("all");
 
   const allProducts = useMemo(() => getAllTradeProducts(), []);
   const productCountMap = useMemo(() => {
