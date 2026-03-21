@@ -111,13 +111,15 @@ const TradeAtelierProfile = () => {
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
               <div className="flex items-start gap-4">
-                {designer.logo_url && (
+                {!heroHasEmbeddedName && designer.logo_url && (
                   <img src={designer.logo_url} alt="" className="h-10 opacity-80 shrink-0" />
                 )}
                 <div>
-                  <h1 className="font-display text-2xl md:text-4xl tracking-wide text-foreground">
-                    {name}
-                  </h1>
+                  {!heroHasEmbeddedName && (
+                    <h1 className="font-display text-2xl md:text-4xl tracking-wide text-foreground">
+                      {name}
+                    </h1>
+                  )}
                    {designer.specialty && (
                     <p className="font-body text-sm text-muted-foreground mt-1 hidden md:block">{designer.specialty}</p>
                   )}
