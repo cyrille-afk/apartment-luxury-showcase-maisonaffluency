@@ -202,13 +202,12 @@ const TradeDesigners = () => {
     });
   }, [designers, productCountMap]);
 
-  // Build carousel: multi-designer brands (founder groups) + all solo designers
-  const brandEntries = useMemo(() => {
+  // Build carousel: split into ateliers (multi-designer brands) and solo designers
+  const { atelierEntries, designerEntries } = useMemo(() => {
     const founderMap = new Map<string, number>();
     const soloNames: string[] = [];
     const founderNames = new Set<string>();
 
-    // First pass: collect all founder names
     for (const d of enriched) {
       if (d.founder) founderNames.add(d.founder);
     }
@@ -217,23 +216,28 @@ const TradeDesigners = () => {
       if (d.founder) {
         founderMap.set(d.founder, (founderMap.get(d.founder) || 0) + 1);
       } else if (!founderNames.has(d.name)) {
-        // Only add as solo if their name doesn't match a brand (avoids duplicate Pouenat etc.)
         soloNames.push(d.name);
       }
     }
 
+    const ateliers: { name: string; docCount: number }[] = [];
+    const solos: { name: string; docCount: number }[] = [];
     const seen = new Set<string>();
-    const entries: { name: string; docCount: number }[] = [];
 
     for (const [name, count] of founderMap) {
-      if (!seen.has(name)) { seen.add(name); entries.push({ name, docCount: count }); }
+      if (!seen.has(name)) { seen.add(name); ateliers.push({ name, docCount: count }); }
     }
     for (const name of soloNames) {
-      if (!seen.has(name)) { seen.add(name); entries.push({ name, docCount: 0 }); }
+      if (!seen.has(name)) { seen.add(name); solos.push({ name, docCount: 0 }); }
     }
 
-    return entries.sort((a, b) => a.name.localeCompare(b.name));
+    return {
+      atelierEntries: ateliers.sort((a, b) => a.name.localeCompare(b.name)),
+      designerEntries: solos.sort((a, b) => a.name.localeCompare(b.name)),
+    };
   }, [enriched]);
+
+  const brandEntries = carouselMode === "ateliers" ? atelierEntries : designerEntries;
 
   // IMPORTANT: carousel selection should NOT lock/filter the A-Z library
   const filtered = useMemo(() => {
