@@ -174,8 +174,15 @@ const TradeDesigners = () => {
     );
   };
 
-  const handleBrandClick = (brandName: string) => {
-    navigate(`/trade/showroom?tab=grid&designer=${encodeURIComponent(brandName)}`);
+  const handleBrandClick = (brand: typeof enrichedBrands[0]) => {
+    if (brand.hasProfile) {
+      const profile = profileMap.get(brand.brand_name.toLowerCase());
+      if (profile) {
+        navigate(`/trade/designers/${profile.slug}`);
+        return;
+      }
+    }
+    navigate(`/trade/showroom?tab=grid&designer=${encodeURIComponent(brand.brand_name)}`);
   };
 
   return (
@@ -342,7 +349,7 @@ const TradeDesigners = () => {
                   {items.map((brand) => (
                     <button
                       key={brand.id}
-                      onClick={() => handleBrandClick(brand.brand_name)}
+                      onClick={() => handleBrandClick(brand)}
                       className="group text-left rounded-lg overflow-hidden border border-border hover:border-foreground/20 transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background"
                     >
                       {/* Thumbnail */}
