@@ -249,6 +249,25 @@ const TradeGallery = () => {
     if (product) handleAddToQuote(product);
   };
 
+  const handleFavorite = async (product: TradeProduct) => {
+    const realId = await toggleFavorite(product.id, {
+      product_name: product.product_name,
+      brand_name: product.brand_name,
+      category: product.category,
+      image_url: product.image_url,
+      dimensions: product.dimensions,
+      materials: product.materials,
+    });
+    if (realId) {
+      setLastFavoritedRealId(realId);
+      setLastFavoritedName(product.product_name);
+      toast({ title: "Added to favorites", description: product.product_name });
+    } else {
+      setLastFavoritedRealId(null);
+      toast({ title: "Removed from favorites", description: product.product_name });
+    }
+  };
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
