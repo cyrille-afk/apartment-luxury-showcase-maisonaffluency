@@ -332,9 +332,16 @@ const TradeAxonometricRequests = () => {
                   {req.notes && (
                     <p className="font-body text-xs text-muted-foreground line-clamp-2">{req.notes}</p>
                   )}
-                  <p className="font-body text-[10px] text-muted-foreground">
-                    Submitted {format(new Date(req.created_at), "d MMM yyyy")}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-body text-[10px] text-muted-foreground">
+                      Submitted {format(new Date(req.created_at), "d MMM yyyy")}
+                    </p>
+                    {Array.isArray(req.linked_favorite_product_ids) && req.linked_favorite_product_ids.length > 0 && (
+                      <span className="font-body text-[10px] text-[hsl(var(--gold))]">
+                        ♥ {req.linked_favorite_product_ids.length} favorite{req.linked_favorite_product_ids.length !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
                   {req.admin_notes && (
                     <p className="font-body text-xs text-muted-foreground/80 italic border-t border-border pt-1.5 mt-1.5">
                       Admin: {req.admin_notes}
