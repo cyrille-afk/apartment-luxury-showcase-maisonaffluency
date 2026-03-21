@@ -11,6 +11,15 @@ import CurrencyToggle, { DisplayCurrency, useFxRates, formatPriceConverted } fro
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
 
+/** Known life dates for historical designers */
+const DESIGNER_DATES: Record<string, string> = {
+  "jean-michel-frank": "1895–1941",
+  "eileen-gray": "1878–1976",
+  "pierre-chareau": "1883–1950",
+  "robert-mallet-stevens": "1886–1945",
+  "mariano-fortuny": "1871–1949",
+};
+
 function displayName(name: string): string {
   if (name.includes(" - ")) {
     const [brand, ...rest] = name.split(" - ");
@@ -109,36 +118,45 @@ const TradeAtelierProfile = () => {
                   loading="eager"
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             </div>
+            {/* Atelier badge — top left */}
+            {designer.founder && designer.founder !== designer.name && (
+              <Link
+                to={`/trade/designers/${designer.founder.toLowerCase().replace(/\s+/g, '-')}`}
+                className="absolute top-4 left-4 md:top-6 md:left-6 z-10 px-4 py-2 md:px-6 md:py-3 bg-primary/90 backdrop-blur-sm rounded-lg text-primary-foreground font-display text-sm md:text-lg tracking-[0.15em] uppercase hover:bg-primary transition-colors shadow-lg"
+              >
+                {designer.founder}
+              </Link>
+            )}
+            {/* Logo — top left for ateliers */}
+            {!heroHasEmbeddedName && designer.logo_url && !designer.founder && (
+              <img src={designer.logo_url} alt="" className="absolute top-4 left-4 md:top-6 md:left-6 h-8 md:h-12 opacity-90 z-10" />
+            )}
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
-                <div className="flex items-start gap-4">
-                  {!heroHasEmbeddedName && designer.logo_url && (
-                    <img src={designer.logo_url} alt="" className="h-10 opacity-80 shrink-0" />
-                  )}
-                  <div>
-                    {!heroHasEmbeddedName && (
-                      <h1 className="font-display text-2xl md:text-3xl tracking-wide text-foreground">
-                        {name}
-                      </h1>
+                {!heroHasEmbeddedName && (
+                  <h1 className="font-display text-2xl md:text-4xl tracking-wide text-white drop-shadow-md">
+                    {name}
+                    {slug && DESIGNER_DATES[slug] && (
+                      <span className="font-body text-base md:text-xl text-white/60 ml-3 font-normal">{DESIGNER_DATES[slug]}</span>
                     )}
-                    {designer.specialty && (
-                      <p className="font-body text-sm md:text-base text-foreground/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
-                    )}
-                  </div>
-                </div>
+                  </h1>
+                )}
+                {designer.specialty && (
+                  <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
+                )}
                 {/* Social links */}
                 <div className="flex items-center gap-3 mt-4">
                   {instagramLink && (
                     <a href={instagramLink} target="_blank" rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground transition-colors">
+                      className="text-white/60 hover:text-white transition-colors">
                       <Instagram className="w-4 h-4" />
                     </a>
                   )}
                   {websiteLink && (
                     <a href={websiteLink} target="_blank" rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground transition-colors">
+                      className="text-white/60 hover:text-white transition-colors">
                       <ExternalLink className="w-4 h-4" />
                     </a>
                   )}
