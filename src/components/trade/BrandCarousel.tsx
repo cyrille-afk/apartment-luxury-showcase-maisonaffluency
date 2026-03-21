@@ -95,8 +95,8 @@ const BrandTile = ({
   onUpload: (file: File) => void;
   onRemove: () => void;
 }) => {
-  const pdfThumb = usePdfThumbnail(!thumbnailUrl ? brand.pdfUrl : null);
-  const thumb = thumbnailUrl || pdfThumb;
+  const pdfThumb = usePdfThumbnail(!thumbnailUrl && !brand.imageUrl ? brand.pdfUrl : null);
+  const thumb = thumbnailUrl || brand.imageUrl || pdfThumb;
 
   return (
     <div className="shrink-0 relative group/brand">
