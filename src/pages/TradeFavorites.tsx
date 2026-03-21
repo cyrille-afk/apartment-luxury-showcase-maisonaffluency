@@ -197,6 +197,12 @@ export default function TradeFavorites() {
               Add All to Quote
             </Button>
           )}
+          {selectedFor3D.size > 0 && (
+            <Button size="sm" onClick={sendTo3DStudio} className="gap-1.5 bg-[hsl(var(--gold))] text-white hover:bg-[hsl(var(--gold))]/90">
+              <Wand2 className="w-3.5 h-3.5" />
+              Send {selectedFor3D.size} to 3D Studio
+            </Button>
+          )}
           <Badge variant="secondary" className="text-[10px]">
             <Heart className="w-3 h-3 mr-1 fill-current" />{favorites.length} saved
           </Badge>
