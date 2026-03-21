@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState, useEffect } from "react";
+import { LayoutDashboard } from "lucide-react";
 import { Outlet, Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
