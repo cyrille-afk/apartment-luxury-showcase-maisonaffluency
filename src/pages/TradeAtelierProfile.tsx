@@ -212,7 +212,8 @@ const TradeAtelierProfile = () => {
                       sharePageOnWhatsApp(
                         `/trade/designers/${slug}`,
                         name,
-                        designer.specialty || undefined
+                        designer.specialty || undefined,
+                        { directUrlPath: `/trade/designers/${slug}` }
                       );
                     }}
                     label="Share on WhatsApp"
