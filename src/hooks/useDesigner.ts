@@ -85,6 +85,53 @@ export function useDesignerPicks(designerId: string | undefined) {
   });
 }
 
+/** Pick with designer attribution */
+export interface AttributedCuratorPick extends DesignerCuratorPick {
+  designer_name: string;
+  designer_slug: string;
+}
+
+/** Fetch curator picks for a parent brand and all its sub-designers, with attribution */
+export function useGroupedDesignerPicks(designer: Designer | null | undefined) {
+  return useQuery({
+    queryKey: ["designer-grouped-picks", designer?.id, designer?.name],
+    queryFn: async () => {
+      if (!designer) return [];
+
+      // Find sub-designers whose founder matches this designer's name
+      const { data: subDesigners } = await supabase
+        .from("designers")
+        .select("id, name, slug")
+        .eq("founder", designer.name)
+        .neq("id", designer.id);
+
+      const allDesigners = [
+        { id: designer.id, name: designer.name, slug: designer.slug },
+        ...(subDesigners || []),
+      ];
+
+      const designerIds = allDesigners.map((d) => d.id);
+      const nameMap = Object.fromEntries(allDesigners.map((d) => [d.id, { name: d.name, slug: d.slug }]));
+
+      const { data, error } = await supabase
+        .from("designer_curator_picks")
+        .select("*")
+        .in("designer_id", designerIds)
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+
+      return (data || []).map((d) => ({
+        ...d,
+        pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
+        designer_name: nameMap[d.designer_id]?.name || designer.name,
+        designer_slug: nameMap[d.designer_id]?.slug || designer.slug,
+      })) as AttributedCuratorPick[];
+    },
+    enabled: !!designer,
+  });
+}
+
 /** Fetch all designers (for directory) */
 export function useAllDesigners() {
   return useQuery({
