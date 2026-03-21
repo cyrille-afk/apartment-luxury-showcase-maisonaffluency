@@ -1,4 +1,5 @@
 import { Package, FileDown } from "lucide-react";
+import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 
 export interface PresentationProduct {
   id: string;
