@@ -217,6 +217,34 @@ async function getOgData(path: string): Promise<OgData> {
     }
   }
 
+  // ── Dynamic: Designer/Atelier profile /trade/designers/:slug ──
+  const designerMatch = clean.match(/^\/trade\/designers\/([^/]+)$/);
+  if (designerMatch) {
+    const slug = designerMatch[1];
+    const sb = supabaseAdmin();
+    const { data } = await sb
+      .from("designers")
+      .select("name, specialty, biography, image_url, founder")
+      .eq("slug", slug)
+      .eq("is_published", true)
+      .single();
+
+    if (data) {
+      const label = data.founder && data.founder !== data.name
+        ? `${data.name} — ${data.founder}`
+        : data.name;
+      const desc =
+        data.specialty ||
+        (data.biography ? data.biography.slice(0, 155) + "…" : "Discover this atelier at Maison Affluency.");
+      return {
+        title: `${label} — Maison Affluency`,
+        description: desc.length > 160 ? desc.slice(0, 157) + "…" : desc,
+        image: ogImage(data.image_url || ""),
+        url: `${SITE_URL}/trade/designers/${slug}`,
+      };
+    }
+  }
+
   // ── Fallback: homepage ─────────────────────────────────────────
   return {
     title: "Maison Affluency | Luxury Furniture & Collectible Design",
