@@ -174,8 +174,15 @@ const TradeDesigners = () => {
     );
   };
 
-  const handleBrandClick = (brandName: string) => {
-    navigate(`/trade/showroom?tab=grid&designer=${encodeURIComponent(brandName)}`);
+  const handleBrandClick = (brand: typeof enrichedBrands[0]) => {
+    if (brand.hasProfile) {
+      const profile = profileMap.get(brand.brand_name.toLowerCase());
+      if (profile) {
+        navigate(`/trade/designers/${profile.slug}`);
+        return;
+      }
+    }
+    navigate(`/trade/showroom?tab=grid&designer=${encodeURIComponent(brand.brand_name)}`);
   };
 
   return (
