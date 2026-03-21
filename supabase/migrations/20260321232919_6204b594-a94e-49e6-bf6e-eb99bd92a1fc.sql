@@ -1,0 +1,1 @@
+ALTER TABLE public.axonometric_requests ADD COLUMN linked_favorite_product_ids jsonb DEFAULT '[]'::jsonb;
