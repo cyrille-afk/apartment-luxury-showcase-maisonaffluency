@@ -189,20 +189,36 @@ const TradeAtelierProfile = () => {
                 {designer.specialty && (
                   <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
                 )}
-                {/* Social links */}
-                <div className="flex items-center gap-3 mt-4">
-                  {instagramLink && (
-                    <a href={instagramLink} target="_blank" rel="noopener noreferrer"
-                      className="text-white/60 hover:text-white transition-colors">
-                      <Instagram className="w-4 h-4" />
-                    </a>
-                  )}
-                  {websiteLink && (
-                    <a href={websiteLink} target="_blank" rel="noopener noreferrer"
-                      className="text-white/60 hover:text-white transition-colors">
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  )}
+                {/* Social links + WhatsApp share */}
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center gap-3">
+                    {instagramLink && (
+                      <a href={instagramLink} target="_blank" rel="noopener noreferrer"
+                        className="text-white/60 hover:text-white transition-colors">
+                        <Instagram className="w-4 h-4" />
+                      </a>
+                    )}
+                    {websiteLink && (
+                      <a href={websiteLink} target="_blank" rel="noopener noreferrer"
+                        className="text-white/60 hover:text-white transition-colors">
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                  <WhatsAppShareButton
+                    onClick={(e) => {
+                      e.preventDefault();
+                      sharePageOnWhatsApp(
+                        `/trade/designers/${slug}`,
+                        name,
+                        designer.specialty || undefined
+                      );
+                    }}
+                    label="Share on WhatsApp"
+                    variant="glass"
+                    size="sm"
+                    hideOn="mobile"
+                  />
                 </div>
               </motion.div>
             </div>
