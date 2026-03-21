@@ -221,9 +221,9 @@ const TradeAtelierProfile = () => {
               </h2>
               <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
             </div>
-            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 lg:grid-cols-4 md:overflow-visible md:pb-0">
+            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-4 md:overflow-visible md:pb-0" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
               {picks.map((pick) => (
-                <div key={pick.id} className="group min-w-[60vw] snap-start shrink-0 md:min-w-0 md:shrink">
+                <div key={pick.id} className="group min-w-[55vw] sm:min-w-[45vw] snap-start shrink-0 md:min-w-0 md:shrink">
                   <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2">
                     <img
                       src={pick.image_url}
@@ -232,7 +232,7 @@ const TradeAtelierProfile = () => {
                       loading="lazy"
                     />
                   </div>
-                  <h3 className="font-display text-xs tracking-wide">{pick.title}</h3>
+                  <h3 className="font-display text-[11px] md:text-xs tracking-wide">{pick.title}</h3>
                   {pick.subtitle && (
                     <p className="font-body text-[10px] text-muted-foreground">{pick.subtitle}</p>
                   )}
