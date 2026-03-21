@@ -217,6 +217,16 @@ const TradeDesigners = () => {
             brands={brandEntries}
             selectedBrand={selectedBrand}
             onSelect={setSelectedBrand}
+            label={
+              <div className="mb-2">
+                <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
+                  Browse by brand · {brandEntries.length} ateliers
+                </p>
+                <p className="font-body text-[10px] text-muted-foreground/60 mt-0.5 normal-case tracking-normal">
+                  Many brands collaborate with multiple designers — select one to explore its roster.
+                </p>
+              </div>
+            }
           />
         )}
         <div className="flex flex-col gap-4">
