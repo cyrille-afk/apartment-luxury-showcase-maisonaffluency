@@ -106,8 +106,24 @@ const TradeDesigners = () => {
     });
   }, [designers, productCountMap]);
 
+  // Build brand carousel entries from founder groups
+  const brandEntries = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const d of enriched) {
+      if (d.founder) {
+        map.set(d.founder, (map.get(d.founder) || 0) + 1);
+      }
+    }
+    return [...map.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, count]) => ({ name, docCount: count }));
+  }, [enriched]);
+
   const filtered = useMemo(() => {
     let result = enriched;
+    if (selectedBrand !== "all") {
+      result = result.filter((b) => b.founder === selectedBrand);
+    }
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -121,7 +137,7 @@ const TradeDesigners = () => {
       result = result.filter((b) => activeFilters.some((f) => b.tags.includes(f)));
     }
     return result;
-  }, [enriched, search, activeFilters]);
+  }, [enriched, search, activeFilters, selectedBrand]);
 
   // Group: independent designers + brand groups (designers sharing a founder)
   const grouped = useMemo(() => {
