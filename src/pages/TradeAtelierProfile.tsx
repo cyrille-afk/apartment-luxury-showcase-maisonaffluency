@@ -419,20 +419,20 @@ const TradeAtelierProfile = () => {
                       </div>
                       <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">
                         {pick.title}
-                        {designerLabel && designerSlug ? (
-                          <Link
-                            to={`/trade/designers/${designerSlug}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="font-body text-[9px] md:text-[10px] text-primary/70 hover:text-primary ml-1.5 underline underline-offset-2"
-                          >
-                            — {designerLabel}
-                          </Link>
-                        ) : designerLabel ? (
-                          <span className="font-body text-[9px] md:text-[10px] text-muted-foreground ml-1.5">
-                            — {designerLabel}
-                          </span>
-                        ) : null}
                       </h3>
+                      {designerLabel && designerSlug ? (
+                        <Link
+                          to={`/trade/designers/${designerSlug}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="block font-body text-[10px] md:text-[11px] text-primary/70 hover:text-primary underline underline-offset-2 leading-tight mt-0.5"
+                        >
+                          {designerLabel}
+                        </Link>
+                      ) : designerLabel ? (
+                        <span className="block font-body text-[10px] md:text-[11px] text-muted-foreground leading-tight mt-0.5">
+                          {designerLabel}
+                        </span>
+                      ) : null}
                       {pick.subtitle && (
                         <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>
                       )}
