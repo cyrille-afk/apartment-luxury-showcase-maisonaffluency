@@ -47,6 +47,8 @@ const TradeGallery = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
+  const [lastFavoritedRealId, setLastFavoritedRealId] = useState<string | null>(null);
+  const [lastFavoritedName, setLastFavoritedName] = useState<string>("");
 
   // Price lookup from trade_products table
   const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string }>>(new Map());
