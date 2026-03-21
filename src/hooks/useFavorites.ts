@@ -1,14 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { ensureTradeProductId, type ProductMeta } from "@/lib/ensureTradeProduct";
 
 /**
  * Hook to manage product favorites.
- * Provides favorited product IDs and toggle function for use in showroom/grid views.
+ * Provides favorited product IDs and toggle function.
+ * 
+ * For gallery products with local IDs (tp-0, tp-1…), pass ProductMeta
+ * to toggleFavorite so a real trade_products record is ensured first.
+ * A localIdMap tracks the mapping from local ID → real UUID.
  */
 export function useFavorites() {
   const { user } = useAuth();
   const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
+  const [localIdMap, setLocalIdMap] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,24 +30,57 @@ export function useFavorites() {
     fetch();
   }, [user]);
 
-  const toggleFavorite = useCallback(async (productId: string): Promise<boolean> => {
-    if (!user) return false;
-    const isFav = favoritedIds.has(productId);
+  /**
+   * Toggle a favorite. Returns the real UUID if added, or null if removed.
+   * 
+   * @param productId - can be a real UUID or a local ID like "tp-0"
+   * @param meta - required for local IDs so a trade_products record can be created
+   */
+  const toggleFavorite = useCallback(async (
+    productId: string,
+    meta?: ProductMeta,
+  ): Promise<string | null> => {
+    if (!user) return null;
+
+    // Resolve to a real UUID
+    let realId = productId;
+    const isLocalId = productId.startsWith("tp-");
+
+    if (isLocalId) {
+      // Check if we already mapped this local ID
+      const cached = localIdMap.get(productId);
+      if (cached) {
+        realId = cached;
+      } else if (meta) {
+        const resolved = await ensureTradeProductId(meta);
+        if (!resolved) return null;
+        realId = resolved;
+        setLocalIdMap((prev) => new Map(prev).set(productId, realId));
+      } else {
+        console.error("Cannot favorite gallery product without metadata");
+        return null;
+      }
+    }
+
+    const isFav = favoritedIds.has(realId);
 
     if (isFav) {
-      // Remove
-      setFavoritedIds((prev) => { const next = new Set(prev); next.delete(productId); return next; });
-      await supabase.from("trade_favorites").delete().eq("user_id", user.id).eq("product_id", productId);
-      return false;
+      setFavoritedIds((prev) => { const next = new Set(prev); next.delete(realId); return next; });
+      await supabase.from("trade_favorites").delete().eq("user_id", user.id).eq("product_id", realId);
+      return null;
     } else {
-      // Add
-      setFavoritedIds((prev) => new Set(prev).add(productId));
-      await supabase.from("trade_favorites").insert({ user_id: user.id, product_id: productId });
-      return true;
+      setFavoritedIds((prev) => new Set(prev).add(realId));
+      await supabase.from("trade_favorites").insert({ user_id: user.id, product_id: realId });
+      return realId;
     }
-  }, [user, favoritedIds]);
+  }, [user, favoritedIds, localIdMap]);
 
-  const isFavorited = useCallback((productId: string) => favoritedIds.has(productId), [favoritedIds]);
+  const isFavorited = useCallback((productId: string) => {
+    if (favoritedIds.has(productId)) return true;
+    // Check if local ID maps to a favorited UUID
+    const mapped = localIdMap.get(productId);
+    return mapped ? favoritedIds.has(mapped) : false;
+  }, [favoritedIds, localIdMap]);
 
   return { isFavorited, toggleFavorite, favoritedIds, loading };
 }
