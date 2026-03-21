@@ -202,11 +202,9 @@ const TradeDesigners = () => {
       .map(([name, count]) => ({ name, docCount: count }));
   }, [enriched]);
 
+  // IMPORTANT: carousel selection should NOT lock/filter the A-Z library
   const filtered = useMemo(() => {
     let result = enriched;
-    if (selectedBrand !== "all") {
-      result = result.filter((b) => b.founder === selectedBrand);
-    }
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -220,7 +218,7 @@ const TradeDesigners = () => {
       result = result.filter((b) => activeFilters.some((f) => b.tags.includes(f)));
     }
     return result;
-  }, [enriched, search, activeFilters, selectedBrand]);
+  }, [enriched, search, activeFilters]);
 
   // Group into a flat A-Z list where brand groups appear as single entries
   type GridEntry =
@@ -300,7 +298,19 @@ const TradeDesigners = () => {
             selectedBrand={selectedBrand}
             onSelect={(b) => {
               setSelectedBrand(b);
-              if (b !== "all") setExpandedBrands(new Set([b]));
+
+              if (b === "all") {
+                setExpandedBrands(new Set());
+                return;
+              }
+
+              setExpandedBrands(new Set([b]));
+
+              const letter = b.charAt(0).toUpperCase();
+              requestAnimationFrame(() => {
+                const el = document.getElementById(`designer-letter-${letter}`);
+                el?.scrollIntoView({ behavior: "smooth", block: "start" });
+              });
             }}
             label={
               <div className="mb-2">
@@ -320,7 +330,7 @@ const TradeDesigners = () => {
               <h1 className="font-display text-2xl text-foreground tracking-wide">Designers Library</h1>
               <p className="font-body text-sm text-muted-foreground mt-1">
                 {enriched.length} designers & ateliers
-                {(activeFilters.length > 0 || selectedBrand !== "all") && (
+                {(activeFilters.length > 0 || search) && (
                   <span className="text-primary ml-1">· {filtered.length} showing</span>
                 )}
               </p>
