@@ -56,6 +56,7 @@ interface ProposalBuilderProps {
   emptyRoomUrl: string | null;
   emptyRoomGenerating: boolean;
   style: string;
+  preloadedProductIds?: string[];
   onClose: () => void;
   onResult?: (result: { imageUrl: string; storedUrl: string | null; text: string; pinnedProducts: SelectedProduct[] }) => void;
 }
