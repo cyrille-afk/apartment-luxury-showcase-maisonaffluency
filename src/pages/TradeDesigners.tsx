@@ -190,16 +190,32 @@ const TradeDesigners = () => {
     });
   }, [designers, productCountMap]);
 
+  // Build carousel: multi-designer brands (founder groups) + all solo designers
   const brandEntries = useMemo(() => {
-    const map = new Map<string, number>();
+    const founderMap = new Map<string, number>();
+    const soloNames: string[] = [];
+
     for (const d of enriched) {
       if (d.founder) {
-        map.set(d.founder, (map.get(d.founder) || 0) + 1);
+        founderMap.set(d.founder, (founderMap.get(d.founder) || 0) + 1);
+      } else {
+        soloNames.push(d.name);
       }
     }
-    return [...map.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([name, count]) => ({ name, docCount: count }));
+
+    const entries: { name: string; docCount: number }[] = [];
+
+    // Multi-designer brands with count
+    for (const [name, count] of founderMap) {
+      entries.push({ name, docCount: count });
+    }
+
+    // Solo designers (docCount = 0 means solo, no expand)
+    for (const name of soloNames) {
+      entries.push({ name, docCount: 0 });
+    }
+
+    return entries.sort((a, b) => a.name.localeCompare(b.name));
   }, [enriched]);
 
   // IMPORTANT: carousel selection should NOT lock/filter the A-Z library
