@@ -93,14 +93,16 @@ const BrandGroupCard = ({
   navigate,
   isExpanded,
   onToggle,
+  heroImage,
 }: {
   brandName: string;
   children: EnrichedDesigner[];
   navigate: (path: string) => void;
   isExpanded: boolean;
   onToggle: () => void;
+  heroImage?: string;
 }) => {
-  const previewImage = children.find((c) => c.image_url)?.image_url || "";
+  const previewImage = heroImage || children.find((c) => c.image_url)?.image_url || "";
 
   return (
     <div className="col-span-1">
@@ -239,16 +241,28 @@ const TradeDesigners = () => {
   // Group into a flat A-Z list where brand groups appear as single entries
   type GridEntry =
     | { type: "solo"; designer: EnrichedDesigner; sortName: string }
-    | { type: "brand"; brandName: string; children: EnrichedDesigner[]; sortName: string };
+    | { type: "brand"; brandName: string; children: EnrichedDesigner[]; sortName: string; heroImage?: string };
 
   const grouped = useMemo(() => {
     const brandChildren = new Map<string, EnrichedDesigner[]>();
     const independents: EnrichedDesigner[] = [];
+    // Track solo designers whose name matches a brand (founder) – merge into brand group
+    const brandSoloCards = new Map<string, EnrichedDesigner>();
+
+    // First pass: identify all founder brand names
+    const founderNames = new Set<string>();
+    for (const d of filtered) {
+      if (d.founder) founderNames.add(d.founder);
+    }
 
     for (const d of filtered) {
       if (d.founder) {
         if (!brandChildren.has(d.founder)) brandChildren.set(d.founder, []);
         brandChildren.get(d.founder)!.push(d);
+      } else if (founderNames.has(d.name)) {
+        // This solo entry IS the brand itself (e.g. "Pouenat") – absorb it
+        brandSoloCards.set(d.name, d);
+        if (!brandChildren.has(d.name)) brandChildren.set(d.name, []);
       } else {
         independents.push(d);
       }
@@ -264,6 +278,7 @@ const TradeDesigners = () => {
         brandName,
         children: children.sort((a, b) => a.name.localeCompare(b.name)),
         sortName: brandName,
+        heroImage: brandSoloCards.get(brandName)?.image_url || undefined,
       });
     }
     entries.sort((a, b) => a.sortName.localeCompare(b.sortName));
@@ -495,6 +510,7 @@ const TradeDesigners = () => {
                         navigate={navigate}
                         isExpanded={expandedBrands.has(entry.brandName)}
                         onToggle={() => toggleBrandExpand(entry.brandName)}
+                        heroImage={entry.heroImage}
                       />
                     )
                   )}
