@@ -22,6 +22,7 @@ const DESIGNER_DATES: Record<string, string> = {
   "paul-laszlo": "1900–1993",
   "jacques-henri-lartigue": "1894–1986",
   "felix-aublet": "1903–1978",
+  "laurent-maugoust-cecile-chenais": "b. 1975",
 };
 
 function displayName(name: string): string {
