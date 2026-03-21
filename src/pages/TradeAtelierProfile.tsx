@@ -122,7 +122,6 @@ const TradeAtelierProfile = () => {
               {designer.specialty && (
                 <p className="font-body text-xs text-muted-foreground mt-3 md:hidden">{designer.specialty}</p>
               )}
-              </div>
               {/* Stats */}
               <div className="flex items-center gap-6 mt-4">
                 {brandProducts.length > 0 && (
