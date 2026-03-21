@@ -414,20 +414,30 @@ const TradeDesigners = () => {
         <div className="flex flex-wrap gap-1">
           {allLetters.map((letter) => {
             const hasResults = grouped.some(([l]) => l === letter);
+            const hasAnyResults = enriched.some((d) => {
+              const ch = d.name.charAt(0).toUpperCase();
+              const fch = d.founder ? d.founder.charAt(0).toUpperCase() : null;
+              return ch === letter || fch === letter;
+            });
             return (
               <button
                 key={letter}
                 onClick={() => {
-                  const el = document.getElementById(`designer-letter-${letter}`);
-                  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  if (selectedBrand !== "all") setSelectedBrand("all");
+                  requestAnimationFrame(() => {
+                    const el = document.getElementById(`designer-letter-${letter}`);
+                    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  });
                 }}
                 className={cn(
                   "w-8 h-8 rounded font-display text-xs flex items-center justify-center transition-colors",
                   hasResults
                     ? "bg-primary/10 text-primary hover:bg-primary/20"
-                    : "bg-muted/30 text-muted-foreground/40 cursor-default"
+                    : hasAnyResults
+                      ? "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                      : "bg-muted/30 text-muted-foreground/40 cursor-default"
                 )}
-                disabled={!hasResults}
+                disabled={!hasAnyResults}
               >
                 {letter}
               </button>
