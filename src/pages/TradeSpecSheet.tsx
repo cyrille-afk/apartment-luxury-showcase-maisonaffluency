@@ -2,11 +2,15 @@ import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { FileDown, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 /**
  * In-app spec sheet viewer.
  * URL pattern: /trade/spec-sheet?brand=Ecart&product=Wolf+Armchair
  * Resolves the actual PDF URL from the database so the address bar stays clean.
+ * Mobile: shows a download card + Google Docs embedded viewer for better rendering.
  */
 export default function TradeSpecSheet() {
   const [params] = useSearchParams();
@@ -14,6 +18,7 @@ export default function TradeSpecSheet() {
   const product = params.get("product") || "";
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   const pageTitle = product
     ? `${brand} — ${product} Spec Sheet`
@@ -23,7 +28,6 @@ export default function TradeSpecSheet() {
     if (!product) { setLoading(false); return; }
 
     const resolve = async () => {
-      // Try designer_curator_picks first
       const { data: pick } = await supabase
         .from("designer_curator_picks")
         .select("pdf_url")
@@ -34,7 +38,6 @@ export default function TradeSpecSheet() {
 
       if (pick?.pdf_url) { setPdfUrl(pick.pdf_url); setLoading(false); return; }
 
-      // Fallback to trade_products
       const { data: tp } = await supabase
         .from("trade_products")
         .select("spec_sheet_url")
@@ -66,6 +69,54 @@ export default function TradeSpecSheet() {
     );
   }
 
+  /* Mobile: Google Docs viewer iframe + prominent download button */
+  if (isMobile) {
+    const googleViewerUrl = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl)}`;
+
+    return (
+      <>
+        <Helmet>
+          <title>{pageTitle} | Maison & Ateliers</title>
+        </Helmet>
+
+        <div className="flex flex-col h-[calc(100vh-4rem)]">
+          {/* Header bar */}
+          <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border bg-background">
+            <div className="min-w-0 flex-1">
+              <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider truncate">{brand}</p>
+              <h1 className="font-display text-sm text-foreground truncate">{product} — Spec Sheet</h1>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <Button size="sm" variant="outline" className="gap-1.5" asChild>
+                <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span className="hidden xs:inline">Open</span>
+                </a>
+              </Button>
+              <Button size="sm" className="gap-1.5 bg-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/90 text-white" asChild>
+                <a href={pdfUrl} download>
+                  <FileDown className="w-3.5 h-3.5" />
+                  Download
+                </a>
+              </Button>
+            </div>
+          </div>
+
+          {/* Google Docs viewer for mobile-friendly PDF rendering */}
+          <div className="flex-1 bg-muted/20">
+            <iframe
+              src={googleViewerUrl}
+              title={pageTitle}
+              className="w-full h-full border-0"
+              allow="fullscreen"
+            />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  /* Desktop: native PDF iframe */
   return (
     <>
       <Helmet>
