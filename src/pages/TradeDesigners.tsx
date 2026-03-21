@@ -239,9 +239,21 @@ const TradeDesigners = () => {
 
   const brandEntries = carouselMode === "ateliers" ? atelierEntries : designerEntries;
 
-  // IMPORTANT: carousel selection should NOT lock/filter the A-Z library
+  // Carousel selection filters the A-Z library when a specific brand/designer is selected
   const filtered = useMemo(() => {
     let result = enriched;
+
+    // If a specific brand is selected from the carousel, filter to that brand's roster
+    if (selectedBrand !== "all") {
+      if (carouselMode === "ateliers") {
+        // Show only designers belonging to this atelier
+        result = result.filter((d) => d.founder === selectedBrand);
+      } else {
+        // Show only the selected solo designer
+        result = result.filter((d) => d.name === selectedBrand);
+      }
+    }
+
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -255,7 +267,7 @@ const TradeDesigners = () => {
       result = result.filter((b) => activeFilters.some((f) => b.tags.includes(f)));
     }
     return result;
-  }, [enriched, search, activeFilters]);
+  }, [enriched, search, activeFilters, selectedBrand, carouselMode]);
 
   // Group into a flat A-Z list where brand groups appear as single entries
   type GridEntry =
