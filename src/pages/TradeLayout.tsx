@@ -14,10 +14,38 @@ const CompareFab = lazy(() => import("@/components/CompareFab"));
 const CompareDrawer = lazy(() => import("@/components/CompareDrawer"));
 const TradeBottomNav = lazy(() => import("@/components/trade/TradeBottomNav"));
 
+const ROUTE_TITLES: Record<string, string> = {
+  "/trade": "Dashboard",
+  "/trade/showroom": "Showroom",
+  "/trade/favorites": "Favorites",
+  "/trade/gallery": "Gallery",
+  "/trade/quotes": "Quotes",
+  "/trade/designers": "Designers",
+  "/trade/documents": "Documents",
+  "/trade/samples": "Samples",
+  "/trade/settings": "Settings",
+  "/trade/journal": "Journal",
+  "/trade/insights": "Insights",
+  "/trade/provenance": "Provenance",
+  "/trade/presentations": "Presentations",
+  "/trade/boards": "Boards",
+  "/trade/media": "Media Library",
+};
+
 const TradeLayout = () => {
   const { user, loading, applicationStatus, isAdmin } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
+  const location = useLocation();
+
+  const pageTitle = useMemo(() => {
+    const path = location.pathname;
+    // Exact match first
+    if (ROUTE_TITLES[path]) return ROUTE_TITLES[path];
+    // Try parent path for nested routes like /trade/designers/ecart
+    const parentPath = path.split("/").slice(0, 3).join("/");
+    return ROUTE_TITLES[parentPath] || "Trade Portal";
+  }, [location.pathname]);
 
   // Fetch submitted quotes count for admin badge (shared between sidebar & mobile menu)
   useEffect(() => {
