@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useDesigner";
+import { useAuth } from "@/hooks/useAuth";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
@@ -50,6 +51,7 @@ function displayName(name: string): string {
 }
 
 const TradeAtelierProfile = () => {
+  const { isTradeUser, isAdmin } = useAuth();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { data: designer, isLoading } = useDesigner(slug);
@@ -299,7 +301,9 @@ const TradeAtelierProfile = () => {
                   )}
                   {pick.trade_price_cents != null && (
                     <p className="font-display text-[11px] md:text-xs text-foreground mt-1">
-                      {formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}
+                      {(isTradeUser || isAdmin)
+                        ? formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)
+                        : "Price on request"}
                     </p>
                   )}
                   {pick.edition && (
