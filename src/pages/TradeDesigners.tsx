@@ -235,10 +235,11 @@ const TradeDesigners = () => {
     const entries: GridEntry[] = [];
 
     for (const d of filtered) {
-      entries.push({ type: "solo", designer: d, sortName: d.name });
+      // For atelier members, use founder as sort prefix so atelier card comes first
+      const sortName = d.isAtelierCard ? d.name : (d.founder && d.founder !== d.name ? `${d.founder}\0${d.name}` : d.name);
+      entries.push({ type: "solo", designer: d, sortName });
     }
 
-    entries.sort((a, b) => a.sortName.localeCompare(b.sortName));
     entries.sort((a, b) => a.sortName.localeCompare(b.sortName));
 
     const letterMap = new Map<string, GridEntry[]>();
