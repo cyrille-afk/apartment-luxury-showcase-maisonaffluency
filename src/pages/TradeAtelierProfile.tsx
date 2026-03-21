@@ -2,7 +2,7 @@ import { useMemo, useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText } from "lucide-react";
+import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText, ShoppingCart, Check, Scale, Heart, Loader2 } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners } from "@/hooks/useDesigner";
@@ -12,14 +12,17 @@ import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import { Badge } from "@/components/ui/badge";
 import CurrencyToggle, { DisplayCurrency, useFxRates, formatPriceConverted } from "@/components/trade/CurrencyToggle";
+import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useCompare, type CompareItem } from "@/contexts/CompareContext";
+import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 
 /** Replace a Cloudinary URL's width transform for responsive loading */
 function responsiveCloudinaryUrl(url: string, width: number): string {
   if (!url.includes("res.cloudinary.com")) return url;
-  // Replace existing w_XXXX or insert width transform
   const replaced = url.replace(/w_\d+/, `w_${width}`);
   if (replaced !== url) return replaced;
-  // No existing width — insert after /upload/
   return url.replace("/upload/", `/upload/w_${width},c_fill,q_auto,f_auto/`);
 }
 
@@ -51,13 +54,33 @@ function displayName(name: string): string {
   return name;
 }
 
+function pickToLightboxItem(pick: DesignerCuratorPick, brandName: string): TradeProductLightboxItem {
+  return {
+    id: pick.id,
+    product_name: pick.title,
+    subtitle: pick.subtitle || undefined,
+    image_url: pick.image_url,
+    hover_image_url: pick.hover_image_url || undefined,
+    brand_name: brandName,
+    materials: pick.materials,
+    dimensions: pick.dimensions,
+    category: pick.category || undefined,
+    subcategory: pick.subcategory || undefined,
+    pdf_url: pick.pdf_url,
+    price: pick.trade_price_cents != null
+      ? `€${(pick.trade_price_cents / 100).toLocaleString()}`
+      : undefined,
+  };
+}
+
 const TradeAtelierProfile = () => {
-  const { isTradeUser, isAdmin } = useAuth();
+  const { isTradeUser, isAdmin, user } = useAuth();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { data: designer, isLoading } = useDesigner(slug);
+  const { isPinned, togglePin } = useCompare();
 
-  // Scroll to top when profile loads
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [slug]);
@@ -65,6 +88,70 @@ const TradeAtelierProfile = () => {
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const fxRates = useFxRates();
+
+  // Lightbox state
+  const [lightboxProduct, setLightboxProduct] = useState<TradeProductLightboxItem | null>(null);
+  const [addingProductId, setAddingProductId] = useState<string | null>(null);
+  const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
+
+  // Quote state
+  const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchDraft = async () => {
+      const { data } = await supabase
+        .from("trade_quotes")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "draft")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (data?.length) setActiveQuoteId(data[0].id);
+    };
+    fetchDraft();
+  }, [user]);
+
+  const handleAddToQuote = useCallback(async (product: TradeProductLightboxItem) => {
+    if (!user) return;
+    setAddingProductId(product.id);
+
+    let quoteId = activeQuoteId;
+    if (!quoteId) {
+      const { data, error } = await supabase
+        .from("trade_quotes")
+        .insert({ user_id: user.id, status: "draft" })
+        .select("id")
+        .single();
+      if (error || !data) {
+        toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
+        setAddingProductId(null);
+        return;
+      }
+      quoteId = data.id;
+      setActiveQuoteId(quoteId);
+    }
+
+    const { error } = await supabase.rpc("add_gallery_product_to_quote", {
+      _user_id: user.id,
+      _quote_id: quoteId!,
+      _product_name: product.product_name,
+      _brand_name: product.brand_name,
+      _category: product.category || "",
+      _image_url: product.image_url || null,
+      _dimensions: product.dimensions || null,
+      _materials: product.materials || null,
+      _quantity: 1,
+    });
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      setAddedProductIds(prev => new Set(prev).add(product.id));
+      toast({ title: "Added to quote", description: `${product.product_name} added` });
+    }
+    setAddingProductId(null);
+  }, [user, activeQuoteId, toast]);
 
   const allProducts = useMemo(() => getAllTradeProducts(), []);
 
@@ -105,7 +192,6 @@ const TradeAtelierProfile = () => {
   const name = displayName(designer.name);
   const instagramLink = designer.links.find((l) => l.type === "Instagram")?.url;
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
-  // Ecart's hero image already contains the brand name — skip text overlay
   const heroHasEmbeddedName = slug === "ecart";
 
   return (
@@ -142,13 +228,12 @@ const TradeAtelierProfile = () => {
           />
         </div>
 
-        {/* Hero + About — side by side on desktop for designers (vertical hero), stacked for ateliers (horizontal hero) */}
+        {/* Hero + About */}
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
           const heroAspect = isDesignerProfile ? "aspect-[3/4]" : "aspect-[16/9]";
           return (
         <div className={cn("flex flex-col gap-6", isDesignerProfile && "md:flex-row")}>
-          {/* Hero image */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -166,7 +251,6 @@ const TradeAtelierProfile = () => {
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             </div>
-            {/* Atelier badge — top left */}
             {designer.founder && designer.founder !== designer.name && (
               <Link
                 to={`/trade/designers/${designer.founder.toLowerCase().replace(/\s+/g, '-')}`}
@@ -175,7 +259,6 @@ const TradeAtelierProfile = () => {
                 {designer.founder}
               </Link>
             )}
-            {/* Logo — top left for ateliers */}
             {!heroHasEmbeddedName && designer.logo_url && !designer.founder && (
               <img src={designer.logo_url} alt="" className="absolute top-4 left-4 md:top-6 md:left-6 h-8 md:h-12 opacity-90 z-10" />
             )}
@@ -192,7 +275,6 @@ const TradeAtelierProfile = () => {
                 {designer.specialty && (
                   <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
                 )}
-                {/* Social links + WhatsApp share */}
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center gap-3">
                     {instagramLink && (
@@ -228,7 +310,6 @@ const TradeAtelierProfile = () => {
             </div>
           </motion.div>
 
-          {/* Biography — beside hero for designers, below for ateliers */}
           {designer.biography && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -236,7 +317,6 @@ const TradeAtelierProfile = () => {
               transition={{ ...transition, delay: 0.2 }}
               className={cn(isDesignerProfile ? "md:w-1/2 flex flex-col justify-center" : "flex flex-col")}
             >
-              {/* Philosophy quote — above biography, bold black */}
               {designer.philosophy && (
                 <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6">
                   "{designer.philosophy}"
@@ -256,10 +336,7 @@ const TradeAtelierProfile = () => {
           );
         })()}
 
-
-
-
-        {/* Curator's Picks — full width */}
+        {/* Curator's Picks */}
         {picks.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -273,9 +350,16 @@ const TradeAtelierProfile = () => {
               <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
             </div>
             <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:grid-cols-3 lg:grid-cols-4 md:gap-4">
-              {picks.map((pick) => (
-                <div key={pick.id} className="group">
-                  <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2">
+              {picks.map((pick) => {
+                const isAdding = addingProductId === pick.id;
+                const isAdded = addedProductIds.has(pick.id);
+                return (
+                <div
+                  key={pick.id}
+                  className="group cursor-pointer"
+                  onClick={() => setLightboxProduct(pickToLightboxItem(pick, designer.name))}
+                >
+                  <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
                     <img
                       src={responsiveCloudinaryUrl(pick.image_url, 600)}
                       srcSet={pickSrcSet(pick.image_url)}
@@ -284,6 +368,38 @@ const TradeAtelierProfile = () => {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
+                    {/* Quick action overlay */}
+                    <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {(isTradeUser || isAdmin) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToQuote(pickToLightboxItem(pick, designer.name));
+                          }}
+                          className={cn(
+                            "p-2 rounded-md text-white transition-colors",
+                            isAdded ? "bg-emerald-600" : "bg-foreground/80 hover:bg-foreground"
+                          )}
+                          title={isAdded ? "Added to quote" : "Add to quote"}
+                        >
+                          {isAdding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> :
+                           isAdded ? <Check className="h-3.5 w-3.5" /> :
+                           <ShoppingCart className="h-3.5 w-3.5" />}
+                        </button>
+                      )}
+                      {pick.pdf_url && (
+                        <a
+                          href={buildSpecSheetUrl(pick.pdf_url, designer.name, pick.title)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
+                          title="Spec sheet"
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                    </div>
                   </div>
                   <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{pick.title}</h3>
                   {pick.subtitle && (
@@ -311,19 +427,9 @@ const TradeAtelierProfile = () => {
                       {pick.edition}
                     </p>
                   )}
-                  {pick.pdf_url && (
-                    <a
-                      href={buildSpecSheetUrl(pick.pdf_url, designer?.name || '', pick.title)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 mt-1 text-[9px] text-primary hover:underline"
-                    >
-                      <FileText className="w-3 h-3" />
-                      Spec Sheet
-                    </a>
-                  )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </motion.div>
         )}
@@ -338,6 +444,16 @@ const TradeAtelierProfile = () => {
         )}
 
       </div>
+
+      {/* Product Lightbox */}
+      <TradeProductLightbox
+        product={lightboxProduct}
+        onClose={() => setLightboxProduct(null)}
+        onAddToQuote={handleAddToQuote}
+        isAdding={!!lightboxProduct && addingProductId === lightboxProduct.id}
+        isAdded={!!lightboxProduct && addedProductIds.has(lightboxProduct.id)}
+        onSelectRelated={(rp) => setLightboxProduct(rp)}
+      />
     </>
   );
 };
