@@ -138,6 +138,9 @@ const TradeAtelierProfile = () => {
                 {!heroHasEmbeddedName && (
                   <h1 className="font-display text-2xl md:text-4xl tracking-wide text-white drop-shadow-md">
                     {name}
+                    {slug && DESIGNER_DATES[slug] && (
+                      <span className="font-body text-base md:text-xl text-white/60 ml-3 font-normal">{DESIGNER_DATES[slug]}</span>
+                    )}
                   </h1>
                 )}
                 {designer.specialty && (
