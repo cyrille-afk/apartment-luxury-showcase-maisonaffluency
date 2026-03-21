@@ -238,8 +238,8 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 </button>
 
                 {/* Add to Project */}
-                {product && isFavorited(product.id) && lastFavRealId && (
-                  <AddToProjectPopover productId={lastFavRealId} productName={product.product_name}>
+                {product && isFavorited(product.id) && (
+                  <AddToProjectPopover productId={lastFavRealId || product.id} productName={product.product_name}>
                     <button className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30">
                       <FolderOpen size={14} />
                       Add to Project
