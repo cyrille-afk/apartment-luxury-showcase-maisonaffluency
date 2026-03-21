@@ -313,7 +313,7 @@ const TradeAtelierProfile = () => {
                   )}
                   {pick.pdf_url && (
                     <a
-                      href={pick.pdf_url}
+                      href={buildSpecSheetUrl(pick.pdf_url, designer?.name || '', pick.title)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 mt-1 text-[9px] text-primary hover:underline"

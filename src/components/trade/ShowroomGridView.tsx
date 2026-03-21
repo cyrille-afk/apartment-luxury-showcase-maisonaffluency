@@ -625,7 +625,7 @@ const ShowroomGridView = ({
                   {isAdded ? "Added" : "Add"}
                 </button>
                 {product.pdf_url && (
-                  <a href={product.pdf_url} target="_blank" rel="noopener noreferrer"
+                  <a href={buildSpecSheetUrl(product.pdf_url, product.designer_name || product.product_name, product.product_name)} target="_blank" rel="noopener noreferrer"
                     className="p-2 text-[hsl(var(--pdf-red))] hover:text-[hsl(var(--pdf-red))]/80 transition-colors" title="Spec sheet">
                     <FileDown className="h-4 w-4" />
                   </a>
