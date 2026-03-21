@@ -480,7 +480,7 @@ const TradeDesigners = () => {
                   <span className="font-display text-2xl text-foreground/20 tracking-widest">{letter}</span>
                   <div className="flex-1 h-px bg-border" />
                   <span className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
-                    {entries.length} {entries.length === 1 ? "entry" : "entries"}
+                    {entries.length} {entries.length === 1 ? "brand / atelier" : "brands & ateliers"}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
