@@ -268,10 +268,6 @@ const TradeDesigners = () => {
     }
     return result;
   }, [enriched, search, activeFilters, selectedBrand, carouselMode]);
-
-  // Group into a flat A-Z list where brand groups appear as single entries
-  type GridEntry =
-    | { type: "solo"; designer: EnrichedDesigner; sortName: string }
   type GridEntry = { type: "solo"; designer: EnrichedDesigner; sortName: string };
 
   const grouped = useMemo(() => {
