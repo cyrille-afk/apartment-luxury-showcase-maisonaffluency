@@ -165,7 +165,7 @@ const BrandTile = ({
   );
 };
 
-const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false }: BrandCarouselProps) => {
+const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, label }: BrandCarouselProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [uploadingBrand, setUploadingBrand] = useState<string | null>(null);
