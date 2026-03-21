@@ -16,6 +16,8 @@ interface BrandCarouselProps {
   onSelect: (brand: string) => void;
   /** Enable thumbnail upload on each brand (admin mode) */
   editable?: boolean;
+  /** Custom label line; defaults to "Browse by brand · N brands A–Z" */
+  label?: React.ReactNode;
 }
 
 /** Simple hash for cache key */
@@ -163,7 +165,7 @@ const BrandTile = ({
   );
 };
 
-const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false }: BrandCarouselProps) => {
+const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, label }: BrandCarouselProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [uploadingBrand, setUploadingBrand] = useState<string | null>(null);
@@ -239,9 +241,11 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false }: Br
 
   return (
     <div className="relative mb-6">
-      <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
-        Browse by brand · {brands.length} brands A–Z
-      </p>
+      {label || (
+        <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
+          Browse by brand · {brands.length} brands A–Z
+        </p>
+      )}
 
       <div className="relative group">
         <button
