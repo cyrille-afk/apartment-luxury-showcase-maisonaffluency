@@ -173,7 +173,8 @@ const TradeDesigners = () => {
 
   // Carousel selection filters the A-Z library when a specific brand/designer is selected
   const filtered = useMemo(() => {
-    let result = enriched;
+    // Exclude self-referencing atelier records (they only serve as carousel headers)
+    let result = enriched.filter((d) => !(d.founder && d.founder === d.name));
 
     // If a specific brand is selected from the carousel, filter to that brand's roster
     if (selectedBrand !== "all") {
