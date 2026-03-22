@@ -36,6 +36,7 @@ const sectionPositionMap: Record<string, string> = {
 const defaultDesktopTop = "75%";
 
 const QuickJumpMenu = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isVisible, setIsVisible] = useState(false);
