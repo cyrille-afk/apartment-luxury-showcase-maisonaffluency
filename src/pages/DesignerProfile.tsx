@@ -109,7 +109,18 @@ const DesignerProfile = () => {
                 Biography
               </h2>
               <p className="font-body text-base md:text-lg leading-relaxed text-foreground/90 max-w-3xl">
-                {designer.biography}
+                {designer.biography.split(/(\u2018[^\u2019]*\u2019|'[^']*')/g).map((segment, i) => {
+                  const isCurly = segment.startsWith("\u2018") && segment.endsWith("\u2019");
+                  const isStraight = segment.startsWith("'") && segment.endsWith("'") && segment.length > 2;
+                  if (isCurly || isStraight) {
+                    return (
+                      <span key={i} className="italic text-foreground font-medium">
+                        {segment}
+                      </span>
+                    );
+                  }
+                  return <span key={i}>{segment}</span>;
+                })}
               </p>
               <div className="flex items-center gap-4 mt-6">
                 {instagramLink && (
