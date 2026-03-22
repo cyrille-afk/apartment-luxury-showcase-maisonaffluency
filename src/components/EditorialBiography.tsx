@@ -213,8 +213,8 @@ function SplitImageBlock({
 /* ------------------------------------------------------------------ */
 /*  Full-width Image Block — used on mobile or when no paired text    */
 /* ------------------------------------------------------------------ */
-function FullWidthImageBlock({ url, designerName, index }: { url: string; designerName: string; index: number }) {
-  const caption = captionFromUrl(url);
+function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { url: string; designerName: string; index: number; overrideCaption?: string | null }) {
+  const caption = overrideCaption ?? captionFromUrl(url);
   return (
     <motion.figure
       initial={{ opacity: 0, y: 20 }}
