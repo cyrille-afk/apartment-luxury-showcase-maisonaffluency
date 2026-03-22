@@ -189,7 +189,8 @@ const TradeDesigners = () => {
         (b) =>
           b.name.toLowerCase().includes(q) ||
           b.specialty.toLowerCase().includes(q) ||
-          b.tags.some((t) => t.toLowerCase().includes(q))
+          b.tags.some((t) => t.toLowerCase().includes(q)) ||
+          (brandMaterialsMap.get(b.name.toLowerCase()) || "").includes(q)
       );
     }
     if (activeFilters.length > 0) {
