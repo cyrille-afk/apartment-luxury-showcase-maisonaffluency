@@ -6,6 +6,7 @@ import { ArrowLeft, Instagram, ExternalLink, Quote, Package } from "lucide-react
 import { useDesigner, useDesignerPicks, useRelatedDesigners, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick, DesignerCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
+import EditorialBiography from "@/components/EditorialBiography";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
