@@ -156,45 +156,47 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           </div>
 
           {/* Details */}
-          <div className="flex-1 p-6 md:p-8 flex flex-col gap-4 overflow-y-auto">
+          <div className="flex-1 p-5 md:p-8 flex flex-col gap-3 md:gap-4 overflow-y-auto">
             <div>
               <p className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))]">
                 {designerDisplay}
               </p>
-              <h2 className="font-display text-xl md:text-2xl text-foreground mt-1 leading-tight">
+              <h2 className="font-display text-lg md:text-2xl text-foreground mt-1 leading-tight">
                 {product.subtitle
                   ? `${product.product_name} ${product.subtitle}`
                   : product.product_name}
               </h2>
             </div>
 
-            {product.materials && (
-              <div className="flex gap-2 items-start">
-                <Layers size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
-                <p className="font-body text-xs text-muted-foreground leading-relaxed">
-                  {product.materials}
-                </p>
-              </div>
-            )}
-
-            {product.dimensions && (
-              <div className="flex gap-2 items-start">
-                <Ruler size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
-                <p className="font-body text-sm text-foreground font-medium">
-                  {product.dimensions}
-                </p>
-              </div>
-            )}
-
+            {/* Materials & Dimensions — compact row on mobile */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {product.materials && (
+                <div className="flex gap-1.5 items-start">
+                  <Layers size={12} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
+                  <p className="font-body text-[11px] md:text-xs text-muted-foreground leading-relaxed">
+                    {product.materials}
+                  </p>
+                </div>
+              )}
+              {product.dimensions && (
+                <div className="flex gap-1.5 items-start">
+                  <Ruler size={12} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
+                  <p className="font-body text-[11px] md:text-sm text-foreground font-medium">
+                    {product.dimensions}
+                  </p>
+                </div>
+              )}
+            </div>
 
             {product.price && (
-              <p className="font-display text-lg text-accent font-semibold">
+              <p className="font-display text-base md:text-lg text-accent font-semibold">
                 {product.price}
               </p>
             )}
 
             {/* Actions */}
-            <div className="mt-auto pt-4 flex flex-col gap-2">
+            <div className="mt-auto pt-3 md:pt-4 flex flex-col gap-2">
+              {/* Primary CTA */}
               <button
                 onClick={() => onAddToQuote(product)}
                 disabled={isAdding}
@@ -216,7 +218,8 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 {isAdded ? "Added to Quote" : "Add to Quote"}
               </button>
 
-              <div className="flex gap-2 flex-wrap">
+              {/* Secondary actions — icon buttons on mobile, text buttons on desktop */}
+              <div className="flex gap-1.5 md:gap-2">
                 {/* Favorite */}
                 <button
                   onClick={async () => {
@@ -231,23 +234,27 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     });
                     setLastFavRealId(realId);
                   }}
+                  title={product && isFavorited(product.id) ? "Favorited" : "Favorite"}
                   className={cn(
-                    "flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
+                    "flex items-center justify-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-md font-body text-[10px] md:text-xs uppercase tracking-[0.12em] transition-all border",
                     product && isFavorited(product.id)
                       ? "border-destructive/30 text-destructive bg-destructive/10"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                   )}
                 >
-                  <Heart size={14} className={cn(product && isFavorited(product.id) && "fill-current")} />
-                  {product && isFavorited(product.id) ? "Favorited" : "Favorite"}
+                  <Heart size={13} className={cn(product && isFavorited(product.id) && "fill-current")} />
+                  <span className="hidden md:inline">{product && isFavorited(product.id) ? "Favorited" : "Favorite"}</span>
                 </button>
 
                 {/* Add to Project */}
                 {product && isFavorited(product.id) && (
                   <AddToProjectPopover productId={lastFavRealId || product.id} productName={product.product_name}>
-                    <button className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30">
-                      <FolderOpen size={14} />
-                      Add to Project
+                    <button
+                      title="Add to Project"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-md font-body text-[10px] md:text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                    >
+                      <FolderOpen size={13} />
+                      <span className="hidden md:inline">Add to Project</span>
                     </button>
                   </AddToProjectPopover>
                 )}
@@ -255,27 +262,30 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 {/* Pin to Selection */}
                 <button
                   onClick={() => togglePin(compareItem)}
+                  title={pinned ? "Pinned" : "Pin to Selection"}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
+                    "flex items-center justify-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-md font-body text-[10px] md:text-xs uppercase tracking-[0.12em] transition-all border",
                     pinned
                       ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
                     compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
                   )}
                 >
-                  <Scale size={14} />
-                  {pinned ? "Pinned" : "Pin to Selection"}
+                  <Scale size={13} />
+                  <span className="hidden md:inline">{pinned ? "Pinned" : "Pin to Selection"}</span>
                 </button>
 
+                {/* Spec Sheet */}
                 {product.pdf_url && (
                   <a
                     href={buildSpecSheetUrl(product.pdf_url, designerDisplay, product.product_name)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                    title="Spec Sheet"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-md font-body text-[10px] md:text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                   >
-                    <FileDown size={14} />
-                    Spec Sheet
+                    <FileDown size={13} />
+                    <span className="hidden md:inline">Spec Sheet</span>
                   </a>
                 )}
               </div>
@@ -291,9 +301,9 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   onClose();
                   navigate(`/trade/samples?${params.toString()}`);
                 }}
-                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-md font-body text-[10px] md:text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
               >
-                <Package size={14} />
+                <Package size={13} />
                 Request Sample
               </button>
 
