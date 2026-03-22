@@ -127,7 +127,8 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
 
           {/* Image */}
           <div
-            className="relative w-full md:w-1/2 aspect-square max-h-[40vh] md:max-h-none md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-0"
+            className="relative w-full md:w-1/2 md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-0"
+            style={{ maxHeight: 'min(45vh, 320px)' }}
             onMouseEnter={() => {
               if (product.hover_image_url) setShowHoverImage(true);
             }}
