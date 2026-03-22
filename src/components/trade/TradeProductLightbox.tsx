@@ -6,8 +6,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
-import { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 
 export interface TradeProductLightboxItem {
@@ -39,7 +38,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const { isFavorited, toggleFavorite } = useFavorites();
   const [showHoverImage, setShowHoverImage] = useState(false);
   const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   // Related products from same brand
   const relatedProducts = useMemo(() => {
@@ -105,7 +103,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header: drag indicator + close */}
-          <div className="md:hidden flex items-center justify-between px-4 pt-3 pb-1">
+          <div className="md:hidden sticky top-0 z-20 flex items-center justify-between px-4 pt-3 pb-2 bg-background/90 backdrop-blur-sm border-b border-border/60">
             <div className="w-8" />
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
             <button
@@ -127,8 +125,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
 
           {/* Image */}
           <div
-            className="relative w-full md:w-1/2 md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-0"
-            style={{ maxHeight: 'min(45vh, 320px)' }}
+            className="relative w-full md:w-1/2 h-[38vh] sm:h-[42vh] md:h-auto md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-0"
             onMouseEnter={() => {
               if (product.hover_image_url) setShowHoverImage(true);
             }}
@@ -140,7 +137,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   src={product.image_url}
                   alt={product.product_name}
                   className={cn(
-                    "max-w-[96%] max-h-[96%] md:max-w-[90%] md:max-h-[90%] object-contain transition-opacity duration-300",
+                    "w-full h-full object-contain transition-opacity duration-300",
                     showHoverImage && product.hover_image_url ? "opacity-0" : "opacity-100"
                   )}
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
@@ -150,7 +147,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     src={product.hover_image_url}
                     alt={`${product.product_name} in context`}
                     className={cn(
-                      "absolute inset-0 m-auto max-w-[96%] max-h-[96%] md:max-w-[90%] md:max-h-[90%] object-contain pointer-events-none transition-opacity duration-300",
+                      "absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-300",
                       showHoverImage ? "opacity-100" : "opacity-0"
                     )}
                   />
