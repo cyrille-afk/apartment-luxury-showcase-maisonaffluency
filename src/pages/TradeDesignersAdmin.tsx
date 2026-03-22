@@ -116,7 +116,7 @@ const TradeDesignersAdmin = () => {
   const hasChanges = (id: string) => !!editBuffer[id] && Object.keys(editBuffer[id]).length > 0;
 
   if (loading) return null;
-  if (!isAdmin) return <Navigate to="/trade" replace />;
+  if (!isSuperAdmin) return <Navigate to="/trade" replace />;
 
   return (
     <>
