@@ -69,7 +69,7 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
           </div>
         )}
         {isAtelier && (
-          <div className="absolute inset-x-0 top-0 px-4 pt-4 pb-10 bg-gradient-to-b from-black/70 via-black/30 to-transparent">
+          <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
             <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">{brand.name}</p>
           </div>
         )}
