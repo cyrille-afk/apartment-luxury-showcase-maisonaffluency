@@ -114,6 +114,7 @@ const TradeDesigners = () => {
   const initialBrand = searchParams.get("brand") || "all";
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [mobileCarouselMode, setMobileCarouselMode] = useState<"ateliers" | "designers">("ateliers");
 
   useEffect(() => {
     const onScroll = () => setShowBackToTop(window.scrollY > 600);
