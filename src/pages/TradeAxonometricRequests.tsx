@@ -321,7 +321,7 @@ const TradeAxonometricRequests = () => {
               />
             </div>
 
-            <Button onClick={handleSubmit} disabled={submitting || !imageUrl} className="w-full">
+            <Button onClick={handleSubmit} disabled={submitting || !imageUrl || !ceilingHeight.trim() || !roomWidth.trim() || !roomDepth.trim()} className="w-full">
               {submitting ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting…</>
               ) : (
