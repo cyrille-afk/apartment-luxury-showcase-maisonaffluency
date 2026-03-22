@@ -369,56 +369,8 @@ const TradeDesigners = () => {
                     <X className="h-3.5 w-3.5" />
                   </button>
                 )}
-              </div>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={cn(
-                  "shrink-0 p-2 rounded-md border transition-colors",
-                  showFilters || activeFilters.length > 0
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                {activeFilters.length > 0 && (
-                  <span className="absolute -mt-6 ml-3 bg-primary text-primary-foreground text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                    {activeFilters.length}
-                  </span>
-                )}
-              </button>
             </div>
           </div>
-
-          {showFilters && (
-            <div className="flex flex-wrap gap-1.5 pb-2 border-b border-border">
-              {ALL_FILTER_TAGS.filter((t) => (tagCounts.get(t) || 0) > 0).map((tag) => {
-                const active = activeFilters.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    onClick={() => toggleFilter(tag)}
-                    className={cn(
-                      "px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] transition-all border",
-                      active
-                        ? "bg-foreground text-background border-foreground"
-                        : "bg-transparent text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
-                    )}
-                  >
-                    {tag}
-                    <span className="ml-1 opacity-60">{tagCounts.get(tag)}</span>
-                  </button>
-                );
-              })}
-              {activeFilters.length > 0 && (
-                <button
-                  onClick={() => setActiveFilters([])}
-                  className="px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] text-destructive hover:text-destructive/80 transition-colors"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
-          )}
         </div>
 
         {/* A-Z quick jump */}
