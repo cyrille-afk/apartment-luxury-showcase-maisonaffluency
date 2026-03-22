@@ -142,13 +142,15 @@ function SplitImageBlock({
   designerName,
   index,
   paragraphs,
+  overrideCaption,
 }: {
   url: string;
   designerName: string;
   index: number;
   paragraphs: string[];
+  overrideCaption?: string | null;
 }) {
-  const caption = captionFromUrl(url);
+  const caption = overrideCaption ?? captionFromUrl(url);
   const imageOnRight = index % 2 === 0;
 
   const imageEl = (
