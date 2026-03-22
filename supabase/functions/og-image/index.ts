@@ -12,7 +12,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
-const SITE_URL = "https://maisonaffluency.com";
+const SITE_URL = "https://www.maisonaffluency.com";
 const DEFAULT_IMAGE =
   "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg";
 const TRADE_IMAGE =
