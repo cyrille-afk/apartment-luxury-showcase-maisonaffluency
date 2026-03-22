@@ -199,7 +199,8 @@ const ShowroomGridView = ({
 
         const { data: pricedProducts } = await supabase
           .from("trade_products")
-          .select("id, product_name, trade_price_cents, rrp_price_cents, currency, gallery_images");
+          .select("id, product_name, trade_price_cents, rrp_price_cents, currency, gallery_images")
+          .eq("is_active", true);
 
         const priceLookup = new Map<string, PriceMatch>();
         const priceEntries: PriceMatch[] = [];
