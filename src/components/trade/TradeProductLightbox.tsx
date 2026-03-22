@@ -201,7 +201,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             )}
 
             {/* Mobile: secondary action icons overlaid on image bottom-left */}
-            <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-2.5">
+            <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">
               <button
                 onClick={async () => {
                   if (!product) return;
