@@ -93,8 +93,8 @@ function captionFromUrl(url: string): string | null {
 /* ------------------------------------------------------------------ */
 /*  Video Block — always full-width to stand out                      */
 /* ------------------------------------------------------------------ */
-function VideoBlock({ url, designerName, index }: { url: string; designerName: string; index: number }) {
-  const caption = captionFromUrl(url);
+function VideoBlock({ url, designerName, index, overrideCaption }: { url: string; designerName: string; index: number; overrideCaption?: string | null }) {
+  const caption = overrideCaption ?? captionFromUrl(url);
   const embedUrl = getEmbedUrl(url);
 
   return (
