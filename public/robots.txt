@@ -3,6 +3,9 @@ Allow: /
 Disallow: /api/
 Disallow: /trade/admin
 Disallow: /trade/media
+Disallow: /*-share.html
+Disallow: /designers/*-share.html
+Disallow: /journal/*-share.html
 
 User-agent: ia_archiver
 Disallow: /
