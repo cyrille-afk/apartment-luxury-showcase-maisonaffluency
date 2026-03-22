@@ -399,7 +399,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   </a>
                 )}
               </div>
-              </div>
 
               {/* More from this brand */}
               {relatedProducts.length > 0 && (
