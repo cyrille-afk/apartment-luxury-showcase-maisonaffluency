@@ -10,6 +10,8 @@ interface BrandEntry {
   /** Designer portrait / image to use as thumbnail */
   imageUrl?: string | null;
   docCount: number;
+  /** Whether this entry is an atelier (shows square badge) */
+  isAtelier?: boolean;
 }
 
 interface BrandCarouselProps {
@@ -126,6 +128,9 @@ const BrandTile = ({
                 {brand.name.charAt(0)}
               </span>
             </div>
+          )}
+          {brand.isAtelier && (
+            <div className="absolute top-1 left-1 w-3.5 h-3.5 bg-foreground rounded-[2px]" />
           )}
         </div>
         <span className="font-body text-[11px] text-foreground whitespace-nowrap max-w-[80px] truncate">
