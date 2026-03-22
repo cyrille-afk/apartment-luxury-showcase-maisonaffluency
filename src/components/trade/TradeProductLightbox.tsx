@@ -6,7 +6,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 
 export interface TradeProductLightboxItem {
@@ -37,7 +37,11 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const [showHoverImage, setShowHoverImage] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
+
+  // Reset image loaded state when product changes
+  useEffect(() => { setImageLoaded(false); setShowHoverImage(false); }, [product?.id]);
 
   // Related products from same brand
   const relatedProducts = useMemo(() => {
@@ -133,12 +137,18 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           >
             {product.image_url ? (
               <>
+                {!imageLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-lg bg-muted animate-pulse" />
+                  </div>
+                )}
                 <img
                   src={product.image_url}
                   alt={product.product_name}
+                  onLoad={() => setImageLoaded(true)}
                   className={cn(
                     "w-full h-full object-contain transition-opacity duration-300",
-                    showHoverImage && product.hover_image_url ? "opacity-0" : "opacity-100"
+                    !imageLoaded ? "opacity-0" : showHoverImage && product.hover_image_url ? "opacity-0" : "opacity-100"
                   )}
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
