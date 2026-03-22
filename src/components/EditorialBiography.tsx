@@ -104,6 +104,16 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
   const thumbnailUrl = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg` : null;
 
+  const isNativeVideo = !embedUrl;
+
+  const playOverlay = (
+    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+      <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center transition-colors shadow-lg">
+        <Play className="w-7 h-7 md:w-9 md:h-9 text-foreground ml-1" fill="currentColor" />
+      </div>
+    </div>
+  );
+
   return (
     <motion.figure
       initial={{ opacity: 0, y: 24 }}
@@ -114,6 +124,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
     >
       <div className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative">
         {!playing && thumbnailUrl ? (
+          /* YouTube/Vimeo with auto-thumbnail */
           <button
             onClick={() => setPlaying(true)}
             className="w-full h-full relative group cursor-pointer"
@@ -124,11 +135,23 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
               alt={caption || `${designerName} — video`}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center transition-colors shadow-lg">
-                <Play className="w-7 h-7 md:w-9 md:h-9 text-foreground ml-1" fill="currentColor" />
-              </div>
-            </div>
+            {playOverlay}
+          </button>
+        ) : !playing && isNativeVideo ? (
+          /* Native MP4/WebM — show first frame via hidden video + play overlay */
+          <button
+            onClick={() => setPlaying(true)}
+            className="w-full h-full relative group cursor-pointer"
+            aria-label={`Play ${caption || 'video'}`}
+          >
+            <video
+              src={url + '#t=0.5'}
+              muted
+              playsInline
+              preload="metadata"
+              className="w-full h-full object-cover pointer-events-none"
+            />
+            {playOverlay}
           </button>
         ) : embedUrl ? (
           <iframe
@@ -142,9 +165,8 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
           <video
             src={url}
             controls
+            autoPlay
             playsInline
-            preload="metadata"
-            poster={thumbnailUrl || undefined}
             className="w-full h-full object-cover"
           />
         )}
