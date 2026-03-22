@@ -44,17 +44,30 @@ function renderQuotedText(text: string) {
   });
 }
 
+/** Parse a media line — supports `URL | Caption` pipe separator */
+function parseMediaLine(text: string): { url: string; caption: string | null } | null {
+  const value = text.trim();
+  // Try pipe separator: "https://...jpg | My Caption"
+  const pipeMatch = value.match(/^(https?:\/\/\S+)\s*\|\s*(.+)$/i);
+  const url = pipeMatch ? pipeMatch[1].trim() : value;
+  const pipeCaption = pipeMatch ? pipeMatch[2].trim() : null;
+
+  if (!/^https?:\/\//i.test(url)) return null;
+  if (/\s/.test(url)) return null;
+
+  const isMedia =
+    isVideoUrl(url) ||
+    /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(url) ||
+    /res\.cloudinary\.com\/.+\/image\/upload/i.test(url) ||
+    /\/storage\/v1\/object\/public\//i.test(url);
+
+  if (!isMedia) return null;
+  return { url, caption: pipeCaption };
+}
+
 /** Detect a standalone media URL paragraph pasted directly into biography text */
 function isStandaloneMediaUrl(text: string): boolean {
-  const value = text.trim();
-  if (!/^https?:\/\//i.test(value)) return false;
-  if (/\s/.test(value)) return false;
-  return (
-    isVideoUrl(value) ||
-    /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(value) ||
-    /res\.cloudinary\.com\/.+\/image\/upload/i.test(value) ||
-    /\/storage\/v1\/object\/public\//i.test(value)
-  );
+  return parseMediaLine(text) !== null;
 }
 
 /** Extract a human-readable caption from a URL's filename */
@@ -80,8 +93,8 @@ function captionFromUrl(url: string): string | null {
 /* ------------------------------------------------------------------ */
 /*  Video Block — always full-width to stand out                      */
 /* ------------------------------------------------------------------ */
-function VideoBlock({ url, designerName, index }: { url: string; designerName: string; index: number }) {
-  const caption = captionFromUrl(url);
+function VideoBlock({ url, designerName, index, overrideCaption }: { url: string; designerName: string; index: number; overrideCaption?: string | null }) {
+  const caption = overrideCaption ?? captionFromUrl(url);
   const embedUrl = getEmbedUrl(url);
 
   return (
@@ -129,13 +142,15 @@ function SplitImageBlock({
   designerName,
   index,
   paragraphs,
+  overrideCaption,
 }: {
   url: string;
   designerName: string;
   index: number;
   paragraphs: string[];
+  overrideCaption?: string | null;
 }) {
-  const caption = captionFromUrl(url);
+  const caption = overrideCaption ?? captionFromUrl(url);
   const imageOnRight = index % 2 === 0;
 
   const imageEl = (
@@ -198,8 +213,8 @@ function SplitImageBlock({
 /* ------------------------------------------------------------------ */
 /*  Full-width Image Block — used on mobile or when no paired text    */
 /* ------------------------------------------------------------------ */
-function FullWidthImageBlock({ url, designerName, index }: { url: string; designerName: string; index: number }) {
-  const caption = captionFromUrl(url);
+function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { url: string; designerName: string; index: number; overrideCaption?: string | null }) {
+  const caption = overrideCaption ?? captionFromUrl(url);
   return (
     <motion.figure
       initial={{ opacity: 0, y: 20 }}
@@ -253,11 +268,12 @@ export default function EditorialBiography({
   /* ------- Inline media mode (URLs pasted directly in biography) ------- */
   if (hasInlineMedia) {
     // Separate into text paragraphs and media URLs, preserving order
-    type Block = { type: "text"; content: string } | { type: "image"; url: string } | { type: "video"; url: string };
+    type Block = { type: "text"; content: string } | { type: "image"; url: string; caption: string | null } | { type: "video"; url: string; caption: string | null };
     const parsed: Block[] = blocks.map((b) => {
-      if (!isStandaloneMediaUrl(b)) return { type: "text" as const, content: b };
-      if (isVideoUrl(b)) return { type: "video" as const, url: b };
-      return { type: "image" as const, url: b };
+      const media = parseMediaLine(b);
+      if (!media) return { type: "text" as const, content: b };
+      if (isVideoUrl(media.url)) return { type: "video" as const, url: media.url, caption: media.caption };
+      return { type: "image" as const, url: media.url, caption: media.caption };
     });
 
     // Group consecutive text blocks that follow an image, pair them for split layout
@@ -288,10 +304,9 @@ export default function EditorialBiography({
 
       if (block.type === "video") {
         elements.push(
-          <VideoBlock key={`vid-${i}`} url={block.url} designerName={designerName} index={i} />
+          <VideoBlock key={`vid-${i}`} url={block.url} designerName={designerName} index={i} overrideCaption={block.caption} />
         );
         i++;
-        // Render any following text as standalone paragraphs until next media
         const followText: string[] = [];
         while (i < parsed.length && parsed[i].type === "text") {
           followText.push((parsed[i] as { type: "text"; content: string }).content);
@@ -312,7 +327,6 @@ export default function EditorialBiography({
       }
 
       if (block.type === "image") {
-        // Collect following text paragraphs to pair with this image
         i++;
         const paired: string[] = [];
         while (i < parsed.length && parsed[i].type === "text") {
@@ -328,6 +342,7 @@ export default function EditorialBiography({
               designerName={designerName}
               index={imageIdx}
               paragraphs={paired}
+              overrideCaption={block.caption}
             />
           );
         } else {
@@ -337,6 +352,7 @@ export default function EditorialBiography({
               url={block.url}
               designerName={designerName}
               index={imageIdx}
+              overrideCaption={block.caption}
             />
           );
         }
