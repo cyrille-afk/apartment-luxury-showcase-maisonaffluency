@@ -98,6 +98,11 @@ function captionFromUrl(url: string): string | null {
 function VideoBlock({ url, designerName, index, overrideCaption }: { url: string; designerName: string; index: number; overrideCaption?: string | null }) {
   const caption = overrideCaption ?? captionFromUrl(url);
   const embedUrl = getEmbedUrl(url);
+  const [playing, setPlaying] = useState(false);
+
+  // Extract YouTube thumbnail automatically
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  const thumbnailUrl = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg` : null;
 
   return (
     <motion.figure
@@ -107,10 +112,27 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
       transition={transition}
       className="my-10 md:my-14 -mx-2 md:-mx-6"
     >
-      <div className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg">
-        {embedUrl ? (
+      <div className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative">
+        {!playing && thumbnailUrl ? (
+          <button
+            onClick={() => setPlaying(true)}
+            className="w-full h-full relative group cursor-pointer"
+            aria-label={`Play ${caption || 'video'}`}
+          >
+            <img
+              src={thumbnailUrl}
+              alt={caption || `${designerName} — video`}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center transition-colors shadow-lg">
+                <Play className="w-7 h-7 md:w-9 md:h-9 text-foreground ml-1" fill="currentColor" />
+              </div>
+            </div>
+          </button>
+        ) : embedUrl ? (
           <iframe
-            src={embedUrl}
+            src={playing ? embedUrl.replace('?', '?autoplay=1&') : embedUrl}
             title={caption || `${designerName} — video`}
             className="w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -122,6 +144,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
             controls
             playsInline
             preload="metadata"
+            poster={thumbnailUrl || undefined}
             className="w-full h-full object-cover"
           />
         )}
