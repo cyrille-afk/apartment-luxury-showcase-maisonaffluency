@@ -126,6 +126,18 @@ const TradeDesigners = () => {
     return map;
   }, [allProducts]);
 
+  // Build a map of brand_name (lowercase) → concatenated material strings for search
+  const brandMaterialsMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of allProducts) {
+      if (!p.materials) continue;
+      const key = p.brand_name.toLowerCase();
+      const prev = map.get(key) || "";
+      map.set(key, prev + " " + p.materials.toLowerCase());
+    }
+    return map;
+  }, [allProducts]);
+
   const enriched = useMemo(() => {
     return designers.map((d) => {
       const tags = extractTags(d.specialty);
@@ -177,14 +189,15 @@ const TradeDesigners = () => {
         (b) =>
           b.name.toLowerCase().includes(q) ||
           b.specialty.toLowerCase().includes(q) ||
-          b.tags.some((t) => t.toLowerCase().includes(q))
+          b.tags.some((t) => t.toLowerCase().includes(q)) ||
+          (brandMaterialsMap.get(b.name.toLowerCase()) || "").includes(q)
       );
     }
     if (activeFilters.length > 0) {
       result = result.filter((b) => activeFilters.some((f) => b.tags.includes(f)));
     }
     return result;
-  }, [enriched, search, activeFilters, selectedBrand]);
+  }, [enriched, search, activeFilters, selectedBrand, brandMaterialsMap]);
 
   // Group into A-Z sections with atelier header cards sorting first in their group
   const grouped = useMemo(() => {
