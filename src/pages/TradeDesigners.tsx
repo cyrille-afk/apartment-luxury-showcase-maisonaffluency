@@ -113,7 +113,6 @@ const TradeDesigners = () => {
   const [showFilters, setShowFilters] = useState(false);
   const initialBrand = searchParams.get("brand") || "all";
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
-  const [carouselMode, setCarouselMode] = useState<"ateliers" | "designers">("ateliers");
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
@@ -136,88 +135,35 @@ const TradeDesigners = () => {
     return designers.map((d) => {
       const tags = extractTags(d.specialty);
       const productCount = productCountMap.get(d.name.toLowerCase()) || 0;
-      return { ...d, tags, productCount };
+      const isAtelierCard = !!(d.founder && d.founder === d.name);
+      return { ...d, tags, productCount, isAtelierCard };
     });
   }, [designers, productCountMap]);
 
-  // Build carousel: split into ateliers (multi-designer brands) and solo designers
-  const { atelierEntries, designerEntries } = useMemo(() => {
-    const founderMap = new Map<string, number>();
-    const founderNames = new Set<string>();
+  // Unified carousel entries — all designers & ateliers in one list
+  const carouselEntries = useMemo(() => {
+    const seen = new Set<string>();
+    const entries: { name: string; docCount: number; imageUrl?: string }[] = [];
 
     for (const d of enriched) {
-      if (d.founder) founderNames.add(d.founder);
-    }
-
-    for (const d of enriched) {
-      if (d.founder) {
-        founderMap.set(d.founder, (founderMap.get(d.founder) || 0) + 1);
+      if (!seen.has(d.name)) {
+        seen.add(d.name);
+        entries.push({ name: d.name, docCount: 0, imageUrl: d.image_url || undefined });
       }
     }
 
-    const ateliers: { name: string; docCount: number; imageUrl?: string }[] = [];
-    const individualDesigners: { name: string; docCount: number; imageUrl?: string }[] = [];
-    const seenAteliers = new Set<string>();
-    const seenDesigners = new Set<string>();
-
-    // Build ateliers list from unique founder values
-    for (const [name, count] of founderMap) {
-      if (!seenAteliers.has(name)) {
-        seenAteliers.add(name);
-        // Use the atelier's own record image (even if self-referencing), or first collaborator's image
-        const atelierRecord = enriched.find((d) => d.name === name);
-        const firstCollab = enriched.find((d) => d.founder === name && d.name !== name);
-        const imageUrl = atelierRecord?.image_url || firstCollab?.image_url || undefined;
-        ateliers.push({ name, docCount: count, imageUrl });
-      }
-    }
-
-    // Build designers list: all individual designers (collaborators + independent solos)
-    for (const d of enriched) {
-      // Skip atelier records (self-referencing or records that serve as atelier headers)
-      if (founderNames.has(d.name) && (!d.founder || d.founder === d.name)) continue;
-      if (!seenDesigners.has(d.name)) {
-        seenDesigners.add(d.name);
-        individualDesigners.push({ name: d.name, docCount: 0, imageUrl: d.image_url || undefined });
-      }
-    }
-
-    return {
-      atelierEntries: ateliers.sort((a, b) => a.name.localeCompare(b.name)),
-      designerEntries: individualDesigners.sort((a, b) => a.name.localeCompare(b.name)),
-    };
+    return entries.sort((a, b) => a.name.localeCompare(b.name));
   }, [enriched]);
 
-  const brandEntries = carouselMode === "ateliers" ? atelierEntries : designerEntries;
-
-  // Carousel selection filters the A-Z library when a specific brand/designer is selected
+  // Unified filtering — all records in one flat list
   const filtered = useMemo(() => {
-    let result: EnrichedDesigner[] = [];
+    let result = enriched.slice();
 
-    if (carouselMode === "ateliers") {
-      // Include atelier header cards (self-referencing) marked distinctly
-      const atelierHeaders = enriched
-        .filter((d) => d.founder && d.founder === d.name)
-        .map((d) => ({ ...d, isAtelierCard: true }));
-      const atelierMembers = enriched.filter((d) => d.founder && d.founder !== d.name);
-
-      if (selectedBrand !== "all") {
-        // Show the atelier header + its members
-        result = [
-          ...atelierHeaders.filter((d) => d.name === selectedBrand),
-          ...atelierMembers.filter((d) => d.founder === selectedBrand),
-        ];
-      } else {
-        result = [...atelierHeaders, ...atelierMembers];
-      }
-    } else {
-      // Designers mode: independents (no founder) + collaborators shown individually
-      if (selectedBrand !== "all") {
-        // When a specific designer is selected, show all records with that name
-        result = enriched.filter((d) => d.name === selectedBrand);
-      } else {
-        result = enriched.filter((d) => !d.founder);
-      }
+    if (selectedBrand !== "all") {
+      // Show the selected entry + any records where founder matches (for ateliers)
+      result = result.filter(
+        (d) => d.name === selectedBrand || d.founder === selectedBrand
+      );
     }
 
     if (search) {
@@ -233,36 +179,36 @@ const TradeDesigners = () => {
       result = result.filter((b) => activeFilters.some((f) => b.tags.includes(f)));
     }
     return result;
-  }, [enriched, search, activeFilters, selectedBrand, carouselMode]);
-  type GridEntry = { type: "solo"; designer: EnrichedDesigner; sortName: string };
+  }, [enriched, search, activeFilters, selectedBrand]);
 
+  // Group into A-Z sections with atelier header cards sorting first in their group
   const grouped = useMemo(() => {
-    const entries: GridEntry[] = [];
+    const entries: { designer: EnrichedDesigner; sortName: string }[] = [];
 
     for (const d of filtered) {
-      // For atelier members, use founder as sort prefix so atelier card comes first
-      const sortName = d.isAtelierCard ? `${d.name}\0\0` : (d.founder && d.founder !== d.name ? `${d.founder}\0\x01${d.name}` : d.name);
-      entries.push({ type: "solo", designer: d, sortName });
+      const sortName = d.isAtelierCard
+        ? `${d.name}\0\0`
+        : d.founder && d.founder !== d.name
+          ? `${d.founder}\0\x01${d.name}`
+          : d.name;
+      entries.push({ designer: d, sortName });
     }
 
     entries.sort((a, b) => {
       const aFounder = a.designer.isAtelierCard ? a.designer.name : (a.designer.founder || "");
       const bFounder = b.designer.isAtelierCard ? b.designer.name : (b.designer.founder || "");
-      // Same atelier group: atelier card first, then alphabetical members
       if (aFounder && bFounder && aFounder === bFounder) {
         if (a.designer.isAtelierCard && !b.designer.isAtelierCard) return -1;
         if (!a.designer.isAtelierCard && b.designer.isAtelierCard) return 1;
         return a.designer.name.localeCompare(b.designer.name);
       }
-      // Different groups: sort by group name (atelier name or own name)
       const aGroup = aFounder || a.designer.name;
       const bGroup = bFounder || b.designer.name;
       return aGroup.localeCompare(bGroup);
     });
 
-    const letterMap = new Map<string, GridEntry[]>();
+    const letterMap = new Map<string, typeof entries>();
     for (const entry of entries) {
-      // Group atelier members under their atelier's letter
       const d = entry.designer;
       const groupName = d.isAtelierCard ? d.name : (d.founder && d.founder !== d.name ? d.founder : d.name);
       const letter = groupName.charAt(0).toUpperCase();
@@ -296,22 +242,21 @@ const TradeDesigners = () => {
     );
   };
 
+  const totalCount = enriched.length;
+
   return (
     <>
       <Helmet>
         <title>Designers & Ateliers Library — Maison Affluency Trade</title>
       </Helmet>
       <div id="designers-carousel-top" className="space-y-6">
-        {(atelierEntries.length > 0 || designerEntries.length > 0) && (
+        {carouselEntries.length > 0 && (
           <BrandCarousel
-            brands={brandEntries}
+            brands={carouselEntries}
             selectedBrand={selectedBrand}
             onSelect={(b) => {
               setSelectedBrand(b);
-
               if (b === "all") return;
-
-              // Scroll to the letter
               const letter = b.charAt(0).toUpperCase();
               requestAnimationFrame(() => {
                 const el = document.getElementById(`designer-letter-${letter}`);
@@ -320,39 +265,11 @@ const TradeDesigners = () => {
             }}
             label={
               <div className="mb-2">
-                <div className="flex items-center gap-3 mb-1.5">
-                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
-                    Browse by
-                  </p>
-                  <div className="flex items-center gap-1 bg-muted/40 rounded-full p-0.5">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setCarouselMode("ateliers"); setSelectedBrand("all"); }}
-                      className={cn(
-                        "px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] transition-all",
-                        carouselMode === "ateliers"
-                          ? "bg-foreground text-background shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      Ateliers · {atelierEntries.length}
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setCarouselMode("designers"); setSelectedBrand("all"); }}
-                      className={cn(
-                        "px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] transition-all",
-                        carouselMode === "designers"
-                          ? "bg-foreground text-background shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      Designers · {designerEntries.length}
-                    </button>
-                  </div>
-                </div>
+                <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-1">
+                  Browse by name
+                </p>
                 <p className="font-body text-[10px] text-muted-foreground/60 normal-case tracking-normal">
-                  {carouselMode === "ateliers"
-                    ? "Multi-designer brands — click to expand their roster."
-                    : "Independent designers & studios."}
+                  Ateliers, designers & studios — select to filter.
                 </p>
               </div>
             }
@@ -363,7 +280,7 @@ const TradeDesigners = () => {
             <div>
               <h1 className="font-display text-2xl text-foreground tracking-wide">Designers & Ateliers Library</h1>
               <p className="font-body text-sm text-muted-foreground mt-1">
-                {atelierEntries.length} ateliers · {designerEntries.length} designers
+                {totalCount} designers & ateliers
                 {(activeFilters.length > 0 || search) && (
                   <span className="text-primary ml-1">· {filtered.length} showing</span>
                 )}
@@ -496,13 +413,12 @@ const TradeDesigners = () => {
             )}
           </div>
         ) : selectedBrand !== "all" ? (
-          /* Flat alphabetical grid when a specific atelier/designer is selected */
           <div>
             <div className="flex items-center gap-3 mb-4">
               <span className="font-display text-sm text-foreground tracking-wide">{selectedBrand}</span>
               <div className="flex-1 h-px bg-border" />
               <span className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
-                {filtered.length} {filtered.length === 1 ? "designer" : "designers"}
+                {filtered.length} {filtered.length === 1 ? "entry" : "entries"}
               </span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -526,7 +442,7 @@ const TradeDesigners = () => {
                   <span className="font-display text-2xl text-foreground/20 tracking-widest">{letter}</span>
                   <div className="flex-1 h-px bg-border" />
                   <span className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">
-                    {entries.length} {entries.length === 1 ? "brand / atelier" : "brands & ateliers"}
+                    {entries.length} {entries.length === 1 ? "entry" : "entries"}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
