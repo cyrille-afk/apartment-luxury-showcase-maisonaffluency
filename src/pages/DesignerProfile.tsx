@@ -85,9 +85,6 @@ const DesignerProfile = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 px-6 md:px-16 pb-10">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
-              {designer.logo_url && (
-                <img src={designer.logo_url} alt="" className="h-8 mb-4 opacity-80" />
-              )}
               <h1 className="font-display text-3xl md:text-5xl tracking-wide">{name}</h1>
               {designer.specialty && (
                 <p className="font-body text-sm md:text-base text-muted-foreground mt-2 max-w-xl">

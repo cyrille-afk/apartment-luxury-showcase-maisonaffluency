@@ -250,9 +250,9 @@ const TradeAtelierProfile = () => {
             className={cn("relative rounded-xl overflow-hidden shrink-0", isDesignerProfile && "md:w-1/2")}
           >
             <div className={heroAspect}>
-              {(designer.logo_url || designer.image_url) && (
+              {designer.image_url && (
                 <img
-                  src={designer.logo_url || designer.image_url}
+                  src={designer.image_url}
                   alt={name}
                   className="absolute inset-0 w-full h-full object-cover"
                   loading="eager"
@@ -267,9 +267,6 @@ const TradeAtelierProfile = () => {
               >
                 {designer.founder}
               </Link>
-            )}
-            {!heroHasEmbeddedName && designer.logo_url && !designer.founder && (
-              <img src={designer.logo_url} alt="" className="absolute top-4 left-4 md:top-6 md:left-6 h-8 md:h-12 opacity-90 z-10" />
             )}
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
