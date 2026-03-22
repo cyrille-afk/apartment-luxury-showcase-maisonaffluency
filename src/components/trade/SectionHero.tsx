@@ -102,7 +102,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
         <div>
           <h1 className="font-display text-xl md:text-2xl text-background mb-1">{title}</h1>
           {subtitle && (
-            <p className="font-body text-xs md:text-sm text-background/70">{subtitle}</p>
+            <p className="font-body text-xs md:text-sm text-background/90 drop-shadow-sm">{subtitle}</p>
           )}
         </div>
         {children && <div className="flex items-center gap-2 md:gap-3 flex-wrap">{children}</div>}
