@@ -37,6 +37,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const [showHoverImage, setShowHoverImage] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
 
   // Related products from same brand
