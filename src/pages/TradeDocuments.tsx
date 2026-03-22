@@ -114,11 +114,11 @@ const TradeDocuments = () => {
 
   return (
     <>
-      <Helmet><title>Brand Library — Trade Portal — Maison Affluency</title></Helmet>
+      <Helmet><title>Resources — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-5xl">
       <SectionHero
         section="documents"
-        title="Brand Library"
+        title="Resources"
         subtitle="Access tearsheets, catalogues, and price lists organized by brand."
       />
 
