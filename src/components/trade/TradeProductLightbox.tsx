@@ -105,15 +105,15 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header: drag indicator + close */}
-          <div className="md:hidden flex items-center justify-between px-4 pt-2 pb-1">
+          <div className="md:hidden flex items-center justify-between px-4 pt-3 pb-1">
             <div className="w-8" />
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
             <button
               onClick={onClose}
-              className="p-1.5 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 transition-all"
+              className="p-2 rounded-full bg-foreground/15 text-foreground hover:bg-foreground/25 transition-all"
               aria-label="Close"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           </div>
           {/* Desktop close button */}
