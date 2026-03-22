@@ -103,9 +103,7 @@ const JournalArticlePage = () => {
                   `/journal/${slug}`,
                   article.title,
                   article.excerpt?.slice(0, 60),
-                  article.slug === "thierry-lemaire-radical-simplicity"
-                    ? { directUrlPath: "/thierry-lemaire-share.html" }
-                    : undefined
+                  { directUrlPath: `/journal/${article.slug}-share.html` }
                 );
                 trackCTA.whatsapp(`JournalArticle_Share_${article.slug}`);
               }}
