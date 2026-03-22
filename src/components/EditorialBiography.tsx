@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { Play } from "lucide-react";
 
 interface EditorialBiographyProps {
   biography: string;
