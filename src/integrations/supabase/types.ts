@@ -496,6 +496,7 @@ export type Database = {
       designers: {
         Row: {
           biography: string
+          biography_images: string[] | null
           created_at: string
           display_name: string | null
           founder: string | null
@@ -515,6 +516,7 @@ export type Database = {
         }
         Insert: {
           biography?: string
+          biography_images?: string[] | null
           created_at?: string
           display_name?: string | null
           founder?: string | null
@@ -534,6 +536,7 @@ export type Database = {
         }
         Update: {
           biography?: string
+          biography_images?: string[] | null
           created_at?: string
           display_name?: string | null
           founder?: string | null
