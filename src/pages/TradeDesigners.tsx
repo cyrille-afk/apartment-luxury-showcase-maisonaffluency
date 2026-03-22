@@ -211,10 +211,12 @@ const TradeDesigners = () => {
         result = [...atelierHeaders, ...atelierMembers];
       }
     } else {
-      // Designers mode: only independents (no founder)
-      result = enriched.filter((d) => !d.founder);
+      // Designers mode: independents (no founder) + collaborators shown individually
       if (selectedBrand !== "all") {
-        result = result.filter((d) => d.name === selectedBrand);
+        // When a specific designer is selected, show all records with that name
+        result = enriched.filter((d) => d.name === selectedBrand);
+      } else {
+        result = enriched.filter((d) => !d.founder);
       }
     }
 
