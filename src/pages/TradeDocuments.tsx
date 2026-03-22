@@ -119,7 +119,7 @@ const TradeDocuments = () => {
       <SectionHero
         section="documents"
         title="Resources"
-        subtitle="Access tearsheets, catalogues, and price lists organized by brand."
+        subtitle="Access Catalogues, Price lists and Spec Sheets when available, organised by Ateliers and Designers."
       />
 
       {/* Brand carousel */}
