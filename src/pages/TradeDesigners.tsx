@@ -197,7 +197,7 @@ const TradeDesigners = () => {
       result = result.filter((b) => activeFilters.some((f) => b.tags.includes(f)));
     }
     return result;
-  }, [enriched, search, activeFilters, selectedBrand]);
+  }, [enriched, search, activeFilters, selectedBrand, brandMaterialsMap]);
 
   // Group into A-Z sections with atelier header cards sorting first in their group
   const grouped = useMemo(() => {
