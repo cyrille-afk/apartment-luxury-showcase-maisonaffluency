@@ -312,7 +312,7 @@ const TradeDesigners = () => {
                   }}
                   label={
                     <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
-                      Ateliers · {atelierCarouselEntries.length} brands
+                      Ateliers · 32 brands
                     </p>
                   }
                 />
