@@ -34,6 +34,9 @@ const TradeAxonometricRequests = () => {
   const [requestType, setRequestType] = useState<"elevation" | "section" | "section_plan">("elevation");
   const [projectName, setProjectName] = useState("");
   const [notes, setNotes] = useState("");
+  const [ceilingHeight, setCeilingHeight] = useState("");
+  const [roomWidth, setRoomWidth] = useState("");
+  const [roomDepth, setRoomDepth] = useState("");
   const [editingRequest, setEditingRequest] = useState<any | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [selectedFavoriteIds, setSelectedFavoriteIds] = useState<string[]>(() => {
@@ -70,6 +73,14 @@ const TradeAxonometricRequests = () => {
       toast({ title: "Please enter a project name", variant: "destructive" });
       return;
     }
+    if (!ceilingHeight.trim()) {
+      toast({ title: "Ceiling height (Z-axis) is required", description: "We need the vertical dimension to generate accurate 3D renders.", variant: "destructive" });
+      return;
+    }
+    if (!roomWidth.trim() || !roomDepth.trim()) {
+      toast({ title: "Room width and depth are required", description: "Please provide all three dimensions (width × depth × height).", variant: "destructive" });
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -78,7 +89,7 @@ const TradeAxonometricRequests = () => {
         image_url: imageUrl,
         request_type: requestType,
         project_name: projectName.trim().slice(0, 200),
-        notes: notes.trim().slice(0, 1000) || null,
+        notes: `[Dimensions: W${roomWidth.trim()} × D${roomDepth.trim()} × H${ceilingHeight.trim()}]${notes.trim() ? "\n" + notes.trim().slice(0, 900) : ""}`.slice(0, 1000) || null,
         linked_favorite_product_ids: selectedFavoriteIds.length > 0 ? selectedFavoriteIds : [],
       });
       if (error) throw error;
@@ -88,6 +99,9 @@ const TradeAxonometricRequests = () => {
       setImageUrl(null);
       setProjectName("");
       setNotes("");
+      setCeilingHeight("");
+      setRoomWidth("");
+      setRoomDepth("");
       setSelectedFavoriteIds([]);
       refetch();
     } catch (e: any) {
@@ -214,6 +228,46 @@ const TradeAxonometricRequests = () => {
               </div>
             </div>
 
+            {/* Room Dimensions — mandatory */}
+            <div className="space-y-1.5">
+              <label className="font-body text-xs text-muted-foreground">Room Dimensions (meters) *</label>
+              <p className="font-body text-[10px] text-muted-foreground/70">
+                Provide the physical measurements so we can generate an accurate 3D view. All three axes are required.
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="font-body text-[10px] text-muted-foreground">Width (X)</label>
+                  <Input
+                    value={roomWidth}
+                    onChange={(e) => setRoomWidth(e.target.value)}
+                    placeholder="e.g. 5.2"
+                    maxLength={10}
+                    className="font-body text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-body text-[10px] text-muted-foreground">Depth (Y)</label>
+                  <Input
+                    value={roomDepth}
+                    onChange={(e) => setRoomDepth(e.target.value)}
+                    placeholder="e.g. 4.0"
+                    maxLength={10}
+                    className="font-body text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-body text-[10px] text-muted-foreground">Ceiling Height (Z)</label>
+                  <Input
+                    value={ceilingHeight}
+                    onChange={(e) => setCeilingHeight(e.target.value)}
+                    placeholder="e.g. 3.0"
+                    maxLength={10}
+                    className="font-body text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-1.5">
               <label className="font-body text-xs text-muted-foreground">Upload Drawing *</label>
               {imageUrl ? (
@@ -267,7 +321,7 @@ const TradeAxonometricRequests = () => {
               />
             </div>
 
-            <Button onClick={handleSubmit} disabled={submitting || !imageUrl} className="w-full">
+            <Button onClick={handleSubmit} disabled={submitting || !imageUrl || !ceilingHeight.trim() || !roomWidth.trim() || !roomDepth.trim()} className="w-full">
               {submitting ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting…</>
               ) : (
