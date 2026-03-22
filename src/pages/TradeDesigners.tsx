@@ -247,20 +247,6 @@ const TradeDesigners = () => {
     return [...letters].sort();
   }, [enriched]);
 
-  const tagCounts = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const b of enriched) {
-      for (const t of b.tags) map.set(t, (map.get(t) || 0) + 1);
-    }
-    return map;
-  }, [enriched]);
-
-  const toggleFilter = (tag: string) => {
-    setActiveFilters((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-  };
-
   const totalCount = enriched.length;
 
   return (
