@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText, ShoppingCart, Check, Scale, Heart, Loader2 } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
+import EditorialBiography from "@/components/EditorialBiography";
 import { cn } from "@/lib/utils";
 import { useDesigner, useDesignerPicks, useRelatedDesigners, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
@@ -331,20 +332,12 @@ const TradeAtelierProfile = () => {
                   About
                 </h2>
               )}
-              <p className="font-body text-sm leading-relaxed text-foreground/85 text-justify whitespace-pre-line">
-                {designer.biography.split(/(\u2018[^\u2019]*\u2019|'[^']*')/g).map((segment, i) => {
-                  const isCurly = segment.startsWith("\u2018") && segment.endsWith("\u2019");
-                  const isStraight = segment.startsWith("'") && segment.endsWith("'") && segment.length > 2;
-                  if (isCurly || isStraight) {
-                    return (
-                      <span key={i} className="italic text-foreground font-medium">
-                        {segment}
-                      </span>
-                    );
-                  }
-                  return <span key={i}>{segment}</span>;
-                })}
-              </p>
+              <EditorialBiography
+                biography={designer.biography}
+                biographyImages={designer.biography_images}
+                pickImages={picks.slice(0, 3).map((p) => p.image_url)}
+                designerName={designer.name}
+              />
             </motion.div>
           )}
         </div>

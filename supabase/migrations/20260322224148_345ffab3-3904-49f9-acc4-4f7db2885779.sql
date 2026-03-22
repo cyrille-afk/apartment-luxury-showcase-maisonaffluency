@@ -1,0 +1,1 @@
+ALTER TABLE public.designers ADD COLUMN biography_images text[] DEFAULT '{}'::text[];
