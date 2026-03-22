@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { FileDown, ExternalLink } from "lucide-react";
+import { FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /**
