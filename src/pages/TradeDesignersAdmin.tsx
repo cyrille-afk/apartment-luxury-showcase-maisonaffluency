@@ -263,6 +263,51 @@ const TradeDesignersAdmin = () => {
                         />
                       </div>
 
+                      {/* Editorial Images */}
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Editorial Images <span className="normal-case font-normal">(shown between biography paragraphs — leave empty to auto-use curator's picks)</span>
+                        </label>
+                        <div className="mt-2 space-y-2">
+                          {((editBuffer[d.id]?.biography_images ?? d.biography_images) || []).map((url: string, idx: number) => (
+                            <div key={idx} className="flex items-center gap-2">
+                              <img src={url} alt="" className="w-16 h-10 object-cover rounded shrink-0 bg-muted" />
+                              <Input
+                                value={url}
+                                onChange={(e) => {
+                                  const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
+                                  imgs[idx] = e.target.value;
+                                  setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+                                }}
+                                placeholder="Image URL"
+                                className="text-xs flex-1"
+                              />
+                              <button
+                                onClick={() => {
+                                  const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
+                                  imgs.splice(idx, 1);
+                                  setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+                                }}
+                                className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || []), ""];
+                              setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+                            }}
+                          >
+                            <Plus className="w-3.5 h-3.5 mr-1" />
+                            Add Image
+                          </Button>
+                        </div>
+                      </div>
+
                       <div className="flex items-center gap-3 flex-wrap">
                         <div className="flex items-center gap-2">
                           <Switch
