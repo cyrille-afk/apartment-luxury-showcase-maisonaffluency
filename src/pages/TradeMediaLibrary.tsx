@@ -156,8 +156,9 @@ export default function TradeMediaLibrary() {
           </div>
           <CloudUpload
             folder="documents"
-            accept="image/*,application/pdf"
+            accept="image/*,application/pdf,video/mp4,video/webm,video/quicktime"
             multiple
+            maxSizeMB={100}
             label="Upload files"
             onUpload={() => fetchFiles()}
           />
