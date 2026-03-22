@@ -48,7 +48,7 @@ const TradeDesignersAdmin = () => {
       if (error) throw error;
       return data as DesignerRow[];
     },
-    enabled: !!isAdmin,
+    enabled: !!isSuperAdmin,
   });
 
   const saveMutation = useMutation({
