@@ -131,7 +131,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   src={product.image_url}
                   alt={product.product_name}
                   className={cn(
-                    "max-w-[90%] max-h-[90%] object-contain transition-opacity duration-300",
+                    "max-w-[96%] max-h-[96%] md:max-w-[90%] md:max-h-[90%] object-contain transition-opacity duration-300",
                     showHoverImage && product.hover_image_url ? "opacity-0" : "opacity-100"
                   )}
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
