@@ -62,7 +62,7 @@ const formatPrice = (cents: number | null, currency: string = "SGD") => {
 };
 
 const TradeQuotesAdmin = () => {
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { isAdmin, isSuperAdmin, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [quotes, setQuotes] = useState<AdminQuote[]>([]);
   const [loading, setLoading] = useState(true);
