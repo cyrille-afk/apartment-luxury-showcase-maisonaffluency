@@ -238,10 +238,18 @@ const TradeDesigners = () => {
     }
 
     entries.sort((a, b) => {
-      // Atelier cards always sort before their members
-      if (a.designer.isAtelierCard && !b.designer.isAtelierCard) return -1;
-      if (!a.designer.isAtelierCard && b.designer.isAtelierCard) return 1;
-      return a.sortName.localeCompare(b.sortName);
+      const aFounder = a.designer.isAtelierCard ? a.designer.name : (a.designer.founder || "");
+      const bFounder = b.designer.isAtelierCard ? b.designer.name : (b.designer.founder || "");
+      // Same atelier group: atelier card first, then alphabetical members
+      if (aFounder && bFounder && aFounder === bFounder) {
+        if (a.designer.isAtelierCard && !b.designer.isAtelierCard) return -1;
+        if (!a.designer.isAtelierCard && b.designer.isAtelierCard) return 1;
+        return a.designer.name.localeCompare(b.designer.name);
+      }
+      // Different groups: sort by group name (atelier name or own name)
+      const aGroup = aFounder || a.designer.name;
+      const bGroup = bFounder || b.designer.name;
+      return aGroup.localeCompare(bGroup);
     });
 
     const letterMap = new Map<string, GridEntry[]>();
