@@ -37,6 +37,7 @@ const ALL_FILTER_TAGS = [
 type EnrichedDesigner = {
   id: string; slug: string; name: string; founder: string | null; specialty: string;
   image_url: string; source: string; tags: string[]; productCount: number;
+  logo_url?: string | null;
   isAtelierCard?: boolean;
   [key: string]: unknown;
 };
@@ -87,11 +88,12 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
           <span className="absolute top-2.5 left-2.5 bg-primary/90 backdrop-blur-sm text-primary-foreground font-body text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full">Collectible</span>
         )}
         {brand.founder && !brand.source?.includes("collectible") && (
-          <span className={cn(
-            "absolute top-2.5 left-2.5 backdrop-blur-sm font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full flex items-center gap-1",
-            isAtelier ? "bg-foreground/75 text-background" : "bg-foreground/75 text-background"
-          )}>
-            <Layers className="h-2.5 w-2.5" />
+          <span className="absolute top-2.5 left-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full flex items-center gap-1">
+            {isAtelier && brand.logo_url ? (
+              <img src={brand.logo_url} alt={`${brand.name} logo`} className="h-2.5 w-2.5 rounded-full object-contain" loading="lazy" />
+            ) : (
+              <Layers className="h-2.5 w-2.5" />
+            )}
             {brand.founder}
           </span>
         )}
