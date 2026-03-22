@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import BrandCarousel from "@/components/trade/BrandCarousel";
+import SectionHero from "@/components/trade/SectionHero";
 
 /** Extract short discipline tags from a specialty string */
 function extractTags(specialty: string): string[] {
@@ -255,25 +256,26 @@ const TradeDesigners = () => {
     return [...letters].sort();
   }, [enriched]);
 
-  const totalCount = enriched.length;
-
   return (
     <>
       <Helmet>
         <title>Designers & Ateliers Library — Maison Affluency Trade</title>
       </Helmet>
       <div id="designers-carousel-top" className="space-y-6">
-        {/* Title + search first */}
+        <SectionHero
+          section="documents"
+          title="Designers & Ateliers Library"
+          subtitle="Discover ateliers and designers by signature materials and collections."
+        />
+
+        {/* Stats + search */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="font-display text-2xl text-foreground tracking-wide">Designers & Ateliers Library</h1>
-            <p className="font-body text-sm text-muted-foreground mt-1">
-              32 Ateliers · 274 Designers
-              {search && (
-                <span className="text-primary ml-1">· {filtered.length} showing</span>
-              )}
-            </p>
-          </div>
+          <p className="font-body text-sm text-muted-foreground">
+            32 Ateliers · 274 Designers
+            {search && (
+              <span className="text-primary ml-1">· {filtered.length} showing</span>
+            )}
+          </p>
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <div className="relative flex-1 sm:w-64 sm:flex-none">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
