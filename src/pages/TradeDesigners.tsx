@@ -337,7 +337,7 @@ const TradeDesigners = () => {
             <div>
               <h1 className="font-display text-2xl text-foreground tracking-wide">Designers & Ateliers Library</h1>
               <p className="font-body text-sm text-muted-foreground mt-1">
-                {enriched.length} designers & ateliers
+                {atelierEntries.length} ateliers · {designerEntries.length} designers
                 {(activeFilters.length > 0 || search) && (
                   <span className="text-primary ml-1">· {filtered.length} showing</span>
                 )}
