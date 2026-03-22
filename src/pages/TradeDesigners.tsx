@@ -140,18 +140,28 @@ const TradeDesigners = () => {
     });
   }, [designers, productCountMap]);
 
-  // Unified carousel entries — all designers & ateliers in one list
-  const carouselEntries = useMemo(() => {
+  // Split carousel entries into ateliers vs designers
+  const atelierCarouselEntries = useMemo(() => {
     const seen = new Set<string>();
     const entries: { name: string; docCount: number; imageUrl?: string }[] = [];
-
     for (const d of enriched) {
-      if (!seen.has(d.name)) {
+      if (d.isAtelierCard && !seen.has(d.name)) {
         seen.add(d.name);
         entries.push({ name: d.name, docCount: 0, imageUrl: d.image_url || undefined });
       }
     }
+    return entries.sort((a, b) => a.name.localeCompare(b.name));
+  }, [enriched]);
 
+  const designerCarouselEntries = useMemo(() => {
+    const seen = new Set<string>();
+    const entries: { name: string; docCount: number; imageUrl?: string }[] = [];
+    for (const d of enriched) {
+      if (!d.isAtelierCard && !seen.has(d.name)) {
+        seen.add(d.name);
+        entries.push({ name: d.name, docCount: 0, imageUrl: d.image_url || undefined });
+      }
+    }
     return entries.sort((a, b) => a.name.localeCompare(b.name));
   }, [enriched]);
 
@@ -259,30 +269,49 @@ const TradeDesigners = () => {
         <title>Designers & Ateliers Library — Maison Affluency Trade</title>
       </Helmet>
       <div id="designers-carousel-top" className="space-y-6">
-        {carouselEntries.length > 0 && (
-          <BrandCarousel
-            brands={carouselEntries}
-            selectedBrand={selectedBrand}
-            onSelect={(b) => {
-              setSelectedBrand(b);
-              if (b === "all") return;
-              const letter = b.charAt(0).toUpperCase();
-              requestAnimationFrame(() => {
-                const el = document.getElementById(`designer-letter-${letter}`);
-                el?.scrollIntoView({ behavior: "smooth", block: "start" });
-              });
-            }}
-            label={
-              <div className="mb-2">
-                <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-1">
-                  Browse by name
-                </p>
-                <p className="font-body text-[10px] text-muted-foreground/60 normal-case tracking-normal">
-                  Ateliers, designers & studios — select to filter.
-                </p>
-              </div>
-            }
-          />
+        {(atelierCarouselEntries.length > 0 || designerCarouselEntries.length > 0) && (
+          <div className="space-y-4">
+            {atelierCarouselEntries.length > 0 && (
+              <BrandCarousel
+                brands={atelierCarouselEntries}
+                selectedBrand={selectedBrand}
+                onSelect={(b) => {
+                  setSelectedBrand(b);
+                  if (b === "all") return;
+                  const letter = b.charAt(0).toUpperCase();
+                  requestAnimationFrame(() => {
+                    const el = document.getElementById(`designer-letter-${letter}`);
+                    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  });
+                }}
+                label={
+                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
+                    Ateliers · {atelierCarouselEntries.length} brands
+                  </p>
+                }
+              />
+            )}
+            {designerCarouselEntries.length > 0 && (
+              <BrandCarousel
+                brands={designerCarouselEntries}
+                selectedBrand={selectedBrand}
+                onSelect={(b) => {
+                  setSelectedBrand(b);
+                  if (b === "all") return;
+                  const letter = b.charAt(0).toUpperCase();
+                  requestAnimationFrame(() => {
+                    const el = document.getElementById(`designer-letter-${letter}`);
+                    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  });
+                }}
+                label={
+                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
+                    Designers · {designerCarouselEntries.length} designers
+                  </p>
+                }
+              />
+            )}
+          </div>
         )}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
