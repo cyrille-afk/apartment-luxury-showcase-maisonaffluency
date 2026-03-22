@@ -119,7 +119,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
 
           {/* Image */}
           <div
-            className="relative w-full md:w-1/2 aspect-[4/3] md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0"
+            className="relative w-full md:w-1/2 aspect-[3/2] md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-0"
             onMouseEnter={() => {
               if (product.hover_image_url) setShowHoverImage(true);
             }}
@@ -131,7 +131,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   src={product.image_url}
                   alt={product.product_name}
                   className={cn(
-                    "max-w-[90%] max-h-[90%] object-contain transition-opacity duration-300",
+                    "max-w-[96%] max-h-[96%] md:max-w-[90%] md:max-h-[90%] object-contain transition-opacity duration-300",
                     showHoverImage && product.hover_image_url ? "opacity-0" : "opacity-100"
                   )}
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
@@ -141,7 +141,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     src={product.hover_image_url}
                     alt={`${product.product_name} in context`}
                     className={cn(
-                      "absolute inset-0 m-auto max-w-[90%] max-h-[90%] object-contain pointer-events-none transition-opacity duration-300",
+                      "absolute inset-0 m-auto max-w-[96%] max-h-[96%] md:max-w-[90%] md:max-h-[90%] object-contain pointer-events-none transition-opacity duration-300",
                       showHoverImage ? "opacity-100" : "opacity-0"
                     )}
                   />
