@@ -269,6 +269,19 @@ const TradeDesignersAdmin = () => {
                         />
                       </div>
 
+                      {/* Hero Image Override */}
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Hero Image URL <span className="normal-case font-normal">(optional — overrides card image for the profile hero)</span>
+                        </label>
+                        <Input
+                          value={(editBuffer[d.id]?.hero_image_url ?? d.hero_image_url) || ""}
+                          onChange={(e) => setField(d.id, "hero_image_url" as keyof DesignerRow, e.target.value || null)}
+                          placeholder="Leave empty to use card image"
+                          className="mt-1 font-mono text-xs"
+                        />
+                      </div>
+
                       {/* Editorial Media */}
                       <div>
                         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
