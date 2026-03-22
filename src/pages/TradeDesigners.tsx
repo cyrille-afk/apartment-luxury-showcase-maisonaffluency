@@ -350,7 +350,7 @@ const TradeDesigners = () => {
                       : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
                   )}
                 >
-                  Ateliers · {atelierCarouselEntries.length}
+                  Ateliers · 32
                 </button>
                 <button
                   onClick={() => setMobileCarouselMode("designers")}
