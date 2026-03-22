@@ -28,11 +28,6 @@ function extractTags(specialty: string): string[] {
   return tags.length > 0 ? tags : ["Design"];
 }
 
-const ALL_FILTER_TAGS = [
-  "Furniture", "Lighting", "Ceramics", "Glass", "Textiles",
-  "Bronze", "Mirrors", "Sculpture", "Collectible", "Stone",
-  "Crystal", "Architecture",
-];
 
 type EnrichedDesigner = {
   id: string; slug: string; name: string; founder: string | null; specialty: string;
