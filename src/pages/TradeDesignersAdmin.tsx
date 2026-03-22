@@ -25,6 +25,7 @@ interface DesignerRow {
   philosophy: string;
   notable_works: string;
   image_url: string;
+  hero_image_url: string | null;
   source: string;
   is_published: boolean;
   biography_images: string[];
@@ -45,7 +46,7 @@ const TradeDesignersAdmin = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, source, is_published, biography_images")
+        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, biography_images")
         .order("name", { ascending: true });
       if (error) throw error;
       return data as DesignerRow[];
@@ -265,6 +266,19 @@ const TradeDesignersAdmin = () => {
                           value={getField(d.id, "specialty")}
                           onChange={(e) => setField(d.id, "specialty", e.target.value)}
                           className="mt-1 text-sm"
+                        />
+                      </div>
+
+                      {/* Hero Image Override */}
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Hero Image URL <span className="normal-case font-normal">(optional — overrides card image for the profile hero)</span>
+                        </label>
+                        <Input
+                          value={(editBuffer[d.id]?.hero_image_url ?? d.hero_image_url) || ""}
+                          onChange={(e) => setField(d.id, "hero_image_url" as keyof DesignerRow, e.target.value || null)}
+                          placeholder="Leave empty to use card image"
+                          className="mt-1 font-mono text-xs"
                         />
                       </div>
 

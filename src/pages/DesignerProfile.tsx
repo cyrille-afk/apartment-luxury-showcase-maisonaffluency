@@ -72,9 +72,9 @@ const DesignerProfile = () => {
 
         {/* Hero */}
         <section className="relative h-[60vh] min-h-[420px] overflow-hidden">
-          {designer.image_url && (
+          {(designer.hero_image_url || designer.image_url) && (
             <motion.img
-              src={designer.image_url}
+              src={designer.hero_image_url || designer.image_url}
               alt={name}
               initial={{ scale: 1.08, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
