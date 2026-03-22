@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet } from "lucide-react";
+import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import SectionHero from "@/components/trade/SectionHero";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import { DocumentCardSkeleton } from "@/components/trade/skeletons";
@@ -19,12 +20,6 @@ interface TradeDocument {
   cover_image_url: string | null;
   created_at: string;
 }
-
-const typeIcons: Record<string, typeof FileText> = {
-  tearsheet: FileText,
-  catalogue: BookOpen,
-  pricelist: FileSpreadsheet,
-};
 
 const typeLabels: Record<string, string> = {
   tearsheet: "Tearsheet",
@@ -47,36 +42,46 @@ const TradeDocuments = () => {
   const initialBrand = searchParams.get("brand") || "all";
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [selectedType, setSelectedType] = useState("all");
+  const [atelierNames, setAtelierNames] = useState<Set<string>>(new Set());
+  const [mobileCarouselMode, setMobileCarouselMode] = useState<"ateliers" | "designers">("ateliers");
 
   useEffect(() => {
-    const fetchDocuments = async () => {
+    const fetchData = async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("trade_documents")
-        .select("*")
-        .order("brand_name", { ascending: true })
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: true });
-      setDocuments((data as TradeDocument[]) || []);
+      const [docsRes, designersRes] = await Promise.all([
+        supabase
+          .from("trade_documents")
+          .select("*")
+          .order("brand_name", { ascending: true })
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("designers")
+          .select("name, founder")
+          .eq("is_published", true),
+      ]);
+      setDocuments((docsRes.data as TradeDocument[]) || []);
+      // Build atelier set: designers where founder === name
+      const ateliers = new Set<string>();
+      for (const d of designersRes.data || []) {
+        if (d.founder && d.founder === d.name) ateliers.add(d.name);
+      }
+      setAtelierNames(ateliers);
       setLoading(false);
     };
-    fetchDocuments();
+    fetchData();
   }, []);
 
-  const brands = useMemo(() => [...new Set(documents.map((d) => d.brand_name))].sort(), [documents]);
   const types = useMemo(() => [...new Set(documents.map((d) => d.document_type))].sort(), [documents]);
 
-  // Build brand entries for carousel with thumbnail from first doc's cover or null
-  const brandEntries = useMemo(() => {
+  // Build carousel entries split by atelier vs designer
+  const { atelierEntries, designerEntries } = useMemo(() => {
     const map = new Map<string, { pdfUrl: string | null; docCount: number }>();
     for (const doc of documents) {
       const existing = map.get(doc.brand_name);
       if (!existing) {
         const isPdf = doc.file_url?.toLowerCase().endsWith(".pdf");
-        map.set(doc.brand_name, {
-          pdfUrl: isPdf ? doc.file_url : null,
-          docCount: 1,
-        });
+        map.set(doc.brand_name, { pdfUrl: isPdf ? doc.file_url : null, docCount: 1 });
       } else {
         existing.docCount++;
         if (!existing.pdfUrl && doc.file_url?.toLowerCase().endsWith(".pdf")) {
@@ -84,10 +89,19 @@ const TradeDocuments = () => {
         }
       }
     }
-    return [...map.entries()]
-      .map(([name, info]) => ({ name, ...info }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [documents]);
+    const ateliers: { name: string; docCount: number; pdfUrl?: string | null; isAtelier?: boolean }[] = [];
+    const designers: { name: string; docCount: number; pdfUrl?: string | null }[] = [];
+    for (const [name, info] of map) {
+      if (atelierNames.has(name)) {
+        ateliers.push({ name, ...info, isAtelier: true });
+      } else {
+        designers.push({ name, ...info });
+      }
+    }
+    ateliers.sort((a, b) => a.name.localeCompare(b.name));
+    designers.sort((a, b) => a.name.localeCompare(b.name));
+    return { atelierEntries: ateliers, designerEntries: designers };
+  }, [documents, atelierNames]);
 
   const filtered = useMemo(() => {
     return documents.filter((d) => {
@@ -109,48 +123,110 @@ const TradeDocuments = () => {
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [filtered]);
 
+  const handleCarouselSelect = (b: string) => {
+    setSelectedBrand(b);
+  };
+
   const inputClass =
     "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
 
   return (
     <>
       <Helmet><title>Resources — Trade Portal — Maison Affluency</title></Helmet>
-    <div className="max-w-5xl">
+    <div className="max-w-5xl space-y-6">
       <SectionHero
         section="documents"
         title="Resources"
         subtitle="Access Catalogues, Price lists and Spec Sheets when available, organised by Ateliers and Designers."
       />
 
-      {/* Brand carousel */}
-      <BrandCarousel
-        brands={brandEntries}
-        selectedBrand={selectedBrand}
-        onSelect={setSelectedBrand}
-      />
+      {/* Carousels */}
+      {(atelierEntries.length > 0 || designerEntries.length > 0) && (
+        <>
+          {/* Desktop: two stacked carousels */}
+          <div className="hidden sm:block space-y-4">
+            {atelierEntries.length > 0 && (
+              <BrandCarousel
+                brands={atelierEntries}
+                selectedBrand={selectedBrand}
+                onSelect={handleCarouselSelect}
+                label={
+                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
+                    Ateliers · {atelierEntries.length} brands
+                  </p>
+                }
+              />
+            )}
+            {designerEntries.length > 0 && (
+              <BrandCarousel
+                brands={designerEntries}
+                selectedBrand={selectedBrand}
+                onSelect={handleCarouselSelect}
+                label={
+                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
+                    Designers · {designerEntries.length}
+                  </p>
+                }
+              />
+            )}
+          </div>
 
-      {/* Filters */}
+          {/* Mobile: toggle between carousels */}
+          <div className="sm:hidden space-y-3">
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setMobileCarouselMode("ateliers")}
+                className={cn(
+                  "px-3 py-1.5 rounded-full font-body text-[10px] uppercase tracking-[0.12em] transition-all border",
+                  mobileCarouselMode === "ateliers"
+                    ? "bg-foreground text-background border-foreground"
+                    : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
+                )}
+              >
+                Ateliers · {atelierEntries.length}
+              </button>
+              <button
+                onClick={() => setMobileCarouselMode("designers")}
+                className={cn(
+                  "px-3 py-1.5 rounded-full font-body text-[10px] uppercase tracking-[0.12em] transition-all border",
+                  mobileCarouselMode === "designers"
+                    ? "bg-foreground text-background border-foreground"
+                    : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
+                )}
+              >
+                Designers · {designerEntries.length}
+              </button>
+            </div>
+            <BrandCarousel
+              brands={mobileCarouselMode === "ateliers" ? atelierEntries : designerEntries}
+              selectedBrand={selectedBrand}
+              onSelect={handleCarouselSelect}
+            />
+          </div>
+        </>
+      )}
+
+      {/* Filters: search + type only */}
       <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 mb-6">
         <div className="relative flex-1 min-w-0 sm:min-w-[200px] sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search documents…"
+            placeholder="Search resources…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={`${inputClass} pl-9 w-full text-[16px] sm:text-sm`}
           />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
-        <div className="flex gap-2">
-          <select value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
-            <option value="all">All Brands</option>
-            {brands.map((b) => <option key={b} value={b}>{b}</option>)}
-          </select>
-          <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}>
-            <option value="all">All Types</option>
-            {types.map((t) => <option key={t} value={t}>{typeLabels[t] || t}</option>)}
-          </select>
-        </div>
+        <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} className={`${inputClass} text-[16px] sm:text-sm`}>
+          <option value="all">All Types</option>
+          {types.map((t) => <option key={t} value={t}>{typeLabels[t] || t}</option>)}
+        </select>
       </div>
 
       {/* Content */}
