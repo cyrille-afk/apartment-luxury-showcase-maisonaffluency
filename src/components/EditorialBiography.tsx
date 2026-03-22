@@ -268,11 +268,12 @@ export default function EditorialBiography({
   /* ------- Inline media mode (URLs pasted directly in biography) ------- */
   if (hasInlineMedia) {
     // Separate into text paragraphs and media URLs, preserving order
-    type Block = { type: "text"; content: string } | { type: "image"; url: string } | { type: "video"; url: string };
+    type Block = { type: "text"; content: string } | { type: "image"; url: string; caption: string | null } | { type: "video"; url: string; caption: string | null };
     const parsed: Block[] = blocks.map((b) => {
-      if (!isStandaloneMediaUrl(b)) return { type: "text" as const, content: b };
-      if (isVideoUrl(b)) return { type: "video" as const, url: b };
-      return { type: "image" as const, url: b };
+      const media = parseMediaLine(b);
+      if (!media) return { type: "text" as const, content: b };
+      if (isVideoUrl(media.url)) return { type: "video" as const, url: media.url, caption: media.caption };
+      return { type: "image" as const, url: media.url, caption: media.caption };
     });
 
     // Group consecutive text blocks that follow an image, pair them for split layout
