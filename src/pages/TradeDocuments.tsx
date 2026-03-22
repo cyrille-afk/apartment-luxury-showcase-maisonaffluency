@@ -61,10 +61,23 @@ const TradeDocuments = () => {
           .eq("is_published", true),
       ]);
       setDocuments((docsRes.data as TradeDocument[]) || []);
-      // Build atelier set: any brand that appears as a founder in the designers table
+      // Build atelier set from designers table:
+      // 1. Any founder value (brands that have designers under them)
+      // 2. Any name where founder === name (self-referencing atelier cards)
       const ateliers = new Set<string>();
       for (const d of designersRes.data || []) {
         if (d.founder) ateliers.add(d.founder);
+      }
+      // Also detect atelier-like brand names not yet in the designers table
+      const atelierKeywords = ["editions", "collection", "atelier", "studio"];
+      const docBrands = new Set((docsRes.data as TradeDocument[])?.map((doc) => doc.brand_name) || []);
+      for (const brandName of docBrands) {
+        if (!ateliers.has(brandName)) {
+          const lower = brandName.toLowerCase();
+          if (atelierKeywords.some((kw) => lower.includes(kw))) {
+            ateliers.add(brandName);
+          }
+        }
       }
       setAtelierNames(ateliers);
       setLoading(false);
