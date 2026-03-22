@@ -42,7 +42,7 @@ export function TradeSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAdmin, signOut, profile, user } = useAuth();
+  const { isAdmin, isSuperAdmin, signOut, profile, user } = useAuth();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [submittedCount, setSubmittedCount] = useState(0);
 
