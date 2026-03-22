@@ -40,6 +40,9 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   const [imageLoaded, setImageLoaded] = useState(false);
   const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
 
+  // Reset image loaded state when product changes
+  useEffect(() => { setImageLoaded(false); setShowHoverImage(false); }, [product?.id]);
+
   // Related products from same brand
   const relatedProducts = useMemo(() => {
     if (!product) return [];
