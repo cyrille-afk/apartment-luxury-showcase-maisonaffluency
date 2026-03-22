@@ -176,7 +176,7 @@ const Navigation = () => {
   const handleNavClick = (href: string) => {
     setIsOpen(false);
     if (href.startsWith("/")) {
-      window.location.href = href;
+      navigate(href);
       return;
     }
     const id = href.replace(/^#/, "");
