@@ -1,0 +1,195 @@
+import { useMemo, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { motion } from "framer-motion";
+import { useAllDesigners } from "@/hooks/useDesigner";
+import { cn } from "@/lib/utils";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+
+type Tab = "ateliers" | "designers";
+
+const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
+
+const PublicDesigners = () => {
+  const navigate = useNavigate();
+  const { data: allDesigners = [], isLoading } = useAllDesigners();
+  const [activeTab, setActiveTab] = useState<Tab>("ateliers");
+
+  // Only show published designers
+  const published = useMemo(
+    () => allDesigners.filter((d) => d.is_published),
+    [allDesigners]
+  );
+
+  const ateliers = useMemo(
+    () =>
+      published
+        .filter((d) => d.founder === d.name)
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [published]
+  );
+
+  const designers = useMemo(
+    () =>
+      published
+        .filter((d) => !d.founder || d.founder !== d.name)
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [published]
+  );
+
+  const items = activeTab === "ateliers" ? ateliers : designers;
+
+  return (
+    <>
+      <Helmet>
+        <title>Ateliers & Designers — Maison Affluency</title>
+        <meta
+          name="description"
+          content="Discover our curated selection of ateliers and designers — from historical masters to contemporary creators of collectible furniture and lighting."
+        />
+      </Helmet>
+
+      <div className="min-h-screen bg-background text-foreground">
+        <Navigation />
+
+        <div className="max-w-7xl mx-auto px-6 md:px-12 pt-28 pb-20">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={transition}
+            className="mb-10"
+          >
+            <h1 className="font-display text-3xl md:text-4xl tracking-wide mb-3">
+              Ateliers & Designers
+            </h1>
+            <p className="font-body text-sm text-muted-foreground max-w-2xl">
+              A curated directory of the ateliers and independent designers whose work defines our collection.
+            </p>
+          </motion.div>
+
+          {/* Tabs */}
+          <div className="flex gap-6 border-b border-border mb-8">
+            {(["ateliers", "designers"] as Tab[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  "font-display text-xs tracking-[0.15em] uppercase pb-3 transition-colors border-b-2 -mb-px",
+                  activeTab === tab
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {tab === "ateliers" ? "Ateliers" : "Designers"}
+              </button>
+            ))}
+          </div>
+
+          {/* Loading */}
+          {isLoading && (
+            <div className="flex items-center justify-center py-32">
+              <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!isLoading && items.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-32 text-center">
+              <p className="font-body text-sm text-muted-foreground">
+                Content coming soon — we're curating this collection.
+              </p>
+            </div>
+          )}
+
+          {/* Grid */}
+          {!isLoading && items.length > 0 && (
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"
+            >
+              {items.map((item) => {
+                const isAtelier = item.founder === item.name;
+                return (
+                  <Link
+                    key={item.slug}
+                    to={`/designers/${item.slug}`}
+                    className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+                  >
+                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+                          <span className="font-display text-3xl text-muted-foreground/20">
+                            {item.name.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Name overlay — ateliers at top, designers at bottom */}
+                      {isAtelier ? (
+                        <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+                            {item.name}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+                            {item.name}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Atelier badge */}
+                      {isAtelier && (
+                        <div className="absolute top-3 left-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
+                          <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">
+                            {item.name}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Founder badge for designers */}
+                      {item.founder && !isAtelier && (
+                        <span className="absolute top-2.5 left-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full">
+                          {item.founder}
+                        </span>
+                      )}
+
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+                        {item.specialty && (
+                          <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">
+                            {item.specialty}
+                          </p>
+                        )}
+                        <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+                          Discover
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </motion.div>
+          )}
+        </div>
+
+        <Footer />
+      </div>
+    </>
+  );
+};
+
+export default PublicDesigners;
