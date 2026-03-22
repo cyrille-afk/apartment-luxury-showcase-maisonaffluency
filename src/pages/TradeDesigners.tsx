@@ -126,6 +126,18 @@ const TradeDesigners = () => {
     return map;
   }, [allProducts]);
 
+  // Build a map of brand_name (lowercase) → concatenated material strings for search
+  const brandMaterialsMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of allProducts) {
+      if (!p.materials) continue;
+      const key = p.brand_name.toLowerCase();
+      const prev = map.get(key) || "";
+      map.set(key, prev + " " + p.materials.toLowerCase());
+    }
+    return map;
+  }, [allProducts]);
+
   const enriched = useMemo(() => {
     return designers.map((d) => {
       const tags = extractTags(d.specialty);
