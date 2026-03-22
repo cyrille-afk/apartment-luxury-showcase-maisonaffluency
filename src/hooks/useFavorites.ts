@@ -42,23 +42,21 @@ export function useFavorites() {
   ): Promise<string | null> => {
     if (!user) return null;
 
-    // Resolve to a real UUID
+    // Resolve to a real trade_products UUID
     let realId = productId;
-    const isLocalId = productId.startsWith("tp-");
 
-    if (isLocalId) {
-      // Check if we already mapped this local ID
+    // If meta is provided, always resolve through ensureTradeProductId
+    // This handles both local IDs (tp-0, tp-1) and non-trade_products UUIDs
+    // (e.g. designer_curator_picks IDs)
+    if (meta) {
       const cached = localIdMap.get(productId);
       if (cached) {
         realId = cached;
-      } else if (meta) {
+      } else {
         const resolved = await ensureTradeProductId(meta);
         if (!resolved) return null;
         realId = resolved;
         setLocalIdMap((prev) => new Map(prev).set(productId, realId));
-      } else {
-        console.error("Cannot favorite gallery product without metadata");
-        return null;
       }
     }
 
