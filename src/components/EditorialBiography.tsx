@@ -46,6 +46,20 @@ function renderQuotedText(text: string) {
   });
 }
 
+/** Detect a standalone media URL paragraph pasted directly into biography text */
+function isStandaloneMediaUrl(text: string): boolean {
+  const value = text.trim();
+  if (!/^https?:\/\//i.test(value)) return false;
+  if (/\s/.test(value)) return false;
+
+  return (
+    isVideoUrl(value) ||
+    /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(value) ||
+    /res\.cloudinary\.com\/.+\/image\/upload/i.test(value) ||
+    /\/storage\/v1\/object\/public\//i.test(value)
+  );
+}
+
 /** Render either an image or a video depending on URL */
 function MediaBlock({ url, designerName, index }: { url: string; designerName: string; index: number }) {
   if (isVideoUrl(url)) {
@@ -128,13 +142,34 @@ export default function EditorialBiography({
   pickImages,
   designerName,
 }: EditorialBiographyProps) {
-  const paragraphs = biography
+  const blocks = biography
     .split(/\n\n+/)
     .map((p) => p.trim())
     .filter(Boolean);
 
-  // Use manual media if set, otherwise fall back to pick images
-  const hasManualMedia = biographyImages && biographyImages.length > 0;
+  // Use manual media if set, otherwise fall back to pick images.
+  // If no manual media is set but standalone media URLs are pasted in biography text,
+  // render those inline at the exact authored position.
+  const hasManualMedia = !!(biographyImages && biographyImages.length > 0);
+  const hasInlineMediaBlocks = !hasManualMedia && blocks.some(isStandaloneMediaUrl);
+
+  if (hasInlineMediaBlocks) {
+    return (
+      <div className="font-body text-sm leading-relaxed text-foreground/85 text-justify">
+        {blocks.map((block, i) =>
+          isStandaloneMediaUrl(block) ? (
+            <MediaBlock key={`inline-media-${i}`} url={block} designerName={designerName} index={500 + i} />
+          ) : (
+            <p key={`inline-p-${i}`} className={i > 0 ? "mt-4" : ""}>
+              {renderQuotedText(block)}
+            </p>
+          )
+        )}
+      </div>
+    );
+  }
+
+  const paragraphs = blocks;
   const media = hasManualMedia ? biographyImages : (pickImages || []);
 
   // No media? Render plain editorial text
