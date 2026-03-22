@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useState, useMemo, useEffect } from "react";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface TradeProductLightboxItem {
   id: string;
@@ -36,12 +37,20 @@ interface TradeProductLightboxProps {
 const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdded, onSelectRelated }: TradeProductLightboxProps) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
+  const isMobile = useIsMobile();
   const [showHoverImage, setShowHoverImage] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
   const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
 
-  // Reset image loaded state when product changes
-  useEffect(() => { setImageLoaded(false); setShowHoverImage(false); }, [product?.id]);
+  // Reset image states when product changes
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageFailed(false);
+    setHoverImageLoaded(false);
+    setShowHoverImage(false);
+  }, [product?.id]);
 
   // Related products from same brand
   const relatedProducts = useMemo(() => {
@@ -66,6 +75,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
 
   if (!product) return null;
 
+  const canShowHoverImage = Boolean(product.hover_image_url) && !isMobile;
   const pinned = isPinned(product.product_name, product.id);
   const designerDisplay = product.brand_name.includes(" - ")
     ? product.brand_name.split(" - ")[0].trim()
@@ -131,34 +141,55 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           <div
             className="relative w-full md:w-1/2 h-[38vh] sm:h-[42vh] md:h-auto md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-0"
             onMouseEnter={() => {
-              if (product.hover_image_url) setShowHoverImage(true);
+              if (canShowHoverImage) setShowHoverImage(true);
             }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
             {product.image_url ? (
               <>
-                {!imageLoaded && (
+                {!imageLoaded && !imageFailed && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-16 h-16 rounded-lg bg-muted animate-pulse" />
+                  </div>
+                )}
+                {imageFailed && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="font-body text-sm text-muted-foreground">Image unavailable</span>
                   </div>
                 )}
                 <img
                   src={product.image_url}
                   alt={product.product_name}
-                  onLoad={() => setImageLoaded(true)}
+                  onLoad={() => {
+                    setImageLoaded(true);
+                    setImageFailed(false);
+                  }}
+                  onError={() => {
+                    setImageFailed(true);
+                    setImageLoaded(true);
+                    setShowHoverImage(false);
+                  }}
                   className={cn(
                     "w-full h-full object-contain transition-opacity duration-300",
-                    !imageLoaded ? "opacity-0" : showHoverImage && product.hover_image_url ? "opacity-0" : "opacity-100"
+                    imageFailed
+                      ? "opacity-0"
+                      : !imageLoaded
+                        ? "opacity-0"
+                        : showHoverImage && canShowHoverImage && hoverImageLoaded
+                          ? "opacity-0"
+                          : "opacity-100"
                   )}
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
-                {product.hover_image_url && (
+                {canShowHoverImage && product.hover_image_url && (
                   <img
                     src={product.hover_image_url}
                     alt={`${product.product_name} in context`}
+                    onLoad={() => setHoverImageLoaded(true)}
+                    onError={() => setHoverImageLoaded(false)}
                     className={cn(
                       "absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-300",
-                      showHoverImage ? "opacity-100" : "opacity-0"
+                      showHoverImage && hoverImageLoaded ? "opacity-100" : "opacity-0"
                     )}
                   />
                 )}
