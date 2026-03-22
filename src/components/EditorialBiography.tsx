@@ -2,14 +2,33 @@ import { motion } from "framer-motion";
 
 interface EditorialBiographyProps {
   biography: string;
-  /** Manual editorial images — takes priority over auto picks */
+  /** Manual editorial media (images or video URLs) — takes priority over auto picks */
   biographyImages?: string[];
-  /** Auto-fill images from curator's picks when no manual images set */
+  /** Auto-fill images from curator's picks when no manual media set */
   pickImages?: string[];
   designerName: string;
 }
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
+
+/** Detect if a URL is a video */
+function isVideoUrl(url: string): boolean {
+  if (/\.(mp4|webm|mov)(\?|$)/i.test(url)) return true;
+  if (/youtube\.com\/watch|youtu\.be\/|youtube\.com\/embed/i.test(url)) return true;
+  if (/vimeo\.com\//i.test(url)) return true;
+  return false;
+}
+
+/** Convert YouTube/Vimeo URLs to embeddable format */
+function getEmbedUrl(url: string): string | null {
+  // YouTube
+  let match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  if (match) return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1`;
+  // Vimeo
+  match = url.match(/vimeo\.com\/(\d+)/);
+  if (match) return `https://player.vimeo.com/video/${match[1]}?title=0&byline=0&portrait=0`;
+  return null;
+}
 
 /** Highlight quoted text within a paragraph */
 function renderQuotedText(text: string) {
@@ -27,9 +46,81 @@ function renderQuotedText(text: string) {
   });
 }
 
+/** Render either an image or a video depending on URL */
+function MediaBlock({ url, designerName, index }: { url: string; designerName: string; index: number }) {
+  if (isVideoUrl(url)) {
+    const embedUrl = getEmbedUrl(url);
+    if (embedUrl) {
+      // YouTube / Vimeo embed
+      return (
+        <motion.figure
+          key={`vid-${index}`}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={transition}
+          className="my-8 -mx-2 md:mx-0"
+        >
+          <div className="aspect-video rounded-lg overflow-hidden bg-muted/20">
+            <iframe
+              src={embedUrl}
+              title={`${designerName} — video`}
+              className="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </motion.figure>
+      );
+    }
+    // Native MP4/WebM
+    return (
+      <motion.figure
+        key={`vid-${index}`}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={transition}
+        className="my-8 -mx-2 md:mx-0"
+      >
+        <div className="aspect-video rounded-lg overflow-hidden bg-muted/20">
+          <video
+            src={url}
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </motion.figure>
+    );
+  }
+
+  // Image
+  return (
+    <motion.figure
+      key={`img-${index}`}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={transition}
+      className="my-8 -mx-2 md:mx-0"
+    >
+      <div className="aspect-[16/10] rounded-lg overflow-hidden bg-muted/20">
+        <img
+          src={url}
+          alt={`${designerName} — editorial`}
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
+      </div>
+    </motion.figure>
+  );
+}
+
 /**
  * Editorial biography layout — splits biography into paragraphs and
- * interleaves full-width images between them, mimicking a magazine interview.
+ * interleaves full-width images/videos between them, mimicking a magazine interview.
  */
 export default function EditorialBiography({
   biography,
@@ -42,12 +133,12 @@ export default function EditorialBiography({
     .map((p) => p.trim())
     .filter(Boolean);
 
-  // Use manual images if set, otherwise fall back to pick images
-  const hasManualImages = biographyImages && biographyImages.length > 0;
-  const images = hasManualImages ? biographyImages : (pickImages || []);
+  // Use manual media if set, otherwise fall back to pick images
+  const hasManualMedia = biographyImages && biographyImages.length > 0;
+  const media = hasManualMedia ? biographyImages : (pickImages || []);
 
-  // No images? Render plain editorial text
-  if (images.length === 0) {
+  // No media? Render plain editorial text
+  if (media.length === 0) {
     return (
       <div className="font-body text-sm leading-relaxed text-foreground/85 text-justify whitespace-pre-line">
         {paragraphs.map((p, i) => (
@@ -59,11 +150,11 @@ export default function EditorialBiography({
     );
   }
 
-  // Place images after every N paragraphs (distribute evenly)
-  const interval = Math.max(2, Math.ceil(paragraphs.length / (images.length + 1)));
+  // Place media after every N paragraphs (distribute evenly)
+  const interval = Math.max(2, Math.ceil(paragraphs.length / (media.length + 1)));
 
   const elements: JSX.Element[] = [];
-  let imageIndex = 0;
+  let mediaIndex = 0;
 
   paragraphs.forEach((p, i) => {
     elements.push(
@@ -72,59 +163,24 @@ export default function EditorialBiography({
       </p>
     );
 
-    // Insert an image after every `interval` paragraphs (but not after the last one)
     if (
       (i + 1) % interval === 0 &&
-      imageIndex < images.length &&
+      mediaIndex < media.length &&
       i < paragraphs.length - 1
     ) {
-      const imgUrl = images[imageIndex];
       elements.push(
-        <motion.figure
-          key={`img-${imageIndex}`}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={transition}
-          className="my-8 -mx-2 md:mx-0"
-        >
-          <div className="aspect-[16/10] rounded-lg overflow-hidden bg-muted/20">
-            <img
-              src={imgUrl}
-              alt={`${designerName} — editorial`}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        </motion.figure>
+        <MediaBlock key={`media-${mediaIndex}`} url={media[mediaIndex]} designerName={designerName} index={mediaIndex} />
       );
-      imageIndex++;
+      mediaIndex++;
     }
   });
 
-  // If there are remaining images not yet placed, add them at the end
-  while (imageIndex < images.length) {
-    const imgUrl = images[imageIndex];
+  // Remaining media at the end
+  while (mediaIndex < media.length) {
     elements.push(
-      <motion.figure
-        key={`img-tail-${imageIndex}`}
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={transition}
-        className="my-8 -mx-2 md:mx-0"
-      >
-        <div className="aspect-[16/10] rounded-lg overflow-hidden bg-muted/20">
-          <img
-            src={imgUrl}
-            alt={`${designerName} — editorial`}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        </div>
-      </motion.figure>
+      <MediaBlock key={`media-tail-${mediaIndex}`} url={media[mediaIndex]} designerName={designerName} index={mediaIndex + 100} />
     );
-    imageIndex++;
+    mediaIndex++;
   }
 
   return (
