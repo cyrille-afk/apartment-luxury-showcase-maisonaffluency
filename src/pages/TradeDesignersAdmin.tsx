@@ -262,38 +262,54 @@ const TradeDesignersAdmin = () => {
                         />
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <Button
-                          size="sm"
-                          disabled={!dirty || saveMutation.isPending}
-                          onClick={() => saveMutation.mutate({ id: d.id, updates: editBuffer[d.id] })}
-                        >
-                          <Save className="w-3.5 h-3.5 mr-1.5" />
-                          Save
-                        </Button>
-                        {dirty && (
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={getField(d.id, "is_published") as unknown as boolean}
+                            onCheckedChange={(checked) => setField(d.id, "is_published", checked as unknown as string)}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {getField(d.id, "is_published") ? (
+                              <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> Published</span>
+                            ) : (
+                              <span className="flex items-center gap-1"><EyeOff className="w-3 h-3" /> Draft</span>
+                            )}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 ml-auto">
+                          {dirty && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() =>
+                                setEditBuffer((prev) => {
+                                  const next = { ...prev };
+                                  delete next[d.id];
+                                  return next;
+                                })
+                              }
+                            >
+                              Discard
+                            </Button>
+                          )}
                           <Button
                             size="sm"
-                            variant="ghost"
-                            onClick={() =>
-                              setEditBuffer((prev) => {
-                                const next = { ...prev };
-                                delete next[d.id];
-                                return next;
-                              })
-                            }
+                            disabled={!dirty || saveMutation.isPending}
+                            onClick={() => saveMutation.mutate({ id: d.id, updates: editBuffer[d.id] })}
                           >
-                            Discard
+                            <Save className="w-3.5 h-3.5 mr-1.5" />
+                            Save
                           </Button>
-                        )}
-                        <a
-                          href={`/designer/${d.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="ml-auto text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-                        >
-                          Preview <ExternalLink className="w-3 h-3" />
-                        </a>
+                          <a
+                            href={`/designer/${d.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                          >
+                            Preview <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
                       </div>
                     </div>
                   )}
