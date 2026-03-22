@@ -10,6 +10,8 @@ interface BrandEntry {
   /** Designer portrait / image to use as thumbnail */
   imageUrl?: string | null;
   docCount: number;
+  /** Whether this entry is an atelier (shows square badge) */
+  isAtelier?: boolean;
 }
 
 interface BrandCarouselProps {
