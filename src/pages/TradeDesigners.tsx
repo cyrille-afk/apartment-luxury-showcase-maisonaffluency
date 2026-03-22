@@ -109,8 +109,7 @@ const TradeDesigners = () => {
   const [searchParams] = useSearchParams();
   const { data: designers = [], isLoading } = useAllDesigners();
   const [search, setSearch] = useState("");
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
+  const [activeFilters] = useState<string[]>([]);
   const initialBrand = searchParams.get("brand") || "all";
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [showBackToTop, setShowBackToTop] = useState(false);
