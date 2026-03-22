@@ -129,6 +129,9 @@ const BrandTile = ({
               </span>
             </div>
           )}
+          {brand.isAtelier && (
+            <div className="absolute top-1 left-1 w-3.5 h-3.5 bg-foreground rounded-[2px]" />
+          )}
         </div>
         <span className="font-body text-[11px] text-foreground whitespace-nowrap max-w-[80px] truncate">
           {brand.name}
