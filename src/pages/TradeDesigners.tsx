@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
-import { Search, Users, SlidersHorizontal, X, Layers, ArrowUp } from "lucide-react";
+import { Search, Users, X, Layers, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
@@ -28,11 +28,6 @@ function extractTags(specialty: string): string[] {
   return tags.length > 0 ? tags : ["Design"];
 }
 
-const ALL_FILTER_TAGS = [
-  "Furniture", "Lighting", "Ceramics", "Glass", "Textiles",
-  "Bronze", "Mirrors", "Sculpture", "Collectible", "Stone",
-  "Crystal", "Architecture",
-];
 
 type EnrichedDesigner = {
   id: string; slug: string; name: string; founder: string | null; specialty: string;
@@ -109,8 +104,7 @@ const TradeDesigners = () => {
   const [searchParams] = useSearchParams();
   const { data: designers = [], isLoading } = useAllDesigners();
   const [search, setSearch] = useState("");
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
+  const [activeFilters] = useState<string[]>([]);
   const initialBrand = searchParams.get("brand") || "all";
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -248,20 +242,6 @@ const TradeDesigners = () => {
     return [...letters].sort();
   }, [enriched]);
 
-  const tagCounts = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const b of enriched) {
-      for (const t of b.tags) map.set(t, (map.get(t) || 0) + 1);
-    }
-    return map;
-  }, [enriched]);
-
-  const toggleFilter = (tag: string) => {
-    setActiveFilters((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-  };
-
   const totalCount = enriched.length;
 
   return (
@@ -364,7 +344,7 @@ const TradeDesigners = () => {
               <h1 className="font-display text-2xl text-foreground tracking-wide">Designers & Ateliers Library</h1>
               <p className="font-body text-sm text-muted-foreground mt-1">
                 {totalCount} designers & ateliers
-                {(activeFilters.length > 0 || search) && (
+                {search && (
                   <span className="text-primary ml-1">· {filtered.length} showing</span>
                 )}
               </p>
@@ -385,55 +365,8 @@ const TradeDesigners = () => {
                   </button>
                 )}
               </div>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={cn(
-                  "shrink-0 p-2 rounded-md border transition-colors",
-                  showFilters || activeFilters.length > 0
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                {activeFilters.length > 0 && (
-                  <span className="absolute -mt-6 ml-3 bg-primary text-primary-foreground text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                    {activeFilters.length}
-                  </span>
-                )}
-              </button>
             </div>
           </div>
-
-          {showFilters && (
-            <div className="flex flex-wrap gap-1.5 pb-2 border-b border-border">
-              {ALL_FILTER_TAGS.filter((t) => (tagCounts.get(t) || 0) > 0).map((tag) => {
-                const active = activeFilters.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    onClick={() => toggleFilter(tag)}
-                    className={cn(
-                      "px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] transition-all border",
-                      active
-                        ? "bg-foreground text-background border-foreground"
-                        : "bg-transparent text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
-                    )}
-                  >
-                    {tag}
-                    <span className="ml-1 opacity-60">{tagCounts.get(tag)}</span>
-                  </button>
-                );
-              })}
-              {activeFilters.length > 0 && (
-                <button
-                  onClick={() => setActiveFilters([])}
-                  className="px-3 py-1 rounded-full font-body text-[10px] uppercase tracking-[0.1em] text-destructive hover:text-destructive/80 transition-colors"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
-          )}
         </div>
 
         {/* A-Z quick jump */}
@@ -486,12 +419,12 @@ const TradeDesigners = () => {
                 ? "No designers match your criteria."
                 : "No designers found."}
             </p>
-            {(search || activeFilters.length > 0) && (
+            {search && (
               <button
-                onClick={() => { setSearch(""); setActiveFilters([]); }}
+                onClick={() => setSearch("")}
                 className="mt-3 font-body text-xs text-primary hover:underline"
               >
-                Clear filters
+                Clear search
               </button>
             )}
           </div>
