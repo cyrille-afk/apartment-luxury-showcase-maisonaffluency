@@ -1,0 +1,1 @@
+UPDATE public.designers SET image_url = 'https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/products/alexander-lamont_workshop-lacquer-process.jpg' WHERE slug = 'alexander-lamont';
