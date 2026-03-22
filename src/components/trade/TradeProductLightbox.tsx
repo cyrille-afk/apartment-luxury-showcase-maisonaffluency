@@ -134,12 +134,18 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           >
             {product.image_url ? (
               <>
+                {!imageLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-lg bg-muted animate-pulse" />
+                  </div>
+                )}
                 <img
                   src={product.image_url}
                   alt={product.product_name}
+                  onLoad={() => setImageLoaded(true)}
                   className={cn(
                     "w-full h-full object-contain transition-opacity duration-300",
-                    showHoverImage && product.hover_image_url ? "opacity-0" : "opacity-100"
+                    !imageLoaded ? "opacity-0" : showHoverImage && product.hover_image_url ? "opacity-0" : "opacity-100"
                   )}
                   style={{ filter: "brightness(1.05) contrast(1.08) saturate(1.05)" }}
                 />
