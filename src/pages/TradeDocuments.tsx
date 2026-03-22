@@ -238,7 +238,7 @@ const TradeDocuments = () => {
                           {doc.file_size_bytes ? ` · ${formatFileSize(doc.file_size_bytes)}` : ""}
                         </p>
                       </div>
-                    </a>
+                    </button>
                   );
                 })}
               </div>
