@@ -201,7 +201,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             )}
 
             {/* Mobile: secondary action icons overlaid on image bottom-left */}
-            <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-2.5">
+            <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">
               <button
                 onClick={async () => {
                   if (!product) return;
@@ -257,7 +257,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   target="_blank"
                   rel="noopener noreferrer"
                   title="Spec Sheet"
-                  className="flex items-center justify-center w-9 h-9 rounded-full bg-destructive/80 backdrop-blur-md text-white transition-all shadow-md"
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-[hsl(var(--pdf-red))] backdrop-blur-md text-white transition-all shadow-md"
                 >
                   <FileDown size={15} />
                 </a>
@@ -392,7 +392,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Spec Sheet"
-                    className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-[hsl(var(--pdf-red))]/30 text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/10 hover:border-[hsl(var(--pdf-red))]"
                   >
                     <FileDown size={13} />
                     Spec Sheet
