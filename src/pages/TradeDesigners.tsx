@@ -114,6 +114,7 @@ const TradeDesigners = () => {
   const initialBrand = searchParams.get("brand") || "all";
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [mobileCarouselMode, setMobileCarouselMode] = useState<"ateliers" | "designers">("ateliers");
 
   useEffect(() => {
     const onScroll = () => setShowBackToTop(window.scrollY > 600);
@@ -270,10 +271,79 @@ const TradeDesigners = () => {
       </Helmet>
       <div id="designers-carousel-top" className="space-y-6">
         {(atelierCarouselEntries.length > 0 || designerCarouselEntries.length > 0) && (
-          <div className="space-y-4">
-            {atelierCarouselEntries.length > 0 && (
+          <>
+            {/* Desktop: two stacked carousels */}
+            <div className="hidden sm:block space-y-4">
+              {atelierCarouselEntries.length > 0 && (
+                <BrandCarousel
+                  brands={atelierCarouselEntries}
+                  selectedBrand={selectedBrand}
+                  onSelect={(b) => {
+                    setSelectedBrand(b);
+                    if (b === "all") return;
+                    const letter = b.charAt(0).toUpperCase();
+                    requestAnimationFrame(() => {
+                      const el = document.getElementById(`designer-letter-${letter}`);
+                      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    });
+                  }}
+                  label={
+                    <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
+                      Ateliers · {atelierCarouselEntries.length} brands
+                    </p>
+                  }
+                />
+              )}
+              {designerCarouselEntries.length > 0 && (
+                <BrandCarousel
+                  brands={designerCarouselEntries}
+                  selectedBrand={selectedBrand}
+                  onSelect={(b) => {
+                    setSelectedBrand(b);
+                    if (b === "all") return;
+                    const letter = b.charAt(0).toUpperCase();
+                    requestAnimationFrame(() => {
+                      const el = document.getElementById(`designer-letter-${letter}`);
+                      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    });
+                  }}
+                  label={
+                    <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
+                      Designers · {designerCarouselEntries.length} designers
+                    </p>
+                  }
+                />
+              )}
+            </div>
+
+            {/* Mobile: single carousel with toggle */}
+            <div className="sm:hidden space-y-3">
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setMobileCarouselMode("ateliers")}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full font-body text-[10px] uppercase tracking-[0.12em] transition-all border",
+                    mobileCarouselMode === "ateliers"
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
+                  )}
+                >
+                  Ateliers · {atelierCarouselEntries.length}
+                </button>
+                <button
+                  onClick={() => setMobileCarouselMode("designers")}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full font-body text-[10px] uppercase tracking-[0.12em] transition-all border",
+                    mobileCarouselMode === "designers"
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
+                  )}
+                >
+                  Designers · {designerCarouselEntries.length}
+                </button>
+              </div>
               <BrandCarousel
-                brands={atelierCarouselEntries}
+                brands={mobileCarouselMode === "ateliers" ? atelierCarouselEntries : designerCarouselEntries}
                 selectedBrand={selectedBrand}
                 onSelect={(b) => {
                   setSelectedBrand(b);
@@ -284,34 +354,9 @@ const TradeDesigners = () => {
                     el?.scrollIntoView({ behavior: "smooth", block: "start" });
                   });
                 }}
-                label={
-                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
-                    Ateliers · {atelierCarouselEntries.length} brands
-                  </p>
-                }
               />
-            )}
-            {designerCarouselEntries.length > 0 && (
-              <BrandCarousel
-                brands={designerCarouselEntries}
-                selectedBrand={selectedBrand}
-                onSelect={(b) => {
-                  setSelectedBrand(b);
-                  if (b === "all") return;
-                  const letter = b.charAt(0).toUpperCase();
-                  requestAnimationFrame(() => {
-                    const el = document.getElementById(`designer-letter-${letter}`);
-                    el?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  });
-                }}
-                label={
-                  <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
-                    Designers · {designerCarouselEntries.length} designers
-                  </p>
-                }
-              />
-            )}
-          </div>
+            </div>
+          </>
         )}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
