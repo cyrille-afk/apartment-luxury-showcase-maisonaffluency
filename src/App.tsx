@@ -121,6 +121,9 @@ const App = () => {
                   <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
                   <Route path="/product/:id" element={<Suspense fallback={null}><ProductPage /></Suspense>} />
                   <Route path="/designer/:slug" element={<Suspense fallback={null}><DesignerProfile /></Suspense>} />
+                  {/* Public designers directory — hidden from nav until all data is populated */}
+                  <Route path="/designers" element={<Suspense fallback={null}><PublicDesigners /></Suspense>} />
+                  <Route path="/designers/:slug" element={<Suspense fallback={null}><PublicDesignerProfile /></Suspense>} />
                   
                   <Route path="/board/:token" element={<Suspense fallback={null}><ClientBoardViewer /></Suspense>} />
                   <Route path="/journal" element={<Suspense fallback={null}><Journal /></Suspense>} />
