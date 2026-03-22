@@ -29,7 +29,7 @@ interface DesignerRow {
 }
 
 const TradeDesignersAdmin = () => {
-  const { isAdmin, loading } = useAuth();
+  const { isSuperAdmin, loading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
