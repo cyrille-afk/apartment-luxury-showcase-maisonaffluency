@@ -257,7 +257,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   target="_blank"
                   rel="noopener noreferrer"
                   title="Spec Sheet"
-                  className="flex items-center justify-center w-9 h-9 rounded-full bg-destructive/80 backdrop-blur-md text-white transition-all shadow-md"
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-[hsl(var(--pdf-red))] backdrop-blur-md text-white transition-all shadow-md"
                 >
                   <FileDown size={15} />
                 </a>
