@@ -6,7 +6,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 
 export interface TradeProductLightboxItem {
