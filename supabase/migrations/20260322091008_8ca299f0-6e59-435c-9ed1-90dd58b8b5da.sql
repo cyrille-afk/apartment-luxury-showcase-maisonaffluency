@@ -1,0 +1,1 @@
+UPDATE designers SET image_url = 'https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/designer-images/alexander-lamont-flipped.jpg' WHERE id = 'de46d314-2935-4aca-9a82-b014971614c8';
