@@ -62,11 +62,11 @@ const formatPrice = (cents: number | null, currency: string = "SGD") => {
 };
 
 const TradeQuotesAdmin = () => {
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { isAdmin, isSuperAdmin, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [quotes, setQuotes] = useState<AdminQuote[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"submitted" | "priced" | "confirmed" | "paid" | "all">("submitted");
+  const [filter, setFilter] = useState<"submitted" | "priced" | "confirmed" | "paid" | "all">("all");
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
 
   useEffect(() => {

@@ -29,7 +29,7 @@ interface DesignerRow {
 }
 
 const TradeDesignersAdmin = () => {
-  const { isAdmin, loading } = useAuth();
+  const { isSuperAdmin, loading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -48,7 +48,7 @@ const TradeDesignersAdmin = () => {
       if (error) throw error;
       return data as DesignerRow[];
     },
-    enabled: !!isAdmin,
+    enabled: !!isSuperAdmin,
   });
 
   const saveMutation = useMutation({
@@ -116,7 +116,7 @@ const TradeDesignersAdmin = () => {
   const hasChanges = (id: string) => !!editBuffer[id] && Object.keys(editBuffer[id]).length > 0;
 
   if (loading) return null;
-  if (!isAdmin) return <Navigate to="/trade" replace />;
+  if (!isSuperAdmin) return <Navigate to="/trade" replace />;
 
   return (
     <>
