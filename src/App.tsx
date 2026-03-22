@@ -49,6 +49,8 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const ProductPage = lazy(() => import("./pages/ProductPage"));
 const DesignerProfile = lazy(() => import("./pages/DesignerProfile"));
+const PublicDesigners = lazy(() => import("./pages/PublicDesigners"));
+const PublicDesignerProfile = lazy(() => import("./pages/PublicDesignerProfile"));
 const TradeSpecSheet = lazy(() => import("./pages/TradeSpecSheet"));
 
 
