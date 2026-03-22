@@ -60,12 +60,40 @@ function isStandaloneMediaUrl(text: string): boolean {
   );
 }
 
+/** Extract a human-readable caption from a URL's filename */
+function captionFromUrl(url: string): string | null {
+  try {
+    const pathname = new URL(url).pathname;
+    // Get the last path segment
+    let filename = pathname.split("/").pop() || "";
+    // Strip common upload prefixes (e.g. "1774220339833-galr9d.mp4" or cloudinary versioned paths)
+    filename = filename.replace(/^\d{10,}-[a-z0-9]+\./, ""); // supabase random prefix
+    // Remove file extension
+    filename = filename.replace(/\.[a-z0-9]+$/i, "");
+    // Remove cloudinary version/id suffixes like _ydnjp2, _1, _fuodom
+    filename = filename.replace(/_[a-z0-9]{4,8}$/i, "");
+    // Remove trailing _1, _2 etc
+    filename = filename.replace(/_\d+$/, "");
+    // Replace separators with spaces
+    filename = filename.replace(/[-_]+/g, " ").trim();
+    if (filename.length < 3) return null;
+    // Title case
+    return filename
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ");
+  } catch {
+    return null;
+  }
+}
+
 /** Render either an image or a video depending on URL */
 function MediaBlock({ url, designerName, index }: { url: string; designerName: string; index: number }) {
+  const caption = captionFromUrl(url);
+
   if (isVideoUrl(url)) {
     const embedUrl = getEmbedUrl(url);
     if (embedUrl) {
-      // YouTube / Vimeo embed
       return (
         <motion.figure
           key={`vid-${index}`}
@@ -78,16 +106,20 @@ function MediaBlock({ url, designerName, index }: { url: string; designerName: s
           <div className="aspect-video rounded-lg overflow-hidden bg-muted/20">
             <iframe
               src={embedUrl}
-              title={`${designerName} — video`}
+              title={caption || `${designerName} — video`}
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
           </div>
+          {caption && (
+            <figcaption className="mt-2 text-center font-body text-[11px] tracking-wide text-muted-foreground italic">
+              {caption}
+            </figcaption>
+          )}
         </motion.figure>
       );
     }
-    // Native MP4/WebM
     return (
       <motion.figure
         key={`vid-${index}`}
@@ -106,6 +138,11 @@ function MediaBlock({ url, designerName, index }: { url: string; designerName: s
             className="w-full h-full object-cover"
           />
         </div>
+        {caption && (
+          <figcaption className="mt-2 text-center font-body text-[11px] tracking-wide text-muted-foreground italic">
+            {caption}
+          </figcaption>
+        )}
       </motion.figure>
     );
   }
@@ -123,11 +160,16 @@ function MediaBlock({ url, designerName, index }: { url: string; designerName: s
       <div className="aspect-[16/10] rounded-lg overflow-hidden bg-muted/20">
         <img
           src={url}
-          alt={`${designerName} — editorial`}
+          alt={caption || `${designerName} — editorial`}
           className="w-full h-full object-cover"
           loading="lazy"
         />
       </div>
+      {caption && (
+        <figcaption className="mt-2 text-center font-body text-[11px] tracking-wide text-muted-foreground italic">
+          {caption}
+        </figcaption>
+      )}
     </motion.figure>
   );
 }
