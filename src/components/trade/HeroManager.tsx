@@ -20,7 +20,9 @@ const HERO_SECTIONS = [
   { key: "dash-gallery", label: "Dashboard · Website Products", fallbackId: "v1773811405/IMG_6996_tfx4bp" },
   { key: "dash-quotes", label: "Dashboard · Quote Builder", fallbackId: "v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg" },
   { key: "dash-library", label: "Dashboard · Resources", fallbackId: "v1773790684/AffluencySG_086_2_1_2_xpvcnw" },
+  { key: "dash-designers", label: "Dashboard · Designers & Ateliers", fallbackId: "v1773838925/1_6Jp3vJWe7VFlFHZ9WhSJng_u6ai93" },
   { key: "dash-3d-studio", label: "Dashboard · 3D Studio", fallbackId: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v" },
+  { key: "designers", label: "Designers & Ateliers Library (page)", fallbackId: "v1773838925/1_6Jp3vJWe7VFlFHZ9WhSJng_u6ai93" },
 ] as const;
 
 const GRAVITY_OPTIONS = [
