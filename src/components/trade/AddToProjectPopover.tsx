@@ -122,7 +122,7 @@ export default function AddToProjectPopover({ productId, productName, children }
       <PopoverTrigger asChild>
         {children}
       </PopoverTrigger>
-      <PopoverContent side="bottom" align="start" className="w-56 p-0 bg-background/95 backdrop-blur-xl border-border">
+      <PopoverContent side="bottom" align="start" className="w-56 p-0 bg-background/95 backdrop-blur-xl border-border z-[110]">
         <div className="p-2.5 border-b border-border">
           <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Add to project</p>
         </div>
