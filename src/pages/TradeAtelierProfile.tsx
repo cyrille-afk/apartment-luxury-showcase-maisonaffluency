@@ -250,9 +250,9 @@ const TradeAtelierProfile = () => {
             className={cn("relative rounded-xl overflow-hidden shrink-0", isDesignerProfile && "md:w-1/2")}
           >
             <div className={heroAspect}>
-              {designer.image_url && (
+              {(designer.logo_url || designer.image_url) && (
                 <img
-                  src={designer.image_url}
+                  src={designer.logo_url || designer.image_url}
                   alt={name}
                   className="absolute inset-0 w-full h-full object-cover"
                   loading="eager"
