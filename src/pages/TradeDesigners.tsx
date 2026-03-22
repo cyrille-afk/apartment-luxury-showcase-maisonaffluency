@@ -361,7 +361,7 @@ const TradeDesigners = () => {
                       : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
                   )}
                 >
-                  Designers · {designerCarouselEntries.length}
+                  Designers · 274
                 </button>
               </div>
               <BrandCarousel
