@@ -44,9 +44,7 @@ const PublicDesignerProfile = () => {
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     isParentBrand ? designer : undefined
   );
-  const { data: ownPicks = [] } = useDesignerPicks(
-    isParentBrand ? undefined : designer?.id
-  );
+  const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const picks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
 
