@@ -1486,6 +1486,7 @@ const partnerBrands = [
     category: "Furniture",
     subcategory: "Furniture",
     origin: "France",
+    thumbnail: "https://res.cloudinary.com/dif1oamtj/image/upload/w_400,h_400,c_fill,g_auto,q_auto,f_auto/v1774173458/Screen_Shot_2026-03-22_at_5.54.36_PM_nhigwv.png",
     description: "NDL Editions is the eponymous furniture line by Noé Duchaufour-Lawrance, translating his organic, biomorphic design language into a curated collection of limited-edition furniture pieces crafted with exceptional materials and artisanal savoir-faire.",
     instagram: "https://www.instagram.com/noeduchaufourlawrance/",
   },
