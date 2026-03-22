@@ -34,6 +34,9 @@ const TradeAxonometricRequests = () => {
   const [requestType, setRequestType] = useState<"elevation" | "section" | "section_plan">("elevation");
   const [projectName, setProjectName] = useState("");
   const [notes, setNotes] = useState("");
+  const [ceilingHeight, setCeilingHeight] = useState("");
+  const [roomWidth, setRoomWidth] = useState("");
+  const [roomDepth, setRoomDepth] = useState("");
   const [editingRequest, setEditingRequest] = useState<any | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [selectedFavoriteIds, setSelectedFavoriteIds] = useState<string[]>(() => {
