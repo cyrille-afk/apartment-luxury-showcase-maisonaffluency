@@ -56,6 +56,7 @@ const benefits = [
     description:
       "Collaborating with an established network of manufacturers and specialist workshops, Maison Affluency Trade Program provides you with endless customisation possibilities and bespoke solutions specifically tailored to your creative needs.",
     image: cloudinaryUrl("v1774176831/Screen_Shot_2026-03-22_at_6.53.33_PM_ynpv0c", { width: 1400, quality: "auto:good", crop: "fill" }),
+    objectPosition: "top",
   },
   {
     title: "Project Folders",
@@ -174,7 +175,7 @@ const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./Trade
               <img
                 src={benefit.image}
                 alt={benefit.title}
-                className="w-full h-full object-cover object-bottom"
+                className={`w-full h-full object-cover ${benefit.objectPosition ? `object-${benefit.objectPosition}` : 'object-bottom'}`}
                 loading="lazy"
               />
             </div>
@@ -457,7 +458,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   <img
                     src={benefit.image}
                     alt={benefit.title}
-                    className="w-full h-full object-cover object-bottom"
+                    className={`w-full h-full object-cover ${benefit.objectPosition ? `object-${benefit.objectPosition}` : 'object-bottom'}`}
                     loading="lazy"
                     decoding="async"
                     data-pin-nopin="true"
