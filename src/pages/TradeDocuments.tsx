@@ -61,10 +61,10 @@ const TradeDocuments = () => {
           .eq("is_published", true),
       ]);
       setDocuments((docsRes.data as TradeDocument[]) || []);
-      // Build atelier set: designers where founder === name
+      // Build atelier set: any brand that appears as a founder in the designers table
       const ateliers = new Set<string>();
       for (const d of designersRes.data || []) {
-        if (d.founder && d.founder === d.name) ateliers.add(d.name);
+        if (d.founder) ateliers.add(d.founder);
       }
       setAtelierNames(ateliers);
       setLoading(false);
