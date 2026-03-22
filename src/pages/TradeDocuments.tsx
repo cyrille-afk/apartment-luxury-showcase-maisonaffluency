@@ -182,12 +182,27 @@ const TradeDocuments = () => {
                 {docs.map((doc) => {
                   const isPdf = doc.file_url.toLowerCase().endsWith(".pdf");
                   return (
-                    <a
+                    <button
                       key={doc.id}
-                      href={doc.file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        try {
+                          const res = await fetch(doc.file_url);
+                          const blob = await res.blob();
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          const ext = doc.file_url.split(".").pop()?.split("?")[0] || "pdf";
+                          a.download = `${doc.brand_name} — ${doc.title}.${ext}`;
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                          URL.revokeObjectURL(url);
+                        } catch {
+                          window.open(doc.file_url, "_blank");
+                        }
+                      }}
+                      className="group text-left border border-border rounded-lg overflow-hidden hover:border-foreground/20 hover:shadow-sm transition-all cursor-pointer"
                     >
                       {/* Cover thumbnail */}
                       <div className="aspect-[3/4] bg-muted/20 relative overflow-hidden">
