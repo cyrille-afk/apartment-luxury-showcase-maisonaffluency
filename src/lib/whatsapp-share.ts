@@ -6,7 +6,7 @@
  * OG tags and then redirects the browser to the real SPA page.
  */
 
-const SITE_URL = "https://maisonaffluency.com";
+const SITE_URL = "https://www.maisonaffluency.com";
 
 const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
 const OG_FUNCTION_BASE = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image`;
