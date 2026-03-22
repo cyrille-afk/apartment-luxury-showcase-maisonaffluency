@@ -370,7 +370,7 @@ const TradeDesigners = () => {
         </div>
 
         {/* A-Z quick jump */}
-        <div className="flex flex-wrap gap-1">
+        <div className="flex gap-1 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible pb-1 sm:pb-0 -mx-1 px-1">
           {allLetters.map((letter) => {
             const hasResults = grouped.some(([l]) => l === letter);
             const hasAnyResults = enriched.some((d) => {
@@ -389,7 +389,7 @@ const TradeDesigners = () => {
                   });
                 }}
                 className={cn(
-                  "w-8 h-8 rounded font-display text-xs flex items-center justify-center transition-colors",
+                  "w-7 h-7 sm:w-8 sm:h-8 rounded font-display text-xs flex-shrink-0 flex items-center justify-center transition-colors",
                   hasResults
                     ? "bg-primary/10 text-primary hover:bg-primary/20"
                     : hasAnyResults
