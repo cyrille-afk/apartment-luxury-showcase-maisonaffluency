@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
-  Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package, Box,
+  Clock, FileSpreadsheet, BookOpen, FileDown, MapPin, Package, Box, Users,
 } from "lucide-react";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
@@ -32,8 +32,8 @@ const thumb = (id: string, gravity?: string) =>
 const DASH_CARDS = [
   { key: "dash-showroom", title: "Browse Showroom", description: "Review items from the Maison Affluency gallery", icon: MapPin, to: "/trade/showroom", fallbackId: "living-room-hero_zxfcxl", fallbackImage: null as string | null, defaultGravity: "auto" },
   { key: "dash-gallery", title: "Browse Website Products", description: "View our full collection with trade pricing", icon: Image, to: "/trade/gallery", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/v1773811405/IMG_6996_tfx4bp.jpg", defaultGravity: "south" },
-  { key: "dash-library", title: "Resources", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", fallbackId: "v1773790684/AffluencySG_086_2_1_2_xpvcnw", fallbackImage: null as string | null, defaultGravity: "auto" },
-  { key: "dash-samples", title: "Request Samples", description: "Order product samples for your projects", icon: Package, to: "/trade/samples", fallbackId: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v", fallbackImage: null as string | null, defaultGravity: "auto" },
+  { key: "dash-library", title: "Resources", description: "Access catalogues, inventory & spec sheets", icon: FolderOpen, to: "/trade/documents", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_400,c_fill,g_auto,q_auto,f_auto/v1774172614/2.-Digital-Resources_qbsqxs.jpg", defaultGravity: "auto" },
+  { key: "dash-designers", title: "Designers & Ateliers Library", description: "Discover 32 ateliers and 274 designers", icon: Users, to: "/trade/designers", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_400,c_fill,g_auto,q_auto,f_auto/v1773838925/1_6Jp3vJWe7VFlFHZ9WhSJng_u6ai93.jpg", defaultGravity: "auto" },
   { key: "dash-quotes", title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/e_contrast:20,e_saturation:15/v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg.png", defaultGravity: "auto" },
   { key: "dash-3d-studio", title: "3D Studio", description: "Submit drawings for 3D renders & browse gallery", icon: Box, to: "/trade/axonometric-requests", fallbackId: null as string | null, fallbackImage: null as string | null, defaultGravity: "auto" },
 ];
