@@ -44,17 +44,30 @@ function renderQuotedText(text: string) {
   });
 }
 
+/** Parse a media line — supports `URL | Caption` pipe separator */
+function parseMediaLine(text: string): { url: string; caption: string | null } | null {
+  const value = text.trim();
+  // Try pipe separator: "https://...jpg | My Caption"
+  const pipeMatch = value.match(/^(https?:\/\/\S+)\s*\|\s*(.+)$/i);
+  const url = pipeMatch ? pipeMatch[1].trim() : value;
+  const pipeCaption = pipeMatch ? pipeMatch[2].trim() : null;
+
+  if (!/^https?:\/\//i.test(url)) return null;
+  if (/\s/.test(url)) return null;
+
+  const isMedia =
+    isVideoUrl(url) ||
+    /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(url) ||
+    /res\.cloudinary\.com\/.+\/image\/upload/i.test(url) ||
+    /\/storage\/v1\/object\/public\//i.test(url);
+
+  if (!isMedia) return null;
+  return { url, caption: pipeCaption };
+}
+
 /** Detect a standalone media URL paragraph pasted directly into biography text */
 function isStandaloneMediaUrl(text: string): boolean {
-  const value = text.trim();
-  if (!/^https?:\/\//i.test(value)) return false;
-  if (/\s/.test(value)) return false;
-  return (
-    isVideoUrl(value) ||
-    /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(value) ||
-    /res\.cloudinary\.com\/.+\/image\/upload/i.test(value) ||
-    /\/storage\/v1\/object\/public\//i.test(value)
-  );
+  return parseMediaLine(text) !== null;
 }
 
 /** Extract a human-readable caption from a URL's filename */
