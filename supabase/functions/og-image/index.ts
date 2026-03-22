@@ -85,7 +85,7 @@ async function getOgData(path: string): Promise<OgData> {
         title:
           "Welcome to Maison Affluency Trade Program — Discover Your Exclusive Trade Benefits and Bespoke Services",
         description:
-          "Dedicated Client Advisor, Document & Material Libraries, project folders, trade pricing, and consolidated insured shipping.",
+          "Dedicated Client Advisors, Designers & Ateliers Library, Project Folders, Trade Pricing, Consolidated Insured Shipping.",
         image:
           "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg,g_auto/v1772085848/intimate-dining_ux4pee.jpg",
         url: `${SITE_URL}/trade/program`,
