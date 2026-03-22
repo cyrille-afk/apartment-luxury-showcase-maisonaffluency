@@ -99,6 +99,9 @@ const TradeAxonometricRequests = () => {
       setImageUrl(null);
       setProjectName("");
       setNotes("");
+      setCeilingHeight("");
+      setRoomWidth("");
+      setRoomDepth("");
       setSelectedFavoriteIds([]);
       refetch();
     } catch (e: any) {
