@@ -31,7 +31,7 @@ const navGroups = [
     items: [
       { title: "Gallery", url: "/trade/gallery", icon: Image },
       { title: "Designers & Ateliers", url: "/trade/designers", icon: Users },
-      { title: "Brand Library", url: "/trade/documents", icon: FolderOpen },
+      { title: "Resources", url: "/trade/documents", icon: FolderOpen },
       { title: "Sample Requests", url: "/trade/samples", icon: Package },
       { title: "Quote Builder", url: "/trade/quotes", icon: FileText },
       { title: "3D Studio", url: "/trade/axonometric-requests", icon: Box },
