@@ -267,6 +267,8 @@ const TradeAxonometricRequests = () => {
                 </div>
               </div>
             </div>
+
+            <div className="space-y-1.5">
               <label className="font-body text-xs text-muted-foreground">Upload Drawing *</label>
               {imageUrl ? (
                 <div className="relative group">
