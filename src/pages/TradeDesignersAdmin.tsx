@@ -27,6 +27,7 @@ interface DesignerRow {
   image_url: string;
   source: string;
   is_published: boolean;
+  biography_images: string[];
 }
 
 const TradeDesignersAdmin = () => {
