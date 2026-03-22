@@ -89,7 +89,7 @@ const TradeAxonometricRequests = () => {
         image_url: imageUrl,
         request_type: requestType,
         project_name: projectName.trim().slice(0, 200),
-        notes: notes.trim().slice(0, 1000) || null,
+        notes: `[Dimensions: W${roomWidth.trim()} × D${roomDepth.trim()} × H${ceilingHeight.trim()}]${notes.trim() ? "\n" + notes.trim().slice(0, 900) : ""}`.slice(0, 1000) || null,
         linked_favorite_product_ids: selectedFavoriteIds.length > 0 ? selectedFavoriteIds : [],
       });
       if (error) throw error;
