@@ -140,18 +140,28 @@ const TradeDesigners = () => {
     });
   }, [designers, productCountMap]);
 
-  // Unified carousel entries — all designers & ateliers in one list
-  const carouselEntries = useMemo(() => {
+  // Split carousel entries into ateliers vs designers
+  const atelierCarouselEntries = useMemo(() => {
     const seen = new Set<string>();
     const entries: { name: string; docCount: number; imageUrl?: string }[] = [];
-
     for (const d of enriched) {
-      if (!seen.has(d.name)) {
+      if (d.isAtelierCard && !seen.has(d.name)) {
         seen.add(d.name);
         entries.push({ name: d.name, docCount: 0, imageUrl: d.image_url || undefined });
       }
     }
+    return entries.sort((a, b) => a.name.localeCompare(b.name));
+  }, [enriched]);
 
+  const designerCarouselEntries = useMemo(() => {
+    const seen = new Set<string>();
+    const entries: { name: string; docCount: number; imageUrl?: string }[] = [];
+    for (const d of enriched) {
+      if (!d.isAtelierCard && !seen.has(d.name)) {
+        seen.add(d.name);
+        entries.push({ name: d.name, docCount: 0, imageUrl: d.image_url || undefined });
+      }
+    }
     return entries.sort((a, b) => a.name.localeCompare(b.name));
   }, [enriched]);
 
