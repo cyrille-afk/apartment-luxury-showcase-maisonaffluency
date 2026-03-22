@@ -201,7 +201,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             )}
 
             {/* Mobile: secondary action icons overlaid on image bottom-left */}
-            <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-1.5">
+            <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-2.5">
               <button
                 onClick={async () => {
                   if (!product) return;
@@ -257,7 +257,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   target="_blank"
                   rel="noopener noreferrer"
                   title="Spec Sheet"
-                  className="flex items-center justify-center w-9 h-9 rounded-full bg-background/70 backdrop-blur-md text-muted-foreground hover:text-foreground transition-all shadow-md"
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-destructive/80 backdrop-blur-md text-white transition-all shadow-md"
                 >
                   <FileDown size={15} />
                 </a>
