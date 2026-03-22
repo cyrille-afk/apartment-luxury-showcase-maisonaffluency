@@ -68,7 +68,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
   const entry = heroDefaults[section] || heroDefaults.gallery;
 
   // Use DB override if available, otherwise Cloudinary default
-  const imageUrl = override?.image_url || cloudinaryUrl(entry.id, {
+  const imageUrl = override?.image_url || entry.rawUrl || cloudinaryUrl(entry.id, {
     width: 1600,
     height: 600,
     quality: "auto",
