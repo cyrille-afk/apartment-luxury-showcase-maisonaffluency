@@ -263,9 +263,39 @@ const TradeDesigners = () => {
         <title>Designers & Ateliers Library — Maison Affluency Trade</title>
       </Helmet>
       <div id="designers-carousel-top" className="space-y-6">
+        {/* Title + search first */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="font-display text-2xl text-foreground tracking-wide">Designers & Ateliers Library</h1>
+            <p className="font-body text-sm text-muted-foreground mt-1">
+              {totalCount} designers & ateliers
+              {search && (
+                <span className="text-primary ml-1">· {filtered.length} showing</span>
+              )}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64 sm:flex-none">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search designers, materials…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors"
+              />
+              {search && (
+                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Carousels below title */}
         {(atelierCarouselEntries.length > 0 || designerCarouselEntries.length > 0) && (
           <>
-            {/* Desktop: two stacked carousels */}
             <div className="hidden sm:block space-y-4">
               {atelierCarouselEntries.length > 0 && (
                 <BrandCarousel
@@ -309,7 +339,6 @@ const TradeDesigners = () => {
               )}
             </div>
 
-            {/* Mobile: single carousel with toggle */}
             <div className="sm:hidden space-y-3">
               <div className="flex items-center gap-1.5">
                 <button
@@ -351,36 +380,6 @@ const TradeDesigners = () => {
             </div>
           </>
         )}
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="font-display text-2xl text-foreground tracking-wide">Designers & Ateliers Library</h1>
-              <p className="font-body text-sm text-muted-foreground mt-1">
-                {totalCount} designers & ateliers
-                {search && (
-                  <span className="text-primary ml-1">· {filtered.length} showing</span>
-                )}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-64 sm:flex-none">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search designers, materials…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors"
-                />
-                {search && (
-                  <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* A-Z quick jump */}
         <div className="flex gap-1 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible pb-1 sm:pb-0 -mx-1 px-1">
