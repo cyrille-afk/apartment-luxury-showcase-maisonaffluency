@@ -73,6 +73,14 @@ const TradeAxonometricRequests = () => {
       toast({ title: "Please enter a project name", variant: "destructive" });
       return;
     }
+    if (!ceilingHeight.trim()) {
+      toast({ title: "Ceiling height (Z-axis) is required", description: "We need the vertical dimension to generate accurate 3D renders.", variant: "destructive" });
+      return;
+    }
+    if (!roomWidth.trim() || !roomDepth.trim()) {
+      toast({ title: "Room width and depth are required", description: "Please provide all three dimensions (width × depth × height).", variant: "destructive" });
+      return;
+    }
 
     setSubmitting(true);
     try {
