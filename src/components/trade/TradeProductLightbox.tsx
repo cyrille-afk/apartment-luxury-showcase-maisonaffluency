@@ -119,7 +119,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
 
           {/* Image */}
           <div
-            className="relative w-full md:w-1/2 aspect-[4/3] md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0"
+            className="relative w-full md:w-1/2 aspect-[3/2] md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-0"
             onMouseEnter={() => {
               if (product.hover_image_url) setShowHoverImage(true);
             }}
