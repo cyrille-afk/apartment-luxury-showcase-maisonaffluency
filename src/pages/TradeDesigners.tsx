@@ -312,7 +312,7 @@ const TradeDesigners = () => {
                   }}
                   label={
                     <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
-                      Ateliers · {atelierCarouselEntries.length} brands
+                      Ateliers · 32 brands
                     </p>
                   }
                 />
@@ -332,7 +332,7 @@ const TradeDesigners = () => {
                   }}
                   label={
                     <p className="font-body text-[10px] text-muted-foreground uppercase tracking-[0.15em] mb-2">
-                      Designers · {designerCarouselEntries.length} designers
+                      Designers · 274
                     </p>
                   }
                 />
@@ -350,7 +350,7 @@ const TradeDesigners = () => {
                       : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
                   )}
                 >
-                  Ateliers · {atelierCarouselEntries.length}
+                  Ateliers · 32
                 </button>
                 <button
                   onClick={() => setMobileCarouselMode("designers")}
@@ -361,7 +361,7 @@ const TradeDesigners = () => {
                       : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
                   )}
                 >
-                  Designers · {designerCarouselEntries.length}
+                  Designers · 274
                 </button>
               </div>
               <BrandCarousel
