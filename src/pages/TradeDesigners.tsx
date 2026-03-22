@@ -424,12 +424,12 @@ const TradeDesigners = () => {
                 ? "No designers match your criteria."
                 : "No designers found."}
             </p>
-            {(search || activeFilters.length > 0) && (
+            {search && (
               <button
-                onClick={() => { setSearch(""); setActiveFilters([]); }}
+                onClick={() => setSearch("")}
                 className="mt-3 font-body text-xs text-primary hover:underline"
               >
-                Clear filters
+                Clear search
               </button>
             )}
           </div>
