@@ -101,19 +101,19 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.98 }}
           transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
-          className="relative max-w-4xl w-full max-h-[92vh] md:max-h-[90vh] flex flex-col md:flex-row bg-background/85 backdrop-blur-xl md:rounded-lg rounded-t-2xl overflow-hidden shadow-2xl"
+          className="relative max-w-4xl w-full max-h-[92vh] md:max-h-[90vh] flex flex-col md:flex-row bg-background/85 backdrop-blur-xl md:rounded-lg rounded-t-2xl shadow-2xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header: drag indicator + close */}
-          <div className="md:hidden flex items-center justify-between px-4 pt-2 pb-1">
+          <div className="md:hidden flex items-center justify-between px-4 pt-3 pb-1">
             <div className="w-8" />
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
             <button
               onClick={onClose}
-              className="p-1.5 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 transition-all"
+              className="p-2 rounded-full bg-foreground/15 text-foreground hover:bg-foreground/25 transition-all"
               aria-label="Close"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           </div>
           {/* Desktop close button */}
@@ -127,7 +127,8 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
 
           {/* Image */}
           <div
-            className="relative w-full md:w-1/2 aspect-square max-h-[40vh] md:max-h-none md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-0"
+            className="relative w-full md:w-1/2 md:aspect-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-0"
+            style={{ maxHeight: 'min(45vh, 320px)' }}
             onMouseEnter={() => {
               if (product.hover_image_url) setShowHoverImage(true);
             }}
