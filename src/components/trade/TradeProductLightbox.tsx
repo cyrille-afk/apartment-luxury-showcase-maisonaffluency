@@ -141,7 +141,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     src={product.hover_image_url}
                     alt={`${product.product_name} in context`}
                     className={cn(
-                      "absolute inset-0 m-auto max-w-[90%] max-h-[90%] object-contain pointer-events-none transition-opacity duration-300",
+                      "absolute inset-0 m-auto max-w-[96%] max-h-[96%] md:max-w-[90%] md:max-h-[90%] object-contain pointer-events-none transition-opacity duration-300",
                       showHoverImage ? "opacity-100" : "opacity-0"
                     )}
                   />
