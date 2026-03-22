@@ -219,7 +219,7 @@ const TradeDesignersAdmin = () => {
                           {d.is_published ? "Published" : "Draft"}
                         </Badge>
                         {dirty && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500 text-amber-600">
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-secondary text-secondary">
                             Unsaved
                           </Badge>
                         )}

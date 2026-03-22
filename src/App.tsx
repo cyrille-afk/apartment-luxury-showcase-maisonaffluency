@@ -151,6 +151,7 @@ const App = () => {
                     <Route path="favorites" element={<TradeFavorites />} />
                     <Route path="insights" element={<TradeInsights />} />
                     <Route path="designers" element={<TradeDesigners />} />
+                    <Route path="designers/admin" element={<TradeDesignersAdmin />} />
                     <Route path="designers/:slug" element={<TradeAtelierProfile />} />
                     <Route path="boards" element={<TradeBoards />} />
                     <Route path="boards/:id" element={<TradeBoardBuilder />} />
