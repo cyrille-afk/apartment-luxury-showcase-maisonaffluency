@@ -304,10 +304,9 @@ export default function EditorialBiography({
 
       if (block.type === "video") {
         elements.push(
-          <VideoBlock key={`vid-${i}`} url={block.url} designerName={designerName} index={i} />
+          <VideoBlock key={`vid-${i}`} url={block.url} designerName={designerName} index={i} overrideCaption={block.caption} />
         );
         i++;
-        // Render any following text as standalone paragraphs until next media
         const followText: string[] = [];
         while (i < parsed.length && parsed[i].type === "text") {
           followText.push((parsed[i] as { type: "text"; content: string }).content);
@@ -328,7 +327,6 @@ export default function EditorialBiography({
       }
 
       if (block.type === "image") {
-        // Collect following text paragraphs to pair with this image
         i++;
         const paired: string[] = [];
         while (i < parsed.length && parsed[i].type === "text") {
@@ -344,6 +342,7 @@ export default function EditorialBiography({
               designerName={designerName}
               index={imageIdx}
               paragraphs={paired}
+              overrideCaption={block.caption}
             />
           );
         } else {
@@ -353,6 +352,7 @@ export default function EditorialBiography({
               url={block.url}
               designerName={designerName}
               index={imageIdx}
+              overrideCaption={block.caption}
             />
           );
         }
