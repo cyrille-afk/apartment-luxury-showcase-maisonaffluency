@@ -228,7 +228,45 @@ const TradeAxonometricRequests = () => {
               </div>
             </div>
 
+            {/* Room Dimensions — mandatory */}
             <div className="space-y-1.5">
+              <label className="font-body text-xs text-muted-foreground">Room Dimensions (meters) *</label>
+              <p className="font-body text-[10px] text-muted-foreground/70">
+                Provide the physical measurements so we can generate an accurate 3D view. All three axes are required.
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="font-body text-[10px] text-muted-foreground">Width (X)</label>
+                  <Input
+                    value={roomWidth}
+                    onChange={(e) => setRoomWidth(e.target.value)}
+                    placeholder="e.g. 5.2"
+                    maxLength={10}
+                    className="font-body text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-body text-[10px] text-muted-foreground">Depth (Y)</label>
+                  <Input
+                    value={roomDepth}
+                    onChange={(e) => setRoomDepth(e.target.value)}
+                    placeholder="e.g. 4.0"
+                    maxLength={10}
+                    className="font-body text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-body text-[10px] text-muted-foreground">Ceiling Height (Z)</label>
+                  <Input
+                    value={ceilingHeight}
+                    onChange={(e) => setCeilingHeight(e.target.value)}
+                    placeholder="e.g. 3.0"
+                    maxLength={10}
+                    className="font-body text-sm"
+                  />
+                </div>
+              </div>
+            </div>
               <label className="font-body text-xs text-muted-foreground">Upload Drawing *</label>
               {imageUrl ? (
                 <div className="relative group">
