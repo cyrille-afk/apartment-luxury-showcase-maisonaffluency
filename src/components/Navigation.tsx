@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, Fragment } from "react";
+import { useNavigate } from "react-router-dom";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Building2, Briefcase, BookOpen } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -82,6 +83,7 @@ const contactOptions = [
 const navItems = [...leftNavItems, ...rightNavItems];
 
 const Navigation = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("#home");
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
@@ -176,7 +178,7 @@ const Navigation = () => {
   const handleNavClick = (href: string) => {
     setIsOpen(false);
     if (href.startsWith("/")) {
-      window.location.href = href;
+      navigate(href);
       return;
     }
     const id = href.replace(/^#/, "");

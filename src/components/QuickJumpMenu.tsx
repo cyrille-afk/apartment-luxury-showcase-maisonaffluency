@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Home, 
@@ -35,6 +36,7 @@ const sectionPositionMap: Record<string, string> = {
 const defaultDesktopTop = "75%";
 
 const QuickJumpMenu = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isVisible, setIsVisible] = useState(false);
@@ -90,7 +92,7 @@ const QuickJumpMenu = () => {
     }
     // Trade links to a separate page
     if (sectionId === "details") {
-      window.location.href = "/trade/program";
+      navigate("/trade/program");
       setIsOpen(false);
       return;
     }
