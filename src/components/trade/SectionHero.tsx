@@ -2,12 +2,13 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const heroDefaults: Record<string, { id: string; gravity?: "auto" | "face" | "center" | "north" | "south" | "east" | "west" }> = {
+const heroDefaults: Record<string, { id: string; gravity?: "auto" | "face" | "center" | "north" | "south" | "east" | "west"; rawUrl?: string }> = {
   showroom: { id: "bespoke-sofa_gxidtx" },
   gallery: { id: "v1773731066/Screen_Shot_2026-03-17_at_3.03.40_PM_b8dux9", gravity: "west" },
   quotes: { id: "v1773726568/AffluencySG_081_dk5rn7" },
   "quotes-admin": { id: "v1773652807/singapore-dollar_jaymbz" },
   documents: { id: "home-office-desk_g0ywv2" },
+  designers: { id: "v1773838925/1_6Jp3vJWe7VFlFHZ9WhSJng_u6ai93", rawUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,h_600,c_fill,g_auto,q_auto,f_auto/v1773838925/1_6Jp3vJWe7VFlFHZ9WhSJng_u6ai93.jpg" },
   provenance: { id: "details-console_hk6uxt" },
   samples: { id: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v" },
   "3d-studio": { id: "v1773472978/combination-interior-material-samples-placed-dark-black-marble-table-including-wooden-ceramic-floor-tiles-luxury-marble-stones_1033579-186119_kmp53v" },
