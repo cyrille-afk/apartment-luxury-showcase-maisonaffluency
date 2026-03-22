@@ -175,7 +175,7 @@ const MobileBenefitsCarousel = ({ benefits }: { benefits: typeof import("./Trade
               <img
                 src={benefit.image}
                 alt={benefit.title}
-                className="w-full h-full object-cover object-bottom"
+                className={`w-full h-full object-cover ${benefit.objectPosition ? `object-${benefit.objectPosition}` : 'object-bottom'}`}
                 loading="lazy"
               />
             </div>
