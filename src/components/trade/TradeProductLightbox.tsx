@@ -328,8 +328,8 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 {isAdded ? "Added to Quote" : "Add to Quote"}
               </button>
 
-              {/* Secondary actions — icon buttons on mobile, text buttons on desktop */}
-              <div className="flex gap-1.5 md:gap-2">
+              {/* Secondary actions — desktop only (mobile icons are on the image) */}
+              <div className="hidden md:flex gap-2">
                 {/* Favorite */}
                 <button
                   onClick={async () => {
@@ -346,14 +346,14 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   }}
                   title={product && isFavorited(product.id) ? "Favorited" : "Favorite"}
                   className={cn(
-                    "flex items-center justify-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-md font-body text-[10px] md:text-xs uppercase tracking-[0.12em] transition-all border",
+                    "flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
                     product && isFavorited(product.id)
                       ? "border-destructive/30 text-destructive bg-destructive/10"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                   )}
                 >
                   <Heart size={13} className={cn(product && isFavorited(product.id) && "fill-current")} />
-                  <span className="hidden md:inline">{product && isFavorited(product.id) ? "Favorited" : "Favorite"}</span>
+                  {product && isFavorited(product.id) ? "Favorited" : "Favorite"}
                 </button>
 
                 {/* Add to Project */}
@@ -361,10 +361,10 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   <AddToProjectPopover productId={lastFavRealId || product.id} productName={product.product_name}>
                     <button
                       title="Add to Project"
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-md font-body text-[10px] md:text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                      className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                     >
                       <FolderOpen size={13} />
-                      <span className="hidden md:inline">Add to Project</span>
+                      Add to Project
                     </button>
                   </AddToProjectPopover>
                 )}
@@ -374,7 +374,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   onClick={() => togglePin(compareItem)}
                   title={pinned ? "Pinned" : "Pin to Selection"}
                   className={cn(
-                    "flex items-center justify-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-md font-body text-[10px] md:text-xs uppercase tracking-[0.12em] transition-all border",
+                    "flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
                     pinned
                       ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
@@ -382,7 +382,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   )}
                 >
                   <Scale size={13} />
-                  <span className="hidden md:inline">{pinned ? "Pinned" : "Pin to Selection"}</span>
+                  {pinned ? "Pinned" : "Pin to Selection"}
                 </button>
 
                 {/* Spec Sheet */}
@@ -392,12 +392,13 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Spec Sheet"
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-md font-body text-[10px] md:text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                   >
                     <FileDown size={13} />
-                    <span className="hidden md:inline">Spec Sheet</span>
+                    Spec Sheet
                   </a>
                 )}
+              </div>
               </div>
 
               {/* More from this brand */}
