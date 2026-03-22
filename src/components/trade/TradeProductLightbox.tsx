@@ -104,14 +104,22 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           className="relative max-w-4xl w-full max-h-[92vh] md:max-h-[90vh] flex flex-col md:flex-row bg-background/85 backdrop-blur-xl md:rounded-lg rounded-t-2xl overflow-hidden shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Mobile drag indicator */}
-          <div className="md:hidden flex justify-center pt-2 pb-1">
+          {/* Mobile header: drag indicator + close */}
+          <div className="md:hidden flex items-center justify-between px-4 pt-2 pb-1">
+            <div className="w-8" />
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 transition-all"
+              aria-label="Close"
+            >
+              <X size={16} />
+            </button>
           </div>
-          {/* Close button */}
+          {/* Desktop close button */}
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 z-20 p-2 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 transition-all"
+            className="hidden md:flex absolute top-3 right-3 z-20 p-2 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 transition-all"
             aria-label="Close"
           >
             <X size={18} />
