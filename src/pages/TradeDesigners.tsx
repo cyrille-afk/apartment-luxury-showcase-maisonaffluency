@@ -216,6 +216,15 @@ const TradeDesigners = () => {
       letterMap.get(letter)!.push(entry);
     }
 
+    // Within each letter, sort ateliers first, then alphabetically
+    for (const [, group] of letterMap) {
+      group.sort((a, b) => {
+        if (a.designer.isAtelierCard && !b.designer.isAtelierCard) return -1;
+        if (!a.designer.isAtelierCard && b.designer.isAtelierCard) return 1;
+        return a.designer.name.localeCompare(b.designer.name);
+      });
+    }
+
     return [...letterMap.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [filtered]);
 
