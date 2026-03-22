@@ -86,20 +86,12 @@ export default function TradeSpecSheet() {
               <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider truncate">{brand}</p>
               <h1 className="font-display text-sm text-foreground truncate">{product} — Spec Sheet</h1>
             </div>
-            <div className="flex gap-2 shrink-0">
-              <Button size="sm" variant="outline" className="gap-1.5" asChild>
-                <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span className="hidden xs:inline">Open</span>
-                </a>
-              </Button>
-              <Button size="sm" className="gap-1.5 bg-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/90 text-white" asChild>
-                <a href={pdfUrl} download>
-                  <FileDown className="w-3.5 h-3.5" />
-                  Download
-                </a>
-              </Button>
-            </div>
+            <Button size="sm" className="gap-1.5 bg-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/90 text-white shrink-0" asChild>
+              <a href={pdfUrl} download={`${brand} — ${product} Spec Sheet.pdf`}>
+                <FileDown className="w-3.5 h-3.5" />
+                Download
+              </a>
+            </Button>
           </div>
 
           {/* Google Docs viewer for mobile-friendly PDF rendering */}
