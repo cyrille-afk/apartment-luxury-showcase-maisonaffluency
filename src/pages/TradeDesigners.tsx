@@ -237,7 +237,12 @@ const TradeDesigners = () => {
       entries.push({ type: "solo", designer: d, sortName });
     }
 
-    entries.sort((a, b) => a.sortName.localeCompare(b.sortName));
+    entries.sort((a, b) => {
+      // Atelier cards always sort before their members
+      if (a.designer.isAtelierCard && !b.designer.isAtelierCard) return -1;
+      if (!a.designer.isAtelierCard && b.designer.isAtelierCard) return 1;
+      return a.sortName.localeCompare(b.sortName);
+    });
 
     const letterMap = new Map<string, GridEntry[]>();
     for (const entry of entries) {
