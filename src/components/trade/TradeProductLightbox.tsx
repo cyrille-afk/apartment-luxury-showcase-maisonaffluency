@@ -298,23 +298,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 )}
               </div>
 
-              {/* Request Sample */}
-              <button
-                onClick={() => {
-                  const params = new URLSearchParams();
-                  params.set("product", product.product_name);
-                  if (product.brand_name) params.set("brand", product.brand_name);
-                  if (product.image_url) params.set("image", product.image_url);
-                  if (product.pdf_url) params.set("tearsheet", product.pdf_url);
-                  onClose();
-                  navigate(`/trade/samples?${params.toString()}`);
-                }}
-                className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-md font-body text-[10px] md:text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-              >
-                <Package size={13} />
-                Request Sample
-              </button>
-
               {/* More from this brand */}
               {relatedProducts.length > 0 && (
                 <div className="pt-4 border-t border-border">
