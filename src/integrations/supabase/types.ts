@@ -500,6 +500,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           founder: string | null
+          hero_image_url: string | null
           id: string
           image_url: string
           is_published: boolean
@@ -520,6 +521,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           founder?: string | null
+          hero_image_url?: string | null
           id?: string
           image_url?: string
           is_published?: boolean
@@ -540,6 +542,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           founder?: string | null
+          hero_image_url?: string | null
           id?: string
           image_url?: string
           is_published?: boolean
