@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackCTA } from "@/lib/analytics";
