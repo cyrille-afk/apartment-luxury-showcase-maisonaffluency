@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import BrandCarousel from "@/components/trade/BrandCarousel";
+import SectionHero from "@/components/trade/SectionHero";
 
 /** Extract short discipline tags from a specialty string */
 function extractTags(specialty: string): string[] {
