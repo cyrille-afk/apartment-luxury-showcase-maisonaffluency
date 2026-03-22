@@ -25,6 +25,7 @@ interface DesignerRow {
   philosophy: string;
   notable_works: string;
   image_url: string;
+  hero_image_url: string | null;
   source: string;
   is_published: boolean;
   biography_images: string[];
