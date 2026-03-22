@@ -483,6 +483,55 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           })}
         </div>
 
+        {/* ─── Designers & Ateliers Banner ─── */}
+        <div className="w-full bg-muted/30 border-y border-border">
+          <div className="max-w-6xl mx-auto px-6 md:px-12 py-14 md:py-20">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="text-center mb-8 md:mb-10"
+            >
+              <p className="font-body text-xs tracking-[0.25em] uppercase text-accent mb-4">Our Curated Network</p>
+              <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
+                Designers & Ateliers Library
+              </h2>
+              <p className="font-body text-sm text-muted-foreground max-w-lg mx-auto">
+                Browse our curated directory of exceptional designers and specialist workshops from around the world.
+              </p>
+            </motion.div>
+
+            <Link to="/trade/designers" className="block group">
+              <div className="relative rounded-sm overflow-hidden aspect-[21/9] md:aspect-[3/1]">
+                <img
+                  src={cloudinaryUrl("v1773838925/1_6Jp3vJWe7VFlFHZ9WhSJng_u6ai93", { width: 1600, height: 600, quality: "auto:good", crop: "fill", gravity: "auto" })}
+                  alt="Designers & Ateliers Library"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-foreground/15 to-transparent" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+                  <div className="flex items-center gap-4 md:gap-8 mb-4">
+                    <div>
+                      <p className="font-display text-3xl md:text-5xl text-background drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">32</p>
+                      <p className="font-body text-[10px] md:text-xs tracking-[0.2em] uppercase text-background/80">Ateliers</p>
+                    </div>
+                    <div className="w-px h-10 md:h-14 bg-background/30" />
+                    <div>
+                      <p className="font-display text-3xl md:text-5xl text-background drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">274</p>
+                      <p className="font-body text-[10px] md:text-xs tracking-[0.2em] uppercase text-background/80">Designers</p>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-2 bg-background/15 backdrop-blur-sm border border-background/30 text-background px-5 py-2.5 font-body text-xs uppercase tracking-wider rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
+                    Explore the Library
+                  </span>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+
         {/* ─── 3D Studio Showcase ─── */}
         <div className="w-full relative overflow-hidden">
           {/* Full-bleed background image */}
