@@ -219,7 +219,7 @@ function SplitImageBlock({
   ) : null;
 
   return (
-    <div className="my-10 md:my-14 flex flex-col md:flex-row gap-6 md:gap-10 items-start">
+    <div className="my-10 md:my-14 flex flex-col md:flex-row gap-6 md:gap-10 items-center">
       {imageOnRight ? (
         <>
           {textEl}
