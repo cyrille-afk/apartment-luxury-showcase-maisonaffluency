@@ -505,7 +505,11 @@ const TradeDesigners = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {filtered
                 .slice()
-                .sort((a, b) => a.name.localeCompare(b.name))
+                .sort((a, b) => {
+                  if (a.isAtelierCard && !b.isAtelierCard) return -1;
+                  if (!a.isAtelierCard && b.isAtelierCard) return 1;
+                  return a.name.localeCompare(b.name);
+                })
                 .map((d) => (
                   <DesignerCard key={d.id} brand={d} navigate={navigate} />
                 ))}
