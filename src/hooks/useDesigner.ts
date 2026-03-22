@@ -15,6 +15,7 @@ export interface Designer {
   logo_url: string | null;
   source: string;
   links: { type: string; url?: string }[];
+  biography_images: string[];
   is_published: boolean;
   sort_order: number;
 }
