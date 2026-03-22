@@ -263,7 +263,7 @@ const TradeDesigners = () => {
       </Helmet>
       <div id="designers-carousel-top" className="space-y-6">
         <SectionHero
-          section="documents"
+          section="designers"
           title="Designers & Ateliers Library"
           subtitle="Discover ateliers and designers by signature materials and collections."
         />
