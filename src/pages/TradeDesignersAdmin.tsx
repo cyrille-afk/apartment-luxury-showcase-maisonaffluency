@@ -55,9 +55,14 @@ const TradeDesignersAdmin = () => {
 
   const saveMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<DesignerRow> }) => {
+      const payload = { ...updates, updated_at: new Date().toISOString() };
+      // Filter out empty strings from biography_images before saving
+      if (payload.biography_images) {
+        payload.biography_images = payload.biography_images.filter((u: string) => u.trim() !== "");
+      }
       const { error } = await supabase
         .from("designers")
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update(payload)
         .eq("id", id);
       if (error) throw error;
     },
