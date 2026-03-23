@@ -409,7 +409,7 @@ const TradeAtelierProfile = () => {
                     return (
                     <div
                       key={pick.id}
-                      className="group cursor-pointer"
+                      className="group cursor-pointer flex flex-col"
                       onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name))}
                     >
                       <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
@@ -467,47 +467,51 @@ const TradeAtelierProfile = () => {
                           })()}
                         </div>
                       </div>
-                      <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">
-                        {pick.title}
-                      </h3>
-                      {designerLabel && designerSlug ? (
-                        <Link
-                          to={`/trade/designers/${designerSlug}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="block font-body text-[10px] md:text-[11px] text-primary/70 hover:text-primary underline underline-offset-2 leading-tight mt-0.5"
-                        >
-                          {designerLabel}
-                        </Link>
-                      ) : designerLabel ? (
-                        <span className="block font-body text-[10px] md:text-[11px] text-muted-foreground leading-tight mt-0.5">
-                          {designerLabel}
-                        </span>
-                      ) : null}
-                      {pick.subtitle && (
-                        <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>
-                      )}
-                      {pick.materials && (
-                        <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2 leading-relaxed">
-                          {pick.materials}
-                        </p>
-                      )}
-                      {pick.dimensions && (
-                        <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
-                          {pick.dimensions.split('\n').filter(line => !line.toLowerCase().includes(' in')).join('\n')}
-                        </p>
-                      )}
-                      {pick.trade_price_cents != null && (
-                        <p className="font-display text-[11px] md:text-xs text-foreground mt-1">
-                          {(isTradeUser || isAdmin)
-                            ? `${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`
-                            : "Price on request"}
-                        </p>
-                      )}
-                      {pick.edition && (
-                        <p className="font-body text-[9px] text-primary/70 mt-0.5 italic">
-                          {pick.edition}
-                        </p>
-                      )}
+                      <div className="flex flex-col flex-1">
+                        <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">
+                          {pick.title}
+                        </h3>
+                        {designerLabel && designerSlug ? (
+                          <Link
+                            to={`/trade/designers/${designerSlug}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="block font-body text-[10px] md:text-[11px] text-primary/70 hover:text-primary underline underline-offset-2 leading-tight mt-0.5"
+                          >
+                            {designerLabel}
+                          </Link>
+                        ) : designerLabel ? (
+                          <span className="block font-body text-[10px] md:text-[11px] text-muted-foreground leading-tight mt-0.5">
+                            {designerLabel}
+                          </span>
+                        ) : null}
+                        {pick.subtitle && (
+                          <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>
+                        )}
+                        {pick.materials && (
+                          <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2 leading-relaxed">
+                            {pick.materials}
+                          </p>
+                        )}
+                        {pick.dimensions && (
+                          <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
+                            {pick.dimensions.split('\n').filter(line => !line.toLowerCase().includes(' in')).join('\n')}
+                          </p>
+                        )}
+                        <div className="mt-auto pt-1">
+                          {pick.trade_price_cents != null && (
+                            <p className="font-display text-[11px] md:text-xs text-foreground">
+                              {(isTradeUser || isAdmin)
+                                ? `${pick.dimensions && pick.dimensions.includes('\n') ? 'From ' : ''}${formatPriceConverted(pick.trade_price_cents, pick.currency || 'EUR', displayCurrency, fxRates)}`
+                                : "Price on request"}
+                            </p>
+                          )}
+                          {pick.edition && (
+                            <p className="font-body text-[9px] text-primary/70 mt-0.5 italic">
+                              {pick.edition}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                     );
                   })}
