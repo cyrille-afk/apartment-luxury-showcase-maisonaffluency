@@ -1,4 +1,4 @@
-import { Instagram } from "lucide-react";
+import { trackCTA } from "@/lib/analytics";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
 
