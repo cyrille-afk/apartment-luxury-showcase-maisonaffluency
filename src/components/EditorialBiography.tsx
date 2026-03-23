@@ -196,11 +196,9 @@ function VideoBlock({
         ) : (
           <video
             src={videoSrc}
-            poster={nativePosterUrl}
             controls
             playsInline
-            autoPlay={playing}
-            preload={nativePosterUrl ? "none" : "metadata"}
+            preload="metadata"
             className="w-full h-auto max-h-[72vh] rounded-lg bg-black"
           />
         )}
@@ -464,17 +462,7 @@ export default function EditorialBiography({
       const block = parsed[i];
 
       if (block.type === "video") {
-        const inlinePoster = (() => {
-          for (let j = i - 1; j >= 0; j--) {
-            const prev = parsed[j];
-            if (prev.type === "image") return prev.url;
-          }
-          for (let j = i + 1; j < parsed.length; j++) {
-            const next = parsed[j];
-            if (next.type === "image") return next.url;
-          }
-          return undefined;
-        })();
+        const inlinePoster = undefined;
 
         elements.push(
           <VideoBlock
@@ -587,15 +575,7 @@ export default function EditorialBiography({
         !!m && /^https?:\/\//i.test(m.url)
     );
 
-  const findNeighborPoster = (startIndex: number) => {
-    for (let j = startIndex - 1; j >= 0; j--) {
-      if (!parsedMedia[j].isVideo) return parsedMedia[j].url;
-    }
-    for (let j = startIndex + 1; j < parsedMedia.length; j++) {
-      if (!parsedMedia[j].isVideo) return parsedMedia[j].url;
-    }
-    return undefined;
-  };
+  const findNeighborPoster = (_startIndex: number) => undefined;
 
   if (parsedMedia.length === 0) {
     return (
