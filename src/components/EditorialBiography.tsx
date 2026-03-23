@@ -221,7 +221,7 @@ function SplitImageBlock({
         />
       </div>
       {caption && (
-        <figcaption className="mt-2 font-body text-[11px] tracking-wide text-muted-foreground italic text-center md:text-left">
+        <figcaption className="mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left">
           {caption}
         </figcaption>
       )}
