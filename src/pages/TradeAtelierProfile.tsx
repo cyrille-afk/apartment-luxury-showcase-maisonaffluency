@@ -361,7 +361,7 @@ const TradeAtelierProfile = () => {
                 Curators' Picks
               </h2>
               <div className="flex items-center gap-3">
-                <div className="hidden md:block">
+                <div>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
