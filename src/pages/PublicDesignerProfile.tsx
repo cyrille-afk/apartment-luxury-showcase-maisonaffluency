@@ -62,10 +62,10 @@ const PublicDesignerProfile = () => {
     let lastKey = "";
 
     while (remaining.length > 0) {
-      const nextIndex = remaining.findIndex((pick) => getSubcategoryKey(pick) !== lastKey);
+      const nextIndex = remaining.findIndex((pick) => getCategoryKey(pick) !== lastKey);
       const next = nextIndex >= 0 ? remaining.splice(nextIndex, 1)[0] : remaining.shift();
       if (!next) break;
-      lastKey = getSubcategoryKey(next);
+      lastKey = getCategoryKey(next);
       interleaved.push(next);
     }
 
