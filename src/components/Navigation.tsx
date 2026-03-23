@@ -405,7 +405,14 @@ const Navigation = () => {
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
               </div>
             </div>
-            <div className="flex justify-end items-center">
+            <div className="flex justify-end items-center gap-4">
+              <button
+                onClick={() => navigate("/favorites")}
+                className="relative group p-1 transition-colors"
+                title="My Favorites"
+              >
+                <Heart className="w-4 h-4 text-foreground group-hover:text-primary transition-colors" />
+              </button>
               <DropdownMenu>
                 <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none relative group">
                   Contact Us
