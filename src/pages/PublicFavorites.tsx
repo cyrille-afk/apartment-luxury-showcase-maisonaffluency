@@ -209,7 +209,7 @@ const PublicFavorites = () => {
                       }}
                     >
                       <img
-                        src={cloudinaryUrl(pick.image_url, { width: 500, quality: "auto", crop: "fill" })}
+                        src={pick.image_url}
                         alt={pick.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
