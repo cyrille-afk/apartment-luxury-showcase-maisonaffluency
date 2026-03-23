@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import EditorialBiography from "@/components/EditorialBiography";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
