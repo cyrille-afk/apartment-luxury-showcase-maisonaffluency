@@ -318,13 +318,28 @@ const PublicDesignerProfile = () => {
                   </Link>
                 )}
 
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 flex items-end justify-between">
                   <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
                     <h1 className="font-display text-2xl md:text-4xl tracking-wide text-white drop-shadow-md">{name}</h1>
                     {designer.specialty && (
                       <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
                     )}
                   </motion.div>
+                  <WhatsAppShareButton
+                    hideOn="mobile"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      sharePageOnWhatsApp(
+                        `/designers/${designer.slug}`,
+                        `${designer.name} — Maison Affluency`,
+                        designer.specialty || undefined,
+                        { directUrlPath: `/designers/${designer.slug}-share.html` }
+                      );
+                    }}
+                    label="Share"
+                    size="sm"
+                    variant="glass"
+                  />
                 </div>
               </motion.div>
 
