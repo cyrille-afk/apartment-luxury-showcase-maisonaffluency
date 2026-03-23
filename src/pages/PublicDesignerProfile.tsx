@@ -243,6 +243,7 @@ const PublicDesignerProfile = () => {
                           )}
                         </div>
                         <WhatsAppShareButton
+                          hideOn="mobile"
                           onClick={(e) => {
                             e.stopPropagation();
                             sharePageOnWhatsApp(
