@@ -14,7 +14,6 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import WhatsAppShareButton from "./WhatsAppShareButton";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
@@ -2245,16 +2244,9 @@ const FeaturedDesigners = () => {
     broadcastFilter(selectedCategory, sub);
   }, [selectedCategory, broadcastFilter]);
 
-  // Collapse all when a filter is applied
-  useEffect(() => {
-    if (selectedCategory || selectedSubcategory) {
-      setOpenDesigners([]);
-    }
-  }, [selectedCategory, selectedSubcategory]);
 
   const [showSearch, setShowSearch] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [openDesigners, setOpenDesigners] = useState<string[]>([]);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -2264,24 +2256,13 @@ const FeaturedDesigners = () => {
   const picksSwipeRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(true);
 
-  // Deep-link handler: expand designer from URL hash
+  // Deep-link handler: navigate to designer profile
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail.section !== "designer") return;
-      const designer = featuredDesigners.find(d => d.id === detail.id);
-      if (designer) {
-        setOpenDesigners(prev => prev.includes(designer.id) ? prev : [...prev, designer.id]);
-        // Wait for accordion to fully expand, then scroll with nav offset
-        setTimeout(() => {
-          const el = document.getElementById(`designer-${designer.id}`);
-          if (el) {
-            const navHeight = document.querySelector('nav')?.getBoundingClientRect().height ?? 64;
-            const top = el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
-            window.scrollTo({ top, behavior: "smooth" });
-          }
-        }, 400);
-      }
+      // Navigate to the full profile page
+      window.location.href = `/designers/${detail.id}`;
     };
     window.addEventListener("deeplink-open-profile", handler);
     return () => window.removeEventListener("deeplink-open-profile", handler);
@@ -2440,18 +2421,6 @@ const FeaturedDesigners = () => {
   }, [filteredDesigners]);
 
   const activeLetters = useMemo(() => designerAlphaGroups.map(([l]) => l), [designerAlphaGroups]);
-
-  const allDesignerIds = useMemo(() => filteredDesigners.map(d => d.id), [filteredDesigners]);
-  const isAllExpanded = openDesigners.length === allDesignerIds.length && allDesignerIds.length > 0;
-
-  const toggleAllDesigners = () => {
-    if (isAllExpanded) {
-      setOpenDesigners([]);
-    } else {
-      setOpenDesigners(allDesignerIds);
-    }
-  };
-
   return (
     <section ref={ref} id="curators-picks" className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
       {/* Gradient accent band */}
@@ -2663,383 +2632,73 @@ const FeaturedDesigners = () => {
           </p>
         )}
 
-        <div className="flex mb-4 justify-start md:justify-end md:pr-8">
-          <button
-            onClick={toggleAllDesigners}
-            className="text-sm text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1.5"
-          >
-            <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
-            <ChevronDown className={`h-4.5 w-4.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
-          </button>
-        </div>
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <Accordion 
-            type="multiple" 
-            value={openDesigners} 
-            onValueChange={(values) => {
-              // Trigger haptic feedback on mobile
-              if ('vibrate' in navigator) {
-                navigator.vibrate(10);
-              }
-              // On mobile, scroll to the newly opened designer
-              if (window.innerWidth < 768 && values.length > openDesigners.length) {
-                const newDesigner = values.find(v => !openDesigners.includes(v));
-                if (newDesigner) {
-                  setTimeout(() => {
-                    const element = document.querySelector(`[data-designer="${newDesigner}"]`);
-                    if (element) {
-                      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                  }, 100);
-                }
-              }
-              setOpenDesigners(values);
-            }} 
-            className="w-full space-y-4"
-          >
-            {designerAlphaGroups.map(([letter, designers]) => (
-              <div key={letter}>
-                <div id={`designer-alpha-${letter}`} className="scroll-mt-32 pt-4 pb-2 flex items-center gap-3 px-1">
-                  <span className="font-serif text-lg md:text-lg text-foreground md:text-muted-foreground">{letter}</span>
-                  <div className="flex-1 h-px bg-border/30 md:hidden" />
-                  <span className="text-[10px] text-foreground/70 tracking-widest font-body uppercase md:hidden">
-                    {designers.length}
-                  </span>
-                </div>
-                {designers.map((designer, index) => (
-              <AccordionItem
-                key={designer.id}
-                value={designer.id}
-                id={`designer-${designer.id}`}
-                data-designer={designer.id}
-                className="border border-border/40 rounded-lg px-4 md:px-6 bg-white md:bg-card/30 hover:bg-white/90 md:hover:bg-card/50 transition-colors duration-300 scroll-mt-16"
-              >
-                <AccordionTrigger className="hover:no-underline py-4 md:py-6 group active:scale-[0.99] touch-manipulation [&>svg]:hidden md:[&>svg]:block">
-                  <div className="flex flex-col w-full gap-3">
-                    <div className="flex items-center gap-4 md:gap-6 text-left w-full">
-                    {designer.image ? (
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <div
-                          className="relative flex-shrink-0 cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedImage({ name: designer.name, image: designer.image! });
-                          }}
-                          onPointerDown={(e) => e.stopPropagation()}
-                          onTouchEnd={(e) => e.stopPropagation()}
-                        >
-                          <img
-                            src={designer.image}
-                            alt={designer.name}
-                            sizes="(max-width: 767px) 112px, 160px"
-                            className="w-28 h-28 md:w-40 md:h-40 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
-                            style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined}
-                            loading="lazy"
-                          />
-                          <div className="absolute inset-0 rounded-full bg-primary/0 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center">
-                            <svg
-                              className="w-8 h-8 text-primary opacity-0 hover:opacity-100 transition-opacity duration-300"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
-                              />
-                            </svg>
-                          </div>
+          {designerAlphaGroups.map(([letter, designers]) => (
+            <div key={letter}>
+              <div id={`designer-alpha-${letter}`} className="scroll-mt-32 pt-4 pb-2 flex items-center gap-3 px-1">
+                <span className="font-serif text-lg md:text-lg text-foreground md:text-muted-foreground">{letter}</span>
+                <div className="flex-1 h-px bg-border/30 md:hidden" />
+                <span className="text-[10px] text-foreground/70 tracking-widest font-body uppercase md:hidden">
+                  {designers.length}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {designers.map((designer) => (
+                  <Link
+                    key={designer.id}
+                    to={`/designers/${designer.id}`}
+                    className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+                  >
+                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                      {designer.image ? (
+                        <img
+                          src={designer.image}
+                          alt={designer.name}
+                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+                          style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+                          <span className="font-display text-3xl text-muted-foreground/20">
+                            {designer.name.charAt(0)}
+                          </span>
                         </div>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-3xl max-h-[90vh] [&>button]:top-3 [&>button]:left-3 [&>button]:right-auto md:[&>button]:left-auto md:[&>button]:right-3 [&>button]:p-2 [&>button]:bg-foreground/10 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:opacity-100 [&>button>svg]:h-5 [&>button>svg]:w-5" aria-describedby={undefined}>
-                        <VisuallyHidden>
-                          <DialogTitle>{selectedImage?.name || designer.name}</DialogTitle>
-                        </VisuallyHidden>
-                        <div className="relative w-full h-full">
-                          <img
-                            src={selectedImage?.image || designer.image!}
-                            alt={selectedImage?.name || designer.name}
-                            sizes="(max-width: 767px) 90vw, 700px"
-                            className="w-full h-auto rounded-lg object-contain max-h-[75vh]"
-                          />
-                          <p className="text-center mt-4 text-lg font-serif text-foreground">
-                            {designer.founder || selectedImage?.name || designer.name}
-                          </p>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    ) : (
-                    <div className="flex-shrink-0 w-28 h-28 md:w-40 md:h-40 rounded-full bg-muted ring-2 ring-border/40 flex items-center justify-center">
-                      <span className="text-2xl font-serif text-muted-foreground">{designer.name.charAt(0)}</span>
-                    </div>
-                    )}
-                    <div className="flex flex-col items-start gap-1 flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        {designer.links?.find(l => l.type === "Instagram")?.url && (
-                          <a
-                            href={designer.links.find(l => l.type === "Instagram")?.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-0.5 transition-transform duration-300 hover:scale-110 relative z-10"
-                            aria-label={`${designer.name} on Instagram`}
-                            onClick={(e) => { e.stopPropagation(); e.preventDefault(); trackCTA.instagram("Featured Designers", designer.name); window.open(designer.links!.find(l => l.type === "Instagram")!.url!, '_blank', 'noopener,noreferrer'); }}
-                            onPointerDown={(e) => e.stopPropagation()}
-                            onTouchEnd={(e) => { e.stopPropagation(); }}
-                          >
-                            <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-name)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <defs>
-                                <linearGradient id="instagram-gradient-name" x1="0%" y1="100%" x2="100%" y2="0%">
-                                  <stop offset="0%" stopColor="#f09433" />
-                                  <stop offset="25%" stopColor="#e6683c" />
-                                  <stop offset="50%" stopColor="#dc2743" />
-                                  <stop offset="75%" stopColor="#cc2366" />
-                                  <stop offset="100%" stopColor="#bc1888" />
-                                </linearGradient>
-                              </defs>
-                              <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                            </svg>
-                          </a>
-                        )}
-                        <Link
-                          to={`/designers/${designer.id}`}
-                          className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 hover:text-primary"
-                          onClick={(e) => e.stopPropagation()}
-                          onPointerDown={(e) => e.stopPropagation()}
-                        >
+                      )}
+
+                      {/* Name overlay */}
+                      <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                        <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
                           {(() => {
                             const fmt = formatDesignerName(designer.name, (designer as any).displayName);
                             return fmt.brand || fmt.person;
                           })()}
-                        </Link>
-                      </div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-sm md:text-base text-primary font-body italic transition-opacity duration-300 group-hover:opacity-80">
-                          {designer.specialty}
                         </p>
                       </div>
-                      <div className="hidden md:flex mt-auto pt-4">
-                        <WhatsAppShareButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
-                            trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
-                          }}
-                          label={`Share ${designer.name} on WhatsApp`}
-                          variant="prominent"
-                          className="md:!text-sm md:!px-4 md:!py-2"
-                        />
+
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+                        {designer.specialty && (
+                          <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">
+                            {designer.specialty}
+                          </p>
+                        )}
+                        <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+                          Discover
+                        </span>
                       </div>
                     </div>
-                    {/* On View thumbnails — right side */}
-                    {(designer.notableWorksLink || designer.notableWorksLinks) && (
-                      <div className="hidden md:flex items-center gap-5 flex-shrink-0 mr-8">
-                        <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider"><em>On View</em></span>
-                        <div className="flex gap-8 pb-6">
-                          {designer.notableWorksLinks ? (
-                            designer.notableWorksLinks.map((link, linkIdx) => {
-                              const thumb = GALLERY_THUMBNAILS[link.galleryIndex];
-                              return (
-                                <div key={linkIdx} className="relative group/avatar">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                        detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` }
-                                      }));
-                                    }}
-                                    onPointerDown={(e) => e.stopPropagation()}
-                                    onTouchEnd={(e) => e.stopPropagation()}
-                                    className="relative w-11 h-11 md:w-14 md:h-14 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-125 hover:z-10 transition-all duration-300 touch-manipulation"
-                                    aria-label={`View ${link.text} in gallery`}
-                                  >
-                                    {thumb && (
-                                      <img src={thumb} alt={link.text} className="w-full h-full object-cover blur-[0.5px] group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
-                                    )}
-                                  </button>
-                                  <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1 flex items-center gap-0.5 text-xs font-body text-muted-foreground whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
-                                    <CornerDownRight className="w-3 h-3" /> {link.text}
-                                  </span>
-                                </div>
-                              );
-                            })
-                          ) : designer.notableWorksLink && (() => {
-                            const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
-                            return (
-                              <div className="relative group/avatar">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                      detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` }
-                                    }));
-                                  }}
-                                  onPointerDown={(e) => e.stopPropagation()}
-                                  onTouchEnd={(e) => e.stopPropagation()}
-                                  className="relative w-11 h-11 md:w-14 md:h-14 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-125 hover:z-10 transition-all duration-300 touch-manipulation"
-                                  aria-label={`View ${designer.notableWorksLink.text} in gallery`}
-                                >
-                                  {thumb && (
-                                    <img src={thumb} alt={designer.notableWorksLink.text} className="w-full h-full object-cover blur-[0.5px] group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
-                                  )}
-                                </button>
-                                <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1 flex items-center gap-0.5 text-xs font-body text-muted-foreground whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
-                                  <CornerDownRight className="w-3 h-3" /> {designer.notableWorksLink.text}
-                                </span>
-                              </div>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                    )}
-                    </div>
-                    {/* Mobile: On View below header */}
-                    {(designer.notableWorksLink || designer.notableWorksLinks) && (
-                      <div className="flex md:hidden items-start gap-2 w-full ml-[7.5rem] -mt-0.5 pr-4">
-                        <div className="w-16 h-px bg-[hsl(var(--gold)/0.4)] mt-0.5 mb-1" />
-                      </div>
-                    )}
-                    {(designer.notableWorksLink || designer.notableWorksLinks) && (
-                      <div className="flex md:hidden items-start gap-2 w-full ml-[7.5rem] -mt-0.5 pr-4">
-                        <span className="text-[10px] text-foreground uppercase tracking-wider mr-2 mt-3.5"><em>On View</em></span>
-                        <div className={`flex gap-5 ${designer.notableWorksLinks && designer.notableWorksLinks.length > 2 ? 'pb-10' : designer.notableWorksLinks && designer.notableWorksLinks.length > 1 ? 'pb-7' : ''}`}>
-                          {designer.notableWorksLinks ? (
-                            designer.notableWorksLinks.map((link, linkIdx) => {
-                              const thumb = GALLERY_THUMBNAILS[link.galleryIndex];
-                              const mobileTooltipOffset = `${linkIdx * 0.85}rem`;
-                              return (
-                                <div key={linkIdx} className="relative group/avatar">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                        detail: { index: link.galleryIndex, sourceId: `designer-${designer.id}` }
-                                      }));
-                                    }}
-                                    onPointerDown={(e) => e.stopPropagation()}
-                                    onTouchEnd={(e) => e.stopPropagation()}
-                                    className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-125 hover:z-10 transition-all duration-300 touch-manipulation"
-                                    aria-label={`View ${link.text} in gallery`}
-                                  >
-                                    {thumb && (
-                                      <img src={thumb} alt={link.text} className="w-full h-full object-cover" loading="lazy" />
-                                    )}
-                                  </button>
-                                  <span
-                                    className={`absolute ${designer.notableWorksLinks && designer.notableWorksLinks.length >= 3 && linkIdx === designer.notableWorksLinks.length - 1 ? 'right-0' : 'left-0'} top-full mt-1 flex items-center gap-0.5 text-[9px] font-body text-foreground whitespace-nowrap pointer-events-none z-50 translate-y-[var(--tooltip-mobile-offset)]`}
-                                    style={{ "--tooltip-mobile-offset": mobileTooltipOffset } as React.CSSProperties}
-                                  >
-                                    <CornerDownRight className="w-3 h-3" /> {link.text}
-                                  </span>
-                                </div>
-                              );
-                            })
-                          ) : designer.notableWorksLink && (() => {
-                            const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
-                            return (
-                              <div className="relative group/avatar pb-4">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                      detail: { index: designer.notableWorksLink.galleryIndex, sourceId: `designer-${designer.id}` }
-                                    }));
-                                  }}
-                                  onPointerDown={(e) => e.stopPropagation()}
-                                  onTouchEnd={(e) => e.stopPropagation()}
-                                  className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-125 hover:z-10 transition-all duration-300 touch-manipulation"
-                                  aria-label={`View ${designer.notableWorksLink.text} in gallery`}
-                                >
-                                  {thumb && (
-                                    <img src={thumb} alt={designer.notableWorksLink.text} className="w-full h-full object-cover" loading="lazy" />
-                                  )}
-                                </button>
-                                <span className="absolute left-0 top-full mt-1 flex items-center gap-0.5 text-[9px] font-body text-foreground whitespace-nowrap pointer-events-none z-50">
-                                  <CornerDownRight className="w-3 h-3" /> {designer.notableWorksLink.text}
-                                </span>
-                              </div>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex justify-start md:hidden">
-                      <ChevronDown className="h-6 w-6 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
-                    </div>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pt-1 pb-3">
-                  <div className="space-y-2 text-muted-foreground font-body">
-                    <p className="text-sm md:text-base leading-relaxed text-justify">{designer.biography}</p>
-
-                    <div className="pt-1 border-t border-border/30 mt-2">
-                      <p className="text-sm md:text-base italic leading-relaxed text-foreground/80 mb-2 text-justify">
-                        "{designer.philosophy}"
-                      </p>
-
-                      {designer.links && designer.links.filter((l) => l.type !== "Instagram" && l.type !== "Curators' Picks").length > 0 && (
-                        <div className="flex flex-row flex-wrap items-center gap-3 mt-4 md:flex-nowrap md:gap-3 md:pr-8">
-                          {designer.links.filter((l) => l.type !== "Instagram" && l.type !== "Curators' Picks").map((link, idx) => (
-                            link.url ? (
-                              <a
-                                key={idx}
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-md transition-all duration-300 border bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 hover:border-primary/40"
-                                aria-label={`${designer.name} — ${link.type}`}
-                              >
-                                <span>{link.type}</span>
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                  />
-                                </svg>
-                              </a>
-                            ) : (
-                              <span
-                                key={idx}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-primary/10 text-primary rounded-md border border-primary/20"
-                              >
-                                {link.type}
-                              </span>
-                            )
-                          ))}
-                        </div>
-                      )}
-
-                      <Link
-                        to={`/designers/${designer.id}`}
-                        className="inline-flex items-center gap-2 mt-4 px-4 py-2 text-sm font-body rounded-md transition-all duration-300 border bg-foreground/5 hover:bg-foreground/10 text-foreground border-border/40 hover:border-border"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        View Full Profile
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </Link>
-
-                    </div>
-                  </div>
-                </AccordionContent>
-                </AccordionItem>
-              ))}
+                  </Link>
+                ))}
               </div>
-            ))}
-            </Accordion>
-          </motion.div>
+            </div>
+          ))}
+        </motion.div>
         </div>
-
         {/* Curators' Picks Lightbox Dialog */}
         <Dialog
           modal={false}
