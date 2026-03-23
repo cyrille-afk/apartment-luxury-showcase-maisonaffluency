@@ -1,5 +1,4 @@
 import { scrollToSection } from "@/lib/scrollToSection";
-import { scrollToSection } from "@/lib/scrollToSection";
 
 const Footer = () => {
   return (
