@@ -421,15 +421,6 @@ const TradeAtelierProfile = () => {
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           loading="lazy"
                         />
-                        {pick.tags && pick.tags.length > 0 && (
-                          <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                            {pick.tags.map((tag) => (
-                              <Badge key={tag} variant="secondary" className="text-[8px] md:text-[9px] px-1.5 py-0.5 font-body tracking-wide bg-background/80 backdrop-blur-sm text-foreground border-none shadow-sm">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
                         <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                           {(isTradeUser || isAdmin) && (
                             <button
