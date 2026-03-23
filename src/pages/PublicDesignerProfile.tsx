@@ -486,7 +486,7 @@ const PublicDesignerProfile = () => {
               to="/trade/program"
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-xs tracking-[0.15em] uppercase rounded-full hover:bg-foreground/90 transition-colors"
             >
-              Join Trade Program
+              Join Our Trade Program
             </Link>
           </div>
         </div>
