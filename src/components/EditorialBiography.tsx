@@ -453,13 +453,7 @@ export default function EditorialBiography({
 
   if (parsedMedia.length === 0) {
     return (
-      <div className="font-body text-sm leading-relaxed text-foreground/85 whitespace-pre-line">
-        {paragraphs.map((p, i) => (
-          <p key={i} className={i > 0 ? "mt-4" : ""}>
-            {renderQuotedText(p)}
-          </p>
-        ))}
-      </div>
+      <MobileCollapsible paragraphs={paragraphs} />
     );
   }
 
