@@ -685,7 +685,7 @@ export default function EditorialBiography({
             <div key={`text-pre-vid-${i}`}>
               {textAccum.map((tp, ti) => (
                 <p key={ti} className={ti > 0 ? "mt-4" : ""}>
-                  {renderQuotedText(tp)}
+                  {renderParagraph(tp)}
                 </p>
               ))}
             </div>
