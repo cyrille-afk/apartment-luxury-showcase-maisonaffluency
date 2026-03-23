@@ -225,8 +225,21 @@ const PublicDesignerProfile = () => {
                   const hasMultipleSizes = !!pick.dimensions && pick.dimensions.includes("\n");
 
                   return (
-                    <div key={pick.id} className="group flex flex-col">
-                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
+                    <div
+                      key={pick.id}
+                      className="group flex flex-col cursor-pointer"
+                      onClick={() => setLightboxItem({
+                        id: pick.id,
+                        title: pick.title,
+                        subtitle: pick.subtitle,
+                        image_url: pick.image_url,
+                        hover_image_url: pick.hover_image_url,
+                        brand_name: designer.name,
+                        materials: pick.materials,
+                        dimensions: pick.dimensions,
+                        pdf_url: pick.pdf_url,
+                      })}
+                    >
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}
