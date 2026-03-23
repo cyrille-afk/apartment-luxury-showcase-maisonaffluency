@@ -441,7 +441,7 @@ function singularizeSub(s: string): string {
               <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#f0eeeb] mb-3 flex items-center justify-center">
                 {(() => {
                   const tags: string[] = item.pick.tags || [];
-                  const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique/i.test(t));
+                  const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco/i.test(t));
                   // Also include the edition field if present and not already covered
                   if (item.pick.edition && !specialTags.some(t => t.toLowerCase() === item.pick.edition!.toLowerCase())) {
                     specialTags.unshift(item.pick.edition);
