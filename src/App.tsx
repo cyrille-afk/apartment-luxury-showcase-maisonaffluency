@@ -158,7 +158,7 @@ const App = () => {
                     <Route path="designers/:slug" element={<TradeAtelierProfile />} />
                     <Route path="boards" element={<TradeBoards />} />
                     <Route path="boards/:id" element={<TradeBoardBuilder />} />
-                    <Route path="spec-sheet" element={<TradeSpecSheet />} />
+                    {/* spec-sheet moved to public route */}
                     <Route path="audit-log" element={<TradeAuditLog />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
