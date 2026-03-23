@@ -180,7 +180,7 @@ const PublicDesignerProfile = () => {
                 <EditorialBiography
                   biography={designer.biography}
                   biographyImages={designer.biography_images}
-                  pickImages={picks.slice(0, 3).map((p) => p.image_url)}
+                  pickImages={picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`)}
                   designerName={designer.name}
                 />
               </motion.div>
