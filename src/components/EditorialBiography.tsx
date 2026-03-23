@@ -176,7 +176,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
         )}
       </div>
       {caption && (
-        <figcaption className="mt-2.5 text-center font-body text-[11px] tracking-wide text-muted-foreground italic">
+        <figcaption className="mt-2.5 text-center font-body text-[13px] tracking-wide text-muted-foreground italic">
           {caption}
         </figcaption>
       )}
