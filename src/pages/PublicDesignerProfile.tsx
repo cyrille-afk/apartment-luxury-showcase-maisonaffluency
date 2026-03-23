@@ -170,7 +170,7 @@ const PublicDesignerProfile = () => {
                 className={cn(isDesignerProfile ? "md:w-1/2 flex flex-col justify-center" : "flex flex-col")}
               >
                 {designer.philosophy && (
-                  <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6">
+                  <blockquote className="font-display text-base md:text-xl italic leading-snug text-foreground mb-4 md:mb-6">
                     "{designer.philosophy}"
                   </blockquote>
                 )}
