@@ -257,7 +257,7 @@ const PublicDesignerProfile = () => {
                      <WhatsAppShareButton
                        onClick={(e) => {
                          e.stopPropagation();
-                         shareProfileOnWhatsApp(designer.name, designer.slug);
+                         shareProfileOnWhatsApp("designer", designer.slug, designer.name);
                        }}
                        label="Share"
                        size="sm"
