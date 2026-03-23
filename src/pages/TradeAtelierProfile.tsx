@@ -290,16 +290,16 @@ const TradeAtelierProfile = () => {
         {/* Hero + About */}
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
-          const heroAspect = isDesignerProfile ? "aspect-[3/2]" : "aspect-[3/2]";
+          const heroAspect = isDesignerProfile ? "aspect-[16/9]" : "aspect-[3/2]";
           return (
-        <div className={cn("flex flex-col gap-6", isDesignerProfile && "md:flex-row")}>
+        <div className={cn("flex flex-col gap-6", isDesignerProfile && "md:flex-row md:items-start")}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={transition}
-            className={cn("relative rounded-xl overflow-hidden shrink-0", isDesignerProfile && "md:w-1/2")}
+            className={cn("relative rounded-xl overflow-hidden shrink-0", isDesignerProfile && "md:w-[45%]")}
           >
-            <div className={cn(heroAspect, !isDesignerProfile ? "md:aspect-[5/2] max-h-[45vh]" : "max-h-[45vh]")}>
+            <div className={cn(heroAspect, !isDesignerProfile && "md:aspect-[5/2] max-h-[45vh]")}>
               {(designer.hero_image_url || designer.image_url) && (
                 <img
                   src={designer.hero_image_url || designer.image_url}
@@ -340,7 +340,7 @@ const TradeAtelierProfile = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.2 }}
-              className={cn(isDesignerProfile ? "md:w-1/2 flex flex-col justify-center" : "flex flex-col")}
+              className={cn(isDesignerProfile ? "md:w-[55%] flex flex-col justify-center" : "flex flex-col")}
             >
               {designer.philosophy && (
                 <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6">
