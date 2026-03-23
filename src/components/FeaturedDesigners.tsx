@@ -2446,31 +2446,7 @@ const FeaturedDesigners = () => {
         <div className="relative">
           {/* A-Z alphabet jump bar + Search + Filter */}
           <div className="flex flex-col gap-4 mb-5 md:mb-6">
-            <div className="flex items-center gap-3 md:gap-4 lg:gap-5 px-1 py-4 overflow-x-auto max-w-3xl border-t border-b border-border/30"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}
-            >
-              {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
-                const isActive = activeLetters.includes(letter);
-                return (
-                  <button
-                    key={letter}
-                    onClick={() => {
-                      if (isActive) {
-                        const el = document.getElementById(`designer-alpha-${letter}`);
-                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                      }
-                    }}
-                    className={`flex-none font-serif text-base md:text-lg leading-none transition-all duration-200 ${
-                      isActive
-                        ? "text-foreground hover:text-primary cursor-pointer"
-                        : "text-foreground/40 cursor-default"
-                    }`}
-                  >
-                    {letter}
-                  </button>
-                );
-              })}
-            </div>
+            {/* Search + Filter row */}
             <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
               <div className="md:hidden order-first">
                 <Popover open={filterOpen} onOpenChange={(open) => {
