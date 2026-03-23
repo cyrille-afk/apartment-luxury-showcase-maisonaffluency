@@ -250,7 +250,7 @@ const TradeAtelierProfile = () => {
             transition={transition}
             className={cn("relative rounded-xl overflow-hidden shrink-0", isDesignerProfile && "md:w-1/2")}
           >
-            <div className={heroAspect}>
+            <div className={cn(heroAspect, !isDesignerProfile && "md:aspect-[5/2] max-h-[45vh]")}>
               {(designer.hero_image_url || designer.image_url) && (
                 <img
                   src={designer.hero_image_url || designer.image_url}
