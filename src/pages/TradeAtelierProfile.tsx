@@ -361,7 +361,7 @@ const TradeAtelierProfile = () => {
               <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
             </div>
 
-                <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:grid-cols-3 lg:grid-cols-4 md:gap-4">
+                <div className="grid grid-cols-3 gap-x-3 gap-y-5 md:grid-cols-4 md:gap-4">
                   {picks.map((pick) => {
                     const isAdding = addingProductId === pick.id;
                     const isAdded = addedProductIds.has(pick.id);
