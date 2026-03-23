@@ -422,7 +422,7 @@ const TradeAtelierProfile = () => {
                     <div
                       key={pick.id}
                       className="group cursor-pointer flex flex-col"
-                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name))}
+                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates))}
                     >
                       <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
                         <img
