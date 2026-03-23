@@ -150,28 +150,6 @@ const PublicDesignerProfile = () => {
                       {designer.specialty}
                     </p>
                   )}
-                  <div className="flex items-center gap-3 mt-4">
-                    {instagramLink && (
-                      <a
-                        href={instagramLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-white/60 hover:text-white transition-colors"
-                      >
-                        <Instagram className="w-4 h-4" />
-                      </a>
-                    )}
-                    {websiteLink && (
-                      <a
-                        href={websiteLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-white/60 hover:text-white transition-colors"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    )}
-                  </div>
                 </motion.div>
               </div>
             </motion.div>
