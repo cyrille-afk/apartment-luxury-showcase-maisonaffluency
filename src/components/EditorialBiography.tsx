@@ -59,15 +59,25 @@ function renderQuotedText(text: string) {
 }
 
 /** Parse a media line — supports `URL | Caption` pipe separator */
-function parseMediaLine(text: string): { url: string; caption: string | null } | null {
+function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null } | null {
   const value = text.trim();
-  // Try pipe separator: "https://...jpg | My Caption"
-  const pipeMatch = value.match(/^(https?:\/\/\S+)\s*\|\s*(.+)$/i);
-  const url = pipeMatch ? pipeMatch[1].trim() : value;
-  const pipeCaption = pipeMatch ? pipeMatch[2].trim() : null;
+  // Try pipe separator: "https://...jpg | My Caption | poster:https://..."
+  const pipes = value.split(/\s*\|\s*/);
+  const url = pipes[0]?.trim() || "";
 
   if (!/^https?:\/\//i.test(url)) return null;
   if (/\s/.test(url)) return null;
+
+  let caption: string | null = null;
+  let poster: string | null = null;
+  for (let i = 1; i < pipes.length; i++) {
+    const seg = pipes[i].trim();
+    if (/^poster:/i.test(seg)) {
+      poster = seg.replace(/^poster:/i, "").trim();
+    } else if (!caption) {
+      caption = seg;
+    }
+  }
 
   const isMedia =
     isVideoUrl(url) ||
@@ -76,7 +86,7 @@ function parseMediaLine(text: string): { url: string; caption: string | null } |
     /\/storage\/v1\/object\/public\//i.test(url);
 
   if (!isMedia) return null;
-  return { url, caption: pipeCaption };
+  return { url, caption, poster };
 }
 
 /** Detect a standalone media URL paragraph pasted directly into biography text */
@@ -130,7 +140,16 @@ function VideoBlock({
 
   const isNativeVideo = !embedUrl;
   const videoSrc = isNativeVideo ? normalizeCloudinaryVideoUrl(url) : url;
-  const nativePosterUrl = posterUrl;
+  // For Supabase-hosted videos, generate poster by extracting a frame server-side;
+  // for Cloudinary videos, swap /video/upload/ to /video/upload/so_2,f_jpg/ for a frame
+  const autoPosterUrl = (() => {
+    if (posterUrl) return posterUrl;
+    if (/res\.cloudinary\.com\/.+\/video\/upload/i.test(url)) {
+      return url.replace("/video/upload/", "/video/upload/so_2,f_jpg,q_auto/");
+    }
+    return undefined;
+  })();
+  const nativePosterUrl = autoPosterUrl;
 
   const playOverlay = (
     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -558,6 +577,7 @@ export default function EditorialBiography({
         return {
           url: parsed.url,
           caption: parsed.caption,
+          poster: parsed.poster,
           isVideo: isVideoUrl(parsed.url),
         };
       }
@@ -567,11 +587,12 @@ export default function EditorialBiography({
       return {
         url: raw,
         caption: null,
+        poster: null as string | null,
         isVideo: isVideoUrl(raw),
       };
     })
     .filter(
-      (m): m is { url: string; caption: string | null; isVideo: boolean } =>
+      (m): m is { url: string; caption: string | null; poster: string | null; isVideo: boolean } =>
         !!m && /^https?:\/\//i.test(m.url)
     );
 
@@ -619,7 +640,7 @@ export default function EditorialBiography({
             designerName={designerName}
             index={mediaIndex}
             overrideCaption={mediaItem.caption}
-            posterUrl={findNeighborPoster(mediaIndex)}
+            posterUrl={mediaItem.poster || undefined}
           />
         );
       } else {
@@ -664,7 +685,7 @@ export default function EditorialBiography({
           designerName={designerName}
           index={mediaIndex}
           overrideCaption={mediaItem.caption}
-          posterUrl={findNeighborPoster(mediaIndex)}
+          posterUrl={mediaItem.poster || undefined}
         />
       );
     } else {
