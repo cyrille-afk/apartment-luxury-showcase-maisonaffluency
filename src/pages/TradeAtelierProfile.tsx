@@ -290,10 +290,16 @@ const TradeAtelierProfile = () => {
         {/* Hero + About */}
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
+          /* Split biography: first ~2 paragraphs next to hero, rest full-width staggered */
+          const bioBlocks = designer.biography
+            ? designer.biography.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean)
+            : [];
+          const heroParagraphs = bioBlocks.slice(0, 2);
+          const remainingBio = bioBlocks.slice(2).join("\n\n");
+
           return isDesignerProfile ? (
-            /* Designer under atelier: hero left with overlaid name, then full-width staggered bio */
             <div className="flex flex-col gap-6">
-              {/* Hero row: portrait left + quote right */}
+              {/* Hero row: portrait left + quote & opening text right */}
               <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
                 {/* Left: portrait with overlaid name */}
                 <motion.div
@@ -310,7 +316,6 @@ const TradeAtelierProfile = () => {
                         className="w-full h-auto object-contain"
                         loading="eager"
                       />
-                      {/* Gradient overlay + name on photo */}
                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 md:p-6">
                         <h1 className="font-display text-xl md:text-2xl tracking-wide text-white drop-shadow-md">
                           {name}
@@ -334,32 +339,39 @@ const TradeAtelierProfile = () => {
                   )}
                 </motion.div>
 
-                {/* Right: philosophy quote */}
-                {designer.philosophy && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ ...transition, delay: 0.15 }}
-                    className="flex-1 min-w-0 flex items-center"
-                  >
-                    <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground">
+                {/* Right: quote + opening paragraphs */}
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ ...transition, delay: 0.15 }}
+                  className="flex-1 min-w-0 flex flex-col justify-center"
+                >
+                  {designer.philosophy && (
+                    <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5">
                       "{designer.philosophy}"
                     </blockquote>
-                  </motion.div>
-                )}
+                  )}
+                  {heroParagraphs.length > 0 && (
+                    <div className="font-body text-sm leading-relaxed text-foreground/85">
+                      {heroParagraphs.map((p: string, i: number) => (
+                        <p key={i} className={i > 0 ? "mt-4" : ""}>{p}</p>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
               </div>
 
-              {/* Full-width staggered biography below */}
-              {designer.biography && (
+              {/* Full-width staggered biography (remaining paragraphs) */}
+              {remainingBio && (
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ ...transition, delay: 0.2 }}
                 >
                   <EditorialBiography
-                    biography={designer.biography}
+                    biography={remainingBio}
                     biographyImages={designer.biography_images}
-                    pickImages={picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`)}
+                    pickImages={picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`)}
                     designerName={designer.name}
                   />
                 </motion.div>
