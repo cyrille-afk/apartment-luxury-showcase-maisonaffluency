@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Package, FileText } from "lucide-react";
@@ -37,6 +37,7 @@ function displayName(name: string): string {
 
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const { data: designer, isLoading } = useDesigner(slug);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
@@ -160,13 +161,19 @@ const PublicDesignerProfile = () => {
         <Navigation />
 
         <div className="max-w-6xl mx-auto px-4 md:px-12 pt-24 md:pt-28 pb-20 space-y-8 md:space-y-12">
-          <Link
-            to="/designers"
+          <button
+            onClick={() => {
+              if (window.history.length > 1) {
+                navigate(-1);
+              } else {
+                navigate("/designers");
+              }
+            }}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             All Ateliers & Designers
-          </Link>
+          </button>
 
           {isDesignerProfile ? (
             /* Designer profile: portrait hero left + quote & opening text right */
