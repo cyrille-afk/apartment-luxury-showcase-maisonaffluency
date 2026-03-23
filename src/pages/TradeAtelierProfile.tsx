@@ -331,23 +331,6 @@ const TradeAtelierProfile = () => {
                 {designer.specialty && (
                   <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
                 )}
-                <div className="flex items-center justify-end mt-4">
-                  <WhatsAppShareButton
-                    onClick={(e) => {
-                      e.preventDefault();
-                      sharePageOnWhatsApp(
-                        `/trade/designers/${slug}`,
-                        name,
-                        designer.specialty || undefined,
-                        { directUrlPath: `/designers/${slug}-share.html` }
-                      );
-                    }}
-                    label="Share on WhatsApp"
-                    variant="glass"
-                    size="sm"
-                    hideOn="mobile"
-                  />
-                </div>
               </motion.div>
             </div>
           </motion.div>
