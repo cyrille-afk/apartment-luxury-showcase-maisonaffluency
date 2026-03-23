@@ -290,12 +290,46 @@ const TradeAtelierProfile = () => {
         {/* Hero + About */}
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
-          /* Split biography: first ~2 paragraphs next to hero, rest staggered below */
           const bioBlocks = designer.biography
             ? designer.biography.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean)
             : [];
-          const heroParagraphs = bioBlocks.slice(0, 2);
-          const remainingBio = bioBlocks.slice(2).join("\n\n");
+
+          const manualMedia = (designer.biography_images || []).filter(Boolean);
+          const curatedMedia = picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`);
+          const mediaEntries = (manualMedia.length > 0 ? manualMedia : curatedMedia).slice(0, 2);
+
+          let heroParagraphs: string[] = [];
+          let remainingBio = "";
+
+          if (bioBlocks.length > 0) {
+            if (mediaEntries.length > 0) {
+              const groupCount = mediaEntries.length + 1;
+              const groupedParagraphs = Array.from({ length: groupCount }, () => [] as string[]);
+
+              bioBlocks.forEach((paragraph, index) => {
+                const groupIndex = Math.min(
+                  groupCount - 1,
+                  Math.floor((index * groupCount) / bioBlocks.length)
+                );
+                groupedParagraphs[groupIndex].push(paragraph);
+              });
+
+              heroParagraphs = groupedParagraphs[0];
+
+              const trailingGroups = groupedParagraphs.slice(1);
+              remainingBio = trailingGroups
+                .map((sectionParagraphs, index) => {
+                  const mediaLine = mediaEntries[index];
+                  const sectionText = sectionParagraphs.join("\n\n");
+                  return [mediaLine, sectionText].filter(Boolean).join("\n\n");
+                })
+                .filter(Boolean)
+                .join("\n\n");
+            } else {
+              heroParagraphs = bioBlocks.slice(0, 2);
+              remainingBio = bioBlocks.slice(2).join("\n\n");
+            }
+          }
 
           return isDesignerProfile ? (
             <div className="flex flex-col gap-6">
@@ -361,7 +395,7 @@ const TradeAtelierProfile = () => {
                 </motion.div>
               </div>
 
-              {/* Remaining biography with staggered media (2 images only) */}
+              {/* Remaining biography with exactly two staggered images */}
               {remainingBio && (
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
@@ -370,8 +404,8 @@ const TradeAtelierProfile = () => {
                 >
                   <EditorialBiography
                     biography={remainingBio}
-                    biographyImages={designer.biography_images}
-                    pickImages={picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`)}
+                    biographyImages={[]}
+                    pickImages={[]}
                     designerName={designer.name}
                   />
                 </motion.div>
