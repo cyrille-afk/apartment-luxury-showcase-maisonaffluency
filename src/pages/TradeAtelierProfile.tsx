@@ -363,16 +363,33 @@ const TradeAtelierProfile = () => {
                         className="w-full h-auto object-contain"
                         loading="eager"
                       />
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 md:p-6">
-                        <h1 className="font-display text-xl md:text-2xl tracking-wide text-white drop-shadow-md">
-                          {name}
-                          {slug && DESIGNER_DATES[slug] && (
-                            <span className="font-body text-sm md:text-base text-white/75 ml-2 font-normal">{DESIGNER_DATES[slug]}</span>
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 md:p-6 flex items-end justify-between">
+                        <div>
+                          <h1 className="font-display text-xl md:text-2xl tracking-wide text-white drop-shadow-md">
+                            {name}
+                            {slug && DESIGNER_DATES[slug] && (
+                              <span className="font-body text-sm md:text-base text-white/75 ml-2 font-normal">{DESIGNER_DATES[slug]}</span>
+                            )}
+                          </h1>
+                          {designer.specialty && (
+                            <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
                           )}
-                        </h1>
-                        {designer.specialty && (
-                          <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
-                        )}
+                        </div>
+                        <WhatsAppShareButton
+                          hideOn="mobile"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            sharePageOnWhatsApp(
+                              `/trade/designers/${slug}`,
+                              name,
+                              designer.specialty || undefined,
+                              { directUrlPath: `/designers/${slug}-share.html` }
+                            );
+                          }}
+                          label="Share"
+                          size="sm"
+                          variant="glass"
+                        />
                       </div>
                     </div>
                   )}
