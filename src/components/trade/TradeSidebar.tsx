@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign, AlertCircle, Package, Box, Presentation, Heart, BarChart3, ClipboardList, Users, PenLine } from "lucide-react";
+import { LayoutDashboard, Image, FileText, FolderOpen, Settings, LogOut, Shield, MapPin, Newspaper, Award, Upload, FolderArchive, DollarSign, AlertCircle, Package, Box, Presentation, Heart, BarChart3, ClipboardList, Users, PenLine, History } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -309,6 +309,18 @@ export function TradeSidebar() {
                     >
                       <Presentation className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>Presentations</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/audit-log"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                      activeClassName="bg-muted text-foreground font-medium"
+                    >
+                      <History className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Audit Log</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -42,6 +42,7 @@ const ClientBoardViewer = lazy(() => import("./pages/ClientBoardViewer"));
 const TradeInsights = lazy(() => import("./pages/TradeInsights"));
 const TradeDesigners = lazy(() => import("./pages/TradeDesigners"));
 const TradeDesignersAdmin = lazy(() => import("./pages/TradeDesignersAdmin"));
+const TradeAuditLog = lazy(() => import("./pages/TradeAuditLog"));
 const TradeAtelierProfile = lazy(() => import("./pages/TradeAtelierProfile"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Journal = lazy(() => import("./pages/Journal"));
@@ -156,6 +157,7 @@ const App = () => {
                     <Route path="boards" element={<TradeBoards />} />
                     <Route path="boards/:id" element={<TradeBoardBuilder />} />
                     <Route path="spec-sheet" element={<TradeSpecSheet />} />
+                    <Route path="audit-log" element={<TradeAuditLog />} />
                     <Route path="settings" element={<TradeSettings />} />
                   </Route>
 
