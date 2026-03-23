@@ -2355,36 +2355,26 @@ const FeaturedDesigners = () => {
             </h2>
             <div className="hidden md:flex items-center gap-2 ml-auto">
               <button
-                onClick={() => setGridCols(3)}
-                className={cn(
-                  "p-1.5 rounded border transition-colors",
-                  gridCols === 3 ? "border-foreground text-foreground" : "border-muted-foreground/30 text-muted-foreground hover:text-foreground hover:border-foreground/50"
-                )}
-                aria-label="3-column grid"
-                title="3 columns"
+                onClick={() => setGridCols(gridCols === 3 ? 5 : 3)}
+                className="p-1.5 rounded border border-foreground text-foreground transition-colors"
+                aria-label={gridCols === 3 ? "Switch to 5 columns" : "Switch to 3 columns"}
+                title={gridCols === 3 ? "Switch to 5 columns" : "Switch to 3 columns"}
               >
-                <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="2" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
-                  <rect x="7.5" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
-                  <rect x="13" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
-                </svg>
-              </button>
-              <button
-                onClick={() => setGridCols(5)}
-                className={cn(
-                  "p-1.5 rounded border transition-colors",
-                  gridCols === 5 ? "border-foreground text-foreground" : "border-muted-foreground/30 text-muted-foreground hover:text-foreground hover:border-foreground/50"
+                {gridCols === 3 ? (
+                  <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
+                    <rect x="7.5" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
+                    <rect x="13" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
+                  </svg>
+                ) : (
+                  <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                    <rect x="4.75" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                    <rect x="8.5" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                    <rect x="12.25" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                    <rect x="16" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                  </svg>
                 )}
-                aria-label="5-column grid"
-                title="5 columns"
-              >
-                <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="1" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                  <rect x="4.75" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                  <rect x="8.5" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                  <rect x="12.25" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                  <rect x="16" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                </svg>
               </button>
               <div className="relative w-56 ml-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
