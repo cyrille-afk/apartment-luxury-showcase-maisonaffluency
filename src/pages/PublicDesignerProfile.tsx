@@ -237,6 +237,8 @@ const PublicDesignerProfile = () => {
                         brand_name: designer.name,
                         materials: pick.materials,
                         dimensions: pick.dimensions,
+                        category: pick.category,
+                        subcategory: pick.subcategory,
                         pdf_url: pick.pdf_url,
                       })}
                     >
