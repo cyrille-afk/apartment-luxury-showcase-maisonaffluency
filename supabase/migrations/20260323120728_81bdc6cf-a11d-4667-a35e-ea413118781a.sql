@@ -1,0 +1,1 @@
+UPDATE public.designers SET founder = NULL WHERE name = 'Alexander Lamont' AND founder = 'Alexander Lamont';
