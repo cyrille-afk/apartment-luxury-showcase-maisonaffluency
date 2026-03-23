@@ -297,7 +297,7 @@ const TradeAtelierProfile = () => {
           const manualMedia = (designer.biography_images || []).filter(Boolean);
           const curatedMedia = picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`);
           const baseMediaEntries = (manualMedia.length > 0 ? manualMedia : curatedMedia).slice(0, 2);
-          const maisonDeVerreLine = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/editorial%2Fmaison-de-verre-rue-saint-guillaume.jpg | Maison de Verre, Paris";
+          const maisonDeVerreLine = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/editorial%2Fmaison-de-verre-chareau.jpg | Maison de Verre, Paris";
 
           const mediaEntries =
             slug === "pierre-chareau" && baseMediaEntries.length > 0
