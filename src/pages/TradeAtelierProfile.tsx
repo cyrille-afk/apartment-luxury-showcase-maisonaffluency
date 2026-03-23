@@ -425,6 +425,23 @@ const TradeAtelierProfile = () => {
                       onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates))}
                     >
                       <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
+                        {/* Tag badges — upper-left */}
+                        {(() => {
+                          const tags: string[] = pick.tags || [];
+                          const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco/i.test(t));
+                          if (pick.edition && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
+                            specialTags.unshift(pick.edition);
+                          }
+                          return specialTags.length > 0 ? (
+                            <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1">
+                              {specialTags.map((tag, i) => (
+                                <span key={i} className="inline-block px-2 py-0.5 text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          ) : null;
+                        })()}
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}

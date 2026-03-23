@@ -503,8 +503,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         title: "Hammered Bowls",
         subtitle: "",
         category: "Decorative",
-        tags: ["Decorative", "Vessels", "Bronze"],
-        materials: "Textured bronze globes lined with pure gold\nUNESCO Award for Design & Craft Excellence",
+        tags: ["Decorative", "Vessels", "Bronze", "UNESCO Award"],
+        materials: "Textured bronze globes lined with pure gold",
         dimensions: "1: Dia 7.5 × H 5.5 cm\n2: Dia 12.5 × H 8 cm\n3: Dia 15 × H 10.5 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Hammered_Bowls.pdf",
         pdfFilename: "Alexander_Lamont-Hammered_Bowls.pdf"
