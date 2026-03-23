@@ -24,6 +24,7 @@ const FeaturedReadBanner = () => {
   // On journal/article pages the nav is position:sticky in normal flow, so we stay in flow.
   const isHomepage = location.pathname === "/";
   const isJournal = location.pathname.startsWith("/journal");
+  const isDesigners = location.pathname.startsWith("/designers");
 
   useEffect(() => {
 
