@@ -289,6 +289,51 @@ function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { ur
 }
 
 /* ------------------------------------------------------------------ */
+/*  Mobile Collapsible — collapses long text on small screens          */
+/* ------------------------------------------------------------------ */
+function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const shouldCollapse = paragraphs.length > MOBILE_COLLAPSE_THRESHOLD;
+  const visibleParagraphs = shouldCollapse && !expanded
+    ? paragraphs.slice(0, MOBILE_COLLAPSE_THRESHOLD)
+    : paragraphs;
+
+  return (
+    <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+      {visibleParagraphs.map((p, i) => (
+        <p key={i} className={i > 0 ? "mt-3 md:mt-5" : ""}>
+          {renderQuotedText(p)}
+        </p>
+      ))}
+      {shouldCollapse && !expanded && (
+        <button
+          onClick={() => setExpanded(true)}
+          className="mt-4 flex items-center gap-1.5 font-display text-[11px] tracking-[0.15em] uppercase text-primary/70 hover:text-primary transition-colors"
+        >
+          Read more
+          <ChevronDown className="w-3.5 h-3.5" />
+        </button>
+      )}
+      <AnimatePresence>
+        {shouldCollapse && expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {paragraphs.slice(MOBILE_COLLAPSE_THRESHOLD).map((p, i) => (
+              <p key={i} className="mt-3 md:mt-5">
+                {renderQuotedText(p)}
+              </p>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 /*  Main component                                                     */
 /* ------------------------------------------------------------------ */
 
