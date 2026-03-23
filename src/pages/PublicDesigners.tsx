@@ -128,6 +128,16 @@ const PublicDesigners = () => {
               })}
             </motion.div>
           )}
+
+          {/* Trade Program CTA */}
+          <div className="mt-16 text-center">
+            <Link
+              to="/trade"
+              className="inline-flex items-center gap-2 px-8 py-3 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-md hover:opacity-90 transition-opacity"
+            >
+              Join Our Trade Program
+            </Link>
+          </div>
         </div>
 
         <Footer />
