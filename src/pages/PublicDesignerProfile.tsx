@@ -38,6 +38,7 @@ const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: designer, isLoading } = useDesigner(slug);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
+  const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
