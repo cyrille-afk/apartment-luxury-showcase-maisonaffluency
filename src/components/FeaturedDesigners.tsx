@@ -14,7 +14,6 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import WhatsAppShareButton from "./WhatsAppShareButton";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
