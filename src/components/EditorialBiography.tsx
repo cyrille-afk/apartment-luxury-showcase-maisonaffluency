@@ -216,6 +216,7 @@ function VideoBlock({
           <video
             src={videoSrc}
             controls
+            autoPlay={playing}
             playsInline
             preload="metadata"
             className="w-full h-auto max-h-[72vh] rounded-lg bg-black"
@@ -446,12 +447,17 @@ export default function EditorialBiography({
   /* ------- Inline media mode (URLs pasted directly in biography) ------- */
   if (hasInlineMedia) {
     // Separate into text paragraphs and media URLs, preserving order
-    type Block = { type: "text"; content: string } | { type: "image"; url: string; caption: string | null } | { type: "video"; url: string; caption: string | null };
+    type Block =
+      | { type: "text"; content: string }
+      | { type: "image"; url: string; caption: string | null; poster: string | null }
+      | { type: "video"; url: string; caption: string | null; poster: string | null };
     const parsed: Block[] = blocks.map((b) => {
       const media = parseMediaLine(b);
       if (!media) return { type: "text" as const, content: b };
-      if (isVideoUrl(media.url)) return { type: "video" as const, url: media.url, caption: media.caption };
-      return { type: "image" as const, url: media.url, caption: media.caption };
+      if (isVideoUrl(media.url)) {
+        return { type: "video" as const, url: media.url, caption: media.caption, poster: media.poster };
+      }
+      return { type: "image" as const, url: media.url, caption: media.caption, poster: media.poster };
     });
 
     // Group consecutive text blocks that follow an image, pair them for split layout
@@ -481,7 +487,7 @@ export default function EditorialBiography({
       const block = parsed[i];
 
       if (block.type === "video") {
-        const inlinePoster = undefined;
+        const inlinePoster = block.poster || undefined;
 
         elements.push(
           <VideoBlock
