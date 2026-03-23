@@ -267,8 +267,7 @@ const PublicDesignerProfile = () => {
 
                         <div className="mt-auto pt-1">
                           <p className="font-display text-[11px] md:text-xs text-foreground">
-                            {pick.trade_price_cents != null && hasMultipleSizes ? "From " : ""}
-                            {formatPickPrice(pick.trade_price_cents, pick.currency)}
+                            Price on request
                           </p>
                           {pick.edition && (
                             <p className="font-body text-[9px] text-primary/70 mt-0.5 italic">{pick.edition}</p>
