@@ -258,7 +258,7 @@ const PublicDesignerProfile = () => {
             <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/10 rounded-xl">
               <Package className="w-8 h-8 text-muted-foreground/30 mb-3" />
               <p className="font-body text-sm text-muted-foreground">
-                Curator's picks coming soon
+                Curators' picks coming soon
               </p>
             </div>
           )}
