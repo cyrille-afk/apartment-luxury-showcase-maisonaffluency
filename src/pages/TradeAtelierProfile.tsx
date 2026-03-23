@@ -290,7 +290,7 @@ const TradeAtelierProfile = () => {
         {/* Hero + About */}
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
-          const heroAspect = isDesignerProfile ? "aspect-[4/5]" : "aspect-[3/2]";
+          const heroAspect = isDesignerProfile ? "aspect-[3/2]" : "aspect-[3/2]";
           return (
         <div className={cn("flex flex-col gap-6", isDesignerProfile && "md:flex-row")}>
           <motion.div
