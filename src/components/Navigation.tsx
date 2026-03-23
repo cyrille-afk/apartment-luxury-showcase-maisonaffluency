@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Building2, Briefcase, BookOpen } from "lucide-react";
+import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Building2, Briefcase, BookOpen, Heart } from "lucide-react";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
