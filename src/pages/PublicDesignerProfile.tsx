@@ -1,11 +1,12 @@
-import { useMemo, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { ArrowLeft, Instagram, ExternalLink, Quote, Package } from "lucide-react";
+import { ArrowLeft, Instagram, ExternalLink, Package } from "lucide-react";
 import { useDesigner, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
-import type { AttributedCuratorPick, DesignerCuratorPick } from "@/hooks/useDesigner";
+import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import EditorialBiography from "@/components/EditorialBiography";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -21,7 +22,7 @@ function responsiveCloudinaryUrl(url: string, width: number): string {
 }
 
 function pickSrcSet(url: string): string {
-  return [300, 400, 600, 800].map(w => `${responsiveCloudinaryUrl(url, w)} ${w}w`).join(", ");
+  return [300, 400, 600, 800].map((w) => `${responsiveCloudinaryUrl(url, w)} ${w}w`).join(", ");
 }
 
 function displayName(name: string): string {
@@ -32,22 +33,28 @@ function displayName(name: string): string {
   return name;
 }
 
+function formatPickPrice(cents: number | null, currency: string | null | undefined) {
+  if (cents == null) return "Price on request";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency || "USD",
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+}
+
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: designer, isLoading } = useDesigner(slug);
+  const [gridCols, setGridCols] = useState<3 | 4>(3);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [slug]);
 
-  // Atelier detection
   const isParentBrand = designer?.founder === designer?.name;
-  const { data: groupedPicks = [] } = useGroupedDesignerPicks(
-    isParentBrand ? designer : undefined
-  );
+  const { data: groupedPicks = [] } = useGroupedDesignerPicks(isParentBrand ? designer : undefined);
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const picks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
-  
 
   const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
 
@@ -90,7 +97,6 @@ const PublicDesignerProfile = () => {
         <Navigation />
 
         <div className="max-w-5xl mx-auto px-6 md:px-12 pt-28 pb-20 space-y-12">
-          {/* Back */}
           <Link
             to="/designers"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -99,7 +105,6 @@ const PublicDesignerProfile = () => {
             All Ateliers & Designers
           </Link>
 
-          {/* Hero + About */}
           <div className={cn("flex flex-col gap-6", isDesignerProfile && "md:flex-row")}>
             <motion.div
               initial={{ opacity: 0 }}
@@ -109,20 +114,14 @@ const PublicDesignerProfile = () => {
             >
               <div className={heroAspect}>
                 {heroImage && (
-                  <img
-                    src={heroImage}
-                    alt={name}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    loading="eager"
-                  />
+                  <img src={heroImage} alt={name} className="absolute inset-0 w-full h-full object-cover" loading="eager" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               </div>
 
-              {/* Founder badge for sub-designers */}
               {designer.founder && designer.founder !== designer.name && (
                 <Link
-                  to={`/designers/${designer.founder.toLowerCase().replace(/\s+/g, '-')}`}
+                  to={`/designers/${designer.founder.toLowerCase().replace(/\s+/g, "-")}`}
                   className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase hover:bg-black/80 transition-colors shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1"
                 >
                   {designer.founder}
@@ -131,9 +130,7 @@ const PublicDesignerProfile = () => {
 
               <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
                 <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
-                  <h1 className="font-display text-2xl md:text-4xl tracking-wide text-white drop-shadow-md">
-                    {name}
-                  </h1>
+                  <h1 className="font-display text-2xl md:text-4xl tracking-wide text-white drop-shadow-md">{name}</h1>
                   {designer.specialty && (
                     <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">
                       {designer.specialty}
@@ -141,14 +138,22 @@ const PublicDesignerProfile = () => {
                   )}
                   <div className="flex items-center gap-3 mt-4">
                     {instagramLink && (
-                      <a href={instagramLink} target="_blank" rel="noopener noreferrer"
-                        className="text-white/60 hover:text-white transition-colors">
+                      <a
+                        href={instagramLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white/60 hover:text-white transition-colors"
+                      >
                         <Instagram className="w-4 h-4" />
                       </a>
                     )}
                     {websiteLink && (
-                      <a href={websiteLink} target="_blank" rel="noopener noreferrer"
-                        className="text-white/60 hover:text-white transition-colors">
+                      <a
+                        href={websiteLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white/60 hover:text-white transition-colors"
+                      >
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     )}
@@ -170,9 +175,7 @@ const PublicDesignerProfile = () => {
                   </blockquote>
                 )}
                 {!isDesignerProfile && (
-                  <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
-                    About
-                  </h2>
+                  <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
                 )}
                 <EditorialBiography
                   biography={designer.biography}
@@ -184,26 +187,32 @@ const PublicDesignerProfile = () => {
             )}
           </div>
 
-          {/* Curator's Picks */}
           {picks.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.25 }}
             >
-              <h2 className="font-display text-xs tracking-[0.2em] uppercase text-foreground mb-6">
-                Curators' Picks
-              </h2>
-              <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:grid-cols-3 lg:grid-cols-4 md:gap-4">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="font-display text-xs tracking-[0.2em] uppercase text-foreground">Curators' Picks</h2>
+                <button
+                  onClick={() => setGridCols((prev) => (prev === 3 ? 4 : 3))}
+                  className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Display {gridCols === 3 ? "4" : "3"}
+                </button>
+              </div>
+
+              <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", gridCols === 4 ? "grid-cols-3 md:grid-cols-4" : "grid-cols-2 md:grid-cols-3")}>
                 {picks.map((pick) => {
                   const ap = pick as AttributedCuratorPick;
-                  const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name
-                    ? ap.designer_name : undefined;
+                  const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
                   const designerSlug = isGrouped && ap.designer_slug ? ap.designer_slug : undefined;
+                  const hasMultipleSizes = !!pick.dimensions && pick.dimensions.includes("\n");
 
                   return (
-                    <div key={pick.id} className="group">
-                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2">
+                    <div key={pick.id} className="group flex flex-col">
+                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}
@@ -212,41 +221,60 @@ const PublicDesignerProfile = () => {
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           loading="lazy"
                         />
+                        {pick.tags && pick.tags.length > 0 && (
+                          <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                            {pick.tags.map((tag) => (
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className="text-[8px] md:text-[9px] px-1.5 py-0.5 font-body tracking-wide bg-background/80 backdrop-blur-sm text-foreground border-none shadow-sm"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">
-                        {pick.title}
-                      </h3>
-                      {designerLabel && designerSlug ? (
-                        <Link
-                          to={`/designers/${designerSlug}`}
-                          className="block font-body text-[10px] md:text-[11px] text-primary/70 hover:text-primary underline underline-offset-2 leading-tight mt-0.5"
-                        >
-                          {designerLabel}
-                        </Link>
-                      ) : designerLabel ? (
-                        <span className="block font-body text-[10px] md:text-[11px] text-muted-foreground leading-tight mt-0.5">
-                          {designerLabel}
-                        </span>
-                      ) : null}
-                      {pick.subtitle && (
-                        <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>
-                      )}
-                      {pick.materials && (
-                        <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2 leading-relaxed">
-                          {pick.materials}
-                        </p>
-                      )}
-                      {pick.dimensions && (
-                        <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
-                          {pick.dimensions.split('\n').filter((line: string) => !line.toLowerCase().includes(' in')).join('\n')}
-                        </p>
-                      )}
-                      {pick.edition && (
-                        <p className="font-body text-[9px] text-primary/70 mt-0.5 italic">
-                          {pick.edition}
-                        </p>
-                      )}
-                      {/* No prices on public side — "Price on request" philosophy */}
+
+                      <div className="flex flex-col flex-1">
+                        <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{pick.title}</h3>
+                        {designerLabel && designerSlug ? (
+                          <Link
+                            to={`/designers/${designerSlug}`}
+                            className="block font-body text-[10px] md:text-[11px] text-primary/70 hover:text-primary underline underline-offset-2 leading-tight mt-0.5"
+                          >
+                            {designerLabel}
+                          </Link>
+                        ) : designerLabel ? (
+                          <span className="block font-body text-[10px] md:text-[11px] text-muted-foreground leading-tight mt-0.5">
+                            {designerLabel}
+                          </span>
+                        ) : null}
+                        {pick.subtitle && <p className="font-body text-[10px] text-muted-foreground leading-tight">{pick.subtitle}</p>}
+                        {pick.materials && (
+                          <p className="font-body text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2 leading-relaxed">
+                            {pick.materials}
+                          </p>
+                        )}
+                        {pick.dimensions && (
+                          <p className="font-body text-[9px] text-muted-foreground/50 mt-0.5">
+                            {pick.dimensions
+                              .split("\n")
+                              .filter((line: string) => !line.toLowerCase().includes(" in"))
+                              .join("\n")}
+                          </p>
+                        )}
+
+                        <div className="mt-auto pt-1">
+                          <p className="font-display text-[11px] md:text-xs text-foreground">
+                            {pick.trade_price_cents != null && hasMultipleSizes ? "From " : ""}
+                            {formatPickPrice(pick.trade_price_cents, pick.currency)}
+                          </p>
+                          {pick.edition && (
+                            <p className="font-body text-[9px] text-primary/70 mt-0.5 italic">{pick.edition}</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
@@ -257,18 +285,12 @@ const PublicDesignerProfile = () => {
           {picks.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/10 rounded-xl">
               <Package className="w-8 h-8 text-muted-foreground/30 mb-3" />
-              <p className="font-body text-sm text-muted-foreground">
-                Curators' picks coming soon
-              </p>
+              <p className="font-body text-sm text-muted-foreground">Curators' picks coming soon</p>
             </div>
           )}
 
-
-          {/* Enquiry CTA */}
           <div className="text-center py-8">
-            <p className="font-body text-sm text-muted-foreground mb-4">
-              Interested in pieces from this collection?
-            </p>
+            <p className="font-body text-sm text-muted-foreground mb-4">Interested in pieces from this collection?</p>
             <Link
               to="/trade/program"
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-xs tracking-[0.15em] uppercase rounded-full hover:bg-foreground/90 transition-colors"
