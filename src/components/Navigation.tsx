@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Building2, Briefcase, BookOpen, Heart } from "lucide-react";
+import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Building2, Briefcase, BookOpen, Heart, Pin } from "lucide-react";
+import { useCompare } from "@/contexts/CompareContext";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,7 @@ const contactOptions = [
 const navItems = [...leftNavItems, ...rightNavItems];
 
 const Navigation = () => {
+  const { items: pinItems, setIsComparing } = useCompare();
   // localStorage-backed favorite count
   const [favCount, setFavCount] = useState(0);
   useEffect(() => {
@@ -378,6 +380,22 @@ const Navigation = () => {
                     </span>
                     <ChevronRight className="h-4 w-4" />
                   </button>
+                  {pinItems.length > 0 && (
+                    <button
+                      onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); setIsComparing(true); }}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); setIsComparing(true); }}
+                      className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Pin className="h-4 w-4" />
+                        My Selection
+                        <span className="min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none px-1">
+                          {pinItems.length}
+                        </span>
+                      </span>
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
 
                 {/* Trade Program & Contact — visually separated */}
