@@ -296,31 +296,41 @@ const TradeAtelierProfile = () => {
 
           const manualMedia = (designer.biography_images || []).filter(Boolean);
           const curatedMedia = picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`);
-          const mediaEntries = (manualMedia.length > 0 ? manualMedia : curatedMedia).slice(0, 2);
+          const baseMediaEntries = (manualMedia.length > 0 ? manualMedia : curatedMedia).slice(0, 2);
+          const maisonDeVerreLine = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/editorial%2Fmaison-de-verre-rue-saint-guillaume.jpg | Maison de Verre, Paris";
+
+          const mediaEntries =
+            slug === "pierre-chareau" && baseMediaEntries.length > 0
+              ? [...baseMediaEntries.slice(0, baseMediaEntries.length - 1), maisonDeVerreLine]
+              : baseMediaEntries;
 
           let heroParagraphs: string[] = [];
           let remainingBio = "";
 
           if (bioBlocks.length > 0) {
             if (mediaEntries.length > 0) {
-              const groupCount = mediaEntries.length + 1;
-              const groupedParagraphs = Array.from({ length: groupCount }, () => [] as string[]);
+              const chunkCount = mediaEntries.length + 1;
+              const chunkSize = Math.max(1, Math.ceil(bioBlocks.length / chunkCount));
+              const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
+                bioBlocks.slice(i * chunkSize, (i + 1) * chunkSize)
+              );
 
-              bioBlocks.forEach((paragraph, index) => {
-                const groupIndex = Math.min(
-                  groupCount - 1,
-                  Math.floor((index * groupCount) / bioBlocks.length)
-                );
-                groupedParagraphs[groupIndex].push(paragraph);
-              });
+              for (let i = 1; i < paragraphChunks.length; i++) {
+                if (paragraphChunks[i].length > 0) continue;
+                for (let j = i - 1; j >= 0; j--) {
+                  if (paragraphChunks[j].length > 1) {
+                    const moved = paragraphChunks[j].pop();
+                    if (moved) paragraphChunks[i].unshift(moved);
+                    break;
+                  }
+                }
+              }
 
-              heroParagraphs = groupedParagraphs[0];
+              heroParagraphs = paragraphChunks[0] || [];
 
-              const trailingGroups = groupedParagraphs.slice(1);
-              remainingBio = trailingGroups
-                .map((sectionParagraphs, index) => {
-                  const mediaLine = mediaEntries[index];
-                  const sectionText = sectionParagraphs.join("\n\n");
+              remainingBio = mediaEntries
+                .map((mediaLine, index) => {
+                  const sectionText = (paragraphChunks[index + 1] || []).join("\n\n");
                   return [mediaLine, sectionText].filter(Boolean).join("\n\n");
                 })
                 .filter(Boolean)
