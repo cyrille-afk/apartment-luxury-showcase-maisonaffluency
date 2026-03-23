@@ -126,7 +126,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
       transition={transition}
       className="my-10 md:my-14 -mx-2 md:-mx-6"
     >
-      <div className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative">
+      <div className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center">
         {!playing && thumbnailUrl ? (
           /* YouTube/Vimeo with auto-thumbnail */
           <button
@@ -153,7 +153,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
               muted
               playsInline
               preload="metadata"
-              className="w-full h-full object-cover pointer-events-none"
+              className="w-full h-full object-contain pointer-events-none"
             />
             {playOverlay}
           </button>
@@ -171,7 +171,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
             controls
             autoPlay
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
         )}
       </div>
