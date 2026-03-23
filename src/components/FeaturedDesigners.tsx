@@ -2353,17 +2353,17 @@ const FeaturedDesigners = () => {
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
               Designers & Makers <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">On View</span>
             </h2>
-            <div className="hidden md:flex items-center gap-1.5 ml-auto">
+            <div className="hidden md:flex items-center gap-2 ml-auto">
               <button
                 onClick={() => setGridCols(3)}
                 className={cn(
-                  "p-1 rounded border transition-colors",
+                  "p-1.5 rounded border transition-colors",
                   gridCols === 3 ? "border-foreground text-foreground" : "border-muted-foreground/30 text-muted-foreground hover:text-foreground hover:border-foreground/50"
                 )}
                 aria-label="3-column grid"
                 title="3 columns"
               >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="2" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
                   <rect x="7.5" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
                   <rect x="13" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
@@ -2372,13 +2372,13 @@ const FeaturedDesigners = () => {
               <button
                 onClick={() => setGridCols(5)}
                 className={cn(
-                  "p-1 rounded border transition-colors",
+                  "p-1.5 rounded border transition-colors",
                   gridCols === 5 ? "border-foreground text-foreground" : "border-muted-foreground/30 text-muted-foreground hover:text-foreground hover:border-foreground/50"
                 )}
                 aria-label="5-column grid"
                 title="5 columns"
               >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="1" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
                   <rect x="4.75" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
                   <rect x="8.5" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
