@@ -126,7 +126,12 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
       transition={transition}
       className="my-10 md:my-14 -mx-2 md:-mx-6"
     >
-      <div className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center">
+      <div
+        className={isNativeVideo
+          ? "rounded-lg overflow-hidden bg-muted/20 shadow-lg relative"
+          : "aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center"
+        }
+      >
         {!playing && thumbnailUrl ? (
           /* YouTube/Vimeo with auto-thumbnail */
           <button
@@ -137,23 +142,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
             <img
               src={thumbnailUrl}
               alt={caption || `${designerName} — video`}
-              className="w-full h-full object-cover"
-            />
-            {playOverlay}
-          </button>
-        ) : !playing && isNativeVideo ? (
-          /* Native MP4/WebM — show first frame via hidden video + play overlay */
-          <button
-            onClick={() => setPlaying(true)}
-            className="w-full h-full relative group cursor-pointer"
-            aria-label={`Play ${caption || 'video'}`}
-          >
-            <video
-              src={url + '#t=0.5'}
-              muted
-              playsInline
-              preload="metadata"
-              className="w-full h-full object-contain pointer-events-none"
+              className="w-full h-full object-contain"
             />
             {playOverlay}
           </button>
@@ -169,9 +158,9 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
           <video
             src={url}
             controls
-            autoPlay
             playsInline
-            className="w-full h-full object-contain"
+            preload="metadata"
+            className="w-full h-auto max-h-[70vh] object-contain"
           />
         )}
       </div>
