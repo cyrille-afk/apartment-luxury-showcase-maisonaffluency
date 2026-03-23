@@ -2548,7 +2548,9 @@ const FeaturedDesigners = () => {
         >
           <div className={cn(
             "grid gap-4 md:gap-6 grid-cols-2",
-            gridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-3 lg:grid-cols-4"
+            gridCols === 3 && "md:grid-cols-3",
+            gridCols === 4 && "md:grid-cols-3 lg:grid-cols-4",
+            gridCols === 5 && "md:grid-cols-3 lg:grid-cols-5"
           )}>
               {filteredDesigners
                 .slice()
