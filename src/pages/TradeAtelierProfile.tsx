@@ -438,7 +438,7 @@ const TradeAtelierProfile = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleAddToQuote(pickToLightboxItem(pick, designerLabel || designer.name));
+                                handleAddToQuote(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates));
                               }}
                               className={cn(
                                 "p-2 rounded-md text-white transition-colors",
