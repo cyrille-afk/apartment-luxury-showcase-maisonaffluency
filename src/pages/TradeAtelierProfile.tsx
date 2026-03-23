@@ -331,21 +331,7 @@ const TradeAtelierProfile = () => {
                 {designer.specialty && (
                   <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
                 )}
-                <div className="flex items-center justify-between mt-4">
-                  <div className="flex items-center gap-3">
-                    {instagramLink && (
-                      <a href={instagramLink} target="_blank" rel="noopener noreferrer"
-                        className="text-white/60 hover:text-white transition-colors">
-                        <Instagram className="w-4 h-4" />
-                      </a>
-                    )}
-                    {websiteLink && (
-                      <a href={websiteLink} target="_blank" rel="noopener noreferrer"
-                        className="text-white/60 hover:text-white transition-colors">
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    )}
-                  </div>
+                <div className="flex items-center justify-end mt-4">
                   <WhatsAppShareButton
                     onClick={(e) => {
                       e.preventDefault();
