@@ -290,7 +290,7 @@ const TradeAtelierProfile = () => {
         {/* Hero + About */}
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
-          const heroAspect = "aspect-[3/2]";
+          const heroAspect = isDesignerProfile ? "aspect-[4/5]" : "aspect-[3/2]";
           return (
         <div className="flex flex-col gap-6">
           <motion.div
@@ -299,7 +299,7 @@ const TradeAtelierProfile = () => {
             transition={transition}
             className="relative rounded-xl overflow-hidden shrink-0"
           >
-            <div className={cn(heroAspect, "md:aspect-[5/2] max-h-[45vh]")}>
+            <div className={cn(heroAspect, !isDesignerProfile && "md:aspect-[5/2] max-h-[45vh]", isDesignerProfile && "md:aspect-[3/2] max-h-[55vh]")}>
               {(designer.hero_image_url || designer.image_url) && (
                 <img
                   src={designer.hero_image_url || designer.image_url}
