@@ -334,6 +334,8 @@ const PublicDesignerProfile = () => {
 
         <Footer />
       </div>
+
+      <PublicProductLightbox product={lightboxItem} onClose={() => setLightboxItem(null)} />
     </>
   );
 };
