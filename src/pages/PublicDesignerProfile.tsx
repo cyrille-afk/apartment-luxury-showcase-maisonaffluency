@@ -8,7 +8,7 @@ import { useDesigner, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
-import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import EditorialBiography from "@/components/EditorialBiography";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -217,11 +217,27 @@ const PublicDesignerProfile = () => {
                   {heroImage && (
                     <div className="relative rounded-xl overflow-hidden">
                       <img src={heroImage} alt={name} className="w-full h-auto object-contain" loading="eager" />
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 md:p-6">
-                        <h1 className="font-display text-xl md:text-2xl tracking-wide text-white drop-shadow-md">{name}</h1>
-                        {designer.specialty && (
-                          <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
-                        )}
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 md:p-6 flex items-end justify-between">
+                        <div>
+                          <h1 className="font-display text-xl md:text-2xl tracking-wide text-white drop-shadow-md">{name}</h1>
+                          {designer.specialty && (
+                            <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
+                          )}
+                        </div>
+                        <WhatsAppShareButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            sharePageOnWhatsApp(
+                              `/designers/${designer.slug}`,
+                              `${designer.name} — Maison Affluency`,
+                              designer.specialty || undefined,
+                              { directUrlPath: `/designers/${designer.slug}-share.html` }
+                            );
+                          }}
+                          label="Share"
+                          size="sm"
+                          variant="glass"
+                        />
                       </div>
                     </div>
                   )}
@@ -253,17 +269,6 @@ const PublicDesignerProfile = () => {
                       ))}
                     </div>
                   )}
-                   <div className="mt-4">
-                     <WhatsAppShareButton
-                       onClick={(e) => {
-                         e.stopPropagation();
-                         shareProfileOnWhatsApp("designer", designer.slug, designer.name);
-                       }}
-                       label="Share"
-                       size="sm"
-                       variant="solid"
-                     />
-                   </div>
                  </motion.div>
               </div>
 
