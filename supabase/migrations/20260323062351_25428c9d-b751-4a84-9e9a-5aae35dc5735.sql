@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET tags = array_append(tags, 'Editions') WHERE id IN ('b18599da-7e4b-40b0-9cf0-bdc633ee3096', '2b796cd0-e21d-4ed9-9516-4db00a6b6459', 'd5f3a746-05fd-498f-85e8-59a5c69d96ce', '95a2251f-c595-469c-85fc-4c240583a7d7') AND NOT ('Editions' = ANY(COALESCE(tags, '{}')));
