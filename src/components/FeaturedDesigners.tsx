@@ -2139,7 +2139,7 @@ const FeaturedDesigners = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [gridCols, setGridCols] = useState<3 | 4 | 5>(3);
+  const [gridCols, setGridCols] = useState<3 | 5>(3);
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
   const categorySourceRef = useRef<string | null>(null);
@@ -2353,21 +2353,39 @@ const FeaturedDesigners = () => {
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
               Designers & Makers <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">On View</span>
             </h2>
-            <div className="hidden md:flex items-center gap-1 ml-auto">
-              {([3, 4, 5] as const).map((cols) => (
-                <button
-                  key={cols}
-                  onClick={() => setGridCols(cols)}
-                  className={cn(
-                    "px-2 py-1 rounded text-[11px] font-body tracking-wide transition-colors",
-                    gridCols === cols ? "text-foreground bg-muted font-semibold" : "text-muted-foreground hover:text-foreground"
-                  )}
-                  aria-label={`${cols}-column grid`}
-                  title={`${cols} columns`}
-                >
-                  {cols}
-                </button>
-              ))}
+            <div className="hidden md:flex items-center gap-1.5 ml-auto">
+              <button
+                onClick={() => setGridCols(3)}
+                className={cn(
+                  "p-1 rounded border transition-colors",
+                  gridCols === 3 ? "border-foreground text-foreground" : "border-muted-foreground/30 text-muted-foreground hover:text-foreground hover:border-foreground/50"
+                )}
+                aria-label="3-column grid"
+                title="3 columns"
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
+                  <rect x="7.5" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
+                  <rect x="13" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
+                </svg>
+              </button>
+              <button
+                onClick={() => setGridCols(5)}
+                className={cn(
+                  "p-1 rounded border transition-colors",
+                  gridCols === 5 ? "border-foreground text-foreground" : "border-muted-foreground/30 text-muted-foreground hover:text-foreground hover:border-foreground/50"
+                )}
+                aria-label="5-column grid"
+                title="5 columns"
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                  <rect x="4.75" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                  <rect x="8.5" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                  <rect x="12.25" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                  <rect x="16" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                </svg>
+              </button>
             </div>
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
@@ -2548,9 +2566,7 @@ const FeaturedDesigners = () => {
         >
           <div className={cn(
             "grid gap-4 md:gap-6 grid-cols-2",
-            gridCols === 3 && "md:grid-cols-3",
-            gridCols === 4 && "md:grid-cols-3 lg:grid-cols-4",
-            gridCols === 5 && "md:grid-cols-3 lg:grid-cols-5"
+            gridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-3 lg:grid-cols-5"
           )}>
               {filteredDesigners
                 .slice()
