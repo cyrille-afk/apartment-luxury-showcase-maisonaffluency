@@ -503,8 +503,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         title: "Hammered Bowls",
         subtitle: "",
         category: "Decorative",
-        tags: ["Decorative", "Vessels", "Bronze"],
-        materials: "Textured bronze globes lined with pure gold\nUNESCO Award for Design & Craft Excellence",
+        tags: ["Decorative", "Vessels", "Bronze", "UNESCO Award"],
+        materials: "Textured bronze globes lined with pure gold",
         dimensions: "1: Dia 7.5 × H 5.5 cm\n2: Dia 12.5 × H 8 cm\n3: Dia 15 × H 10.5 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Hammered_Bowls.pdf",
         pdfFilename: "Alexander_Lamont-Hammered_Bowls.pdf"
@@ -3159,10 +3159,10 @@ const FeaturedDesigners = () => {
                       {!isZoomed && (() => {
                         const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
                         const tags: string[] = pick?.tags || [];
-                        const specialTags = tags.filter((t: string) => /couture|edition|limited|re-edition|unique/i.test(t));
+                        const specialTags = tags.filter((t: string) => /couture|edition|limited|re-edition|unique|modern scholar|unesco/i.test(t));
                         const hasEdition = !!pick?.edition;
                         return (specialTags.length > 0 || hasEdition) ? (
-                          <div className="absolute top-2 right-2 z-20 flex flex-wrap gap-1.5 justify-end">
+                          <div className="absolute top-2 left-2 z-20 flex flex-wrap gap-1.5">
                             {specialTags.map((tag: string, i: number) => (
                               <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
                                 {tag}

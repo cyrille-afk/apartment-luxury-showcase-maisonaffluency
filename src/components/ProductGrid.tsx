@@ -441,13 +441,13 @@ function singularizeSub(s: string): string {
               <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#f0eeeb] mb-3 flex items-center justify-center">
                 {(() => {
                   const tags: string[] = item.pick.tags || [];
-                  const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique/i.test(t));
+                  const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco/i.test(t));
                   // Also include the edition field if present and not already covered
                   if (item.pick.edition && !specialTags.some(t => t.toLowerCase() === item.pick.edition!.toLowerCase())) {
                     specialTags.unshift(item.pick.edition);
                   }
                   return specialTags.length > 0 ? (
-                    <div className="absolute top-2 right-2 z-10 flex flex-wrap gap-1 justify-end">
+                    <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1">
                       {specialTags.map((tag, i) => (
                         <span key={i} className="inline-block px-2 py-0.5 text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
                           {tag}
@@ -542,12 +542,12 @@ function singularizeSub(s: string): string {
                   {/* Special tags */}
                   {(() => {
                     const tags: string[] = currentItem.pick.tags || [];
-                    const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique/i.test(t));
+                    const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco/i.test(t));
                     if (currentItem.pick.edition && !specialTags.some(t => t.toLowerCase() === currentItem.pick.edition!.toLowerCase())) {
                       specialTags.unshift(currentItem.pick.edition);
                     }
                     return specialTags.length > 0 && !isZoomed ? (
-                      <div className="absolute top-2 right-2 z-20 flex flex-wrap gap-1.5 justify-end">
+                      <div className="absolute top-2 left-2 z-20 flex flex-wrap gap-1.5">
                         {specialTags.map((tag, i) => (
                           <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
                             {tag}
