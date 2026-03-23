@@ -126,7 +126,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
       transition={transition}
       className="my-10 md:my-14 -mx-2 md:-mx-6"
     >
-      <div className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative">
+      <div className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center">
         {!playing && thumbnailUrl ? (
           /* YouTube/Vimeo with auto-thumbnail */
           <button
