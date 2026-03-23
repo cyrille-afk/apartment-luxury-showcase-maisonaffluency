@@ -641,8 +641,10 @@ export default function EditorialBiography({
     mediaIndex++;
   }
 
+  const hasParsedVideo = parsedMedia.some((mediaItem) => mediaItem.isVideo);
+
   return (
-    <CollapsibleBiographyWrapper elementCount={elements.length}>
+    <CollapsibleBiographyWrapper elementCount={elements.length} allowCollapse={!hasParsedVideo}>
       <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
         {elements}
       </div>
