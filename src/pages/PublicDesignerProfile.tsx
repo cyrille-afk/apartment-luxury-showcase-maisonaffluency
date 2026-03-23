@@ -352,13 +352,13 @@ const PublicDesignerProfile = () => {
                         pdf_url: pick.pdf_url,
                       })}
                     >
-                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
+                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative flex items-center justify-center">
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-105"
                           loading="lazy"
                         />
                         {pick.tags && pick.tags.length > 0 && (() => {
