@@ -42,8 +42,25 @@ function normalizeCloudinaryVideoUrl(url: string): string {
     .replace(/,c_(fill|crop)\b/gi, ",c_fit");
 }
 
+/** Render a paragraph supporting <strong> HTML tags and highlighted quoted text */
+function renderParagraph(text: string): React.ReactNode[] {
+  // First split on <strong>...</strong> tags
+  const parts = text.split(/(<strong>[\s\S]*?<\/strong>)/g);
+  return parts.map((part, i) => {
+    const strongMatch = part.match(/^<strong>([\s\S]*?)<\/strong>$/);
+    if (strongMatch) {
+      return (
+        <strong key={i} className="font-semibold text-foreground">
+          {renderQuotedText(strongMatch[1])}
+        </strong>
+      );
+    }
+    return <span key={i}>{renderQuotedText(part)}</span>;
+  });
+}
+
 /** Highlight quoted text within a paragraph */
-function renderQuotedText(text: string) {
+function renderQuotedText(text: string): React.ReactNode[] {
   return text.split(/(\u2018[^\u2019]*\u2019|'[^']*')/g).map((segment, i) => {
     const isCurly = segment.startsWith("\u2018") && segment.endsWith("\u2019");
     const isStraight = segment.startsWith("'") && segment.endsWith("'") && segment.length > 2;
@@ -322,7 +339,7 @@ function SplitImageBlock({
     >
       {paragraphs.map((p, i) => (
         <p key={i} className={i > 0 ? "mt-4" : ""}>
-          {renderQuotedText(p)}
+          {renderParagraph(p)}
         </p>
       ))}
     </motion.div>
@@ -386,7 +403,7 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
     <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
       {visibleParagraphs.map((p, i) => (
         <p key={i} className={i > 0 ? "mt-3 md:mt-5" : ""}>
-          {renderQuotedText(p)}
+          {renderParagraph(p)}
         </p>
       ))}
       {shouldCollapse && !expanded && (
@@ -408,7 +425,7 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
           >
             {paragraphs.slice(MOBILE_COLLAPSE_THRESHOLD).map((p, i) => (
               <p key={i} className="mt-3 md:mt-5">
-                {renderQuotedText(p)}
+                {renderParagraph(p)}
               </p>
             ))}
           </motion.div>
@@ -512,7 +529,7 @@ export default function EditorialBiography({
         <div key="leading-text">
           {leadingText.map((p, pi) => (
             <p key={pi} className={pi > 0 ? "mt-4" : ""}>
-              {renderQuotedText(p)}
+              {renderParagraph(p)}
             </p>
           ))}
         </div>
@@ -546,7 +563,7 @@ export default function EditorialBiography({
             <div key={`post-vid-text-${i}`}>
               {followText.map((p, pi) => (
                 <p key={pi} className={pi > 0 ? "mt-4" : ""}>
-                  {renderQuotedText(p)}
+                  {renderParagraph(p)}
                 </p>
               ))}
             </div>
@@ -709,7 +726,7 @@ export default function EditorialBiography({
       <div key="trailing-text">
         {textAccum.map((p, i) => (
           <p key={i} className={i > 0 ? "mt-4" : ""}>
-            {renderQuotedText(p)}
+            {renderParagraph(p)}
           </p>
         ))}
       </div>
