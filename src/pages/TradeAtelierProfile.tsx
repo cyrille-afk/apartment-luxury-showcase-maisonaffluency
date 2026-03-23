@@ -56,7 +56,22 @@ function displayName(name: string): string {
   return name;
 }
 
-function pickToLightboxItem(pick: DesignerCuratorPick, brandName: string): TradeProductLightboxItem {
+function pickToLightboxItem(
+  pick: DesignerCuratorPick,
+  brandName: string,
+  displayCurrency?: DisplayCurrency,
+  fxRates?: Record<string, number>,
+): TradeProductLightboxItem {
+  const currency = pick.currency || "EUR";
+  let price: string | undefined;
+  if (pick.trade_price_cents != null) {
+    if (displayCurrency && fxRates) {
+      price = formatPriceConverted(pick.trade_price_cents, currency, displayCurrency, fxRates);
+    } else {
+      const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency + " ";
+      price = `${symbol}${(pick.trade_price_cents / 100).toLocaleString()}`;
+    }
+  }
   return {
     id: pick.id,
     product_name: pick.title,
@@ -69,9 +84,7 @@ function pickToLightboxItem(pick: DesignerCuratorPick, brandName: string): Trade
     category: pick.category || undefined,
     subcategory: pick.subcategory || undefined,
     pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
-    price: pick.trade_price_cents != null
-      ? `€${(pick.trade_price_cents / 100).toLocaleString()}`
-      : undefined,
+    price,
   };
 }
 
