@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { ArrowLeft, Package, FileText } from "lucide-react";
+import { ArrowLeft, Package, FileText, Maximize2 } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useDesigner, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
@@ -407,6 +407,11 @@ const PublicDesignerProfile = () => {
                             </div>
                           ) : null;
                         })()}
+                        <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
+                            <Maximize2 className="h-3 w-3" />
+                          </div>
+                        </div>
                         {pick.pdf_url && (
                           <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             <a
