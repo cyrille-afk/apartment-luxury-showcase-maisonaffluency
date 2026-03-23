@@ -447,7 +447,7 @@ function singularizeSub(s: string): string {
                     specialTags.unshift(item.pick.edition);
                   }
                   return specialTags.length > 0 ? (
-                    <div className="absolute top-2 right-2 z-10 flex flex-wrap gap-1 justify-end">
+                    <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1">
                       {specialTags.map((tag, i) => (
                         <span key={i} className="inline-block px-2 py-0.5 text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
                           {tag}
