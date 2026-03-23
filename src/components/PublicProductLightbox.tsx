@@ -272,9 +272,15 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
               )}
             </div>
 
-            <p className="font-display text-sm text-foreground mt-2">
-              Price on request
-            </p>
+            {/* Primary CTA — matches "Add to Quote" visual style */}
+            <div className="mt-auto pt-3 md:pt-4 flex flex-col gap-2">
+              <a
+                href="/trade/program"
+                className="flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
+              >
+                Price on Request
+              </a>
+            </div>
 
             {/* Desktop secondary actions */}
             <div className="hidden md:flex gap-2 flex-wrap">

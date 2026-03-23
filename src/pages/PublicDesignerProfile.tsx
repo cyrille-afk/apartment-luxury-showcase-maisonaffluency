@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { ArrowLeft, Instagram, ExternalLink, Package } from "lucide-react";
+import { ArrowLeft, Package, FileText } from "lucide-react";
+import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useDesigner, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
@@ -247,6 +248,20 @@ const PublicDesignerProfile = () => {
                             </div>
                           ) : null;
                         })()}
+                        {pick.pdf_url && (
+                          <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a
+                              href={buildSpecSheetUrl(pick.pdf_url, designer.name, pick.title)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="p-2 bg-[hsl(var(--pdf-red))]/80 rounded-md text-white hover:bg-[hsl(var(--pdf-red))] transition-colors"
+                              title="Spec sheet"
+                            >
+                              <FileText className="h-3.5 w-3.5" />
+                            </a>
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex flex-col flex-1">
