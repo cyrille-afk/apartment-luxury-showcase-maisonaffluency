@@ -107,12 +107,18 @@ const TradeAtelierProfile = () => {
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
 
-  // Interleave picks so same category never appears side-by-side
+  // Interleave picks so same functional subcategory never appears side-by-side
   const picks = useMemo(() => {
     if (rawPicks.length <= 2) return rawPicks;
 
-    const getCategoryKey = (p: typeof rawPicks[0]) => {
-      return p.category?.trim().toLowerCase() || "other";
+    const getFunctionalCategory = (p: typeof rawPicks[0]) => {
+      if (p.subcategory?.trim()) return p.subcategory.trim().toLowerCase();
+      const tags = p.tags || [];
+      if (tags.length > 0) {
+        const last = tags[tags.length - 1]?.toLowerCase().trim();
+        if (last) return last;
+      }
+      return p.category?.toLowerCase() || "other";
     };
 
     const result: typeof rawPicks = [];
@@ -120,9 +126,9 @@ const TradeAtelierProfile = () => {
     let lastCat = "";
 
     while (remaining.length > 0) {
-      const idx = remaining.findIndex((p) => getCategoryKey(p) !== lastCat);
+      const idx = remaining.findIndex((p) => getFunctionalCategory(p) !== lastCat);
       const picked = idx >= 0 ? remaining.splice(idx, 1)[0] : remaining.shift()!;
-      lastCat = getCategoryKey(picked);
+      lastCat = getFunctionalCategory(picked);
       result.push(picked);
     }
     return result;
