@@ -547,7 +547,7 @@ function singularizeSub(s: string): string {
                       specialTags.unshift(currentItem.pick.edition);
                     }
                     return specialTags.length > 0 && !isZoomed ? (
-                      <div className="absolute top-2 right-2 z-20 flex flex-wrap gap-1.5 justify-end">
+                      <div className="absolute top-2 left-2 z-20 flex flex-wrap gap-1.5">
                         {specialTags.map((tag, i) => (
                           <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
                             {tag}
