@@ -571,6 +571,16 @@ export default function EditorialBiography({
         !!m && /^https?:\/\//i.test(m.url)
     );
 
+  const findNeighborPoster = (startIndex: number) => {
+    for (let j = startIndex - 1; j >= 0; j--) {
+      if (!parsedMedia[j].isVideo) return parsedMedia[j].url;
+    }
+    for (let j = startIndex + 1; j < parsedMedia.length; j++) {
+      if (!parsedMedia[j].isVideo) return parsedMedia[j].url;
+    }
+    return undefined;
+  };
+
   if (parsedMedia.length === 0) {
     return (
       <MobileCollapsible paragraphs={paragraphs} />
