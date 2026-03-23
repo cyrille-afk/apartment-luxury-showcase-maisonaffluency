@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
@@ -33,15 +33,6 @@ function displayName(name: string): string {
   return name;
 }
 
-function formatPickPrice(cents: number | null, currency: string | null | undefined) {
-  if (cents == null) return "Price on request";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency || "USD",
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
-}
-
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: designer, isLoading } = useDesigner(slug);
@@ -54,7 +45,28 @@ const PublicDesignerProfile = () => {
   const isParentBrand = designer?.founder === designer?.name;
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(isParentBrand ? designer : undefined);
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
-  const picks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
+  const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
+
+  const picks = useMemo(() => {
+    if (rawPicks.length <= 2) return rawPicks;
+
+    const getSubcategoryKey = (pick: (typeof rawPicks)[number]) =>
+      pick.subcategory?.trim().toLowerCase() || pick.category?.trim().toLowerCase() || "other";
+
+    const interleaved: typeof rawPicks = [];
+    const remaining = [...rawPicks];
+    let lastKey = "";
+
+    while (remaining.length > 0) {
+      const nextIndex = remaining.findIndex((pick) => getSubcategoryKey(pick) !== lastKey);
+      const next = nextIndex >= 0 ? remaining.splice(nextIndex, 1)[0] : remaining.shift();
+      if (!next) break;
+      lastKey = getSubcategoryKey(next);
+      interleaved.push(next);
+    }
+
+    return interleaved;
+  }, [rawPicks]);
 
   const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
 
