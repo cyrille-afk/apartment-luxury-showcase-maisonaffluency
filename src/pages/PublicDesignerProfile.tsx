@@ -43,19 +43,28 @@ const PublicDesignerProfile = () => {
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
 
   useEffect(() => {
+    // Prevent browser from restoring previous scroll position
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
     const resetScroll = () => {
-      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
     };
 
     resetScroll();
     const raf = window.requestAnimationFrame(resetScroll);
-    const timer = window.setTimeout(resetScroll, 80);
+    const t1 = window.setTimeout(resetScroll, 50);
+    const t2 = window.setTimeout(resetScroll, 150);
+    const t3 = window.setTimeout(resetScroll, 400);
 
     return () => {
       window.cancelAnimationFrame(raf);
-      window.clearTimeout(timer);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearTimeout(t3);
     };
   }, [slug]);
 
