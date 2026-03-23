@@ -430,7 +430,7 @@ const TradeAtelierProfile = () => {
                 transition={transition}
                 className="relative rounded-xl overflow-hidden shrink-0"
               >
-                <div className="aspect-[3/2] md:aspect-[5/2] max-h-[45vh]">
+                <div className="aspect-[3/2] md:aspect-[2/1] max-h-[50vh]">
                   {(designer.hero_image_url || designer.image_url) && (
                     <img
                       src={designer.hero_image_url || designer.image_url}
