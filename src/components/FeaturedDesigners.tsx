@@ -2810,12 +2810,17 @@ const FeaturedDesigners = () => {
                             </svg>
                           </a>
                         )}
-                        <h3 className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 group-hover:text-primary">
+                        <Link
+                          to={`/designers/${designer.id}`}
+                          className="text-xl md:text-2xl font-serif text-foreground transition-colors duration-300 hover:text-primary"
+                          onClick={(e) => e.stopPropagation()}
+                          onPointerDown={(e) => e.stopPropagation()}
+                        >
                           {(() => {
                             const fmt = formatDesignerName(designer.name, (designer as any).displayName);
                             return fmt.brand || fmt.person;
                           })()}
-                        </h3>
+                        </Link>
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
                         <p className="text-sm md:text-base text-primary font-body italic transition-opacity duration-300 group-hover:opacity-80">
