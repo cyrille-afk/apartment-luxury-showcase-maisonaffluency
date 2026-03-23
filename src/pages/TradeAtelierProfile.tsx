@@ -356,7 +356,7 @@ const TradeAtelierProfile = () => {
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-display text-xs tracking-[0.2em] uppercase text-foreground">
-                Curator's Picks
+                Curators' Picks
               </h2>
               <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
             </div>
