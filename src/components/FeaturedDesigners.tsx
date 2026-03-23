@@ -2647,12 +2647,9 @@ const FeaturedDesigners = () => {
                 </span>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                {designers.map((designer) => (
-                  <Link
-                    key={designer.id}
-                    to={`/designers/${designer.id}`}
-                    className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
-                  >
+                {designers.map((designer) => {
+                  const isLamont = designer.id === "alexander-lamont";
+                  const cardContent = (
                     <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                       {designer.image ? (
                         <img
@@ -2688,12 +2685,40 @@ const FeaturedDesigners = () => {
                           </p>
                         )}
                         <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-                          Discover
+                          {isLamont ? "View Profile" : "Discover"}
                         </span>
                       </div>
                     </div>
-                  </Link>
-                ))}
+                  );
+
+                  if (isLamont) {
+                    return (
+                      <Link
+                        key={designer.id}
+                        to={`/designers/${designer.id}`}
+                        className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+                      >
+                        {cardContent}
+                      </Link>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={designer.id}
+                      type="button"
+                      onClick={() => {
+                        setCuratorPicksDesigner(designer);
+                        setCuratorPickIndex(0);
+                        setIsZoomed(false);
+                        setPicksHovered(false);
+                      }}
+                      className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+                    >
+                      {cardContent}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}
