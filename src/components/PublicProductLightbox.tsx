@@ -291,7 +291,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
             </div>
 
             {/* Desktop secondary actions */}
-            <div className="hidden md:flex gap-2 flex-wrap">
+            <div className="hidden md:grid grid-cols-3 gap-2">
               <button
                 onClick={() => toggleFavorite(product.id)}
                 title={favorited ? "Favorited" : "Favorite"}
