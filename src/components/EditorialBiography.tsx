@@ -416,7 +416,7 @@ export default function EditorialBiography({
     }
 
     return (
-      <div className="font-body text-sm leading-relaxed text-foreground/85 text-justify">
+      <div className="font-body text-sm leading-relaxed text-foreground/85">
         {elements}
       </div>
     );
