@@ -47,7 +47,7 @@ const PublicDesignerProfile = () => {
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const picks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
-  const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
+  
 
   const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
 
