@@ -466,15 +466,6 @@ const TradeAtelierProfile = () => {
                           {pick.edition}
                         </p>
                       )}
-                      {pick.tags && pick.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {pick.tags.map((tag) => (
-                            <Badge key={tag} variant="outline" className="text-[8px] md:text-[9px] px-1.5 py-0 font-body tracking-wide text-muted-foreground border-border/60">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
                     </div>
                     );
                   })}
