@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { ArrowLeft, Package, FileText, Maximize2 } from "lucide-react";
+import { ArrowLeft, Package, FileText, Maximize2, Share2, Check } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useDesigner, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
@@ -42,6 +42,7 @@ const PublicDesignerProfile = () => {
   const { data: designer, isLoading } = useDesigner(slug);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
+  const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => {
     // Prevent browser from restoring previous scroll position
@@ -229,21 +230,21 @@ const PublicDesignerProfile = () => {
                             <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
                           )}
                         </div>
-                        <WhatsAppShareButton
-                          hideOn="mobile"
+                        <button
+                          className="hidden md:inline-flex items-center gap-1.5 font-body text-xs text-white/80 hover:text-white transition-colors uppercase tracking-[0.1em]"
+                          title="Copy shareable link"
                           onClick={(e) => {
                             e.stopPropagation();
-                            sharePageOnWhatsApp(
-                              `/designers/${designer.slug}`,
-                              `${designer.name} — Maison Affluency`,
-                              designer.specialty || undefined,
-                              { directUrlPath: `/designers/${designer.slug}-share.html` }
-                            );
+                            const url = `https://www.maisonaffluency.com/designers/${designer.slug}-share.html`;
+                            navigator.clipboard.writeText(url).then(() => {
+                              setShareCopied(true);
+                              setTimeout(() => setShareCopied(false), 2000);
+                            });
                           }}
-                          label="Share"
-                          size="sm"
-                          variant="glass"
-                        />
+                        >
+                          {shareCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+                          {shareCopied ? "Copied!" : "Share"}
+                        </button>
                       </div>
                     </div>
                   )}
@@ -325,21 +326,21 @@ const PublicDesignerProfile = () => {
                       <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
                     )}
                   </motion.div>
-                  <WhatsAppShareButton
-                    hideOn="mobile"
+                  <button
+                    className="hidden md:inline-flex items-center gap-1.5 font-body text-xs text-white/80 hover:text-white transition-colors uppercase tracking-[0.1em]"
+                    title="Copy shareable link"
                     onClick={(e) => {
                       e.stopPropagation();
-                      sharePageOnWhatsApp(
-                        `/designers/${designer.slug}`,
-                        `${designer.name} — Maison Affluency`,
-                        designer.specialty || undefined,
-                        { directUrlPath: `/designers/${designer.slug}-share.html` }
-                      );
+                      const url = `https://www.maisonaffluency.com/designers/${designer.slug}-share.html`;
+                      navigator.clipboard.writeText(url).then(() => {
+                        setShareCopied(true);
+                        setTimeout(() => setShareCopied(false), 2000);
+                      });
                     }}
-                    label="Share"
-                    size="sm"
-                    variant="glass"
-                  />
+                  >
+                    {shareCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+                    {shareCopied ? "Copied!" : "Share"}
+                  </button>
                 </div>
               </motion.div>
 
