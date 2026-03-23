@@ -171,7 +171,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
             controls
             autoPlay
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
         )}
       </div>
