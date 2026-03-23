@@ -128,7 +128,7 @@ const PublicDesignerProfile = () => {
             >
               <div className={heroAspect}>
                 {heroImage && (
-                  <img src={heroImage} alt={name} className="absolute inset-0 w-full h-full object-cover" loading="eager" />
+                  <img src={heroImage} alt={name} className="absolute inset-0 w-full h-full object-cover object-bottom" loading="eager" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               </div>

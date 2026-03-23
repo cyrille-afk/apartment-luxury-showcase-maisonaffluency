@@ -176,7 +176,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
         )}
       </div>
       {caption && (
-        <figcaption className="mt-2.5 text-center font-body text-[11px] tracking-wide text-muted-foreground italic">
+        <figcaption className="mt-2.5 text-center font-body text-[13px] tracking-wide text-muted-foreground italic">
           {caption}
         </figcaption>
       )}
@@ -221,7 +221,7 @@ function SplitImageBlock({
         />
       </div>
       {caption && (
-        <figcaption className="mt-2 font-body text-[11px] tracking-wide text-muted-foreground italic text-center md:text-left">
+        <figcaption className="mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left">
           {caption}
         </figcaption>
       )}
@@ -280,7 +280,7 @@ function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { ur
         />
       </div>
       {caption && (
-        <figcaption className="mt-2 text-center font-body text-[11px] tracking-wide text-muted-foreground italic">
+        <figcaption className="mt-2 text-center font-body text-[13px] tracking-wide text-muted-foreground italic">
           {caption}
         </figcaption>
       )}
