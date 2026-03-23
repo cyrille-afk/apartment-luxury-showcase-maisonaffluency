@@ -1,9 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Layers, Ruler, FileDown } from "lucide-react";
+import { X, Layers, Ruler, FileDown, Heart, Scale, FolderOpen } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
+import { useCompare, type CompareItem } from "@/contexts/CompareContext";
+import { useFavorites } from "@/hooks/useFavorites";
+import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface PublicLightboxItem {
@@ -15,34 +18,46 @@ export interface PublicLightboxItem {
   brand_name: string;
   materials?: string | null;
   dimensions?: string | null;
+  category?: string | null;
+  subcategory?: string | null;
   pdf_url?: string | null;
 }
 
 interface Props {
   product: PublicLightboxItem | null;
+  allPicks?: PublicLightboxItem[];
   onClose: () => void;
+  onSelectRelated?: (item: PublicLightboxItem) => void;
 }
 
-const PublicProductLightbox = ({ product, onClose }: Props) => {
+const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelated }: Props) => {
   const isMobile = useIsMobile();
+  const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { isFavorited, toggleFavorite } = useFavorites();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [showHoverImage, setShowHoverImage] = useState(false);
   const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
+  const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
 
   useEffect(() => {
     setImageLoaded(false);
     setImageFailed(false);
     setHoverImageLoaded(false);
     setShowHoverImage(false);
+    setLastFavRealId(null);
   }, [product?.id]);
 
-  // Lock body scroll
   useEffect(() => {
     if (!product) return;
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, [product]);
+
+  const relatedProducts = useMemo(() => {
+    if (!product) return [];
+    return allPicks.filter((p) => p.id !== product.id && p.image_url).slice(0, 4);
+  }, [product?.id, allPicks]);
 
   if (!product) return null;
 
@@ -50,6 +65,24 @@ const PublicProductLightbox = ({ product, onClose }: Props) => {
   const designerDisplay = product.brand_name.includes(" - ")
     ? product.brand_name.split(" - ")[0].trim()
     : product.brand_name;
+
+  const compareItem: CompareItem = {
+    pick: {
+      title: product.title,
+      subtitle: product.subtitle || undefined,
+      image: product.image_url,
+      hoverImage: product.hover_image_url || undefined,
+      materials: product.materials,
+      dimensions: product.dimensions,
+      category: product.category || undefined,
+      subcategory: product.subcategory || undefined,
+    },
+    designerName: designerDisplay,
+    designerId: product.id,
+    section: "designers",
+  };
+
+  const pinned = isPinned(product.title, product.id);
 
   return createPortal(
     <AnimatePresence>
@@ -73,21 +106,13 @@ const PublicProductLightbox = ({ product, onClose }: Props) => {
           <div className="md:hidden sticky top-0 z-20 flex items-center justify-between px-4 pt-3 pb-2 bg-background/90 backdrop-blur-sm border-b border-border/60">
             <div className="w-8" />
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full bg-foreground/15 text-foreground hover:bg-foreground/25 transition-all"
-              aria-label="Close"
-            >
+            <button onClick={onClose} className="p-2 rounded-full bg-foreground/15 text-foreground hover:bg-foreground/25 transition-all" aria-label="Close">
               <X size={18} />
             </button>
           </div>
 
           {/* Desktop close */}
-          <button
-            onClick={onClose}
-            className="hidden md:flex absolute top-3 right-3 z-20 p-2 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 transition-all"
-            aria-label="Close"
-          >
+          <button onClick={onClose} className="hidden md:flex absolute top-3 right-3 z-20 p-2 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 transition-all" aria-label="Close">
             <X size={18} />
           </button>
 
@@ -140,9 +165,54 @@ const PublicProductLightbox = ({ product, onClose }: Props) => {
               <span className="font-body text-sm text-muted-foreground">No image</span>
             )}
 
-            {/* Mobile spec sheet button */}
-            {product.pdf_url && (
-              <div className="md:hidden absolute bottom-3 left-3 z-10">
+            {/* Mobile: secondary action icons overlaid on image bottom-left */}
+            <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">
+              <button
+                onClick={async () => {
+                  const realId = await toggleFavorite(product.id, {
+                    product_name: product.title,
+                    brand_name: product.brand_name,
+                    category: product.category || undefined,
+                    image_url: product.image_url,
+                    dimensions: product.dimensions,
+                    materials: product.materials,
+                  });
+                  setLastFavRealId(realId);
+                }}
+                title={isFavorited(product.id) ? "Favorited" : "Favorite"}
+                className={cn(
+                  "flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-md",
+                  isFavorited(product.id)
+                    ? "bg-destructive/80 text-white"
+                    : "bg-background/70 text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Heart size={15} className={cn(isFavorited(product.id) && "fill-current")} />
+              </button>
+
+              {isFavorited(product.id) && (
+                <AddToProjectPopover productId={lastFavRealId || product.id} productName={product.title}>
+                  <button title="Add to Project" className="flex items-center justify-center w-9 h-9 rounded-full bg-background/70 backdrop-blur-md text-muted-foreground hover:text-foreground transition-all shadow-md">
+                    <FolderOpen size={15} />
+                  </button>
+                </AddToProjectPopover>
+              )}
+
+              <button
+                onClick={() => togglePin(compareItem)}
+                title={pinned ? "Pinned" : "Pin to Selection"}
+                className={cn(
+                  "flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-md",
+                  pinned
+                    ? "bg-[hsl(var(--gold))]/80 text-white"
+                    : "bg-background/70 text-muted-foreground hover:text-foreground",
+                  compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                )}
+              >
+                <Scale size={15} />
+              </button>
+
+              {product.pdf_url && (
                 <a
                   href={buildSpecSheetUrl(product.pdf_url, designerDisplay, product.title)}
                   target="_blank"
@@ -152,8 +222,8 @@ const PublicProductLightbox = ({ product, onClose }: Props) => {
                 >
                   <FileDown size={15} />
                 </a>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Details */}
@@ -192,18 +262,96 @@ const PublicProductLightbox = ({ product, onClose }: Props) => {
               Price on request
             </p>
 
-            {/* Desktop spec sheet */}
-            {product.pdf_url && (
-              <div className="mt-auto pt-3">
+            {/* Desktop secondary actions */}
+            <div className="hidden md:flex gap-2 flex-wrap">
+              <button
+                onClick={async () => {
+                  const realId = await toggleFavorite(product.id, {
+                    product_name: product.title,
+                    brand_name: product.brand_name,
+                    category: product.category || undefined,
+                    image_url: product.image_url,
+                    dimensions: product.dimensions,
+                    materials: product.materials,
+                  });
+                  setLastFavRealId(realId);
+                }}
+                title={isFavorited(product.id) ? "Favorited" : "Favorite"}
+                className={cn(
+                  "flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
+                  isFavorited(product.id)
+                    ? "border-destructive/30 text-destructive bg-destructive/10"
+                    : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                )}
+              >
+                <Heart size={13} className={cn(isFavorited(product.id) && "fill-current")} />
+                {isFavorited(product.id) ? "Favorited" : "Favorite"}
+              </button>
+
+              {isFavorited(product.id) && (
+                <AddToProjectPopover productId={lastFavRealId || product.id} productName={product.title}>
+                  <button title="Add to Project" className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30">
+                    <FolderOpen size={13} />
+                    Add to Project
+                  </button>
+                </AddToProjectPopover>
+              )}
+
+              <button
+                onClick={() => togglePin(compareItem)}
+                title={pinned ? "Pinned" : "Pin to Selection"}
+                className={cn(
+                  "flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
+                  pinned
+                    ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
+                    : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
+                  compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                )}
+              >
+                <Scale size={13} />
+                {pinned ? "Pinned" : "Pin to Selection"}
+              </button>
+
+              {product.pdf_url && (
                 <a
                   href={buildSpecSheetUrl(product.pdf_url, designerDisplay, product.title)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-[hsl(var(--pdf-red))]/30 text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/10 hover:border-[hsl(var(--pdf-red))]"
+                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-[hsl(var(--pdf-red))]/30 text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/10 hover:border-[hsl(var(--pdf-red))]"
                 >
                   <FileDown size={13} />
                   Spec Sheet
                 </a>
+              )}
+            </div>
+
+            {/* More from this designer */}
+            {relatedProducts.length > 0 && (
+              <div className="pt-4 border-t border-border">
+                <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-3">
+                  More from {designerDisplay}
+                </p>
+                <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                  {relatedProducts.map((rp) => (
+                    <button
+                      key={rp.id}
+                      onClick={() => onSelectRelated?.(rp)}
+                      className="shrink-0 w-20 group"
+                    >
+                      <div className="aspect-square rounded-md overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors">
+                        <img
+                          src={rp.image_url}
+                          alt={rp.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <p className="font-body text-[9px] text-muted-foreground mt-1 truncate group-hover:text-foreground transition-colors">
+                        {rp.title}
+                      </p>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
