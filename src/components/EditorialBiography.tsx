@@ -339,7 +339,7 @@ function SplitImageBlock({
     >
       {paragraphs.map((p, i) => (
         <p key={i} className={i > 0 ? "mt-4" : ""}>
-          {renderQuotedText(p)}
+          {renderParagraph(p)}
         </p>
       ))}
     </motion.div>
@@ -403,7 +403,7 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
     <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
       {visibleParagraphs.map((p, i) => (
         <p key={i} className={i > 0 ? "mt-3 md:mt-5" : ""}>
-          {renderQuotedText(p)}
+          {renderParagraph(p)}
         </p>
       ))}
       {shouldCollapse && !expanded && (
@@ -425,7 +425,7 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
           >
             {paragraphs.slice(MOBILE_COLLAPSE_THRESHOLD).map((p, i) => (
               <p key={i} className="mt-3 md:mt-5">
-                {renderQuotedText(p)}
+                {renderParagraph(p)}
               </p>
             ))}
           </motion.div>
@@ -529,7 +529,7 @@ export default function EditorialBiography({
         <div key="leading-text">
           {leadingText.map((p, pi) => (
             <p key={pi} className={pi > 0 ? "mt-4" : ""}>
-              {renderQuotedText(p)}
+              {renderParagraph(p)}
             </p>
           ))}
         </div>
@@ -563,7 +563,7 @@ export default function EditorialBiography({
             <div key={`post-vid-text-${i}`}>
               {followText.map((p, pi) => (
                 <p key={pi} className={pi > 0 ? "mt-4" : ""}>
-                  {renderQuotedText(p)}
+                  {renderParagraph(p)}
                 </p>
               ))}
             </div>
@@ -726,7 +726,7 @@ export default function EditorialBiography({
       <div key="trailing-text">
         {textAccum.map((p, i) => (
           <p key={i} className={i > 0 ? "mt-4" : ""}>
-            {renderQuotedText(p)}
+            {renderParagraph(p)}
           </p>
         ))}
       </div>
