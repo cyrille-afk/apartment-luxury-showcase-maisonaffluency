@@ -2986,9 +2986,9 @@ const FeaturedDesigners = () => {
                         "{designer.philosophy}"
                       </p>
 
-                      {designer.links && designer.links.filter(l => l.type !== "Instagram").length > 0 && (
+                      {designer.links && designer.links.filter((l) => l.type !== "Instagram" && l.type !== "Curators' Picks").length > 0 && (
                         <div className="flex flex-row flex-wrap items-center gap-3 mt-4 md:flex-nowrap md:gap-3 md:pr-8">
-                          {designer.links.filter(l => l.type !== "Instagram").map((link, idx) => (
+                          {designer.links.filter((l) => l.type !== "Instagram" && l.type !== "Curators' Picks").map((link, idx) => (
                             link.url ? (
                               <a
                                 key={idx}
@@ -3008,59 +3008,6 @@ const FeaturedDesigners = () => {
                                   />
                                 </svg>
                               </a>
-                            ) : link.type === "Curators' Picks" ? (
-                              <React.Fragment key={idx}>
-                              {/* Mobile: Curators' Picks standalone on first line */}
-                              <button
-                                onClick={() => {
-                                  setCuratorPicksDesigner(designer);
-                                  const allPicks = designer.curatorPicks || [];
-                                  if (selectedSubcategory) {
-                                    const SUB_TAGS: Record<string, string[]> = {
-                                      "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
-                                      "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
-                                      "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
-                                      "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
-                                      "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
-                                      "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
-                                      "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
-                                      "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
-                                      "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
-                                      "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
-                                      "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
-                                    };
-                                    const mapped = SUB_TAGS[selectedSubcategory];
-                                    const firstMatch = allPicks.findIndex((pick: any) => {
-                                      if (mapped) return pick.tags?.some((tag: string) => mapped.some(mt => tag.toLowerCase() === mt.toLowerCase()));
-                                      return pick.tags?.includes(selectedSubcategory);
-                                    });
-                                    setCuratorPickIndex(firstMatch >= 0 ? firstMatch : 0);
-                                  } else if (selectedCategory) {
-                                    const firstMatch = allPicks.findIndex((pick: any) => pick.tags?.includes(selectedCategory));
-                                    setCuratorPickIndex(firstMatch >= 0 ? firstMatch : 0);
-                                  } else {
-                                    setCuratorPickIndex(0);
-                                  }
-                                }}
-                                className="inline-flex items-center gap-1.5 md:px-4 md:py-2 text-base md:text-sm font-body md:bg-accent/10 md:hover:bg-accent/20 text-foreground md:text-accent-foreground md:rounded-full transition-all duration-300 cursor-pointer md:border md:border-accent/30 md:ml-auto"
-                              >
-                                <Gem size={16} className="fill-accent text-accent md:w-3.5 md:h-3.5" />
-                                <span className="font-semibold underline underline-offset-2 decoration-accent/40 md:font-medium md:no-underline">{link.type}</span>
-                              </button>
-                              {/* Logo hidden on mobile to avoid crowding */}
-                              {/* Mobile: WhatsApp below Curators' Picks */}
-                              <div className="flex items-center md:hidden">
-                                <WhatsAppShareButton
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    shareProfileOnWhatsApp("designer", designer.id, designer.name, designer.specialty);
-                                    trackCTA.whatsapp(`FeaturedDesigners_Share_${designer.name}`);
-                                  }}
-                                  label={`Share ${designer.name} on WhatsApp`}
-                                  variant="branded"
-                                />
-                              </div>
-                              </React.Fragment>
                             ) : (
                               <span
                                 key={idx}
