@@ -213,7 +213,7 @@ function SplitImageBlock({
         <img
           src={url}
           alt={caption || `${designerName} — editorial`}
-          className="w-full h-auto object-contain"
+          className="max-w-full h-auto object-contain mx-auto"
           loading="lazy"
         />
       </div>
