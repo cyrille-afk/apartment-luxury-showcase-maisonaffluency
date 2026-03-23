@@ -130,6 +130,7 @@ function VideoBlock({
 
   const isNativeVideo = !embedUrl;
   const videoSrc = isNativeVideo ? normalizeCloudinaryVideoUrl(url) : url;
+  const nativePosterUrl = posterUrl;
 
   const playOverlay = (
     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -178,13 +179,28 @@ function VideoBlock({
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
+        ) : !playing && nativePosterUrl ? (
+          <button
+            onClick={() => setPlaying(true)}
+            className="w-full h-full relative group cursor-pointer"
+            aria-label={`Play ${caption || "video"}`}
+          >
+            <img
+              src={nativePosterUrl}
+              alt={caption || `${designerName} — video cover`}
+              className="w-full h-auto max-h-[72vh] rounded-lg object-contain bg-black"
+              loading="lazy"
+            />
+            {playOverlay}
+          </button>
         ) : (
           <video
             src={videoSrc}
-            poster={posterUrl}
+            poster={nativePosterUrl}
             controls
             playsInline
-            preload="auto"
+            autoPlay={playing}
+            preload={nativePosterUrl ? "none" : "metadata"}
             className="w-full h-auto max-h-[72vh] rounded-lg bg-black"
           />
         )}
