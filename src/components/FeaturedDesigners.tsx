@@ -74,9 +74,6 @@ const forestGiaconiaImg = dImg("forest-giaconia_ikcmkg");
 const adamCourtsOkhaImg = dImg("adam-courts");
 
 // Curator picks — migrated to Cloudinary
-const noeDuchaufourMadonnaTables = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.06.51_PM_ukeqij", { width: 1200, quality: "auto:good", crop: "fill" });
-const noeMineralFlowerSide = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.40.43_PM_b0tuc9", { width: 1200, quality: "auto:good", crop: "fill" });
-const noeMineralFlowerCoffee = cloudinaryUrl("Screen_Shot_2026-02-23_at_1.42.29_PM_ryudnm", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsAngeloMCollection = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.35.13_AM_jwbivd", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsAngeloMDining = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.09.13_AM_z727ht", { width: 1200, quality: "auto:good", crop: "fill" });
 const leoAertsVitrineCabinet = cloudinaryUrl("Screen_Shot_2026-02-18_at_10.07.49_AM_bj59um", { width: 1200, quality: "auto:good", crop: "fill" });
