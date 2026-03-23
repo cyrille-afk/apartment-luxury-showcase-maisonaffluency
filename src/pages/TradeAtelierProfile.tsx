@@ -675,6 +675,7 @@ const TradeAtelierProfile = () => {
         isAdding={!!lightboxProduct && addingProductId === lightboxProduct.id}
         isAdded={!!lightboxProduct && addedProductIds.has(lightboxProduct.id)}
         onSelectRelated={(rp) => setLightboxProduct(rp)}
+        allPicks={picks.map(p => pickToLightboxItem(p, designer?.name || "", displayCurrency, fxRates))}
       />
     </>
   );

@@ -32,9 +32,11 @@ interface TradeProductLightboxProps {
   isAdding?: boolean;
   isAdded?: boolean;
   onSelectRelated?: (product: TradeProductLightboxItem) => void;
+  /** All available picks from same designer/brand — used for "More from" carousel */
+  allPicks?: TradeProductLightboxItem[];
 }
 
-const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdded, onSelectRelated }: TradeProductLightboxProps) => {
+const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdded, onSelectRelated, allPicks }: TradeProductLightboxProps) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const isMobile = useIsMobile();
@@ -52,9 +54,24 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     setShowHoverImage(false);
   }, [product?.id]);
 
-  // Related products from same brand
+  // Related products — prefer allPicks (excludes current + varies selection), fallback to trade catalog
   const relatedProducts = useMemo(() => {
     if (!product) return [];
+
+    // If allPicks provided, filter out current and pick 4 different items
+    if (allPicks && allPicks.length > 0) {
+      const candidates = allPicks.filter(p => p.id !== product.id && p.image_url);
+      // Deterministic but varied: hash product id to offset into candidates
+      const hash = product.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+      const offset = hash % Math.max(candidates.length, 1);
+      const picked: TradeProductLightboxItem[] = [];
+      for (let i = 0; i < Math.min(4, candidates.length); i++) {
+        picked.push(candidates[(offset + i) % candidates.length]);
+      }
+      return picked;
+    }
+
+    // Fallback: trade catalog
     const all = getAllTradeProducts();
     return all
       .filter(p => p.brand_name === product.brand_name && p.id !== product.id && p.image_url)
@@ -71,7 +88,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
         category: p.category,
         subcategory: p.subcategory,
       } as TradeProductLightboxItem));
-  }, [product?.id, product?.brand_name]);
+  }, [product?.id, product?.brand_name, allPicks]);
 
   if (!product) return null;
 

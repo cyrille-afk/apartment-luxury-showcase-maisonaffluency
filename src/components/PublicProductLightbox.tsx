@@ -87,7 +87,15 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
 
   const relatedProducts = useMemo(() => {
     if (!product) return [];
-    return allPicks.filter((p) => p.id !== product.id && p.image_url).slice(0, 4);
+    const candidates = allPicks.filter((p) => p.id !== product.id && p.image_url);
+    // Vary selection per product using a simple hash offset
+    const hash = product.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+    const offset = hash % Math.max(candidates.length, 1);
+    const picked: PublicLightboxItem[] = [];
+    for (let i = 0; i < Math.min(4, candidates.length); i++) {
+      picked.push(candidates[(offset + i) % candidates.length]);
+    }
+    return picked;
   }, [product?.id, allPicks]);
 
   if (!product) return null;
