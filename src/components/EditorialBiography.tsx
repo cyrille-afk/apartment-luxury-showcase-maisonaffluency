@@ -59,15 +59,25 @@ function renderQuotedText(text: string) {
 }
 
 /** Parse a media line — supports `URL | Caption` pipe separator */
-function parseMediaLine(text: string): { url: string; caption: string | null } | null {
+function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null } | null {
   const value = text.trim();
-  // Try pipe separator: "https://...jpg | My Caption"
-  const pipeMatch = value.match(/^(https?:\/\/\S+)\s*\|\s*(.+)$/i);
-  const url = pipeMatch ? pipeMatch[1].trim() : value;
-  const pipeCaption = pipeMatch ? pipeMatch[2].trim() : null;
+  // Try pipe separator: "https://...jpg | My Caption | poster:https://..."
+  const pipes = value.split(/\s*\|\s*/);
+  const url = pipes[0]?.trim() || "";
 
   if (!/^https?:\/\//i.test(url)) return null;
   if (/\s/.test(url)) return null;
+
+  let caption: string | null = null;
+  let poster: string | null = null;
+  for (let i = 1; i < pipes.length; i++) {
+    const seg = pipes[i].trim();
+    if (/^poster:/i.test(seg)) {
+      poster = seg.replace(/^poster:/i, "").trim();
+    } else if (!caption) {
+      caption = seg;
+    }
+  }
 
   const isMedia =
     isVideoUrl(url) ||
@@ -76,7 +86,7 @@ function parseMediaLine(text: string): { url: string; caption: string | null } |
     /\/storage\/v1\/object\/public\//i.test(url);
 
   if (!isMedia) return null;
-  return { url, caption: pipeCaption };
+  return { url, caption, poster };
 }
 
 /** Detect a standalone media URL paragraph pasted directly into biography text */
