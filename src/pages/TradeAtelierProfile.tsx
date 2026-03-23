@@ -56,7 +56,22 @@ function displayName(name: string): string {
   return name;
 }
 
-function pickToLightboxItem(pick: DesignerCuratorPick, brandName: string): TradeProductLightboxItem {
+function pickToLightboxItem(
+  pick: DesignerCuratorPick,
+  brandName: string,
+  displayCurrency?: DisplayCurrency,
+  fxRates?: Record<string, number>,
+): TradeProductLightboxItem {
+  const currency = pick.currency || "EUR";
+  let price: string | undefined;
+  if (pick.trade_price_cents != null) {
+    if (displayCurrency && fxRates) {
+      price = formatPriceConverted(pick.trade_price_cents, currency, displayCurrency, fxRates);
+    } else {
+      const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency + " ";
+      price = `${symbol}${(pick.trade_price_cents / 100).toLocaleString()}`;
+    }
+  }
   return {
     id: pick.id,
     product_name: pick.title,
@@ -69,9 +84,7 @@ function pickToLightboxItem(pick: DesignerCuratorPick, brandName: string): Trade
     category: pick.category || undefined,
     subcategory: pick.subcategory || undefined,
     pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
-    price: pick.trade_price_cents != null
-      ? `€${(pick.trade_price_cents / 100).toLocaleString()}`
-      : undefined,
+    price,
   };
 }
 
@@ -87,7 +100,7 @@ const TradeAtelierProfile = () => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [slug]);
   // For parent brands (founder === name), fetch picks from all sub-designers
-  const isParentBrand = designer?.founder === designer?.name || (!designer?.founder && designer?.name);
+  const isParentBrand = !!(designer?.founder && designer.founder === designer.name);
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     isParentBrand && designer?.founder === designer?.name ? designer : undefined
   );
@@ -409,7 +422,7 @@ const TradeAtelierProfile = () => {
                     <div
                       key={pick.id}
                       className="group cursor-pointer flex flex-col"
-                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name))}
+                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates))}
                     >
                       <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
                         <img
@@ -425,7 +438,7 @@ const TradeAtelierProfile = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleAddToQuote(pickToLightboxItem(pick, designerLabel || designer.name));
+                                handleAddToQuote(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates));
                               }}
                               className={cn(
                                 "p-2 rounded-md text-white transition-colors",
