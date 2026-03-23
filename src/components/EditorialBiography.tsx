@@ -338,10 +338,18 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
 /* ------------------------------------------------------------------ */
 /*  Collapsible wrapper — limits height on mobile for long bios        */
 /* ------------------------------------------------------------------ */
-function CollapsibleBiographyWrapper({ children, elementCount }: { children: React.ReactNode; elementCount: number }) {
+function CollapsibleBiographyWrapper({
+  children,
+  elementCount,
+  allowCollapse = true,
+}: {
+  children: React.ReactNode;
+  elementCount: number;
+  allowCollapse?: boolean;
+}) {
   const [expanded, setExpanded] = useState(false);
-  // Only collapse on mobile when there's substantial content
-  if (elementCount <= 3) return <>{children}</>;
+  // Only collapse on mobile when there's substantial content and no blocking media
+  if (!allowCollapse || elementCount <= 3) return <>{children}</>;
 
   return (
     <div className="relative">
