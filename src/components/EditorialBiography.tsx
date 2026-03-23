@@ -196,11 +196,9 @@ function VideoBlock({
         ) : (
           <video
             src={videoSrc}
-            poster={nativePosterUrl}
             controls
             playsInline
-            autoPlay={playing}
-            preload={nativePosterUrl ? "none" : "metadata"}
+            preload="metadata"
             className="w-full h-auto max-h-[72vh] rounded-lg bg-black"
           />
         )}
