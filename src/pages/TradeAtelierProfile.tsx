@@ -540,7 +540,7 @@ const TradeAtelierProfile = () => {
                       className="group cursor-pointer flex flex-col"
                       onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates))}
                     >
-                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative">
+                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative flex items-center justify-center">
                         {/* Tag badges — upper-left */}
                         {(() => {
                           const tags: string[] = pick.tags || [];
