@@ -107,19 +107,12 @@ const TradeAtelierProfile = () => {
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
 
-  // Interleave picks so same functional category never appears side-by-side
+  // Interleave picks so same category never appears side-by-side
   const picks = useMemo(() => {
     if (rawPicks.length <= 2) return rawPicks;
-    const getFunctionalCategory = (p: typeof rawPicks[0]) => {
-      // Use subcategory if available
-      if (p.subcategory?.trim()) return p.subcategory.trim().toLowerCase();
-      // Fall back to tags — use the most specific (last) tag as functional key
-      const tags = p.tags || [];
-      if (tags.length > 0) {
-        const last = tags[tags.length - 1]?.toLowerCase().trim();
-        if (last) return last;
-      }
-      return p.category?.toLowerCase() || "other";
+
+    const getCategoryKey = (p: typeof rawPicks[0]) => {
+      return p.category?.trim().toLowerCase() || "other";
     };
 
     const result: typeof rawPicks = [];
@@ -127,10 +120,9 @@ const TradeAtelierProfile = () => {
     let lastCat = "";
 
     while (remaining.length > 0) {
-      // Find first item whose functional category differs from last placed
-      const idx = remaining.findIndex(p => getFunctionalCategory(p) !== lastCat);
+      const idx = remaining.findIndex((p) => getCategoryKey(p) !== lastCat);
       const picked = idx >= 0 ? remaining.splice(idx, 1)[0] : remaining.shift()!;
-      lastCat = getFunctionalCategory(picked);
+      lastCat = getCategoryKey(picked);
       result.push(picked);
     }
     return result;
