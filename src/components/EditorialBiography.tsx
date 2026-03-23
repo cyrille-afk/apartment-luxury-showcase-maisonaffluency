@@ -130,7 +130,16 @@ function VideoBlock({
 
   const isNativeVideo = !embedUrl;
   const videoSrc = isNativeVideo ? normalizeCloudinaryVideoUrl(url) : url;
-  const nativePosterUrl = posterUrl;
+  // For Supabase-hosted videos, generate poster by extracting a frame server-side;
+  // for Cloudinary videos, swap /video/upload/ to /video/upload/so_2,f_jpg/ for a frame
+  const autoPosterUrl = (() => {
+    if (posterUrl) return posterUrl;
+    if (/res\.cloudinary\.com\/.+\/video\/upload/i.test(url)) {
+      return url.replace("/video/upload/", "/video/upload/so_2,f_jpg,q_auto/");
+    }
+    return undefined;
+  })();
+  const nativePosterUrl = autoPosterUrl;
 
   const playOverlay = (
     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
