@@ -253,7 +253,18 @@ const PublicDesignerProfile = () => {
                       ))}
                     </div>
                   )}
-                </motion.div>
+                   <div className="mt-4">
+                     <WhatsAppShareButton
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         shareProfileOnWhatsApp(designer.name, designer.slug);
+                       }}
+                       label="Share"
+                       size="sm"
+                       variant="solid"
+                     />
+                   </div>
+                 </motion.div>
               </div>
 
               {remainingBio && (
