@@ -398,7 +398,7 @@ const TradeAtelierProfile = () => {
               </div>
             </div>
 
-                <div className="grid grid-cols-3 gap-x-3 gap-y-5 md:grid-cols-4 md:gap-4">
+                <div className={cn("grid gap-x-3 gap-y-5 md:gap-4 grid-cols-3", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
                   {picks.map((pick) => {
                     const isAdding = addingProductId === pick.id;
                     const isAdded = addedProductIds.has(pick.id);
