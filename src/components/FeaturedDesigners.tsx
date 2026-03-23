@@ -2386,6 +2386,24 @@ const FeaturedDesigners = () => {
                   <rect x="16" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
                 </svg>
               </button>
+              <div className="relative w-56 ml-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Designer..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-8 h-9 text-sm bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => { setSearchQuery(""); ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
@@ -2395,11 +2413,10 @@ const FeaturedDesigners = () => {
         </motion.div>
 
         <div className="relative">
-          {/* A-Z alphabet jump bar + Search + Filter */}
-          <div className="flex flex-col gap-4 mb-5 md:mb-6">
-            {/* Search + Filter row */}
-            <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
-              <div className="md:hidden order-first">
+          {/* Mobile: Search + Filter row */}
+          <div className="flex flex-col gap-4 mb-5 md:mb-6 md:hidden">
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="order-first">
                 <Popover open={filterOpen} onOpenChange={(open) => {
                           setFilterOpen(open);
                           if (!open && selectedCategory) {
@@ -2479,14 +2496,14 @@ const FeaturedDesigners = () => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="relative flex-none order-last md:order-first md:w-56">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder="Designer..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 md:pl-9 pr-7 md:pr-8 h-8 md:h-9 text-[16px] md:text-sm bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
+                  className="pl-8 pr-7 h-8 text-[16px] bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
                 />
                 {searchQuery && (
                   <button
