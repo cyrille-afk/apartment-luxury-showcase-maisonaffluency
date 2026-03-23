@@ -280,7 +280,7 @@ function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { ur
         />
       </div>
       {caption && (
-        <figcaption className="mt-2 text-center font-body text-[11px] tracking-wide text-muted-foreground italic">
+        <figcaption className="mt-2 text-center font-body text-[13px] tracking-wide text-muted-foreground italic">
           {caption}
         </figcaption>
       )}
