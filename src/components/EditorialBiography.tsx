@@ -181,9 +181,10 @@ function VideoBlock({
         ) : (
           <video
             src={videoSrc}
+            poster={posterUrl}
             controls
             playsInline
-            preload="metadata"
+            preload="auto"
             className="w-full h-auto max-h-[72vh] rounded-lg bg-black"
           />
         )}
