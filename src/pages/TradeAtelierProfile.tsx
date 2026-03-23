@@ -304,7 +304,7 @@ const TradeAtelierProfile = () => {
                 <img
                   src={designer.hero_image_url || designer.image_url}
                   alt={name}
-                  className="absolute inset-0 w-full h-full object-cover object-top"
+                  className={cn("absolute inset-0 w-full h-full", isDesignerProfile ? "object-contain object-top" : "object-cover object-top")}
                   loading="eager"
                 />
               )}
