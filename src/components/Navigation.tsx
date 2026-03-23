@@ -429,6 +429,11 @@ const Navigation = () => {
                 title="My Favorites"
               >
                 <Heart className="w-4 h-4 text-foreground group-hover:text-primary transition-colors" />
+                {favCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none px-1">
+                    {favCount}
+                  </span>
+                )}
               </button>
               <DropdownMenu>
                 <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none relative group">
