@@ -3068,6 +3068,14 @@ const FeaturedDesigners = () => {
                         </div>
                       )}
 
+                      <Link
+                        to={`/designers/${designer.id}`}
+                        className="inline-flex items-center gap-2 mt-4 px-4 py-2 text-sm font-body rounded-md transition-all duration-300 border bg-foreground/5 hover:bg-foreground/10 text-foreground border-border/40 hover:border-border"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        View Full Profile
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </Link>
 
                     </div>
                   </div>
