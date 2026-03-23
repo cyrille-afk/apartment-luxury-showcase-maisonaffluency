@@ -542,7 +542,7 @@ function singularizeSub(s: string): string {
                   {/* Special tags */}
                   {(() => {
                     const tags: string[] = currentItem.pick.tags || [];
-                    const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique/i.test(t));
+                    const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco/i.test(t));
                     if (currentItem.pick.edition && !specialTags.some(t => t.toLowerCase() === currentItem.pick.edition!.toLowerCase())) {
                       specialTags.unshift(currentItem.pick.edition);
                     }
