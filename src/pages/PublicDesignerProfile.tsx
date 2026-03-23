@@ -8,7 +8,7 @@ import { useDesigner, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
-import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import EditorialBiography from "@/components/EditorialBiography";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
