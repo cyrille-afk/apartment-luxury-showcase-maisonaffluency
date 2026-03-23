@@ -599,8 +599,10 @@ export default function EditorialBiography({
   }
 
   return (
-    <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
-      {elements}
-    </div>
+    <CollapsibleBiographyWrapper elementCount={elements.length}>
+      <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+        {elements}
+      </div>
+    </CollapsibleBiographyWrapper>
   );
 }
