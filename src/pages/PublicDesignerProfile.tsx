@@ -221,19 +221,24 @@ const PublicDesignerProfile = () => {
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           loading="lazy"
                         />
-                        {pick.tags && pick.tags.length > 0 && (
-                          <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                            {pick.tags.map((tag) => (
-                              <Badge
-                                key={tag}
-                                variant="secondary"
-                                className="text-[8px] md:text-[9px] px-1.5 py-0.5 font-body tracking-wide bg-background/80 backdrop-blur-sm text-foreground border-none shadow-sm"
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
+                        {pick.tags && pick.tags.length > 0 && (() => {
+                          const collectionTags = pick.tags.filter((t) =>
+                            /couture|edition|limited|modern scholar|unesco/i.test(t)
+                          );
+                          return collectionTags.length > 0 ? (
+                            <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                              {collectionTags.map((tag) => (
+                                <Badge
+                                  key={tag}
+                                  variant="secondary"
+                                  className="text-[8px] md:text-[9px] px-1.5 py-0.5 font-body tracking-wide bg-background/80 backdrop-blur-sm text-foreground border-none shadow-sm"
+                                >
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : null;
+                        })()}
                       </div>
 
                       <div className="flex flex-col flex-1">
