@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText, ShoppingCart, Check, Scale, Heart, Loader2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import EditorialBiography from "@/components/EditorialBiography";
 import { cn } from "@/lib/utils";
@@ -95,6 +96,7 @@ const TradeAtelierProfile = () => {
   const picks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const [gridCols, setGridCols] = useState<3 | 4>(4);
   const fxRates = useFxRates();
 
   // Lightbox state
@@ -358,10 +360,45 @@ const TradeAtelierProfile = () => {
               <h2 className="font-display text-xs tracking-[0.2em] uppercase text-foreground">
                 Curators' Picks
               </h2>
-              <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
+              <div className="flex items-center gap-3">
+                <div className="hidden md:block">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
+                          className="flex items-center p-1.5 rounded transition-all hover:opacity-70"
+                          aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            {gridCols === 3 ? (
+                              <>
+                                <rect x="2" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
+                                <rect x="8.5" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
+                                <rect x="15" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
+                                <rect x="21.5" y="3" width="1" height="18" rx="0.5" fill="currentColor" opacity="0.25" />
+                              </>
+                            ) : (
+                              <>
+                                <rect x="4" y="3" width="4" height="18" rx="1" fill="currentColor" />
+                                <rect x="10" y="3" width="4" height="18" rx="1" fill="currentColor" />
+                                <rect x="16" y="3" width="4" height="18" rx="1" fill="currentColor" />
+                              </>
+                            )}
+                          </svg>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">
+                        {gridCols === 3 ? "Display 4" : "Display 3"}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
+              </div>
             </div>
 
-                <div className="grid grid-cols-3 gap-x-3 gap-y-5 md:grid-cols-4 md:gap-4">
+                <div className={cn("grid gap-x-3 gap-y-5 md:gap-4 grid-cols-3", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
                   {picks.map((pick) => {
                     const isAdding = addingProductId === pick.id;
                     const isAdded = addedProductIds.has(pick.id);
