@@ -4,8 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { format } from "date-fns";
-import { History, Trash2, Pencil, Plus, ChevronDown, ChevronRight, Search, Filter } from "lucide-react";
+import { History, Trash2, Pencil, Plus, ChevronDown, ChevronRight, Search, Filter, RotateCcw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface AuditEntry {
   id: string;
@@ -78,7 +83,8 @@ function ChangedFields({ oldData, newData }: { oldData: Record<string, any> | nu
 }
 
 const TradeAuditLog = () => {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, isSuperAdmin, loading } = useAuth();
+  const { toast } = useToast();
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [fetching, setFetching] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -86,6 +92,9 @@ const TradeAuditLog = () => {
   const [opFilter, setOpFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [profileMap, setProfileMap] = useState<Record<string, string>>({});
+  const [restoreTarget, setRestoreTarget] = useState<AuditEntry | null>(null);
+  const [restoring, setRestoring] = useState(false);
+  const [restoredIds, setRestoredIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -115,6 +124,29 @@ const TradeAuditLog = () => {
       }
     }
     setFetching(false);
+  };
+
+  const RESTORABLE_TABLES = ["designer_curator_picks", "trade_documents", "designers"] as const;
+
+  const handleRestore = async (entry: AuditEntry) => {
+    if (!entry.old_data || !RESTORABLE_TABLES.includes(entry.table_name as any)) return;
+    setRestoring(true);
+    try {
+      // Strip system-generated fields that would conflict on reinsert
+      const record = { ...entry.old_data };
+      delete record.created_at;
+
+      const { error } = await supabase.from(entry.table_name as any).upsert(record as any, { onConflict: "id" });
+      if (error) throw error;
+
+      toast({ title: "Restored", description: `"${getRecordLabel(entry)}" has been restored to ${TABLE_LABELS[entry.table_name]}.` });
+      setRestoredIds((prev) => new Set(prev).add(entry.id));
+    } catch (err: any) {
+      toast({ title: "Restore failed", description: err.message || "Unknown error", variant: "destructive" });
+    } finally {
+      setRestoring(false);
+      setRestoreTarget(null);
+    }
   };
 
   const filtered = useMemo(() => {
@@ -279,6 +311,20 @@ const TradeAuditLog = () => {
                                 <pre className="font-body text-xs text-muted-foreground bg-muted/50 rounded p-3 overflow-x-auto max-h-64 whitespace-pre-wrap">
                                   {JSON.stringify(entry.old_data, null, 2)}
                                 </pre>
+                                {isSuperAdmin && RESTORABLE_TABLES.includes(entry.table_name as any) && (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setRestoreTarget(entry); }}
+                                    disabled={restoredIds.has(entry.id)}
+                                    className={`mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-body text-xs border transition-colors ${
+                                      restoredIds.has(entry.id)
+                                        ? "border-success/30 text-success bg-success/5 cursor-default"
+                                        : "border-foreground/20 text-foreground hover:bg-foreground/5"
+                                    }`}
+                                  >
+                                    <RotateCcw className="h-3 w-3" />
+                                    {restoredIds.has(entry.id) ? "Restored" : "Restore this record"}
+                                  </button>
+                                )}
                               </div>
                             )}
                             {entry.operation === "UPDATE" && (
@@ -313,6 +359,28 @@ const TradeAuditLog = () => {
           Showing {filtered.length} of {entries.length} entries · Audit logging active since March 23, 2026
         </p>
       </div>
+
+      <AlertDialog open={!!restoreTarget} onOpenChange={(open) => !open && setRestoreTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Restore Deleted Record</AlertDialogTitle>
+            <AlertDialogDescription className="font-body">
+              This will reinsert <span className="font-medium text-foreground">"{restoreTarget ? getRecordLabel(restoreTarget) : ""}"</span> back
+              into {restoreTarget ? TABLE_LABELS[restoreTarget.table_name] || restoreTarget.table_name : ""}. The record will be restored exactly as it was before deletion.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="font-body text-xs" disabled={restoring}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="font-body text-xs"
+              disabled={restoring}
+              onClick={() => restoreTarget && handleRestore(restoreTarget)}
+            >
+              {restoring ? "Restoring…" : "Restore"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
