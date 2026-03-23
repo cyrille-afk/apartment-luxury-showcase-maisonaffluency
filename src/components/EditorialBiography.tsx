@@ -207,9 +207,9 @@ function SplitImageBlock({
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={transition}
-      className="shrink-0 w-full md:w-[35%]"
+      className="shrink-0 w-full md:w-[20%]"
     >
-      <div className="rounded-lg overflow-hidden bg-muted/10 aspect-square">
+      <div className="rounded-lg overflow-hidden bg-muted/10">
         <img
           src={url}
           alt={caption || `${designerName} — editorial`}
