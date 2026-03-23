@@ -347,11 +347,11 @@ function SplitImageBlock({
 
   return (
     <div className={`${index === 0 ? "mb-10 md:mb-14" : "my-10 md:my-14"} flex flex-col md:flex-row gap-6 md:gap-10 items-start`}>
-      <div className={`shrink-0 w-full md:w-[50%] order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
+      <div className={`shrink-0 w-full md:w-[50%] order-2 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
         {imageEl}
       </div>
       {textEl && (
-        <div className={`flex-1 min-w-0 order-2 ${imageOnRight ? 'md:order-1' : 'md:order-2'}`}>
+        <div className={`flex-1 min-w-0 order-1 ${imageOnRight ? 'md:order-1' : 'md:order-2'}`}>
           {textEl}
         </div>
       )}
