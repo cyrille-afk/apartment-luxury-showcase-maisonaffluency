@@ -472,8 +472,7 @@ export default function EditorialBiography({
 
     const shouldInsertMedia =
       (i + 1) % interval === 0 &&
-      mediaIndex < parsedMedia.length &&
-      i < paragraphs.length - 1;
+      mediaIndex < parsedMedia.length;
 
     if (shouldInsertMedia) {
       const mediaItem = parsedMedia[mediaIndex];
