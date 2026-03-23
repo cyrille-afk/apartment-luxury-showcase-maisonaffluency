@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Play, ChevronDown } from "lucide-react";
 
 interface EditorialBiographyProps {
@@ -114,6 +114,16 @@ function captionFromUrl(url: string): string | null {
   }
 }
 
+const VIDEO_POSTER_FALLBACKS: Record<string, string> = {
+  "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1774220339833-galr9d.mp4":
+    "/images/lamont-video-poster-v2.jpg?v=20260323-2",
+};
+
+function getPosterFallbackForVideo(url: string): string | undefined {
+  const normalized = url.split("?")[0];
+  return VIDEO_POSTER_FALLBACKS[normalized];
+}
+
 /* ------------------------------------------------------------------ */
 /*  Video Block — always full-width to stand out                      */
 /* ------------------------------------------------------------------ */
@@ -133,6 +143,8 @@ function VideoBlock({
   const caption = overrideCaption ?? captionFromUrl(url);
   const embedUrl = getEmbedUrl(url);
   const [playing, setPlaying] = useState(false);
+  const [posterIndex, setPosterIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Extract YouTube thumbnail automatically
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
@@ -140,16 +152,41 @@ function VideoBlock({
 
   const isNativeVideo = !embedUrl;
   const videoSrc = isNativeVideo ? normalizeCloudinaryVideoUrl(url) : url;
-  // For Supabase-hosted videos, generate poster by extracting a frame server-side;
-  // for Cloudinary videos, swap /video/upload/ to /video/upload/so_2,f_jpg/ for a frame
+
+  const manualPosterUrl = posterUrl?.trim() || undefined;
   const autoPosterUrl = (() => {
-    if (posterUrl) return posterUrl;
+    if (manualPosterUrl) return manualPosterUrl;
     if (/res\.cloudinary\.com\/.+\/video\/upload/i.test(url)) {
       return url.replace("/video/upload/", "/video/upload/so_2,f_jpg,q_auto/");
     }
     return undefined;
   })();
-  const nativePosterUrl = autoPosterUrl;
+  const mappedFallbackPoster = getPosterFallbackForVideo(url);
+
+  const posterCandidates = useMemo(
+    () =>
+      [...new Set([manualPosterUrl, autoPosterUrl, mappedFallbackPoster].filter((p): p is string => !!p))],
+    [manualPosterUrl, autoPosterUrl, mappedFallbackPoster]
+  );
+
+  useEffect(() => {
+    setPosterIndex(0);
+  }, [url, manualPosterUrl]);
+
+  useEffect(() => {
+    if (!playing || !isNativeVideo || !videoRef.current) return;
+    const video = videoRef.current;
+    video.play().catch(() => undefined);
+  }, [playing, isNativeVideo, videoSrc]);
+
+  const currentPosterUrl = posterCandidates[posterIndex];
+
+  const handlePosterError = () => {
+    setPosterIndex((prev) => {
+      if (prev >= posterCandidates.length - 1) return prev;
+      return prev + 1;
+    });
+  };
 
   const playOverlay = (
     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -159,8 +196,6 @@ function VideoBlock({
     </div>
   );
 
-  const usesEmbeddedFrame = !!thumbnailUrl || !!embedUrl;
-
   return (
     <motion.figure
       initial={{ opacity: 0, y: 24 }}
@@ -169,13 +204,7 @@ function VideoBlock({
       transition={transition}
       className="my-10 md:my-14 -mx-2 md:-mx-6"
     >
-      <div
-        className={
-          usesEmbeddedFrame
-            ? "aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center"
-            : "rounded-lg bg-muted/20 shadow-lg relative flex items-center justify-center"
-        }
-      >
+      <div className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center">
         {!playing && thumbnailUrl ? (
           /* YouTube/Vimeo with auto-thumbnail */
           <button
@@ -198,28 +227,35 @@ function VideoBlock({
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
-        ) : !playing && nativePosterUrl ? (
+        ) : !playing ? (
           <button
             onClick={() => setPlaying(true)}
             className="w-full h-full relative group cursor-pointer"
             aria-label={`Play ${caption || "video"}`}
           >
-            <img
-              src={nativePosterUrl}
-              alt={caption || `${designerName} — video cover`}
-              className="w-full h-auto max-h-[72vh] rounded-lg object-contain bg-black"
-              loading="lazy"
-            />
+            {currentPosterUrl ? (
+              <img
+                src={currentPosterUrl}
+                alt={caption || `${designerName} — video cover`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={handlePosterError}
+              />
+            ) : (
+              <div className="w-full h-full bg-muted/40" />
+            )}
             {playOverlay}
           </button>
         ) : (
           <video
+            ref={videoRef}
             src={videoSrc}
             controls
-            autoPlay={playing}
+            autoPlay
             playsInline
             preload="metadata"
-            className="w-full h-auto max-h-[72vh] rounded-lg bg-black"
+            className="w-full h-full object-contain bg-black"
+            poster={currentPosterUrl}
           />
         )}
       </div>
