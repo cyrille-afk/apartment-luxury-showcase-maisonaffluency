@@ -105,7 +105,44 @@ const TradeAtelierProfile = () => {
     isParentBrand && designer?.founder === designer?.name ? designer : undefined
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
-  const picks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
+  const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
+
+  // Interleave picks so same functional category never appears side-by-side
+  const picks = useMemo(() => {
+    if (rawPicks.length <= 2) return rawPicks;
+    const getFunctionalCategory = (p: typeof rawPicks[0]) => {
+      const sub = p.subcategory?.toLowerCase() || "";
+      const tags = (p.tags || []).join(" ").toLowerCase();
+      const cat = p.category?.toLowerCase() || "";
+      // Derive a functional key from subcategory or tag hints
+      if (sub.includes("table lamp") || tags.includes("table lamp")) return "table-lamp";
+      if (sub.includes("floor lamp") || tags.includes("floor lamp")) return "floor-lamp";
+      if (sub.includes("sconce") || sub.includes("wall") || tags.includes("sconce")) return "sconce";
+      if (sub.includes("lantern") || tags.includes("lantern")) return "lantern";
+      if (sub.includes("console") || tags.includes("console")) return "console";
+      if (sub.includes("desk") || tags.includes("desk")) return "desk";
+      if (sub.includes("bench") || tags.includes("bench")) return "bench";
+      if (sub.includes("cabinet") || tags.includes("cabinet")) return "cabinet";
+      if (sub.includes("bowl") || sub.includes("vessel") || tags.includes("vessel") || tags.includes("bowl")) return "vessel";
+      if (sub.includes("box") || tags.includes("box")) return "box";
+      if (sub) return sub;
+      if (cat) return cat;
+      return "other";
+    };
+
+    const result: typeof rawPicks = [];
+    const remaining = [...rawPicks];
+    let lastCat = "";
+
+    while (remaining.length > 0) {
+      // Find first item whose functional category differs from last placed
+      const idx = remaining.findIndex(p => getFunctionalCategory(p) !== lastCat);
+      const picked = idx >= 0 ? remaining.splice(idx, 1)[0] : remaining.shift()!;
+      lastCat = getFunctionalCategory(picked);
+      result.push(picked);
+    }
+    return result;
+  }, [rawPicks]);
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [gridCols, setGridCols] = useState<3 | 4>(3);
