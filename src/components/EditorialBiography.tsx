@@ -216,6 +216,7 @@ function VideoBlock({
           <video
             src={videoSrc}
             controls
+            autoPlay={playing}
             playsInline
             preload="metadata"
             className="w-full h-auto max-h-[72vh] rounded-lg bg-black"
