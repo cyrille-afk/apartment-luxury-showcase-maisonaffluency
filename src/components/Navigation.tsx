@@ -199,6 +199,11 @@ const Navigation = () => {
       return;
     }
     const id = href.replace(/^#/, "");
+    // If not on the homepage, navigate there first with the hash
+    if (window.location.pathname !== "/") {
+      navigate(`/${href}`);
+      return;
+    }
     // Delay scroll to allow Sheet close animation to complete
     setTimeout(() => scrollToSection(id), 350);
   };
