@@ -221,8 +221,13 @@ export default function TradeFavorites() {
 
       <div className="border-b border-border">
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-10">
-          <h1 className="font-display text-lg text-foreground">Saved Products</h1>
-          <p className="font-body text-xs text-muted-foreground mt-1">Your curated shortlist of products across our portfolio.</p>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h1 className="font-display text-lg text-foreground">Saved Products</h1>
+              <p className="font-body text-xs text-muted-foreground mt-1">Your curated shortlist of products across our portfolio.</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => navigate("/trade/showroom")}>Back to Showroom</Button>
+          </div>
         </div>
       </div>
 
