@@ -86,16 +86,22 @@ const PublicDesignerProfile = () => {
       return pick.category?.trim().toLowerCase() || "other";
     };
 
-    const interleaved: typeof rawPicks = [];
-    const remaining = [...rawPicks];
-    let lastKey = "";
+    // Group items by functional category, then round-robin to maximise spacing
+    const buckets = new Map<string, typeof rawPicks>();
+    for (const pick of rawPicks) {
+      const key = getFunctionalCategory(pick);
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key)!.push(pick);
+    }
+    // Sort buckets largest-first so the most common category seeds the spread
+    const queues = [...buckets.values()].sort((a, b) => b.length - a.length);
 
-    while (remaining.length > 0) {
-      const nextIndex = remaining.findIndex((pick) => getFunctionalCategory(pick) !== lastKey);
-      const next = nextIndex >= 0 ? remaining.splice(nextIndex, 1)[0] : remaining.shift();
-      if (!next) break;
-      lastKey = getFunctionalCategory(next);
-      interleaved.push(next);
+    const interleaved: typeof rawPicks = [];
+    let safety = rawPicks.length + 1;
+    while (interleaved.length < rawPicks.length && --safety > 0) {
+      for (const q of queues) {
+        if (q.length > 0) interleaved.push(q.shift()!);
+      }
     }
 
     return interleaved;
