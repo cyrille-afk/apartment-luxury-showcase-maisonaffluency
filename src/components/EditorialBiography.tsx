@@ -42,8 +42,25 @@ function normalizeCloudinaryVideoUrl(url: string): string {
     .replace(/,c_(fill|crop)\b/gi, ",c_fit");
 }
 
+/** Render a paragraph supporting <strong> HTML tags and highlighted quoted text */
+function renderParagraph(text: string): React.ReactNode[] {
+  // First split on <strong>...</strong> tags
+  const parts = text.split(/(<strong>[\s\S]*?<\/strong>)/g);
+  return parts.map((part, i) => {
+    const strongMatch = part.match(/^<strong>([\s\S]*?)<\/strong>$/);
+    if (strongMatch) {
+      return (
+        <strong key={i} className="font-semibold text-foreground">
+          {renderQuotedText(strongMatch[1])}
+        </strong>
+      );
+    }
+    return <span key={i}>{renderQuotedText(part)}</span>;
+  });
+}
+
 /** Highlight quoted text within a paragraph */
-function renderQuotedText(text: string) {
+function renderQuotedText(text: string): React.ReactNode[] {
   return text.split(/(\u2018[^\u2019]*\u2019|'[^']*')/g).map((segment, i) => {
     const isCurly = segment.startsWith("\u2018") && segment.endsWith("\u2019");
     const isStraight = segment.startsWith("'") && segment.endsWith("'") && segment.length > 2;
