@@ -83,6 +83,23 @@ const contactOptions = [
 const navItems = [...leftNavItems, ...rightNavItems];
 
 const Navigation = () => {
+  // localStorage-backed favorite count
+  const [favCount, setFavCount] = useState(0);
+  useEffect(() => {
+    const read = () => {
+      try {
+        const raw = localStorage.getItem("public_favorites");
+        setFavCount(raw ? JSON.parse(raw).length : 0);
+      } catch { setFavCount(0); }
+    };
+    read();
+    const onStorage = (e: StorageEvent) => { if (e.key === "public_favorites") read(); };
+    window.addEventListener("storage", onStorage);
+    // Also listen for same-tab changes via a custom event
+    const onLocal = () => read();
+    window.addEventListener("public_favorites_changed", onLocal);
+    return () => { window.removeEventListener("storage", onStorage); window.removeEventListener("public_favorites_changed", onLocal); };
+  }, []);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("#home");
