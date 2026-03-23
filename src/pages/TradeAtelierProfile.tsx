@@ -249,7 +249,7 @@ const TradeAtelierProfile = () => {
         <title>{name} — Ateliers & Partners</title>
       </Helmet>
 
-      <div className="space-y-4 pt-4">
+      <div className="space-y-4">
         {/* Back */}
         <div className="flex items-center justify-between">
           <button
