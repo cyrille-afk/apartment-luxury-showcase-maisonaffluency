@@ -207,7 +207,7 @@ function SplitImageBlock({
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={transition}
-      className="flex-1 min-w-0"
+      className="shrink-0 w-full md:w-[35%]"
     >
       <div className="rounded-lg overflow-hidden bg-muted/10 aspect-square">
         <img
