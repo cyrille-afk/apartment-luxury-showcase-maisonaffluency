@@ -160,7 +160,7 @@ const PublicDesignerProfile = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-24 md:pt-28 pb-20 space-y-8 md:space-y-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-28 md:pt-32 pb-20 space-y-8 md:space-y-12">
           <button
             onClick={() => {
               if (window.history.length > 1) {
