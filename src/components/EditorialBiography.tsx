@@ -34,6 +34,14 @@ function getEmbedUrl(url: string): string | null {
   return null;
 }
 
+/** Keep Cloudinary-hosted videos uncropped when legacy URLs contain c_fill/c_crop */
+function normalizeCloudinaryVideoUrl(url: string): string {
+  if (!/res\.cloudinary\.com\/.+\/video\/upload/i.test(url)) return url;
+  return url
+    .replace(/\/c_(fill|crop),/gi, "/c_fit,")
+    .replace(/,c_(fill|crop)\b/gi, ",c_fit");
+}
+
 /** Highlight quoted text within a paragraph */
 function renderQuotedText(text: string) {
   return text.split(/(\u2018[^\u2019]*\u2019|'[^']*')/g).map((segment, i) => {
@@ -109,6 +117,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
   const thumbnailUrl = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg` : null;
 
   const isNativeVideo = !embedUrl;
+  const videoSrc = isNativeVideo ? normalizeCloudinaryVideoUrl(url) : url;
 
   const playOverlay = (
     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -127,10 +136,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
       className="my-10 md:my-14 -mx-2 md:-mx-6"
     >
       <div
-        className={isNativeVideo
-          ? "rounded-lg overflow-hidden bg-muted/20 shadow-lg relative"
-          : "aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center"
-        }
+        className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center"
       >
         {!playing && thumbnailUrl ? (
           /* YouTube/Vimeo with auto-thumbnail */
@@ -156,11 +162,11 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
           />
         ) : (
           <video
-            src={url}
+            src={videoSrc}
             controls
             playsInline
             preload="metadata"
-            className="w-full h-auto max-h-[70vh] object-contain"
+            className="w-full h-full object-contain bg-black"
           />
         )}
       </div>
