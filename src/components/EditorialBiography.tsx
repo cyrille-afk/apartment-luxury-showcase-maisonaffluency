@@ -486,7 +486,7 @@ export default function EditorialBiography({
       const block = parsed[i];
 
       if (block.type === "video") {
-        const inlinePoster = undefined;
+        const inlinePoster = block.poster || undefined;
 
         elements.push(
           <VideoBlock
