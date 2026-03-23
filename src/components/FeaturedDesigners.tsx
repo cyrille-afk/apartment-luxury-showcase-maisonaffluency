@@ -2613,17 +2613,15 @@ const FeaturedDesigners = () => {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          {designerAlphaGroups.map(([letter, designers]) => (
-            <div key={letter}>
-              <div id={`designer-alpha-${letter}`} className="scroll-mt-32 pt-4 pb-2 flex items-center gap-3 px-1">
-                <span className="font-serif text-lg md:text-lg text-foreground md:text-muted-foreground">{letter}</span>
-                <div className="flex-1 h-px bg-border/30 md:hidden" />
-                <span className="text-[10px] text-foreground/70 tracking-widest font-body uppercase md:hidden">
-                  {designers.length}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                {designers.map((designer) => {
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {filteredDesigners
+                .slice()
+                .sort((a, b) => {
+                  const nameA = (a.displayName || a.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                  const nameB = (b.displayName || b.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                  return nameA.localeCompare(nameB);
+                })
+                .map((designer) => {
                   const isLamont = designer.id === "alexander-lamont";
                   const cardContent = (
                     <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
@@ -2643,7 +2641,6 @@ const FeaturedDesigners = () => {
                         </div>
                       )}
 
-                      {/* Name overlay */}
                       <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
                         <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
                           {(() => {
@@ -2653,7 +2650,6 @@ const FeaturedDesigners = () => {
                         </p>
                       </div>
 
-                      {/* Hover overlay */}
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
                         {designer.specialty && (
                           <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">
@@ -2695,9 +2691,7 @@ const FeaturedDesigners = () => {
                     </button>
                   );
                 })}
-              </div>
             </div>
-          ))}
         </motion.div>
         </div>
         {/* Curators' Picks Lightbox Dialog */}
