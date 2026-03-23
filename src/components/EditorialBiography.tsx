@@ -209,11 +209,11 @@ function SplitImageBlock({
       transition={transition}
       className="flex-1 min-w-0"
     >
-      <div className="rounded-lg overflow-hidden bg-muted/10">
+      <div className="rounded-lg overflow-hidden bg-muted/10 aspect-square">
         <img
           src={url}
           alt={caption || `${designerName} — editorial`}
-          className="max-w-full h-auto object-contain mx-auto"
+          className="w-full h-full object-contain"
           loading="lazy"
         />
       </div>
@@ -267,13 +267,13 @@ function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { ur
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={transition}
-      className="my-8 -mx-2 md:mx-0"
+      className="my-10 md:my-14"
     >
-      <div className="rounded-lg overflow-hidden bg-muted/10">
+      <div className="rounded-lg overflow-hidden bg-muted/10 aspect-square max-w-[520px] mx-auto">
         <img
           src={url}
           alt={caption || `${designerName} — editorial`}
-          className="w-full h-auto object-contain"
+          className="w-full h-full object-contain"
           loading="lazy"
         />
       </div>
