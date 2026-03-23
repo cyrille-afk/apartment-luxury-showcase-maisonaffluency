@@ -100,7 +100,7 @@ const TradeAtelierProfile = () => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [slug]);
   // For parent brands (founder === name), fetch picks from all sub-designers
-  const isParentBrand = designer?.founder === designer?.name || (!designer?.founder && designer?.name);
+  const isParentBrand = !!(designer?.founder && designer.founder === designer.name);
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     isParentBrand && designer?.founder === designer?.name ? designer : undefined
   );
