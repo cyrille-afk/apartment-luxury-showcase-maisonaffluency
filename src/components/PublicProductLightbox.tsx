@@ -140,7 +140,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.98 }}
           transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
-          className="relative max-w-4xl w-full h-[100dvh] md:h-auto md:max-h-[90vh] flex flex-col md:flex-row bg-background/85 backdrop-blur-xl md:rounded-lg rounded-none shadow-2xl overflow-hidden"
+          className="relative max-w-4xl w-full h-[100dvh] md:h-auto md:max-h-[90vh] flex flex-col md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header */}
