@@ -2353,48 +2353,6 @@ const FeaturedDesigners = () => {
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
               Designers & Makers <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">On View</span>
             </h2>
-            <div className="hidden md:flex items-center gap-2 ml-auto">
-              <button
-                onClick={() => setGridCols(gridCols === 3 ? 5 : 3)}
-                className="p-1.5 rounded border border-foreground text-foreground transition-colors"
-                aria-label={gridCols === 3 ? "Switch to 5 columns" : "Switch to 3 columns"}
-                title={gridCols === 3 ? "Switch to 5 columns" : "Switch to 3 columns"}
-              >
-                {gridCols === 3 ? (
-                  <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="2" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
-                    <rect x="7.5" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
-                    <rect x="13" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
-                  </svg>
-                ) : (
-                  <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                    <rect x="4.75" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                    <rect x="8.5" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                    <rect x="12.25" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                    <rect x="16" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                  </svg>
-                )}
-              </button>
-              <div className="relative w-56 ml-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Designer..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-8 h-9 text-sm bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => { setSearchQuery(""); ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
             Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings
@@ -2565,6 +2523,50 @@ const FeaturedDesigners = () => {
             {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
           </p>
         )}
+
+        {/* Grid toggle + search — right-aligned above grid */}
+        <div className="hidden md:flex items-center justify-end gap-2 mb-4">
+          <button
+            onClick={() => setGridCols(gridCols === 3 ? 5 : 3)}
+            className="p-1.5 rounded border border-foreground text-foreground transition-colors"
+            aria-label={gridCols === 3 ? "Switch to 5 columns" : "Switch to 3 columns"}
+            title={gridCols === 3 ? "Switch to 5 columns" : "Switch to 3 columns"}
+          >
+            {gridCols === 3 ? (
+              <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
+                <rect x="7.5" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
+                <rect x="13" y="2" width="3" height="14" rx="0.5" fill="currentColor"/>
+              </svg>
+            ) : (
+              <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                <rect x="4.75" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                <rect x="8.5" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                <rect x="12.25" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                <rect x="16" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+              </svg>
+            )}
+          </button>
+          <div className="relative w-56">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Designer..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-8 h-9 text-sm bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => { setSearchQuery(""); ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
