@@ -111,23 +111,15 @@ const TradeAtelierProfile = () => {
   const picks = useMemo(() => {
     if (rawPicks.length <= 2) return rawPicks;
     const getFunctionalCategory = (p: typeof rawPicks[0]) => {
-      const sub = p.subcategory?.toLowerCase() || "";
-      const tags = (p.tags || []).join(" ").toLowerCase();
-      const cat = p.category?.toLowerCase() || "";
-      // Derive a functional key from subcategory or tag hints
-      if (sub.includes("table lamp") || tags.includes("table lamp")) return "table-lamp";
-      if (sub.includes("floor lamp") || tags.includes("floor lamp")) return "floor-lamp";
-      if (sub.includes("sconce") || sub.includes("wall") || tags.includes("sconce")) return "sconce";
-      if (sub.includes("lantern") || tags.includes("lantern")) return "lantern";
-      if (sub.includes("console") || tags.includes("console")) return "console";
-      if (sub.includes("desk") || tags.includes("desk")) return "desk";
-      if (sub.includes("bench") || tags.includes("bench")) return "bench";
-      if (sub.includes("cabinet") || tags.includes("cabinet")) return "cabinet";
-      if (sub.includes("bowl") || sub.includes("vessel") || tags.includes("vessel") || tags.includes("bowl")) return "vessel";
-      if (sub.includes("box") || tags.includes("box")) return "box";
-      if (sub) return sub;
-      if (cat) return cat;
-      return "other";
+      // Use subcategory if available
+      if (p.subcategory?.trim()) return p.subcategory.trim().toLowerCase();
+      // Fall back to tags — use the most specific (last) tag as functional key
+      const tags = p.tags || [];
+      if (tags.length > 0) {
+        const last = tags[tags.length - 1]?.toLowerCase().trim();
+        if (last) return last;
+      }
+      return p.category?.toLowerCase() || "other";
     };
 
     const result: typeof rawPicks = [];
