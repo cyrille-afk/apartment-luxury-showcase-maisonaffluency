@@ -484,7 +484,10 @@ const TradeAtelierProfile = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transition, delay: 0.25 }}
           >
-            <div className="flex items-center justify-end mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-xs tracking-[0.2em] uppercase text-foreground">
+                Curators' Picks
+              </h2>
               <div className="flex items-center gap-3">
                 <div>
                   <TooltipProvider>
