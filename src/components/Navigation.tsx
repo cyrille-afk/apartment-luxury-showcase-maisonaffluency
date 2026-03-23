@@ -83,6 +83,23 @@ const contactOptions = [
 const navItems = [...leftNavItems, ...rightNavItems];
 
 const Navigation = () => {
+  // localStorage-backed favorite count
+  const [favCount, setFavCount] = useState(0);
+  useEffect(() => {
+    const read = () => {
+      try {
+        const raw = localStorage.getItem("public_favorites");
+        setFavCount(raw ? JSON.parse(raw).length : 0);
+      } catch { setFavCount(0); }
+    };
+    read();
+    const onStorage = (e: StorageEvent) => { if (e.key === "public_favorites") read(); };
+    window.addEventListener("storage", onStorage);
+    // Also listen for same-tab changes via a custom event
+    const onLocal = () => read();
+    window.addEventListener("public_favorites_changed", onLocal);
+    return () => { window.removeEventListener("storage", onStorage); window.removeEventListener("public_favorites_changed", onLocal); };
+  }, []);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("#home");
@@ -412,6 +429,11 @@ const Navigation = () => {
                 title="My Favorites"
               >
                 <Heart className="w-4 h-4 text-foreground group-hover:text-primary transition-colors" />
+                {favCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none px-1">
+                    {favCount}
+                  </span>
+                )}
               </button>
               <DropdownMenu>
                 <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none relative group">

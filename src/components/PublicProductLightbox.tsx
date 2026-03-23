@@ -42,6 +42,7 @@ function readLocalFavorites(): Set<string> {
 
 function writeLocalFavorites(ids: Set<string>) {
   localStorage.setItem(LS_KEY, JSON.stringify([...ids]));
+  window.dispatchEvent(new Event("public_favorites_changed"));
 }
 
 function useLocalFavorites() {
