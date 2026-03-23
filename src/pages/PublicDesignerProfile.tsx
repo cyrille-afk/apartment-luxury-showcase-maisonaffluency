@@ -83,7 +83,7 @@ const PublicDesignerProfile = () => {
   const instagramLink = designer.links.find((l) => l.type === "Instagram")?.url;
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
   const heroImage = designer.hero_image_url || designer.image_url;
-  const heroAspect = isDesignerProfile ? "aspect-[3/4]" : "aspect-[16/9]";
+  const heroAspect = isDesignerProfile ? "aspect-[3/4]" : "aspect-[4/5] md:aspect-[16/9]";
   const isGrouped = groupedPicks.length > 0;
 
   return (
