@@ -2139,7 +2139,7 @@ const FeaturedDesigners = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [gridCols, setGridCols] = useState<3 | 4>(3);
+  const [gridCols, setGridCols] = useState<3 | 4 | 5>(3);
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
   const categorySourceRef = useRef<string | null>(null);
@@ -2354,28 +2354,20 @@ const FeaturedDesigners = () => {
               Designers & Makers <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">On View</span>
             </h2>
             <div className="hidden md:flex items-center gap-1 ml-auto">
-              <button
-                onClick={() => setGridCols(3)}
-                className={cn(
-                  "p-1.5 rounded transition-colors",
-                  gridCols === 3 ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground"
-                )}
-                aria-label="3-column grid"
-                title="3 columns"
-              >
-                <Grid3X3 className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setGridCols(4)}
-                className={cn(
-                  "p-1.5 rounded transition-colors",
-                  gridCols === 4 ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground"
-                )}
-                aria-label="4-column grid"
-                title="4 columns"
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </button>
+              {([3, 4, 5] as const).map((cols) => (
+                <button
+                  key={cols}
+                  onClick={() => setGridCols(cols)}
+                  className={cn(
+                    "px-2 py-1 rounded text-[11px] font-body tracking-wide transition-colors",
+                    gridCols === cols ? "text-foreground bg-muted font-semibold" : "text-muted-foreground hover:text-foreground"
+                  )}
+                  aria-label={`${cols}-column grid`}
+                  title={`${cols} columns`}
+                >
+                  {cols}
+                </button>
+              ))}
             </div>
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
@@ -2556,7 +2548,9 @@ const FeaturedDesigners = () => {
         >
           <div className={cn(
             "grid gap-4 md:gap-6 grid-cols-2",
-            gridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-3 lg:grid-cols-4"
+            gridCols === 3 && "md:grid-cols-3",
+            gridCols === 4 && "md:grid-cols-3 lg:grid-cols-4",
+            gridCols === 5 && "md:grid-cols-3 lg:grid-cols-5"
           )}>
               {filteredDesigners
                 .slice()
