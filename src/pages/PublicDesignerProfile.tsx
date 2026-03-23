@@ -380,7 +380,7 @@ const PublicDesignerProfile = () => {
                         pdf_url: pick.pdf_url,
                       })}
                     >
-                      <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-2 relative flex items-center justify-center">
+                      <div className="aspect-[4/5] bg-muted/20 rounded-xl overflow-hidden mb-2 relative flex items-center justify-center">
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}
