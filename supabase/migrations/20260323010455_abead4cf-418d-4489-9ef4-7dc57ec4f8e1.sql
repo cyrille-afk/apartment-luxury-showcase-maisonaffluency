@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET tags = ARRAY['Couture'] WHERE id IN ('f64acaef-6c3e-4245-ada3-2ec5952057f2', '5489ad80-c870-407a-a569-471f0b923183');
