@@ -290,9 +290,16 @@ const TradeAtelierProfile = () => {
         {/* Hero + About */}
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
+          /* Split biography: first ~2 paragraphs next to hero, rest staggered below */
+          const bioBlocks = designer.biography
+            ? designer.biography.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean)
+            : [];
+          const heroParagraphs = bioBlocks.slice(0, 2);
+          const remainingBio = bioBlocks.slice(2).join("\n\n");
+
           return isDesignerProfile ? (
             <div className="flex flex-col gap-6">
-              {/* Hero row: portrait left + quote & first paragraphs right */}
+              {/* Hero row: portrait left + quote & opening text right */}
               <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
                 {/* Left: portrait with overlaid name */}
                 <motion.div
@@ -332,28 +339,43 @@ const TradeAtelierProfile = () => {
                   )}
                 </motion.div>
 
-                {/* Right: quote + biography (staggered with 2 pick images) */}
+                {/* Right: quote + opening paragraphs */}
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ ...transition, delay: 0.15 }}
-                  className="flex-1 min-w-0"
+                  className="flex-1 min-w-0 flex flex-col justify-center"
                 >
                   {designer.philosophy && (
                     <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5">
                       "{designer.philosophy}"
                     </blockquote>
                   )}
-                  {designer.biography && (
-                    <EditorialBiography
-                      biography={designer.biography}
-                      biographyImages={designer.biography_images}
-                      pickImages={picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`)}
-                      designerName={designer.name}
-                    />
+                  {heroParagraphs.length > 0 && (
+                    <div className="font-body text-sm leading-relaxed text-foreground/85">
+                      {heroParagraphs.map((p: string, i: number) => (
+                        <p key={i} className={i > 0 ? "mt-4" : ""}>{p}</p>
+                      ))}
+                    </div>
                   )}
                 </motion.div>
               </div>
+
+              {/* Remaining biography with staggered media (2 images only) */}
+              {remainingBio && (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ ...transition, delay: 0.2 }}
+                >
+                  <EditorialBiography
+                    biography={remainingBio}
+                    biographyImages={designer.biography_images}
+                    pickImages={picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`)}
+                    designerName={designer.name}
+                  />
+                </motion.div>
+              )}
             </div>
           ) : (
             /* Atelier: full-width hero */
