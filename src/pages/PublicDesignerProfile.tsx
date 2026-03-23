@@ -53,8 +53,15 @@ const PublicDesignerProfile = () => {
   const picks = useMemo(() => {
     if (rawPicks.length <= 2) return rawPicks;
 
-    const getSubcategoryKey = (pick: (typeof rawPicks)[number]) =>
-      pick.subcategory?.trim().toLowerCase() || pick.category?.trim().toLowerCase() || "other";
+    const getSubcategoryKey = (pick: (typeof rawPicks)[number]) => {
+      if (pick.subcategory?.trim()) return pick.subcategory.trim().toLowerCase();
+      const tags = pick.tags || [];
+      if (tags.length > 0) {
+        const last = tags[tags.length - 1]?.toLowerCase().trim();
+        if (last) return last;
+      }
+      return pick.category?.trim().toLowerCase() || "other";
+    };
 
     const interleaved: typeof rawPicks = [];
     const remaining = [...rawPicks];
