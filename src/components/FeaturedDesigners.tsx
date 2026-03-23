@@ -2139,7 +2139,7 @@ const FeaturedDesigners = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [gridCols, setGridCols] = useState<3 | 4>(3);
+  const [gridCols, setGridCols] = useState<3 | 4 | 5>(3);
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
   const categorySourceRef = useRef<string | null>(null);
