@@ -107,7 +107,19 @@ function captionFromUrl(url: string): string | null {
 /* ------------------------------------------------------------------ */
 /*  Video Block — always full-width to stand out                      */
 /* ------------------------------------------------------------------ */
-function VideoBlock({ url, designerName, index, overrideCaption }: { url: string; designerName: string; index: number; overrideCaption?: string | null }) {
+function VideoBlock({
+  url,
+  designerName,
+  index,
+  overrideCaption,
+  posterUrl,
+}: {
+  url: string;
+  designerName: string;
+  index: number;
+  overrideCaption?: string | null;
+  posterUrl?: string;
+}) {
   const caption = overrideCaption ?? captionFromUrl(url);
   const embedUrl = getEmbedUrl(url);
   const [playing, setPlaying] = useState(false);
@@ -169,9 +181,10 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
         ) : (
           <video
             src={videoSrc}
+            poster={posterUrl}
             controls
             playsInline
-            preload="metadata"
+            preload="auto"
             className="w-full h-auto max-h-[72vh] rounded-lg bg-black"
           />
         )}
@@ -435,8 +448,27 @@ export default function EditorialBiography({
       const block = parsed[i];
 
       if (block.type === "video") {
+        const inlinePoster = (() => {
+          for (let j = i - 1; j >= 0; j--) {
+            const prev = parsed[j];
+            if (prev.type === "image") return prev.url;
+          }
+          for (let j = i + 1; j < parsed.length; j++) {
+            const next = parsed[j];
+            if (next.type === "image") return next.url;
+          }
+          return undefined;
+        })();
+
         elements.push(
-          <VideoBlock key={`vid-${i}`} url={block.url} designerName={designerName} index={i} overrideCaption={block.caption} />
+          <VideoBlock
+            key={`vid-${i}`}
+            url={block.url}
+            designerName={designerName}
+            index={i}
+            overrideCaption={block.caption}
+            posterUrl={inlinePoster}
+          />
         );
         i++;
         const followText: string[] = [];
@@ -539,6 +571,16 @@ export default function EditorialBiography({
         !!m && /^https?:\/\//i.test(m.url)
     );
 
+  const findNeighborPoster = (startIndex: number) => {
+    for (let j = startIndex - 1; j >= 0; j--) {
+      if (!parsedMedia[j].isVideo) return parsedMedia[j].url;
+    }
+    for (let j = startIndex + 1; j < parsedMedia.length; j++) {
+      if (!parsedMedia[j].isVideo) return parsedMedia[j].url;
+    }
+    return undefined;
+  };
+
   if (parsedMedia.length === 0) {
     return (
       <MobileCollapsible paragraphs={paragraphs} />
@@ -581,6 +623,7 @@ export default function EditorialBiography({
             designerName={designerName}
             index={mediaIndex}
             overrideCaption={mediaItem.caption}
+            posterUrl={findNeighborPoster(mediaIndex)}
           />
         );
       } else {
@@ -625,6 +668,7 @@ export default function EditorialBiography({
           designerName={designerName}
           index={mediaIndex}
           overrideCaption={mediaItem.caption}
+          posterUrl={findNeighborPoster(mediaIndex)}
         />
       );
     } else {
