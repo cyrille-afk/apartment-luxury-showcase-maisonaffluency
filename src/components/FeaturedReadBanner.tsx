@@ -104,7 +104,7 @@ const FeaturedReadBanner = () => {
     </div>
   );
 
-  if (isJournal) return null;
+  if (isJournal || isDesigners) return null;
 
   return (
     <AnimatePresence>
