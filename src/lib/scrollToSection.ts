@@ -31,7 +31,11 @@ function animateScroll(from: number, to: number, duration: number) {
 }
 
 export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth") {
-  const navHeight = 96;
+  // Measure actual fixed header height (nav + any fixed banners like Featured Read)
+  const nav = document.querySelector("nav");
+  const banner = document.querySelector("[data-featured-read-banner]");
+  const navHeight = (nav?.getBoundingClientRect().height ?? 96)
+    + (banner && window.getComputedStyle(banner).position === "fixed" ? banner.getBoundingClientRect().height : 0);
   const isMobile = window.innerWidth < 768;
   const extraOffset: Record<string, number> = {
     "sociable-environment": isMobile ? 16 : 40,
