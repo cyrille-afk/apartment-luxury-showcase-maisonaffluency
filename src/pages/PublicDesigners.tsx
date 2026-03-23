@@ -1,49 +1,28 @@
-import { useMemo, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { useAllDesigners } from "@/hooks/useDesigner";
-import { cn } from "@/lib/utils";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-
-type Tab = "ateliers" | "designers";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 
 const PublicDesigners = () => {
-  const navigate = useNavigate();
   const { data: allDesigners = [], isLoading } = useAllDesigners();
-  const [activeTab, setActiveTab] = useState<Tab>("ateliers");
 
-  // Only show published designers
-  const published = useMemo(
-    () => allDesigners.filter((d) => d.is_published),
+  const items = useMemo(
+    () =>
+      allDesigners
+        .filter((d) => d.is_published)
+        .sort((a, b) => a.name.localeCompare(b.name)),
     [allDesigners]
   );
-
-  const ateliers = useMemo(
-    () =>
-      published
-        .filter((d) => d.founder === d.name)
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [published]
-  );
-
-  const designers = useMemo(
-    () =>
-      published
-        .filter((d) => !d.founder || d.founder !== d.name)
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [published]
-  );
-
-  const items = activeTab === "ateliers" ? ateliers : designers;
 
   return (
     <>
       <Helmet>
-        <title>Ateliers & Designers — Maison Affluency</title>
+        <title>Designers & Makers in Situ — Maison Affluency</title>
         <meta
           name="description"
           content="Discover our curated selection of ateliers and designers — from historical masters to contemporary creators of collectible furniture and lighting."
@@ -54,7 +33,6 @@ const PublicDesigners = () => {
         <Navigation />
 
         <div className="max-w-7xl mx-auto px-6 md:px-12 pt-28 pb-20">
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -62,39 +40,19 @@ const PublicDesigners = () => {
             className="mb-10"
           >
             <h1 className="font-display text-3xl md:text-4xl tracking-wide mb-3">
-              Ateliers & Designers
+              Designers & Makers in Situ
             </h1>
             <p className="font-body text-sm text-muted-foreground max-w-2xl">
               A curated directory of the ateliers and independent designers whose work defines our collection.
             </p>
           </motion.div>
 
-          {/* Tabs */}
-          <div className="flex gap-6 border-b border-border mb-8">
-            {(["ateliers", "designers"] as Tab[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={cn(
-                  "font-display text-xs tracking-[0.15em] uppercase pb-3 transition-colors border-b-2 -mb-px",
-                  activeTab === tab
-                    ? "border-foreground text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {tab === "ateliers" ? "Ateliers" : "Designers"}
-              </button>
-            ))}
-          </div>
-
-          {/* Loading */}
           {isLoading && (
             <div className="flex items-center justify-center py-32">
               <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
             </div>
           )}
 
-          {/* Empty state */}
           {!isLoading && items.length === 0 && (
             <div className="flex flex-col items-center justify-center py-32 text-center">
               <p className="font-body text-sm text-muted-foreground">
@@ -103,10 +61,8 @@ const PublicDesigners = () => {
             </div>
           )}
 
-          {/* Grid */}
           {!isLoading && items.length > 0 && (
             <motion.div
-              key={activeTab}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4 }}
@@ -136,22 +92,12 @@ const PublicDesigners = () => {
                         </div>
                       )}
 
-                      {/* Name overlay — ateliers at top, designers at bottom */}
-                      {isAtelier ? (
-                        <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
-                            {item.name}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
-                            {item.name}
-                          </p>
-                        </div>
-                      )}
+                      <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                        <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+                          {item.name}
+                        </p>
+                      </div>
 
-                      {/* Atelier badge */}
                       {isAtelier && (
                         <div className="absolute top-3 left-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
                           <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">
@@ -160,14 +106,12 @@ const PublicDesigners = () => {
                         </div>
                       )}
 
-                      {/* Founder badge for designers */}
                       {item.founder && !isAtelier && (
                         <span className="absolute top-2.5 left-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full">
                           {item.founder}
                         </span>
                       )}
 
-                      {/* Hover overlay */}
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
                         {item.specialty && (
                           <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">
