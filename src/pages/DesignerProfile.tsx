@@ -165,7 +165,7 @@ const DesignerProfile = () => {
               transition={transition}
             >
               <h2 className="font-display text-lg tracking-widest uppercase text-muted-foreground mb-8">
-                Curator's Picks
+                Curators' Picks
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {picks.map((pick) => (

@@ -192,7 +192,7 @@ const PublicDesignerProfile = () => {
               transition={{ ...transition, delay: 0.25 }}
             >
               <h2 className="font-display text-xs tracking-[0.2em] uppercase text-foreground mb-6">
-                Curator's Picks
+                Curators' Picks
               </h2>
               <div className="grid grid-cols-2 gap-x-3 gap-y-5 md:grid-cols-3 lg:grid-cols-4 md:gap-4">
                 {picks.map((pick) => {
@@ -258,7 +258,7 @@ const PublicDesignerProfile = () => {
             <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/10 rounded-xl">
               <Package className="w-8 h-8 text-muted-foreground/30 mb-3" />
               <p className="font-body text-sm text-muted-foreground">
-                Curator's picks coming soon
+                Curators' picks coming soon
               </p>
             </div>
           )}
