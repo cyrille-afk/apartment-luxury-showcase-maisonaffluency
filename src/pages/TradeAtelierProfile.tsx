@@ -290,7 +290,7 @@ const TradeAtelierProfile = () => {
         {/* Hero + About */}
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
-          const heroAspect = isDesignerProfile ? "aspect-[4/5]" : "aspect-[3/2]";
+          const heroAspect = isDesignerProfile ? "aspect-[3/2]" : "aspect-[3/2]";
           return (
         <div className={cn("flex flex-col gap-6", isDesignerProfile && "md:flex-row")}>
           <motion.div
@@ -299,7 +299,7 @@ const TradeAtelierProfile = () => {
             transition={transition}
             className={cn("relative rounded-xl overflow-hidden shrink-0", isDesignerProfile && "md:w-1/2")}
           >
-            <div className={cn(heroAspect, !isDesignerProfile ? "md:aspect-[5/2] max-h-[45vh]" : "max-h-[60vh]")}>
+            <div className={cn(heroAspect, !isDesignerProfile ? "md:aspect-[5/2] max-h-[45vh]" : "max-h-[45vh]")}>
               {(designer.hero_image_url || designer.image_url) && (
                 <img
                   src={designer.hero_image_url || designer.image_url}
@@ -331,23 +331,6 @@ const TradeAtelierProfile = () => {
                 {designer.specialty && (
                   <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
                 )}
-                <div className="flex items-center justify-end mt-4">
-                  <WhatsAppShareButton
-                    onClick={(e) => {
-                      e.preventDefault();
-                      sharePageOnWhatsApp(
-                        `/trade/designers/${slug}`,
-                        name,
-                        designer.specialty || undefined,
-                        { directUrlPath: `/designers/${slug}-share.html` }
-                      );
-                    }}
-                    label="Share on WhatsApp"
-                    variant="glass"
-                    size="sm"
-                    hideOn="mobile"
-                  />
-                </div>
               </motion.div>
             </div>
           </motion.div>
