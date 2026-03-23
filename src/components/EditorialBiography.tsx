@@ -577,6 +577,7 @@ export default function EditorialBiography({
         return {
           url: parsed.url,
           caption: parsed.caption,
+          poster: parsed.poster,
           isVideo: isVideoUrl(parsed.url),
         };
       }
@@ -586,11 +587,12 @@ export default function EditorialBiography({
       return {
         url: raw,
         caption: null,
+        poster: null as string | null,
         isVideo: isVideoUrl(raw),
       };
     })
     .filter(
-      (m): m is { url: string; caption: string | null; isVideo: boolean } =>
+      (m): m is { url: string; caption: string | null; poster: string | null; isVideo: boolean } =>
         !!m && /^https?:\/\//i.test(m.url)
     );
 
