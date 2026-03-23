@@ -140,11 +140,11 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.98 }}
           transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
-          className="relative max-w-4xl w-full h-[100dvh] md:h-auto md:max-h-[90vh] flex flex-col md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden"
+          className="relative max-w-4xl w-full h-[100dvh] md:h-auto md:max-h-[90vh] md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header */}
-          <div className="md:hidden sticky top-0 z-20 flex items-center justify-between px-4 pt-3 pb-2 bg-background/90 backdrop-blur-sm border-b border-border/60">
+          <div className="md:hidden sticky top-0 z-20 flex items-center justify-between px-4 pt-3 pb-2 bg-background/90 backdrop-blur-sm border-b border-border/60 shrink-0">
             <div className="w-8" />
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
             <button onClick={onClose} className="p-2 rounded-full bg-foreground/15 text-foreground hover:bg-foreground/25 transition-all" aria-label="Close">
@@ -157,9 +157,12 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
             <X size={18} />
           </button>
 
+          {/* Scrollable mobile body */}
+          <div className="flex-1 overflow-y-auto md:flex md:flex-row md:overflow-visible">
+
           {/* Image */}
           <div
-            className="relative w-full md:w-1/2 flex-1 md:flex-none md:min-h-[400px] md:h-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-0"
+            className="relative w-full md:w-1/2 h-[55vh] md:h-auto shrink-0 bg-muted/30 flex items-center justify-center p-2 md:p-0 md:min-h-[400px]"
             onMouseEnter={() => { if (canShowHoverImage) setShowHoverImage(true); }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
@@ -374,6 +377,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
               </p>
             </div>
           </div>
+          </div> {/* end scrollable mobile body */}
         </motion.div>
       </motion.div>
     </AnimatePresence>,
