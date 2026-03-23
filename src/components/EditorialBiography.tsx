@@ -16,6 +16,7 @@ const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 /** Detect if a URL is a video */
 function isVideoUrl(url: string): boolean {
   if (/\.(mp4|webm|mov)(\?|$)/i.test(url)) return true;
+  if (/res\.cloudinary\.com\/.+\/video\/upload/i.test(url)) return true;
   if (/youtube\.com\/watch|youtu\.be\/|youtube\.com\/embed/i.test(url)) return true;
   if (/vimeo\.com\//i.test(url)) return true;
   return false;
@@ -60,7 +61,7 @@ function parseMediaLine(text: string): { url: string; caption: string | null } |
   const isMedia =
     isVideoUrl(url) ||
     /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(url) ||
-    /res\.cloudinary\.com\/.+\/image\/upload/i.test(url) ||
+    /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
     /\/storage\/v1\/object\/public\//i.test(url);
 
   if (!isMedia) return null;
