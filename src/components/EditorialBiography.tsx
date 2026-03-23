@@ -127,6 +127,8 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
     </div>
   );
 
+  const usesEmbeddedFrame = !!thumbnailUrl || !!embedUrl;
+
   return (
     <motion.figure
       initial={{ opacity: 0, y: 24 }}
@@ -136,14 +138,18 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
       className="my-10 md:my-14 -mx-2 md:-mx-6"
     >
       <div
-        className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center"
+        className={
+          usesEmbeddedFrame
+            ? "aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center"
+            : "rounded-lg bg-muted/20 shadow-lg relative flex items-center justify-center"
+        }
       >
         {!playing && thumbnailUrl ? (
           /* YouTube/Vimeo with auto-thumbnail */
           <button
             onClick={() => setPlaying(true)}
             className="w-full h-full relative group cursor-pointer"
-            aria-label={`Play ${caption || 'video'}`}
+            aria-label={`Play ${caption || "video"}`}
           >
             <img
               src={thumbnailUrl}
@@ -154,7 +160,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
           </button>
         ) : embedUrl ? (
           <iframe
-            src={playing ? embedUrl.replace('?', '?autoplay=1&') : embedUrl}
+            src={playing ? embedUrl.replace("?", "?autoplay=1&") : embedUrl}
             title={caption || `${designerName} — video`}
             className="w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -166,7 +172,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
             controls
             playsInline
             preload="metadata"
-            className="w-full h-full object-contain bg-black"
+            className="w-full h-auto max-h-[72vh] rounded-lg bg-black"
           />
         )}
       </div>
@@ -332,10 +338,18 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
 /* ------------------------------------------------------------------ */
 /*  Collapsible wrapper — limits height on mobile for long bios        */
 /* ------------------------------------------------------------------ */
-function CollapsibleBiographyWrapper({ children, elementCount }: { children: React.ReactNode; elementCount: number }) {
+function CollapsibleBiographyWrapper({
+  children,
+  elementCount,
+  allowCollapse = true,
+}: {
+  children: React.ReactNode;
+  elementCount: number;
+  allowCollapse?: boolean;
+}) {
   const [expanded, setExpanded] = useState(false);
-  // Only collapse on mobile when there's substantial content
-  if (elementCount <= 3) return <>{children}</>;
+  // Only collapse on mobile when there's substantial content and no blocking media
+  if (!allowCollapse || elementCount <= 3) return <>{children}</>;
 
   return (
     <div className="relative">
@@ -487,8 +501,10 @@ export default function EditorialBiography({
       i++;
     }
 
+    const hasInlineVideo = parsed.some((block) => block.type === "video");
+
     return (
-      <CollapsibleBiographyWrapper elementCount={elements.length}>
+      <CollapsibleBiographyWrapper elementCount={elements.length} allowCollapse={!hasInlineVideo}>
         <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
           {elements}
         </div>
@@ -625,8 +641,10 @@ export default function EditorialBiography({
     mediaIndex++;
   }
 
+  const hasParsedVideo = parsedMedia.some((mediaItem) => mediaItem.isVideo);
+
   return (
-    <CollapsibleBiographyWrapper elementCount={elements.length}>
+    <CollapsibleBiographyWrapper elementCount={elements.length} allowCollapse={!hasParsedVideo}>
       <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
         {elements}
       </div>
