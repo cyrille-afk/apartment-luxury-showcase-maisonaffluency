@@ -68,7 +68,7 @@ function pickToLightboxItem(pick: DesignerCuratorPick, brandName: string): Trade
     dimensions: pick.dimensions,
     category: pick.category || undefined,
     subcategory: pick.subcategory || undefined,
-    pdf_url: pick.pdf_url,
+    pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
     price: pick.trade_price_cents != null
       ? `€${(pick.trade_price_cents / 100).toLocaleString()}`
       : undefined,
