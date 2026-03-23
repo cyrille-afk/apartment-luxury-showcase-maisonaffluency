@@ -337,7 +337,24 @@ const PublicDesignerProfile = () => {
         <Footer />
       </div>
 
-      <PublicProductLightbox product={lightboxItem} onClose={() => setLightboxItem(null)} />
+      <PublicProductLightbox
+        product={lightboxItem}
+        allPicks={picks.map((p) => ({
+          id: p.id,
+          title: p.title,
+          subtitle: p.subtitle,
+          image_url: p.image_url,
+          hover_image_url: p.hover_image_url,
+          brand_name: designer?.name || "",
+          materials: p.materials,
+          dimensions: p.dimensions,
+          category: p.category,
+          subcategory: p.subcategory,
+          pdf_url: p.pdf_url,
+        }))}
+        onClose={() => setLightboxItem(null)}
+        onSelectRelated={(item) => setLightboxItem(item)}
+      />
     </>
   );
 };
