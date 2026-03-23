@@ -153,7 +153,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
               muted
               playsInline
               preload="metadata"
-              className="w-full h-full object-cover pointer-events-none"
+              className="w-full h-full object-contain pointer-events-none"
             />
             {playOverlay}
           </button>
