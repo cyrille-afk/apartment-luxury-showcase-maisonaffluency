@@ -127,6 +127,8 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
     </div>
   );
 
+  const usesEmbeddedFrame = !!thumbnailUrl || !!embedUrl;
+
   return (
     <motion.figure
       initial={{ opacity: 0, y: 24 }}
@@ -136,14 +138,18 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
       className="my-10 md:my-14 -mx-2 md:-mx-6"
     >
       <div
-        className="aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center"
+        className={
+          usesEmbeddedFrame
+            ? "aspect-video rounded-lg overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center"
+            : "rounded-lg bg-muted/20 shadow-lg relative flex items-center justify-center"
+        }
       >
         {!playing && thumbnailUrl ? (
           /* YouTube/Vimeo with auto-thumbnail */
           <button
             onClick={() => setPlaying(true)}
             className="w-full h-full relative group cursor-pointer"
-            aria-label={`Play ${caption || 'video'}`}
+            aria-label={`Play ${caption || "video"}`}
           >
             <img
               src={thumbnailUrl}
@@ -154,7 +160,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
           </button>
         ) : embedUrl ? (
           <iframe
-            src={playing ? embedUrl.replace('?', '?autoplay=1&') : embedUrl}
+            src={playing ? embedUrl.replace("?", "?autoplay=1&") : embedUrl}
             title={caption || `${designerName} — video`}
             className="w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -166,7 +172,7 @@ function VideoBlock({ url, designerName, index, overrideCaption }: { url: string
             controls
             playsInline
             preload="metadata"
-            className="w-full h-full object-contain bg-black"
+            className="w-full h-auto max-h-[72vh] rounded-lg bg-black"
           />
         )}
       </div>
