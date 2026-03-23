@@ -1,0 +1,1 @@
+UPDATE designers SET image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/gabriel-hendifar-apparatus-studio' WHERE id = 'e637fe48-0001-4000-8000-000000000001';
