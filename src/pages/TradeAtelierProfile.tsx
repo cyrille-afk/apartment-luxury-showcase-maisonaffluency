@@ -372,7 +372,7 @@ const TradeAtelierProfile = () => {
               <EditorialBiography
                 biography={designer.biography}
                 biographyImages={designer.biography_images}
-                pickImages={picks.slice(0, 3).map((p) => p.image_url)}
+                pickImages={isDesignerProfile ? [] : picks.slice(0, 3).map((p) => p.image_url)}
                 designerName={designer.name}
               />
             </motion.div>
