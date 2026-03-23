@@ -2257,24 +2257,13 @@ const FeaturedDesigners = () => {
   const picksSwipeRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(true);
 
-  // Deep-link handler: expand designer from URL hash
+  // Deep-link handler: navigate to designer profile
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail.section !== "designer") return;
-      const designer = featuredDesigners.find(d => d.id === detail.id);
-      if (designer) {
-        setOpenDesigners(prev => prev.includes(designer.id) ? prev : [...prev, designer.id]);
-        // Wait for accordion to fully expand, then scroll with nav offset
-        setTimeout(() => {
-          const el = document.getElementById(`designer-${designer.id}`);
-          if (el) {
-            const navHeight = document.querySelector('nav')?.getBoundingClientRect().height ?? 64;
-            const top = el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
-            window.scrollTo({ top, behavior: "smooth" });
-          }
-        }, 400);
-      }
+      // Navigate to the full profile page
+      window.location.href = `/designers/${detail.id}`;
     };
     window.addEventListener("deeplink-open-profile", handler);
     return () => window.removeEventListener("deeplink-open-profile", handler);
