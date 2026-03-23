@@ -1,12 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Layers, Ruler, FileDown, Heart, Scale, FolderOpen } from "lucide-react";
+import { X, Layers, Ruler, FileDown, Heart, Scale } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
-import { useFavorites } from "@/hooks/useFavorites";
-import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface PublicLightboxItem {
@@ -30,22 +28,55 @@ interface Props {
   onSelectRelated?: (item: PublicLightboxItem) => void;
 }
 
+/* ------------------------------------------------------------------ */
+/*  Tiny localStorage-backed favorites (no auth needed)                */
+/* ------------------------------------------------------------------ */
+const LS_KEY = "public_favorites";
+
+function readLocalFavorites(): Set<string> {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch { return new Set(); }
+}
+
+function writeLocalFavorites(ids: Set<string>) {
+  localStorage.setItem(LS_KEY, JSON.stringify([...ids]));
+}
+
+function useLocalFavorites() {
+  const [ids, setIds] = useState<Set<string>>(() => readLocalFavorites());
+
+  const isFavorited = useCallback((id: string) => ids.has(id), [ids]);
+
+  const toggleFavorite = useCallback((id: string) => {
+    setIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      writeLocalFavorites(next);
+      return next;
+    });
+  }, []);
+
+  return { isFavorited, toggleFavorite };
+}
+
+/* ------------------------------------------------------------------ */
+
 const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelated }: Props) => {
   const isMobile = useIsMobile();
   const { isPinned, togglePin, items: compareItems } = useCompare();
-  const { isFavorited, toggleFavorite } = useFavorites();
+  const { isFavorited, toggleFavorite } = useLocalFavorites();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [showHoverImage, setShowHoverImage] = useState(false);
   const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
-  const [lastFavRealId, setLastFavRealId] = useState<string | null>(null);
 
   useEffect(() => {
     setImageLoaded(false);
     setImageFailed(false);
     setHoverImageLoaded(false);
     setShowHoverImage(false);
-    setLastFavRealId(null);
   }, [product?.id]);
 
   useEffect(() => {
@@ -65,6 +96,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
   const designerDisplay = product.brand_name.includes(" - ")
     ? product.brand_name.split(" - ")[0].trim()
     : product.brand_name;
+  const favorited = isFavorited(product.id);
 
   const compareItem: CompareItem = {
     pick: {
@@ -165,38 +197,20 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
               <span className="font-body text-sm text-muted-foreground">No image</span>
             )}
 
-            {/* Mobile: secondary action icons overlaid on image bottom-left */}
+            {/* Mobile: secondary action icons */}
             <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">
               <button
-                onClick={async () => {
-                  const realId = await toggleFavorite(product.id, {
-                    product_name: product.title,
-                    brand_name: product.brand_name,
-                    category: product.category || undefined,
-                    image_url: product.image_url,
-                    dimensions: product.dimensions,
-                    materials: product.materials,
-                  });
-                  setLastFavRealId(realId);
-                }}
-                title={isFavorited(product.id) ? "Favorited" : "Favorite"}
+                onClick={() => toggleFavorite(product.id)}
+                title={favorited ? "Favorited" : "Favorite"}
                 className={cn(
                   "flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all shadow-md",
-                  isFavorited(product.id)
+                  favorited
                     ? "bg-destructive/80 text-white"
                     : "bg-background/70 text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Heart size={15} className={cn(isFavorited(product.id) && "fill-current")} />
+                <Heart size={15} className={cn(favorited && "fill-current")} />
               </button>
-
-              {isFavorited(product.id) && (
-                <AddToProjectPopover productId={lastFavRealId || product.id} productName={product.title}>
-                  <button title="Add to Project" className="flex items-center justify-center w-9 h-9 rounded-full bg-background/70 backdrop-blur-md text-muted-foreground hover:text-foreground transition-all shadow-md">
-                    <FolderOpen size={15} />
-                  </button>
-                </AddToProjectPopover>
-              )}
 
               <button
                 onClick={() => togglePin(compareItem)}
@@ -265,37 +279,18 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
             {/* Desktop secondary actions */}
             <div className="hidden md:flex gap-2 flex-wrap">
               <button
-                onClick={async () => {
-                  const realId = await toggleFavorite(product.id, {
-                    product_name: product.title,
-                    brand_name: product.brand_name,
-                    category: product.category || undefined,
-                    image_url: product.image_url,
-                    dimensions: product.dimensions,
-                    materials: product.materials,
-                  });
-                  setLastFavRealId(realId);
-                }}
-                title={isFavorited(product.id) ? "Favorited" : "Favorite"}
+                onClick={() => toggleFavorite(product.id)}
+                title={favorited ? "Favorited" : "Favorite"}
                 className={cn(
                   "flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border",
-                  isFavorited(product.id)
+                  favorited
                     ? "border-destructive/30 text-destructive bg-destructive/10"
                     : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                 )}
               >
-                <Heart size={13} className={cn(isFavorited(product.id) && "fill-current")} />
-                {isFavorited(product.id) ? "Favorited" : "Favorite"}
+                <Heart size={13} className={cn(favorited && "fill-current")} />
+                {favorited ? "Favorited" : "Favorite"}
               </button>
-
-              {isFavorited(product.id) && (
-                <AddToProjectPopover productId={lastFavRealId || product.id} productName={product.title}>
-                  <button title="Add to Project" className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30">
-                    <FolderOpen size={13} />
-                    Add to Project
-                  </button>
-                </AddToProjectPopover>
-              )}
 
               <button
                 onClick={() => togglePin(compareItem)}
