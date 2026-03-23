@@ -464,17 +464,7 @@ export default function EditorialBiography({
       const block = parsed[i];
 
       if (block.type === "video") {
-        const inlinePoster = (() => {
-          for (let j = i - 1; j >= 0; j--) {
-            const prev = parsed[j];
-            if (prev.type === "image") return prev.url;
-          }
-          for (let j = i + 1; j < parsed.length; j++) {
-            const next = parsed[j];
-            if (next.type === "image") return next.url;
-          }
-          return undefined;
-        })();
+        const inlinePoster = undefined;
 
         elements.push(
           <VideoBlock
