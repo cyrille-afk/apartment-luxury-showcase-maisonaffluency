@@ -396,13 +396,12 @@ const PublicDesignerProfile = () => {
                           return collectionTags.length > 0 ? (
                             <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                               {collectionTags.map((tag) => (
-                                <Badge
+                                <span
                                   key={tag}
-                                  variant="secondary"
-                                  className="text-[8px] md:text-[9px] px-1.5 py-0.5 font-body tracking-wide bg-background/80 backdrop-blur-sm text-foreground border-none shadow-sm"
+                                  className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm"
                                 >
                                   {tag}
-                                </Badge>
+                                </span>
                               ))}
                             </div>
                           ) : null;
