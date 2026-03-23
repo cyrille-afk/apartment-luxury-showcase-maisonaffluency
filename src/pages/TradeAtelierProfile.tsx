@@ -577,6 +577,11 @@ const TradeAtelierProfile = () => {
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           loading="lazy"
                         />
+                        <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
+                            <Maximize2 className="h-3 w-3" />
+                          </div>
+                        </div>
                         <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                           {(isTradeUser || isAdmin) && (
                             <button
