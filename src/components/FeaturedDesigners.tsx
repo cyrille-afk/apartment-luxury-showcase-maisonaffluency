@@ -57,7 +57,7 @@ const theoremeEditionsImg = dImg("theoreme-editions");
 const garnierLinkerImg = dImg("garnier-linker_wvqg7k");
 const robicaraImg = dImg("robicara_p1c2fz");
 const redaAmalouImg = dImg("reda-amalou");
-const noeDuchaufourImg = dImg("noe-duchaufour-lawrance");
+
 const binaBAitelImg = dImg("bina-baitel_ujy4gj");
 const tristanAuerImg = dImg("tristan-auer_iepsoy");
 const manOfPartsImg = dImg("man-of-parts_kjvhqs");
