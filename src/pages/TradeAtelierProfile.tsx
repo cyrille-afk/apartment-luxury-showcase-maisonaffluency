@@ -291,67 +291,79 @@ const TradeAtelierProfile = () => {
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
           return isDesignerProfile ? (
-            /* Designer under atelier: side-by-side hero left + quote/bio right */
-            <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-              {/* Left: portrait image, uncropped */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={transition}
-                className="relative shrink-0 md:w-[38%]"
-              >
-                {(designer.hero_image_url || designer.image_url) && (
-                  <img
-                    src={designer.hero_image_url || designer.image_url}
-                    alt={name}
-                    className="w-full h-auto object-contain rounded-xl"
-                    loading="eager"
-                  />
-                )}
-                {designer.founder && (
-                  <Link
-                    to={`/trade/designers/${designer.founder.toLowerCase().replace(/\s+/g, '-')}`}
-                    className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase hover:bg-black/80 transition-colors shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1"
-                  >
-                    {designer.founder}
-                  </Link>
-                )}
-              </motion.div>
-
-              {/* Right: name, quote, biography */}
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...transition, delay: 0.15 }}
-                className="flex-1 min-w-0 flex flex-col"
-              >
-                <h1 className="font-display text-2xl md:text-3xl tracking-wide text-foreground">
-                  {name}
-                  {slug && DESIGNER_DATES[slug] && (
-                    <span className="font-body text-base md:text-lg text-muted-foreground ml-3 font-normal">{DESIGNER_DATES[slug]}</span>
+            /* Designer under atelier: hero left with overlaid name, then full-width staggered bio */
+            <div className="flex flex-col gap-6">
+              {/* Hero row: portrait left + quote right */}
+              <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
+                {/* Left: portrait with overlaid name */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={transition}
+                  className="relative shrink-0 md:w-[38%]"
+                >
+                  {(designer.hero_image_url || designer.image_url) && (
+                    <div className="relative rounded-xl overflow-hidden">
+                      <img
+                        src={designer.hero_image_url || designer.image_url}
+                        alt={name}
+                        className="w-full h-auto object-contain"
+                        loading="eager"
+                      />
+                      {/* Gradient overlay + name on photo */}
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 md:p-6">
+                        <h1 className="font-display text-xl md:text-2xl tracking-wide text-white drop-shadow-md">
+                          {name}
+                          {slug && DESIGNER_DATES[slug] && (
+                            <span className="font-body text-sm md:text-base text-white/75 ml-2 font-normal">{DESIGNER_DATES[slug]}</span>
+                          )}
+                        </h1>
+                        {designer.specialty && (
+                          <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
+                        )}
+                      </div>
+                    </div>
                   )}
-                </h1>
-                {designer.specialty && (
-                  <p className="font-body text-sm text-muted-foreground mt-1 tracking-wide">{designer.specialty}</p>
-                )}
+                  {designer.founder && (
+                    <Link
+                      to={`/trade/designers/${designer.founder.toLowerCase().replace(/\s+/g, '-')}`}
+                      className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase hover:bg-black/80 transition-colors shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1"
+                    >
+                      {designer.founder}
+                    </Link>
+                  )}
+                </motion.div>
 
+                {/* Right: philosophy quote */}
                 {designer.philosophy && (
-                  <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mt-6 mb-4">
-                    "{designer.philosophy}"
-                  </blockquote>
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ ...transition, delay: 0.15 }}
+                    className="flex-1 min-w-0 flex items-center"
+                  >
+                    <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground">
+                      "{designer.philosophy}"
+                    </blockquote>
+                  </motion.div>
                 )}
+              </div>
 
-                {designer.biography && (
-                  <div className="mt-4">
-                    <EditorialBiography
-                      biography={designer.biography}
-                      biographyImages={designer.biography_images}
-                      pickImages={picks.slice(0, 3).map((p) => p.image_url)}
-                      designerName={designer.name}
-                    />
-                  </div>
-                )}
-              </motion.div>
+              {/* Full-width staggered biography below */}
+              {designer.biography && (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ ...transition, delay: 0.2 }}
+                >
+                  <EditorialBiography
+                    biography={designer.biography}
+                    biographyImages={designer.biography_images}
+                    pickImages={picks.slice(0, 3).map((p) => p.image_url)}
+                    designerName={designer.name}
+                  />
+                </motion.div>
+              )}
             </div>
           ) : (
             /* Atelier: full-width hero */
