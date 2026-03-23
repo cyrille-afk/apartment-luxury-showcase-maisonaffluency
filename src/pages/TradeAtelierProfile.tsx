@@ -290,16 +290,16 @@ const TradeAtelierProfile = () => {
         {/* Hero + About */}
         {(() => {
           const isDesignerProfile = designer.founder && designer.founder !== designer.name;
-          const heroAspect = isDesignerProfile ? "aspect-[4/5]" : "aspect-[3/2]";
+          const heroAspect = "aspect-[3/2]";
           return (
-        <div className={cn("flex flex-col gap-6", isDesignerProfile && "md:flex-row md:items-start")}>
+        <div className="flex flex-col gap-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={transition}
-            className={cn("relative rounded-xl overflow-hidden shrink-0", isDesignerProfile && "md:w-[45%]")}
+            className="relative rounded-xl overflow-hidden shrink-0"
           >
-            <div className={cn(heroAspect, !isDesignerProfile && "md:aspect-[5/2] max-h-[45vh]")}>
+            <div className={cn(heroAspect, "md:aspect-[5/2] max-h-[45vh]")}>
               {(designer.hero_image_url || designer.image_url) && (
                 <img
                   src={designer.hero_image_url || designer.image_url}
@@ -310,9 +310,9 @@ const TradeAtelierProfile = () => {
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             </div>
-            {designer.founder && designer.founder !== designer.name && (
+            {isDesignerProfile && (
               <Link
-                to={`/trade/designers/${designer.founder.toLowerCase().replace(/\s+/g, '-')}`}
+                to={`/trade/designers/${designer.founder!.toLowerCase().replace(/\s+/g, '-')}`}
                 className="absolute top-4 left-4 md:top-6 md:left-6 z-10 w-16 h-16 md:w-20 md:h-20 bg-black text-white font-display text-[7px] md:text-[9px] tracking-[0.12em] uppercase hover:bg-black/80 transition-colors shadow-lg flex items-center justify-center text-center leading-tight overflow-hidden p-1"
               >
                 {designer.founder}
@@ -340,7 +340,7 @@ const TradeAtelierProfile = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transition, delay: 0.2 }}
-              className={cn(isDesignerProfile ? "md:w-[55%] flex flex-col justify-center" : "flex flex-col")}
+              className="flex flex-col"
             >
               {designer.philosophy && (
                 <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6">
@@ -355,7 +355,7 @@ const TradeAtelierProfile = () => {
               <EditorialBiography
                 biography={designer.biography}
                 biographyImages={designer.biography_images}
-                pickImages={isDesignerProfile ? [] : picks.slice(0, 3).map((p) => p.image_url)}
+                pickImages={picks.slice(0, 3).map((p) => p.image_url)}
                 designerName={designer.name}
               />
             </motion.div>
