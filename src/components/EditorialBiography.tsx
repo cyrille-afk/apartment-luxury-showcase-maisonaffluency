@@ -501,8 +501,10 @@ export default function EditorialBiography({
       i++;
     }
 
+    const hasInlineVideo = parsed.some((block) => block.type === "video");
+
     return (
-      <CollapsibleBiographyWrapper elementCount={elements.length}>
+      <CollapsibleBiographyWrapper elementCount={elements.length} allowCollapse={!hasInlineVideo}>
         <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
           {elements}
         </div>
