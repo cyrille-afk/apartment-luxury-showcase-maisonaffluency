@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { Play } from "lucide-react";
+import { Play, ChevronDown } from "lucide-react";
 
 interface EditorialBiographyProps {
   biography: string;
@@ -10,6 +10,9 @@ interface EditorialBiographyProps {
   pickImages?: string[];
   designerName: string;
 }
+
+/** Number of biography paragraphs to show before "Read more" on mobile */
+const MOBILE_COLLAPSE_THRESHOLD = 3;
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 
@@ -286,7 +289,82 @@ function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { ur
 }
 
 /* ------------------------------------------------------------------ */
-/*  Main component                                                     */
+/*  Mobile Collapsible — collapses long text on small screens          */
+/* ------------------------------------------------------------------ */
+function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const shouldCollapse = paragraphs.length > MOBILE_COLLAPSE_THRESHOLD;
+  const visibleParagraphs = shouldCollapse && !expanded
+    ? paragraphs.slice(0, MOBILE_COLLAPSE_THRESHOLD)
+    : paragraphs;
+
+  return (
+    <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+      {visibleParagraphs.map((p, i) => (
+        <p key={i} className={i > 0 ? "mt-3 md:mt-5" : ""}>
+          {renderQuotedText(p)}
+        </p>
+      ))}
+      {shouldCollapse && !expanded && (
+        <button
+          onClick={() => setExpanded(true)}
+          className="mt-4 flex items-center gap-1.5 font-display text-[11px] tracking-[0.15em] uppercase text-primary/70 hover:text-primary transition-colors"
+        >
+          Read more
+          <ChevronDown className="w-3.5 h-3.5" />
+        </button>
+      )}
+      <AnimatePresence>
+        {shouldCollapse && expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {paragraphs.slice(MOBILE_COLLAPSE_THRESHOLD).map((p, i) => (
+              <p key={i} className="mt-3 md:mt-5">
+                {renderQuotedText(p)}
+              </p>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Collapsible wrapper — limits height on mobile for long bios        */
+/* ------------------------------------------------------------------ */
+function CollapsibleBiographyWrapper({ children, elementCount }: { children: React.ReactNode; elementCount: number }) {
+  const [expanded, setExpanded] = useState(false);
+  // Only collapse on mobile when there's substantial content
+  if (elementCount <= 3) return <>{children}</>;
+
+  return (
+    <div className="relative">
+      <div
+        className={expanded ? "" : "max-h-[420px] md:max-h-none overflow-hidden"}
+      >
+        {children}
+      </div>
+      {!expanded && (
+        <div className="md:hidden">
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+          <button
+            onClick={() => setExpanded(true)}
+            className="relative z-10 mt-2 flex items-center gap-1.5 font-display text-[11px] tracking-[0.15em] uppercase text-primary/70 hover:text-primary transition-colors"
+          >
+            Continue reading
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 
 /**
@@ -415,9 +493,11 @@ export default function EditorialBiography({
     }
 
     return (
-      <div className="font-body text-sm leading-relaxed text-foreground/85">
-        {elements}
-      </div>
+      <CollapsibleBiographyWrapper elementCount={elements.length}>
+        <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+          {elements}
+        </div>
+      </CollapsibleBiographyWrapper>
     );
   }
 
@@ -450,13 +530,7 @@ export default function EditorialBiography({
 
   if (parsedMedia.length === 0) {
     return (
-      <div className="font-body text-sm leading-relaxed text-foreground/85 whitespace-pre-line">
-        {paragraphs.map((p, i) => (
-          <p key={i} className={i > 0 ? "mt-4" : ""}>
-            {renderQuotedText(p)}
-          </p>
-        ))}
-      </div>
+      <MobileCollapsible paragraphs={paragraphs} />
     );
   }
 
@@ -557,8 +631,10 @@ export default function EditorialBiography({
   }
 
   return (
-    <div className="font-body text-sm leading-relaxed text-foreground/85">
-      {elements}
-    </div>
+    <CollapsibleBiographyWrapper elementCount={elements.length}>
+      <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+        {elements}
+      </div>
+    </CollapsibleBiographyWrapper>
   );
 }

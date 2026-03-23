@@ -83,7 +83,7 @@ const PublicDesignerProfile = () => {
   const instagramLink = designer.links.find((l) => l.type === "Instagram")?.url;
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
   const heroImage = designer.hero_image_url || designer.image_url;
-  const heroAspect = isDesignerProfile ? "aspect-[3/4]" : "aspect-[16/9]";
+  const heroAspect = isDesignerProfile ? "aspect-[3/4]" : "aspect-[4/5] md:aspect-[16/9]";
   const isGrouped = groupedPicks.length > 0;
 
   return (
@@ -96,7 +96,7 @@ const PublicDesignerProfile = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <div className="max-w-5xl mx-auto px-6 md:px-12 pt-28 pb-20 space-y-12">
+        <div className="max-w-5xl mx-auto px-4 md:px-12 pt-24 md:pt-28 pb-20 space-y-8 md:space-y-12">
           <Link
             to="/designers"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -170,7 +170,7 @@ const PublicDesignerProfile = () => {
                 className={cn(isDesignerProfile ? "md:w-1/2 flex flex-col justify-center" : "flex flex-col")}
               >
                 {designer.philosophy && (
-                  <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6">
+                  <blockquote className="font-display text-base md:text-xl italic leading-snug text-foreground mb-4 md:mb-6">
                     "{designer.philosophy}"
                   </blockquote>
                 )}
