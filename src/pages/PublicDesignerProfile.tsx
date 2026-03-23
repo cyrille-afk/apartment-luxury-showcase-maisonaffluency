@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package } from "lucide-react";
-import { useDesigner, useDesignerPicks, useRelatedDesigners, useGroupedDesignerPicks } from "@/hooks/useDesigner";
+import { useDesigner, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick, DesignerCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
 import EditorialBiography from "@/components/EditorialBiography";
@@ -47,7 +47,7 @@ const PublicDesignerProfile = () => {
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const picks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
-  const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
+  
 
   const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
 
@@ -263,41 +263,6 @@ const PublicDesignerProfile = () => {
             </div>
           )}
 
-          {/* Related Designers */}
-          {related.length > 0 && (
-            <motion.section
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={transition}
-            >
-              <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-6">
-                Related Ateliers
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {related.map((r) => (
-                  <Link
-                    key={r.slug}
-                    to={`/designers/${r.slug}`}
-                    className="group block"
-                  >
-                    <div className="aspect-[3/4] bg-muted/20 rounded-lg overflow-hidden mb-2">
-                      {r.image_url && (
-                        <img
-                          src={r.image_url}
-                          alt={r.name}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      )}
-                    </div>
-                    <p className="font-display text-xs tracking-wide">{displayName(r.name)}</p>
-                    <p className="font-body text-[10px] text-muted-foreground mt-0.5">{r.specialty}</p>
-                  </Link>
-                ))}
-              </div>
-            </motion.section>
-          )}
 
           {/* Enquiry CTA */}
           <div className="text-center py-8">
