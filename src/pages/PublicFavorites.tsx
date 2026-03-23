@@ -23,6 +23,7 @@ function readLocalFavorites(): string[] {
 
 function writeLocalFavorites(ids: string[]) {
   localStorage.setItem(LS_KEY, JSON.stringify(ids));
+  window.dispatchEvent(new Event("public_favorites_changed"));
 }
 
 interface FavPick {
