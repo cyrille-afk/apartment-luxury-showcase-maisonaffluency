@@ -685,7 +685,7 @@ export default function EditorialBiography({
           designerName={designerName}
           index={mediaIndex}
           overrideCaption={mediaItem.caption}
-          posterUrl={findNeighborPoster(mediaIndex)}
+          posterUrl={mediaItem.poster || undefined}
         />
       );
     } else {
