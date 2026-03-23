@@ -243,8 +243,7 @@ function SplitImageBlock({
 
   return (
     <div className={`${index === 0 ? "mb-10 md:mb-14" : "my-10 md:my-14"} flex flex-col md:flex-row gap-6 md:gap-10 items-center`}>
-      {/* On mobile: image always first. On desktop: alternate left/right */}
-      <div className={`flex-1 min-w-0 order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
+      <div className={`shrink-0 w-full md:w-[35%] order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
         {imageEl}
       </div>
       {textEl && (
