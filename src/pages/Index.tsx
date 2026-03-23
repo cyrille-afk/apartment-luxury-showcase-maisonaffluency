@@ -40,6 +40,7 @@ const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
 const ExitIntentBanner = lazyRetry(() => import("@/components/ExitIntentBanner"));
 const StickyBottomNav = lazyRetry(() => import("@/components/StickyBottomNav"));
 const JournalTeaser = lazyRetry(() => import("@/components/JournalTeaser"));
+const InstagramFeed = lazyRetry(() => import("@/components/InstagramFeed"));
 const CompareFab = lazyRetry(() => import("@/components/CompareFab"));
 const CompareDrawer = lazyRetry(() => import("@/components/CompareDrawer"));
 const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
@@ -465,6 +466,9 @@ const Index = () => {
             </section>
             <Suspense fallback={null}>
               <JournalTeaser />
+            </Suspense>
+            <Suspense fallback={null}>
+              <InstagramFeed />
             </Suspense>
             <Suspense fallback={null}>
               <Footer />
