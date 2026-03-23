@@ -288,32 +288,43 @@ const TradeDesignersAdmin = () => {
                           Editorial Media <span className="normal-case font-normal">(images, YouTube/Vimeo links, or MP4 URLs — shown between biography paragraphs)</span>
                         </label>
                         <div className="mt-2 space-y-2">
-                          {((editBuffer[d.id]?.biography_images ?? d.biography_images) || []).map((url: string, idx: number) => {
-                            const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(url) || /youtube|youtu\.be|vimeo/i.test(url);
+                          {((editBuffer[d.id]?.biography_images ?? d.biography_images) || []).map((entry: string, idx: number) => {
+                            // Parse pipe separator: "URL | Caption"
+                            const pipeMatch = entry.match(/^(https?:\/\/\S+)\s*\|\s*(.+)$/i);
+                            const rawUrl = pipeMatch ? pipeMatch[1].trim() : entry.trim();
+                            const caption = pipeMatch ? pipeMatch[2].trim() : null;
+                            const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(rawUrl) || /youtube|youtu\.be|vimeo/i.test(rawUrl) || /res\.cloudinary\.com\/.+\/video\/upload/i.test(rawUrl);
                             return (
-                              <div key={idx} className="flex items-center gap-2">
+                              <div key={idx} className="flex items-start gap-2">
                                 {isVideo ? (
                                   <div className="w-16 h-10 rounded shrink-0 bg-muted flex items-center justify-center text-muted-foreground text-[9px] font-medium">▶ Video</div>
+                                ) : rawUrl.startsWith("http") ? (
+                                  <img src={rawUrl} alt="" className="w-16 h-10 object-cover rounded shrink-0 bg-muted" />
                                 ) : (
-                                  <img src={url} alt="" className="w-16 h-10 object-cover rounded shrink-0 bg-muted" />
+                                  <div className="w-16 h-10 rounded shrink-0 bg-muted" />
                                 )}
-                                <Input
-                                  value={url}
-                                  onChange={(e) => {
-                                    const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
-                                    imgs[idx] = e.target.value;
-                                    setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
-                                  }}
-                                  placeholder="Image URL, YouTube link, or MP4 URL"
-                                  className="text-xs flex-1"
-                                />
+                                <div className="flex-1 min-w-0 space-y-1">
+                                  <Input
+                                    value={entry}
+                                    onChange={(e) => {
+                                      const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
+                                      imgs[idx] = e.target.value;
+                                      setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
+                                    }}
+                                    placeholder="URL | Caption  (e.g. https://...jpg | My Caption)"
+                                    className="text-xs"
+                                  />
+                                  {caption && (
+                                    <p className="text-[10px] text-muted-foreground italic truncate px-1">Caption: {caption}</p>
+                                  )}
+                                </div>
                                 <button
                                   onClick={() => {
                                     const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
                                     imgs.splice(idx, 1);
                                     setField(d.id, "biography_images" as keyof DesignerRow, imgs as any);
                                   }}
-                                  className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                                  className="text-muted-foreground hover:text-destructive transition-colors p-1 mt-1"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
