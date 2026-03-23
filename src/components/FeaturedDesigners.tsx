@@ -2584,6 +2584,10 @@ const FeaturedDesigners = () => {
                       <Link
                         key={designer.id}
                         to={`/designers/${designer.id}`}
+                        onClick={() => {
+                          sessionStorage.removeItem("__scroll_y");
+                          window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+                        }}
                         className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                       >
                         {cardContent}

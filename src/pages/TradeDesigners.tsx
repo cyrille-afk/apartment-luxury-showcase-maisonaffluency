@@ -42,7 +42,11 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
   const isAtelier = brand.isAtelierCard;
   return (
     <button
-      onClick={() => navigate(`/trade/designers/${brand.slug}`)}
+      onClick={() => {
+        sessionStorage.removeItem("__scroll_y");
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        navigate(`/trade/designers/${brand.slug}`);
+      }}
       className={cn(
         "group text-left rounded-xl overflow-hidden border transition-all hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background",
         isAtelier

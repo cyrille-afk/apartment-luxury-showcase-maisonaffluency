@@ -74,6 +74,10 @@ const PublicDesigners = () => {
                   <Link
                     key={item.slug}
                     to={`/designers/${item.slug}`}
+                    onClick={() => {
+                      sessionStorage.removeItem("__scroll_y");
+                      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+                    }}
                     className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                   >
                     <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
