@@ -13,7 +13,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { sharePageOnWhatsApp } from "@/lib/whatsapp-share";
-import { Badge } from "@/components/ui/badge";
 import CurrencyToggle, { DisplayCurrency, useFxRates, formatPriceConverted } from "@/components/trade/CurrencyToggle";
 import TradeProductLightbox, { type TradeProductLightboxItem } from "@/components/trade/TradeProductLightbox";
 import { supabase } from "@/integrations/supabase/client";
