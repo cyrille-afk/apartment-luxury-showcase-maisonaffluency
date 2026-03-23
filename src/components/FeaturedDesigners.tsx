@@ -2422,18 +2422,6 @@ const FeaturedDesigners = () => {
   }, [filteredDesigners]);
 
   const activeLetters = useMemo(() => designerAlphaGroups.map(([l]) => l), [designerAlphaGroups]);
-
-  const allDesignerIds = useMemo(() => filteredDesigners.map(d => d.id), [filteredDesigners]);
-  const isAllExpanded = openDesigners.length === allDesignerIds.length && allDesignerIds.length > 0;
-
-  const toggleAllDesigners = () => {
-    if (isAllExpanded) {
-      setOpenDesigners([]);
-    } else {
-      setOpenDesigners(allDesignerIds);
-    }
-  };
-
   return (
     <section ref={ref} id="curators-picks" className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-mt-16">
       {/* Gradient accent band */}
