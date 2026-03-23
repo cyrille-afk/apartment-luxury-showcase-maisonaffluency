@@ -7,7 +7,8 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useDesigner, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import WhatsAppShareButton from "@/components/WhatsAppShareButton";
+import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
 import EditorialBiography from "@/components/EditorialBiography";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -252,7 +253,18 @@ const PublicDesignerProfile = () => {
                       ))}
                     </div>
                   )}
-                </motion.div>
+                   <div className="mt-4">
+                     <WhatsAppShareButton
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         shareProfileOnWhatsApp("designer", designer.slug, designer.name);
+                       }}
+                       label="Share"
+                       size="sm"
+                       variant="solid"
+                     />
+                   </div>
+                 </motion.div>
               </div>
 
               {remainingBio && (
