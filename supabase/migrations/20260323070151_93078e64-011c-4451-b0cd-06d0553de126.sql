@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET tags = array_replace(tags, 'Couture Collection', 'Couture') WHERE 'Couture Collection' = ANY(tags);
