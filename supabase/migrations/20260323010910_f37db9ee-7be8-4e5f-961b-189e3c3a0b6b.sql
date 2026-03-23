@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET tags = ARRAY['Editions'] WHERE designer_id = 'de46d314-2935-4aca-9a82-b014971614c8' AND title IN ('Reef Vessels', 'Hammered Bowls');
