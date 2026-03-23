@@ -11,6 +11,9 @@ interface EditorialBiographyProps {
   designerName: string;
 }
 
+/** Number of biography paragraphs to show before "Read more" on mobile */
+const MOBILE_COLLAPSE_THRESHOLD = 3;
+
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 
 /** Detect if a URL is a video */
