@@ -425,8 +425,31 @@ export default function EditorialBiography({
   /* ------- Manual media array or pick images fallback ------- */
   const paragraphs = blocks;
   const media = hasManualMedia ? biographyImages! : (pickImages || []);
+  const parsedMedia = media
+    .map((entry) => {
+      const parsed = parseMediaLine(entry);
+      if (parsed) {
+        return {
+          url: parsed.url,
+          caption: parsed.caption,
+          isVideo: isVideoUrl(parsed.url),
+        };
+      }
 
-  if (media.length === 0) {
+      const raw = entry.trim();
+      if (!raw) return null;
+      return {
+        url: raw,
+        caption: null,
+        isVideo: isVideoUrl(raw),
+      };
+    })
+    .filter(
+      (m): m is { url: string; caption: string | null; isVideo: boolean } =>
+        !!m && /^https?:\/\//i.test(m.url)
+    );
+
+  if (parsedMedia.length === 0) {
     return (
       <div className="font-body text-sm leading-relaxed text-foreground/85 text-justify whitespace-pre-line">
         {paragraphs.map((p, i) => (
@@ -439,7 +462,7 @@ export default function EditorialBiography({
   }
 
   // Distribute media among paragraphs
-  const interval = Math.max(2, Math.ceil(paragraphs.length / (media.length + 1)));
+  const interval = Math.max(2, Math.ceil(paragraphs.length / (parsedMedia.length + 1)));
   const elements: JSX.Element[] = [];
   let mediaIndex = 0;
   let textAccum: string[] = [];
@@ -449,12 +472,12 @@ export default function EditorialBiography({
 
     const shouldInsertMedia =
       (i + 1) % interval === 0 &&
-      mediaIndex < media.length &&
+      mediaIndex < parsedMedia.length &&
       i < paragraphs.length - 1;
 
     if (shouldInsertMedia) {
-      const url = media[mediaIndex];
-      if (isVideoUrl(url)) {
+      const mediaItem = parsedMedia[mediaIndex];
+      if (mediaItem.isVideo) {
         // Flush text before video
         if (textAccum.length > 0) {
           elements.push(
@@ -469,17 +492,24 @@ export default function EditorialBiography({
           textAccum = [];
         }
         elements.push(
-          <VideoBlock key={`media-vid-${mediaIndex}`} url={url} designerName={designerName} index={mediaIndex} />
+          <VideoBlock
+            key={`media-vid-${mediaIndex}`}
+            url={mediaItem.url}
+            designerName={designerName}
+            index={mediaIndex}
+            overrideCaption={mediaItem.caption}
+          />
         );
       } else {
         // Pair accumulated text with image in split layout
         elements.push(
           <SplitImageBlock
             key={`media-split-${mediaIndex}`}
-            url={url}
+            url={mediaItem.url}
             designerName={designerName}
             index={mediaIndex}
             paragraphs={textAccum}
+            overrideCaption={mediaItem.caption}
           />
         );
         textAccum = [];
@@ -502,15 +532,27 @@ export default function EditorialBiography({
   }
 
   // Remaining media
-  while (mediaIndex < media.length) {
-    const url = media[mediaIndex];
-    if (isVideoUrl(url)) {
+  while (mediaIndex < parsedMedia.length) {
+    const mediaItem = parsedMedia[mediaIndex];
+    if (mediaItem.isVideo) {
       elements.push(
-        <VideoBlock key={`media-tail-vid-${mediaIndex}`} url={url} designerName={designerName} index={mediaIndex} />
+        <VideoBlock
+          key={`media-tail-vid-${mediaIndex}`}
+          url={mediaItem.url}
+          designerName={designerName}
+          index={mediaIndex}
+          overrideCaption={mediaItem.caption}
+        />
       );
     } else {
       elements.push(
-        <FullWidthImageBlock key={`media-tail-${mediaIndex}`} url={url} designerName={designerName} index={mediaIndex + 100} />
+        <FullWidthImageBlock
+          key={`media-tail-${mediaIndex}`}
+          url={mediaItem.url}
+          designerName={designerName}
+          index={mediaIndex + 100}
+          overrideCaption={mediaItem.caption}
+        />
       );
     }
     mediaIndex++;
