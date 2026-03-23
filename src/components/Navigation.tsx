@@ -380,6 +380,22 @@ const Navigation = () => {
                     </span>
                     <ChevronRight className="h-4 w-4" />
                   </button>
+                  {pinItems.length > 0 && (
+                    <button
+                      onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); setIsComparing(true); }}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); setIsComparing(true); }}
+                      className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Pin className="h-4 w-4" />
+                        My Selection
+                        <span className="min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none px-1">
+                          {pinItems.length}
+                        </span>
+                      </span>
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
 
                 {/* Trade Program & Contact — visually separated */}
