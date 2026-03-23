@@ -190,14 +190,7 @@ const PublicDesignerProfile = () => {
         <Navigation />
 
         <div className="max-w-6xl mx-auto px-4 md:px-12 pt-32 md:pt-36 pb-20 space-y-8 md:space-y-12">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate("/designers")}
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </button>
+          <div className="flex items-center justify-end">
             <div className="md:hidden">
               <WhatsAppShareButton
                 onClick={(e) => {
