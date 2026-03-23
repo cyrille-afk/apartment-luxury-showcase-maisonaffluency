@@ -215,7 +215,6 @@ function SplitImageBlock({
           alt={caption || `${designerName} — editorial`}
           className="max-w-full h-auto object-contain mx-auto"
           loading="lazy"
-          style={/300x300/i.test(url) ? { maxWidth: '300px' } : undefined}
         />
       </div>
       {caption && (
