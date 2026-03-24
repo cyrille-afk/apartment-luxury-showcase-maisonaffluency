@@ -1044,6 +1044,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: brunoDeMaistreImg,
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085726/boudoir_ll5spn.jpg", galleryIndex: GALLERY.A_SOPHISTICATED_BOUDOIR },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg", galleryIndex: GALLERY.A_JEWELRY_BOX_LIKE_SETTING },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.20.04_AM_j1zeee.png",
     biography:
