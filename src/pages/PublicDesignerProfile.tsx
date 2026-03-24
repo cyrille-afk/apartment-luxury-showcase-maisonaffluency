@@ -182,7 +182,7 @@ const PublicDesignerProfile = () => {
       const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
 
       // Cap hero paragraphs at 2 to keep the top section balanced
-      const maxHero = 2;
+      const maxHero = 3;
       const chunkCount = mediaEntries.length + 1;
       const chunkSize = Math.max(1, Math.ceil(textBlocks.length / chunkCount));
       const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
