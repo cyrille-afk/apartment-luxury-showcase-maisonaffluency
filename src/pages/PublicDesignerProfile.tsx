@@ -177,11 +177,10 @@ const PublicDesignerProfile = () => {
   };
 
   if (bioBlocks.length > 0) {
-    // Separate text-only blocks from media blocks for proper chunking
-    const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
-    const mediaBlocks = bioBlocks.filter((b) => isMediaBlock(b));
-
     if (mediaEntries.length > 0) {
+      // Separate text-only blocks from inline media blocks
+      const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
+
       const chunkCount = mediaEntries.length + 1;
       const chunkSize = Math.max(1, Math.ceil(textBlocks.length / chunkCount));
       const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
@@ -198,32 +197,55 @@ const PublicDesignerProfile = () => {
         }
       }
       heroParagraphs = paragraphChunks[0] || [];
-      // Build remainingBio: interleave media entries with text chunks, then append inline media blocks
-      const interleaved = mediaEntries
-        .map((mediaLine, index) => {
-          const sectionText = (paragraphChunks[index + 1] || []).join("\n\n");
-          return [mediaLine, sectionText].filter(Boolean).join("\n\n");
-        })
-        .filter(Boolean)
-        .join("\n\n");
-      // Append any inline media blocks (Vimeo, YouTube, images pasted in biography) that aren't already in mediaEntries
-      const extraMedia = mediaBlocks.filter((mb) => !mediaEntries.some((me) => mb.includes(me)));
-      remainingBio = [interleaved, ...extraMedia].filter(Boolean).join("\n\n");
-    } else {
-      heroParagraphs = textBlocks.slice(0, 2);
-      // Include media blocks in the remaining bio so they render properly
-      const remainingText = textBlocks.slice(2);
-      // Re-insert media blocks at their original positions relative to text
-      const allRemaining: string[] = [];
-      let textIdx = 0;
-      let originalTextCount = 0;
+
+      // Build remainingBio preserving original order of inline media blocks.
+      // First, reconstruct the remaining blocks in original order (skipping hero paragraphs).
+      const heroSet = new Set(heroParagraphs);
+      const remainingOrdered: string[] = [];
       for (const block of bioBlocks) {
-        if (isMediaBlock(block)) {
-          if (originalTextCount >= 2) allRemaining.push(block);
-        } else {
-          originalTextCount++;
-          if (originalTextCount > 2) allRemaining.push(block);
+        if (heroSet.has(block)) {
+          heroSet.delete(block);
+          continue;
         }
+        remainingOrdered.push(block);
+      }
+
+      // Now interleave mediaEntries with the remaining ordered blocks:
+      // Insert each mediaEntry before its corresponding text chunk boundary.
+      const result: string[] = [];
+      let textCount = 0;
+      let mediaIdx = 0;
+      for (const block of remainingOrdered) {
+        if (!isMediaBlock(block)) {
+          // Check if we should insert a mediaEntry before this text chunk
+          const chunkBoundary = mediaIdx < mediaEntries.length
+            ? (paragraphChunks[mediaIdx + 1] || [])[0]
+            : null;
+          if (chunkBoundary && block === chunkBoundary && mediaIdx < mediaEntries.length) {
+            result.push(mediaEntries[mediaIdx]);
+            mediaIdx++;
+          }
+        }
+        result.push(block);
+      }
+      // Append any remaining media entries not yet inserted
+      while (mediaIdx < mediaEntries.length) {
+        result.push(mediaEntries[mediaIdx]);
+        mediaIdx++;
+      }
+      remainingBio = result.filter(Boolean).join("\n\n");
+    } else {
+      const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
+      heroParagraphs = textBlocks.slice(0, 2);
+      // Preserve original order including inline media
+      const heroSet = new Set(heroParagraphs);
+      const allRemaining: string[] = [];
+      for (const block of bioBlocks) {
+        if (heroSet.has(block)) {
+          heroSet.delete(block);
+          continue;
+        }
+        allRemaining.push(block);
       }
       remainingBio = allRemaining.join("\n\n");
     }
