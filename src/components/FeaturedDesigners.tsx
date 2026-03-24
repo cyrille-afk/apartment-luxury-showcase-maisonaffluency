@@ -2812,6 +2812,12 @@ const FeaturedDesigners = () => {
                       className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                     >
                       {cardContent}
+                      {designer.id === "alexander-lamont" && (
+                        <div className="flex gap-1.5 p-1.5 pt-0">
+                          <div className="flex-1 aspect-square rounded-md bg-muted/40 border border-border/50" />
+                          <div className="flex-1 aspect-square rounded-md bg-muted/40 border border-border/50" />
+                        </div>
+                      )}
                     </Link>
                   );
                 })
