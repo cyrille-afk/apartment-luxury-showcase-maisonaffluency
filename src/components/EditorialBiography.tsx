@@ -76,9 +76,9 @@ function renderQuotedText(text: string): React.ReactNode[] {
 }
 
 /** Parse a media line — supports `URL | Caption` pipe separator */
-function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null } | null {
+function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null } | null {
   const value = text.trim();
-  // Try pipe separator: "https://...jpg | My Caption | poster:https://..."
+  // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right
   const pipes = value.split(/\s*\|\s*/);
   const url = pipes[0]?.trim() || "";
 
@@ -87,10 +87,13 @@ function parseMediaLine(text: string): { url: string; caption: string | null; po
 
   let caption: string | null = null;
   let poster: string | null = null;
+  let align: "left" | "right" | null = null;
   for (let i = 1; i < pipes.length; i++) {
     const seg = pipes[i].trim();
     if (/^poster:/i.test(seg)) {
       poster = seg.replace(/^poster:/i, "").trim();
+    } else if (/^(left|right)$/i.test(seg)) {
+      align = seg.toLowerCase() as "left" | "right";
     } else if (!caption) {
       caption = seg;
     }
@@ -103,7 +106,7 @@ function parseMediaLine(text: string): { url: string; caption: string | null; po
     /\/storage\/v1\/object\/public\//i.test(url);
 
   if (!isMedia) return null;
-  return { url, caption, poster };
+  return { url, caption, poster, align };
 }
 
 /** Detect a standalone media URL paragraph pasted directly into biography text */
@@ -306,15 +309,17 @@ function SplitImageBlock({
   index,
   paragraphs,
   overrideCaption,
+  forceAlign,
 }: {
   url: string;
   designerName: string;
   index: number;
   paragraphs: string[];
   overrideCaption?: string | null;
+  forceAlign?: "left" | "right" | null;
 }) {
   const caption = overrideCaption ?? captionFromUrl(url);
-  const imageOnRight = index % 2 === 0;
+  const imageOnRight = forceAlign ? forceAlign === "right" : index % 2 === 0;
 
   const imageEl = (
     <motion.figure
@@ -513,7 +518,7 @@ export default function EditorialBiography({
     // Separate into text paragraphs and media URLs, preserving order
     type Block =
       | { type: "text"; content: string }
-      | { type: "image"; url: string; caption: string | null; poster: string | null }
+      | { type: "image"; url: string; caption: string | null; poster: string | null; align: "left" | "right" | null }
       | { type: "video"; url: string; caption: string | null; poster: string | null };
     const parsed: Block[] = blocks.map((b) => {
       const media = parseMediaLine(b);
@@ -521,7 +526,7 @@ export default function EditorialBiography({
       if (isVideoUrl(media.url)) {
         return { type: "video" as const, url: media.url, caption: media.caption, poster: media.poster };
       }
-      return { type: "image" as const, url: media.url, caption: media.caption, poster: media.poster };
+      return { type: "image" as const, url: media.url, caption: media.caption, poster: media.poster, align: media.align };
     });
 
     // Group consecutive text blocks that follow an image, pair them for split layout
@@ -600,6 +605,7 @@ export default function EditorialBiography({
               index={imageIdx}
               paragraphs={paired}
               overrideCaption={block.caption}
+              forceAlign={(block as any).align}
             />
           );
         } else {
@@ -648,6 +654,7 @@ export default function EditorialBiography({
           url: parsed.url,
           caption: parsed.caption,
           poster: parsed.poster,
+          align: parsed.align,
           isVideo: isVideoUrl(parsed.url),
         };
       }
@@ -658,11 +665,12 @@ export default function EditorialBiography({
         url: raw,
         caption: null,
         poster: null as string | null,
+        align: null as "left" | "right" | null,
         isVideo: isVideoUrl(raw),
       };
     })
     .filter(
-      (m): m is { url: string; caption: string | null; poster: string | null; isVideo: boolean } =>
+      (m): m is { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; isVideo: boolean } =>
         !!m && /^https?:\/\//i.test(m.url)
     );
 
@@ -723,6 +731,7 @@ export default function EditorialBiography({
             index={mediaIndex}
             paragraphs={textAccum}
             overrideCaption={mediaItem.caption}
+            forceAlign={mediaItem.align}
           />
         );
         textAccum = [];
