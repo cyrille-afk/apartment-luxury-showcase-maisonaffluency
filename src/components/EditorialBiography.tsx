@@ -675,6 +675,7 @@ export default function EditorialBiography({
           caption: parsed.caption,
           poster: parsed.poster,
           align: parsed.align,
+          size: parsed.size,
           isVideo: isVideoUrl(parsed.url),
         };
       }
@@ -686,11 +687,12 @@ export default function EditorialBiography({
         caption: null,
         poster: null as string | null,
         align: null as "left" | "right" | null,
+        size: null as "small" | null,
         isVideo: isVideoUrl(raw),
       };
     })
     .filter(
-      (m): m is { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; isVideo: boolean } =>
+      (m): m is { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: "small" | null; isVideo: boolean } =>
         !!m && /^https?:\/\//i.test(m.url)
     );
 
