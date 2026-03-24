@@ -144,7 +144,7 @@ const TradeAtelierProfile = () => {
   }, [rawPicks]);
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
-  const [gridCols, setGridCols] = useState<3 | 4>(3);
+  const [gridCols, setGridCols] = useState<3 | 4>(4);
   const fxRates = useFxRates();
 
   // Lightbox state
