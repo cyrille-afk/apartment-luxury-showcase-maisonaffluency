@@ -2810,9 +2810,12 @@ const FeaturedDesigners = () => {
                       <div className="absolute inset-x-0 top-0 px-4 pb-10 pt-3 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
                         <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
                           {(() => {
-                            const fmt = formatDesignerName(designer.name, (designer as any).displayName);
-                            if (fmt.brand && fmt.person) return `${fmt.person} — ${fmt.brand}`;
-                            return fmt.brand || fmt.person;
+                            const dn = (designer as any).displayName || designer.name;
+                            if (dn.includes(" - ")) {
+                              const [brand, ...rest] = dn.split(" - ");
+                              return `${rest.join(" - ").trim()} — ${brand.trim()}`;
+                            }
+                            return dn;
                           })()}
                         </p>
                       </div>
