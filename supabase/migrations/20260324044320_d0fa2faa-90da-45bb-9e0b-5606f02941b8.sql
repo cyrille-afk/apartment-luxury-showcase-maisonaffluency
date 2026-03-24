@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET image_url = 'https://www.alineadesignobjects.com/wp-content/uploads/2024/01/Angelo-W-table-in-luxurious-Ebben-Amara-_-Alinea-Design-Objects-548x420.jpg' WHERE id = '08d6ee54-7caf-40c7-a68e-764f2a154172';
