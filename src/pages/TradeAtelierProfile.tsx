@@ -587,9 +587,22 @@ const TradeAtelierProfile = () => {
                           srcSet={pickSrcSet(pick.image_url)}
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className={cn(
+                            "absolute inset-0 w-full h-full object-cover transition-all duration-700",
+                            pick.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
+                          )}
                           loading="lazy"
                         />
+                        {pick.hover_image_url && (
+                          <img
+                            src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
+                            srcSet={pickSrcSet(pick.hover_image_url)}
+                            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                            alt={`${pick.title} hover view`}
+                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                            loading="lazy"
+                          />
+                        )}
                         <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
                             <Maximize2 className="h-3 w-3" />
