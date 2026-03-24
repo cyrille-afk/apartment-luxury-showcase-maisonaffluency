@@ -2036,7 +2036,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     specialty: "Patinated Surfaces, Paintings & Furniture",
     image: pierreBonnefulleImg,
     cardThumbnails: [
-      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774340153/AffluencySG_073_1_m4j7uv.jpg", galleryIndex: GALLERY.A_SOPHISTICATED_LIVING_ROOM },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774340153/AffluencySG_073_1_m4j7uv.jpg", galleryIndex: GALLERY.A_DESIGN_TREASURE_TROVE },
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085533/art-master-bronze_hf6bad.jpg", galleryIndex: GALLERY.A_DESIGN_TREASURE_TROVE },
     ],
     biography: "Pierre Bonnefille is a French artist, painter, designer and 'Maître d'Art' — a title awarded by the French Ministry of Culture to masters of exceptional craft. A graduate of École Boulle and École Nationale Supérieure des Arts Décoratifs, he creates his own materials from mineral powder, limestone, lava, marble, earth, natural pigments and metallic powders. His Bronze Paintings are monumental works where material and color become inseparable. His collaboration with Olivier Gagnère on the Café Marly at the Musée du Louvre first brought him widespread international attention.",
