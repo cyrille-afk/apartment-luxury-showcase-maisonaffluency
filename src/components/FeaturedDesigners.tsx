@@ -2223,6 +2223,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "The Eclipse Wall Light for Pouenat by Tristan Auer is a sculptural study in circular geometry — a brushed copper disc framing a deep painted steel recess. Its minimal, planetary form generates a warm, grazing light that animates the wall surface with shadow and material depth."
       },
     ],
+    cardThumbnails: [
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085769/home-office-3_t39msw.jpg", galleryIndex: GALLERY.LIGHT_AND_FOCUS },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/tristanauer/" },
       { type: "Curators' Picks" },
