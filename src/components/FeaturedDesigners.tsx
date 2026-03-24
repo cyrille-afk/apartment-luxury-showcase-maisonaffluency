@@ -2811,6 +2811,7 @@ const FeaturedDesigners = () => {
                         <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
                           {(() => {
                             const fmt = formatDesignerName(designer.name, (designer as any).displayName);
+                            if (fmt.brand && fmt.person) return `${fmt.brand} — ${fmt.person}`;
                             return fmt.brand || fmt.person;
                           })()}
                         </p>
