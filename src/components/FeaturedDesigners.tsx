@@ -1252,7 +1252,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: felixAgostiniImg,
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg", galleryIndex: GALLERY.A_JEWELRY_BOX_LIKE_SETTING },
-      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_north,q_auto,f_auto/v1774348120/PHOTO-2024-11-15-15-13-10_rj8jic.jpg", galleryIndex: GALLERY.A_JEWELRY_BOX_LIKE_SETTING },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_north,y_0,q_auto,f_auto/v1774348120/PHOTO-2024-11-15-15-13-10_rj8jic.jpg", galleryIndex: GALLERY.A_JEWELRY_BOX_LIKE_SETTING },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.42.43_AM_tsqocc.png",
     biography: "Felix Agostini is a mid-twentieth century French designer renowned for his highly refined figural bronze lighting, created under the Charles Paris imprint. Working primarily in the 1950s and 1960s, his Grande Caryatide sconces and candelabra draw on the classical tradition of architectural figural sculpture while expressing a distinctly French post-war elegance. His pieces are now highly sought after by collectors and museums worldwide.",
