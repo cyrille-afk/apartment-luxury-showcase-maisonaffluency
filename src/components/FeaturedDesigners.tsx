@@ -2712,12 +2712,12 @@ const FeaturedDesigners = () => {
                     }}
                     className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                   >
-                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                    <div className="aspect-[3/4] bg-muted/10 overflow-hidden relative">
                       {pick.image ? (
                         <img
                           src={pick.image}
                           alt={pick.title}
-                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+                          className="w-full h-full object-contain transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
                           loading="lazy"
                         />
                       ) : (
