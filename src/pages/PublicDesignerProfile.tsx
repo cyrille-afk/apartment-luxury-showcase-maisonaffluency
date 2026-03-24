@@ -503,7 +503,7 @@ const PublicDesignerProfile = () => {
                         />
                         {pick.tags && pick.tags.length > 0 && (() => {
                           const collectionTags = pick.tags.filter((t) =>
-                            /couture|edition|limited|modern scholar|unesco/i.test(t)
+                            /couture|edition|limited|modern scholar|unesco|good design award/i.test(t)
                           );
                           return collectionTags.length > 0 ? (
                             <div className="absolute top-2 left-2 flex flex-wrap gap-1">
