@@ -2225,6 +2225,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085769/home-office-3_t39msw.jpg", galleryIndex: GALLERY.LIGHT_AND_FOCUS },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1773200000/Screen_Shot_2026-03-11_at_11.11.33_AM_p0wtix.png", galleryIndex: GALLERY.LIGHT_AND_FOCUS },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/tristanauer/" },
