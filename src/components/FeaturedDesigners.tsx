@@ -1042,6 +1042,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     name: "Atelier BdM - Bruno de Maistre",
     specialty: "Contemporary Furniture Design",
     image: brunoDeMaistreImg,
+    cardThumbnails: [
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085726/boudoir_ll5spn.jpg", galleryIndex: GALLERY.A_SOPHISTICATED_BOUDOIR },
+    ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.20.04_AM_j1zeee.png",
     biography:
       "Bruno de Maistre is a French designer known for his poetic approach to furniture design. His Lyrical Desk demonstrates his ability to create pieces that are both functional and emotionally resonant, with flowing lines and thoughtful proportions that inspire creativity and contemplation.",
