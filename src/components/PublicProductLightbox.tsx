@@ -26,6 +26,8 @@ interface Props {
   allPicks?: PublicLightboxItem[];
   onClose: () => void;
   onSelectRelated?: (item: PublicLightboxItem) => void;
+  /** When true, render inline instead of portaling to document.body */
+  inline?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -64,7 +66,7 @@ function useLocalFavorites() {
 
 /* ------------------------------------------------------------------ */
 
-const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelated }: Props) => {
+const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelated, inline }: Props) => {
   const isMobile = useIsMobile();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useLocalFavorites();
@@ -80,10 +82,15 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     setShowHoverImage(false);
   }, [product?.id]);
 
+  // Track whether body overflow was already hidden (e.g. by a parent Gallery lightbox)
+  // so we don't clobber it on close.
   useEffect(() => {
     if (!product) return;
+    const wasAlreadyHidden = document.body.style.overflow === "hidden";
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      if (!wasAlreadyHidden) document.body.style.overflow = "";
+    };
   }, [product]);
 
   const relatedProducts = useMemo(() => {
@@ -125,7 +132,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
 
   const pinned = isPinned(product.title, product.id);
 
-  return createPortal(
+  const content = (
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
@@ -380,9 +387,10 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
           </div> {/* end scrollable mobile body */}
         </motion.div>
       </motion.div>
-    </AnimatePresence>,
-    document.body
+    </AnimatePresence>
   );
+
+  return inline ? content : createPortal(content, document.body);
 };
 
 export default PublicProductLightbox;
