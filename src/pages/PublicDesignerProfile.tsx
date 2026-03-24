@@ -356,13 +356,68 @@ const PublicDesignerProfile = () => {
                       "{designer.philosophy}"
                     </blockquote>
                   )}
-                  <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
-                  <EditorialBiography
-                    biography={designer.biography}
-                    biographyImages={designer.biography_images}
-                    pickImages={picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`)}
-                    designerName={designer.name}
-                  />
+
+                  {/* Side-by-side: About + opening text on left, first media on right */}
+                  {(() => {
+                    const atelierMedia = (designer.biography_images || []).filter(Boolean);
+                    const curatedMediaFallback = picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`);
+                    const allMedia = atelierMedia.length > 0 ? atelierMedia : curatedMediaFallback;
+                    const firstMedia = allMedia[0] || null;
+                    const remainingMedia = allMedia.slice(1);
+
+                    // Parse first media entry
+                    const firstMediaParsed = firstMedia ? (() => {
+                      const pipes = firstMedia.split(/\s*\|\s*/);
+                      const url = pipes[0]?.trim() || "";
+                      const caption = pipes[1]?.trim() || null;
+                      return /^https?:\/\//i.test(url) ? { url, caption } : null;
+                    })() : null;
+
+                    return (
+                      <>
+                        <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center">
+                          <div className="flex-1 min-w-0">
+                            <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
+                            <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+                              {heroParagraphs.map((p: string, i: number) => (
+                                <p key={i} className={i > 0 ? "mt-4" : ""}>{p}</p>
+                              ))}
+                            </div>
+                          </div>
+                          {firstMediaParsed && (
+                            <div className="shrink-0 w-full md:w-[38%]">
+                              <figure>
+                                <div className="rounded-xl overflow-hidden bg-muted/10">
+                                  <img
+                                    src={firstMediaParsed.url}
+                                    alt={firstMediaParsed.caption || `${designer.name} — editorial`}
+                                    className="w-full h-full object-contain"
+                                    loading="lazy"
+                                  />
+                                </div>
+                                {firstMediaParsed.caption && (
+                                  <figcaption className="mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left">
+                                    {firstMediaParsed.caption}
+                                  </figcaption>
+                                )}
+                              </figure>
+                            </div>
+                          )}
+                        </div>
+
+                        {remainingBio && (
+                          <div className="mt-10 md:mt-14">
+                            <EditorialBiography
+                              biography={remainingBio}
+                              biographyImages={remainingMedia.length > 0 ? remainingMedia : []}
+                              pickImages={[]}
+                              designerName={designer.name}
+                            />
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </motion.div>
               )}
             </div>
