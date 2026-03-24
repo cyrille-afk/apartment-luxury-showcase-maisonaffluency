@@ -321,6 +321,7 @@ function SplitImageBlock({
   paragraphs,
   overrideCaption,
   forceAlign,
+  size,
 }: {
   url: string;
   designerName: string;
@@ -328,9 +329,11 @@ function SplitImageBlock({
   paragraphs: string[];
   overrideCaption?: string | null;
   forceAlign?: "left" | "right" | null;
+  size?: "small" | null;
 }) {
   const caption = overrideCaption ?? captionFromUrl(url);
   const imageOnRight = forceAlign ? forceAlign === "right" : index % 2 === 0;
+  const isSmall = size === "small";
 
   const imageEl = (
     <motion.figure
@@ -340,7 +343,7 @@ function SplitImageBlock({
       transition={transition}
       className="shrink-0 w-full"
     >
-      <div className="rounded-xl overflow-hidden bg-muted/10">
+      <div className={`rounded-xl overflow-hidden bg-muted/10 ${isSmall ? "max-w-[240px] mx-auto md:mx-0" : ""}`}>
         <img
           src={url}
           alt={caption || `${designerName} — editorial`}
@@ -349,7 +352,7 @@ function SplitImageBlock({
         />
       </div>
       {caption && (
-        <figcaption className="mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left">
+        <figcaption className={`mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left ${isSmall ? "max-w-[240px] mx-auto md:mx-0" : ""}`}>
           {caption}
         </figcaption>
       )}
@@ -372,6 +375,8 @@ function SplitImageBlock({
     </motion.div>
   ) : null;
 
+  const imageWidth = isSmall ? "md:w-[24%]" : "md:w-[38%]";
+
   return (
     <div className={`${index === 0 ? "mb-10 md:mb-14" : "my-10 md:my-14"} flex flex-col md:flex-row gap-6 md:gap-10 items-center`}>
       {textEl && (
@@ -379,7 +384,7 @@ function SplitImageBlock({
           {textEl}
         </div>
       )}
-      <div className={`shrink-0 w-full md:w-[38%] ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
+      <div className={`shrink-0 w-full ${imageWidth} ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
         {imageEl}
       </div>
     </div>
