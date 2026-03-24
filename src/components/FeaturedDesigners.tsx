@@ -1415,6 +1415,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: garnierLinkerImg,
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772536395/AffluencySG_194-22.jpg_macpwj.jpg", galleryIndex: GALLERY.A_COLOURFUL_NOOK },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774336947/eaa39674-f12c-4297-8e77-3c4407f1dce9_oaceoq.jpg", galleryIndex: GALLERY.A_COLOURFUL_NOOK },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.45.53_AM_xuwt7r.png",
     biography: "Guillaume Garnier and Florent Linker are two French creators based in Paris. Their work is about giving a contemporary design to rare materials and savoir-faire. All pieces are handmade in small series by French master craftsmen. As designers, they draw inspiration from both decorative arts and sculpture to create pure-shaped forms that reveal their materiality. With their background in interior design, they offer objects that are as comfortable in a gallery as in a private home.",
