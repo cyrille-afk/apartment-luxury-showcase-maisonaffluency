@@ -2951,6 +2951,7 @@ const FeaturedDesigners = () => {
                   return (
                     <Link
                       key={designer.id}
+                      id={`designer-card-${designer.id}`}
                       to={`/designers/${designer.id}`}
                       onClick={() => {
                         sessionStorage.removeItem("__scroll_y");
