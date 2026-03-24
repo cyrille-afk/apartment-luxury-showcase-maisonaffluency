@@ -2448,6 +2448,19 @@ const FeaturedDesigners = () => {
                 Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings
                 their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
               </p>
+              <button
+                onClick={() => {
+                  const url = "https://www.maisonaffluency.com/designers";
+                  navigator.clipboard.writeText(url).then(() => {
+                    import("sonner").then(({ toast }) => toast("Link copied to clipboard"));
+                  }).catch(() => {});
+                }}
+                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.12em]"
+                aria-label="Share Designers & Makers section"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Share
+              </button>
             </div>
           </div>
         </motion.div>
