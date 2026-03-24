@@ -359,19 +359,30 @@ const PublicDesignerProfile = () => {
 
                   {/* Side-by-side: About + opening text on left, first media on right */}
                   {(() => {
-                    const atelierMedia = (designer.biography_images || []).filter(Boolean);
-                    const curatedMediaFallback = picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`);
-                    const allMedia = atelierMedia.length > 0 ? atelierMedia : curatedMediaFallback;
-                    const firstMedia = allMedia[0] || null;
-                    const remainingMedia = allMedia.slice(1);
+                    // remainingBio already has media URLs interleaved as text lines
+                    // Split it to extract the first media URL for the hero, keep the rest for EditorialBiography
+                    const remainingBlocks = remainingBio
+                      ? remainingBio.split(/\n\n+/).map((b: string) => b.trim()).filter(Boolean)
+                      : [];
 
-                    // Parse first media entry
-                    const firstMediaParsed = firstMedia ? (() => {
-                      const pipes = firstMedia.split(/\s*\|\s*/);
+                    // Find first media URL in remainingBlocks
+                    let firstMediaIdx = -1;
+                    let firstMediaParsed: { url: string; caption: string | null } | null = null;
+                    for (let i = 0; i < remainingBlocks.length; i++) {
+                      const line = remainingBlocks[i];
+                      const pipes = line.split(/\s*\|\s*/);
                       const url = pipes[0]?.trim() || "";
-                      const caption = pipes[1]?.trim() || null;
-                      return /^https?:\/\//i.test(url) ? { url, caption } : null;
-                    })() : null;
+                      if (/^https?:\/\//i.test(url) && /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(url) || /res\.cloudinary\.com\/.+\/image\/upload/i.test(url)) {
+                        firstMediaParsed = { url, caption: pipes[1]?.trim() || null };
+                        firstMediaIdx = i;
+                        break;
+                      }
+                    }
+
+                    // Remove the first media from the remaining bio so EditorialBiography handles the rest
+                    const editorialBio = firstMediaIdx >= 0
+                      ? [...remainingBlocks.slice(0, firstMediaIdx), ...remainingBlocks.slice(firstMediaIdx + 1)].join("\n\n")
+                      : remainingBio;
 
                     return (
                       <>
@@ -405,11 +416,11 @@ const PublicDesignerProfile = () => {
                           )}
                         </div>
 
-                        {remainingBio && (
+                        {editorialBio && (
                           <div className="mt-10 md:mt-14">
                             <EditorialBiography
-                              biography={remainingBio}
-                              biographyImages={remainingMedia.length > 0 ? remainingMedia : []}
+                              biography={editorialBio}
+                              biographyImages={[]}
                               pickImages={[]}
                               designerName={designer.name}
                             />
