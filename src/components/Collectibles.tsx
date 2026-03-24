@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import CuratorPicksLegend from "./CuratorPicksLegend";
 import { GALLERY } from "@/constants/galleryIndex";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
@@ -352,6 +353,7 @@ export const collectibleDesigners: Array<{
 ];
 
 const Collectibles = () => {
+  const navigate = useNavigate();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { isPinned, togglePin, items: compareItems } = useCompare();
@@ -977,7 +979,7 @@ const Collectibles = () => {
                           key={designer.id}
                           id={`collectible-card-${designer.id}`}
                           type="button"
-                          onClick={() => openCuratorPicks(designer)}
+                          onClick={() => navigate(`/designers/${designer.id}`)}
                           className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                         >
                           <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
@@ -1007,7 +1009,7 @@ const Collectibles = () => {
                             {/* Hover overlay */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
                               <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-                                <Gem size={12} className="fill-accent text-accent" /> Curator's Picks
+                                View Profile
                               </span>
                             </div>
                           </div>
@@ -1060,7 +1062,7 @@ const Collectibles = () => {
                       <button
                         key={`${designer.id}-mobile`}
                         type="button"
-                        onClick={() => openCuratorPicks(designer)}
+                        onClick={() => navigate(`/designers/${designer.id}`)}
                         className="group block w-full text-left rounded-xl overflow-hidden border border-border bg-background"
                       >
                         <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
