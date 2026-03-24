@@ -2475,56 +2475,6 @@ const FeaturedDesigners = () => {
           </div>
 
 
-          {(() => {
-            // Compute per-subcategory item counts
-            const SUBCATEGORY_TO_TAGS_LOCAL: Record<string, string[]> = {
-              "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
-              "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
-              "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
-              "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
-              "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
-              "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
-              "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
-              "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
-              "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
-              "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
-              "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
-            };
-            const counts: Record<string, number> = {};
-            Object.entries(SUBCATEGORY_TO_TAGS_LOCAL).forEach(([sub, tags]) => {
-              let total = 0;
-              featuredDesigners.forEach(d => {
-                d.curatorPicks?.forEach((pick: any) => {
-                  const matchesTags = pick.tags?.some((tag: string) => tags.some(mt => tag.toLowerCase() === mt.toLowerCase()));
-                  const matchesCat = tags.some(mt => pick.category?.toLowerCase() === mt.toLowerCase());
-                  if (matchesTags || matchesCat) total++;
-                });
-              });
-              counts[sub] = total;
-            });
-            return (
-              <CategorySidebar
-                activeCategory={selectedCategory}
-                activeSubcategory={selectedSubcategory}
-                onSelect={(cat, sub) => {
-                  if (cat === null) {
-                    setSelectedCategory(null);
-                  } else {
-                    setSelectedCategoryRaw(cat);
-                    if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
-                    broadcastFilter(cat, sub);
-                    // Scroll to product grid when a filter is applied
-                    setTimeout(() => {
-                      document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 150);
-                  }
-                }}
-                itemCounts={counts}
-                sectionLabel="all Designers"
-              />
-            );
-          })()}
-
         {(searchQuery || selectedCategory) && (
           <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
             {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
@@ -2577,14 +2527,68 @@ const FeaturedDesigners = () => {
           </div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
+        {/* Desktop: Sidebar + Grid flex layout */}
+        <div className="hidden md:flex gap-6">
+          {(() => {
+            const SUBCATEGORY_TO_TAGS_LOCAL: Record<string, string[]> = {
+              "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+              "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+              "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+              "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+              "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
+              "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+              "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+              "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+              "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+              "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+              "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+            };
+            const counts: Record<string, number> = {};
+            Object.entries(SUBCATEGORY_TO_TAGS_LOCAL).forEach(([sub, tags]) => {
+              let total = 0;
+              featuredDesigners.forEach(d => {
+                d.curatorPicks?.forEach((pick: any) => {
+                  const matchesTags = pick.tags?.some((tag: string) => tags.some(mt => tag.toLowerCase() === mt.toLowerCase()));
+                  const matchesCat = tags.some(mt => pick.category?.toLowerCase() === mt.toLowerCase());
+                  if (matchesTags || matchesCat) total++;
+                });
+              });
+              counts[sub] = total;
+            });
+            return (
+              <CategorySidebar
+                activeCategory={selectedCategory}
+                activeSubcategory={selectedSubcategory}
+                onSelect={(cat, sub) => {
+                  if (cat === null) {
+                    setSelectedCategory(null);
+                  } else {
+                    setSelectedCategoryRaw(cat);
+                    if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
+                    broadcastFilter(cat, sub);
+                    setTimeout(() => {
+                      document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 150);
+                  }
+                }}
+                itemCounts={counts}
+                sectionLabel="all Designers"
+                onOpenChange={setSidebarOpen}
+              />
+            );
+          })()}
+
+          <motion.div
+            className="flex-1 min-w-0"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
           <div className={cn(
             "grid gap-4 md:gap-6 grid-cols-2",
-            gridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-3 lg:grid-cols-5"
+            sidebarOpen
+              ? "md:grid-cols-4"
+              : gridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-3 lg:grid-cols-5"
           )}>
               {filteredDesigners
                 .slice()
