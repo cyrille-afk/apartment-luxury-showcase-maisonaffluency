@@ -64,7 +64,7 @@ const herveTourbillonPendant = cloudinaryUrl("Screen_Shot_2026-02-23_at_11.01.34
 const herveFacettedPendant = cloudinaryUrl("Screen_Shot_2026-02-23_at_11.07.41_AM_lbv2zc", { width: 1200, quality: "auto:good", crop: "fill" });
 const herveTumulteMirror = cloudinaryUrl("Screen_Shot_2026-02-23_at_11.10.56_AM_un5mxc", { width: 1200, quality: "auto:good", crop: "fill" });
 const herveEmpileeConsole = cloudinaryUrl("Screen_Shot_2026-02-23_at_11.16.19_AM_p0jbm0", { width: 1200, quality: "auto:good", crop: "fill" });
-const emmanuelBabledImg = cloudinaryUrl("Screen_Shot_2025-12-14_at_7.32.25_AM_wujvd4", { width: 800, quality: "auto", crop: "fill" });
+const emmanuelBabledImg = cloudinaryUrl("Screen_Shot_2025-12-12_at_2.16.52_PM_fojs2q", { width: 800, quality: "auto", crop: "fill" });
 import emmanuelBabledPick1 from "@/assets/curators-picks/emmanuel-babled-1.jpg";
 const emmanuelBabledPick2 = cloudinaryUrl("Screen_Shot_2026-03-05_at_8.08.08_PM_e3yqrd", { width: 1200, quality: "auto:good", crop: "fill" });
 import emmanuelBabledPick3 from "@/assets/curators-picks/emmanuel-babled-3.jpg";
