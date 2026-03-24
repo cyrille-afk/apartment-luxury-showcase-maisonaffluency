@@ -9,6 +9,8 @@ import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
 import GalleryHotspots from "./GalleryHotspots";
 import QuoteRequestDialog from "./QuoteRequestDialog";
+import PublicProductLightbox, { type PublicLightboxItem } from "./PublicProductLightbox";
+import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -260,6 +262,57 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     setQuoteProduct({ name: productName, designer: designerName });
     setQuoteDialogOpen(true);
   }, []);
+
+  // ── Hotspot → PublicProductLightbox matching ──
+  const [hotspotLightboxProduct, setHotspotLightboxProduct] = useState<PublicLightboxItem | null>(null);
+
+  const allCuratorPicks = useMemo((): PublicLightboxItem[] => {
+    return getAllTradeProducts()
+      .filter(p => p.image_url)
+      .map(p => ({
+        id: p.id,
+        title: p.product_name,
+        subtitle: p.subtitle || null,
+        image_url: p.image_url!,
+        hover_image_url: p.hover_image_url || null,
+        brand_name: p.brand_name,
+        materials: p.materials || null,
+        dimensions: p.dimensions || null,
+        category: p.category || null,
+        subcategory: p.subcategory || null,
+        pdf_url: p.pdf_url || p.pdf_urls?.[0]?.url || null,
+      }));
+  }, []);
+
+  const handleHotspotViewProduct = useCallback((productName: string, designerName: string) => {
+    const normName = productName.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+    const normDesigner = designerName.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+    const tokenize = (s: string) => s.split(" ").filter(t => t.length > 2);
+    const nameTokens = tokenize(normName);
+
+    let best: PublicLightboxItem | null = null;
+    let bestScore = 0;
+
+    for (const item of allCuratorPicks) {
+      const itemName = item.title.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+      const itemBrand = item.brand_name.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+      const itemTokens = tokenize(itemName);
+      const overlap = nameTokens.filter(t => itemTokens.includes(t)).length;
+      const shorter = Math.min(nameTokens.length, itemTokens.length);
+      const nameScore = shorter > 0 ? overlap / shorter : 0;
+      // Boost if designer matches
+      const designerMatch = normDesigner && itemBrand.includes(normDesigner) ? 0.2 : 0;
+      const score = nameScore + designerMatch;
+      if (score > bestScore && nameScore >= 0.5) {
+        bestScore = score;
+        best = item;
+      }
+    }
+
+    if (best) {
+      setHotspotLightboxProduct(best);
+    }
+  }, [allCuratorPicks]);
 
   // Pulsing hotspot hint — show once per session on the first hotspot section image
   const [showHotspotHint, setShowHotspotHint] = useState(() => {
@@ -989,6 +1042,14 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           onOpenChange={setQuoteDialogOpen}
           productName={quoteProduct.name}
           designerName={quoteProduct.designer}
+        />
+      )}
+      {!onHotspotAddToQuote && (
+        <PublicProductLightbox
+          product={hotspotLightboxProduct}
+          allPicks={allCuratorPicks.filter(p => p.brand_name === hotspotLightboxProduct?.brand_name)}
+          onClose={() => setHotspotLightboxProduct(null)}
+          onSelectRelated={(item) => setHotspotLightboxProduct(item)}
         />
       )}
     </>;
