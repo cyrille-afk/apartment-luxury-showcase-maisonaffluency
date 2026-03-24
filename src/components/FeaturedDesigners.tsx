@@ -955,6 +955,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: binaBAitelImg,
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087851/IMG_2133_wtxd62.jpg", galleryIndex: GALLERY.A_COLOURFUL_NOOK },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774336201/AffluencySG_191_2_jthubs.jpg", galleryIndex: GALLERY.A_COLOURFUL_NOOK },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.17.48_AM_rkjerk.png",
     biography: "Bina Baitel Studio creates interior and industrial design projects as well as unique creations in collaboration with museums and galleries. The Paris-based studio conducts a global creative approach ranging from artistic direction to technical studies, with a constant focus on timeless projects and a search for innovation. Bina Baitel's work has been exhibited at the Grand Palais, Milan Design Week, and leading design galleries worldwide.",
