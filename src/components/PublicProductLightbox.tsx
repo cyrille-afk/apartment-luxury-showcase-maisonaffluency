@@ -66,7 +66,7 @@ function useLocalFavorites() {
 
 /* ------------------------------------------------------------------ */
 
-const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelated }: Props) => {
+const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelated, inline }: Props) => {
   const isMobile = useIsMobile();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useLocalFavorites();
