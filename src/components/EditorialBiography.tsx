@@ -754,6 +754,7 @@ export default function EditorialBiography({
             paragraphs={textAccum}
             overrideCaption={mediaItem.caption}
             forceAlign={mediaItem.align}
+            size={mediaItem.size}
           />
         );
         textAccum = [];
