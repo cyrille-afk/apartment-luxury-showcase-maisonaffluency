@@ -2349,7 +2349,7 @@ const FeaturedDesigners = () => {
           transition={{ duration: 0.8 }}
           className="mb-12 md:mb-16 text-left"
         >
-          <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
             {/* Hero image placeholder — will be replaced with Cloudinary URL */}
             <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
               <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 font-body text-xs uppercase tracking-widest">
