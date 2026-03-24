@@ -2483,8 +2483,22 @@ const FeaturedDesigners = () => {
           </p>
         )}
 
-        {/* Grid toggle + search — right-aligned above grid */}
-        <div className="hidden md:flex items-center justify-end gap-2 mb-4">
+        {/* Filter + Grid toggle + search — single row above grid */}
+        <div className="hidden md:flex items-center gap-2 mb-4">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-foreground text-foreground transition-colors relative"
+            aria-label="Filter"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            <span className="text-[11px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
+            {selectedCategory && (
+              <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
+                1
+              </span>
+            )}
+          </button>
+          <div className="flex-1" />
           <button
             onClick={() => setGridCols(gridCols === 3 ? 5 : 3)}
             className="p-1.5 rounded border border-foreground text-foreground transition-colors"
@@ -2574,6 +2588,7 @@ const FeaturedDesigners = () => {
                 itemCounts={counts}
                 sectionLabel="all Designers"
                 onOpenChange={setSidebarOpen}
+                isOpen={sidebarOpen}
               />
             );
           })()}
