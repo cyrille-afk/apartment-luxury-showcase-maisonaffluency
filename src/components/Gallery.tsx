@@ -515,8 +515,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     setIsExpanded(false);
     imageZoomedRef.current = false;
     setImageZoomed(false);
-    // Scroll back to the source item after closing
-    if (externalSourceId) {
+    // Navigate to return URL if set (e.g. designer profile after thumbnail click)
+    if (returnUrl) {
+      const url = returnUrl;
+      setReturnUrl(null);
+      setExternalSourceId(null);
+      setTimeout(() => navigate(url), 100);
+    } else if (externalSourceId) {
       setTimeout(() => {
         const element = document.getElementById(externalSourceId);
         if (element) {
