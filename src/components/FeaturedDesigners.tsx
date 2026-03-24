@@ -1515,6 +1515,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     displayName: "Ecart - Jean-Michel Frank",
     specialty: "Minimalist Luxury & Art Deco Pioneer",
     image: jeanMichelFrankImg,
+    cardThumbnails: [
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087732/IMG_2402_y3atdm.jpg", galleryIndex: GALLERY.A_SUN_LIT_READING_CORNER },
+    ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/v1772270649/Screen_Shot_2026-02-28_at_5.23.19_PM_widtwe.png",
     imagePosition: "center 20%",
     biography:
