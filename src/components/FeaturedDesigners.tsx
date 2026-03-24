@@ -635,7 +635,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: apparatusStudioImg,
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085919/small-room-personality_wvxz6y.png", galleryIndex: GALLERY.COMPACT_ELEGANCE },
-      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085690/bedroom-second_cyfmdj.jpg", galleryIndex: GALLERY.AN_INVITING_LOUNGE_AREA },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085690/bedroom-second_cyfmdj.jpg", galleryIndex: GALLERY.A_SERENE_DECOR },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.57.35_AM_yilszh.png",
     biography:
