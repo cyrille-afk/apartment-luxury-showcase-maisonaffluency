@@ -162,12 +162,30 @@ const PublicDesignerProfile = () => {
   let heroParagraphs: string[] = [];
   let remainingBio = "";
 
+  // Helper: detect standalone media URLs (images, videos, Vimeo, YouTube)
+  const isMediaBlock = (text: string): boolean => {
+    const pipes = text.split(/\s*\|\s*/);
+    const url = pipes[0]?.trim() || "";
+    if (!/^https?:\/\//i.test(url)) return false;
+    if (/\s/.test(url)) return false;
+    return (
+      /\.(avif|gif|jpe?g|png|webp|mp4|webm|mov)(\?|$)/i.test(url) ||
+      /res\.cloudinary\.com\/.+\/(image|video)\/upload/i.test(url) ||
+      /vimeo\.com\//i.test(url) ||
+      /youtube\.com\/watch|youtu\.be\//i.test(url)
+    );
+  };
+
   if (bioBlocks.length > 0) {
+    // Separate text-only blocks from media blocks for proper chunking
+    const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
+    const mediaBlocks = bioBlocks.filter((b) => isMediaBlock(b));
+
     if (mediaEntries.length > 0) {
       const chunkCount = mediaEntries.length + 1;
-      const chunkSize = Math.max(1, Math.ceil(bioBlocks.length / chunkCount));
+      const chunkSize = Math.max(1, Math.ceil(textBlocks.length / chunkCount));
       const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
-        bioBlocks.slice(i * chunkSize, (i + 1) * chunkSize)
+        textBlocks.slice(i * chunkSize, (i + 1) * chunkSize)
       );
       for (let i = 1; i < paragraphChunks.length; i++) {
         if (paragraphChunks[i].length > 0) continue;
@@ -180,16 +198,34 @@ const PublicDesignerProfile = () => {
         }
       }
       heroParagraphs = paragraphChunks[0] || [];
-      remainingBio = mediaEntries
+      // Build remainingBio: interleave media entries with text chunks, then append inline media blocks
+      const interleaved = mediaEntries
         .map((mediaLine, index) => {
           const sectionText = (paragraphChunks[index + 1] || []).join("\n\n");
           return [mediaLine, sectionText].filter(Boolean).join("\n\n");
         })
         .filter(Boolean)
         .join("\n\n");
+      // Append any inline media blocks (Vimeo, YouTube, images pasted in biography) that aren't already in mediaEntries
+      const extraMedia = mediaBlocks.filter((mb) => !mediaEntries.some((me) => mb.includes(me)));
+      remainingBio = [interleaved, ...extraMedia].filter(Boolean).join("\n\n");
     } else {
-      heroParagraphs = bioBlocks.slice(0, 2);
-      remainingBio = bioBlocks.slice(2).join("\n\n");
+      heroParagraphs = textBlocks.slice(0, 2);
+      // Include media blocks in the remaining bio so they render properly
+      const remainingText = textBlocks.slice(2);
+      // Re-insert media blocks at their original positions relative to text
+      const allRemaining: string[] = [];
+      let textIdx = 0;
+      let originalTextCount = 0;
+      for (const block of bioBlocks) {
+        if (isMediaBlock(block)) {
+          if (originalTextCount >= 2) allRemaining.push(block);
+        } else {
+          originalTextCount++;
+          if (originalTextCount > 2) allRemaining.push(block);
+        }
+      }
+      remainingBio = allRemaining.join("\n\n");
     }
   }
 
