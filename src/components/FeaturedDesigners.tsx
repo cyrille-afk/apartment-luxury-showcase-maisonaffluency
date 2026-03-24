@@ -389,6 +389,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085686/bedroom-alt_yk0j0d.jpg", galleryIndex: GALLERY.UNIQUE_BY_DESIGN_VIGNETTE },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774340485/AffluencySG_030_1_pncaim.jpg", galleryIndex: GALLERY.UNIQUE_BY_DESIGN_VIGNETTE },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/__okha/" },
