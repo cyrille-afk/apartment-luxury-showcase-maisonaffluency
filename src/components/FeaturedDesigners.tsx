@@ -529,7 +529,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "leo-aerts-alinea",
-    name: "Alinea Design Objects - Léo Aerts",
+    name: "Alinea Design Objects - Leo Aerts",
     specialty: "Stone Furniture & Design Objects",
     image: leoAertsAlineaImg,
     cardThumbnails: [
@@ -537,7 +537,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774330412/AffluencySG_107_2_s4nfeb.jpg", galleryIndex: GALLERY.PANORAMIC_CITYSCAPE_VIEWS },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_9.50.29_AM_pngvay.png",
-    biography: "Léo Aerts is a Belgian designer and the founder of Alinea Design Objects, a studio renowned for its mastery of natural stone and its ability to transform one of the earth's oldest materials into contemporary design objects of exceptional refinement. Each piece is conceived as a sculptural statement: monolithic yet precise, elemental yet deeply considered. Working closely with Belgian and Italian quarries, Aerts selects his stones for their geological character, ensuring that every table, shelf and object carries the unique signature of its material. His Angelo series has earned international recognition for its fusion of natural stone with solid American walnut.",
+    biography: "Leo Aerts is a Belgian designer and the founder of Alinea Design Objects, a studio renowned for its mastery of natural stone and its ability to transform one of the earth's oldest materials into contemporary design objects of exceptional refinement. Each piece is conceived as a sculptural statement: monolithic yet precise, elemental yet deeply considered. Working closely with Belgian and Italian quarries, Aerts selects his stones for their geological character, ensuring that every table, shelf and object carries the unique signature of its material. His Angelo series has earned international recognition for its fusion of natural stone with solid American walnut.",
     notableWorks: "Angelo M/R Dining Table, Angelo M/O 290, Angelo M Side Table Collection, Angelo W Limited Edition, Visible M Horizontal Display Cabinet, Twin Chair",
     notableWorksLinks: [
       { text: "Custom Angelo M 110 Dining Table", galleryIndex: GALLERY.PANORAMIC_CITYSCAPE_VIEWS },
@@ -553,7 +553,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Tables", "Dining Table"],
         materials: "Natural stone top & base • Solid American walnut",
         dimensions: "Angelo M/R 130: Ø 130 × 75 cm H — Twin Indoor: 52 × 51 × 74 cm H",
-        description: "The Angelo M/R 130 dining table is Léo Aerts' most celebrated work. Award-winning design table: Good Design Award – Chicago, USA (2018), People's Choice, AZ Award – Toronto, Canada (2019), German Design Award – Frankfurt, Germany (2020).",
+        description: "The Angelo M/R 130 dining table is Leo Aerts' most celebrated work. Award-winning design table: Good Design Award – Chicago, USA (2018), People's Choice, AZ Award – Toronto, Canada (2019), German Design Award – Frankfurt, Germany (2020).",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Alinea_Angelo_M_Info.pdf",
         pdfFilename: "Alinea-Angelo_M_Info.pdf"
       },
