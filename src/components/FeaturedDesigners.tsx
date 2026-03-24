@@ -2923,7 +2923,21 @@ const FeaturedDesigners = () => {
                         {[0, 1].map((i) => {
                           const thumb = (designer as any).cardThumbnails?.[i];
                           return thumb ? (
-                            <div key={i} className="w-14 h-14 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
+                            <div
+                              key={i}
+                              className="w-14 h-14 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md cursor-pointer active:scale-95 transition-transform"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const galleryEl = document.getElementById('gallery');
+                                if (galleryEl) galleryEl.scrollIntoView({ behavior: 'smooth' });
+                                setTimeout(() => {
+                                  window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                                    detail: { index: thumb.galleryIndex, sourceId: `designer-card-${designer.id}` }
+                                  }));
+                                }, 400);
+                              }}
+                            >
                               <img src={thumb.image} alt="" className="w-full h-full object-cover" loading="lazy" />
                             </div>
                           ) : (
