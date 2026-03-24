@@ -2450,13 +2450,13 @@ const FeaturedDesigners = () => {
               </p>
               <button
                 onClick={() => {
-                  const bridgeUrl = "https://www.maisonaffluency.com/designers-share.html";
+                  const cleanUrl = "https://www.maisonaffluency.com/designers";
                   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                   if (isMobile) {
-                    const waUrl = `https://wa.me/?text=${encodeURIComponent(`Designers & Makers in Situ — Maison Affluency: ${bridgeUrl}`)}`;
+                    const waUrl = `https://wa.me/?text=${encodeURIComponent(`Designers & Makers in Situ — Maison Affluency: ${cleanUrl}`)}`;
                     window.location.href = waUrl;
                   } else {
-                    navigator.clipboard.writeText(bridgeUrl).then(() => {
+                    navigator.clipboard.writeText(cleanUrl).then(() => {
                       import("sonner").then(({ toast }) => toast("Link copied to clipboard"));
                     }).catch(() => {});
                   }
