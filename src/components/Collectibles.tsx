@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
 import { Input } from "@/components/ui/input";
 // Accordion removed — now using card grid layout
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
