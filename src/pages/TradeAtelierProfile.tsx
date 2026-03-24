@@ -588,8 +588,8 @@ const TradeAtelierProfile = () => {
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
                           className={cn(
-                            "absolute inset-0 w-full h-full object-cover transition-all duration-700",
-                            pick.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
+                            "absolute inset-0 w-full h-full transition-all duration-700",
+                            pick.hover_image_url ? "object-contain bg-muted/30 opacity-100 group-hover:opacity-0 group-hover:scale-105" : "object-cover group-hover:scale-105"
                           )}
                           loading="lazy"
                         />
