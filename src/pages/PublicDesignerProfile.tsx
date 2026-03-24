@@ -325,7 +325,7 @@ const PublicDesignerProfile = () => {
                           title="Copy shareable link"
                           onClick={(e) => {
                             e.stopPropagation();
-                            const url = `https://www.maisonaffluency.com/designers/${designer.slug}-og.html`;
+                            const url = `https://www.maisonaffluency.com/designers/${designer.slug}-card.html`;
                             navigator.clipboard.writeText(url).then(() => {
                               setShareCopied(true);
                               setTimeout(() => setShareCopied(false), 2000);
@@ -421,7 +421,7 @@ const PublicDesignerProfile = () => {
                     title="Copy shareable link"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const url = `https://www.maisonaffluency.com/designers/${designer.slug}-og.html`;
+                      const url = `https://www.maisonaffluency.com/designers/${designer.slug}-card.html`;
                       navigator.clipboard.writeText(url).then(() => {
                         setShareCopied(true);
                         setTimeout(() => setShareCopied(false), 2000);
