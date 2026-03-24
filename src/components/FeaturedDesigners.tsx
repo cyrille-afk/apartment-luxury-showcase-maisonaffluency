@@ -2801,7 +2801,21 @@ const FeaturedDesigners = () => {
                         {[0, 1].map((i) => {
                           const thumb = (designer as any).cardThumbnails?.[i];
                           return thumb ? (
-                            <div key={i} className="w-[72px] h-[72px] md:w-20 md:h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
+                            <div
+                              key={i}
+                              className="w-[72px] h-[72px] md:w-20 md:h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md cursor-pointer hover:scale-105 transition-transform"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const galleryEl = document.getElementById('gallery');
+                                if (galleryEl) {
+                                  galleryEl.scrollIntoView({ behavior: 'smooth' });
+                                  setTimeout(() => {
+                                    window.dispatchEvent(new CustomEvent('openGalleryLightbox', { detail: { index: thumb.galleryIndex } }));
+                                  }, 600);
+                                }
+                              }}
+                            >
                               <img src={thumb.image} alt="" className="w-full h-full object-cover" loading="lazy" />
                             </div>
                           ) : (
