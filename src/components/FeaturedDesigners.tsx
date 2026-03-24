@@ -2812,13 +2812,13 @@ const FeaturedDesigners = () => {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                const target = document.getElementById(`gallery-item-${thumb.galleryIndex}`);
-                                if (target) {
-                                  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                } else {
-                                  const galleryEl = document.getElementById('gallery');
-                                  if (galleryEl) galleryEl.scrollIntoView({ behavior: 'smooth' });
-                                }
+                                const galleryEl = document.getElementById('gallery');
+                                if (galleryEl) galleryEl.scrollIntoView({ behavior: 'smooth' });
+                                setTimeout(() => {
+                                  window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                                    detail: { index: thumb.galleryIndex }
+                                  }));
+                                }, 400);
                               }}
                             >
                               <img src={thumb.image} alt="" className="w-full h-full object-cover" loading="lazy" />
