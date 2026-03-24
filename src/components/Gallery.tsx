@@ -730,24 +730,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           {!isHotspotSection && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                           )}
-                          {/* Subtle hotspot hint — mobile: first image only */}
-                          {isHotspotSection && showHotspotHint && index === 0 && (
-                            <div ref={hotspotHintRef} className="absolute bottom-12 left-3 z-20 pointer-events-none">
-                              <motion.span
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 1, delay: 1.2 }}
-                                className="bg-black/30 backdrop-blur-md font-body text-[10px] text-white/80 tracking-wide px-2.5 py-1 rounded-full"
-                              >
-                                Tap image to explore pieces
-                              </motion.span>
-                            </div>
-                          )}
-                          {/* Piece count — subtle frosted bottom-right */}
+                          {/* Pulsating dot — mobile hotspot hint */}
                           {isHotspotSection && hotspotCounts[item.title] > 0 && (
-                            <span className="absolute bottom-3 right-3 z-10 bg-black/25 backdrop-blur-md font-body text-[9px] text-white/70 px-2 py-0.5 rounded-full">
-                              {hotspotCounts[item.title]} {hotspotCounts[item.title] === 1 ? "piece" : "pieces"}
+                            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                              <span className="relative flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white/60" />
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-white/80 shadow-md" />
+                              </span>
                             </span>
                           )}
                           {/* Expand icon - bottom left */}
