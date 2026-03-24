@@ -2888,7 +2888,7 @@ const FeaturedDesigners = () => {
                                 if (galleryEl) galleryEl.scrollIntoView({ behavior: 'smooth' });
                                 setTimeout(() => {
                                   window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                    detail: { index: thumb.galleryIndex, returnUrl: `/designers/${designer.id}` }
+                                    detail: { index: thumb.galleryIndex, returnUrl: '/#designers' }
                                   }));
                                 }, 400);
                               }}
