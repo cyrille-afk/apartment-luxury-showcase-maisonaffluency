@@ -73,6 +73,8 @@ interface GalleryHotspotsProps {
   onAddToQuote?: (product: HotspotProduct) => void;
   /** Public: callback to open quote request dialog pre-filled */
   onRequestQuote?: (productName: string, designerName: string) => void;
+  /** Public: callback to open product lightbox for a matched curator's pick */
+  onViewProduct?: (productName: string, designerName: string) => void;
 }
 
 interface PendingHotspot {
@@ -80,7 +82,7 @@ interface PendingHotspot {
   y_percent: number;
 }
 
-const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote }: GalleryHotspotsProps) => {
+const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote, onViewProduct }: GalleryHotspotsProps) => {
   const isMobile = useIsMobile();
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -453,8 +455,22 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                           </button>
                         )}
 
+                        {/* Public: View Product (opens PublicProductLightbox) */}
+                        {onViewProduct && (
+                          <button
+                            className="flex items-center gap-1.5 mt-2.5 w-full text-xs font-body bg-foreground text-background rounded px-3 py-2 hover:bg-foreground/90 transition-colors justify-center"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onViewProduct(hotspot.product_name, hotspot.designer_name || "");
+                              setActiveId(null);
+                            }}
+                          >
+                            View Product →
+                          </button>
+                        )}
+
                         {/* Public: Request a Quote */}
-                        {onRequestQuote && (
+                        {onRequestQuote && !onViewProduct && (
                           <button
                             className="flex items-center gap-1.5 mt-2.5 w-full text-xs font-body bg-foreground text-background rounded px-3 py-2 hover:bg-foreground/90 transition-colors justify-center"
                             onClick={(e) => {
