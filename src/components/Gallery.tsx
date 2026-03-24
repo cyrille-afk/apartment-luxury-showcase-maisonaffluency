@@ -1036,14 +1036,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
            )}
           {/* Product lightbox inside Dialog so it's within focus-trap scope */}
           {!onHotspotAddToQuote && hotspotLightboxProduct && (
-            <div className="fixed inset-0 z-[100]" onClick={(e) => e.stopPropagation()}>
-              <PublicProductLightbox
-                product={hotspotLightboxProduct}
-                allPicks={allCuratorPicks.filter(p => p.brand_name === hotspotLightboxProduct?.brand_name)}
-                onClose={() => setHotspotLightboxProduct(null)}
-                onSelectRelated={(item) => setHotspotLightboxProduct(item)}
-              />
-            </div>
+            <PublicProductLightbox
+              product={hotspotLightboxProduct}
+              allPicks={allCuratorPicks.filter(p => p.brand_name === hotspotLightboxProduct?.brand_name)}
+              onClose={() => setHotspotLightboxProduct(null)}
+              onSelectRelated={(item) => setHotspotLightboxProduct(item)}
+              inline
+            />
           )}
         </DialogContent>
       </Dialog>
