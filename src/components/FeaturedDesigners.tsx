@@ -1343,7 +1343,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
     ],
     cardThumbnails: [
-      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774340767/AffluencySG_178_1_esvjq2.jpg", galleryIndex: GALLERY.CRAFTSMANSHIP_AT_EVERY_CORNER },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774340767/AffluencySG_178_1_esvjq2.jpg", galleryIndex: GALLERY.A_SOPHISTICATED_LIVING_ROOM },
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087460/AffluencySG_204_1_qbbpqb.jpg", galleryIndex: GALLERY.CRAFTSMANSHIP_AT_EVERY_CORNER },
     ],
     links: [
