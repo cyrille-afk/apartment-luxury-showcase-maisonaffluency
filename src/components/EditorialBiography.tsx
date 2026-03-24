@@ -247,6 +247,14 @@ function VideoBlock({
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
+        ) : playing && embedUrl ? (
+          <iframe
+            src={embedUrl.includes("?") ? `${embedUrl}&autoplay=1` : `${embedUrl}?autoplay=1`}
+            title={caption || `${designerName} — video`}
+            className="w-full h-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
         ) : !playing ? (
           <button
             onClick={() => setPlaying(true)}
