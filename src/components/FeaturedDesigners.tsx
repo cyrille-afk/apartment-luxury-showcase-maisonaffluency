@@ -2779,13 +2779,20 @@ const FeaturedDesigners = () => {
                         </div>
                       )}
 
-                      <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                      {/* Name — top-left */}
+                      <div className="absolute inset-x-0 top-0 px-4 pb-10 pt-3 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
                         <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
                           {(() => {
                             const fmt = formatDesignerName(designer.name, (designer as any).displayName);
                             return fmt.brand || fmt.person;
                           })()}
                         </p>
+                      </div>
+
+                      {/* Thumbnail placeholders — bottom-right */}
+                      <div className="absolute bottom-2.5 right-2.5 flex gap-1.5 z-10">
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
                       </div>
 
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
@@ -2853,10 +2860,16 @@ const FeaturedDesigners = () => {
                           </span>
                         </div>
                       )}
-                      <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                      {/* Name — top-left */}
+                      <div className="absolute inset-x-0 top-0 px-3 pb-8 pt-2.5 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
                         <p className="font-display text-sm text-white tracking-wide leading-tight drop-shadow-sm">
                           {designer.displayName || designer.name}
                         </p>
+                      </div>
+                      {/* Thumbnail placeholders — bottom-right */}
+                      <div className="absolute bottom-2 right-2 flex gap-1 z-10">
+                        <div className="w-8 h-8 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
+                        <div className="w-8 h-8 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
                       </div>
                     </div>
                   );
