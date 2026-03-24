@@ -103,10 +103,13 @@ const PublicDesignerProfile = () => {
     const arranged: typeof rawPicks = [];
     while (arranged.length < rawPicks.length) {
       const index = arranged.length;
-      const blockedCategory = index >= columns ? getFunctionalCategory(arranged[index - columns]) : null;
+      // Block the category directly above AND directly to the left
+      const blockedCategories = new Set<string>();
+      if (index >= columns) blockedCategories.add(getFunctionalCategory(arranged[index - columns]));
+      if (index % columns !== 0 && index > 0) blockedCategories.add(getFunctionalCategory(arranged[index - 1]));
 
       const candidates = queues
-        .filter((q) => q.items.length > 0 && q.category !== blockedCategory)
+        .filter((q) => q.items.length > 0 && !blockedCategories.has(q.category))
         .sort((a, b) => b.items.length - a.items.length);
 
       const fallback = queues
