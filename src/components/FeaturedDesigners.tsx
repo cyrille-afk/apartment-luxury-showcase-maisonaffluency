@@ -2016,6 +2016,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085877/living-room-hero_zxfcxl.jpg", galleryIndex: GALLERY.A_SOPHISTICATED_LIVING_ROOM },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087732/IMG_2402_y3atdm.jpg", galleryIndex: GALLERY.A_SUN_LIT_READING_CORNER },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
