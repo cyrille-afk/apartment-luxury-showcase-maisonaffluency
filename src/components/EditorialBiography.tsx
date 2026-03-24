@@ -69,13 +69,16 @@ export function renderParagraph(text: string): React.ReactNode[] {
 
 /** Highlight quoted text within a paragraph */
 function renderQuotedText(text: string): React.ReactNode[] {
-  // Match curly single quotes, straight single quotes, curly double quotes, and straight double quotes
-  return text.split(/(\u2018[^\u2019]*\u2019|'[^']*'|\u201C[^\u201D]*\u201D|"[^"]*")/g).map((segment, i) => {
+  // Match curly single quotes, straight single quotes (preceded by space/start), curly double quotes, and straight double quotes
+  // The straight single-quote pattern requires a word boundary before the opening quote to avoid matching possessives like "Aerts'"
+  return text.split(/(\u2018[^\u2019]*\u2019|(?:^|(?<=\s))'[^']*'|\u201C[^\u201D]*\u201D|"[^"]*")/g).map((segment, i) => {
     const isCurlySingle = segment.startsWith("\u2018") && segment.endsWith("\u2019");
     const isStraightSingle = segment.startsWith("'") && segment.endsWith("'") && segment.length > 2;
     const isCurlyDouble = segment.startsWith("\u201C") && segment.endsWith("\u201D");
     const isStraightDouble = segment.startsWith('"') && segment.endsWith('"') && segment.length > 2;
-    if (isCurlySingle || isStraightSingle || isCurlyDouble || isStraightDouble) {
+    // Extra guard: skip if the "quoted" text is unreasonably long (likely a false match from an apostrophe)
+    const maxQuoteLength = 300;
+    if ((isCurlySingle || isStraightSingle || isCurlyDouble || isStraightDouble) && segment.length <= maxQuoteLength) {
       return (
         <span key={i} className="font-black text-foreground" style={{ fontWeight: 900 }}>
           {segment}
