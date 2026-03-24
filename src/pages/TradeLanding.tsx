@@ -94,9 +94,9 @@ const stats = [
 const testimonials = [
   {
     quote: "Working with Cyrille and Elsa on our recently completed 20,000 sq ft penthouse was a seamless experience. Maison Affluency did so without question. Their personalised approach helped to ensure that our design vision and curation was implemented meticulously. They are the partners you want on your most ambitious projects, and we look forward to many more collaborations ahead.",
-    name: "Amelia and Antonio",
+    name: "Amelia W. and Antonio E.",
     title: "Co-founders, Wecraft Group",
-    location: "",
+    location: "Singapore",
   },
   {
     quote: "Access to exclusive collections and consolidated shipping has been invaluable. Maison Affluency truly understands the needs of design professionals working across borders.",
