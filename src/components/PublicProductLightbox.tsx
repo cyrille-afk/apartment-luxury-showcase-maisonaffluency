@@ -26,6 +26,8 @@ interface Props {
   allPicks?: PublicLightboxItem[];
   onClose: () => void;
   onSelectRelated?: (item: PublicLightboxItem) => void;
+  /** When true, render inline instead of portaling to document.body */
+  inline?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
