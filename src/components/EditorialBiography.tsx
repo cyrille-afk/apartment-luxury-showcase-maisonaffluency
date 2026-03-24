@@ -571,7 +571,7 @@ export default function EditorialBiography({
         }
         if (followText.length > 0) {
           elements.push(
-            <div key={`post-vid-text-${i}`}>
+            <div key={`post-vid-text-${i}`} className="mb-6 md:mb-10">
               {followText.map((p, pi) => (
                 <p key={pi} className={pi > 0 ? "mt-4" : ""}>
                   {renderParagraph(p)}
