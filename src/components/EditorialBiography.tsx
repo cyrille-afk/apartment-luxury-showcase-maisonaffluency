@@ -84,9 +84,9 @@ function renderQuotedText(text: string): React.ReactNode[] {
 }
 
 /** Parse a media line — supports `URL | Caption` pipe separator */
-function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null } | null {
+function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: "small" | null } | null {
   const value = text.trim();
-  // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right
+  // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right | small
   const pipes = value.split(/\s*\|\s*/);
   const url = pipes[0]?.trim() || "";
 
@@ -96,12 +96,15 @@ function parseMediaLine(text: string): { url: string; caption: string | null; po
   let caption: string | null = null;
   let poster: string | null = null;
   let align: "left" | "right" | null = null;
+  let size: "small" | null = null;
   for (let i = 1; i < pipes.length; i++) {
     const seg = pipes[i].trim();
     if (/^poster:/i.test(seg)) {
       poster = seg.replace(/^poster:/i, "").trim();
     } else if (/^(left|right)$/i.test(seg)) {
       align = seg.toLowerCase() as "left" | "right";
+    } else if (/^small$/i.test(seg)) {
+      size = "small";
     } else if (!caption) {
       caption = seg;
     }
@@ -114,7 +117,7 @@ function parseMediaLine(text: string): { url: string; caption: string | null; po
     /\/storage\/v1\/object\/public\//i.test(url);
 
   if (!isMedia) return null;
-  return { url, caption, poster, align };
+  return { url, caption, poster, align, size };
 }
 
 /** Detect a standalone media URL paragraph pasted directly into biography text */
@@ -318,6 +321,7 @@ function SplitImageBlock({
   paragraphs,
   overrideCaption,
   forceAlign,
+  size,
 }: {
   url: string;
   designerName: string;
@@ -325,9 +329,11 @@ function SplitImageBlock({
   paragraphs: string[];
   overrideCaption?: string | null;
   forceAlign?: "left" | "right" | null;
+  size?: "small" | null;
 }) {
   const caption = overrideCaption ?? captionFromUrl(url);
   const imageOnRight = forceAlign ? forceAlign === "right" : index % 2 === 0;
+  const isSmall = size === "small";
 
   const imageEl = (
     <motion.figure
@@ -337,7 +343,7 @@ function SplitImageBlock({
       transition={transition}
       className="shrink-0 w-full"
     >
-      <div className="rounded-xl overflow-hidden bg-muted/10">
+      <div className={`rounded-xl overflow-hidden bg-muted/10 ${isSmall ? "max-w-[240px] mx-auto md:mx-0" : ""}`}>
         <img
           src={url}
           alt={caption || `${designerName} — editorial`}
@@ -346,7 +352,7 @@ function SplitImageBlock({
         />
       </div>
       {caption && (
-        <figcaption className="mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left">
+        <figcaption className={`mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left ${isSmall ? "max-w-[240px] mx-auto md:mx-0" : ""}`}>
           {caption}
         </figcaption>
       )}
@@ -369,6 +375,8 @@ function SplitImageBlock({
     </motion.div>
   ) : null;
 
+  const imageWidth = isSmall ? "md:w-[24%]" : "md:w-[38%]";
+
   return (
     <div className={`${index === 0 ? "mb-10 md:mb-14" : "my-10 md:my-14"} flex flex-col md:flex-row gap-6 md:gap-10 items-center`}>
       {textEl && (
@@ -376,7 +384,7 @@ function SplitImageBlock({
           {textEl}
         </div>
       )}
-      <div className={`shrink-0 w-full md:w-[38%] ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
+      <div className={`shrink-0 w-full ${imageWidth} ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
         {imageEl}
       </div>
     </div>
@@ -667,6 +675,7 @@ export default function EditorialBiography({
           caption: parsed.caption,
           poster: parsed.poster,
           align: parsed.align,
+          size: parsed.size,
           isVideo: isVideoUrl(parsed.url),
         };
       }
@@ -678,11 +687,12 @@ export default function EditorialBiography({
         caption: null,
         poster: null as string | null,
         align: null as "left" | "right" | null,
+        size: null as "small" | null,
         isVideo: isVideoUrl(raw),
       };
     })
     .filter(
-      (m): m is { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; isVideo: boolean } =>
+      (m): m is { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: "small" | null; isVideo: boolean } =>
         !!m && /^https?:\/\//i.test(m.url)
     );
 
@@ -744,6 +754,7 @@ export default function EditorialBiography({
             paragraphs={textAccum}
             overrideCaption={mediaItem.caption}
             forceAlign={mediaItem.align}
+            size={mediaItem.size}
           />
         );
         textAccum = [];
