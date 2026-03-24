@@ -2139,7 +2139,7 @@ const FeaturedDesigners = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [gridCols, setGridCols] = useState<3 | 5>(3);
+  const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
   const categorySourceRef = useRef<string | null>(null);
@@ -2570,10 +2570,10 @@ const FeaturedDesigners = () => {
           </button>
           <div className="flex-1" />
           <button
-            onClick={() => setGridCols(gridCols === 3 ? 5 : 3)}
+            onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
             className="p-1.5 rounded border border-foreground text-foreground transition-colors"
-            aria-label={gridCols === 3 ? "Switch to 5 columns" : "Switch to 3 columns"}
-            title={gridCols === 3 ? "Switch to 5 columns" : "Switch to 3 columns"}
+            aria-label={gridCols === 3 ? "Switch to 4 columns" : "Switch to 3 columns"}
+            title={gridCols === 3 ? "Switch to 4 columns" : "Switch to 3 columns"}
           >
             {gridCols === 3 ? (
               <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2670,7 +2670,7 @@ const FeaturedDesigners = () => {
             "grid gap-4 md:gap-6 grid-cols-2",
             sidebarOpen
               ? "md:grid-cols-4"
-              : gridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-3 lg:grid-cols-5"
+              : gridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-4"
           )}>
               {filteredPicks ? (
                 filteredPicks.map(({ pick, designer, pickIndex }, i) => (
