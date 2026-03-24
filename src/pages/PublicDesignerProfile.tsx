@@ -496,9 +496,22 @@ const PublicDesignerProfile = () => {
                           srcSet={pickSrcSet(pick.image_url)}
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className={cn(
+                            "absolute inset-0 w-full h-full object-cover transition-all duration-700",
+                            pick.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
+                          )}
                           loading="lazy"
                         />
+                        {pick.hover_image_url && (
+                          <img
+                            src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
+                            srcSet={pickSrcSet(pick.hover_image_url)}
+                            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                            alt={`${pick.title} hover view`}
+                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                            loading="lazy"
+                          />
+                        )}
                         {pick.tags && pick.tags.length > 0 && (() => {
                           const collectionTags = pick.tags.filter((t) =>
                             /couture|edition|limited|modern scholar|unesco|good design award/i.test(t)
