@@ -2450,10 +2450,16 @@ const FeaturedDesigners = () => {
               </p>
               <button
                 onClick={() => {
-                  const url = "https://www.maisonaffluency.com/designers";
-                  navigator.clipboard.writeText(url).then(() => {
-                    import("sonner").then(({ toast }) => toast("Link copied to clipboard"));
-                  }).catch(() => {});
+                  const bridgeUrl = "https://www.maisonaffluency.com/designers-share.html";
+                  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                  if (isMobile) {
+                    const waUrl = `https://wa.me/?text=${encodeURIComponent(`Designers & Makers in Situ — Maison Affluency: ${bridgeUrl}`)}`;
+                    window.location.href = waUrl;
+                  } else {
+                    navigator.clipboard.writeText(bridgeUrl).then(() => {
+                      import("sonner").then(({ toast }) => toast("Link copied to clipboard"));
+                    }).catch(() => {});
+                  }
                 }}
                 className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.12em]"
                 aria-label="Share Designers & Makers section"
