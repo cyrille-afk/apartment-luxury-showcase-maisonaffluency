@@ -1343,7 +1343,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
     ],
     cardThumbnails: [
-      undefined,
+      null,
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087460/AffluencySG_204_1_qbbpqb.jpg", galleryIndex: GALLERY.CRAFTSMANSHIP_AT_EVERY_CORNER },
     ],
     links: [
