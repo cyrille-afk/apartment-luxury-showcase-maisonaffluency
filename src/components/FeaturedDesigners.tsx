@@ -2452,8 +2452,7 @@ const FeaturedDesigners = () => {
                 onClick={() => {
                   const url = "https://www.maisonaffluency.com/designers";
                   navigator.clipboard.writeText(url).then(() => {
-                    const { toast } = require("sonner");
-                    toast?.("Link copied to clipboard");
+                    import("sonner").then(({ toast }) => toast("Link copied to clipboard"));
                   }).catch(() => {});
                 }}
                 className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.12em]"
