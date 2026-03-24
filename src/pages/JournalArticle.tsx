@@ -103,7 +103,7 @@ const JournalArticlePage = () => {
                   `/journal/${slug}`,
                   article.title,
                   article.excerpt?.slice(0, 60),
-                  { directUrlPath: `/journal/${article.slug}-share.html` }
+                  { directUrlPath: `/journal/${article.slug}-og.html` }
                 );
                 trackCTA.whatsapp(`JournalArticle_Share_${article.slug}`);
               }}
