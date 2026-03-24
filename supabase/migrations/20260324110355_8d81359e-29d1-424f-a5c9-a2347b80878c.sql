@@ -1,0 +1,1 @@
+UPDATE designers SET hero_image_url = 'https://static.wixstatic.com/media/5f463e_75290f1c81e940109581b5dfb776a44c~mv2.jpg/v1/fill/w_280,h_210,q_90,enc_avif,quality_auto/5f463e_75290f1c81e940109581b5dfb776a44c~mv2.jpg' WHERE slug = 'atelier-demichelis';
