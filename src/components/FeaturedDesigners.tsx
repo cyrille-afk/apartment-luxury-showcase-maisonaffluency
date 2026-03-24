@@ -2922,7 +2922,7 @@ const FeaturedDesigners = () => {
                                 if (galleryEl) galleryEl.scrollIntoView({ behavior: 'smooth' });
                                 setTimeout(() => {
                                   window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                    detail: { index: thumb.galleryIndex, returnUrl: '/#designers' }
+                                    detail: { index: thumb.galleryIndex, sourceId: `designer-card-${designer.id}` }
                                   }));
                                 }, 400);
                               }}
