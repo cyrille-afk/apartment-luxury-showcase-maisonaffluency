@@ -502,16 +502,21 @@ const PublicDesignerProfile = () => {
                           )}
                           loading="lazy"
                         />
-                        {pick.hover_image_url && (
-                          <img
-                            src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
-                            srcSet={pickSrcSet(pick.hover_image_url)}
-                            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
-                            alt={`${pick.title} hover view`}
-                            className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-                            loading="lazy"
-                          />
-                        )}
+                        {pick.hover_image_url && (() => {
+                          const hoverPosTag = pick.tags?.find((t) => t.startsWith("hover-pos:"));
+                          const hoverPos = hoverPosTag ? hoverPosTag.replace("hover-pos:", "") : undefined;
+                          return (
+                            <img
+                              src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
+                              srcSet={pickSrcSet(pick.hover_image_url)}
+                              sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                              alt={`${pick.title} hover view`}
+                              className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                              style={hoverPos ? { objectPosition: hoverPos } : undefined}
+                              loading="lazy"
+                            />
+                          );
+                        })()}
                         {pick.tags && pick.tags.length > 0 && (() => {
                           const collectionTags = pick.tags.filter((t) =>
                             /couture|edition|limited|modern scholar|unesco|good design award/i.test(t)
