@@ -2144,6 +2144,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085716/bespoke-sofa_gxidtx.jpg", galleryIndex: GALLERY.AN_INVITING_LOUNGE_AREA },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085877/living-room-hero_zxfcxl.jpg", galleryIndex: GALLERY.A_SOPHISTICATED_LIVING_ROOM },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
