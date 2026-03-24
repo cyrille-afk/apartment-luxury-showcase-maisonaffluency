@@ -2815,10 +2815,10 @@ const FeaturedDesigners = () => {
                             return (
                               <>
                                 <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
-                                  {rest.join(" - ").trim()}
+                                  {brand.trim()}
                                 </p>
                                 <p className="font-body text-[9px] md:text-[10px] text-white/60 tracking-wider mt-0.5 drop-shadow-sm">
-                                  {brand.trim()}
+                                  {rest.join(" - ").trim()}
                                 </p>
                               </>
                             );
