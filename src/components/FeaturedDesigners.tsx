@@ -2352,7 +2352,7 @@ const FeaturedDesigners = () => {
           <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
             {/* Hero image placeholder — will be replaced with Cloudinary URL */}
             <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
-              <img src="https://res.cloudinary.com/dif1oamtj/image/upload/w_640,q_auto,f_auto/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" alt="Designers & Makers" className="w-full h-full object-cover" loading="lazy" />
+              <img src="https://res.cloudinary.com/dif1oamtj/image/upload/w_640,q_auto,f_auto,c_fit/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" alt="Designers & Makers" className="w-full h-full object-contain" loading="lazy" />
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
