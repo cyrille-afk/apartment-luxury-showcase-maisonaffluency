@@ -18,7 +18,7 @@ import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
 import { Input } from "@/components/ui/input";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+// Accordion removed — now using card grid layout
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
