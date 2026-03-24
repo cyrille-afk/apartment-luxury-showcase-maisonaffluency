@@ -588,7 +588,7 @@ const TradeAtelierProfile = () => {
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
                           className={cn(
-                            "absolute inset-0 w-full h-full transition-all duration-700",
+                            "absolute inset-0 w-full h-full transition-all duration-700 rounded-xl",
                             pick.hover_image_url ? "object-contain bg-muted/30 opacity-100 group-hover:opacity-0 group-hover:scale-105" : "object-cover group-hover:scale-105"
                           )}
                           loading="lazy"
@@ -599,7 +599,7 @@ const TradeAtelierProfile = () => {
                             srcSet={pickSrcSet(pick.hover_image_url)}
                             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                             alt={`${pick.title} hover view`}
-                            className="absolute inset-0 w-full h-full object-contain bg-muted/30 opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                            className="absolute inset-0 w-full h-full object-contain bg-muted/30 rounded-xl opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
                             loading="lazy"
                           />
                         )}
