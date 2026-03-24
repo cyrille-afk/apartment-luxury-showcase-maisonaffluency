@@ -1,1 +1,0 @@
-UPDATE designer_curator_picks SET image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/v1774339681/AffluencySG_191_3_1_r0dard.jpg' WHERE id = '2e4e1b47-554a-495a-a39e-d76fff6b959d';
