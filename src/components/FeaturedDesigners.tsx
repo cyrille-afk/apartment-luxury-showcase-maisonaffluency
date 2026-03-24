@@ -2796,7 +2796,7 @@ const FeaturedDesigners = () => {
                           </p>
                         )}
                         <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-                          {isLamont ? "View Profile" : "Discover"}
+                          View Profile
                         </span>
                       </div>
                     </div>
