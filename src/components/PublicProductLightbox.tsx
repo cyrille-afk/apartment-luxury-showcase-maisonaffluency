@@ -132,7 +132,7 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
 
   const pinned = isPinned(product.title, product.id);
 
-  return createPortal(
+  const content = (
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
