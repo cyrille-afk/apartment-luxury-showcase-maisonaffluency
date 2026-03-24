@@ -2453,7 +2453,7 @@ const FeaturedDesigners = () => {
                   const cleanUrl = "https://www.maisonaffluency.com/designers";
                   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                   if (isMobile) {
-                    const waUrl = `https://wa.me/?text=${encodeURIComponent(`Designers & Makers in Situ — Maison Affluency: ${cleanUrl}`)}`;
+                    const waUrl = `https://wa.me/?text=${encodeURIComponent(`Designers & Makers On View — Maison Affluency: ${cleanUrl}`)}`;
                     window.location.href = waUrl;
                   } else {
                     navigator.clipboard.writeText(cleanUrl).then(() => {
