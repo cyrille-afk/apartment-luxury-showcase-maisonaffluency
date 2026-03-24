@@ -225,7 +225,7 @@ const Index = () => {
       const tryScroll = () => {
         const el = document.getElementById(sectionId);
         if (el) {
-          el.scrollIntoView({ behavior: instant, block: "start" });
+          scrollToSection(sectionId, instant);
         } else if (attempts < 15) {
           attempts++;
           setTimeout(tryScroll, 200);
