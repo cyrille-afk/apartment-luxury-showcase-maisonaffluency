@@ -16,7 +16,11 @@ interface CategorySidebarProps {
 
 const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect, className, itemCounts, sectionLabel, onOpenChange }) => {
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpenState] = useState(false);
+  const setIsOpen = (open: boolean) => {
+    setIsOpenState(open);
+    onOpenChange?.(open);
+  };
 
   // Auto-open sidebar and expand parent category when a subcategory is selected
   useEffect(() => {
