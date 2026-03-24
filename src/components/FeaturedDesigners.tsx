@@ -2761,7 +2761,6 @@ const FeaturedDesigners = () => {
                   return nameA.localeCompare(nameB);
                 })
                 .map((designer) => {
-                  const isLamont = designer.id === "alexander-lamont";
                   const cardContent = (
                     <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                       {designer.image ? (
@@ -2802,36 +2801,18 @@ const FeaturedDesigners = () => {
                     </div>
                   );
 
-                  if (isLamont) {
-                    return (
-                      <Link
-                        key={designer.id}
-                        to={`/designers/${designer.id}`}
-                        onClick={() => {
-                          sessionStorage.removeItem("__scroll_y");
-                          window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-                        }}
-                        className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
-                      >
-                        {cardContent}
-                      </Link>
-                    );
-                  }
-
                   return (
-                    <button
+                    <Link
                       key={designer.id}
-                      type="button"
+                      to={`/designers/${designer.id}`}
                       onClick={() => {
-                        setCuratorPicksDesigner(designer);
-                        setCuratorPickIndex(0);
-                        setIsZoomed(false);
-                        setPicksHovered(false);
+                        sessionStorage.removeItem("__scroll_y");
+                        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
                       }}
                       className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                     >
                       {cardContent}
-                    </button>
+                    </Link>
                   );
                 })
               )}
@@ -2855,7 +2836,6 @@ const FeaturedDesigners = () => {
                   return nameA.localeCompare(nameB);
                 })
                 .map((designer) => {
-                  const isLamont = designer.id === "alexander-lamont";
                   const cardContent = (
                     <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                       {designer.image ? (
@@ -2880,27 +2860,18 @@ const FeaturedDesigners = () => {
                       </div>
                     </div>
                   );
-                  if (isLamont) {
-                    return (
-                      <Link key={designer.id} to="/designers/alexander-lamont" className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
-                        {cardContent}
-                      </Link>
-                    );
-                  }
                   return (
-                    <button
+                    <Link
                       key={designer.id}
-                      type="button"
+                      to={`/designers/${designer.id}`}
                       onClick={() => {
-                        setCuratorPicksDesigner(designer);
-                        setCuratorPickIndex(0);
-                        setIsZoomed(false);
-                        setPicksHovered(false);
+                        sessionStorage.removeItem("__scroll_y");
+                        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
                       }}
                       className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                     >
                       {cardContent}
-                    </button>
+                    </Link>
                   );
                 })}
           </div>
