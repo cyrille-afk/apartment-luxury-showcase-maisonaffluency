@@ -856,6 +856,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     name: "Atelier Pendhapa",
     specialty: "Bespoke Furniture & Indonesian Craftsmanship",
     image: atelierPendhapaImg,
+    cardThumbnails: [
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085848/intimate-dining_ux4pee.jpg", galleryIndex: GALLERY.A_DREAMY_TUSCAN_LANDSCAPE },
+    ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.10.52_AM_eabe8v.png",
     biography:
       "Atelier Pendhapa is an Indonesian design atelier founded by Antonin Hautefort & Ignatio Tenggara, specializing in bespoke furniture that celebrates the rich tradition of Indonesian woodworking and craftsmanship. Their Astra Dining Table exemplifies their philosophy of creating pieces that honor traditional techniques while embracing contemporary design sensibilities. Each piece is handcrafted by master artisans using sustainably sourced materials.",
