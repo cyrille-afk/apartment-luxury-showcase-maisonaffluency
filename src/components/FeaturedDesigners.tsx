@@ -2588,6 +2588,7 @@ const FeaturedDesigners = () => {
                 itemCounts={counts}
                 sectionLabel="all Designers"
                 onOpenChange={setSidebarOpen}
+                isOpen={sidebarOpen}
               />
             );
           })()}
