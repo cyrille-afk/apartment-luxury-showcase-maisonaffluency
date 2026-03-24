@@ -1526,7 +1526,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: jeanMichelFrankImg,
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087732/IMG_2402_y3atdm.jpg", galleryIndex: GALLERY.A_SUN_LIT_READING_CORNER },
-      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774342927/IMG_2514_dg2byz.jpg", galleryIndex: GALLERY.A_SUN_LIT_READING_CORNER },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774343324/IMG_2491_cirrjv.jpg", galleryIndex: GALLERY.A_SUN_LIT_READING_CORNER },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/v1772270649/Screen_Shot_2026-02-28_at_5.23.19_PM_widtwe.png",
     imagePosition: "center 20%",
