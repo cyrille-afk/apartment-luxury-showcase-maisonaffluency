@@ -64,6 +64,14 @@
     <priority>0.6</priority>
   </url>
 
+  <!-- Designers Directory -->
+  <url>
+    <loc>https://maisonaffluency.com/designers</loc>
+    <lastmod>2026-03-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- Journal -->
   <url>
     <loc>https://maisonaffluency.com/journal</loc>
