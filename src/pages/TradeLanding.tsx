@@ -632,7 +632,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               <h2 className="font-display text-2xl md:text-3xl text-foreground mb-3">
                 Trusted by Design Professionals
               </h2>
-              <p className="font-body text-sm text-muted-foreground max-w-lg mx-auto">
+              <p className="font-body text-sm text-muted-foreground mx-auto">
                 Hear from architects and interior designers who rely on our trade program for their projects.
               </p>
             </motion.div>
