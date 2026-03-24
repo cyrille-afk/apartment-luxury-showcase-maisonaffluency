@@ -2450,14 +2450,14 @@ const FeaturedDesigners = () => {
               </p>
               <button
                 onClick={() => {
-                  const cleanUrl = "https://www.maisonaffluency.com/designers";
+                  const shareUrl = "https://www.maisonaffluency.com/designers-og.html?v=20260324b";
                   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                   if (isMobile) {
-                    const waUrl = `https://wa.me/?text=${encodeURIComponent(`Designers & Makers On View — Maison Affluency: ${cleanUrl}`)}`;
+                    const waUrl = `https://wa.me/?text=${encodeURIComponent(`Designers & Makers On View — Maison Affluency: ${shareUrl}`)}`;
                     window.location.href = waUrl;
                   } else {
-                    navigator.clipboard.writeText(cleanUrl).then(() => {
-                      import("sonner").then(({ toast }) => toast("Link copied to clipboard"));
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                      import("sonner").then(({ toast }) => toast("Share link copied"));
                     }).catch(() => {});
                   }
                 }}
