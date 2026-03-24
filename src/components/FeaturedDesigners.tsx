@@ -1342,6 +1342,10 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "The Ara Side Table is a study in material transformation — moulded shagreen liquid metal takes on the texture and depth of natural hide, finished in a warm bronzed patina over a fiber-reinforced form. Available in two proportions, from a slender tall pedestal to a more generous low table."
       },
     ],
+    cardThumbnails: [
+      null,
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087460/AffluencySG_204_1_qbbpqb.jpg", galleryIndex: GALLERY.CRAFTSMANSHIP_AT_EVERY_CORNER },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/robicaradesign/" },
       { type: "Curators' Picks" },
