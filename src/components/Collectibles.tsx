@@ -994,9 +994,11 @@ const Collectibles = () => {
                               <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
                                 {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
                               </p>
+                              {designer.founder && (
                               <p className={cn("font-body text-[9px] md:text-[10px] text-white/60 tracking-wider mt-0.5 drop-shadow-sm", designerGridCols === 5 && "hidden")}>
-                                {designer.founder || designer.specialty}
+                                {designer.founder}
                               </p>
+                              )}
                             </div>
 
                             {/* Designer portrait thumbnail — bottom-right */}
