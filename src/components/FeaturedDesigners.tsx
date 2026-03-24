@@ -2790,9 +2790,9 @@ const FeaturedDesigners = () => {
                       </div>
 
                       {/* Thumbnail placeholders — bottom-right */}
-                      <div className="absolute bottom-2.5 right-2.5 flex gap-1.5 z-10">
-                        <div className="w-10 h-10 md:w-12 md:h-12 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
-                        <div className="w-10 h-10 md:w-12 md:h-12 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
+                      <div className="absolute bottom-3 right-3 flex gap-2 z-10">
+                        <div className="w-14 h-14 md:w-16 md:h-16 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
+                        <div className="w-14 h-14 md:w-16 md:h-16 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
                       </div>
 
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
