@@ -2583,11 +2583,10 @@ const FeaturedDesigners = () => {
               </svg>
             ) : (
               <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                <rect x="4.75" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                <rect x="8.5" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                <rect x="12.25" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
-                <rect x="16" y="2" width="2" height="14" rx="0.5" fill="currentColor"/>
+                <rect x="1" y="2" width="2.5" height="14" rx="0.5" fill="currentColor"/>
+                <rect x="5.5" y="2" width="2.5" height="14" rx="0.5" fill="currentColor"/>
+                <rect x="10" y="2" width="2.5" height="14" rx="0.5" fill="currentColor"/>
+                <rect x="14.5" y="2" width="2.5" height="14" rx="0.5" fill="currentColor"/>
               </svg>
             )}
           </button>
