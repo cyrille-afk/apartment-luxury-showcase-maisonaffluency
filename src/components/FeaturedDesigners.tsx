@@ -1640,7 +1640,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: jeremyMaxwellWintrebertImg,
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085848/intimate-dining_ux4pee.jpg", galleryIndex: GALLERY.A_DREAMY_TUSCAN_LANDSCAPE },
-      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774338139/AffluencySG_131_1_fz2esj.jpg", galleryIndex: GALLERY.A_DREAMY_TUSCAN_LANDSCAPE },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774338139/AffluencySG_131_1_fz2esj.jpg", galleryIndex: GALLERY.A_HIGHLY_CUSTOMISED_DINING_ROOM },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.51.56_AM_aukfkk.png",
     biography:
