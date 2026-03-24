@@ -79,13 +79,11 @@ const PublicDesignerProfile = () => {
     if (rawPicks.length <= 2) return rawPicks;
 
     const getFunctionalCategory = (pick: (typeof rawPicks)[number]) => {
+      // Use top-level category for grouping to maximise visual distance
+      // between items of the same type (e.g., all Tables separated)
+      if (pick.category?.trim()) return pick.category.trim().toLowerCase();
       if (pick.subcategory?.trim()) return pick.subcategory.trim().toLowerCase();
-      const tags = pick.tags || [];
-      if (tags.length > 0) {
-        const last = tags[tags.length - 1]?.toLowerCase().trim();
-        if (last) return last;
-      }
-      return pick.category?.trim().toLowerCase() || "other";
+      return "other";
     };
 
     // Group items by functional category, then round-robin to maximise spacing

@@ -125,13 +125,9 @@ const TradeAtelierProfile = () => {
     if (rawPicks.length <= 2) return rawPicks;
 
     const getFunctionalCategory = (p: typeof rawPicks[0]) => {
+      if (p.category?.trim()) return p.category.trim().toLowerCase();
       if (p.subcategory?.trim()) return p.subcategory.trim().toLowerCase();
-      const tags = p.tags || [];
-      if (tags.length > 0) {
-        const last = tags[tags.length - 1]?.toLowerCase().trim();
-        if (last) return last;
-      }
-      return p.category?.toLowerCase() || "other";
+      return "other";
     };
 
     const result: typeof rawPicks = [];
