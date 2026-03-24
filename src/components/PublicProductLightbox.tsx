@@ -387,9 +387,10 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
           </div> {/* end scrollable mobile body */}
         </motion.div>
       </motion.div>
-    </AnimatePresence>,
-    document.body
+    </AnimatePresence>
   );
+
+  return inline ? content : createPortal(content, document.body);
 };
 
 export default PublicProductLightbox;
