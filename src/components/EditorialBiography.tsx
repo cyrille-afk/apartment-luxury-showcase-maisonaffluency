@@ -529,8 +529,12 @@ export default function EditorialBiography({
     .map((p) => p.trim())
     .filter(Boolean);
 
+  // Debug: log blocks and media detection
+  console.log('[BIO DEBUG] blocks:', blocks.map((b, i) => `[${i}] standalone=${isStandaloneMediaUrl(b)} "${b.substring(0, 80)}..."`));
+
   const hasManualMedia = !!(biographyImages && biographyImages.length > 0);
-  const hasInlineMedia = !hasManualMedia && blocks.some(isStandaloneMediaUrl);
+  const hasInlineMedia = blocks.some(isStandaloneMediaUrl);
+  console.log('[BIO DEBUG] hasManualMedia:', hasManualMedia, 'hasInlineMedia:', hasInlineMedia);
 
   /* ------- Inline media mode (URLs pasted directly in biography) ------- */
   if (hasInlineMedia) {
@@ -649,6 +653,43 @@ export default function EditorialBiography({
         </p>
       );
       i++;
+    }
+
+    // Append any manual biography_images that aren't already inline
+    if (hasManualMedia && biographyImages) {
+      for (const entry of biographyImages) {
+        const media = parseMediaLine(entry);
+        if (!media) continue;
+        // Skip if this URL is already rendered inline
+        const alreadyInline = parsed.some(
+          (b) => b.type !== "text" && (b as any).url === media.url
+        );
+        if (alreadyInline) continue;
+
+        if (isVideoUrl(media.url)) {
+          elements.push(
+            <VideoBlock
+              key={`manual-vid-${imageIdx}`}
+              url={media.url}
+              designerName={designerName}
+              index={imageIdx}
+              overrideCaption={media.caption}
+              posterUrl={media.poster || undefined}
+            />
+          );
+        } else {
+          elements.push(
+            <FullWidthImageBlock
+              key={`manual-img-${imageIdx}`}
+              url={media.url}
+              designerName={designerName}
+              index={imageIdx}
+              overrideCaption={media.caption}
+            />
+          );
+        }
+        imageIdx++;
+      }
     }
 
     const hasInlineVideo = parsed.some((block) => block.type === "video");
