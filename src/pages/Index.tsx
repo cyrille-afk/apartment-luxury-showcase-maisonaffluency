@@ -3,6 +3,7 @@ import FeaturedReadBanner from "@/components/FeaturedReadBanner";
 import { Helmet } from "react-helmet-async";
 import Hero from "@/components/Hero";
 import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
+import { scrollToSection } from "@/lib/scrollToSection";
 
 // Retry wrapper for dynamic imports — handles stale Vite chunks after HMR
 function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
@@ -225,7 +226,7 @@ const Index = () => {
       const tryScroll = () => {
         const el = document.getElementById(sectionId);
         if (el) {
-          el.scrollIntoView({ behavior: instant, block: "start" });
+          scrollToSection(sectionId, instant);
         } else if (attempts < 15) {
           attempts++;
           setTimeout(tryScroll, 200);
