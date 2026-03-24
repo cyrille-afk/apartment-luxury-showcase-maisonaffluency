@@ -605,6 +605,7 @@ export default function EditorialBiography({
               index={imageIdx}
               paragraphs={paired}
               overrideCaption={block.caption}
+              forceAlign={(block as any).align}
             />
           );
         } else {
