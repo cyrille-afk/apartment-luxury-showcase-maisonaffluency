@@ -278,7 +278,7 @@ const TradeAtelierProfile = () => {
                 `/trade/designers/${slug}`,
                 name,
                 designer.specialty || undefined,
-                { directUrlPath: `/designers/${slug}-share.html` }
+                { directUrlPath: `/designers/${slug}-og.html` }
               );
             }}
             label="Share on WhatsApp"
@@ -379,7 +379,7 @@ const TradeAtelierProfile = () => {
                               `/trade/designers/${slug}`,
                               name,
                               designer.specialty || undefined,
-                              { directUrlPath: `/designers/${slug}-share.html` }
+                              { directUrlPath: `/designers/${slug}-og.html` }
                             );
                           }}
                           label="Share"
