@@ -2120,6 +2120,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085919/small-room-personality_wvxz6y.png", galleryIndex: GALLERY.COMPACT_ELEGANCE },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085890/small-room-bedroom_mp8mdd.jpg", galleryIndex: GALLERY.AN_ARTISTIC_STATEMENT },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/redaamaloudesign/" },
