@@ -2922,7 +2922,7 @@ const FeaturedDesigners = () => {
                                 if (galleryEl) galleryEl.scrollIntoView({ behavior: 'smooth' });
                                 setTimeout(() => {
                                   window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                    detail: { index: thumb.galleryIndex, returnUrl: '/#designers' }
+                                    detail: { index: thumb.galleryIndex, sourceId: `designer-card-${designer.id}` }
                                   }));
                                 }, 400);
                               }}
@@ -2951,6 +2951,7 @@ const FeaturedDesigners = () => {
                   return (
                     <Link
                       key={designer.id}
+                      id={`designer-card-${designer.id}`}
                       to={`/designers/${designer.id}`}
                       onClick={() => {
                         sessionStorage.removeItem("__scroll_y");
