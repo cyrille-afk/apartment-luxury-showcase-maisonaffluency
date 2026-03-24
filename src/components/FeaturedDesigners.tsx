@@ -2351,7 +2351,7 @@ const FeaturedDesigners = () => {
         >
           <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
             {/* Hero image placeholder — will be replaced with Cloudinary URL */}
-            <div className="hidden md:block w-[260px] flex-shrink-0 aspect-[3/4] bg-muted/20 rounded-lg overflow-hidden">
+            <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
               <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 font-body text-xs uppercase tracking-widest">
                 Image
               </div>
