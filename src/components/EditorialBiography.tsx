@@ -42,10 +42,10 @@ function normalizeCloudinaryVideoUrl(url: string): string {
     .replace(/,c_(fill|crop)\b/gi, ",c_fit");
 }
 
-/** Render a paragraph supporting <strong> HTML tags and highlighted quoted text */
+/** Render inline HTML: <strong>, <a href="...">, and highlighted quoted text */
 export function renderParagraph(text: string): React.ReactNode[] {
-  // First split on <strong>...</strong> tags
-  const parts = text.split(/(<strong>[\s\S]*?<\/strong>)/g);
+  // Split on <strong>...</strong> and <a href="...">...</a> tags
+  const parts = text.split(/(<strong>[\s\S]*?<\/strong>|<a\s+href="[^"]*"[^>]*>[\s\S]*?<\/a>)/g);
   return parts.map((part, i) => {
     const strongMatch = part.match(/^<strong>([\s\S]*?)<\/strong>$/);
     if (strongMatch) {
@@ -53,6 +53,14 @@ export function renderParagraph(text: string): React.ReactNode[] {
         <strong key={i} className="font-black text-foreground" style={{ fontWeight: 900 }}>
           {renderQuotedText(strongMatch[1])}
         </strong>
+      );
+    }
+    const linkMatch = part.match(/^<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>$/);
+    if (linkMatch) {
+      return (
+        <a key={i} href={linkMatch[1]} className="underline underline-offset-2 text-foreground hover:text-primary transition-colors">
+          {linkMatch[2]}
+        </a>
       );
     }
     return <span key={i}>{renderQuotedText(part)}</span>;
