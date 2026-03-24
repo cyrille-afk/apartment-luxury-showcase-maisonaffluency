@@ -2797,11 +2797,11 @@ const FeaturedDesigners = () => {
                         {[0, 1].map((i) => {
                           const thumb = (designer as any).cardThumbnails?.[i];
                           return thumb ? (
-                            <div key={i} className="w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border border-white/15 backdrop-blur-sm">
+                            <div key={i} className="w-[72px] h-[72px] md:w-20 md:h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
                               <img src={thumb.image} alt="" className="w-full h-full object-cover" loading="lazy" />
                             </div>
                           ) : (
-                            <div key={i} className="w-14 h-14 md:w-16 md:h-16 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
+                            <div key={i} className="w-[72px] h-[72px] md:w-20 md:h-20 rounded bg-muted/40 border-2 border-white backdrop-blur-sm shadow-md" />
                           );
                         })}
                       </div>
@@ -2878,9 +2878,9 @@ const FeaturedDesigners = () => {
                         </p>
                       </div>
                       {/* Thumbnail placeholders — bottom-right */}
-                      <div className="absolute bottom-2 right-2 flex gap-1.5 z-10">
-                        <div className="w-11 h-11 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
-                        <div className="w-11 h-11 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
+                      <div className="absolute bottom-2.5 right-2.5 flex gap-1.5 z-10">
+                        <div className="w-14 h-14 rounded bg-muted/40 border-2 border-white backdrop-blur-sm shadow-md" />
+                        <div className="w-14 h-14 rounded bg-muted/40 border-2 border-white backdrop-blur-sm shadow-md" />
                       </div>
                     </div>
                   );
