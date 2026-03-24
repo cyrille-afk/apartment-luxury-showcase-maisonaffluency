@@ -2349,15 +2349,25 @@ const FeaturedDesigners = () => {
           transition={{ duration: 0.8 }}
           className="mb-12 md:mb-16 text-left"
         >
-          <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
-              Designers & Makers <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">On View</span>
-            </h2>
+          <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
+            {/* Hero image placeholder — will be replaced with Cloudinary URL */}
+            <div className="w-full md:w-[38%] flex-shrink-0 aspect-[3/4] bg-muted/20 rounded-lg overflow-hidden">
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 font-body text-xs uppercase tracking-widest">
+                Image
+              </div>
+            </div>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
+                  Designers & Makers <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">On View</span>
+                </h2>
+              </div>
+              <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
+                Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings
+                their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
+              </p>
+            </div>
           </div>
-          <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
-            Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings
-            their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
-          </p>
         </motion.div>
 
         <div className="relative">
