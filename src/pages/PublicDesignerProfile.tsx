@@ -181,6 +181,8 @@ const PublicDesignerProfile = () => {
       // Separate text-only blocks from inline media blocks
       const textBlocks = bioBlocks.filter((b) => !isMediaBlock(b));
 
+      // Cap hero paragraphs at 2 to keep the top section balanced
+      const maxHero = 2;
       const chunkCount = mediaEntries.length + 1;
       const chunkSize = Math.max(1, Math.ceil(textBlocks.length / chunkCount));
       const paragraphChunks = Array.from({ length: chunkCount }, (_, i) =>
@@ -196,7 +198,14 @@ const PublicDesignerProfile = () => {
           }
         }
       }
-      heroParagraphs = paragraphChunks[0] || [];
+      // Move overflow hero paragraphs into the first remaining chunk
+      const rawHero = paragraphChunks[0] || [];
+      if (rawHero.length > maxHero) {
+        const overflow = rawHero.splice(maxHero);
+        if (!paragraphChunks[1]) paragraphChunks[1] = [];
+        paragraphChunks[1].unshift(...overflow);
+      }
+      heroParagraphs = rawHero;
 
       // Build remainingBio preserving original order of inline media blocks.
       // First, reconstruct the remaining blocks in original order (skipping hero paragraphs).
