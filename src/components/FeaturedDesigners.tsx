@@ -2505,7 +2505,7 @@ const FeaturedDesigners = () => {
                               {categoryMap[category].map(sub => (
                                 <button
                                   key={sub}
-                                  onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); setTimeout(() => { document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150); }}
+                                  onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); }}
                                   className={`block text-[10px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${
                                     selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-foreground/60 hover:text-primary'
                                   }`}
@@ -2648,12 +2648,9 @@ const FeaturedDesigners = () => {
                     setSelectedCategory(null);
                   } else {
                     setSelectedCategoryRaw(cat);
-                    if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
-                    broadcastFilter(cat, sub);
-                    setTimeout(() => {
-                      document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 150);
-                  }
+                      if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
+                      broadcastFilter(cat, sub);
+                    }
                 }}
                 itemCounts={counts}
                 sectionLabel="all Designers"
