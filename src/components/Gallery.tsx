@@ -238,7 +238,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     once: true,
     margin: "-100px"
   });
+  const navigate = useNavigate();
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [returnUrl, setReturnUrl] = useState<string | null>(null);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const imageZoomedRef = useRef(false);
