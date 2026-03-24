@@ -144,7 +144,7 @@ const PublicDesignerProfile = () => {
     : [];
   const manualMedia = (designer.biography_images || []).filter(Boolean);
   const curatedMedia = picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`);
-  const mediaEntries = (manualMedia.length > 0 ? manualMedia : curatedMedia).slice(0, 2);
+  const mediaEntries = (manualMedia.length > 0 ? manualMedia : curatedMedia).slice(0, 3);
 
   let heroParagraphs: string[] = [];
   let remainingBio = "";
