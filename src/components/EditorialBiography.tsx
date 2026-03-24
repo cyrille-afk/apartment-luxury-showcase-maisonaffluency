@@ -84,9 +84,9 @@ function renderQuotedText(text: string): React.ReactNode[] {
 }
 
 /** Parse a media line — supports `URL | Caption` pipe separator */
-function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null } | null {
+function parseMediaLine(text: string): { url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: "small" | null } | null {
   const value = text.trim();
-  // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right
+  // Try pipe separator: "https://...jpg | My Caption | poster:https://..." | left/right | small
   const pipes = value.split(/\s*\|\s*/);
   const url = pipes[0]?.trim() || "";
 
@@ -96,12 +96,15 @@ function parseMediaLine(text: string): { url: string; caption: string | null; po
   let caption: string | null = null;
   let poster: string | null = null;
   let align: "left" | "right" | null = null;
+  let size: "small" | null = null;
   for (let i = 1; i < pipes.length; i++) {
     const seg = pipes[i].trim();
     if (/^poster:/i.test(seg)) {
       poster = seg.replace(/^poster:/i, "").trim();
     } else if (/^(left|right)$/i.test(seg)) {
       align = seg.toLowerCase() as "left" | "right";
+    } else if (/^small$/i.test(seg)) {
+      size = "small";
     } else if (!caption) {
       caption = seg;
     }
@@ -114,7 +117,7 @@ function parseMediaLine(text: string): { url: string; caption: string | null; po
     /\/storage\/v1\/object\/public\//i.test(url);
 
   if (!isMedia) return null;
-  return { url, caption, poster, align };
+  return { url, caption, poster, align, size };
 }
 
 /** Detect a standalone media URL paragraph pasted directly into biography text */
