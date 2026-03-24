@@ -1823,6 +1823,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: leoSentouImg,
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087732/IMG_2402_y3atdm.jpg", galleryIndex: GALLERY.A_SUN_LIT_READING_CORNER },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774339681/AffluencySG_191_3_1_r0dard.jpg", galleryIndex: GALLERY.A_COLOURFUL_NOOK },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.59.56_AM_ehkyal.png",
     biography:
@@ -1885,9 +1886,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "W90 × H80 × D81 cm",
         description: "The Fauteuil L.D takes its inspiration from an elegant oval bergère by Parisian master menuisier Louis Delanois (1731 - 1792). Made entirely by hand in Europe by a team of skilled artisans, the seat is upholstered in mohair, and rests on a set of four gauged bronze feet. The original medallion and arm bolsters found in classical Louis XVI furniture, have been simplified as part of the armchairs plush upholstery, thus becoming a sculptural contemporary echo of what over two centuries has come to define the iconic French style."
       },
-    ],
-    cardThumbnails: [
-      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774339681/AffluencySG_191_3_1_r0dard.jpg", galleryIndex: GALLERY.A_COLOURFUL_NOOK },
     ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/leosentou" },
