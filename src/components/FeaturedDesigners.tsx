@@ -2357,6 +2357,44 @@ const FeaturedDesigners = () => {
     return designers;
   }, [searchQuery, selectedCategory, selectedSubcategory]);
 
+  // When a category/subcategory is active, collect all matching curator picks across all designers
+  const filteredPicks = useMemo(() => {
+    if (!selectedCategory && !selectedSubcategory) return null;
+    const SUB_TAGS: Record<string, string[]> = {
+      "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+      "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+      "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+      "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+      "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
+      "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+      "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+      "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+      "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+      "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+      "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+    };
+    const picks: { pick: CuratorPick; designer: typeof featuredDesigners[0]; pickIndex: number }[] = [];
+    const matchPick = (pick: CuratorPick) => {
+      if (selectedSubcategory) {
+        const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
+        return tags.some(tag =>
+          pick.subcategory === tag ||
+          pick.category === tag ||
+          (pick.tags && pick.tags.some(t => t.toLowerCase() === tag.toLowerCase()))
+        );
+      }
+      return pick.category === selectedCategory || (pick.tags && pick.tags.includes(selectedCategory!));
+    };
+    for (const designer of featuredDesigners) {
+      designer.curatorPicks?.forEach((pick, idx) => {
+        if (matchPick(pick)) {
+          picks.push({ pick, designer, pickIndex: idx });
+        }
+      });
+    }
+    return picks;
+  }, [selectedCategory, selectedSubcategory]);
+
   // Group filtered designers by first letter for A-Z navigation
   const designerAlphaGroups = useMemo(() => {
     const groups: Record<string, typeof filteredDesigners> = {};
@@ -2507,7 +2545,9 @@ const FeaturedDesigners = () => {
 
         {(searchQuery || selectedCategory) && (
           <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
-            {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
+            {filteredPicks
+              ? `${filteredPicks.length} piece${filteredPicks.length !== 1 ? 's' : ''} found`
+              : `${filteredDesigners.length} designer${filteredDesigners.length !== 1 ? 's' : ''} found`}
             {selectedSubcategory && <span> · {selectedSubcategory}</span>}
             {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
           </p>
@@ -2635,7 +2675,61 @@ const FeaturedDesigners = () => {
               ? "md:grid-cols-4"
               : gridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-3 lg:grid-cols-5"
           )}>
-              {filteredDesigners
+              {filteredPicks ? (
+                filteredPicks.map(({ pick, designer, pickIndex }, i) => (
+                  <button
+                    key={`${designer.id}-${pickIndex}`}
+                    type="button"
+                    onClick={() => {
+                      setCuratorPicksDesigner(designer);
+                      setCuratorPickIndex(pickIndex);
+                      setIsZoomed(false);
+                      setPicksHovered(false);
+                    }}
+                    className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+                  >
+                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                      {pick.image ? (
+                        <img
+                          src={pick.image}
+                          alt={pick.title}
+                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+                          <span className="font-display text-3xl text-muted-foreground/20">
+                            {pick.title.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                        <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+                          {pick.title}
+                        </p>
+                        {pick.subtitle && (
+                          <p className="font-body text-[10px] text-white/70 mt-0.5">{pick.subtitle}</p>
+                        )}
+                        <p className="font-body text-[9px] text-white/50 mt-1 uppercase tracking-wider">
+                          {formatDesignerName(designer.name, (designer as any).displayName).brand || formatDesignerName(designer.name, (designer as any).displayName).person}
+                        </p>
+                      </div>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+                        {pick.materials && (
+                          <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-2 max-w-[90%]">{pick.materials}</p>
+                        )}
+                        {pick.dimensions && (
+                          <p className="font-body text-[10px] text-white/60 text-center mb-4">{pick.dimensions}</p>
+                        )}
+                        <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+                          View
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                ))
+              ) : (
+              filteredDesigners
                 .slice()
                 .sort((a, b) => {
                   const nameA = (a.displayName || a.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -2715,7 +2809,8 @@ const FeaturedDesigners = () => {
                       {cardContent}
                     </button>
                   );
-                })}
+                })
+              )}
             </div>
           </motion.div>
         </div>{/* end sidebar+grid flex */}
