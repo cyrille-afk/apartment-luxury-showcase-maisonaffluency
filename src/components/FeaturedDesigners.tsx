@@ -1990,6 +1990,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: nathalieZieglerImg,
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085726/boudoir_ll5spn.jpg", galleryIndex: GALLERY.A_SOPHISTICATED_BOUDOIR },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774342944/IMG_2498_qwza44.jpg", galleryIndex: GALLERY.A_SOPHISTICATED_BOUDOIR },
     ],
     biography: "Nathalie Ziegler is a French glass artist who creates bespoke chandeliers and glass sculptures that blur the line between functional lighting and fine art. Drawing on traditional Murano and Saint-Just glassmaking techniques, she manipulates light through hand-blown glass to create dramatic, ethereal forms that transform spaces. Her chandeliers and vessels are entirely unique — each a one-of-a-kind commission conceived in close collaboration with her clients.",
     notableWorks: "Saint Just Custom Glass Chandelier (Maison Affluency), Gold Leaves+Glass Snake Vase, Sculptural Glass Lighting",
