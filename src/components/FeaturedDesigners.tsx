@@ -2357,6 +2357,44 @@ const FeaturedDesigners = () => {
     return designers;
   }, [searchQuery, selectedCategory, selectedSubcategory]);
 
+  // When a category/subcategory is active, collect all matching curator picks across all designers
+  const filteredPicks = useMemo(() => {
+    if (!selectedCategory && !selectedSubcategory) return null;
+    const SUB_TAGS: Record<string, string[]> = {
+      "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+      "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+      "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+      "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+      "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
+      "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+      "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+      "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+      "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+      "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+      "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+    };
+    const picks: { pick: CuratorPick; designer: typeof featuredDesigners[0]; pickIndex: number }[] = [];
+    const matchPick = (pick: CuratorPick) => {
+      if (selectedSubcategory) {
+        const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
+        return tags.some(tag =>
+          pick.subcategory === tag ||
+          pick.category === tag ||
+          (pick.tags && pick.tags.some(t => t.toLowerCase() === tag.toLowerCase()))
+        );
+      }
+      return pick.category === selectedCategory || (pick.tags && pick.tags.includes(selectedCategory!));
+    };
+    for (const designer of featuredDesigners) {
+      designer.curatorPicks?.forEach((pick, idx) => {
+        if (matchPick(pick)) {
+          picks.push({ pick, designer, pickIndex: idx });
+        }
+      });
+    }
+    return picks;
+  }, [selectedCategory, selectedSubcategory]);
+
   // Group filtered designers by first letter for A-Z navigation
   const designerAlphaGroups = useMemo(() => {
     const groups: Record<string, typeof filteredDesigners> = {};
