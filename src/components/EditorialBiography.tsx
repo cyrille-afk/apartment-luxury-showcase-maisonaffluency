@@ -50,7 +50,7 @@ export function renderParagraph(text: string): React.ReactNode[] {
     const strongMatch = part.match(/^<strong>([\s\S]*?)<\/strong>$/);
     if (strongMatch) {
       return (
-        <strong key={i} className="font-bold text-foreground">
+        <strong key={i} className="font-black text-foreground" style={{ fontWeight: 900 }}>
           {renderQuotedText(strongMatch[1])}
         </strong>
       );
