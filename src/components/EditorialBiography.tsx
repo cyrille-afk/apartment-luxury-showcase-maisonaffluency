@@ -134,6 +134,8 @@ function captionFromUrl(url: string): string | null {
 const VIDEO_POSTER_FALLBACKS: Record<string, string> = {
   "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/documents/1774220339833-galr9d.mp4":
     "/images/lamont-video-poster-v2.jpg?v=20260323-2",
+  "https://vimeo.com/803009029":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772110437/Screen_Shot_2026-02-18_at_10.08.42_AM_xr4vun.jpg",
 };
 
 function getPosterFallbackForVideo(url: string): string | undefined {
@@ -222,23 +224,32 @@ function VideoBlock({
       className="my-10 md:my-14 -mx-2 md:-mx-6"
     >
       <div className="aspect-video rounded-xl overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center">
-        {!playing && thumbnailUrl ? (
-          /* YouTube/Vimeo with auto-thumbnail */
+        {!playing && (thumbnailUrl || currentPosterUrl) ? (
+          /* Poster + play button for YouTube, Vimeo, or any video with a poster */
           <button
             onClick={() => setPlaying(true)}
             className="w-full h-full relative group cursor-pointer"
             aria-label={`Play ${caption || "video"}`}
           >
             <img
-              src={thumbnailUrl}
+              src={thumbnailUrl || currentPosterUrl!}
               alt={caption || `${designerName} — video`}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
+              onError={thumbnailUrl ? undefined : handlePosterError}
             />
             {playOverlay}
           </button>
-        ) : embedUrl ? (
+        ) : !playing && embedUrl ? (
           <iframe
-            src={playing ? embedUrl.replace("?", "?autoplay=1&") : embedUrl}
+            src={embedUrl}
+            title={caption || `${designerName} — video`}
+            className="w-full h-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : playing && embedUrl ? (
+          <iframe
+            src={embedUrl.includes("?") ? `${embedUrl}&autoplay=1` : `${embedUrl}?autoplay=1`}
             title={caption || `${designerName} — video`}
             className="w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
