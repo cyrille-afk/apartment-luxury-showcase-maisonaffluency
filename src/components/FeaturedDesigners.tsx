@@ -2794,8 +2794,16 @@ const FeaturedDesigners = () => {
 
                       {/* Thumbnail placeholders — bottom-right */}
                       <div className="absolute bottom-3 right-3 flex gap-2 z-10">
-                        <div className="w-14 h-14 md:w-16 md:h-16 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
-                        <div className="w-14 h-14 md:w-16 md:h-16 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
+                        {[0, 1].map((i) => {
+                          const thumb = (designer as any).cardThumbnails?.[i];
+                          return thumb ? (
+                            <div key={i} className="w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border border-white/15 backdrop-blur-sm">
+                              <img src={thumb.image} alt="" className="w-full h-full object-cover" loading="lazy" />
+                            </div>
+                          ) : (
+                            <div key={i} className="w-14 h-14 md:w-16 md:h-16 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
+                          );
+                        })}
                       </div>
 
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
