@@ -1344,6 +1344,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     name: "Forest & Giaconia - Frédéric Forest & Clémentine Giaconia",
     specialty: "Contemporary Furniture & Lighting Design",
     image: forestGiaconiaImg,
+    cardThumbnails: [
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085856/intimate-lounge_tf4sm1.jpg", galleryIndex: GALLERY.A_RELAXED_SETTING },
+    ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Sans-titre-1_ct3lmz.gif",
     biography: "Forest & Giaconia is a French design duo known for their refined approach to contemporary furniture and lighting. Their work combines natural materials — notably walnut wood — with innovative technical elements such as PMMA, resulting in pieces of sculptural clarity and tactile warmth. The IHI Floor Lamp exemplifies their ability to create objects that are simultaneously minimal and deeply considered.",
     notableWorks: "IHI Floor Lamp (walnut & PMMA), Contemporary Furniture Collection",
