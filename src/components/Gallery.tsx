@@ -1034,6 +1034,17 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                </button>
              </div>
            )}
+          {/* Product lightbox inside Dialog so it's within focus-trap scope */}
+          {!onHotspotAddToQuote && hotspotLightboxProduct && (
+            <div className="fixed inset-0 z-[100]" onClick={(e) => e.stopPropagation()}>
+              <PublicProductLightbox
+                product={hotspotLightboxProduct}
+                allPicks={allCuratorPicks.filter(p => p.brand_name === hotspotLightboxProduct?.brand_name)}
+                onClose={() => setHotspotLightboxProduct(null)}
+                onSelectRelated={(item) => setHotspotLightboxProduct(item)}
+              />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
       {!onHotspotAddToQuote && (
@@ -1044,7 +1055,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           designerName={quoteProduct.designer}
         />
       )}
-      {!onHotspotAddToQuote && (
+      {/* Render outside Dialog for non-lightbox hotspot views */}
+      {!onHotspotAddToQuote && !lightboxOpen && (
         <PublicProductLightbox
           product={hotspotLightboxProduct}
           allPicks={allCuratorPicks.filter(p => p.brand_name === hotspotLightboxProduct?.brand_name)}
