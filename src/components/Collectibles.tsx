@@ -999,7 +999,7 @@ const Collectibles = () => {
 
                             {/* Designer portrait thumbnail — bottom-right */}
                             <div className="absolute bottom-3 right-3 z-10">
-                              <div className="w-[72px] h-[72px] md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-white shadow-md">
+                              <div className="w-[72px] h-[72px] md:w-20 md:h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
                                 <img src={designer.image} alt={designer.name} className="w-full h-full object-cover" loading="lazy" />
                               </div>
                             </div>
@@ -1082,7 +1082,7 @@ const Collectibles = () => {
                           </div>
                           {/* Designer portrait — bottom-right */}
                           <div className="absolute bottom-2 right-2 z-10">
-                            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-md">
+                            <div className="w-14 h-14 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md">
                               <img src={designer.image} alt={designer.name} className="w-full h-full object-cover" loading="lazy" />
                             </div>
                           </div>
