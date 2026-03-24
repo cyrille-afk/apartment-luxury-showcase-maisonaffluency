@@ -2142,6 +2142,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     curatorPicks: [
       { image: cloudinaryUrl("Screen_Shot_2026-03-10_at_3.06.48_PM_kohqxi", { width: 1200, quality: "auto:good", crop: "fill" }), title: "Niko Sofa 340", category: "Seating", tags: ["Seating", "Sofas"], materials: "Sofa upholstered in fabric · Metal Base in Brushed Brass / Brushed Copper / Polished Aluminium", dimensions: "L 240 / 260 / 300 / 340 x D 92 x H 78 cm - SH 40 cm" },
     ],
+    cardThumbnails: [
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085716/bespoke-sofa_gxidtx.jpg", galleryIndex: GALLERY.AN_INVITING_LOUNGE_AREA },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/thierrylemaire_/?hl=en" },
       { type: "Curators' Picks" },
