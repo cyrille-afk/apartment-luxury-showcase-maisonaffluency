@@ -644,8 +644,12 @@ export default function EditorialBiography({
   }
 
   /* ------- Manual media array or pick images fallback ------- */
-  const paragraphs = blocks;
-  const media = hasManualMedia ? biographyImages! : (pickImages || []);
+  // Strip any inline media URLs from text paragraphs so they don't render as raw text
+  const paragraphs = blocks.filter((b) => !isStandaloneMediaUrl(b));
+  // Collect inline media from biography text and merge with manual array
+  const inlineMediaEntries = blocks.filter((b) => isStandaloneMediaUrl(b));
+  const manualEntries = hasManualMedia ? biographyImages! : (pickImages || []);
+  const media = [...inlineMediaEntries, ...manualEntries];
   const parsedMedia = media
     .map((entry) => {
       const parsed = parseMediaLine(entry);
