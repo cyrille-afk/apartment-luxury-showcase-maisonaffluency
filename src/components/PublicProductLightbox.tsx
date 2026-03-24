@@ -80,10 +80,15 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     setShowHoverImage(false);
   }, [product?.id]);
 
+  // Track whether body overflow was already hidden (e.g. by a parent Gallery lightbox)
+  // so we don't clobber it on close.
   useEffect(() => {
     if (!product) return;
+    const wasAlreadyHidden = document.body.style.overflow === "hidden";
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      if (!wasAlreadyHidden) document.body.style.overflow = "";
+    };
   }, [product]);
 
   const relatedProducts = useMemo(() => {
