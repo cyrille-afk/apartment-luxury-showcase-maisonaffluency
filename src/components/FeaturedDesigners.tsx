@@ -2808,16 +2808,27 @@ const FeaturedDesigners = () => {
 
                       {/* Name — top-left */}
                       <div className="absolute inset-x-0 top-0 px-4 pb-10 pt-3 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
-                        <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
-                          {(() => {
-                            const dn = (designer as any).displayName || designer.name;
-                            if (dn.includes(" - ")) {
-                              const [brand, ...rest] = dn.split(" - ");
-                              return `${rest.join(" - ").trim()} — ${brand.trim()}`;
-                            }
-                            return dn;
-                          })()}
-                        </p>
+                        {(() => {
+                          const dn = (designer as any).displayName || designer.name;
+                          if (dn.includes(" - ")) {
+                            const [brand, ...rest] = dn.split(" - ");
+                            return (
+                              <>
+                                <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+                                  {rest.join(" - ").trim()}
+                                </p>
+                                <p className="font-body text-[9px] md:text-[10px] text-white/60 tracking-wider mt-0.5 drop-shadow-sm">
+                                  {brand.trim()}
+                                </p>
+                              </>
+                            );
+                          }
+                          return (
+                            <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+                              {dn}
+                            </p>
+                          );
+                        })()}
                       </div>
 
                       {/* Thumbnail placeholders — bottom-right */}
