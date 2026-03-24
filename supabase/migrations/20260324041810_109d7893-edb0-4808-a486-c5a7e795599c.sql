@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET hover_image_url = 'https://www.alineadesignobjects.com/wp-content/uploads/2009/05/Angelo-M-kruk-compositie_Alinea-Design-Objects-scaled.jpg' WHERE designer_id = '86483e10-0001-4000-8000-000000000001' AND title = 'Angelo M Stool';
