@@ -2693,7 +2693,9 @@ const FeaturedDesigners = () => {
           <div className={cn(
             "grid gap-4 md:gap-6 grid-cols-2",
             sidebarOpen
-              ? "md:grid-cols-4"
+              ? (filteredPicks
+                  ? (productGridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-4")
+                  : "md:grid-cols-4")
               : filteredPicks
                 ? (productGridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-4")
                 : (designerGridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-5")
