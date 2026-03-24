@@ -346,7 +346,7 @@ function SplitImageBlock({
   ) : null;
 
   return (
-    <div className={`${index === 0 ? "mb-10 md:mb-14" : "my-10 md:my-14"} flex flex-col md:flex-row gap-6 md:gap-10 items-start`}>
+    <div className={`${index === 0 ? "mb-10 md:mb-14" : "my-10 md:my-14"} flex flex-col md:flex-row gap-6 md:gap-10 items-center`}>
       {textEl && (
         <div className={`flex-1 min-w-0 ${imageOnRight ? 'md:order-1' : 'md:order-2'}`}>
           {textEl}
