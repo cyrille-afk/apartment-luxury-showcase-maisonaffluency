@@ -923,7 +923,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                                 imageIdentifier={item.title}
                                 visible={true}
                                 onCloseLightbox={closeLightbox}
-                                 {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest })}
+                                 {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                               />
                            )}
                           </div>
@@ -985,7 +985,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
                          visible={!imageZoomed}
                          onCloseLightbox={closeLightbox}
-                         {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest })}
+                         {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                        />
                       {/* Close button — desktop: near image */}
                       <button
