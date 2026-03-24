@@ -1887,7 +1887,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       },
     ],
     cardThumbnails: [
-      { image: "", galleryIndex: GALLERY.A_SUN_LIT_READING_CORNER },
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774339681/AffluencySG_191_3_1_r0dard.jpg", galleryIndex: GALLERY.A_COLOURFUL_NOOK },
     ],
     links: [
