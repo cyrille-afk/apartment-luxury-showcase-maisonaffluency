@@ -1944,6 +1944,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: milanPekarImg,
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1773727267/AffluencySG_213_1_jp2060.jpg", galleryIndex: GALLERY.A_DREAMY_TUSCAN_LANDSCAPE },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085920/small-room-vase_s3nz5o.jpg", galleryIndex: GALLERY.YELLOW_CRYSTALLINE },
     ],
     imagePosition: "center 30%",
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_11.18.21_AM_blwg7a.png",
