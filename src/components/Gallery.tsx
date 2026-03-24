@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
@@ -237,7 +238,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     once: true,
     margin: "-100px"
   });
+  const navigate = useNavigate();
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [returnUrl, setReturnUrl] = useState<string | null>(null);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const imageZoomedRef = useRef(false);
@@ -442,6 +445,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     const handleOpenLightbox = (e: CustomEvent<{
       index: number;
       sourceId?: string;
+      returnUrl?: string;
     }>) => {
       const index = e.detail.index;
       if (index >= 0 && index < allItems.length) {
@@ -449,6 +453,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         setCurrentSectionIndex(sectionIndex);
         setCurrentItemIndex(itemIndex);
         setExternalSourceId(e.detail.sourceId || null);
+        setReturnUrl(e.detail.returnUrl || null);
         setSourceItemKey(null);
         setLightboxOpen(true);
       }
@@ -510,8 +515,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     setIsExpanded(false);
     imageZoomedRef.current = false;
     setImageZoomed(false);
-    // Scroll back to the source item after closing
-    if (externalSourceId) {
+    // Navigate to return URL if set (e.g. designer profile after thumbnail click)
+    if (returnUrl) {
+      const url = returnUrl;
+      setReturnUrl(null);
+      setExternalSourceId(null);
+      setTimeout(() => navigate(url), 100);
+    } else if (externalSourceId) {
       setTimeout(() => {
         const element = document.getElementById(externalSourceId);
         if (element) {
