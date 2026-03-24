@@ -259,8 +259,7 @@ const Navigation = () => {
                 {leftNavItems.map((item, index) => (
                   <Fragment key={item.href}>
                     <button 
-                      onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
+                      onClick={() => handleNavClick(item.href)}
                       className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
                       style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
                     >
@@ -350,8 +349,7 @@ const Navigation = () => {
                 
                 {/* Journal */}
                 <button
-                  onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick("/journal"); }}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick("/journal"); }}
+                  onClick={() => handleNavClick("/journal")}
                   className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
                   style={{ animationDelay: `${leftNavItems.length * 120}ms`, animationFillMode: 'forwards' }}
                 >
@@ -365,8 +363,7 @@ const Navigation = () => {
                   style={{ animationDelay: `${(leftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   <button
-                    onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); navigate("/favorites"); }}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); navigate("/favorites"); }}
+                    onClick={() => { setIsOpen(false); navigate("/favorites"); }}
                     className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                   >
                     <span className="flex items-center gap-2">
@@ -382,8 +379,7 @@ const Navigation = () => {
                   </button>
                   {pinItems.length > 0 && (
                     <button
-                      onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); setIsComparing(true); }}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); setIsComparing(true); }}
+                      onClick={() => { setIsOpen(false); setIsComparing(true); }}
                       className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                     >
                       <span className="flex items-center gap-2">
@@ -406,8 +402,7 @@ const Navigation = () => {
                   {rightNavItems.map((item) => (
                     <button 
                       key={item.href} 
-                      onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNavClick(item.href); }}
+                      onClick={() => handleNavClick(item.href)}
                       className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                     >
                       {item.label}
@@ -427,8 +422,8 @@ const Navigation = () => {
                       {contactOptions.map((option) => (
                         <button
                           key={option.label}
-                          onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); option.action(); }}
-                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(false); option.action(); }}
+                          onTouchEnd={undefined}
+                          onClick={() => { setIsOpen(false); option.action(); }}
                           className="flex items-center gap-3 text-left font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground hover:text-primary transition-colors py-1.5 font-semibold"
                         >
                           <option.icon className="h-4 w-4 text-primary" />
