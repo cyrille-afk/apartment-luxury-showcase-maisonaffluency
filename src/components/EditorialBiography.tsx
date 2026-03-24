@@ -43,7 +43,7 @@ function normalizeCloudinaryVideoUrl(url: string): string {
 }
 
 /** Render a paragraph supporting <strong> HTML tags and highlighted quoted text */
-function renderParagraph(text: string): React.ReactNode[] {
+export function renderParagraph(text: string): React.ReactNode[] {
   // First split on <strong>...</strong> tags
   const parts = text.split(/(<strong>[\s\S]*?<\/strong>)/g);
   return parts.map((part, i) => {

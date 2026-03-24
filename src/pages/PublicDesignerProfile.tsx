@@ -9,7 +9,7 @@ import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { shareProfileOnWhatsApp, sharePageOnWhatsApp } from "@/lib/whatsapp-share";
-import EditorialBiography from "@/components/EditorialBiography";
+import EditorialBiography, { renderParagraph } from "@/components/EditorialBiography";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
@@ -272,7 +272,7 @@ const PublicDesignerProfile = () => {
                   {heroParagraphs.length > 0 && (
                     <div className="font-body text-sm leading-relaxed text-foreground/85">
                       {heroParagraphs.map((p: string, i: number) => (
-                        <p key={i} className={i > 0 ? "mt-4" : ""}>{p}</p>
+                        <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                       ))}
                     </div>
                   )}
@@ -380,7 +380,7 @@ const PublicDesignerProfile = () => {
                             <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">About</h2>
                             <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
                               {heroParagraphs.map((p: string, i: number) => (
-                                <p key={i} className={i > 0 ? "mt-4" : ""}>{p}</p>
+                                <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                               ))}
                             </div>
                           </div>
