@@ -2164,6 +2164,7 @@ const FeaturedDesigners = () => {
 
   const [showSearch, setShowSearch] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
