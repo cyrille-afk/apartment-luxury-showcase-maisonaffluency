@@ -1443,7 +1443,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     specialty: "Whimsical Furniture & Collectible Design",
     image: hamreiImg,
     cardThumbnails: [
-      undefined as any,
+      null as any,
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg", galleryIndex: GALLERY.A_JEWELRY_BOX_LIKE_SETTING },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/v1772270538/Screen_Shot_2026-02-28_at_5.21.50_PM_skmljz.png",
