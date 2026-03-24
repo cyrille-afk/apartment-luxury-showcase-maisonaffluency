@@ -96,14 +96,15 @@ const PublicDesigners = () => {
                         </div>
                       )}
 
-                      <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                      {/* Name — top-left */}
+                      <div className="absolute inset-x-0 top-0 px-4 pb-10 pt-3 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
                         <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
                           {item.name}
                         </p>
                       </div>
 
                       {isAtelier && (
-                        <div className="absolute top-3 left-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
+                        <div className="absolute top-3 right-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
                           <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">
                             {item.name}
                           </span>
@@ -111,10 +112,16 @@ const PublicDesigners = () => {
                       )}
 
                       {item.founder && !isAtelier && (
-                        <span className="absolute top-2.5 left-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full">
+                        <span className="absolute top-2.5 right-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full">
                           {item.founder}
                         </span>
                       )}
+
+                      {/* Thumbnail placeholders — bottom-right */}
+                      <div className="absolute bottom-2.5 right-2.5 flex gap-1.5 z-10">
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded bg-muted/40 border border-white/15 backdrop-blur-sm" />
+                      </div>
 
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
                         {item.specialty && (
