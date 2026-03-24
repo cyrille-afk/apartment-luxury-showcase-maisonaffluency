@@ -92,6 +92,15 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    const { pathname, search, hash } = window.location;
+    const normalizedPath = pathname.replace(/\/\/{2,}/g, "/");
+
+    if (normalizedPath !== pathname) {
+      window.history.replaceState(null, "", `${normalizedPath}${search}${hash}`);
+    }
+  }, []);
+
+  useEffect(() => {
     const win = window as any;
 
     if (typeof win.requestIdleCallback === "function") {
