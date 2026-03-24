@@ -2164,6 +2164,7 @@ const FeaturedDesigners = () => {
 
   const [showSearch, setShowSearch] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof featuredDesigners[0] | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -2474,56 +2475,6 @@ const FeaturedDesigners = () => {
           </div>
 
 
-          {(() => {
-            // Compute per-subcategory item counts
-            const SUBCATEGORY_TO_TAGS_LOCAL: Record<string, string[]> = {
-              "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
-              "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
-              "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
-              "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
-              "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
-              "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
-              "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
-              "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
-              "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
-              "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
-              "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
-            };
-            const counts: Record<string, number> = {};
-            Object.entries(SUBCATEGORY_TO_TAGS_LOCAL).forEach(([sub, tags]) => {
-              let total = 0;
-              featuredDesigners.forEach(d => {
-                d.curatorPicks?.forEach((pick: any) => {
-                  const matchesTags = pick.tags?.some((tag: string) => tags.some(mt => tag.toLowerCase() === mt.toLowerCase()));
-                  const matchesCat = tags.some(mt => pick.category?.toLowerCase() === mt.toLowerCase());
-                  if (matchesTags || matchesCat) total++;
-                });
-              });
-              counts[sub] = total;
-            });
-            return (
-              <CategorySidebar
-                activeCategory={selectedCategory}
-                activeSubcategory={selectedSubcategory}
-                onSelect={(cat, sub) => {
-                  if (cat === null) {
-                    setSelectedCategory(null);
-                  } else {
-                    setSelectedCategoryRaw(cat);
-                    if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
-                    broadcastFilter(cat, sub);
-                    // Scroll to product grid when a filter is applied
-                    setTimeout(() => {
-                      document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 150);
-                  }
-                }}
-                itemCounts={counts}
-                sectionLabel="all Designers"
-              />
-            );
-          })()}
-
         {(searchQuery || selectedCategory) && (
           <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
             {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
@@ -2576,14 +2527,68 @@ const FeaturedDesigners = () => {
           </div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
+        {/* Desktop: Sidebar + Grid flex layout */}
+        <div className="hidden md:flex gap-6">
+          {(() => {
+            const SUBCATEGORY_TO_TAGS_LOCAL: Record<string, string[]> = {
+              "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+              "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+              "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+              "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+              "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
+              "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+              "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+              "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+              "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+              "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+              "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+            };
+            const counts: Record<string, number> = {};
+            Object.entries(SUBCATEGORY_TO_TAGS_LOCAL).forEach(([sub, tags]) => {
+              let total = 0;
+              featuredDesigners.forEach(d => {
+                d.curatorPicks?.forEach((pick: any) => {
+                  const matchesTags = pick.tags?.some((tag: string) => tags.some(mt => tag.toLowerCase() === mt.toLowerCase()));
+                  const matchesCat = tags.some(mt => pick.category?.toLowerCase() === mt.toLowerCase());
+                  if (matchesTags || matchesCat) total++;
+                });
+              });
+              counts[sub] = total;
+            });
+            return (
+              <CategorySidebar
+                activeCategory={selectedCategory}
+                activeSubcategory={selectedSubcategory}
+                onSelect={(cat, sub) => {
+                  if (cat === null) {
+                    setSelectedCategory(null);
+                  } else {
+                    setSelectedCategoryRaw(cat);
+                    if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
+                    broadcastFilter(cat, sub);
+                    setTimeout(() => {
+                      document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 150);
+                  }
+                }}
+                itemCounts={counts}
+                sectionLabel="all Designers"
+                onOpenChange={setSidebarOpen}
+              />
+            );
+          })()}
+
+          <motion.div
+            className="flex-1 min-w-0"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
           <div className={cn(
             "grid gap-4 md:gap-6 grid-cols-2",
-            gridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-3 lg:grid-cols-5"
+            sidebarOpen
+              ? "md:grid-cols-4"
+              : gridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-3 lg:grid-cols-5"
           )}>
               {filteredDesigners
                 .slice()
@@ -2667,6 +2672,74 @@ const FeaturedDesigners = () => {
                   );
                 })}
             </div>
+          </motion.div>
+        </div>{/* end sidebar+grid flex */}
+
+        {/* Mobile-only grid (no sidebar) */}
+        <motion.div
+          className="md:hidden"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className="grid gap-4 grid-cols-2">
+              {filteredDesigners
+                .slice()
+                .sort((a, b) => {
+                  const nameA = (a.displayName || a.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                  const nameB = (b.displayName || b.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                  return nameA.localeCompare(nameB);
+                })
+                .map((designer) => {
+                  const isLamont = designer.id === "alexander-lamont";
+                  const cardContent = (
+                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                      {designer.image ? (
+                        <img
+                          src={designer.image}
+                          alt={designer.name}
+                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+                          style={(designer as any).imagePosition ? { objectPosition: (designer as any).imagePosition } : undefined}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+                          <span className="font-display text-3xl text-muted-foreground/20">
+                            {designer.name.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                        <p className="font-display text-sm text-white tracking-wide leading-tight drop-shadow-sm">
+                          {designer.displayName || designer.name}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                  if (isLamont) {
+                    return (
+                      <Link key={designer.id} to="/designers/alexander-lamont" className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
+                        {cardContent}
+                      </Link>
+                    );
+                  }
+                  return (
+                    <button
+                      key={designer.id}
+                      type="button"
+                      onClick={() => {
+                        setCuratorPicksDesigner(designer);
+                        setCuratorPickIndex(0);
+                        setIsZoomed(false);
+                        setPicksHovered(false);
+                      }}
+                      className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+                    >
+                      {cardContent}
+                    </button>
+                  );
+                })}
+          </div>
         </motion.div>
         </div>
         {/* Curators' Picks Lightbox Dialog */}

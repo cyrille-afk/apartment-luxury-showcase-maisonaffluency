@@ -11,11 +11,16 @@ interface CategorySidebarProps {
   className?: string;
   itemCounts?: Record<string, number>;
   sectionLabel?: string;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect, className, itemCounts, sectionLabel }) => {
+const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect, className, itemCounts, sectionLabel, onOpenChange }) => {
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpenState] = useState(false);
+  const setIsOpen = (open: boolean) => {
+    setIsOpenState(open);
+    onOpenChange?.(open);
+  };
 
   // Auto-open sidebar and expand parent category when a subcategory is selected
   useEffect(() => {
@@ -53,7 +58,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
   const activeCount = activeSubcategory ? 1 : (activeCategory ? 1 : 0);
 
   return (
-    <aside className={cn("hidden md:flex flex-col shrink-0 pr-1 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto absolute right-full mr-4 pt-4", isOpen ? "w-44 lg:w-48" : "w-auto", className)}>
+    <aside className={cn("hidden md:flex flex-col shrink-0 pr-1 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-4", isOpen ? "w-44 lg:w-48" : "w-auto", className)}>
       {/* Collapsed state: Filter button */}
       {!isOpen && (
         <button
