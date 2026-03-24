@@ -568,16 +568,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "The Twin Outdoor Chair extends Alinea's material sensibility to the exterior — its robust construction and considered proportions making it as much at home on a terrace as in an interior."
       },
       {
-        image: leoAertsVitrineCabinet,
-        title: "Visible M Horizontal",
-        subtitle: "Display Cabinet",
-        category: "Storage",
-        tags: ["Storage", "Cabinet"],
-        materials: "Bottom part in natural stone with aluminium frame",
-        dimensions: "VHS/M 120-45/60 glass: 120 × 45 × 45/60 cm\nVHS/M 120-60 glass: 120 × 45 × 60 cm\nVHS/M 150-45/60 glass: 150 × 45 × 45/60 cm",
-        description: "Visible M conveys the story behind each object to its collector and admirer and adds a personal touch to the interior. Via this way, the collector can express his identity and cherish memories associated with the exposed objects."
-      },
-      {
         image: leoAertsAngeloMO290,
         title: "Angelo M/O 290",
         subtitle: "Project: Olivier Lempereur, Amandine & Jules",
@@ -588,14 +578,14 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         description: "The Angelo M/O 290 is a monumental oval dining table commissioned for a project by Olivier Lempereur — its elongated stone surface creating a sculptural centrepiece that anchors the room with quiet authority."
       },
       {
-        image: leoAertsAngeloMDining,
-        title: "Angelo M Side Table Collection",
-        subtitle: "Three Heights",
-        category: "Tables",
-        tags: ["Tables", "Side Table"],
-        materials: "Natural stone • Solid American walnut",
-        dimensions: "M/SR 45: Ø45 × 62cm H — M/SR 55: Ø55 × 48cm H — M/SR 80: Ø80 × 36cm H",
-        description: "Available in three complementary heights, the Angelo M Side Table Collection offers a family of stone objects that work independently or together — their geological variation making each a unique specimen."
+        image: leoAertsVitrineCabinet,
+        title: "Visible M Horizontal",
+        subtitle: "Display Cabinet",
+        category: "Storage",
+        tags: ["Storage", "Cabinet"],
+        materials: "Bottom part in natural stone with aluminium frame",
+        dimensions: "VHS/M 120-45/60 glass: 120 × 45 × 45/60 cm\nVHS/M 120-60 glass: 120 × 45 × 60 cm\nVHS/M 150-45/60 glass: 150 × 45 × 45/60 cm",
+        description: "Visible M conveys the story behind each object to its collector and admirer and adds a personal touch to the interior. Via this way, the collector can express his identity and cherish memories associated with the exposed objects."
       },
       {
         image: leoAertsTwinChairIndoor,
@@ -606,6 +596,16 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         materials: "Upholstered leather seat • Ash bleached frame\n(Also available in ashwood light gray, ashwood mid gray, ashwood dark brown, ashwood black, walnut)",
         dimensions: "W52 × D55 × H76 cm",
         description: "The Twin Indoor Chair in leather and bleached ash — its considered proportions and refined materiality making it a quietly sculptural presence in any interior."
+      },
+      {
+        image: leoAertsAngeloMDining,
+        title: "Angelo M Side Table Collection",
+        subtitle: "Three Heights",
+        category: "Tables",
+        tags: ["Tables", "Side Table"],
+        materials: "Natural stone • Solid American walnut",
+        dimensions: "M/SR 45: Ø45 × 62cm H — M/SR 55: Ø55 × 48cm H — M/SR 80: Ø80 × 36cm H",
+        description: "Available in three complementary heights, the Angelo M Side Table Collection offers a family of stone objects that work independently or together — their geological variation making each a unique specimen."
       },
       {
         image: leoAertsAngeloMMacassar,
