@@ -593,16 +593,21 @@ const TradeAtelierProfile = () => {
                           )}
                           loading="lazy"
                         />
-                        {pick.hover_image_url && (
-                          <img
-                            src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
-                            srcSet={pickSrcSet(pick.hover_image_url)}
-                            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
-                            alt={`${pick.title} hover view`}
-                            className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-                            loading="lazy"
-                          />
-                        )}
+                        {pick.hover_image_url && (() => {
+                          const hoverPosTag = pick.tags?.find((t: string) => t.startsWith("hover-pos:"));
+                          const hoverPos = hoverPosTag ? hoverPosTag.replace("hover-pos:", "") : undefined;
+                          return (
+                            <img
+                              src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
+                              srcSet={pickSrcSet(pick.hover_image_url)}
+                              sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                              alt={`${pick.title} hover view`}
+                              className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                              style={hoverPos ? { objectPosition: hoverPos } : undefined}
+                              loading="lazy"
+                            />
+                          );
+                        })()}
                         <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
                             <Maximize2 className="h-3 w-3" />
