@@ -1828,7 +1828,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     image: leoSentouImg,
     cardThumbnails: [
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772087732/IMG_2402_y3atdm.jpg", galleryIndex: GALLERY.A_SUN_LIT_READING_CORNER },
-      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774339681/AffluencySG_191_3_1_r0dard.jpg", galleryIndex: GALLERY.A_COLOURFUL_NOOK },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774339681/AffluencySG_191_3_1_r0dard.jpg", galleryIndex: GALLERY.A_SOPHISTICATED_LIVING_ROOM },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.59.56_AM_ehkyal.png",
     biography:
