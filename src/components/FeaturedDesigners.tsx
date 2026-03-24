@@ -1422,7 +1422,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     specialty: "Lost-Wax Crystal & Sculptural Glass Objects",
     image: garnierLinkerImg,
     cardThumbnails: [
-      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772536395/AffluencySG_194-22.jpg_macpwj.jpg", galleryIndex: GALLERY.A_COLOURFUL_NOOK },
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772536395/AffluencySG_194-22.jpg_macpwj.jpg", galleryIndex: GALLERY.A_SOPHISTICATED_LIVING_ROOM },
       { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1774336947/eaa39674-f12c-4297-8e77-3c4407f1dce9_oaceoq.jpg", galleryIndex: GALLERY.A_COLOURFUL_NOOK },
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.45.53_AM_xuwt7r.png",
