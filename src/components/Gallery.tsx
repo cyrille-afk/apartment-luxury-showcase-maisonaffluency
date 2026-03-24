@@ -445,6 +445,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     const handleOpenLightbox = (e: CustomEvent<{
       index: number;
       sourceId?: string;
+      returnUrl?: string;
     }>) => {
       const index = e.detail.index;
       if (index >= 0 && index < allItems.length) {
@@ -452,6 +453,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         setCurrentSectionIndex(sectionIndex);
         setCurrentItemIndex(itemIndex);
         setExternalSourceId(e.detail.sourceId || null);
+        setReturnUrl(e.detail.returnUrl || null);
         setSourceItemKey(null);
         setLightboxOpen(true);
       }
