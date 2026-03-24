@@ -7,6 +7,7 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useDesigner, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { shareProfileOnWhatsApp, sharePageOnWhatsApp } from "@/lib/whatsapp-share";
 import EditorialBiography, { renderParagraph } from "@/components/EditorialBiography";
@@ -43,6 +44,7 @@ const PublicDesignerProfile = () => {
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Prevent browser from restoring previous scroll position
@@ -79,33 +81,46 @@ const PublicDesignerProfile = () => {
     if (rawPicks.length <= 2) return rawPicks;
 
     const getFunctionalCategory = (pick: (typeof rawPicks)[number]) => {
-      // Use top-level category for grouping to maximise visual distance
-      // between items of the same type (e.g., all Tables separated)
       if (pick.category?.trim()) return pick.category.trim().toLowerCase();
       if (pick.subcategory?.trim()) return pick.subcategory.trim().toLowerCase();
       return "other";
     };
 
-    // Group items by functional category, then round-robin to maximise spacing
+    const columns = isMobile ? Math.max(2, gridCols - 1) : gridCols;
+
     const buckets = new Map<string, typeof rawPicks>();
     for (const pick of rawPicks) {
       const key = getFunctionalCategory(pick);
       if (!buckets.has(key)) buckets.set(key, []);
       buckets.get(key)!.push(pick);
     }
-    // Sort buckets largest-first so the most common category seeds the spread
-    const queues = [...buckets.values()].sort((a, b) => b.length - a.length);
 
-    const interleaved: typeof rawPicks = [];
-    let safety = rawPicks.length + 1;
-    while (interleaved.length < rawPicks.length && --safety > 0) {
-      for (const q of queues) {
-        if (q.length > 0) interleaved.push(q.shift()!);
-      }
+    const queues = [...buckets.entries()].map(([category, items]) => ({
+      category,
+      items: [...items],
+    }));
+
+    const arranged: typeof rawPicks = [];
+    while (arranged.length < rawPicks.length) {
+      const index = arranged.length;
+      const blockedCategory = index >= columns ? getFunctionalCategory(arranged[index - columns]) : null;
+
+      const candidates = queues
+        .filter((q) => q.items.length > 0 && q.category !== blockedCategory)
+        .sort((a, b) => b.items.length - a.items.length);
+
+      const fallback = queues
+        .filter((q) => q.items.length > 0)
+        .sort((a, b) => b.items.length - a.items.length)[0];
+
+      const selected = candidates[0] ?? fallback;
+      if (!selected) break;
+
+      arranged.push(selected.items.shift()!);
     }
 
-    return interleaved;
-  }, [rawPicks]);
+    return arranged.length === rawPicks.length ? arranged : rawPicks;
+  }, [rawPicks, gridCols, isMobile]);
 
   const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
 
