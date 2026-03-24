@@ -544,16 +544,43 @@ const Collectibles = () => {
     return designers;
   }, [searchQuery, selectedCategory, selectedSubcategory]);
 
-  const allDesignerIds = filteredDesigners.map(d => d.id);
-  const isAllExpanded = openDesigners.length === allDesignerIds.length && allDesignerIds.length > 0;
-
-  const toggleAllDesigners = () => {
-    if (isAllExpanded) {
-      setOpenDesigners([]);
-    } else {
-      setOpenDesigners(allDesignerIds);
+  // When a category/subcategory is active, collect all matching curator picks across all collectible designers
+  const filteredPicks = useMemo(() => {
+    if (!selectedCategory && !selectedSubcategory) return null;
+    const SUB_TAGS: Record<string, string[]> = {
+      "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+      "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+      "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+      "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+      "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
+      "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+      "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+      "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+      "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+      "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+      "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+    };
+    const picks: { pick: typeof collectibleDesigners[0]["curatorPicks"][0]; designer: typeof collectibleDesigners[0]; pickIndex: number }[] = [];
+    const matchPick = (pick: any) => {
+      if (selectedSubcategory) {
+        const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
+        return tags.some(tag =>
+          categoryMatchLocal(pick.subcategory, tag) || categoryMatchLocal(pick.subcategory, selectedSubcategory) ||
+          categoryMatchLocal(pick.category, tag) ||
+          (pick.tags && pick.tags.some((t: string) => categoryMatchLocal(t, tag)))
+        );
+      }
+      return categoryMatchLocal(pick.category, selectedCategory || undefined) || (pick.tags && pick.tags.some((t: string) => categoryMatchLocal(t, selectedCategory || undefined)));
+    };
+    for (const designer of collectibleDesigners) {
+      designer.curatorPicks?.forEach((pick, idx) => {
+        if (matchPick(pick)) {
+          picks.push({ pick, designer, pickIndex: idx });
+        }
+      });
     }
-  };
+    return picks;
+  }, [selectedCategory, selectedSubcategory]);
 
   // Helper: check if a curator pick matches the active subcategory/category filter
   const pickMatchesFilter = useMemo(() => {
