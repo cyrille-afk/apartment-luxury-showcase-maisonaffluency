@@ -701,191 +701,176 @@ const Collectibles = () => {
           </motion.div>
 
           <div className="relative">
-            {/* A-Z alphabet jump bar + Search + Filter */}
-            {(() => {
-              const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
-              const designerLetters = [...new Set(filteredDesigners.map(d => normalize(d.name)[0]))].sort();
-              return (
-                <div className="flex flex-col gap-4 mb-5 md:mb-6">
-                  <div
-                    className="flex items-center gap-3 md:gap-4 lg:gap-5 px-1 py-4 border-t border-b border-border/30 overflow-x-auto max-w-3xl"
-                    style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as any}
-                  >
-                    {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => {
-                      const isActive = designerLetters.includes(letter);
-                      return (
-                        <button
-                          key={letter}
-                          onClick={() => {
-                            if (isActive) {
-                              const el = document.getElementById(`collectible-alpha-${letter}`);
-                              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                            }
-                          }}
-                          className={`flex-none font-serif text-base md:text-lg leading-none transition-all duration-200 ${
-                            isActive
-                              ? "text-foreground hover:text-primary cursor-pointer"
-                              : "text-foreground/40 cursor-default"
-                          }`}
-                        >
-                          {letter}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
-                    <div className="md:hidden order-first">
-                    <Popover open={filterOpen} onOpenChange={(open) => {
-                          setFilterOpen(open);
-                          if (!open && selectedCategory) {
-                            broadcastFilter(selectedCategory, selectedSubcategory);
-                            setTimeout(() => { document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
-                          }
-                        }}>
-                      <PopoverTrigger asChild>
-                        <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-[hsl(var(--gold))] bg-background shadow-sm hover:shadow-md text-foreground transition-all duration-300 relative" aria-label="Filter">
-                          <SlidersHorizontal className="h-3.5 w-3.5" />
-                          <span className="text-[10px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
-                          {selectedCategory && (
-                            <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
-                              1
-                            </span>
-                          )}
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent align="start" className="w-[260px] p-4 max-h-[400px] overflow-y-auto">
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="font-serif text-sm text-foreground flex items-center gap-2"><SlidersHorizontal className="h-3.5 w-3.5" /> Filter</h4>
-                          <div className="flex items-center gap-2">
-                          {selectedCategory && (
-                            <button
-                              onClick={() => { setSelectedCategory(null); }}
-                              className="px-3 py-1 rounded-full border border-[hsl(var(--gold))] bg-white text-xs font-body font-medium text-foreground shadow-sm hover:shadow-md transition-all duration-200"
-                            >
-                              Clear
-                            </button>
-                          )}
-                          <button onClick={() => setFilterOpen(false)} className="p-1.5 rounded-full bg-muted hover:bg-muted-foreground/20 text-foreground transition-colors" aria-label="Close filter">
-                            <X className="h-4 w-4" />
-                          </button>
-                          </div>
-                        </div>
-                        {(() => {
-                          // Compute per-subcategory item counts scoped to collectibles only
-                          const SUB_TAGS_LOCAL: Record<string, string[]> = {
-                            "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
-                            "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
-                            "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
-                            "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
-                            "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
-                            "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
-                            "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
-                            "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
-                            "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
-                            "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
-                            "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
-                          };
-                          const subCounts: Record<string, number> = {};
-                          Object.entries(SUB_TAGS_LOCAL).forEach(([sub, tags]) => {
-                            let total = 0;
-                            collectibleDesigners.forEach(d => {
-                              d.curatorPicks?.forEach(pick => {
-                                if (tags.some(tag =>
-                                  categoryMatchLocal(pick.subcategory, tag) || categoryMatchLocal(pick.subcategory, sub) ||
-                                  categoryMatchLocal(pick.category, tag) ||
-                                  (pick.tags && pick.tags.some((t: string) => categoryMatchLocal(t, tag)))
-                                )) total++;
-                              });
-                            });
-                            subCounts[sub] = total;
-                          });
-                          // Compute per-category totals
-                          const catCounts: Record<string, number> = {};
-                          categories.forEach(cat => {
-                            const subs = categoryMap[cat] || [];
-                            catCounts[cat] = subs.reduce((sum, s) => sum + (subCounts[s] || 0), 0);
-                          });
-                          return (
-                        <div className="space-y-1">
-                          {categories.map((category) => (
-                            <div key={category}>
-                              <label className="flex items-center gap-3 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors">
-                                <Checkbox
-                                  checked={selectedCategory === category}
-                                  onCheckedChange={() => {
-                                    if (selectedCategory === category) {
-                                      setSelectedCategory(null, true);
-                                    } else {
-                                      setSelectedCategory(category, true);
-                                    }
-                                  }}
-                                />
-                                <span className="text-sm text-foreground font-body">{category}</span>
-                                <span className="ml-auto text-[9px] text-muted-foreground/60 font-body">{catCounts[category] || 0}</span>
-                              </label>
-                              {selectedCategory === category && categoryMap[category]?.length > 0 && (
-                                <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
-                                  <button
-                                    onClick={() => setSelectedSubcategory(null)}
-                                    className={`block text-[11px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                      !selectedSubcategory ? 'text-primary' : 'text-foreground/60 hover:text-primary'
-                                    }`}
-                                  >
-                                    All {category}
-                                  </button>
-                                  {categoryMap[category].map(sub => (
-                                    <button
-                                      key={sub}
-                                      onClick={() => { setSelectedSubcategory(selectedSubcategory === sub ? null : sub); setFilterOpen(false); setTimeout(() => { document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150); }}
-                                      className={`block text-[10px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${
-                                        selectedSubcategory === sub ? 'text-[hsl(var(--accent))] font-semibold' : 'text-foreground/60 hover:text-primary'
-                                      }`}
-                                    >
-                                      {sub} <span className="text-[9px] text-muted-foreground/50">({subCounts[sub] || 0})</span>
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                          );
-                        })()}
-                      </PopoverContent>
-                    </Popover>
-                    </div>
-                    <div className="relative flex-none order-last md:order-first md:w-56">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
-                      <Input
-                        type="text"
-                        placeholder="Designer..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-8 md:pl-9 pr-7 md:pr-8 h-8 md:h-9 text-[16px] md:text-sm bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
-                      />
-                      {searchQuery && (
-                        <button
-                          onClick={() => { setSearchQuery(""); ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                    </div>
+
+          {(searchQuery || (selectedCategory && !selectedSubcategory)) && (
+            <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
+              {filteredPicks
+                ? `${filteredPicks.length} piece${filteredPicks.length !== 1 ? 's' : ''} found`
+                : `${filteredDesigners.length} designer${filteredDesigners.length !== 1 ? 's' : ''} found`}
+              {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
+            </p>
+          )}
+
+          {/* Filter + Grid toggle + search — single row above grid (desktop) */}
+          <div className="hidden md:flex items-center gap-2 mb-4">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-foreground text-foreground transition-colors relative"
+              aria-label="Filter"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span className="text-[11px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
+              {selectedCategory && (
+                <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
+                  1
+                </span>
+              )}
+            </button>
+            <div className="flex-1" />
+            <button
+              onClick={() => {
+                if (filteredPicks) {
+                  setProductGridCols(productGridCols === 3 ? 4 : 3);
+                } else {
+                  setDesignerGridCols(designerGridCols === 3 ? 5 : 3);
+                }
+              }}
+              className="p-1.5 rounded border border-foreground text-foreground transition-colors"
+              aria-label={filteredPicks ? (productGridCols === 3 ? "Switch to 4 columns" : "Switch to 3 columns") : (designerGridCols === 3 ? "Switch to 5 columns" : "Switch to 3 columns")}
+            >
+              {filteredPicks ? (
+                productGridCols === 3 ? (
+                  <svg width="28" height="28" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="3" height="14" rx="0.5" fill="currentColor"/><rect x="7.5" y="2" width="3" height="14" rx="0.5" fill="currentColor"/><rect x="13" y="2" width="3" height="14" rx="0.5" fill="currentColor"/></svg>
+                ) : (
+                  <svg width="28" height="28" viewBox="0 0 18 18" fill="none"><rect x="1" y="2" width="2.5" height="14" rx="0.5" fill="currentColor"/><rect x="5.5" y="2" width="2.5" height="14" rx="0.5" fill="currentColor"/><rect x="10" y="2" width="2.5" height="14" rx="0.5" fill="currentColor"/><rect x="14.5" y="2" width="2.5" height="14" rx="0.5" fill="currentColor"/></svg>
+                )
+              ) : (
+                designerGridCols === 3 ? (
+                  <svg width="28" height="28" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="3" height="14" rx="0.5" fill="currentColor"/><rect x="7.5" y="2" width="3" height="14" rx="0.5" fill="currentColor"/><rect x="13" y="2" width="3" height="14" rx="0.5" fill="currentColor"/></svg>
+                ) : (
+                  <svg width="28" height="28" viewBox="0 0 18 18" fill="none"><rect x="1" y="2" width="2" height="14" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="2" height="14" rx="0.5" fill="currentColor"/><rect x="8" y="2" width="2" height="14" rx="0.5" fill="currentColor"/><rect x="11.5" y="2" width="2" height="14" rx="0.5" fill="currentColor"/><rect x="15" y="2" width="2" height="14" rx="0.5" fill="currentColor"/></svg>
+                )
+              )}
+            </button>
+            <div className="relative w-56">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Designer..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-8 h-9 text-sm bg-background border-[hsl(var(--gold))] shadow-sm rounded-full focus:border-primary/60 focus:shadow-md font-body"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => { setSearchQuery(""); ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile: Filter + Search row */}
+          <div className="flex md:hidden items-center gap-3 mb-4">
+            <Popover open={filterOpen} onOpenChange={(open) => {
+              setFilterOpen(open);
+              if (!open && selectedCategory) {
+                broadcastFilter(selectedCategory, selectedSubcategory);
+              }
+            }}>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-[hsl(var(--gold))] bg-background shadow-sm hover:shadow-md text-foreground transition-all duration-300 relative" aria-label="Filter">
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  <span className="text-[10px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
+                  {selectedCategory && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">1</span>
+                  )}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-[260px] p-4 max-h-[400px] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-serif text-sm text-foreground flex items-center gap-2"><SlidersHorizontal className="h-3.5 w-3.5" /> Filter</h4>
+                  <div className="flex items-center gap-2">
+                    {selectedCategory && (
+                      <button
+                        onClick={() => { setSelectedCategory(null); }}
+                        className="px-3 py-1 rounded-full border border-[hsl(var(--gold))] bg-white text-xs font-body font-medium text-foreground shadow-sm hover:shadow-md transition-all duration-200"
+                      >Clear</button>
+                    )}
+                    <button onClick={() => setFilterOpen(false)} className="p-1.5 rounded-full bg-muted hover:bg-muted-foreground/20 text-foreground transition-colors" aria-label="Close filter"><X className="h-4 w-4" /></button>
                   </div>
                 </div>
-              );
-            })()}
+                {(() => {
+                  const SUB_TAGS_LOCAL: Record<string, string[]> = {
+                    "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
+                    "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
+                    "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
+                    "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
+                    "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
+                    "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
+                    "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
+                    "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
+                    "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
+                    "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
+                    "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
+                  };
+                  const counts: Record<string, number> = {};
+                  Object.entries(SUB_TAGS_LOCAL).forEach(([sub, tags]) => {
+                    let total = 0;
+                    collectibleDesigners.forEach(d => {
+                      d.curatorPicks?.forEach(pick => {
+                        if (tags.some(tag =>
+                          categoryMatchLocal(pick.subcategory, tag) || categoryMatchLocal(pick.subcategory, sub) ||
+                          categoryMatchLocal(pick.category, tag) ||
+                          (pick.tags && pick.tags.some((t: string) => categoryMatchLocal(t, tag)))
+                        )) total++;
+                      });
+                    });
+                    counts[sub] = total;
+                  });
+                  return (
+                    <CategorySidebar
+                      activeCategory={selectedCategory}
+                      activeSubcategory={selectedSubcategory}
+                      onSelect={(cat, sub) => {
+                        if (cat === null) { setSelectedCategory(null); }
+                        else {
+                          setSelectedCategoryRaw(cat);
+                          if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
+                          broadcastFilter(cat, sub);
+                        }
+                        setFilterOpen(false);
+                      }}
+                      itemCounts={counts}
+                      sectionLabel="Collectible Design"
+                    />
+                  );
+                })()}
+              </PopoverContent>
+            </Popover>
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-8 h-8 text-xs bg-background border-[hsl(var(--gold))] shadow-sm rounded-full font-body"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          </div>
 
-
+          {/* Desktop: Sidebar + Grid flex layout */}
+          <div className="hidden md:flex gap-6">
             {(() => {
-              const SUBCATS = ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools", "Bar Stools",
-                "Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables",
-                "Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights",
-                "Bookcases", "Cabinets", "Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs",
-                "Vases & Vessels", "Mirrors", "Books", "Candle Holders", "Decorative Objects"];
-              const counts: Record<string, number> = {};
-              const SUB_TAGS: Record<string, string[]> = {
+              const SUB_TAGS_DESK: Record<string, string[]> = {
                 "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
                 "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
                 "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
@@ -898,8 +883,8 @@ const Collectibles = () => {
                 "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
                 "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
               };
-              SUBCATS.forEach(sub => {
-                const tags = SUB_TAGS[sub] || [sub];
+              const counts: Record<string, number> = {};
+              Object.entries(SUB_TAGS_DESK).forEach(([sub, tags]) => {
                 let total = 0;
                 collectibleDesigners.forEach(d => {
                   d.curatorPicks?.forEach(pick => {
@@ -917,343 +902,198 @@ const Collectibles = () => {
                   activeCategory={selectedCategory}
                   activeSubcategory={selectedSubcategory}
                   onSelect={(cat, sub) => {
-                    if (cat === null) {
-                      setSelectedCategory(null);
-                    } else {
+                    if (cat === null) { setSelectedCategory(null); }
+                    else {
                       setSelectedCategoryRaw(cat);
                       if (sub !== selectedSubcategory) setSelectedSubcategoryRaw(sub);
                       broadcastFilter(cat, sub);
-                      setTimeout(() => {
-                        document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }, 150);
                     }
                   }}
                   itemCounts={counts}
                   sectionLabel="Collectible Design"
+                  onOpenChange={setSidebarOpen}
+                  isOpen={sidebarOpen}
                 />
               );
             })()}
 
-          {(searchQuery || selectedCategory) && (
-            <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
-              {filteredDesigners.length} designer{filteredDesigners.length !== 1 ? 's' : ''} found
-              {selectedSubcategory && <span> · {selectedSubcategory}</span>}
-              {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
-            </p>
-          )}
-
-          <div className="flex justify-start md:justify-end mb-4 md:pr-8">
-            <button
-              onClick={toggleAllDesigners}
-              className="text-sm text-muted-foreground hover:text-primary font-body transition-colors duration-300 flex items-center gap-1.5"
+            <motion.div
+              className="flex-1 min-w-0"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <span>{isAllExpanded ? 'Collapse All' : 'Expand All'}</span>
-              <ChevronDown className={`h-4.5 w-4.5 transition-transform duration-300 ${isAllExpanded ? 'rotate-180' : ''}`} />
-            </button>
-          </div>
+              <div className={cn(
+                "grid gap-4 md:gap-6 grid-cols-2",
+                sidebarOpen
+                  ? (filteredPicks
+                      ? (productGridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-4")
+                      : "md:grid-cols-4")
+                  : filteredPicks
+                    ? (productGridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-4")
+                    : (designerGridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-5")
+              )}>
+                {filteredPicks ? (
+                  filteredPicks.map(({ pick, designer, pickIndex }, i) => (
+                    <button
+                      key={`${designer.id}-${pickIndex}`}
+                      type="button"
+                      onClick={() => {
+                        setCuratorPicksDesigner(designer);
+                        setCuratorPickIndex(pickIndex);
+                        setIsZoomed(false);
+                        setPicksHovered(false);
+                      }}
+                      className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+                    >
+                      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                        {pick.image ? (
+                          <img src={pick.image} alt={pick.title} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted/10"><span className="font-display text-3xl text-muted-foreground/20">{pick.title.charAt(0)}</span></div>
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">{pick.title}</p>
+                          <p className="font-body text-[9px] text-white/50 mt-1 uppercase tracking-wider">
+                            {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
+                          </p>
+                        </div>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+                          {pick.materials && <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-2 max-w-[90%]">{pick.materials}</p>}
+                          {pick.dimensions && <p className="font-body text-[10px] text-white/60 text-center mb-4">{pick.dimensions}</p>}
+                          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View</span>
+                        </div>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  filteredDesigners
+                    .slice()
+                    .sort((a, b) => a.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").localeCompare(b.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")))
+                    .map((designer) => {
+                      const heroProduct = designer.curatorPicks?.[0];
+                      return (
+                        <button
+                          key={designer.id}
+                          id={`collectible-card-${designer.id}`}
+                          type="button"
+                          onClick={() => openCuratorPicks(designer)}
+                          className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+                        >
+                          <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                            {heroProduct?.image ? (
+                              <img src={heroProduct.image} alt={heroProduct.title} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-muted/10"><span className="font-display text-3xl text-muted-foreground/20">{designer.name.charAt(0)}</span></div>
+                            )}
 
+                            {/* Name — top-left */}
+                            <div className="absolute inset-x-0 top-0 px-4 pb-10 pt-3 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
+                              <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+                                {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
+                              </p>
+                              <p className={cn("font-body text-[9px] md:text-[10px] text-white/60 tracking-wider mt-0.5 drop-shadow-sm", designerGridCols === 5 && "hidden")}>
+                                {designer.specialty}
+                              </p>
+                            </div>
+
+                            {/* Designer portrait thumbnail — bottom-right */}
+                            <div className="absolute bottom-3 right-3 z-10">
+                              <div className="w-[72px] h-[72px] md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-white shadow-md">
+                                <img src={designer.image} alt={designer.name} className="w-full h-full object-cover" loading="lazy" />
+                              </div>
+                            </div>
+
+                            {/* Hover overlay */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+                              {designer.curatorPicks?.length && (
+                                <p className="font-body text-[11px] text-white/85 text-center leading-relaxed mb-4 max-w-[90%]">
+                                  {designer.curatorPicks.length} piece{designer.curatorPicks.length !== 1 ? 's' : ''}
+                                </p>
+                              )}
+                              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+                                <Gem size={12} className="fill-accent text-accent" /> Curator's Picks
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })
+                )}
+              </div>
+            </motion.div>
+          </div>{/* end sidebar+grid flex */}
+
+          {/* Mobile-only grid (no sidebar) */}
           <motion.div
+            className="md:hidden"
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {filteredDesigners.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground font-body">
-                <p>No designers found matching "{searchQuery}"</p>
-              </div>
-            ) : (
-              <Accordion 
-                type="multiple" 
-                value={openDesigners} 
-                onValueChange={(values) => {
-                  if ('vibrate' in navigator) {
-                    navigator.vibrate(10);
-                  }
-                  if (window.innerWidth < 768 && values.length > openDesigners.length) {
-                    const newDesigner = values.find(v => !openDesigners.includes(v));
-                    if (newDesigner) {
-                      setTimeout(() => {
-                        const element = document.querySelector(`[data-collectible="${newDesigner}"]`);
-                        if (element) {
-                          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-                      }, 100);
-                    }
-                  }
-                  setOpenDesigners(values);
-                }} 
-                className="w-full space-y-4"
-              >
-                {filteredDesigners.map((designer, index) => {
-                  const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
-                  const currentLetter = normalize(designer.name)[0];
-                  const prevLetter = index > 0 ? normalize(filteredDesigners[index - 1].name)[0] : null;
-                  const isFirstOfLetter = currentLetter !== prevLetter;
-                  return (
-                <Fragment key={designer.id}>
-                  {isFirstOfLetter && <div id={`collectible-alpha-${currentLetter}`} className="scroll-mt-24" />}
-                <AccordionItem
-                  value={designer.id}
-                  id={`collectible-${designer.id}`}
-                  data-collectible={designer.id}
-                  className="border border-border/40 rounded-lg px-4 md:px-6 bg-white md:bg-card/30 hover:bg-white/90 md:hover:bg-card/50 transition-colors duration-300 scroll-mt-16"
-                >
-                  <AccordionTrigger className="hover:no-underline py-4 md:py-6 group active:scale-[0.99] touch-manipulation [&>svg]:hidden md:[&>svg]:block">
-                    <div className="flex flex-col w-full gap-3">
-                    <div className="flex items-center gap-4 md:gap-6 text-left w-full">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <div
-                            className="relative flex-shrink-0 cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedImage({ name: designer.name, image: designer.image });
-                            }}
-                            onPointerDown={(e) => e.stopPropagation()}
-                            onTouchEnd={(e) => e.stopPropagation()}
-                          >
-                            <img
-                              src={designer.image}
-                              alt={designer.name}
-                              sizes="(max-width: 767px) 96px, 128px"
-                              className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-2 ring-border/40 transition-all duration-300 hover:ring-primary/60 hover:scale-105 hover:shadow-lg"
-                              loading="lazy"
-                            />
-                            <div className="absolute inset-0 rounded-full bg-primary/0 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center">
-                              <svg
-                                className="w-8 h-8 text-primary opacity-0 hover:opacity-100 transition-opacity duration-300"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
-                                />
-                              </svg>
-                            </div>
-                          </div>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-3xl [&>button]:left-3 [&>button]:right-auto md:[&>button]:left-auto md:[&>button]:right-3" aria-describedby={undefined}>
-                          <VisuallyHidden>
-                            <DialogTitle>{selectedImage?.name || designer.name}</DialogTitle>
-                          </VisuallyHidden>
-                          <div className="relative w-full h-full">
-                            <img
-                              src={selectedImage?.image || designer.image}
-                              alt={selectedImage?.name || designer.name}
-                              sizes="(max-width: 767px) 90vw, 700px"
-                              className="w-full h-auto rounded-lg object-contain"
-                            />
-                            <p className="text-center mt-4 text-lg font-serif text-foreground">
-                              {designer.founder || selectedImage?.name || designer.name}
-                            </p>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      <div className="flex flex-col items-start gap-1 flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          {designer.links?.find(l => l.type === "Instagram")?.url && (
-                            <a
-                              href={designer.links.find(l => l.type === "Instagram")?.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-0.5 transition-transform duration-300 hover:scale-110 relative z-10"
-                              aria-label={`${designer.name} on Instagram`}
-                              onClick={(e) => e.stopPropagation()}
-                              onPointerDown={(e) => e.stopPropagation()}
-                              onTouchEnd={(e) => e.stopPropagation()}
-                            >
-                              <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-collectibles)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <defs>
-                                  <linearGradient id="instagram-gradient-collectibles" x1="0%" y1="100%" x2="100%" y2="0%">
-                                    <stop offset="0%" stopColor="#f09433" />
-                                    <stop offset="25%" stopColor="#e6683c" />
-                                    <stop offset="50%" stopColor="#dc2743" />
-                                    <stop offset="75%" stopColor="#cc2366" />
-                                    <stop offset="100%" stopColor="#bc1888" />
-                                  </linearGradient>
-                                </defs>
-                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                              </svg>
-                            </a>
-                          )}
-                          <h3 className="font-serif text-xl md:text-2xl text-foreground group-hover:text-primary transition-colors duration-300">
-                            {(() => {
-                              const fmt = formatDesignerName(designer.name);
-                              return fmt.brand || fmt.person;
-                            })()}
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-sm md:text-base text-primary font-body">{designer.specialty}</p>
-                        </div>
-                        <div className="hidden md:flex mt-auto pt-4">
-                          <WhatsAppShareButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              shareProfileOnWhatsApp("collectible", designer.id ?? designer.name, designer.name, designer.specialty);
-                              trackCTA.whatsapp(`Collectibles_Share_${designer.name}`);
-                            }}
-                            label={`Share ${designer.name} on WhatsApp`}
-                            variant="prominent"
-                            className="md:!text-sm md:!px-4 md:!py-2"
-                          />
-                        </div>
-                      </div>
-                    {/* On View thumbnails — right side */}
-                    {designer.notableWorksLink && (() => {
-                      const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
-                      return (
-                        <div className="hidden md:flex items-center gap-5 flex-shrink-0 mr-8">
-                          <span className="text-xs text-muted-foreground uppercase tracking-wider"><em>On View</em></span>
-                          <div className="relative group/avatar pb-6">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                  detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` }
-                                }));
-                              }}
-                              onPointerDown={(e) => e.stopPropagation()}
-                              onTouchEnd={(e) => e.stopPropagation()}
-                              className="relative w-11 h-11 md:w-14 md:h-14 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-125 hover:z-10 transition-all duration-300 touch-manipulation"
-                              aria-label={`View ${designer.notableWorksLink!.text} in gallery`}
-                            >
-                              {thumb && (
-                                <img src={thumb} alt={designer.notableWorksLink!.text} className="w-full h-full object-cover blur-[0.5px] group-hover/avatar:blur-0 transition-[filter] duration-300" loading="lazy" />
-                              )}
-                            </button>
-                            <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1 flex items-center gap-0.5 text-xs font-body text-muted-foreground whitespace-nowrap opacity-0 group-hover/avatar:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
-                              <CornerDownRight className="w-3 h-3" /> {designer.notableWorksLink!.text}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                    </div>
-                    {/* Mobile: On View below header */}
-                    {designer.notableWorksLink && (() => {
-                      const thumb = GALLERY_THUMBNAILS[designer.notableWorksLink.galleryIndex];
-                      return (
-                        <>
-                        <div className="flex md:hidden items-start gap-2 w-full ml-[7.5rem] -mt-0.5 pr-4">
-                          <div className="w-16 h-px bg-[hsl(var(--gold)/0.4)] mt-0.5 mb-1" />
-                        </div>
-                        <div className="flex md:hidden items-start gap-2 w-full ml-[7.5rem] -mt-0.5 pr-4">
-                          <span className="text-[10px] text-foreground uppercase tracking-wider mr-2 mt-3.5"><em>On View</em></span>
-                          <div className="relative group/avatar pb-4">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                  detail: { index: designer.notableWorksLink!.galleryIndex, sourceId: `collectible-${designer.id}` }
-                                }));
-                              }}
-                              onPointerDown={(e) => e.stopPropagation()}
-                              onTouchEnd={(e) => e.stopPropagation()}
-                              className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-background hover:ring-primary/60 hover:scale-125 hover:z-10 transition-all duration-300 touch-manipulation"
-                              aria-label={`View ${designer.notableWorksLink!.text} in gallery`}
-                            >
-                              {thumb && (
-                                <img src={thumb} alt={designer.notableWorksLink!.text} className="w-full h-full object-cover" loading="lazy" />
-                              )}
-                            </button>
-                            <span className="absolute left-0 top-full mt-1 flex items-center gap-0.5 text-[9px] font-body text-foreground whitespace-nowrap pointer-events-none z-50">
-                              <CornerDownRight className="w-3 h-3" /> {designer.notableWorksLink!.text}
-                            </span>
-                          </div>
-                        </div>
-                        </>
-                      );
-                    })()}
-                    <div className="flex justify-start md:hidden">
-                      <ChevronDown className="h-6 w-6 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
-                    </div>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-1 pb-3">
-                    <div className="space-y-2 text-muted-foreground font-body">
-                      <p className="text-sm md:text-base leading-relaxed text-justify">
-                        {designer.biography}
-                      </p>
-
-                      <div className="pt-2 border-t border-border/30 mt-4">
-                        <p className="text-sm md:text-base italic leading-relaxed text-foreground/80 mb-4 text-justify">
-                          "{designer.philosophy}"
+            <div className="grid gap-4 grid-cols-2">
+              {filteredPicks ? (
+                filteredPicks.map(({ pick, designer, pickIndex }) => (
+                  <button
+                    key={`${designer.id}-${pickIndex}-mobile`}
+                    type="button"
+                    onClick={() => {
+                      setCuratorPicksDesigner(designer);
+                      setCuratorPickIndex(pickIndex);
+                      setIsZoomed(false);
+                    }}
+                    className="group block w-full text-left rounded-xl overflow-hidden border border-border bg-background"
+                  >
+                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                      {pick.image && <img src={pick.image} alt={pick.title} className="w-full h-full object-cover" loading="lazy" />}
+                      <div className="absolute inset-x-0 bottom-0 px-3 pt-8 pb-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                        <p className="font-display text-xs text-white tracking-wide leading-tight drop-shadow-sm">{pick.title}</p>
+                        <p className="font-body text-[8px] text-white/50 mt-0.5 uppercase tracking-wider">
+                          {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
                         </p>
                       </div>
-
-                      {designer.links && designer.links.filter(l => l.type !== "Instagram").length > 0 && (
-                        <div className="flex flex-row flex-wrap items-center gap-3 mt-4 md:flex-nowrap md:gap-3 md:pr-8">
-                          {designer.links.filter(l => l.type !== "Instagram").map((link, idx) => (
-                            link.url ? (
-                              <a
-                                key={idx}
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body rounded-md transition-all duration-300 border bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 hover:border-primary/40"
-                                aria-label={`${designer.name} — ${link.type}`}
-                              >
-                                <span>{link.type}</span>
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                  />
-                                </svg>
-                              </a>
-                            ) : link.type === "Curators' Picks" ? (
-                              <Fragment key={idx}>
-                              {/* Mobile: Curators' Picks standalone on first line */}
-                              <button
-                                onClick={() => openCuratorPicks(designer)}
-                                className="inline-flex items-center gap-1.5 md:px-4 md:py-2 text-base md:text-sm font-body md:bg-accent/10 md:hover:bg-accent/20 text-foreground md:text-accent-foreground md:rounded-full transition-all duration-300 cursor-pointer md:border md:border-accent/30 md:ml-auto"
-                              >
-                                <Gem size={16} className="fill-accent text-accent md:w-3.5 md:h-3.5" />
-                                <span className="font-semibold underline underline-offset-2 decoration-accent/40 md:font-medium md:no-underline">{link.type}</span>
-                              </button>
-                              {/* Logo hidden on mobile to avoid crowding */}
-                              {/* Mobile: WhatsApp below Curators' Picks */}
-                              <div className="flex items-center md:hidden">
-                                <WhatsAppShareButton
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    shareProfileOnWhatsApp("collectible", designer.id ?? designer.name, designer.name, designer.specialty);
-                                    trackCTA.whatsapp(`Collectibles_Share_${designer.name}`);
-                                  }}
-                                  label={`Share ${designer.name} on WhatsApp`}
-                                  variant="branded"
-                                />
-                              </div>
-                              </Fragment>
-                            ) : (
-                              <span
-                                key={idx}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-body bg-primary/10 text-primary rounded-md border border-primary/20"
-                              >
-                                {link.type}
-                              </span>
-                            )
-                          ))}
-                        </div>
-                      )}
                     </div>
-                  </AccordionContent>
-              </AccordionItem>
-                </Fragment>
-                  );
-                })}
-            </Accordion>
-            )}
+                  </button>
+                ))
+              ) : (
+                filteredDesigners
+                  .slice()
+                  .sort((a, b) => a.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").localeCompare(b.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")))
+                  .map((designer) => {
+                    const heroProduct = designer.curatorPicks?.[0];
+                    return (
+                      <button
+                        key={`${designer.id}-mobile`}
+                        type="button"
+                        onClick={() => openCuratorPicks(designer)}
+                        className="group block w-full text-left rounded-xl overflow-hidden border border-border bg-background"
+                      >
+                        <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                          {heroProduct?.image ? (
+                            <img src={heroProduct.image} alt={heroProduct.title} className="w-full h-full object-cover" loading="lazy" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-muted/10"><span className="font-display text-2xl text-muted-foreground/20">{designer.name.charAt(0)}</span></div>
+                          )}
+                          {/* Name overlay */}
+                          <div className="absolute inset-x-0 top-0 px-3 pb-8 pt-2 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
+                            <p className="font-display text-xs text-white tracking-wide leading-tight drop-shadow-sm">
+                              {formatDesignerName(designer.name).brand || formatDesignerName(designer.name).person}
+                            </p>
+                          </div>
+                          {/* Designer portrait — bottom-right */}
+                          <div className="absolute bottom-2 right-2 z-10">
+                            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-md">
+                              <img src={designer.image} alt={designer.name} className="w-full h-full object-cover" loading="lazy" />
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })
+              )}
+            </div>
           </motion.div>
+
           </div>
         </div>
       </section>
