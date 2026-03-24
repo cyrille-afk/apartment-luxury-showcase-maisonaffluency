@@ -352,7 +352,7 @@ function SplitImageBlock({
           {textEl}
         </div>
       )}
-      <div className={`shrink-0 w-full md:w-[50%] ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
+      <div className={`shrink-0 w-full md:w-[38%] ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
         {imageEl}
       </div>
     </div>
