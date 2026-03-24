@@ -314,7 +314,7 @@ function SplitImageBlock({
   overrideCaption?: string | null;
 }) {
   const caption = overrideCaption ?? captionFromUrl(url);
-  const imageOnRight = index % 2 !== 0;
+  const imageOnRight = index % 2 === 0;
 
   const imageEl = (
     <motion.figure
