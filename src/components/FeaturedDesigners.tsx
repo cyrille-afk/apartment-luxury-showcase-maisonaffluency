@@ -529,7 +529,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "leo-aerts-alinea",
-    name: "Alinéa Design Objects - Léo Aerts",
+    name: "Alinea Design Objects - Léo Aerts",
     specialty: "Stone Furniture & Design Objects",
     image: leoAertsAlineaImg,
     cardThumbnails: [
