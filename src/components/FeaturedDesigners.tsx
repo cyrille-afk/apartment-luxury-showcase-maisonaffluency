@@ -2014,6 +2014,9 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       { image: oliviaCognetTotemSeries, title: "Totem Series", category: "Sculpture", tags: ["Sculpture", "Objects"], materials: "Ceramic, Steel base", dimensions: "Small: 170 cm · Medium: 190 cm · Large: 220 cm" },
       { image: oliviaCognetRetrofutureTable, title: "Retrofuture Coffee Table", category: "Tables", tags: ["Tables", "Coffee Tables"], materials: "Ceramic", dimensions: "L 130 × W 60 × H 45 cm" },
     ],
+    cardThumbnails: [
+      { image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085877/living-room-hero_zxfcxl.jpg", galleryIndex: GALLERY.A_SOPHISTICATED_LIVING_ROOM },
+    ],
     links: [
       { type: "Instagram", url: "https://www.instagram.com/olivia_cognet" },
       { type: "Curators' Picks" },
