@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET image_url = 'https://apparatusstudio.com/cdn/shop/files/APPARATUS_METRONOME_READING_LAMP_01.jpg?v=1763153203&width=1920' WHERE id = 'bdcf9f7e-6bd3-4a97-b132-278aecd5912e';
