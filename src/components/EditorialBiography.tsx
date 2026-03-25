@@ -532,12 +532,8 @@ export default function EditorialBiography({
     .map((p) => p.trim())
     .filter(Boolean);
 
-  // Debug: log blocks and media detection
-  console.log('[BIO DEBUG] blocks:', blocks.map((b, i) => `[${i}] standalone=${isStandaloneMediaUrl(b)} "${b.substring(0, 80)}..."`));
-
   const hasManualMedia = !!(biographyImages && biographyImages.length > 0);
   const hasInlineMedia = blocks.some(isStandaloneMediaUrl);
-  console.log('[BIO DEBUG] hasManualMedia:', hasManualMedia, 'hasInlineMedia:', hasInlineMedia);
 
   /* ------- Inline media mode (URLs pasted directly in biography) ------- */
   if (hasInlineMedia) {
@@ -635,6 +631,16 @@ export default function EditorialBiography({
             />
           );
         } else {
+          const hasFutureTextOrVideo = parsed
+            .slice(i)
+            .some((nextBlock) => nextBlock.type === "text" || nextBlock.type === "video");
+
+          // Suppress only truly trailing unpaired images at the very bottom.
+          if (!hasFutureTextOrVideo) {
+            imageIdx++;
+            continue;
+          }
+
           elements.push(
             <FullWidthImageBlock
               key={`fw-${imageIdx}`}
@@ -681,15 +687,9 @@ export default function EditorialBiography({
             />
           );
         } else {
-          elements.push(
-            <FullWidthImageBlock
-              key={`manual-img-${imageIdx}`}
-              url={media.url}
-              designerName={designerName}
-              index={imageIdx}
-              overrideCaption={media.caption}
-            />
-          );
+          // Keep manual trailing videos, suppress manual trailing images.
+          imageIdx++;
+          continue;
         }
         imageIdx++;
       }
