@@ -56,7 +56,7 @@ const PublicDesignerProfile = lazy(() => import("./pages/PublicDesignerProfile")
 const PublicFavorites = lazy(() => import("./pages/PublicFavorites"));
 const TradeSpecSheet = lazy(() => import("./pages/TradeSpecSheet"));
 const ApartmentTour = lazy(() => import("./pages/ApartmentTour"));
-const ApartmentTourVertical = lazy(() => import("./pages/ApartmentTourVertical"));
+
 
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
@@ -140,7 +140,7 @@ const App = () => {
                   <Route path="/designers/:slug" element={<Suspense fallback={null}><PublicDesignerProfile /></Suspense>} />
                   <Route path="/favorites" element={<Suspense fallback={null}><PublicFavorites /></Suspense>} />
                   <Route path="/apartment-tour" element={<Suspense fallback={null}><ApartmentTour /></Suspense>} />
-                  <Route path="/apartment-tour/vertical" element={<Suspense fallback={null}><ApartmentTourVertical /></Suspense>} />
+                  
                   
                   <Route path="/board/:token" element={<Suspense fallback={null}><ClientBoardViewer /></Suspense>} />
                   <Route path="/journal" element={<Suspense fallback={null}><Journal /></Suspense>} />
