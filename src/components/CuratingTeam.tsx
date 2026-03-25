@@ -40,7 +40,7 @@ const CuratingTeam = () => {
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ duration: 0.8, delay: 0.2 }}
-      className="mt-0 pt-6 md:pt-8 pb-12 md:pb-16 px-4 md:px-12 border-t border-primary/10 scroll-mt-24 bg-white"
+      className="mt-0 pt-6 md:pt-8 pb-12 md:pb-16 px-4 md:px-12 scroll-mt-24 bg-white"
     >
       {/* Gallery thumbnail + heading */}
       <div className="flex items-center justify-center gap-4 mb-4">
