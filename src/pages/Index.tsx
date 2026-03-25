@@ -46,6 +46,7 @@ const CompareFab = lazyRetry(() => import("@/components/CompareFab"));
 const CompareDrawer = lazyRetry(() => import("@/components/CompareDrawer"));
 const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
 const ParallaxInterlude = lazy(() => import("@/components/ParallaxInterlude"));
+const ApartmentTourInterlude = lazyRetry(() => import("@/components/ApartmentTourInterlude"));
 
 /**
  * Parse deep-link hash: #designer/<id>, #collectible/<id>, #atelier/<slug>
@@ -424,6 +425,9 @@ const Index = () => {
                 <Gallery />
               </Suspense>
             </section>
+            <Suspense fallback={null}>
+              <ApartmentTourInterlude />
+            </Suspense>
             <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 900px' }}>
               <Suspense fallback={<SectionFallback />}>
                 <CuratingTeam />
