@@ -812,21 +812,20 @@ export default function EditorialBiography({
           />
         );
       } else {
-          if (debugMediaOrder) debugEvents.push(`Split image rendered with ${textAccum.length} paired paragraph${textAccum.length !== 1 ? "s" : ""}: ${mediaItem.url}`);
-          elements.push(
-            <SplitImageBlock
-              key={`media-split-${mediaIndex}`}
-              url={mediaItem.url}
-              designerName={designerName}
-              index={mediaIndex}
-              paragraphs={textAccum}
-              overrideCaption={mediaItem.caption}
-              forceAlign={mediaItem.align}
-              size={mediaItem.size}
-            />
-          );
-          textAccum = [];
-        }
+        if (debugMediaOrder) debugEvents.push(`Split image rendered with ${textAccum.length} paired paragraph${textAccum.length !== 1 ? "s" : ""}: ${mediaItem.url}`);
+        elements.push(
+          <SplitImageBlock
+            key={`media-split-${mediaIndex}`}
+            url={mediaItem.url}
+            designerName={designerName}
+            index={mediaIndex}
+            paragraphs={textAccum}
+            overrideCaption={mediaItem.caption}
+            forceAlign={mediaItem.align}
+            size={mediaItem.size}
+          />
+        );
+        textAccum = [];
       }
       mediaIndex++;
     }
