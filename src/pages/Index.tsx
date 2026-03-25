@@ -256,15 +256,28 @@ const Index = () => {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Find the topmost visible section
-        let topSection: string | null = null;
-        let topY = Infinity;
+        // Prefer the first section at/under viewport top; this prevents
+        // deep-link landings from being overwritten by the previous section.
+        let closestPositive: { id: string; top: number } | null = null;
+        let closestNegative: { id: string; top: number } | null = null;
+
         for (const entry of entries) {
-          if (entry.isIntersecting && entry.boundingClientRect.top < topY) {
-            topY = entry.boundingClientRect.top;
-            topSection = entry.target.id;
+          if (!entry.isIntersecting) continue;
+
+          const top = entry.boundingClientRect.top;
+          const id = entry.target.id;
+
+          if (top >= 0) {
+            if (!closestPositive || top < closestPositive.top) {
+              closestPositive = { id, top };
+            }
+          } else if (!closestNegative || top > closestNegative.top) {
+            closestNegative = { id, top };
           }
         }
+
+        const topSection = closestPositive?.id ?? closestNegative?.id ?? null;
+
         if (topSection && topSection !== currentHash) {
           currentHash = topSection;
           if (rafId) cancelAnimationFrame(rafId);
