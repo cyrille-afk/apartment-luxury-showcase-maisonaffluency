@@ -679,7 +679,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           alt="Gallery tour"
                           className="w-12 h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                         />
-                        <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body group-hover:text-primary transition-colors">
+                        <span className="text-[10px] uppercase tracking-[0.15em] font-body font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
                           Tour Our Gallery
                         </span>
                       </button>
