@@ -663,6 +663,25 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         Interactive Gallery
                       </span>
                     )}
+                    {originalSectionIndex === 0 && (
+                      <button
+                        onClick={() => {
+                          const el = document.getElementById("apartment-tour");
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }}
+                        className="hidden md:inline-flex items-center gap-2 cursor-pointer group"
+                        aria-label="Tour Our Gallery"
+                      >
+                        <img
+                          src="https://res.cloudinary.com/dif1oamtj/image/upload/w_80,h_80,q_auto,f_auto,c_fill,g_auto/bespoke-sofa_gxidtx"
+                          alt="Gallery tour"
+                          className="w-8 h-8 rounded-full object-cover border border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body group-hover:text-primary transition-colors mb-1">
+                          Tour Our Gallery
+                        </span>
+                      </button>
+                    )}
                   </div>
                   {originalSectionIndex === 0 && (
                     <TooltipProvider delayDuration={200}>
