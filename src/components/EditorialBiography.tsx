@@ -845,12 +845,11 @@ export default function EditorialBiography({
     );
   }
 
-  // Remaining media — only render trailing videos; skip trailing images so
-  // photos never dangle at the bottom of the biography (especially on mobile).
+  // Remaining media — render all (images and videos)
   while (mediaIndex < parsedMedia.length) {
     const mediaItem = parsedMedia[mediaIndex];
     if (mediaItem.isVideo) {
-      if (debugMediaOrder) debugEvents.push(`Trailing video kept: ${mediaItem.url}`);
+      if (debugMediaOrder) debugEvents.push(`Trailing video rendered: ${mediaItem.url}`);
       elements.push(
         <VideoBlock
           key={`media-tail-vid-${mediaIndex}`}
@@ -861,8 +860,17 @@ export default function EditorialBiography({
           posterUrl={mediaItem.poster || undefined}
         />
       );
-    } else if (debugMediaOrder) {
-      debugEvents.push(`Trailing image suppressed: ${mediaItem.url}`);
+    } else {
+      if (debugMediaOrder) debugEvents.push(`Trailing image rendered: ${mediaItem.url}`);
+      elements.push(
+        <FullWidthImageBlock
+          key={`media-tail-img-${mediaIndex}`}
+          url={mediaItem.url}
+          designerName={designerName}
+          index={mediaIndex}
+          overrideCaption={mediaItem.caption}
+        />
+      );
     }
     mediaIndex++;
   }
