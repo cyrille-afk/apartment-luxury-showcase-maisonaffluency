@@ -632,10 +632,10 @@ export default function EditorialBiography({
         i++;
         const paired: string[] = [];
         while (i < parsed.length && parsed[i].type === "text") {
-          // Stop pairing if the block after this text is a video — leave the last
+          // Stop pairing if the block after this text is a video — leave this
           // text paragraph unpaired so it renders full-width above the video
           const nextAfterThis = i + 1;
-          if (nextAfterThis < parsed.length && parsed[nextAfterThis].type === "video" && paired.length > 0) {
+          if (nextAfterThis < parsed.length && parsed[nextAfterThis].type === "video") {
             break;
           }
           paired.push((parsed[i] as { type: "text"; content: string }).content);
