@@ -460,6 +460,11 @@ const PublicDesignerProfile = () => {
                     {shareCopied ? "Copied!" : "Share"}
                   </button>
                 </div>
+                {designer.hero_photo_credit && (
+                  <p className="absolute bottom-1 right-4 md:right-6 text-[10px] uppercase tracking-[0.15em] text-white/50 z-10">
+                    Photo: {designer.hero_photo_credit}
+                  </p>
+                )}
               </motion.div>
 
               {designer.biography && (
