@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, type Transition } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote } from "lucide-react";
@@ -30,16 +30,7 @@ const DesignerProfile = () => {
   }
 
   if (!designer) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h1 className="text-2xl font-light text-foreground">Designer not found</h1>
-          <Link to="/" className="text-primary underline underline-offset-4 text-sm">
-            Return to gallery
-          </Link>
-        </div>
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
   const instagramLink = designer.links.find((l) => l.type === "Instagram")?.url;
