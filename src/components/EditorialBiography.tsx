@@ -671,14 +671,13 @@ export default function EditorialBiography({
       for (const entry of biographyImages) {
         const media = parseMediaLine(entry);
         if (!media) continue;
-        // Skip if this URL is already rendered inline
         const alreadyInline = parsed.some(
           (b) => b.type !== "text" && (b as any).url === media.url
         );
         if (alreadyInline) continue;
 
         if (isVideoUrl(media.url)) {
-          if (debugMediaOrder) debugEvents.push(`Manual trailing video kept: ${media.url}`);
+          if (debugMediaOrder) debugEvents.push(`Manual trailing video: ${media.url}`);
           elements.push(
             <VideoBlock
               key={`manual-vid-${imageIdx}`}
@@ -690,10 +689,16 @@ export default function EditorialBiography({
             />
           );
         } else {
-          // Keep manual trailing videos, suppress manual trailing images.
-          if (debugMediaOrder) debugEvents.push(`Manual trailing image suppressed: ${media.url}`);
-          imageIdx++;
-          continue;
+          if (debugMediaOrder) debugEvents.push(`Manual trailing image rendered: ${media.url}`);
+          elements.push(
+            <FullWidthImageBlock
+              key={`manual-img-${imageIdx}`}
+              url={media.url}
+              designerName={designerName}
+              index={imageIdx}
+              overrideCaption={media.caption}
+            />
+          );
         }
         imageIdx++;
       }
