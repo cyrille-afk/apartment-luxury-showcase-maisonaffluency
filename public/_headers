@@ -25,3 +25,8 @@
   Cache-Control: no-cache
 /
   Cache-Control: no-cache
+
+# All HTML pages — force revalidation so mobile browsers always fetch the latest
+/*
+  Cache-Control: no-cache
+  X-Content-Type-Options: nosniff
