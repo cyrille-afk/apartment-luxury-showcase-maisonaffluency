@@ -2448,25 +2448,6 @@ const FeaturedDesigners = () => {
                 Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings
                 their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
               </p>
-              <button
-                onClick={() => {
-                  const shareUrl = "https://www.maisonaffluency.com/designers-og.html?v=20260324b";
-                  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                  if (isMobile) {
-                    const waUrl = `https://wa.me/?text=${encodeURIComponent(`Designers & Makers On View — Maison Affluency: ${shareUrl}`)}`;
-                    window.location.href = waUrl;
-                  } else {
-                    navigator.clipboard.writeText(shareUrl).then(() => {
-                      import("sonner").then(({ toast }) => toast("Share link copied"));
-                    }).catch(() => {});
-                  }
-                }}
-                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.12em]"
-                aria-label="Share Designers & Makers section"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                Share
-              </button>
             </div>
           </div>
         </motion.div>
