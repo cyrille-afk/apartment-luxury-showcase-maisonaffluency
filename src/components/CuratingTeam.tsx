@@ -42,9 +42,20 @@ const CuratingTeam = () => {
       transition={{ duration: 0.8, delay: 0.2 }}
       className="mt-0 pt-6 md:pt-8 pb-12 md:pb-16 px-4 md:px-12 border-t border-primary/10 scroll-mt-24 bg-white"
     >
-      <h3 className="font-display text-2xl md:text-3xl text-primary mb-4 text-center">
-        The Curating Team
-      </h3>
+      {/* Gallery thumbnail + heading */}
+      <div className="flex items-center justify-center gap-4 mb-4">
+        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-primary/20 flex-shrink-0 shadow-md">
+          <img
+            src="https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,q_auto,f_auto,c_fill,g_auto/bespoke-sofa_gxidtx"
+            alt="Gallery preview"
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
+        <h3 className="font-display text-2xl md:text-3xl text-primary">
+          The Curating Team
+        </h3>
+      </div>
       <p className="text-muted-foreground font-body text-center max-w-2xl mx-auto mb-12 italic">
         The heart and soul of the gallery and designers selection
       </p>
