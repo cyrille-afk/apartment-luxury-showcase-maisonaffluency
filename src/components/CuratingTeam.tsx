@@ -147,7 +147,6 @@ const CuratingTeam = () => {
             </p>
           </motion.div>
         ))}
-        </div>
       </div>
 
       <motion.div
