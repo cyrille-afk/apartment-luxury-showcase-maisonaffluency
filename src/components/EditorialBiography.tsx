@@ -631,8 +631,15 @@ export default function EditorialBiography({
       if (block.type === "image") {
         i++;
         const paired: string[] = [];
-        while (i < parsed.length && parsed[i].type === "text") {
+        const MAX_PAIRED = 2; // Limit paired paragraphs to keep text readable and allow overflow as full-width
+        while (i < parsed.length && parsed[i].type === "text" && paired.length < MAX_PAIRED) {
           paired.push((parsed[i] as { type: "text"; content: string }).content);
+          i++;
+        }
+        // Any remaining consecutive text blocks render as full-width below
+        const overflow: string[] = [];
+        while (i < parsed.length && parsed[i].type === "text") {
+          overflow.push((parsed[i] as { type: "text"; content: string }).content);
           i++;
         }
 
