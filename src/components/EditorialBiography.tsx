@@ -490,7 +490,7 @@ function CollapsibleBiographyWrapper({
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
           <button
             onClick={() => setExpanded(true)}
-            className="relative z-10 mt-3 flex items-center gap-1.5 font-display text-[11px] tracking-[0.15em] uppercase text-primary/70 hover:text-primary transition-colors"
+            className="relative z-10 mt-5 inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md"
           >
             View full profile
             <ChevronDown className="w-3.5 h-3.5" />
