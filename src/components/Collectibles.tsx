@@ -276,25 +276,6 @@ export const collectibleDesigners: Array<{
     ],
   },
   {
-    id: "nathalie-ziegler",
-    name: "Nathalie Ziegler",
-    specialty: "Bespoke Glass Art & Chandeliers",
-    image: nathalieZieglerImg,
-    biography:
-      "Nathalie Ziegler is a French glass artist known for her custom chandeliers and glass sculptures that blur the line between functional lighting and fine art. Her Saint Just Custom Glass Chandelier showcases her ability to manipulate glass into dramatic, ethereal forms that transform spaces with light and color.",
-    notableWorks: "Saint Just Custom Glass Chandelier, Gold Leaves+Glass Snake Vase, Sculptural Glass Series",
-    notableWorksLink: { text: "Custom Glass Chandelier", galleryIndex: GALLERY.A_SOPHISTICATED_BOUDOIR },
-    philosophy:
-      "Glass is alive—it captures and transforms light, creating an ever-changing dialogue with its environment.",
-    curatorPicks: [
-      { image: nathalieZieglerSnakeVessel, title: "Gold & Silver Snake Vessel", category: "Decorative Object", subcategory: "Vessels", materials: "Hand-blown glass • Gold & silver leaf accents", dimensions: "H38 cm × Diam 30 cm", edition: "Unique Piece" },
-    ],
-    links: [
-      { type: "Instagram", url: "https://instagram.com/nathaliezieglerpasqua" },
-      { type: "Curators' Picks" },
-    ],
-  },
-  {
     id: "pierre-bonnefille",
     name: "Pierre Bonnefille",
     specialty: "Patinated Surfaces, Paintings & Furniture",
