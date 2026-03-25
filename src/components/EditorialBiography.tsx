@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Play, ChevronDown } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EditorialBiographyProps {
   biography: string;
@@ -9,6 +10,8 @@ interface EditorialBiographyProps {
   /** Auto-fill images from curator's picks when no manual media set */
   pickImages?: string[];
   designerName: string;
+  /** Shows debug events for text/media pairing in preview contexts */
+  debugMediaOrder?: boolean;
 }
 
 /** Number of biography paragraphs to show before "Read more" on mobile */
@@ -526,7 +529,9 @@ export default function EditorialBiography({
   biographyImages,
   pickImages,
   designerName,
+  debugMediaOrder = false,
 }: EditorialBiographyProps) {
+  const isMobile = useIsMobile();
   const blocks = biography
     .split(/\n\n+/)
     .map((p) => p.trim())
@@ -537,6 +542,7 @@ export default function EditorialBiography({
 
   /* ------- Inline media mode (URLs pasted directly in biography) ------- */
   if (hasInlineMedia) {
+    const debugEvents: string[] = [];
     // Separate into text paragraphs and media URLs, preserving order
     type Block =
       | { type: "text"; content: string }
@@ -563,6 +569,7 @@ export default function EditorialBiography({
       i++;
     }
     if (leadingText.length > 0) {
+      if (debugMediaOrder) debugEvents.push(`Leading text block (${leadingText.length} paragraph${leadingText.length > 1 ? "s" : ""})`);
       elements.push(
         <div key="leading-text">
           {leadingText.map((p, pi) => (
@@ -578,6 +585,7 @@ export default function EditorialBiography({
       const block = parsed[i];
 
       if (block.type === "video") {
+        if (debugMediaOrder) debugEvents.push(`Video rendered: ${block.url}`);
         const inlinePoster = block.poster || undefined;
 
         elements.push(
@@ -618,7 +626,38 @@ export default function EditorialBiography({
           i++;
         }
 
+        const hasFutureTextOrVideo = parsed
+          .slice(i)
+          .some((nextBlock) => nextBlock.type === "text" || nextBlock.type === "video");
+
+        if (!hasFutureTextOrVideo) {
+          if (isMobile) {
+            if (paired.length > 0) {
+              elements.push(
+                <div key={`terminal-text-${imageIdx}`}>
+                  {paired.map((p, pi) => (
+                    <p key={pi} className={pi > 0 ? "mt-4" : ""}>
+                      {renderParagraph(p)}
+                    </p>
+                  ))}
+                </div>
+              );
+            }
+            if (debugMediaOrder) debugEvents.push(`Suppressed terminal mobile image: ${block.url}`);
+            imageIdx++;
+            continue;
+          }
+
+          // On desktop, keep paired terminal images but still suppress unpaired trailing images.
+          if (paired.length === 0) {
+            if (debugMediaOrder) debugEvents.push(`Suppressed trailing unpaired image: ${block.url}`);
+            imageIdx++;
+            continue;
+          }
+        }
+
         if (paired.length > 0) {
+          if (debugMediaOrder) debugEvents.push(`Split image rendered with ${paired.length} paired paragraph${paired.length > 1 ? "s" : ""}: ${block.url}`);
           elements.push(
             <SplitImageBlock
               key={`split-${imageIdx}`}
@@ -631,16 +670,7 @@ export default function EditorialBiography({
             />
           );
         } else {
-          const hasFutureTextOrVideo = parsed
-            .slice(i)
-            .some((nextBlock) => nextBlock.type === "text" || nextBlock.type === "video");
-
-          // Suppress only truly trailing unpaired images at the very bottom.
-          if (!hasFutureTextOrVideo) {
-            imageIdx++;
-            continue;
-          }
-
+          if (debugMediaOrder) debugEvents.push(`Full-width image rendered: ${block.url}`);
           elements.push(
             <FullWidthImageBlock
               key={`fw-${imageIdx}`}
@@ -676,6 +706,7 @@ export default function EditorialBiography({
         if (alreadyInline) continue;
 
         if (isVideoUrl(media.url)) {
+          if (debugMediaOrder) debugEvents.push(`Manual trailing video kept: ${media.url}`);
           elements.push(
             <VideoBlock
               key={`manual-vid-${imageIdx}`}
@@ -688,6 +719,7 @@ export default function EditorialBiography({
           );
         } else {
           // Keep manual trailing videos, suppress manual trailing images.
+          if (debugMediaOrder) debugEvents.push(`Manual trailing image suppressed: ${media.url}`);
           imageIdx++;
           continue;
         }
@@ -700,6 +732,16 @@ export default function EditorialBiography({
     return (
       <CollapsibleBiographyWrapper elementCount={elements.length} allowCollapse={!hasInlineVideo}>
         <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+          {debugMediaOrder && debugEvents.length > 0 && (
+            <div className="mb-4 rounded-md border border-border bg-muted/30 p-3">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Debug media order</p>
+              <ol className="mt-2 space-y-1 text-xs text-muted-foreground list-decimal list-inside">
+                {debugEvents.map((event, idx) => (
+                  <li key={`${idx}-${event}`}>{event}</li>
+                ))}
+              </ol>
+            </div>
+          )}
           {elements}
         </div>
       </CollapsibleBiographyWrapper>
@@ -756,6 +798,7 @@ export default function EditorialBiography({
   const elements: JSX.Element[] = [];
   let mediaIndex = 0;
   let textAccum: string[] = [];
+  const debugEvents: string[] = [];
 
   paragraphs.forEach((p, i) => {
     textAccum.push(p);
@@ -767,6 +810,7 @@ export default function EditorialBiography({
     if (shouldInsertMedia) {
       const mediaItem = parsedMedia[mediaIndex];
       if (mediaItem.isVideo) {
+        if (debugMediaOrder) debugEvents.push(`Video rendered: ${mediaItem.url}`);
         // Flush text before video
         if (textAccum.length > 0) {
           elements.push(
@@ -791,6 +835,15 @@ export default function EditorialBiography({
           />
         );
       } else {
+        const hasFutureParagraphs = i < paragraphs.length - 1;
+
+        if (isMobile && !hasFutureParagraphs) {
+          if (debugMediaOrder) debugEvents.push(`Suppressed terminal mobile image: ${mediaItem.url}`);
+          mediaIndex++;
+          continue;
+        }
+
+        if (debugMediaOrder) debugEvents.push(`Split image rendered with ${textAccum.length} paired paragraph${textAccum.length !== 1 ? "s" : ""}: ${mediaItem.url}`);
         // Pair accumulated text with image in split layout
         elements.push(
           <SplitImageBlock
@@ -828,6 +881,7 @@ export default function EditorialBiography({
   while (mediaIndex < parsedMedia.length) {
     const mediaItem = parsedMedia[mediaIndex];
     if (mediaItem.isVideo) {
+      if (debugMediaOrder) debugEvents.push(`Trailing video kept: ${mediaItem.url}`);
       elements.push(
         <VideoBlock
           key={`media-tail-vid-${mediaIndex}`}
@@ -838,6 +892,8 @@ export default function EditorialBiography({
           posterUrl={mediaItem.poster || undefined}
         />
       );
+    } else if (debugMediaOrder) {
+      debugEvents.push(`Trailing image suppressed: ${mediaItem.url}`);
     }
     mediaIndex++;
   }
@@ -847,6 +903,16 @@ export default function EditorialBiography({
   return (
     <CollapsibleBiographyWrapper elementCount={elements.length} allowCollapse={!hasParsedVideo}>
       <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+        {debugMediaOrder && debugEvents.length > 0 && (
+          <div className="mb-4 rounded-md border border-border bg-muted/30 p-3">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Debug media order</p>
+            <ol className="mt-2 space-y-1 text-xs text-muted-foreground list-decimal list-inside">
+              {debugEvents.map((event, idx) => (
+                <li key={`${idx}-${event}`}>{event}</li>
+              ))}
+            </ol>
+          </div>
+        )}
         {elements}
       </div>
     </CollapsibleBiographyWrapper>
