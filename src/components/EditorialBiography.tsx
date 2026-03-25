@@ -7,7 +7,7 @@ interface EditorialBiographyProps {
   biography: string;
   /** Manual editorial media (images or video URLs) — takes priority over auto picks */
   biographyImages?: string[];
-  /** Auto-fill images from curator's picks when no manual media set */
+  /** Deprecated: curator pick media is intentionally ignored in biography rendering */
   pickImages?: string[];
   designerName: string;
   /** Shows debug events for text/media pairing in preview contexts */
@@ -537,7 +537,7 @@ function CollapsibleBiographyWrapper({
 export default function EditorialBiography({
   biography,
   biographyImages,
-  pickImages,
+  pickImages: _pickImages,
   designerName,
   debugMediaOrder = false,
 }: EditorialBiographyProps) {
@@ -746,7 +746,7 @@ export default function EditorialBiography({
   const paragraphs = blocks.filter((b) => !isStandaloneMediaUrl(b));
   // Collect inline media from biography text and merge with manual array
   const inlineMediaEntries = blocks.filter((b) => isStandaloneMediaUrl(b));
-  const manualEntries = hasManualMedia ? biographyImages! : (pickImages || []);
+  const manualEntries = hasManualMedia ? biographyImages! : [];
   const media = [...inlineMediaEntries, ...manualEntries];
   const parsedMedia = media
     .map((entry) => {
