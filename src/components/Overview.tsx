@@ -131,11 +131,6 @@ const Overview = () => {
                 >
                   <div className="flex -space-x-2 relative z-10 -ml-3">
                     <img
-                      src="https://res.cloudinary.com/dif1oamtj/image/upload/w_128,h_128,q_auto,f_auto,c_fill,g_auto/bespoke-sofa_gxidtx"
-                      alt="Gallery preview"
-                      className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <img
                       src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 128, quality: "auto", crop: "fill" })}
                       alt="Cyrille Delval"
                       className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
@@ -183,11 +178,6 @@ const Overview = () => {
                 aria-label="Meet The Curating Team"
               >
                 <div className="flex -space-x-3 relative z-10 -mr-4">
-                  <img
-                    src="https://res.cloudinary.com/dif1oamtj/image/upload/w_160,h_160,q_auto,f_auto,c_fill,g_auto/bespoke-sofa_gxidtx"
-                    alt="Gallery preview"
-                    className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                  />
                   <img
                     src={cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 160, quality: "auto", crop: "fill" })}
                     alt="Cyrille Delval"
