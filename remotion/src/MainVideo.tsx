@@ -247,18 +247,26 @@ function OutroCard() {
 const TOTAL_FRAMES = 70 + scenes.length * SCENE_DUR + 80 - (scenes.length + 1) * TRANS_DUR;
 const AUDIO_DUR_FRAMES = 32 * 30; // 32s audio at 30fps = 960 frames
 
+const VOICEOVER_START = 70; // Start after intro card
+const VOICEOVER_DUR_FRAMES = Math.round(55.6 * 30); // 55.6s at 30fps
+
 export const MainVideo = () => {
   // Layer audio copies to cover the full video duration
   const audioCopies = Math.ceil(TOTAL_FRAMES / AUDIO_DUR_FRAMES);
 
   return (
     <AbsoluteFill style={{ background: "#0a0a0a" }}>
-      {/* Loop audio by layering sequential copies */}
+      {/* Loop ambient music — lower volume when voiceover plays */}
       {Array.from({ length: audioCopies }).map((_, i) => (
         <Sequence key={i} from={i * AUDIO_DUR_FRAMES}>
-          <Audio src={staticFile("audio/ambient-track.mp3")} volume={0.4} />
+          <Audio src={staticFile("audio/ambient-track.mp3")} volume={0.25} />
         </Sequence>
       ))}
+
+      {/* Voiceover narration — starts after intro */}
+      <Sequence from={VOICEOVER_START} durationInFrames={VOICEOVER_DUR_FRAMES}>
+        <Audio src={staticFile("audio/voiceover.mp3")} volume={0.9} />
+      </Sequence>
 
       <TransitionSeries>
         <TransitionSeries.Sequence durationInFrames={70}>
