@@ -332,6 +332,7 @@ const PublicDesignerProfile = () => {
                   className="relative shrink-0 md:w-[38%]"
                 >
                   {heroImage && (
+                    <>
                     <div className="relative rounded-xl overflow-hidden">
                       <img src={heroImage} alt={name} className="w-full h-auto object-contain" loading="eager" />
                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 md:p-6 flex items-end justify-between">
@@ -363,7 +364,7 @@ const PublicDesignerProfile = () => {
                         Photo: {designer.hero_photo_credit}
                       </p>
                     )}
-                  </div>
+                    </>
                   )}
                   {designer.founder && designer.founder !== designer.name && (
                     <Link
