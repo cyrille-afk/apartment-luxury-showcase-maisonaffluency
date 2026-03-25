@@ -79,8 +79,30 @@ const PublicDesignerProfile = () => {
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
 
   const picks = useMemo(() => {
-    // Curators' Picks are editorially curated and must be rendered as-is.
-    if (rawPicks.length <= 2) return rawPicks;
+    // Collect image URLs used in biography so matching picks are excluded from the grid.
+    const bioUrls = new Set<string>();
+    for (const entry of designer?.biography_images || []) {
+      if (entry) {
+        const url = entry.split(/\s*\|\s*/)[0]?.trim();
+        if (url) bioUrls.add(url);
+      }
+    }
+    if (designer?.biography) {
+      for (const block of designer.biography.split(/\n\n+/)) {
+        const trimmed = block.trim();
+        const url = trimmed.split(/\s*\|\s*/)[0]?.trim();
+        if (url && /^https?:\/\//i.test(url) && !/\s/.test(url)) {
+          bioUrls.add(url);
+        }
+      }
+    }
+
+    // Exclude picks whose image already appears in the biography
+    const filtered = bioUrls.size > 0
+      ? rawPicks.filter((pick) => !bioUrls.has(pick.image_url))
+      : rawPicks;
+
+    if (filtered.length <= 2) return filtered;
 
     const getFunctionalCategory = (pick: (typeof rawPicks)[number]) => {
       if (pick.category?.trim()) return pick.category.trim().toLowerCase();
@@ -91,7 +113,7 @@ const PublicDesignerProfile = () => {
     const columns = isMobile ? Math.max(2, gridCols - 1) : gridCols;
 
     const buckets = new Map<string, typeof rawPicks>();
-    for (const pick of rawPicks) {
+    for (const pick of filtered) {
       const key = getFunctionalCategory(pick);
       if (!buckets.has(key)) buckets.set(key, []);
       buckets.get(key)!.push(pick);
@@ -103,7 +125,7 @@ const PublicDesignerProfile = () => {
     }));
 
     const arranged: typeof rawPicks = [];
-    while (arranged.length < rawPicks.length) {
+    while (arranged.length < filtered.length) {
       const index = arranged.length;
       // Block the category directly above AND directly to the left
       const blockedCategories = new Set<string>();
@@ -124,8 +146,8 @@ const PublicDesignerProfile = () => {
       arranged.push(selected.items.shift()!);
     }
 
-    return arranged.length === rawPicks.length ? arranged : rawPicks;
-  }, [rawPicks, gridCols, isMobile]);
+    return arranged.length === filtered.length ? arranged : filtered;
+  }, [rawPicks, gridCols, isMobile, designer?.biography_images, designer?.biography]);
 
   const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
 
