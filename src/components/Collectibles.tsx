@@ -6,7 +6,7 @@ import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
-import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote, FileDown, CornerDownRight, Scale } from "lucide-react";
+import { Instagram, ChevronDown, ExternalLink, Gem, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X, SlidersHorizontal, MessageSquareQuote, FileDown, CornerDownRight, Scale, Share2 } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
@@ -683,6 +683,19 @@ const Collectibles = () => {
                   <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
                     Collectible Design <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">On View</span>
                   </h2>
+                  <button
+                    onClick={() => {
+                      const shareUrl = "https://www.maisonaffluency.com/collectibles-og.html?v=20260325";
+                      const text = `Collectible Design On View — Maison Affluency\n${shareUrl}`;
+                      const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                      window.open(wa, "_blank", "noopener");
+                    }}
+                    className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors mb-1"
+                    aria-label="Share Collectible Design section"
+                  >
+                    <Share2 className="w-3.5 h-3.5" />
+                    Share
+                  </button>
                 </div>
                 <p className="font-body text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed mb-4 text-justify">
                   Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance.
