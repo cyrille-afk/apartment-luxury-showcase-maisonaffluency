@@ -188,9 +188,15 @@ function VideoBlock({
   const [posterIndex, setPosterIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Extract YouTube thumbnail automatically
+  // Extract YouTube thumbnail automatically — try maxres first, then hqdefault
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
-  const thumbnailUrl = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg` : null;
+  const ytThumbnails = ytMatch
+    ? [
+        `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`,
+        `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`,
+      ]
+    : [];
+  const thumbnailUrl = ytThumbnails[0] || null;
 
   const isNativeVideo = !embedUrl;
   const videoSrc = isNativeVideo ? normalizeCloudinaryVideoUrl(url) : url;
@@ -207,8 +213,8 @@ function VideoBlock({
 
   const posterCandidates = useMemo(
     () =>
-      [...new Set([manualPosterUrl, autoPosterUrl, mappedFallbackPoster].filter((p): p is string => !!p))],
-    [manualPosterUrl, autoPosterUrl, mappedFallbackPoster]
+      [...new Set([manualPosterUrl, ...ytThumbnails, autoPosterUrl, mappedFallbackPoster].filter((p): p is string => !!p))],
+    [manualPosterUrl, autoPosterUrl, mappedFallbackPoster, ytThumbnails.join(",")]
   );
 
   useEffect(() => {
@@ -225,7 +231,11 @@ function VideoBlock({
 
   const handlePosterError = () => {
     setPosterIndex((prev) => {
-      if (prev >= posterCandidates.length - 1) return prev;
+      if (prev >= posterCandidates.length - 1) {
+        // All posters failed — force playing state so iframe renders directly
+        setPlaying(true);
+        return prev;
+      }
       return prev + 1;
     });
   };
@@ -255,10 +265,10 @@ function VideoBlock({
             aria-label={`Play ${caption || "video"}`}
           >
             <img
-              src={thumbnailUrl || currentPosterUrl!}
+              src={currentPosterUrl || thumbnailUrl!}
               alt={caption || `${designerName} — video`}
               className="w-full h-full object-cover"
-              onError={thumbnailUrl ? undefined : handlePosterError}
+              onError={handlePosterError}
             />
             {playOverlay}
           </button>
