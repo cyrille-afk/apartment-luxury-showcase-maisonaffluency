@@ -516,6 +516,7 @@ function CollapsibleBiographyWrapper({
             className="relative z-10 mt-3 flex items-center gap-1.5 font-display text-[11px] tracking-[0.15em] uppercase text-primary/70 hover:text-primary transition-colors"
           >
             Continue reading
+            &nbsp;· View full profile
             <ChevronDown className="w-3.5 h-3.5" />
           </button>
         </div>
