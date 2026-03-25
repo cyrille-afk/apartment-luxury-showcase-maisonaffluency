@@ -13,6 +13,7 @@ export interface Designer {
   philosophy: string;
   image_url: string;
   hero_image_url: string | null;
+  hero_photo_credit: string | null;
   logo_url: string | null;
   source: string;
   links: { type: string; url?: string }[];

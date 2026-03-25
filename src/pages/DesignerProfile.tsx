@@ -74,6 +74,11 @@ const DesignerProfile = () => {
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+          {designer.hero_photo_credit && (
+            <p className="absolute bottom-2 right-6 md:right-16 text-[10px] uppercase tracking-[0.15em] text-white/60 z-10">
+              Photo: {designer.hero_photo_credit}
+            </p>
+          )}
           <div className="absolute bottom-0 left-0 right-0 px-6 md:px-16 pb-10">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
               <h1 className="font-display text-3xl md:text-5xl tracking-wide">{name}</h1>

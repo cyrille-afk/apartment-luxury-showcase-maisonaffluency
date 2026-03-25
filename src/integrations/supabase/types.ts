@@ -534,6 +534,7 @@ export type Database = {
           display_name: string | null
           founder: string | null
           hero_image_url: string | null
+          hero_photo_credit: string | null
           id: string
           image_url: string
           is_published: boolean
@@ -555,6 +556,7 @@ export type Database = {
           display_name?: string | null
           founder?: string | null
           hero_image_url?: string | null
+          hero_photo_credit?: string | null
           id?: string
           image_url?: string
           is_published?: boolean
@@ -576,6 +578,7 @@ export type Database = {
           display_name?: string | null
           founder?: string | null
           hero_image_url?: string | null
+          hero_photo_credit?: string | null
           id?: string
           image_url?: string
           is_published?: boolean

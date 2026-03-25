@@ -332,6 +332,7 @@ const PublicDesignerProfile = () => {
                   className="relative shrink-0 md:w-[38%]"
                 >
                   {heroImage && (
+                    <>
                     <div className="relative rounded-xl overflow-hidden">
                       <img src={heroImage} alt={name} className="w-full h-auto object-contain" loading="eager" />
                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 md:p-6 flex items-end justify-between">
@@ -358,6 +359,12 @@ const PublicDesignerProfile = () => {
                         </button>
                       </div>
                     </div>
+                    {designer.hero_photo_credit && (
+                      <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60 mt-1.5 text-right pr-1">
+                        Photo: {designer.hero_photo_credit}
+                      </p>
+                    )}
+                    </>
                   )}
                   {designer.founder && designer.founder !== designer.name && (
                     <Link
@@ -453,6 +460,11 @@ const PublicDesignerProfile = () => {
                     {shareCopied ? "Copied!" : "Share"}
                   </button>
                 </div>
+                {designer.hero_photo_credit && (
+                  <p className="absolute bottom-1 right-4 md:right-6 text-[10px] uppercase tracking-[0.15em] text-white/50 z-10">
+                    Photo: {designer.hero_photo_credit}
+                  </p>
+                )}
               </motion.div>
 
               {designer.biography && (
