@@ -120,9 +120,36 @@ const TradeAtelierProfile = () => {
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
 
+  // Extract image URLs used in biography to deprioritize matching picks
+  const bioImageUrls = useMemo(() => {
+    const urls = new Set<string>();
+    for (const entry of designer?.biography_images || []) {
+      if (entry) {
+        const url = entry.split(/\s*\|\s*/)[0]?.trim();
+        if (url) urls.add(url);
+      }
+    }
+    if (designer?.biography) {
+      for (const block of designer.biography.split(/\n\n+/)) {
+        const trimmed = block.trim();
+        const url = trimmed.split(/\s*\|\s*/)[0]?.trim();
+        if (url && /^https?:\/\//i.test(url) && !/\s/.test(url)) {
+          urls.add(url);
+        }
+      }
+    }
+    return urls;
+  }, [designer?.biography_images, designer?.biography]);
+
   // Interleave picks so same functional subcategory never appears side-by-side
   const picks = useMemo(() => {
-    if (rawPicks.length <= 2) return rawPicks;
+    // Deprioritize picks whose image appears in biography
+    const deprioritized = [...rawPicks].sort((a, b) => {
+      const aInBio = bioImageUrls.has(a.image_url) ? 1 : 0;
+      const bInBio = bioImageUrls.has(b.image_url) ? 1 : 0;
+      return aInBio - bInBio;
+    });
+    if (deprioritized.length <= 2) return deprioritized;
 
     const getFunctionalCategory = (p: typeof rawPicks[0]) => {
       if (p.category?.trim()) return p.category.trim().toLowerCase();
