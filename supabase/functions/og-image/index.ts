@@ -69,6 +69,51 @@ function ogImage(url: string): string {
 async function getOgData(path: string): Promise<OgData> {
   const clean = path.replace(/\/+$/, "") || "/";
 
+  // ── Section hash routes (e.g. /#designers, /#collectibles, /#brands) ──
+  const sectionHashMatch = clean.match(/^\/?#(designers|collectibles|brands|gallery|overview|contact)$/);
+  if (sectionHashMatch) {
+    const section = sectionHashMatch[1];
+    const sectionMeta: Record<string, { title: string; description: string; image: string }> = {
+      designers: {
+        title: "Designers & Makers On View — Maison Affluency",
+        description: "Discover our curated selection of ateliers and designers — from historical masters to contemporary creators of collectible furniture and lighting.",
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg",
+      },
+      collectibles: {
+        title: "Collectible Design On View — Maison Affluency",
+        description: "Unique and limited-edition functional art pieces — sculptural furniture, lighting, and ceramics by contemporary collectible designers.",
+        image: "https://design-milk.com/images/2024/02/draga-aurel-flare-collection-15.jpg",
+      },
+      brands: {
+        title: "Ateliers & Partners — Maison Affluency",
+        description: "We collaborate with the world's most distinguished furniture houses, textile ateliers, and artisan workshops to bring exceptional pieces to discerning collectors.",
+        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg",
+      },
+      gallery: {
+        title: "Gallery — Maison Affluency",
+        description: "Experience our curated gallery of luxury furniture and collectible design.",
+        image: DEFAULT_IMAGE,
+      },
+      overview: {
+        title: "Overview — Maison Affluency",
+        description: "Singapore's destination for museum-grade, investment-worthy collectible furniture.",
+        image: DEFAULT_IMAGE,
+      },
+      contact: {
+        title: "Contact — Maison Affluency",
+        description: "Get in touch with Maison Affluency for inquiries about collectible furniture and design.",
+        image: DEFAULT_IMAGE,
+      },
+    };
+    const meta = sectionMeta[section] || sectionMeta.designers;
+    return {
+      title: meta.title,
+      description: meta.description,
+      image: meta.image,
+      url: `${SITE_URL}/#${section}`,
+    };
+  }
+
   // ── Static routes ──────────────────────────────────────────────
   switch (clean) {
     case "/catalogue":
