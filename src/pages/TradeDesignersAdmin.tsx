@@ -130,6 +130,117 @@ const TradeDesignersAdmin = () => {
 
   const hasChanges = (id: string) => !!editBuffer[id] && Object.keys(editBuffer[id]).length > 0;
 
+  /* ── Sub-component: Biography preview with duplicate-media warning ── */
+  const PreviewWithDuplicateCheck = useCallback(
+    ({ designer, editBuffer: eb, previewMobile: pm, previewDebug: pd, getField: gf }: {
+      designer: DesignerRow;
+      editBuffer: Record<string, Partial<DesignerRow>>;
+      previewMobile: boolean;
+      previewDebug: boolean;
+      getField: (id: string, field: keyof DesignerRow) => string;
+    }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { data: curatorPicks = [] } = useQuery({
+        queryKey: ["admin-designer-picks", designer.id],
+        queryFn: async () => {
+          const { data, error } = await supabase
+            .from("designer_curator_picks")
+            .select("id, image_url, title")
+            .eq("designer_id", designer.id);
+          if (error) throw error;
+          return data || [];
+        },
+      });
+
+      const bioText = gf(designer.id, "biography") || "";
+      const bioImages = (eb[designer.id]?.biography_images ?? designer.biography_images) || [];
+
+      // Collect all bio media URLs (manual + inline)
+      const bioUrls = new Set<string>();
+      bioImages.forEach((raw: string) => {
+        const url = raw.split("|")[0].trim();
+        if (url) bioUrls.add(url);
+      });
+      // Extract inline URLs from biography text
+      bioText.split("\n").forEach((line: string) => {
+        const trimmed = line.trim();
+        if (/^https?:\/\/.+\.(jpg|jpeg|png|webp|gif|mp4|mov)/i.test(trimmed)) {
+          bioUrls.add(trimmed.split("|")[0].trim());
+        }
+      });
+
+      // Find duplicates
+      const duplicates = curatorPicks.filter((p) => bioUrls.has(p.image_url));
+
+      return (
+        <div className="mt-4 rounded-lg border border-dashed border-border bg-background overflow-hidden">
+          <div className="flex items-center justify-between px-4 pt-3 pb-2">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
+              Editorial render preview
+            </p>
+            <div className="flex flex-col items-end gap-2">
+              <div className="flex items-center gap-1 bg-muted rounded-md p-0.5">
+                <button
+                  onClick={() => setPreviewMobile(false)}
+                  className={cn(
+                    "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors",
+                    !pm ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Monitor className="w-3 h-3" /> Desktop
+                </button>
+                <button
+                  onClick={() => setPreviewMobile(true)}
+                  className={cn(
+                    "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors",
+                    pm ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Smartphone className="w-3 h-3" /> Mobile
+                </button>
+              </div>
+              <label className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                Debug media order
+                <Switch checked={pd} onCheckedChange={setPreviewDebug} />
+              </label>
+            </div>
+          </div>
+
+          {duplicates.length > 0 && (
+            <div className="mx-4 mb-2 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 px-3 py-2 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+              <div className="text-xs text-amber-800 dark:text-amber-300">
+                <span className="font-semibold">{duplicates.length} image{duplicates.length > 1 ? "s" : ""} also used in Curators' Picks</span>
+                {" — "}these will be deprioritised in the grid.
+                <ul className="mt-1 list-disc pl-4 text-[11px] opacity-80">
+                  {duplicates.map((p) => (
+                    <li key={p.id} className="truncate max-w-sm">{p.title}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          <div className={cn(
+            "mx-auto p-4 transition-all duration-300",
+            pm ? "max-w-[375px] border-x border-border" : "max-w-none"
+          )}>
+            <Suspense fallback={<div className="h-20 flex items-center justify-center text-xs text-muted-foreground">Loading…</div>}>
+              <EditorialBiography
+                biography={bioText}
+                biographyImages={bioImages}
+                pickImages={[]}
+                designerName={designer.name}
+                debugMediaOrder={pd}
+              />
+            </Suspense>
+          </div>
+        </div>
+      );
+    },
+    [setPreviewMobile, setPreviewDebug]
+  );
+
   if (loading) return null;
   if (!isSuperAdmin) return <Navigate to="/trade" replace />;
 
