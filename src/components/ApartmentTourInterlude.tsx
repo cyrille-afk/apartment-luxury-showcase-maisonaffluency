@@ -39,7 +39,7 @@ const ApartmentTourInterlude = () => {
   };
 
   return (
-    <section ref={ref} id="apartment-tour" className="py-8 md:py-12 bg-white scroll-mt-32">
+    <section ref={ref} id="apartment-tour" className="pt-8 md:pt-12 pb-2 md:pb-4 bg-white scroll-mt-32">
       <div className="mx-auto max-w-6xl px-4 md:px-12 lg:px-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
