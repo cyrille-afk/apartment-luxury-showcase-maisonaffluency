@@ -214,13 +214,6 @@ function OutroCard() {
     }}>
       <div style={{ textAlign: "center", opacity }}>
         <div style={{
-          fontFamily: bodyFont, fontSize: 16, fontWeight: 300,
-          color: "rgba(212,190,160,0.7)", letterSpacing: "0.25em",
-          textTransform: "uppercase", marginBottom: 20,
-        }}>
-          Curated By
-        </div>
-        <div style={{
           fontFamily: displayFont, fontSize: 56, fontWeight: 300,
           color: "#f5f0eb", letterSpacing: "0.06em",
         }}>
@@ -231,11 +224,11 @@ function OutroCard() {
           background: "rgba(212,190,160,0.5)",
         }} />
         <div style={{
-          fontFamily: bodyFont, fontSize: 18, fontWeight: 300,
-          color: "rgba(212,190,160,0.6)", letterSpacing: "0.15em",
+          fontFamily: bodyFont, fontSize: 22, fontWeight: 300,
+          color: "rgba(212,190,160,0.8)", letterSpacing: "0.12em",
           textTransform: "uppercase",
         }}>
-          Singapore
+          at One Grange Garden Singapore
         </div>
       </div>
     </AbsoluteFill>
@@ -248,7 +241,7 @@ const TOTAL_FRAMES = 70 + scenes.length * SCENE_DUR + 80 - (scenes.length + 1) *
 const AUDIO_DUR_FRAMES = 32 * 30; // 32s audio at 30fps = 960 frames
 
 const VOICEOVER_START = 70; // Start after intro card
-const VOICEOVER_DUR_FRAMES = Math.round(55.6 * 30); // 55.6s at 30fps
+const VOICEOVER_DUR_FRAMES = Math.round(77.4 * 30); // 77.4s at 30fps
 
 export const MainVideo = () => {
   // Layer audio copies to cover the full video duration
