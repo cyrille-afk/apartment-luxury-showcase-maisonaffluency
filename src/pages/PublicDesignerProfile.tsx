@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Package, FileText, Maximize2, Share2, Check } from "lucide-react";
@@ -39,113 +39,14 @@ function displayName(name: string): string {
 
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
   const { data: designer, isLoading } = useDesigner(slug);
-  const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    // Prevent browser from restoring previous scroll position
-    if ("scrollRestoration" in window.history) {
-      window.history.scrollRestoration = "manual";
-    }
-
-    const resetScroll = () => {
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    };
-
-    resetScroll();
-    const raf = window.requestAnimationFrame(resetScroll);
-    const t1 = window.setTimeout(resetScroll, 50);
-    const t2 = window.setTimeout(resetScroll, 150);
-    const t3 = window.setTimeout(resetScroll, 400);
-
-    return () => {
-      window.cancelAnimationFrame(raf);
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      window.clearTimeout(t3);
-    };
-  }, [slug]);
-
-  const isParentBrand = designer?.founder === designer?.name;
-  const { data: groupedPicks = [] } = useGroupedDesignerPicks(isParentBrand ? designer : undefined);
-  const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
-  const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
-
-  const picks = useMemo(() => {
-    if (rawPicks.length <= 2) return rawPicks;
-
-    const getFunctionalCategory = (pick: (typeof rawPicks)[number]) => {
-      if (pick.category?.trim()) return pick.category.trim().toLowerCase();
-      if (pick.subcategory?.trim()) return pick.subcategory.trim().toLowerCase();
-      return "other";
-    };
-
-    const columns = isMobile ? Math.max(2, gridCols - 1) : gridCols;
-
-    const buckets = new Map<string, typeof rawPicks>();
-    for (const pick of rawPicks) {
-      const key = getFunctionalCategory(pick);
-      if (!buckets.has(key)) buckets.set(key, []);
-      buckets.get(key)!.push(pick);
-    }
-
-    const queues = [...buckets.entries()].map(([category, items]) => ({
-      category,
-      items: [...items],
-    }));
-
-    const arranged: typeof rawPicks = [];
-    while (arranged.length < rawPicks.length) {
-      const index = arranged.length;
-      // Block the category directly above AND directly to the left
-      const blockedCategories = new Set<string>();
-      if (index >= columns) blockedCategories.add(getFunctionalCategory(arranged[index - columns]));
-      if (index % columns !== 0 && index > 0) blockedCategories.add(getFunctionalCategory(arranged[index - 1]));
-
-      const candidates = queues
-        .filter((q) => q.items.length > 0 && !blockedCategories.has(q.category))
-        .sort((a, b) => b.items.length - a.items.length);
-
-      const fallback = queues
-        .filter((q) => q.items.length > 0)
-        .sort((a, b) => b.items.length - a.items.length)[0];
-
-      const selected = candidates[0] ?? fallback;
-      if (!selected) break;
-
-      arranged.push(selected.items.shift()!);
-    }
-
-    return arranged.length === rawPicks.length ? arranged : rawPicks;
-  }, [rawPicks, gridCols, isMobile]);
-
-  const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
-
+...
   if (!designer) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h1 className="text-2xl font-light text-foreground">Designer not found</h1>
-          <Link to="/designers" className="text-primary underline underline-offset-4 text-sm">
-            Back to directory
-          </Link>
-        </div>
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
   const name = displayName(designer.name);
