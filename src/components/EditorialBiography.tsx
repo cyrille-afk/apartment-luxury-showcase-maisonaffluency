@@ -823,7 +823,8 @@ export default function EditorialBiography({
     );
   }
 
-  // Remaining media
+  // Remaining media — only render trailing videos; skip trailing images so
+  // photos never dangle at the bottom of the biography (especially on mobile).
   while (mediaIndex < parsedMedia.length) {
     const mediaItem = parsedMedia[mediaIndex];
     if (mediaItem.isVideo) {
@@ -835,16 +836,6 @@ export default function EditorialBiography({
           index={mediaIndex}
           overrideCaption={mediaItem.caption}
           posterUrl={mediaItem.poster || undefined}
-        />
-      );
-    } else {
-      elements.push(
-        <FullWidthImageBlock
-          key={`media-tail-${mediaIndex}`}
-          url={mediaItem.url}
-          designerName={designerName}
-          index={mediaIndex + 100}
-          overrideCaption={mediaItem.caption}
         />
       );
     }
