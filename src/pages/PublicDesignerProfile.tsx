@@ -117,7 +117,7 @@ const PublicDesignerProfile = () => {
     const columns = isMobile ? Math.max(2, gridCols - 1) : gridCols;
 
     const buckets = new Map<string, typeof rawPicks>();
-    for (const pick of rawPicks) {
+    for (const pick of deprioritized) {
       const key = getFunctionalCategory(pick);
       if (!buckets.has(key)) buckets.set(key, []);
       buckets.get(key)!.push(pick);
@@ -129,7 +129,7 @@ const PublicDesignerProfile = () => {
     }));
 
     const arranged: typeof rawPicks = [];
-    while (arranged.length < rawPicks.length) {
+    while (arranged.length < deprioritized.length) {
       const index = arranged.length;
       // Block the category directly above AND directly to the left
       const blockedCategories = new Set<string>();
@@ -150,8 +150,8 @@ const PublicDesignerProfile = () => {
       arranged.push(selected.items.shift()!);
     }
 
-    return arranged.length === rawPicks.length ? arranged : rawPicks;
-  }, [rawPicks, gridCols, isMobile]);
+    return arranged.length === deprioritized.length ? arranged : deprioritized;
+  }, [rawPicks, gridCols, isMobile, bioImageUrls]);
 
   const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
 

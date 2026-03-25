@@ -158,7 +158,7 @@ const TradeAtelierProfile = () => {
     };
 
     const result: typeof rawPicks = [];
-    const remaining = [...rawPicks];
+    const remaining = [...deprioritized];
     let lastCat = "";
 
     while (remaining.length > 0) {
@@ -168,7 +168,7 @@ const TradeAtelierProfile = () => {
       result.push(picked);
     }
     return result;
-  }, [rawPicks]);
+  }, [rawPicks, bioImageUrls]);
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
   const [gridCols, setGridCols] = useState<3 | 4>(4);
