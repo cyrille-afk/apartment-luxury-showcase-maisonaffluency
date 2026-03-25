@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen } from "lucide-react";
+import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,6 +44,7 @@ const TradeDesignersAdmin = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editBuffer, setEditBuffer] = useState<Record<string, Partial<DesignerRow>>>({});
   const [previewId, setPreviewId] = useState<string | null>(null);
+  const [previewMobile, setPreviewMobile] = useState(false);
 
   const { data: designers = [], isLoading } = useQuery({
     queryKey: ["admin-designers"],
@@ -410,18 +411,46 @@ const TradeDesignersAdmin = () => {
                         </button>
 
                         {previewId === d.id && (
-                          <div className="mt-4 p-4 rounded-lg border border-dashed border-border bg-background">
-                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3 font-medium">
-                              Editorial render preview
-                            </p>
-                            <Suspense fallback={<div className="h-20 flex items-center justify-center text-xs text-muted-foreground">Loading…</div>}>
-                              <EditorialBiography
-                                biography={getField(d.id, "biography") || ""}
-                                biographyImages={(editBuffer[d.id]?.biography_images ?? d.biography_images) || []}
-                                pickImages={[]}
-                                designerName={d.name}
-                              />
-                            </Suspense>
+                          <div className="mt-4 rounded-lg border border-dashed border-border bg-background overflow-hidden">
+                            <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
+                                Editorial render preview
+                              </p>
+                              <div className="flex items-center gap-1 bg-muted rounded-md p-0.5">
+                                <button
+                                  onClick={() => setPreviewMobile(false)}
+                                  className={cn(
+                                    "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors",
+                                    !previewMobile ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                                  )}
+                                >
+                                  <Monitor className="w-3 h-3" /> Desktop
+                                </button>
+                                <button
+                                  onClick={() => setPreviewMobile(true)}
+                                  className={cn(
+                                    "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors",
+                                    previewMobile ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                                  )}
+                                >
+                                  <Smartphone className="w-3 h-3" /> Mobile
+                                </button>
+                              </div>
+                            </div>
+                            <div className={cn(
+                              "mx-auto p-4 transition-all duration-300",
+                              previewMobile ? "max-w-[375px] border-x border-border" : "max-w-none"
+                            )}>
+                              <Suspense fallback={<div className="h-20 flex items-center justify-center text-xs text-muted-foreground">Loading…</div>}>
+                                <EditorialBiography
+                                  biography={getField(d.id, "biography") || ""}
+                                  biographyImages={(editBuffer[d.id]?.biography_images ?? d.biography_images) || []}
+                                  pickImages={[]}
+                                  designerName={d.name}
+                                  forceMobile={previewMobile}
+                                />
+                              </Suspense>
+                            </div>
                           </div>
                         )}
                       </div>
