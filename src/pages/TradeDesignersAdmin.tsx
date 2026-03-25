@@ -448,7 +448,6 @@ const TradeDesignersAdmin = () => {
                                   biographyImages={(editBuffer[d.id]?.biography_images ?? d.biography_images) || []}
                                   pickImages={[]}
                                   designerName={d.name}
-                                  forceMobile={previewMobile}
                                 />
                               </Suspense>
                             </div>
