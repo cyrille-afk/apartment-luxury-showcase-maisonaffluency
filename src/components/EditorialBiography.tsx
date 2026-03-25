@@ -577,17 +577,57 @@ export default function EditorialBiography({
       leadingText.push((parsed[i] as { type: "text"; content: string }).content);
       i++;
     }
+
+    // On mobile, insert the first image after the first paragraph of leading text
+    const firstImageIndex = isMobile && leadingText.length > 1
+      ? parsed.findIndex((b) => b.type === "image")
+      : -1;
+    const earlyMobileImage = firstImageIndex >= 0 ? parsed[firstImageIndex] as { type: "image"; url: string; caption: string | null } : null;
+
     if (leadingText.length > 0) {
       if (debugMediaOrder) debugEvents.push(`Leading text block (${leadingText.length} paragraph${leadingText.length > 1 ? "s" : ""})`);
-      elements.push(
-        <div key="leading-text">
-          {leadingText.map((p, pi) => (
-            <p key={pi} className={pi > 0 ? "mt-4" : ""}>
-              {renderParagraph(p)}
-            </p>
-          ))}
-        </div>
-      );
+
+      if (earlyMobileImage) {
+        // First paragraph
+        elements.push(
+          <div key="leading-text-before">
+            <p>{renderParagraph(leadingText[0])}</p>
+          </div>
+        );
+        // First image pulled up for mobile
+        elements.push(
+          <FullWidthImageBlock
+            key="mobile-early-img"
+            url={earlyMobileImage.url}
+            designerName={designerName}
+            index={0}
+            overrideCaption={earlyMobileImage.caption}
+          />
+        );
+        imageIdx++;
+        // Remaining leading text
+        if (leadingText.length > 1) {
+          elements.push(
+            <div key="leading-text-after">
+              {leadingText.slice(1).map((p, pi) => (
+                <p key={pi} className={pi > 0 ? "mt-4" : ""}>
+                  {renderParagraph(p)}
+                </p>
+              ))}
+            </div>
+          );
+        }
+      } else {
+        elements.push(
+          <div key="leading-text">
+            {leadingText.map((p, pi) => (
+              <p key={pi} className={pi > 0 ? "mt-4" : ""}>
+                {renderParagraph(p)}
+              </p>
+            ))}
+          </div>
+        );
+      }
     }
 
     while (i < parsed.length) {
@@ -628,6 +668,11 @@ export default function EditorialBiography({
       }
 
       if (block.type === "image") {
+        // Skip if this image was already rendered early on mobile
+        if (earlyMobileImage && block.url === earlyMobileImage.url) {
+          i++;
+          continue;
+        }
         i++;
         const paired: string[] = [];
         while (i < parsed.length && parsed[i].type === "text") {
