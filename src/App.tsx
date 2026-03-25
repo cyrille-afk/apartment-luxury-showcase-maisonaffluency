@@ -140,6 +140,7 @@ const App = () => {
                   <Route path="/designers/:slug" element={<Suspense fallback={null}><PublicDesignerProfile /></Suspense>} />
                   <Route path="/favorites" element={<Suspense fallback={null}><PublicFavorites /></Suspense>} />
                   <Route path="/apartment-tour" element={<Suspense fallback={null}><ApartmentTour /></Suspense>} />
+                  <Route path="/apartment-tour/vertical" element={<Suspense fallback={null}><ApartmentTourVertical /></Suspense>} />
                   
                   <Route path="/board/:token" element={<Suspense fallback={null}><ClientBoardViewer /></Suspense>} />
                   <Route path="/journal" element={<Suspense fallback={null}><Journal /></Suspense>} />
