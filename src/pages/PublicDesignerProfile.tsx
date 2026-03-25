@@ -78,33 +78,9 @@ const PublicDesignerProfile = () => {
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
 
-  // Extract image URLs used in biography so matching Curators' Picks can be excluded.
-  const bioImageUrls = useMemo(() => {
-    const urls = new Set<string>();
-    // From manual biography_images (pipe-separated "url | caption")
-    for (const entry of designer?.biography_images || []) {
-      if (entry) {
-        const url = entry.split(/\s*\|\s*/)[0]?.trim();
-        if (url) urls.add(url);
-      }
-    }
-    // From inline media in biography text
-    if (designer?.biography) {
-      for (const block of designer.biography.split(/\n\n+/)) {
-        const trimmed = block.trim();
-        const url = trimmed.split(/\s*\|\s*/)[0]?.trim();
-        if (url && /^https?:\/\//i.test(url) && !/\s/.test(url)) {
-          urls.add(url);
-        }
-      }
-    }
-    return urls;
-  }, [designer?.biography_images, designer?.biography]);
-
   const picks = useMemo(() => {
-    // Hard rule: never render Curators' Picks images that are already used in biography media.
-    const filtered = rawPicks.filter((pick) => !bioImageUrls.has(pick.image_url));
-    if (filtered.length <= 2) return filtered;
+    // Curators' Picks are editorially curated and must be rendered as-is.
+    if (rawPicks.length <= 2) return rawPicks;
 
     const getFunctionalCategory = (pick: (typeof rawPicks)[number]) => {
       if (pick.category?.trim()) return pick.category.trim().toLowerCase();
@@ -115,7 +91,7 @@ const PublicDesignerProfile = () => {
     const columns = isMobile ? Math.max(2, gridCols - 1) : gridCols;
 
     const buckets = new Map<string, typeof rawPicks>();
-    for (const pick of filtered) {
+    for (const pick of rawPicks) {
       const key = getFunctionalCategory(pick);
       if (!buckets.has(key)) buckets.set(key, []);
       buckets.get(key)!.push(pick);
@@ -127,7 +103,7 @@ const PublicDesignerProfile = () => {
     }));
 
     const arranged: typeof rawPicks = [];
-    while (arranged.length < filtered.length) {
+    while (arranged.length < rawPicks.length) {
       const index = arranged.length;
       // Block the category directly above AND directly to the left
       const blockedCategories = new Set<string>();
@@ -148,8 +124,8 @@ const PublicDesignerProfile = () => {
       arranged.push(selected.items.shift()!);
     }
 
-    return arranged.length === filtered.length ? arranged : filtered;
-  }, [rawPicks, gridCols, isMobile, bioImageUrls]);
+    return arranged.length === rawPicks.length ? arranged : rawPicks;
+  }, [rawPicks, gridCols, isMobile]);
 
   const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
 
