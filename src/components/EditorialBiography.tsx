@@ -631,15 +631,8 @@ export default function EditorialBiography({
       if (block.type === "image") {
         i++;
         const paired: string[] = [];
-        const MAX_PAIRED = 2; // Limit paired paragraphs to keep text readable and allow overflow as full-width
-        while (i < parsed.length && parsed[i].type === "text" && paired.length < MAX_PAIRED) {
-          paired.push((parsed[i] as { type: "text"; content: string }).content);
-          i++;
-        }
-        // Any remaining consecutive text blocks render as full-width below
-        const overflow: string[] = [];
         while (i < parsed.length && parsed[i].type === "text") {
-          overflow.push((parsed[i] as { type: "text"; content: string }).content);
+          paired.push((parsed[i] as { type: "text"; content: string }).content);
           i++;
         }
 
@@ -668,18 +661,6 @@ export default function EditorialBiography({
               index={imageIdx}
               overrideCaption={block.caption}
             />
-          );
-        }
-        // Render overflow text as full-width paragraphs
-        if (overflow.length > 0) {
-          elements.push(
-            <div key={`overflow-${imageIdx}`} className="mb-6 md:mb-10">
-              {overflow.map((p, pi) => (
-                <p key={pi} className={pi > 0 ? "mt-4" : ""}>
-                  {renderParagraph(p)}
-                </p>
-              ))}
-            </div>
           );
         }
         imageIdx++;
