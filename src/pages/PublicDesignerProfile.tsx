@@ -363,6 +363,7 @@ const PublicDesignerProfile = () => {
                         Photo: {designer.hero_photo_credit}
                       </p>
                     )}
+                  </div>
                   )}
                   {designer.founder && designer.founder !== designer.name && (
                     <Link
