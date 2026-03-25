@@ -265,10 +265,10 @@ function VideoBlock({
             aria-label={`Play ${caption || "video"}`}
           >
             <img
-              src={thumbnailUrl || currentPosterUrl!}
+              src={currentPosterUrl || thumbnailUrl!}
               alt={caption || `${designerName} — video`}
               className="w-full h-full object-cover"
-              onError={thumbnailUrl ? undefined : handlePosterError}
+              onError={handlePosterError}
             />
             {playOverlay}
           </button>
