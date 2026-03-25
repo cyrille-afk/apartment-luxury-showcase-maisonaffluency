@@ -38,18 +38,18 @@ const ApartmentTourInterlude = () => {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 md:mb-10">
             <div className="flex-1">
-              <p className="text-[11px] md:text-[12px] tracking-[0.3em] uppercase text-[#d4bea0]/60 mb-3 font-light font-body">
+              <p className="text-[11px] md:text-[12px] tracking-[0.3em] uppercase text-muted-foreground/60 mb-3 font-light font-body">
                 Maison Affluency · Singapore
               </p>
-              <h2 className="font-serif text-xl md:text-3xl lg:text-4xl text-[#f5f0eb] font-light tracking-wide">
+              <h2 className="font-serif text-xl md:text-3xl lg:text-4xl text-foreground font-light tracking-wide">
                 A Private Apartment Tour
               </h2>
-              <p className="text-[#d4bea0]/50 text-xs md:text-sm tracking-[0.1em] mt-3 font-light font-body max-w-xl">
+              <p className="text-muted-foreground text-xs md:text-sm tracking-[0.1em] mt-3 font-light font-body max-w-xl">
                 An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship, and panoramic cityscape views.
               </p>
               <button
                 onClick={handleShare}
-                className="inline-flex items-center gap-1.5 text-[11px] font-body text-[#d4bea0]/40 hover:text-[#d4bea0]/70 transition-colors mt-3"
+                className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors mt-3"
                 aria-label="Share apartment tour"
               >
                 <Share2 className="w-3.5 h-3.5" />
