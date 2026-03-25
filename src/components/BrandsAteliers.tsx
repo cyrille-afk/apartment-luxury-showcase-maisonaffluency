@@ -2558,24 +2558,24 @@ const BrandsAteliers = () => {
             <span className="text-sm md:text-base text-foreground font-body mb-1 md:mb-1.5">
               {totalBrands}
             </span>
-            <button
-              onClick={() => {
-                const shareUrl = "https://www.maisonaffluency.com/brands-og.html?v=20260325";
-                const text = `Ateliers & Partners — Maison Affluency\n${shareUrl}`;
-                const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                window.open(wa, "_blank", "noopener");
-              }}
-              className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors mb-1"
-              aria-label="Share Ateliers & Partners section"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              Share
-            </button>
           </div>
           <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-3 md:mb-4 text-justify">
             We collaborate with the world's most distinguished furniture houses, textile ateliers, and artisan workshops 
             to bring exceptional pieces to discerning collectors and design professionals.
           </p>
+          <button
+            onClick={() => {
+              const shareUrl = "https://www.maisonaffluency.com/brands-og.html?v=20260325";
+              const text = `Ateliers & Partners — Maison Affluency\n${shareUrl}`;
+              const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+              window.open(wa, "_blank", "noopener");
+            }}
+            className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors"
+            aria-label="Share Ateliers & Partners section"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            Share
+          </button>
         </motion.div>
 
         <div className="relative">
