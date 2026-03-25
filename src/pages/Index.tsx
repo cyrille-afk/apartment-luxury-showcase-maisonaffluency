@@ -108,10 +108,21 @@ const Index = () => {
   useScrollDepthTracking();
 
   // Stagger non-LCP content so hero image wins bandwidth on mobile.
-  // Only deep-links (designer/collectible/atelier profiles) bypass delays.
-  // Section hashes (#designers, #brands) still wait for hero to load first,
-  // then mount sections and scroll — preserving LCP on mobile.
+  // Deep-links and explicit section hashes from shared links should land fast.
   useEffect(() => {
+    const sectionHash = parseSectionHash(window.location.hash);
+    const hasExplicitSectionHash = !!sectionHash && sectionHash !== "home";
+
+    // If URL explicitly asks for a section, it must win over stale scroll restore.
+    if (hasExplicitSectionHash) {
+      sessionStorage.removeItem("__scroll_y");
+      needsScrollRestore.current = false;
+      setShowNavigation(true);
+      setShowScrollProgress(true);
+      setShowBelowFoldSections(true);
+      return;
+    }
+
     // Deep-links and scroll restore both need sections immediately
     const hasRestore = Number(sessionStorage.getItem("__scroll_y") || 0) > 0;
     if (isDeepLink() || hasRestore) {
@@ -184,6 +195,23 @@ const Index = () => {
     const sectionId = parseSectionHash(window.location.hash);
     const instant = "instant" as ScrollBehavior;
 
+    // Explicit section hash should always win over any stored scroll position.
+    if (sectionId && sectionId !== "home") {
+      sessionStorage.removeItem("__scroll_y");
+      let attempts = 0;
+      const tryScroll = () => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          scrollToSection(sectionId, instant);
+        } else if (attempts < 15) {
+          attempts++;
+          setTimeout(tryScroll, 200);
+        }
+      };
+      setTimeout(tryScroll, 100);
+      return;
+    }
+
     if (savedY && Number(savedY) > 0) {
       const targetY = Number(savedY);
       let waitAttempts = 0;
@@ -214,25 +242,10 @@ const Index = () => {
           waitAttempts++;
           setTimeout(tryRestore, 200);
         } else {
-          if (sectionId && sectionId !== "home") {
-            document.getElementById(sectionId)?.scrollIntoView({ behavior: instant, block: "start" });
-          }
           sessionStorage.removeItem("__scroll_y");
         }
       };
       setTimeout(tryRestore, 100);
-    } else if (sectionId && sectionId !== "home") {
-      let attempts = 0;
-      const tryScroll = () => {
-        const el = document.getElementById(sectionId);
-        if (el) {
-          scrollToSection(sectionId, instant);
-        } else if (attempts < 15) {
-          attempts++;
-          setTimeout(tryScroll, 200);
-        }
-      };
-      setTimeout(tryScroll, 100);
     }
   }, [showBelowFoldSections]);
 
