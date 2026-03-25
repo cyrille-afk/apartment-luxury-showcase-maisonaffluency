@@ -256,6 +256,13 @@ const Index = () => {
 
     const observer = new IntersectionObserver(
       (entries) => {
+        // Preserve initial section hash on first load (e.g. #designers/#collectibles)
+        // so observer updates don't overwrite it to #gallery before restore scroll runs.
+        const initialSectionHash = parseSectionHash(window.location.hash);
+        if (initialSectionHash && initialSectionHash !== "home" && window.scrollY < 80) {
+          return;
+        }
+
         // Prefer the first section at/under viewport top; this prevents
         // deep-link landings from being overwritten by the previous section.
         let closestPositive: { id: string; top: number } | null = null;
