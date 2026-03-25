@@ -188,9 +188,15 @@ function VideoBlock({
   const [posterIndex, setPosterIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Extract YouTube thumbnail automatically
+  // Extract YouTube thumbnail automatically — try maxres first, then hqdefault
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
-  const thumbnailUrl = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg` : null;
+  const ytThumbnails = ytMatch
+    ? [
+        `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`,
+        `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`,
+      ]
+    : [];
+  const thumbnailUrl = ytThumbnails[0] || null;
 
   const isNativeVideo = !embedUrl;
   const videoSrc = isNativeVideo ? normalizeCloudinaryVideoUrl(url) : url;
