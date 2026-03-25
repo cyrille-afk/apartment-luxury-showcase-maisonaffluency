@@ -5,13 +5,16 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical } from "lucide-react";
+import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { lazy, Suspense } from "react";
+
+const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -40,6 +43,7 @@ const TradeDesignersAdmin = () => {
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editBuffer, setEditBuffer] = useState<Record<string, Partial<DesignerRow>>>({});
+  const [previewId, setPreviewId] = useState<string | null>(null);
 
   const { data: designers = [], isLoading } = useQuery({
     queryKey: ["admin-designers"],
@@ -385,7 +389,7 @@ const TradeDesignersAdmin = () => {
                             Save
                           </Button>
                           <a
-                            href={`/designer/${d.slug}`}
+                            href={`/designers/${d.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
@@ -393,6 +397,33 @@ const TradeDesignersAdmin = () => {
                             Preview <ExternalLink className="w-3 h-3" />
                           </a>
                         </div>
+                      </div>
+
+                      {/* Biography Preview Toggle */}
+                      <div className="border-t border-border pt-4">
+                        <button
+                          onClick={() => setPreviewId(previewId === d.id ? null : d.id)}
+                          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <BookOpen className="w-3.5 h-3.5" />
+                          {previewId === d.id ? "Hide" : "Show"} Biography Preview
+                        </button>
+
+                        {previewId === d.id && (
+                          <div className="mt-4 p-4 rounded-lg border border-dashed border-border bg-background">
+                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3 font-medium">
+                              Editorial render preview
+                            </p>
+                            <Suspense fallback={<div className="h-20 flex items-center justify-center text-xs text-muted-foreground">Loading…</div>}>
+                              <EditorialBiography
+                                biography={getField(d.id, "biography") || ""}
+                                biographyImages={(editBuffer[d.id]?.biography_images ?? d.biography_images) || []}
+                                pickImages={[]}
+                                designerName={d.name}
+                              />
+                            </Suspense>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
