@@ -839,25 +839,23 @@ export default function EditorialBiography({
 
         if (isMobile && !hasFutureParagraphs) {
           if (debugMediaOrder) debugEvents.push(`Suppressed terminal mobile image: ${mediaItem.url}`);
-          mediaIndex++;
-          continue;
+        } else {
+          if (debugMediaOrder) debugEvents.push(`Split image rendered with ${textAccum.length} paired paragraph${textAccum.length !== 1 ? "s" : ""}: ${mediaItem.url}`);
+          // Pair accumulated text with image in split layout
+          elements.push(
+            <SplitImageBlock
+              key={`media-split-${mediaIndex}`}
+              url={mediaItem.url}
+              designerName={designerName}
+              index={mediaIndex}
+              paragraphs={textAccum}
+              overrideCaption={mediaItem.caption}
+              forceAlign={mediaItem.align}
+              size={mediaItem.size}
+            />
+          );
+          textAccum = [];
         }
-
-        if (debugMediaOrder) debugEvents.push(`Split image rendered with ${textAccum.length} paired paragraph${textAccum.length !== 1 ? "s" : ""}: ${mediaItem.url}`);
-        // Pair accumulated text with image in split layout
-        elements.push(
-          <SplitImageBlock
-            key={`media-split-${mediaIndex}`}
-            url={mediaItem.url}
-            designerName={designerName}
-            index={mediaIndex}
-            paragraphs={textAccum}
-            overrideCaption={mediaItem.caption}
-            forceAlign={mediaItem.align}
-            size={mediaItem.size}
-          />
-        );
-        textAccum = [];
       }
       mediaIndex++;
     }
