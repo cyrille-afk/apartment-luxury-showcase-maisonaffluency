@@ -78,7 +78,7 @@ const PublicDesignerProfile = () => {
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
 
-  // Extract image URLs used in biography to deprioritize matching picks
+  // Extract image URLs used in biography so matching Curators' Picks can be excluded.
   const bioImageUrls = useMemo(() => {
     const urls = new Set<string>();
     // From manual biography_images (pipe-separated "url | caption")
@@ -102,13 +102,9 @@ const PublicDesignerProfile = () => {
   }, [designer?.biography_images, designer?.biography]);
 
   const picks = useMemo(() => {
-    // Deprioritize picks whose image appears in biography
-    const deprioritized = [...rawPicks].sort((a, b) => {
-      const aInBio = bioImageUrls.has(a.image_url) ? 1 : 0;
-      const bInBio = bioImageUrls.has(b.image_url) ? 1 : 0;
-      return aInBio - bInBio;
-    });
-    if (deprioritized.length <= 2) return deprioritized;
+    // Hard rule: never render Curators' Picks images that are already used in biography media.
+    const filtered = rawPicks.filter((pick) => !bioImageUrls.has(pick.image_url));
+    if (filtered.length <= 2) return filtered;
 
     const getFunctionalCategory = (pick: (typeof rawPicks)[number]) => {
       if (pick.category?.trim()) return pick.category.trim().toLowerCase();
@@ -119,7 +115,7 @@ const PublicDesignerProfile = () => {
     const columns = isMobile ? Math.max(2, gridCols - 1) : gridCols;
 
     const buckets = new Map<string, typeof rawPicks>();
-    for (const pick of deprioritized) {
+    for (const pick of filtered) {
       const key = getFunctionalCategory(pick);
       if (!buckets.has(key)) buckets.set(key, []);
       buckets.get(key)!.push(pick);
@@ -131,7 +127,7 @@ const PublicDesignerProfile = () => {
     }));
 
     const arranged: typeof rawPicks = [];
-    while (arranged.length < deprioritized.length) {
+    while (arranged.length < filtered.length) {
       const index = arranged.length;
       // Block the category directly above AND directly to the left
       const blockedCategories = new Set<string>();
@@ -152,7 +148,7 @@ const PublicDesignerProfile = () => {
       arranged.push(selected.items.shift()!);
     }
 
-    return arranged.length === deprioritized.length ? arranged : deprioritized;
+    return arranged.length === filtered.length ? arranged : filtered;
   }, [rawPicks, gridCols, isMobile, bioImageUrls]);
 
   const isDesignerProfile = designer?.founder && designer.founder !== designer.name;
@@ -180,8 +176,7 @@ const PublicDesignerProfile = () => {
     ? designer.biography.split(/\n\n+/).map((p: string) => p.trim()).filter(Boolean)
     : [];
   const manualMedia = (designer.biography_images || []).filter(Boolean);
-  const curatedMedia = picks.slice(0, 2).map((p) => `${p.image_url} | ${p.title}`);
-  const mediaEntries = (manualMedia.length > 0 ? manualMedia : curatedMedia).slice(0, 3);
+  const mediaEntries = manualMedia.slice(0, 3);
 
   let heroParagraphs: string[] = [];
   let remainingBio = "";
