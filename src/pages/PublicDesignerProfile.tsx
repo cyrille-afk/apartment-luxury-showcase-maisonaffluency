@@ -39,6 +39,8 @@ function displayName(name: string): string {
 
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get("highlight");
   const { data: designer, isLoading } = useDesigner(slug);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
