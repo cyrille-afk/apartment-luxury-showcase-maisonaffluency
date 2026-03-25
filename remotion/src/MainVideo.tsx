@@ -8,7 +8,7 @@ const { fontFamily: displayFont } = loadCormorant("normal", { weights: ["300", "
 const { fontFamily: bodyFont } = loadJost("normal", { weights: ["300", "400"], subsets: ["latin"] });
 
 const CLOUD_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
-const cld = (id: string) => `${CLOUD_BASE}/w_1920,q_auto:best,c_fill,g_auto,ar_16:9/${id}`;
+const cld = (id: string) => `${CLOUD_BASE}/w_1920,h_1080,q_auto:best,c_fill,g_auto/${id}`;
 
 const scenes = [
   {
