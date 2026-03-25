@@ -674,14 +674,21 @@ const Collectibles = () => {
             transition={{ duration: 0.8 }}
             className="mb-12 md:mb-16 text-left"
           >
-            <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
-                Collectible Design <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">On View</span>
-              </h2>
+            <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
+              <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
+                <img src="https://design-milk.com/images/2024/02/draga-aurel-flare-collection-15.jpg" alt="Collectible Design" className="w-full h-full object-contain" loading="lazy" />
+              </div>
+              <div className="flex-1">
+                <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-2">
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
+                    Collectible Design <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">On View</span>
+                  </h2>
+                </div>
+                <p className="font-body text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed mb-4 text-justify">
+                  Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance.
+                </p>
+              </div>
             </div>
-            <p className="font-body text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed mb-4 text-justify">
-              Collectible design refers to unique or limited-edition, often handmade, functional art pieces—such as furniture, lighting, and ceramics—that bridge the gap between art and utility. These items, characterized by high-level craftsmanship, storytelling, and investment potential, are often sought after for their artistic value and ability to enhance.
-            </p>
           </motion.div>
 
           <div className="relative">
