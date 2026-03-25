@@ -676,7 +676,7 @@ export default function EditorialBiography({
       // Stray text (shouldn't happen but safety)
       elements.push(
         <p key={`stray-${i}`} className="mt-4">
-          {renderQuotedText((block as { type: "text"; content: string }).content)}
+          {renderParagraph((block as { type: "text"; content: string }).content)}
         </p>
       );
       i++;
