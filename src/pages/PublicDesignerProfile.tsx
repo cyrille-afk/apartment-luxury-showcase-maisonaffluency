@@ -358,6 +358,11 @@ const PublicDesignerProfile = () => {
                         </button>
                       </div>
                     </div>
+                    {designer.hero_photo_credit && (
+                      <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60 mt-1.5 text-right pr-1">
+                        Photo: {designer.hero_photo_credit}
+                      </p>
+                    )}
                   )}
                   {designer.founder && designer.founder !== designer.name && (
                     <Link
