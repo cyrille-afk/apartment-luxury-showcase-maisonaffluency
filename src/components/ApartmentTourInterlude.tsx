@@ -28,7 +28,7 @@ const ApartmentTourInterlude = () => {
   };
 
   return (
-    <section ref={ref} className="py-12 md:py-20 bg-muted/30">
+    <section ref={ref} className="py-12 md:py-20 bg-background">
       <div className="mx-auto max-w-6xl px-4 md:px-12 lg:px-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
