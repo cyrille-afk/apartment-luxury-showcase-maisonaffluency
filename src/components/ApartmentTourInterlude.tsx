@@ -93,7 +93,7 @@ const ApartmentTourInterlude = () => {
           </div>
 
           {/* Caption */}
-          <p className="text-[#d4bea0]/40 text-[10px] md:text-xs tracking-[0.15em] uppercase mt-4 md:mt-6 font-light font-body text-center">
+          <p className="text-muted-foreground/60 text-[10px] md:text-xs tracking-[0.15em] uppercase mt-4 md:mt-6 font-light font-body text-center">
             Collectible Furniture · Artisan Craftsmanship · Bespoke Interiors
           </p>
         </motion.div>
