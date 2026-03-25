@@ -2443,24 +2443,24 @@ const FeaturedDesigners = () => {
                 <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-foreground">
                   Designers & Makers <span className="text-[10px] tracking-[0.2em] uppercase font-body align-middle italic text-[hsl(var(--gold))]">On View</span>
                 </h2>
-                <button
-                  onClick={() => {
-                    const shareUrl = "https://www.maisonaffluency.com/designers-og.html?v=20260325";
-                    const text = `Designers & Makers On View — Maison Affluency\n${shareUrl}`;
-                    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                    window.open(wa, "_blank", "noopener");
-                  }}
-                  className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors mb-1"
-                  aria-label="Share Designers & Makers section"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  Share
-                </button>
               </div>
               <p className="text-sm md:text-base text-muted-foreground font-body max-w-3xl leading-relaxed mb-4 text-justify">
                 Discover the visionary designers whose exceptional work currently defines Maison Affluency Singapore. Each brings
                 their unique perspective and masterful craftsmanship to create pieces that transcend ordinary furniture.
               </p>
+              <button
+                onClick={() => {
+                  const shareUrl = "https://www.maisonaffluency.com/designers-og.html?v=20260325";
+                  const text = `Designers & Makers On View — Maison Affluency\n${shareUrl}`;
+                  const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                  window.open(wa, "_blank", "noopener");
+                }}
+                className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors"
+                aria-label="Share Designers & Makers section"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                Share
+              </button>
             </div>
           </div>
         </motion.div>
