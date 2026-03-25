@@ -487,7 +487,7 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Collapsible wrapper — limits height on mobile for long bios        */
+/*  Collapsible wrapper — limits height for long bios (all viewports)  */
 /* ------------------------------------------------------------------ */
 function CollapsibleBiographyWrapper({
   children,
@@ -499,22 +499,21 @@ function CollapsibleBiographyWrapper({
   allowCollapse?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
-  // Only collapse on mobile when there's substantial content and no blocking media
   if (!allowCollapse || elementCount <= 3) return <>{children}</>;
 
   return (
     <div className="relative">
       <div
-        className={expanded ? "" : "max-h-[420px] md:max-h-none overflow-hidden"}
+        className={expanded ? "" : "max-h-[420px] md:max-h-[600px] overflow-hidden"}
       >
         {children}
       </div>
       {!expanded && (
-        <div className="md:hidden">
+        <div>
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
           <button
             onClick={() => setExpanded(true)}
-            className="relative z-10 mt-2 flex items-center gap-1.5 font-display text-[11px] tracking-[0.15em] uppercase text-primary/70 hover:text-primary transition-colors"
+            className="relative z-10 mt-3 flex items-center gap-1.5 font-display text-[11px] tracking-[0.15em] uppercase text-primary/70 hover:text-primary transition-colors"
           >
             Continue reading
             <ChevronDown className="w-3.5 h-3.5" />
