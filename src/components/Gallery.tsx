@@ -663,6 +663,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         Interactive Gallery
                       </span>
                     )}
+                  </div>
+                  <div className="flex items-center gap-3">
                     {originalSectionIndex === 0 && (
                       <button
                         onClick={() => {
@@ -673,16 +675,15 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         aria-label="Tour Our Gallery"
                       >
                         <img
-                          src="https://res.cloudinary.com/dif1oamtj/image/upload/w_80,h_80,q_auto,f_auto,c_fill,g_auto/bespoke-sofa_gxidtx"
+                          src="https://res.cloudinary.com/dif1oamtj/image/upload/w_160,h_160,q_auto,f_auto,c_fill,g_auto/bespoke-sofa_gxidtx"
                           alt="Gallery tour"
-                          className="w-8 h-8 rounded-full object-cover border border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                          className="w-12 h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                         />
-                        <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body group-hover:text-primary transition-colors mb-1">
+                        <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body group-hover:text-primary transition-colors">
                           Tour Our Gallery
                         </span>
                       </button>
                     )}
-                  </div>
                   {originalSectionIndex === 0 && (
                     <TooltipProvider delayDuration={200}>
                       <Tooltip>
@@ -716,6 +717,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       </Tooltip>
                     </TooltipProvider>
                   )}
+                  </div>
                 </div>
                 <p className="hidden md:block text-sm md:text-base text-muted-foreground font-body italic">
                   {section.subtitle}
