@@ -413,56 +413,7 @@ const TradeDesignersAdmin = () => {
                         </button>
 
                         {previewId === d.id && (
-                          <div className="mt-4 rounded-lg border border-dashed border-border bg-background overflow-hidden">
-                            <div className="flex items-center justify-between px-4 pt-3 pb-2">
-                              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
-                                Editorial render preview
-                              </p>
-                              <div className="flex flex-col items-end gap-2">
-                                <div className="flex items-center gap-1 bg-muted rounded-md p-0.5">
-                                  <button
-                                    onClick={() => setPreviewMobile(false)}
-                                    className={cn(
-                                      "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors",
-                                      !previewMobile ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                                    )}
-                                  >
-                                    <Monitor className="w-3 h-3" /> Desktop
-                                  </button>
-                                  <button
-                                    onClick={() => setPreviewMobile(true)}
-                                    className={cn(
-                                      "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors",
-                                      previewMobile ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                                    )}
-                                  >
-                                    <Smartphone className="w-3 h-3" /> Mobile
-                                  </button>
-                                </div>
-                                <label className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                                  Debug media order
-                                  <Switch
-                                    checked={previewDebug}
-                                    onCheckedChange={setPreviewDebug}
-                                  />
-                                </label>
-                              </div>
-                            </div>
-                            <div className={cn(
-                              "mx-auto p-4 transition-all duration-300",
-                              previewMobile ? "max-w-[375px] border-x border-border" : "max-w-none"
-                            )}>
-                              <Suspense fallback={<div className="h-20 flex items-center justify-center text-xs text-muted-foreground">Loading…</div>}>
-                                <EditorialBiography
-                                  biography={getField(d.id, "biography") || ""}
-                                  biographyImages={(editBuffer[d.id]?.biography_images ?? d.biography_images) || []}
-                                  pickImages={[]}
-                                  designerName={d.name}
-                                  debugMediaOrder={previewDebug}
-                                />
-                              </Suspense>
-                            </div>
-                          </div>
+                          <PreviewWithDuplicateCheck designer={d} editBuffer={editBuffer} previewMobile={previewMobile} previewDebug={previewDebug} getField={getField} />
                         )}
                       </div>
                     </div>
