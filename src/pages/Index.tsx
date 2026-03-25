@@ -46,6 +46,7 @@ const CompareFab = lazyRetry(() => import("@/components/CompareFab"));
 const CompareDrawer = lazyRetry(() => import("@/components/CompareDrawer"));
 const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
 const ParallaxInterlude = lazy(() => import("@/components/ParallaxInterlude"));
+const ApartmentTourInterlude = lazyRetry(() => import("@/components/ApartmentTourInterlude"));
 
 /**
  * Parse deep-link hash: #designer/<id>, #collectible/<id>, #atelier/<slug>
