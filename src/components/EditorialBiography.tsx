@@ -668,6 +668,11 @@ export default function EditorialBiography({
       }
 
       if (block.type === "image") {
+        // Skip if this image was already rendered early on mobile
+        if (earlyMobileImage && block.url === earlyMobileImage.url) {
+          i++;
+          continue;
+        }
         i++;
         const paired: string[] = [];
         while (i < parsed.length && parsed[i].type === "text") {
