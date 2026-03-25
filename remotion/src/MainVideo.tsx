@@ -214,13 +214,6 @@ function OutroCard() {
     }}>
       <div style={{ textAlign: "center", opacity }}>
         <div style={{
-          fontFamily: bodyFont, fontSize: 16, fontWeight: 300,
-          color: "rgba(212,190,160,0.7)", letterSpacing: "0.25em",
-          textTransform: "uppercase", marginBottom: 20,
-        }}>
-          Curated By
-        </div>
-        <div style={{
           fontFamily: displayFont, fontSize: 56, fontWeight: 300,
           color: "#f5f0eb", letterSpacing: "0.06em",
         }}>
@@ -231,11 +224,11 @@ function OutroCard() {
           background: "rgba(212,190,160,0.5)",
         }} />
         <div style={{
-          fontFamily: bodyFont, fontSize: 18, fontWeight: 300,
-          color: "rgba(212,190,160,0.6)", letterSpacing: "0.15em",
+          fontFamily: bodyFont, fontSize: 22, fontWeight: 300,
+          color: "rgba(212,190,160,0.8)", letterSpacing: "0.12em",
           textTransform: "uppercase",
         }}>
-          Singapore
+          at One Grange Garden Singapore
         </div>
       </div>
     </AbsoluteFill>
