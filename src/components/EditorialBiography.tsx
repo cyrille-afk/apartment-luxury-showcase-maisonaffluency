@@ -213,8 +213,8 @@ function VideoBlock({
 
   const posterCandidates = useMemo(
     () =>
-      [...new Set([manualPosterUrl, autoPosterUrl, mappedFallbackPoster].filter((p): p is string => !!p))],
-    [manualPosterUrl, autoPosterUrl, mappedFallbackPoster]
+      [...new Set([manualPosterUrl, ...ytThumbnails, autoPosterUrl, mappedFallbackPoster].filter((p): p is string => !!p))],
+    [manualPosterUrl, autoPosterUrl, mappedFallbackPoster, ytThumbnails.join(",")]
   );
 
   useEffect(() => {
@@ -231,7 +231,11 @@ function VideoBlock({
 
   const handlePosterError = () => {
     setPosterIndex((prev) => {
-      if (prev >= posterCandidates.length - 1) return prev;
+      if (prev >= posterCandidates.length - 1) {
+        // All posters failed — force playing state so iframe renders directly
+        setPlaying(true);
+        return prev;
+      }
       return prev + 1;
     });
   };
