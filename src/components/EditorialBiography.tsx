@@ -670,6 +670,18 @@ export default function EditorialBiography({
             />
           );
         }
+        // Render overflow text as full-width paragraphs
+        if (overflow.length > 0) {
+          elements.push(
+            <div key={`overflow-${imageIdx}`} className="mb-6 md:mb-10">
+              {overflow.map((p, pi) => (
+                <p key={pi} className={pi > 0 ? "mt-4" : ""}>
+                  {renderParagraph(p)}
+                </p>
+              ))}
+            </div>
+          );
+        }
         imageIdx++;
         continue;
       }
