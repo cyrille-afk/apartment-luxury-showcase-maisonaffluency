@@ -1,8 +1,9 @@
-import { AbsoluteFill, Sequence, useCurrentFrame, interpolate } from "remotion";
+import { AbsoluteFill, useCurrentFrame, interpolate, delayRender, continueRender, Img } from "remotion";
 import { TransitionSeries, springTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import { loadFont as loadCormorant } from "@remotion/google-fonts/CormorantGaramond";
 import { loadFont as loadJost } from "@remotion/google-fonts/Jost";
+import { useCallback, useState } from "react";
 
 const { fontFamily: displayFont } = loadCormorant("normal", { weights: ["300", "400", "600"], subsets: ["latin"] });
 const { fontFamily: bodyFont } = loadJost("normal", { weights: ["300", "400"], subsets: ["latin"] });
@@ -69,109 +70,88 @@ const scenes = [
   },
 ];
 
-const SCENE_DUR = 120; // 4 seconds per scene
-const TRANS_DUR = 24;  // 0.8s transition
+const SCENE_DUR = 120;
+const TRANS_DUR = 24;
 
 function Scene({ image, room, title, caption, panX, panY, scale }: typeof scenes[0]) {
   const frame = useCurrentFrame();
   const progress = frame / SCENE_DUR;
+  const [handle] = useState(() => delayRender("Loading image: " + title));
+
+  const onLoad = useCallback(() => {
+    continueRender(handle);
+  }, [handle]);
 
   const sx = interpolate(progress, [0, 1], scale, { extrapolateRight: "clamp" });
   const px = interpolate(progress, [0, 1], panX, { extrapolateRight: "clamp" });
   const py = interpolate(progress, [0, 1], panY, { extrapolateRight: "clamp" });
 
-  // Text fade in
   const textOpacity = interpolate(frame, [12, 30], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const textY = interpolate(frame, [12, 30], [20, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-
-  // Room label (smaller, appears first)
   const roomOpacity = interpolate(frame, [6, 20], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const roomY = interpolate(frame, [6, 20], [12, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-
-  // Caption
   const captionOpacity = interpolate(frame, [24, 42], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-
-  // Subtle vignette pulse
-  const vignetteOpacity = interpolate(Math.sin(frame * 0.04), [-1, 1], [0.5, 0.7]);
+  const vignetteOpacity = interpolate(Math.sin(frame * 0.04), [-1, 1], [0.35, 0.55]);
 
   return (
     <AbsoluteFill style={{ background: "#0a0a0a" }}>
-      {/* Ken Burns image */}
-      <div style={{
-        position: "absolute", inset: 0, overflow: "hidden",
-      }}>
-        <img
+      <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+        <Img
           src={image}
+          onLoad={onLoad}
           style={{
             width: "100%", height: "100%", objectFit: "cover",
             transform: `scale(${sx}) translate(${px}%, ${py}%)`,
-            willChange: "transform",
           }}
         />
       </div>
 
-      {/* Vignette overlay */}
       <div style={{
         position: "absolute", inset: 0,
-        background: `radial-gradient(ellipse at center, transparent 40%, rgba(10,10,10,${vignetteOpacity}) 100%)`,
+        background: `radial-gradient(ellipse at center, transparent 50%, rgba(10,10,10,${vignetteOpacity}) 100%)`,
       }} />
 
-      {/* Bottom gradient for text */}
       <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0, height: "45%",
-        background: "linear-gradient(to top, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.4) 50%, transparent 100%)",
+        position: "absolute", bottom: 0, left: 0, right: 0, height: "40%",
+        background: "linear-gradient(to top, rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.3) 50%, transparent 100%)",
       }} />
 
-      {/* Text block */}
-      <div style={{
-        position: "absolute", bottom: 80, left: 80, right: 80,
-      }}>
+      <div style={{ position: "absolute", bottom: 80, left: 80, right: 80 }}>
         {room && (
           <div style={{
             fontFamily: bodyFont, fontSize: 16, fontWeight: 300,
             letterSpacing: "0.25em", textTransform: "uppercase",
-            color: "rgba(212,190,160,0.9)",
-            opacity: roomOpacity,
-            transform: `translateY(${roomY}px)`,
-            marginBottom: 14,
+            color: "rgba(212,190,160,0.9)", opacity: roomOpacity,
+            transform: `translateY(${roomY}px)`, marginBottom: 14,
           }}>
             {room}
           </div>
         )}
-
         <div style={{
           fontFamily: displayFont, fontSize: 52, fontWeight: 300,
-          color: "#f5f0eb",
-          opacity: textOpacity,
-          transform: `translateY(${textY}px)`,
-          lineHeight: 1.15,
-          marginBottom: 16,
+          color: "#f5f0eb", opacity: textOpacity,
+          transform: `translateY(${textY}px)`, lineHeight: 1.15, marginBottom: 16,
         }}>
           {title}
         </div>
-
         <div style={{
           fontFamily: bodyFont, fontSize: 18, fontWeight: 300,
-          color: "rgba(212,190,160,0.7)",
-          opacity: captionOpacity,
+          color: "rgba(212,190,160,0.7)", opacity: captionOpacity,
           letterSpacing: "0.08em",
         }}>
           {caption}
         </div>
       </div>
 
-      {/* Thin gold line accent */}
       <div style={{
         position: "absolute", bottom: 60, left: 80,
         width: interpolate(frame, [0, 40], [0, 120], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
-        height: 1,
-        background: "rgba(212,190,160,0.4)",
+        height: 1, background: "rgba(212,190,160,0.4)",
       }} />
     </AbsoluteFill>
   );
 }
 
-// Intro title card
 function IntroCard() {
   const frame = useCurrentFrame();
   const logoOpacity = interpolate(frame, [15, 40], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -188,8 +168,7 @@ function IntroCard() {
         <div style={{
           fontFamily: displayFont, fontSize: 64, fontWeight: 300,
           color: "#f5f0eb", opacity: logoOpacity,
-          transform: `translateY(${logoY}px)`,
-          letterSpacing: "0.08em",
+          transform: `translateY(${logoY}px)`, letterSpacing: "0.08em",
         }}>
           Maison Affluency
         </div>
@@ -209,7 +188,6 @@ function IntroCard() {
   );
 }
 
-// Outro
 function OutroCard() {
   const frame = useCurrentFrame();
   const opacity = interpolate(frame, [10, 35], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -254,17 +232,13 @@ export const MainVideo = () => {
   return (
     <AbsoluteFill style={{ background: "#0a0a0a" }}>
       <TransitionSeries>
-        {/* Intro */}
         <TransitionSeries.Sequence durationInFrames={75}>
           <IntroCard />
         </TransitionSeries.Sequence>
-
         <TransitionSeries.Transition
           presentation={fade()}
           timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS_DUR })}
         />
-
-        {/* Scenes */}
         {scenes.map((scene, i) => (
           <>
             <TransitionSeries.Sequence key={i} durationInFrames={SCENE_DUR}>
@@ -276,8 +250,6 @@ export const MainVideo = () => {
             />
           </>
         ))}
-
-        {/* Outro */}
         <TransitionSeries.Sequence durationInFrames={90}>
           <OutroCard />
         </TransitionSeries.Sequence>
