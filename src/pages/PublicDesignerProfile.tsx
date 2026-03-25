@@ -311,7 +311,7 @@ const PublicDesignerProfile = () => {
                     `/designers/${designer.slug}`,
                     `${designer.name} — Maison Affluency`,
                     designer.specialty || undefined,
-                    { directUrlPath: `/designers/${designer.slug}-og.html` }
+                    { directUrlPath: `/${designer.slug}-og.html` }
                   );
                 }}
                 label="Share"
@@ -346,7 +346,7 @@ const PublicDesignerProfile = () => {
                           title="Copy shareable link"
                           onClick={(e) => {
                             e.stopPropagation();
-                            const url = `https://www.maisonaffluency.com/designers/${designer.slug}-card.html`;
+                            const url = `https://www.maisonaffluency.com/${designer.slug}-card.html`;
                             navigator.clipboard.writeText(url).then(() => {
                               setShareCopied(true);
                               setTimeout(() => setShareCopied(false), 2000);
@@ -442,7 +442,7 @@ const PublicDesignerProfile = () => {
                     title="Copy shareable link"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const url = `https://www.maisonaffluency.com/designers/${designer.slug}-card.html`;
+                      const url = `https://www.maisonaffluency.com/${designer.slug}-card.html`;
                       navigator.clipboard.writeText(url).then(() => {
                         setShareCopied(true);
                         setTimeout(() => setShareCopied(false), 2000);
