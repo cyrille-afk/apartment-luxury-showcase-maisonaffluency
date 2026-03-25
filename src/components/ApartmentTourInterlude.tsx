@@ -22,7 +22,7 @@ const ApartmentTourInterlude = () => {
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/apartment-tour-og.html`;
+    const shareUrl = `${window.location.origin}/apartment-tour-og.html?v=2`;
     const text = `A Private Apartment Tour — Maison Affluency Singapore\n${shareUrl}`;
 
     if (isMobile) {
