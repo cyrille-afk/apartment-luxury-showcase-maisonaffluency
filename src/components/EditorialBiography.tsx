@@ -626,35 +626,7 @@ export default function EditorialBiography({
           i++;
         }
 
-        const hasFutureTextOrVideo = parsed
-          .slice(i)
-          .some((nextBlock) => nextBlock.type === "text" || nextBlock.type === "video");
-
-        if (!hasFutureTextOrVideo) {
-          if (isMobile) {
-            if (paired.length > 0) {
-              elements.push(
-                <div key={`terminal-text-${imageIdx}`}>
-                  {paired.map((p, pi) => (
-                    <p key={pi} className={pi > 0 ? "mt-4" : ""}>
-                      {renderParagraph(p)}
-                    </p>
-                  ))}
-                </div>
-              );
-            }
-            if (debugMediaOrder) debugEvents.push(`Suppressed terminal mobile image: ${block.url}`);
-            imageIdx++;
-            continue;
-          }
-
-          // On desktop, keep paired terminal images but still suppress unpaired trailing images.
-          if (paired.length === 0) {
-            if (debugMediaOrder) debugEvents.push(`Suppressed trailing unpaired image: ${block.url}`);
-            imageIdx++;
-            continue;
-          }
-        }
+        // Always render images — never suppress them
 
         if (paired.length > 0) {
           if (debugMediaOrder) debugEvents.push(`Split image rendered with ${paired.length} paired paragraph${paired.length > 1 ? "s" : ""}: ${block.url}`);
@@ -699,14 +671,13 @@ export default function EditorialBiography({
       for (const entry of biographyImages) {
         const media = parseMediaLine(entry);
         if (!media) continue;
-        // Skip if this URL is already rendered inline
         const alreadyInline = parsed.some(
           (b) => b.type !== "text" && (b as any).url === media.url
         );
         if (alreadyInline) continue;
 
         if (isVideoUrl(media.url)) {
-          if (debugMediaOrder) debugEvents.push(`Manual trailing video kept: ${media.url}`);
+          if (debugMediaOrder) debugEvents.push(`Manual trailing video: ${media.url}`);
           elements.push(
             <VideoBlock
               key={`manual-vid-${imageIdx}`}
@@ -718,10 +689,16 @@ export default function EditorialBiography({
             />
           );
         } else {
-          // Keep manual trailing videos, suppress manual trailing images.
-          if (debugMediaOrder) debugEvents.push(`Manual trailing image suppressed: ${media.url}`);
-          imageIdx++;
-          continue;
+          if (debugMediaOrder) debugEvents.push(`Manual trailing image rendered: ${media.url}`);
+          elements.push(
+            <FullWidthImageBlock
+              key={`manual-img-${imageIdx}`}
+              url={media.url}
+              designerName={designerName}
+              index={imageIdx}
+              overrideCaption={media.caption}
+            />
+          );
         }
         imageIdx++;
       }
@@ -835,27 +812,20 @@ export default function EditorialBiography({
           />
         );
       } else {
-        const hasFutureParagraphs = i < paragraphs.length - 1;
-
-        if (isMobile && !hasFutureParagraphs) {
-          if (debugMediaOrder) debugEvents.push(`Suppressed terminal mobile image: ${mediaItem.url}`);
-        } else {
-          if (debugMediaOrder) debugEvents.push(`Split image rendered with ${textAccum.length} paired paragraph${textAccum.length !== 1 ? "s" : ""}: ${mediaItem.url}`);
-          // Pair accumulated text with image in split layout
-          elements.push(
-            <SplitImageBlock
-              key={`media-split-${mediaIndex}`}
-              url={mediaItem.url}
-              designerName={designerName}
-              index={mediaIndex}
-              paragraphs={textAccum}
-              overrideCaption={mediaItem.caption}
-              forceAlign={mediaItem.align}
-              size={mediaItem.size}
-            />
-          );
-          textAccum = [];
-        }
+        if (debugMediaOrder) debugEvents.push(`Split image rendered with ${textAccum.length} paired paragraph${textAccum.length !== 1 ? "s" : ""}: ${mediaItem.url}`);
+        elements.push(
+          <SplitImageBlock
+            key={`media-split-${mediaIndex}`}
+            url={mediaItem.url}
+            designerName={designerName}
+            index={mediaIndex}
+            paragraphs={textAccum}
+            overrideCaption={mediaItem.caption}
+            forceAlign={mediaItem.align}
+            size={mediaItem.size}
+          />
+        );
+        textAccum = [];
       }
       mediaIndex++;
     }
@@ -874,12 +844,11 @@ export default function EditorialBiography({
     );
   }
 
-  // Remaining media — only render trailing videos; skip trailing images so
-  // photos never dangle at the bottom of the biography (especially on mobile).
+  // Remaining media — render all (images and videos)
   while (mediaIndex < parsedMedia.length) {
     const mediaItem = parsedMedia[mediaIndex];
     if (mediaItem.isVideo) {
-      if (debugMediaOrder) debugEvents.push(`Trailing video kept: ${mediaItem.url}`);
+      if (debugMediaOrder) debugEvents.push(`Trailing video rendered: ${mediaItem.url}`);
       elements.push(
         <VideoBlock
           key={`media-tail-vid-${mediaIndex}`}
@@ -890,8 +859,17 @@ export default function EditorialBiography({
           posterUrl={mediaItem.poster || undefined}
         />
       );
-    } else if (debugMediaOrder) {
-      debugEvents.push(`Trailing image suppressed: ${mediaItem.url}`);
+    } else {
+      if (debugMediaOrder) debugEvents.push(`Trailing image rendered: ${mediaItem.url}`);
+      elements.push(
+        <FullWidthImageBlock
+          key={`media-tail-img-${mediaIndex}`}
+          url={mediaItem.url}
+          designerName={designerName}
+          index={mediaIndex}
+          overrideCaption={mediaItem.caption}
+        />
+      );
     }
     mediaIndex++;
   }
