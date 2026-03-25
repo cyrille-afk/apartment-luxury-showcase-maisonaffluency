@@ -46,6 +46,7 @@ const TradeDesignersAdmin = () => {
   const [editBuffer, setEditBuffer] = useState<Record<string, Partial<DesignerRow>>>({});
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [previewMobile, setPreviewMobile] = useState(false);
+  const [previewDebug, setPreviewDebug] = useState(false);
 
   const { data: designers = [], isLoading } = useQuery({
     queryKey: ["admin-designers"],
@@ -417,25 +418,34 @@ const TradeDesignersAdmin = () => {
                               <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
                                 Editorial render preview
                               </p>
-                              <div className="flex items-center gap-1 bg-muted rounded-md p-0.5">
-                                <button
-                                  onClick={() => setPreviewMobile(false)}
-                                  className={cn(
-                                    "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors",
-                                    !previewMobile ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                                  )}
-                                >
-                                  <Monitor className="w-3 h-3" /> Desktop
-                                </button>
-                                <button
-                                  onClick={() => setPreviewMobile(true)}
-                                  className={cn(
-                                    "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors",
-                                    previewMobile ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                                  )}
-                                >
-                                  <Smartphone className="w-3 h-3" /> Mobile
-                                </button>
+                              <div className="flex flex-col items-end gap-2">
+                                <div className="flex items-center gap-1 bg-muted rounded-md p-0.5">
+                                  <button
+                                    onClick={() => setPreviewMobile(false)}
+                                    className={cn(
+                                      "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors",
+                                      !previewMobile ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                  >
+                                    <Monitor className="w-3 h-3" /> Desktop
+                                  </button>
+                                  <button
+                                    onClick={() => setPreviewMobile(true)}
+                                    className={cn(
+                                      "flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors",
+                                      previewMobile ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                  >
+                                    <Smartphone className="w-3 h-3" /> Mobile
+                                  </button>
+                                </div>
+                                <label className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                                  Debug media order
+                                  <Switch
+                                    checked={previewDebug}
+                                    onCheckedChange={setPreviewDebug}
+                                  />
+                                </label>
                               </div>
                             </div>
                             <div className={cn(
@@ -448,6 +458,7 @@ const TradeDesignersAdmin = () => {
                                   biographyImages={(editBuffer[d.id]?.biography_images ?? d.biography_images) || []}
                                   pickImages={[]}
                                   designerName={d.name}
+                                  debugMediaOrder={previewDebug}
                                 />
                               </Suspense>
                             </div>
