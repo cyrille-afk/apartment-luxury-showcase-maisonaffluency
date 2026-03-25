@@ -55,6 +55,7 @@ const PublicDesigners = lazy(() => import("./pages/PublicDesigners"));
 const PublicDesignerProfile = lazy(() => import("./pages/PublicDesignerProfile"));
 const PublicFavorites = lazy(() => import("./pages/PublicFavorites"));
 const TradeSpecSheet = lazy(() => import("./pages/TradeSpecSheet"));
+const ApartmentTour = lazy(() => import("./pages/ApartmentTour"));
 
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
