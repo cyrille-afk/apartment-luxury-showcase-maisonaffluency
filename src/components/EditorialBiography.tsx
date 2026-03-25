@@ -257,32 +257,9 @@ function VideoBlock({
       className="my-10 md:my-14 -mx-2 md:-mx-6"
     >
       <div className="aspect-video rounded-xl overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center">
-        {!playing && (thumbnailUrl || currentPosterUrl) ? (
-          /* Poster + play button for YouTube, Vimeo, or any video with a poster */
-          <button
-            onClick={() => setPlaying(true)}
-            className="w-full h-full relative group cursor-pointer"
-            aria-label={`Play ${caption || "video"}`}
-          >
-            <img
-              src={currentPosterUrl || thumbnailUrl!}
-              alt={caption || `${designerName} — video`}
-              className="w-full h-full object-cover"
-              onError={handlePosterError}
-            />
-            {playOverlay}
-          </button>
-        ) : !playing && embedUrl ? (
+        {embedUrl ? (
           <iframe
-            src={embedUrl}
-            title={caption || `${designerName} — video`}
-            className="w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        ) : playing && embedUrl ? (
-          <iframe
-            src={embedUrl.includes("?") ? `${embedUrl}&autoplay=1` : `${embedUrl}?autoplay=1`}
+            src={playing ? (embedUrl.includes("?") ? `${embedUrl}&autoplay=1` : `${embedUrl}?autoplay=1`) : embedUrl}
             title={caption || `${designerName} — video`}
             className="w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
