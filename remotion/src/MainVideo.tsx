@@ -1,4 +1,4 @@
-import { AbsoluteFill, useCurrentFrame, interpolate, delayRender, continueRender, Img } from "remotion";
+import { AbsoluteFill, useCurrentFrame, interpolate, delayRender, continueRender, Img, Audio, staticFile } from "remotion";
 import { TransitionSeries, springTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import { loadFont as loadCormorant } from "@remotion/google-fonts/CormorantGaramond";
@@ -231,6 +231,7 @@ function OutroCard() {
 export const MainVideo = () => {
   return (
     <AbsoluteFill style={{ background: "#0a0a0a" }}>
+      <Audio src={staticFile("audio/ambient-track.mp3")} volume={0.45} />
       <TransitionSeries>
         <TransitionSeries.Sequence durationInFrames={75}>
           <IntroCard />
