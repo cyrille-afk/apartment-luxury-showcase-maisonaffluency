@@ -42,14 +42,17 @@ const CuratingTeam = () => {
       transition={{ duration: 0.8, delay: 0.2 }}
       className="mt-0 pt-4 md:pt-6 pb-12 md:pb-16 px-4 md:px-12 scroll-mt-24 bg-white"
     >
-      <h3 className="font-display text-2xl md:text-3xl text-primary mb-4 text-center">
-        The Curating Team
-      </h3>
-      <p className="text-muted-foreground font-body text-center max-w-2xl mx-auto mb-12 italic">
-        The heart and soul of the gallery and designers selection
-      </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 md:mb-12">
+        <div className="mb-6 md:mb-0">
+          <h3 className="font-display text-2xl md:text-3xl text-primary mb-2">
+            The Curating Team
+          </h3>
+          <p className="text-muted-foreground font-body italic">
+            The heart and soul of the gallery and designers selection
+          </p>
+        </div>
 
-      <div className="grid grid-cols-2 gap-3 md:gap-8 max-w-md mx-auto">
+        <div className="flex items-center gap-4 md:gap-8">
         {curatingTeam.map((member, index) => (
           <motion.div
             key={member.id}
