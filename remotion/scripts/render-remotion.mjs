@@ -33,4 +33,5 @@ await renderMedia({
 });
 
 await browser.close({ silent: false });
-console.log("Rendered to /mnt/documents/apartment-tour.mp4");
+console.log(`Duration: ${composition.durationInFrames} frames, ${composition.durationInFrames / composition.fps}s`);
+console.log("Silent render complete at /tmp/apartment-tour-silent.mp4");
