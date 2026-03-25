@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Package, FileText, Maximize2, Share2, Check } from "lucide-react";
@@ -39,9 +39,8 @@ function displayName(name: string): string {
 
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
   const { data: designer, isLoading } = useDesigner(slug);
-  const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const isMobile = useIsMobile();
@@ -136,16 +135,7 @@ const PublicDesignerProfile = () => {
   }
 
   if (!designer) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h1 className="text-2xl font-light text-foreground">Designer not found</h1>
-          <Link to="/designers" className="text-primary underline underline-offset-4 text-sm">
-            Back to directory
-          </Link>
-        </div>
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
   const name = displayName(designer.name);
