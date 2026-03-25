@@ -626,35 +626,7 @@ export default function EditorialBiography({
           i++;
         }
 
-        const hasFutureTextOrVideo = parsed
-          .slice(i)
-          .some((nextBlock) => nextBlock.type === "text" || nextBlock.type === "video");
-
-        if (!hasFutureTextOrVideo) {
-          if (isMobile) {
-            if (paired.length > 0) {
-              elements.push(
-                <div key={`terminal-text-${imageIdx}`}>
-                  {paired.map((p, pi) => (
-                    <p key={pi} className={pi > 0 ? "mt-4" : ""}>
-                      {renderParagraph(p)}
-                    </p>
-                  ))}
-                </div>
-              );
-            }
-            if (debugMediaOrder) debugEvents.push(`Suppressed terminal mobile image: ${block.url}`);
-            imageIdx++;
-            continue;
-          }
-
-          // On desktop, keep paired terminal images but still suppress unpaired trailing images.
-          if (paired.length === 0) {
-            if (debugMediaOrder) debugEvents.push(`Suppressed trailing unpaired image: ${block.url}`);
-            imageIdx++;
-            continue;
-          }
-        }
+        // Always render images — never suppress them
 
         if (paired.length > 0) {
           if (debugMediaOrder) debugEvents.push(`Split image rendered with ${paired.length} paired paragraph${paired.length > 1 ? "s" : ""}: ${block.url}`);
