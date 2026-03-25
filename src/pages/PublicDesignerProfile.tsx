@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { useParams, Link, Navigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Package, FileText, Maximize2, Share2, Check } from "lucide-react";
@@ -39,6 +39,8 @@ function displayName(name: string): string {
 
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get("highlight");
   const { data: designer, isLoading } = useDesigner(slug);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
@@ -586,7 +588,16 @@ const PublicDesignerProfile = () => {
                   return (
                     <div
                       key={pick.id}
-                      className="group flex flex-col cursor-pointer"
+                      id={`pick-${pick.id}`}
+                      ref={(el) => {
+                        if (el && highlightId === pick.id) {
+                          el.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }
+                      }}
+                      className={cn(
+                        "group flex flex-col cursor-pointer transition-all duration-700",
+                        highlightId === pick.id && "ring-2 ring-primary rounded-xl ring-offset-2 ring-offset-background animate-pulse"
+                      )}
                       onClick={() => setLightboxItem({
                         id: pick.id,
                         title: pick.title,

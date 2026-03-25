@@ -214,7 +214,16 @@ const TradeDesignersAdmin = () => {
                 {" — "}these will be deprioritised in the grid.
                 <ul className="mt-1 list-disc pl-4 text-[11px] opacity-80">
                   {duplicates.map((p) => (
-                    <li key={p.id} className="truncate max-w-sm">{p.title}</li>
+                    <li key={p.id} className="truncate max-w-sm">
+                      <a
+                        href={`/designers/${designer.slug}?highlight=${p.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline decoration-amber-400 underline-offset-2 hover:text-amber-900 dark:hover:text-amber-200 transition-colors cursor-pointer"
+                      >
+                        {p.title} <ExternalLink className="w-2.5 h-2.5 inline-block ml-0.5" />
+                      </a>
+                    </li>
                   ))}
                 </ul>
               </div>
