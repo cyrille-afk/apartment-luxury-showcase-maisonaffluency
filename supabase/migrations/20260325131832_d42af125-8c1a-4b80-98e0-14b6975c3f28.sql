@@ -1,0 +1,1 @@
+ALTER TABLE public.designers ADD COLUMN hero_photo_credit text DEFAULT NULL;
