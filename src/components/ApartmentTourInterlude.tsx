@@ -46,38 +46,28 @@ const ApartmentTourInterlude = () => {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
         >
-          {/* Header with thumbnail */}
-          <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center mb-6 md:mb-10">
-            <div className="hidden md:block w-[320px] flex-shrink-0 aspect-[4/3] bg-muted/20 rounded-lg overflow-hidden">
-              <img
-                src="https://res.cloudinary.com/dif1oamtj/image/upload/w_640,q_auto,f_auto,c_fill,g_auto/bespoke-sofa_gxidtx"
-                alt="Gallery preview"
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-            <div className="flex-1">
-              <p className="text-[11px] md:text-[12px] tracking-[0.3em] uppercase text-muted-foreground/60 mb-3 font-light font-body">
-                Maison Affluency · Singapore
-              </p>
-              <h2 className="font-serif text-xl md:text-3xl lg:text-4xl text-foreground font-light tracking-wide">
-                Tour Our Gallery
-              </h2>
-              <h3 className="font-serif text-lg md:text-xl text-muted-foreground font-light tracking-wide mt-1">
-                & Meet the Curating Team
-              </h3>
-              <p className="text-muted-foreground text-xs md:text-sm tracking-[0.1em] mt-3 font-light font-body max-w-xl">
-                An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship, and panoramic cityscape views.
-              </p>
-              <button
-                onClick={handleShare}
-                className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors mt-3"
-                aria-label="Share apartment tour"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                Share
-              </button>
-            </div>
+          {/* Header */}
+          <div className="flex flex-col mb-6 md:mb-10">
+            <p className="text-[11px] md:text-[12px] tracking-[0.3em] uppercase text-muted-foreground/60 mb-3 font-light font-body">
+              Maison Affluency · Singapore
+            </p>
+            <h2 className="font-serif text-xl md:text-3xl lg:text-4xl text-foreground font-light tracking-wide">
+              Tour Our Gallery
+            </h2>
+            <h3 className="font-serif text-lg md:text-xl text-muted-foreground font-light tracking-wide mt-1">
+              & Meet the Curating Team
+            </h3>
+            <p className="text-muted-foreground text-xs md:text-sm tracking-[0.1em] mt-3 font-light font-body max-w-xl">
+              An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship, and panoramic cityscape views.
+            </p>
+            <button
+              onClick={handleShare}
+              className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors mt-3"
+              aria-label="Share apartment tour"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              Share
+            </button>
           </div>
 
           {/* Video player */}
