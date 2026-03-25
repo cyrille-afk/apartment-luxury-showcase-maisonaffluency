@@ -812,13 +812,7 @@ export default function EditorialBiography({
           />
         );
       } else {
-        const hasFutureParagraphs = i < paragraphs.length - 1;
-
-        if (isMobile && !hasFutureParagraphs) {
-          if (debugMediaOrder) debugEvents.push(`Suppressed terminal mobile image: ${mediaItem.url}`);
-        } else {
           if (debugMediaOrder) debugEvents.push(`Split image rendered with ${textAccum.length} paired paragraph${textAccum.length !== 1 ? "s" : ""}: ${mediaItem.url}`);
-          // Pair accumulated text with image in split layout
           elements.push(
             <SplitImageBlock
               key={`media-split-${mediaIndex}`}
