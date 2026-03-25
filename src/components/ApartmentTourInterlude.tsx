@@ -1,7 +1,8 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
-import { Share2, Play } from "lucide-react";
+import { Share2, Play, Check, Copy } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "sonner";
 
 const VIDEO_URL = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/videos/apartment-tour-voiceover.mp4";
 const POSTER_URL = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,c_fill,g_auto/bespoke-sofa_gxidtx";
@@ -20,11 +21,21 @@ const ApartmentTourInterlude = () => {
     }, 100);
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const shareUrl = `${window.location.origin}/apartment-tour`;
     const text = `A Private Apartment Tour — Maison Affluency Singapore\n${shareUrl}`;
-    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(wa, "_blank", "noopener");
+
+    if (isMobile) {
+      const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(wa, "_blank", "noopener");
+    } else {
+      try {
+        await navigator.clipboard.writeText(text);
+        toast.success("Link copied — paste it into WhatsApp or any app");
+      } catch {
+        toast.error("Could not copy link");
+      }
+    }
   };
 
   return (
