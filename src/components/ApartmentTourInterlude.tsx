@@ -55,10 +55,10 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               <p className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-muted-foreground/60 mb-2 font-light font-body">
                 Maison Affluency · Singapore
               </p>
-              <h2 className="font-serif text-lg md:text-2xl text-foreground font-light tracking-wide">
+              <h2 className="font-serif text-base md:text-lg text-foreground font-light tracking-wide">
                 Tour Our Gallery
               </h2>
-               <p className="text-muted-foreground text-xs tracking-[0.08em] mt-2 font-light font-body max-w-md">
+               <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5">
                 An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship, and panoramic cityscape views.
               </p>
 
