@@ -826,12 +826,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             </motion.span>
                           </div>
                         )}
-                        {/* Piece count — subtle frosted, only on hover */}
-                        {!section.items.some(i => i.description) && hotspotCounts[item.title] > 0 && (
-                          <span className="absolute top-3 right-3 z-10 bg-background/30 backdrop-blur-md font-body text-[10px] text-foreground/60 px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            {hotspotCounts[item.title]} {hotspotCounts[item.title] === 1 ? "piece" : "pieces"}
-                          </span>
-                        )}
                         {/* +1 more indicator on last visible card in 3-col mode */}
                         {gridCols === 3 && index === 2 && section.items.length > 3 && (
                           <button
@@ -858,11 +852,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             <Maximize2 className={`w-3 h-3 ${gridCols === 4 ? '' : 'md:w-3.5 md:h-3.5'}`} />
                           </span>
                         </button>
-                      </div>
-                      <div className="mb-4 md:mb-6">
-                        <h4 className={`font-serif text-foreground group-hover:text-primary transition-colors duration-300 ${gridCols === 4 ? 'text-sm' : 'text-base'}`}>
-                          {item.title}
-                        </h4>
                       </div>
                     </motion.div>
                   );
