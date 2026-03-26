@@ -66,11 +66,10 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               <h3 className="font-serif text-base md:text-lg text-foreground font-light tracking-wide mt-4">
                 & Meet the Curating Team
               </h3>
-              <div className="flex items-center gap-6 mt-0.5 mb-3">
-                <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide">
-                  The heart and soul of the gallery and designers selection
-                </p>
-                <div className="flex items-start gap-8">
+              <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5 mb-3">
+                The heart and soul of the gallery and designers selection
+              </p>
+              <div className="flex items-start gap-8">
                 {[
                   {
                     name: "Cyrille Delval",
@@ -116,7 +115,6 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                     </DialogContent>
                   </Dialog>
                 ))}
-                </div>
               </div>
             </div>
 
