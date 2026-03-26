@@ -91,7 +91,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                           <img
                             src={member.image}
                             alt={member.name}
-                            className="w-16 h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                            className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                           />
                           <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-background border border-[hsl(var(--gold))]/40 flex items-center justify-center">
                             <Search className="w-2.5 h-2.5 text-muted-foreground" />
