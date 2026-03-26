@@ -1,10 +1,11 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Share2, Play, Search } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { trackVideoEvent, attachMilestoneTracking } from "@/lib/videoTracking";
 
 const VIDEO_URL = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/videos/apartment-tour-voiceover.mp4";
 const POSTER_URL = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,c_fill,g_auto/bespoke-sofa_gxidtx";
@@ -16,8 +17,24 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const isMobile = useIsMobile();
 
+  // Attach milestone tracking when video starts playing
+  useEffect(() => {
+    if (!isPlaying || !videoRef.current) return;
+    const cleanup = attachMilestoneTracking(videoRef.current);
+    const video = videoRef.current;
+    const onPause = () => {
+      if (!video.ended) trackVideoEvent("pause");
+    };
+    video.addEventListener("pause", onPause);
+    return () => {
+      cleanup();
+      video.removeEventListener("pause", onPause);
+    };
+  }, [isPlaying]);
+
   const handlePlay = () => {
     setIsPlaying(true);
+    trackVideoEvent("play");
     setTimeout(() => {
       videoRef.current?.play();
     }, 100);
