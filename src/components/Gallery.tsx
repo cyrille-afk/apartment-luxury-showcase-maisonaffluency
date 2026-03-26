@@ -826,6 +826,19 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             {hotspotCounts[item.title]} {hotspotCounts[item.title] === 1 ? "piece" : "pieces"}
                           </span>
                         )}
+                        {/* +1 more indicator on last visible card in 3-col mode */}
+                        {gridCols === 3 && index === 2 && section.items.length > 3 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setGridCols(4);
+                            }}
+                            className="absolute bottom-2 right-2 md:bottom-4 md:right-4 z-10 bg-black/50 backdrop-blur-sm text-white font-body text-xs tracking-wide px-3 py-1.5 rounded-full hover:bg-black/70 transition-all duration-300"
+                            aria-label="Show 1 more photo"
+                          >
+                            +1 more
+                          </button>
+                        )}
                         {/* Expand icon - opens lightbox directly */}
                         <button
                           onClick={(e) => {
