@@ -68,19 +68,21 @@ export function useDesigner(slug: string | undefined) {
 }
 
 /** Fetch curator picks for a designer */
-export function useDesignerPicks(designerId: string | undefined) {
+export function useDesignerPicks(designerId: string | undefined, { publicOnly = false }: { publicOnly?: boolean } = {}) {
   return useQuery({
-    queryKey: ["designer-picks", designerId],
+    queryKey: ["designer-picks", designerId, publicOnly],
     queryFn: async () => {
       if (!designerId) return [];
+      const table = publicOnly ? "designer_curator_picks_public" : "designer_curator_picks";
       const { data, error } = await supabase
-        .from("designer_curator_picks")
+        .from(table)
         .select("*")
         .eq("designer_id", designerId)
         .order("sort_order", { ascending: true });
       if (error) throw error;
       return (data || []).map((d) => ({
         ...d,
+        trade_price_cents: 'trade_price_cents' in d ? d.trade_price_cents : null,
         pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
       })) as DesignerCuratorPick[];
     },
