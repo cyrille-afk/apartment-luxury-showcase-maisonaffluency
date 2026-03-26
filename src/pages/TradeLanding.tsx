@@ -11,7 +11,8 @@ const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/uploa
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
 const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
-const TRADE_PROGRAM_SHARE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image?path=/trade/program&v=6&t=${Date.now()}`;
+const buildTradeProgramShareUrl = () =>
+  `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image?path=/trade/program&v=6&t=${Date.now()}`;
 
 const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
   const [open, setOpen] = useState(false);
