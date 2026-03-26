@@ -66,7 +66,7 @@ const scenes: SceneData[] = [
   { image: portrait("AffluencySG_204_1_qbbpqb"), room: "", title: "A Final Flourish", caption: "Sculptural objects as finishing touches", orientation: "portrait" },
 ];
 
-const SCENE_DUR = 125;
+const SCENE_DUR = 210;
 const TRANS_DUR = 18;
 
 function Scene({ image, room, title, caption, orientation }: SceneData) {
