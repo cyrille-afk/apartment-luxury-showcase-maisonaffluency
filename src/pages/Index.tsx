@@ -403,7 +403,9 @@ const Index = () => {
         </Suspense>
       )}
 
-      <FeaturedReadBanner />
+      <Suspense fallback={null}>
+        <FeaturedReadBanner />
+      </Suspense>
 
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:rounded focus:shadow-lg focus:border focus:border-border font-body text-sm">
         Skip to main content
