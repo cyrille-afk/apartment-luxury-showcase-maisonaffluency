@@ -66,10 +66,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               </p>
 
               {/* The Curating Team — inline */}
-              <h4 className="font-serif text-sm md:text-base text-foreground font-light tracking-wide mt-5">
-                Meet The Curating Team
-              </h4>
-              <p className="text-[9px] md:text-[10px] font-body text-muted-foreground/60 italic tracking-wide mt-0.5 mb-3">
+              <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-4 mb-3">
                 The heart and soul of the gallery and designers selection
               </p>
               <div className="flex items-start gap-4">
