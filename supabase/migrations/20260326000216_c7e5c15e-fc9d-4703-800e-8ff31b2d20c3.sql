@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/v1774483251/Screen_Shot_2026-03-26_at_7.59.59_AM_ds69cb.png' WHERE id = 'bdcf9f7e-6bd3-4a97-b132-278aecd5912e';
