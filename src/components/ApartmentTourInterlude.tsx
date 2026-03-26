@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
-import { Share2, Play, Check, Copy } from "lucide-react";
+import { Share2, Play, Search } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -90,11 +90,16 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   <Dialog key={member.name}>
                     <DialogTrigger asChild>
                       <button className="flex flex-col items-center text-center group cursor-pointer">
-                        <img
-                          src={member.image}
-                          alt={member.name}
-                          className="w-12 h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                        />
+                        <div className="relative">
+                          <img
+                            src={member.image}
+                            alt={member.name}
+                            className="w-12 h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                          />
+                          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-background border border-[hsl(var(--gold))]/40 flex items-center justify-center">
+                            <Search className="w-2.5 h-2.5 text-muted-foreground" />
+                          </div>
+                        </div>
                         <span className="text-[10px] font-body text-foreground mt-1 tracking-wide group-hover:text-primary transition-colors">{member.name}</span>
                         <span className="text-[9px] font-body text-muted-foreground/70 tracking-wider uppercase">{member.role}</span>
                       </button>
