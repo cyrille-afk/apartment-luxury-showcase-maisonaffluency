@@ -66,7 +66,7 @@ const scenes: SceneData[] = [
   { image: portrait("AffluencySG_204_1_qbbpqb"), room: "", title: "A Final Flourish", caption: "Sculptural objects as finishing touches", orientation: "portrait" },
 ];
 
-const SCENE_DUR = 105;
+const SCENE_DUR = 127;
 const TRANS_DUR = 18;
 
 function Scene({ image, room, title, caption, orientation }: SceneData) {
@@ -235,13 +235,13 @@ function OutroCard() {
   );
 }
 
-// Total duration: intro(70) + 27 scenes × 75 + outro(80) - 28 transitions × 18
-// = 70 + 2025 + 80 - 504 = 1671 frames ≈ 55.7s
+// Total duration: intro(70) + 27 scenes × 127 + outro(80) - 28 transitions × 18
+// = 70 + 3429 + 80 - 504 = 3075 frames ≈ 102.5s
 const TOTAL_FRAMES = 70 + scenes.length * SCENE_DUR + 80 - (scenes.length + 1) * TRANS_DUR;
 const AUDIO_DUR_FRAMES = 32 * 30; // 32s audio at 30fps = 960 frames
 
 const VOICEOVER_START = 70; // Start after intro card
-const VOICEOVER_DUR_FRAMES = Math.round(77.4 * 30); // 77.4s at 30fps
+const VOICEOVER_DUR_FRAMES = Math.round(97.5 * 30); // ~97.5s at 30fps (ends ~5s before outro)
 
 export const MainVideo = () => {
   // Layer audio copies to cover the full video duration
