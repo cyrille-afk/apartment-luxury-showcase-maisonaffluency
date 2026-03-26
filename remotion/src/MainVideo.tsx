@@ -28,43 +28,43 @@ const scenes: SceneData[] = [
   // ── A Sociable Environment ──
   { image: portrait("bespoke-sofa_gxidtx"), room: "A Sociable Environment", title: "An Inviting Lounge Area", caption: "Bespoke sofa · Hand-knotted artisan rug · Sculptural lighting", orientation: "portrait" },
   { image: landscape("living-room-hero_zxfcxl"), room: "", title: "A Sophisticated Living Room", caption: "Collectible furniture and panoramic cityscape views", orientation: "landscape" },
-  { image: portrait("dining-room_ey0bu5"), room: "", title: "Panoramic Cityscape Views", caption: "Custom dining with a view of the city skyline", orientation: "portrait" },
+  { image: portrait("dining-room_ey0bu5"), room: "", title: "Panoramic Cityscape Views", caption: "Custom dining with a view of the city skyline", orientation: "portrait", pan: "horizontal" },
   { image: portrait("IMG_2402_y3atdm"), room: "", title: "A Sun Lit Reading Corner", caption: "Quiet moments bathed in natural light", orientation: "portrait" },
 
   // ── An Intimate Setting ──
   { image: portrait("intimate-dining_ux4pee"), room: "An Intimate Setting", title: "A Dreamy Tuscan Landscape", caption: "Custom dining · Hand-blown glass pendants", orientation: "portrait" },
-  { image: portrait("intimate-table-detail_aqxvvm"), room: "", title: "A Highly Customised Dining Room", caption: "Every detail meticulously considered", orientation: "portrait" },
+  { image: portrait("intimate-table-detail_aqxvvm"), room: "", title: "A Highly Customised Dining Room", caption: "Every detail meticulously considered", orientation: "portrait", pan: "horizontal" },
   { image: portrait("intimate-lounge_tf4sm1"), room: "", title: "A Relaxed Setting", caption: "Sculptural seating and artisan accessories", orientation: "portrait" },
   { image: portrait("IMG_2133_wtxd62"), room: "", title: "A Colourful Nook", caption: "Bold colours in an intimate space", orientation: "portrait" },
 
   // ── A Personal Sanctuary ──
-  { image: portrait("boudoir_ll5spn"), room: "A Personal Sanctuary", title: "A Sophisticated Boudoir", caption: "Bespoke marquetry desk · Hand-blown glass chandelier", orientation: "portrait" },
+  { image: portrait("boudoir_ll5spn"), room: "A Personal Sanctuary", title: "A Sophisticated Boudoir", caption: "Bespoke marquetry desk · Hand-blown glass chandelier", orientation: "portrait", pan: "horizontal" },
   { image: `${CLOUD_BASE}/w_1920,q_auto:best,c_fit,e_brightness:-15/v1772177400/70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq.jpg`, room: "", title: "A Jewelry Box Like Setting", caption: "Artisan suede lamp and bronze painting", orientation: "portrait" },
   { image: portrait("bedroom-second_cyfmdj"), room: "", title: "A Serene Decor", caption: "Soft tones and delicate textures", orientation: "portrait" },
-  { image: portrait("art-master-bronze_hf6bad"), room: "", title: "A Design Treasure Trove", caption: "Curated collectibles and sculptural art", orientation: "portrait" },
+  { image: portrait("art-master-bronze_hf6bad"), room: "", title: "A Design Treasure Trove", caption: "Curated collectibles and sculptural art", orientation: "portrait", pan: "horizontal" },
 
   // ── A Calming and Dreamy Environment ──
   { image: portrait("master-suite_y6jaix"), room: "A Calming and Dreamy Environment", title: "A Masterful Suite", caption: "Hand-carved furniture · Hand-knotted silk rugs", orientation: "portrait" },
   { image: portrait("bedroom-third_ol56sx"), room: "", title: "Design Tableau", caption: "Layered textures and soft lighting", orientation: "portrait" },
-  { image: portrait("bedroom-alt_yk0j0d"), room: "", title: "Unique By Design Vignette", caption: "A personal statement in every corner", orientation: "portrait" },
+  { image: portrait("bedroom-alt_yk0j0d"), room: "", title: "Unique By Design Vignette", caption: "A personal statement in every corner", orientation: "portrait", pan: "horizontal" },
 
   // ── A Small Room with Massive Personality ──
   { image: portrait("small-room-bedroom_mp8mdd"), room: "A Small Room with Massive Personality", title: "An Artistic Statement", caption: "Bold statement pieces · Artisan craftsmanship", orientation: "portrait" },
-  { image: portrait("small-room-personality_wvxz6y"), room: "", title: "Compact Elegance", caption: "Maximising character in a modest footprint", orientation: "portrait" },
+  { image: portrait("small-room-personality_wvxz6y"), room: "", title: "Compact Elegance", caption: "Maximising character in a modest footprint", orientation: "portrait", pan: "horizontal" },
   { image: portrait("small-room-vase_s3nz5o"), room: "", title: "Yellow Crystalline", caption: "Hand-crafted artisan glasswork", orientation: "portrait" },
   { image: portrait("small-room-chair_aobzyb"), room: "", title: "Golden Hour", caption: "Warm light and refined seating", orientation: "portrait" },
 
   // ── Home Office with a View ──
   { image: portrait("home-office-desk_g0ywv2"), room: "Home Office with a View", title: "A Workspace of Distinction", caption: "Sculptural desk · Refined lighting", orientation: "portrait" },
-  { image: portrait("home-office-desk-2_gb1nlb"), room: "", title: "Refined Details", caption: "Precision in every material choice", orientation: "portrait" },
+  { image: portrait("home-office-desk-2_gb1nlb"), room: "", title: "Refined Details", caption: "Precision in every material choice", orientation: "portrait", pan: "horizontal" },
   { image: portrait("home-office-3_t39msw"), room: "", title: "Light & Focus", caption: "Natural light meets considered design", orientation: "portrait" },
   { image: portrait("AffluencySG_143_1_f9iihg"), room: "", title: "Design & Fine Art Books Corner", caption: "A curated library of inspiration", orientation: "portrait" },
 
   // ── The Details Make the Design ──
-  { image: portrait("details-section_u6rwbu"), room: "The Details Make the Design", title: "Curated Vignette", caption: "Every object tells a story", orientation: "portrait" },
+  { image: portrait("details-section_u6rwbu"), room: "The Details Make the Design", title: "Curated Vignette", caption: "Every object tells a story", orientation: "portrait", pan: "horizontal" },
   { image: portrait("details-console_hk6uxt"), room: "", title: "Craftsmanship at Every Corner", caption: "The details are not the details — they make the design", orientation: "portrait" },
   { image: portrait("details-lamp_clzcrk"), room: "", title: "Light & Texture", caption: "Interplay of materials and illumination", orientation: "portrait" },
-  { image: portrait("AffluencySG_204_1_qbbpqb"), room: "", title: "A Final Flourish", caption: "Sculptural objects as finishing touches", orientation: "portrait" },
+  { image: portrait("AffluencySG_204_1_qbbpqb"), room: "", title: "A Final Flourish", caption: "Sculptural objects as finishing touches", orientation: "portrait", pan: "horizontal" },
 ];
 
 const SCENE_DUR = 105;
