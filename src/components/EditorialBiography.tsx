@@ -258,13 +258,30 @@ function VideoBlock({
     >
       <div className="aspect-video rounded-xl overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center">
         {embedUrl ? (
-          <iframe
-            src={playing ? (embedUrl.includes("?") ? `${embedUrl}&autoplay=1` : `${embedUrl}?autoplay=1`) : embedUrl}
-            title={caption || `${designerName} — video`}
-            className="w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          !playing && currentPosterUrl ? (
+            <button
+              onClick={() => setPlaying(true)}
+              className="w-full h-full relative group cursor-pointer"
+              aria-label={`Play ${caption || "video"}`}
+            >
+              <img
+                src={currentPosterUrl}
+                alt={caption || `${designerName} — video cover`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={handlePosterError}
+              />
+              {playOverlay}
+            </button>
+          ) : (
+            <iframe
+              src={playing ? (embedUrl.includes("?") ? `${embedUrl}&autoplay=1` : `${embedUrl}?autoplay=1`) : embedUrl}
+              title={caption || `${designerName} — video`}
+              className="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )
         ) : !playing ? (
           <button
             onClick={() => setPlaying(true)}
