@@ -1885,13 +1885,13 @@ const brandToDesignerMap: Record<string, string> = {
 
 // Ecart sub-designers for nested display
 const ecartSubDesigners = [
-  { name: "Jean-Michel Frank", slug: "jean-michel-frank", image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_267,c_fill,g_auto,q_auto/v1/jean-michel-frank-portrait" },
-  { name: "Eileen Gray", slug: "eileen-gray", image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_267,c_fill,g_auto,q_auto/v1/eileen-gray-portrait" },
-  { name: "Pierre Chareau", slug: "pierre-chareau", image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_267,c_fill,g_auto,q_auto/v1/pierre-chareau-portrait" },
-  { name: "Mariano Fortuny", slug: "mariano-fortuny", image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_267,c_fill,g_auto,q_auto/v1/mariano-fortuny-portrait" },
-  { name: "Paul László", slug: "paul-laszlo", image: "" },
-  { name: "Félix Aublet", slug: "felix-aublet", image: "" },
-  { name: "Laurent Maugoust & Cécile Chenais", slug: "laurent-maugoust-cecile-chenais", image: "" },
+  { name: "Jean-Michel Frank", slug: "jean-michel-frank", image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_267,q_auto,c_fill,g_auto,f_auto/jean-michel-frank-new_toifde" },
+  { name: "Eileen Gray", slug: "eileen-gray", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Eileen_Gray.jpg" },
+  { name: "Pierre Chareau", slug: "pierre-chareau", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Pierre_Chareau.jpg" },
+  { name: "Mariano Fortuny", slug: "mariano-fortuny", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Mariano_Fortuny.jpg" },
+  { name: "Paul László", slug: "paul-laszlo", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Paul_Laszlo_BD.jpg" },
+  { name: "Félix Aublet", slug: "felix-aublet", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Felix_Aublet.jpg" },
+  { name: "Laurent Maugoust & Cécile Chenais", slug: "laurent-maugoust-cecile-chenais", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Laurent_Maugoust_Cecile_Chenais.jpg" },
 ];
 
 // Reverse map: designer ID → brand name (for deep-link resolution)
