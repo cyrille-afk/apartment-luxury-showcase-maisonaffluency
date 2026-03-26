@@ -661,37 +661,28 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   </div>
                   <div className="flex items-center gap-3">
                   {originalSectionIndex === 0 && (
-                    <TooltipProvider delayDuration={200}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
-                            className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
-                            aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
-                          >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                              {gridCols === 3 ? (
-                                <>
-                                  <rect x="4" y="3" width="4" height="18" rx="1" fill="black" />
-                                  <rect x="10" y="3" width="4" height="18" rx="1" fill="black" />
-                                  <rect x="16" y="3" width="4" height="18" rx="1" fill="black" />
-                                </>
-                              ) : (
-                                <>
-                                  <rect x="2" y="3" width="4" height="18" rx="1" fill="black" />
-                                  <rect x="7.5" y="3" width="4" height="18" rx="1" fill="black" />
-                                  <rect x="13" y="3" width="4" height="18" rx="1" fill="black" />
-                                  <rect x="18.5" y="3" width="4" height="18" rx="0.5" fill="black" />
-                                </>
-                              )}
-                            </svg>
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="text-xs">
-                          {gridCols === 3 ? "Display 4" : "Display 3"}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                      <button
+                        onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
+                        className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
+                        aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                          {gridCols === 3 ? (
+                            <>
+                              <rect x="4" y="3" width="4" height="18" rx="1" fill="black" />
+                              <rect x="10" y="3" width="4" height="18" rx="1" fill="black" />
+                              <rect x="16" y="3" width="4" height="18" rx="1" fill="black" />
+                            </>
+                          ) : (
+                            <>
+                              <rect x="2" y="3" width="4" height="18" rx="1" fill="black" />
+                              <rect x="7.5" y="3" width="4" height="18" rx="1" fill="black" />
+                              <rect x="13" y="3" width="4" height="18" rx="1" fill="black" />
+                              <rect x="18.5" y="3" width="4" height="18" rx="0.5" fill="black" />
+                            </>
+                          )}
+                        </svg>
+                      </button>
                   )}
                   </div>
                 </div>
