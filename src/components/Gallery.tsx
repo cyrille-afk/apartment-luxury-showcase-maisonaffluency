@@ -845,7 +845,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             e.stopPropagation();
                             openLightbox(originalSectionIndex, index);
                           }}
-                          className="absolute bottom-2 left-2 md:bottom-4 md:left-auto md:right-4 flex opacity-100 transition-opacity duration-300"
+                          className={`absolute bottom-2 left-2 ${gridCols === 3 && index === 2 && section.items.length > 3 ? 'md:bottom-4 md:left-4' : 'md:bottom-4 md:left-auto md:right-4'} flex opacity-100 transition-opacity duration-300`}
                           aria-label="View full image"
                         >
                           <span className={`bg-black/60 text-white rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300 ${gridCols === 4 ? 'p-1.5' : 'p-1.5 md:p-2'}`}>
