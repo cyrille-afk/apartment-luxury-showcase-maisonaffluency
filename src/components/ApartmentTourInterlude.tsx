@@ -119,14 +119,16 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   className={`w-full h-full object-cover ${!isPlaying ? "invisible" : ""}`}
                 />
               </div>
-              <button
-                onClick={handleShare}
-                className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors mt-1.5 self-start"
-                aria-label="Share apartment tour"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                Share
-              </button>
+              <div className="flex justify-end mt-1.5">
+                <button
+                  onClick={handleShare}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="Share apartment tour"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  Share
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>
