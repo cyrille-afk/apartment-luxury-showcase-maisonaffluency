@@ -420,14 +420,14 @@ const Index = () => {
                 <ApartmentTourInterlude compact />
               </Suspense>
             </section>
-            <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24 pt-10 md:pt-16" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 900px' }}>
-              <Suspense fallback={<SectionFallback />}>
-                <CuratingTeam />
-              </Suspense>
-            </section>
             <section id="gallery" className="scroll-mt-20 md:scroll-mt-24">
               <Suspense fallback={<SectionFallback />}>
                 <Gallery />
+              </Suspense>
+            </section>
+            <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 900px' }}>
+              <Suspense fallback={<SectionFallback />}>
+                <CuratingTeam />
               </Suspense>
             </section>
 
