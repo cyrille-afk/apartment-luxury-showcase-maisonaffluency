@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
-import { Share2, Play, Check, Copy } from "lucide-react";
+import { Share2, Play, Search } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import { scrollToSection } from "@/lib/scrollToSection";
