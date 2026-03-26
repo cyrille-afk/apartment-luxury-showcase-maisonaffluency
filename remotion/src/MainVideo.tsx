@@ -70,7 +70,7 @@ const scenes: SceneData[] = [
 const SCENE_DUR = 105;
 const TRANS_DUR = 18;
 
-function Scene({ image, room, title, caption, orientation }: SceneData) {
+function Scene({ image, room, title, caption, orientation, pan = "vertical" }: SceneData) {
   const frame = useCurrentFrame();
   const progress = frame / SCENE_DUR;
   const [handle] = useState(() => delayRender("Loading image: " + title));
@@ -79,18 +79,22 @@ function Scene({ image, room, title, caption, orientation }: SceneData) {
     continueRender(handle);
   }, [handle]);
 
-  // Portrait: slow vertical pan (top → bottom). Landscape: gentle horizontal pan + zoom.
   const isPortrait = orientation === "portrait";
+  const isHorizontalPan = isPortrait && pan === "horizontal";
 
-  // For portrait images: object-position pans from top to bottom
-  const objPosY = isPortrait
+  // Vertical pan (default for portrait): top → bottom
+  // Horizontal pan: left → right across the image
+  // Landscape: gentle horizontal pan + zoom
+  const objPosY = isPortrait && !isHorizontalPan
     ? interpolate(progress, [0, 1], [15, 85], { extrapolateRight: "clamp" })
     : 50;
-  const objPosX = !isPortrait
-    ? interpolate(progress, [0, 1], [40, 60], { extrapolateRight: "clamp" })
+  const objPosX = (!isPortrait || isHorizontalPan)
+    ? interpolate(progress, [0, 1],
+        isHorizontalPan ? [20, 80] : [40, 60],
+        { extrapolateRight: "clamp" })
     : 50;
   const scale = interpolate(progress, [0, 1],
-    isPortrait ? [1.02, 1.06] : [1.08, 1.15],
+    isHorizontalPan ? [1.04, 1.1] : isPortrait ? [1.02, 1.06] : [1.08, 1.15],
     { extrapolateRight: "clamp" }
   );
 
