@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback, lazy, Suspense } from "react";
-import FeaturedReadBanner from "@/components/FeaturedReadBanner";
+const FeaturedReadBanner = lazyRetry(() => import("@/components/FeaturedReadBanner"));
 import { Helmet } from "react-helmet-async";
 import Hero from "@/components/Hero";
 import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
