@@ -786,18 +786,19 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
               })()}
 
               <div className={`hidden md:grid md:gap-8 md:grid-cols-2 ${gridCols === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} transition-all duration-300`}>
-                {(gridCols === 3 ? section.items.slice(0, 3) : section.items).map((item, index) => {
+                {section.items.map((item, index) => {
                   const itemKey = `${originalSectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
+                  const hiddenIn3Col = gridCols === 3 && index >= 3;
 
                   return (
                     <motion.div
                       key={`${item.title}-${index}`}
                       id={`gallery-item-${itemKey}`}
                       initial={{ opacity: 0, y: 40 }}
-                      animate={isInView ? { opacity: 1, y: 0 } : {}}
+                      animate={isInView ? { opacity: hiddenIn3Col ? 0 : 1, y: hiddenIn3Col ? 20 : 0 } : {}}
                       transition={{ duration: 0.6, delay: originalSectionIndex * 0.2 + index * 0.1 }}
-                      className="group cursor-pointer"
+                      className={`group cursor-pointer ${hiddenIn3Col ? 'hidden' : ''}`}
                     >
                       <div
                         className="relative mb-2 aspect-[4/5] overflow-hidden rounded-sm"
