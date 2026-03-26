@@ -295,6 +295,66 @@ export type Database = {
         }
         Relationships: []
       }
+      client_taste_profiles: {
+        Row: {
+          cluster_description: string | null
+          cluster_label: string
+          computed_at: string
+          created_at: string
+          engagement_score: number | null
+          id: string
+          raw_signals: Json | null
+          style_keywords: string[] | null
+          top_brands: string[] | null
+          top_categories: string[] | null
+          top_designers: string[] | null
+          top_materials: string[] | null
+          total_favorites: number | null
+          total_quotes: number | null
+          total_samples: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cluster_description?: string | null
+          cluster_label?: string
+          computed_at?: string
+          created_at?: string
+          engagement_score?: number | null
+          id?: string
+          raw_signals?: Json | null
+          style_keywords?: string[] | null
+          top_brands?: string[] | null
+          top_categories?: string[] | null
+          top_designers?: string[] | null
+          top_materials?: string[] | null
+          total_favorites?: number | null
+          total_quotes?: number | null
+          total_samples?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cluster_description?: string | null
+          cluster_label?: string
+          computed_at?: string
+          created_at?: string
+          engagement_score?: number | null
+          id?: string
+          raw_signals?: Json | null
+          style_keywords?: string[] | null
+          top_brands?: string[] | null
+          top_categories?: string[] | null
+          top_designers?: string[] | null
+          top_materials?: string[] | null
+          total_favorites?: number | null
+          total_quotes?: number | null
+          total_samples?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       competitor_designers: {
         Row: {
           created_at: string
