@@ -327,7 +327,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             </Link>
             <button
               onClick={() => {
-                const ogUrl = TRADE_PROGRAM_SHARE_URL;
+                const ogUrl = buildTradeProgramShareUrl();
                 navigator.clipboard.writeText(ogUrl).then(() => {
                   setShareCopied(true);
                   setTimeout(() => setShareCopied(false), 2000);
