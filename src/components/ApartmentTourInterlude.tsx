@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { Share2, Play, Check, Copy } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
+import { scrollToSection } from "@/lib/scrollToSection";
 
 const VIDEO_URL = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/videos/apartment-tour-voiceover.mp4";
 const POSTER_URL = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,c_fill,g_auto/bespoke-sofa_gxidtx";
@@ -59,9 +60,32 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               <h3 className="font-serif text-base md:text-lg text-muted-foreground font-light tracking-wide mt-0.5">
                 & Meet the Curating Team
               </h3>
-              <p className="text-muted-foreground text-xs tracking-[0.08em] mt-2 font-light font-body max-w-md">
+               <p className="text-muted-foreground text-xs tracking-[0.08em] mt-2 font-light font-body max-w-md">
                 An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship, and panoramic cityscape views.
               </p>
+
+              {/* Meet the Curating Team CTA */}
+              <button
+                onClick={() => scrollToSection("curating-team")}
+                className="group relative flex items-center cursor-pointer transition-all duration-300 mt-6"
+                aria-label="Meet The Curating Team"
+              >
+                <div className="flex -space-x-3 relative z-10 -mr-4">
+                  <img
+                    src="https://res.cloudinary.com/dif1oamtj/image/upload/w_128,q_auto,c_fill/IMG_2542_1_kc4fvs"
+                    alt="Cyrille Delval"
+                    className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                  />
+                  <img
+                    src="https://res.cloudinary.com/dif1oamtj/image/upload/w_128,q_auto,c_fill/Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs"
+                    alt="Elsa Lemarignier"
+                    className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
+                <span className="bg-white hover:bg-white/90 text-foreground border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] group-hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] transition-all duration-300 text-xs md:text-sm rounded-full pl-5 pr-4 py-2 font-body">
+                  Meet The Curating Team
+                </span>
+              </button>
             </div>
 
             {/* Video — compact, right side */}
