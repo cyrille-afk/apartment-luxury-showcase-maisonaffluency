@@ -797,15 +797,21 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       id={`gallery-item-${itemKey}`}
                       initial={{ opacity: 0, y: 40 }}
                       animate={isInView ? { opacity: hiddenIn3Col ? 0 : 1, y: hiddenIn3Col ? 20 : 0 } : {}}
-                      transition={{ duration: 0.6, delay: originalSectionIndex * 0.2 + index * 0.1 }}
+                      transition={{ duration: 0.6, delay: originalSectionIndex * 0.2 + index * 0.15 }}
                       className={`group cursor-pointer ${hiddenIn3Col ? 'hidden' : ''}`}
                     >
                       <div
-                        className="relative mb-2 aspect-[4/5] overflow-hidden rounded-sm"
+                        className="relative mb-2 aspect-[4/5] overflow-hidden rounded-sm shadow-md transition-shadow duration-500 group-hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.35)]"
                         onClick={() => openLightbox(originalSectionIndex, index)}
                       >
-                        <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 4 ? "(max-width: 1024px) 50vw, 25vw" : "(max-width: 1024px) 50vw, 33vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                        <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 4 ? "(max-width: 1024px) 50vw, 25vw" : "(max-width: 1024px) 50vw, 33vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.85]" loading="lazy" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                        {/* Cinematic title overlay on hover */}
+                        <div className="absolute bottom-0 left-0 right-0 px-4 pb-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 pointer-events-none z-10">
+                          <p className="font-display text-white text-sm tracking-widest uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                            {item.title}
+                          </p>
+                        </div>
                         {/* Subtle hotspot hint — desktop: bottom-left of first image only */}
                         {!section.items.some(i => i.description) && showHotspotHint && index === 0 && (
                           <div ref={hotspotHintRef} className="absolute bottom-12 left-3 z-20 pointer-events-none">
