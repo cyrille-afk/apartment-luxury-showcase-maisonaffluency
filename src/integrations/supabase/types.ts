@@ -1700,6 +1700,42 @@ export type Database = {
         }
         Relationships: []
       }
+      video_watch_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          progress_percent: number | null
+          referrer: string | null
+          session_id: string
+          user_agent: string | null
+          video_id: string
+          watch_duration_seconds: number | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          progress_percent?: number | null
+          referrer?: string | null
+          session_id: string
+          user_agent?: string | null
+          video_id?: string
+          watch_duration_seconds?: number | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          progress_percent?: number | null
+          referrer?: string | null
+          session_id?: string
+          user_agent?: string | null
+          video_id?: string
+          watch_duration_seconds?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
