@@ -5,8 +5,16 @@ import { trackCTA } from "@/lib/analytics";
 
 // Use a single fallback src (smallest useful size); srcSet handles responsive selection
 const HERO_ID = "AffluencySG_194-22.jpg_macpwj";
-const heroImageFallback = cloudinaryUrl(HERO_ID, { width: 320, quality: "auto:good", crop: "fill" });
-const heroSrcSet = cloudinarySrcSet(HERO_ID, [320, 400, 600, 828, 1200, 1600], { quality: "auto:good", crop: "fill" });
+const heroImageFallback = cloudinaryUrl(HERO_ID, { width: 320, quality: "auto:eco", crop: "fill" });
+// Mobile widths use q_auto:eco (smaller file, faster LCP); desktop keeps q_auto:good
+const heroSrcSet = [
+  `${cloudinaryUrl(HERO_ID, { width: 320, quality: "auto:eco", crop: "fill" })} 320w`,
+  `${cloudinaryUrl(HERO_ID, { width: 400, quality: "auto:eco", crop: "fill" })} 400w`,
+  `${cloudinaryUrl(HERO_ID, { width: 600, quality: "auto:eco", crop: "fill" })} 600w`,
+  `${cloudinaryUrl(HERO_ID, { width: 828, quality: "auto:good", crop: "fill" })} 828w`,
+  `${cloudinaryUrl(HERO_ID, { width: 1200, quality: "auto:good", crop: "fill" })} 1200w`,
+  `${cloudinaryUrl(HERO_ID, { width: 1600, quality: "auto:good", crop: "fill" })} 1600w`,
+].join(", ");
 
 const scrollToOverview = () => scrollToSection("overview");
 
@@ -56,7 +64,7 @@ const Hero = () => {
             <div className="mt-16 md:mt-24 flex flex-col items-start md:items-center gap-6">
               <button
                 onClick={scrollToOverview}
-                className="flex items-center gap-2 px-6 py-3 md:px-10 md:py-4 lg:px-12 lg:py-4.5 bg-white/20 hover:bg-white/30 backdrop-blur-md md:backdrop-blur-2xl border border-white/40 hover:border-white/60 text-white text-sm md:text-lg font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_6px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_40px_rgba(0,0,0,0.4)] hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.3)]"
+                className="flex items-center gap-2 px-6 py-3 md:px-10 md:py-4 lg:px-12 lg:py-4.5 bg-white/20 hover:bg-white/30 md:backdrop-blur-2xl border border-white/40 hover:border-white/60 text-white text-sm md:text-lg font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_6px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_40px_rgba(0,0,0,0.4)] hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.3)]"
               >
                 Explore Our Curated Collection
               </button>
@@ -73,13 +81,13 @@ const Hero = () => {
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-xs font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/20 border border-white/30 hover:border-white/50 text-white text-xs font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
         >
           Book a Viewing
         </button>
         <Link
           to="/trade/program"
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 hover:border-white/50 text-white text-xs font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/20 border border-white/30 hover:border-white/50 text-white text-xs font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
         >
           Trade Program
         </Link>

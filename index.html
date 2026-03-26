@@ -161,7 +161,7 @@
     <!-- Critical resource hints - hero image FIRST, then fonts -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
     <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-    <link rel="preload" as="image" imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_320,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 320w, https://res.cloudinary.com/dif1oamtj/image/upload/w_400,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 400w, https://res.cloudinary.com/dif1oamtj/image/upload/w_600,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 600w, https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 828w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 1200w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 1600w" imagesizes="100vw" fetchpriority="high" />
+    <link rel="preload" as="image" imagesrcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_320,c_fill,q_auto:eco,f_auto/AffluencySG_194-22.jpg_macpwj 320w, https://res.cloudinary.com/dif1oamtj/image/upload/w_400,c_fill,q_auto:eco,f_auto/AffluencySG_194-22.jpg_macpwj 400w, https://res.cloudinary.com/dif1oamtj/image/upload/w_600,c_fill,q_auto:eco,f_auto/AffluencySG_194-22.jpg_macpwj 600w, https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 828w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 1200w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 1600w" imagesizes="100vw" fetchpriority="high" />
 
     <!-- Layout-critical styles only -->
     <style>
@@ -177,12 +177,12 @@
       @media (min-width: 768px) { .hero-skeleton img { height: 120%; object-position: 50% 0%; } }
 
       /* Self-hosted fonts — cached 1 year via _headers */
-      @font-face { font-family: 'Lora'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/Lora-Regular.woff2') format('woff2'); }
-      @font-face { font-family: 'Lora'; font-style: italic; font-weight: 400; font-display: swap; src: url('/fonts/Lora-Italic.woff2') format('woff2'); }
-      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 300; font-display: swap; src: url('/fonts/PlayfairDisplay-500.woff2') format('woff2'); }
-      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/PlayfairDisplay-500.woff2') format('woff2'); }
-      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/PlayfairDisplay-600.woff2') format('woff2'); }
-      @font-face { font-family: 'Cinzel'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/Cinzel-Bold.woff2') format('woff2'); }
+      @font-face { font-family: 'Lora'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/Lora-Regular.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+      @font-face { font-family: 'Lora'; font-style: italic; font-weight: 400; font-display: swap; src: url('/fonts/Lora-Italic.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 300; font-display: swap; src: url('/fonts/PlayfairDisplay-500.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/PlayfairDisplay-500.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+      @font-face { font-family: 'Playfair Display'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/PlayfairDisplay-600.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+      @font-face { font-family: 'Cinzel'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/Cinzel-Bold.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
     </style>
     <!-- Fallback: ensure css-ready is added even if JS fails to load -->
     <script>
@@ -232,8 +232,8 @@
     <div id="root">
       <div class="hero-skeleton" aria-hidden="true">
         <img
-          src="https://res.cloudinary.com/dif1oamtj/image/upload/w_320,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj"
-          srcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_320,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 320w, https://res.cloudinary.com/dif1oamtj/image/upload/w_400,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 400w, https://res.cloudinary.com/dif1oamtj/image/upload/w_600,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 600w, https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 828w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 1200w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 1600w"
+          src="https://res.cloudinary.com/dif1oamtj/image/upload/w_320,c_fill,q_auto:eco,f_auto/AffluencySG_194-22.jpg_macpwj"
+          srcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_320,c_fill,q_auto:eco,f_auto/AffluencySG_194-22.jpg_macpwj 320w, https://res.cloudinary.com/dif1oamtj/image/upload/w_400,c_fill,q_auto:eco,f_auto/AffluencySG_194-22.jpg_macpwj 400w, https://res.cloudinary.com/dif1oamtj/image/upload/w_600,c_fill,q_auto:eco,f_auto/AffluencySG_194-22.jpg_macpwj 600w, https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 828w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 1200w, https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,c_fill,q_auto:good,f_auto/AffluencySG_194-22.jpg_macpwj 1600w"
           sizes="100vw"
           alt="Maison Affluency luxury showroom in Singapore featuring curated collectible furniture and designer pieces"
           fetchpriority="high"

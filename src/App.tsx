@@ -1,10 +1,14 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
 import { CompareProvider } from "@/contexts/CompareContext";
 import { AuthProvider } from "@/hooks/useAuth";
+
+// Defer react-helmet-async — all critical meta tags are already in index.html
+const LazyHelmetProvider = lazy(() =>
+  import("react-helmet-async").then(m => ({ default: m.HelmetProvider }))
+);
 
 // Lazy-load non-landing pages and non-critical UI
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -115,8 +119,9 @@ const App = () => {
   }, []);
 
   return (
-    <HelmetProvider>
-      <AuthProvider>
+    <Suspense fallback={null}>
+      <LazyHelmetProvider>
+        <AuthProvider>
         <CompareProvider>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
@@ -196,8 +201,9 @@ const App = () => {
             </BrowserRouter>
           </QueryClientProvider>
         </CompareProvider>
-      </AuthProvider>
-    </HelmetProvider>
+        </AuthProvider>
+      </LazyHelmetProvider>
+    </Suspense>
   );
 };
 
