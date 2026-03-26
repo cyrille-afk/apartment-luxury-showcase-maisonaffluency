@@ -23,7 +23,7 @@ const Navigation = lazyRetry(() => import("@/components/Navigation"));
 
 
 // Lazy-load everything below the fold to reduce initial JS
-const Overview = lazyRetry(() => import("@/components/Overview"));
+
 const Gallery = lazyRetry(() => import("@/components/Gallery"));
 const ScrollProgress = lazyRetry(() => import("@/components/ScrollProgress"));
 const CuratingTeam = lazyRetry(() => import("@/components/CuratingTeam"));
