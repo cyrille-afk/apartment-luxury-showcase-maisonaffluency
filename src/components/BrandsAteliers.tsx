@@ -2155,6 +2155,7 @@ function AlphaStrip({
                   </div>
                 )}
 
+              </div>
 
                {/* Bottom bar: Expand (left on mobile, right on desktop) | Curators' Picks (center) | Share (right on mobile, left of expand on desktop) */}
               <div className={`absolute bottom-0 left-0 right-0 h-16 z-[5] pointer-events-none ${hasBg ? 'bg-gradient-to-t from-black/50 via-black/30 to-transparent' : 'bg-gradient-to-t from-background/60 via-background/30 to-transparent'}`} />
