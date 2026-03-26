@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import CuratorPicksLegend from "./CuratorPicksLegend";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { GALLERY } from "@/constants/galleryIndex";
@@ -1882,6 +1883,17 @@ const brandToDesignerMap: Record<string, string> = {
   "Pierre Frey": "pierre-frey",
 };
 
+// Ecart sub-designers for nested display
+const ecartSubDesigners = [
+  { name: "Jean-Michel Frank", slug: "jean-michel-frank", image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_267,q_auto,c_fill,g_auto,f_auto/jean-michel-frank-new_toifde" },
+  { name: "Eileen Gray", slug: "eileen-gray", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Eileen_Gray.jpg" },
+  { name: "Pierre Chareau", slug: "pierre-chareau", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Pierre_Chareau.jpg" },
+  { name: "Mariano Fortuny", slug: "mariano-fortuny", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Mariano_Fortuny.jpg" },
+  { name: "Paul László", slug: "paul-laszlo", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Paul_Laszlo_BD.jpg" },
+  { name: "Félix Aublet", slug: "felix-aublet", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Felix_Aublet.jpg" },
+  { name: "Laurent Maugoust & Cécile Chenais", slug: "laurent-maugoust-cecile-chenais", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Laurent_Maugoust_Cecile_Chenais.jpg" },
+];
+
 // Reverse map: designer ID → brand name (for deep-link resolution)
 const designerIdToBrandMap: Record<string, string> = Object.fromEntries(
   Object.entries(brandToDesignerMap).map(([brand, id]) => [id, brand])
@@ -2104,9 +2116,44 @@ function AlphaStrip({
                 </div>
                 )}
 
-
-              </div>
-
+                {/* Ecart sub-designers grid */}
+                {expandedCard === brand.name && brand.name === "Ecart Paris" && (
+                  <div className="pl-8 md:pl-0 mb-3">
+                    <span className="text-[10px] md:text-xs uppercase tracking-wider block mb-2 text-[hsl(var(--gold))]">
+                      <em>Designers</em>
+                    </span>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {ecartSubDesigners.map((d) => (
+                        <Link
+                          key={d.slug}
+                          to={`/designers/${d.slug}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="group/sub block rounded overflow-hidden border border-white/20 hover:border-white/50 transition-all"
+                        >
+                          <div className="aspect-[3/4] relative bg-black/30">
+                            {d.image ? (
+                              <img
+                                src={d.image}
+                                alt={d.name}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="font-display text-sm text-white/30">{d.name.charAt(0)}</span>
+                              </div>
+                            )}
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-1 pb-1 pt-4">
+                              <p className="font-body text-[8px] md:text-[9px] text-white leading-tight line-clamp-2">
+                                {d.name}
+                              </p>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
 
                {/* Bottom bar: Expand (left on mobile, right on desktop) | Curators' Picks (center) | Share (right on mobile, left of expand on desktop) */}
