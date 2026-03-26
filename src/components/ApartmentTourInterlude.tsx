@@ -206,27 +206,28 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
           transition={{ duration: 0.8 }}
         >
           {/* Header */}
-          <div className="flex flex-col mb-6 md:mb-10">
+          <div className="flex flex-col items-center text-center mb-6 md:mb-10">
             <p className="text-[11px] md:text-[12px] tracking-[0.3em] uppercase text-muted-foreground/60 mb-3 font-light font-body">
               Maison Affluency · Singapore
             </p>
-            <h2 className="font-serif text-xl md:text-3xl lg:text-4xl text-foreground font-light tracking-wide">
-              Tour Our Gallery
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="font-serif text-xl md:text-3xl lg:text-4xl text-foreground font-light tracking-wide">
+                Tour Our Gallery
+              </h2>
+              <button
+                onClick={handleShare}
+                className="inline-flex items-center gap-1 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors"
+                aria-label="Share apartment tour"
+              >
+                <Share2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
+              </button>
+            </div>
             <h3 className="font-serif text-lg md:text-xl text-muted-foreground font-light tracking-wide mt-1">
               & Meet the Curating Team
             </h3>
             <p className="text-muted-foreground text-xs md:text-sm tracking-[0.1em] mt-3 font-light font-body max-w-xl">
               An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship, and panoramic cityscape views.
             </p>
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors mt-3"
-              aria-label="Share apartment tour"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              Share
-            </button>
           </div>
 
           {/* Video player */}
