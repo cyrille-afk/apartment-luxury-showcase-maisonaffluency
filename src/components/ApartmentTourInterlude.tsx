@@ -69,7 +69,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5 mb-3">
                 The heart and soul of the gallery and designers selection
               </p>
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-8">
                 {[
                   {
                     name: "Cyrille Delval",
