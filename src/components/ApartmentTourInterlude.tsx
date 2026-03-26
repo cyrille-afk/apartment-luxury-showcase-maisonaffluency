@@ -65,24 +65,27 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               </p>
 
               {/* The Curating Team — inline */}
-              <div className="flex items-center gap-4 mt-6">
+              <p className="text-[10px] md:text-[11px] tracking-[0.25em] uppercase text-muted-foreground/50 mt-5 mb-2 font-light font-body">
+                The Curating Team
+              </p>
+              <div className="flex items-center gap-4">
                 <div className="flex flex-col items-center text-center">
                   <img
                     src="https://res.cloudinary.com/dif1oamtj/image/upload/w_128,q_auto,c_fill/IMG_2542_1_kc4fvs"
                     alt="Cyrille Delval"
-                    className="w-14 h-14 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm"
+                    className="w-12 h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm"
                   />
-                  <span className="text-[10px] md:text-[11px] font-body text-foreground mt-1.5 tracking-wide">Cyrille Delval</span>
-                  <span className="text-[9px] md:text-[10px] font-body text-muted-foreground/70 tracking-wider uppercase">Founder & Curator</span>
+                  <span className="text-[10px] font-body text-foreground mt-1 tracking-wide">Cyrille Delval</span>
+                  <span className="text-[9px] font-body text-muted-foreground/70 tracking-wider uppercase">Founder & Curator</span>
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <img
                     src="https://res.cloudinary.com/dif1oamtj/image/upload/w_128,q_auto,c_fill/Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs"
                     alt="Elsa Lemarignier"
-                    className="w-14 h-14 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm"
+                    className="w-12 h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm"
                   />
-                  <span className="text-[10px] md:text-[11px] font-body text-foreground mt-1.5 tracking-wide">Elsa Lemarignier</span>
-                  <span className="text-[9px] md:text-[10px] font-body text-muted-foreground/70 tracking-wider uppercase">Art Director</span>
+                  <span className="text-[10px] font-body text-foreground mt-1 tracking-wide">Elsa Lemarignier</span>
+                  <span className="text-[9px] font-body text-muted-foreground/70 tracking-wider uppercase">Art Director</span>
                 </div>
               </div>
             </div>
