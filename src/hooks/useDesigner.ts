@@ -108,9 +108,9 @@ export interface AttributedCuratorPick extends DesignerCuratorPick {
 }
 
 /** Fetch curator picks for a parent brand and all its sub-designers, with attribution */
-export function useGroupedDesignerPicks(designer: Designer | null | undefined) {
+export function useGroupedDesignerPicks(designer: Designer | null | undefined, { publicOnly = false }: { publicOnly?: boolean } = {}) {
   return useQuery({
-    queryKey: ["designer-grouped-picks", designer?.id, designer?.name],
+    queryKey: ["designer-grouped-picks", designer?.id, designer?.name, publicOnly],
     queryFn: async () => {
       if (!designer) return [];
 
@@ -131,6 +131,22 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined) {
 
       const designerIds = allDesigners.map((d) => d.id);
       const nameMap = Object.fromEntries(allDesigners.map((d) => [d.id, { name: d.name, slug: d.slug }]));
+
+      if (publicOnly) {
+        const { data, error } = await supabase
+          .from("designer_curator_picks_public")
+          .select("*")
+          .in("designer_id", designerIds)
+          .order("sort_order", { ascending: true });
+        if (error) throw error;
+        return (data || []).map((d) => ({
+          ...d,
+          trade_price_cents: null,
+          pdf_urls: d.pdf_urls as DesignerCuratorPick["pdf_urls"],
+          designer_name: nameMap[d.designer_id]?.name || designer.name,
+          designer_slug: nameMap[d.designer_id]?.slug || designer.slug,
+        })) as AttributedCuratorPick[];
+      }
 
       const { data, error } = await supabase
         .from("designer_curator_picks")
