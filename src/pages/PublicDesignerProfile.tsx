@@ -17,6 +17,7 @@ import PublicProductLightbox, { type PublicLightboxItem } from "@/components/Pub
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
+const DESIGNER_SHARE_VERSION = "20260326b";
 
 function responsiveCloudinaryUrl(url: string, width: number): string {
   if (!url.includes("res.cloudinary.com")) return url;
@@ -168,6 +169,8 @@ const PublicDesignerProfile = () => {
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
   const heroImage = designer.hero_image_url || designer.image_url;
   const isGrouped = groupedPicks.length > 0;
+  const buildDesignerBridgePath = (kind: "og" | "card") =>
+    `/${designer.slug}-${kind}.html?v=${DESIGNER_SHARE_VERSION}&t=${Date.now()}`;
 
   /* Split biography into hero paragraphs + remaining (with interleaved media) — same as trade */
   const bioBlocks = designer.biography
@@ -304,7 +307,7 @@ const PublicDesignerProfile = () => {
                     `/designers/${designer.slug}`,
                     `${designer.name} — Maison Affluency`,
                     designer.specialty || undefined,
-                    { directUrlPath: `/${designer.slug}-og.html` }
+                    { directUrlPath: buildDesignerBridgePath("og") }
                   );
                 }}
                 label="Share"
@@ -340,7 +343,7 @@ const PublicDesignerProfile = () => {
                           title="Copy shareable link"
                           onClick={(e) => {
                             e.stopPropagation();
-                            const url = `https://www.maisonaffluency.com/${designer.slug}-card.html`;
+                            const url = `https://www.maisonaffluency.com${buildDesignerBridgePath("card")}`;
                             navigator.clipboard.writeText(url).then(() => {
                               setShareCopied(true);
                               setTimeout(() => setShareCopied(false), 2000);
@@ -442,7 +445,7 @@ const PublicDesignerProfile = () => {
                     title="Copy shareable link"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const url = `https://www.maisonaffluency.com/${designer.slug}-card.html`;
+                      const url = `https://www.maisonaffluency.com${buildDesignerBridgePath("card")}`;
                       navigator.clipboard.writeText(url).then(() => {
                         setShareCopied(true);
                         setTimeout(() => setShareCopied(false), 2000);
