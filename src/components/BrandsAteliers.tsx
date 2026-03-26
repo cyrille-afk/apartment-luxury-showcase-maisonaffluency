@@ -2116,9 +2116,44 @@ function AlphaStrip({
                 </div>
                 )}
 
-
-              </div>
-
+                {/* Ecart sub-designers grid */}
+                {expandedCard === brand.name && brand.name === "Ecart Paris" && (
+                  <div className="pl-8 md:pl-0 mb-3">
+                    <span className="text-[10px] md:text-xs uppercase tracking-wider block mb-2 text-[hsl(var(--gold))]">
+                      <em>Designers</em>
+                    </span>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {ecartSubDesigners.map((d) => (
+                        <Link
+                          key={d.slug}
+                          to={`/designers/${d.slug}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="group/sub block rounded overflow-hidden border border-white/20 hover:border-white/50 transition-all"
+                        >
+                          <div className="aspect-[3/4] relative bg-black/30">
+                            {d.image ? (
+                              <img
+                                src={d.image}
+                                alt={d.name}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="font-display text-sm text-white/30">{d.name.charAt(0)}</span>
+                              </div>
+                            )}
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-1 pb-1 pt-4">
+                              <p className="font-body text-[8px] md:text-[9px] text-white leading-tight line-clamp-2">
+                                {d.name}
+                              </p>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
 
                {/* Bottom bar: Expand (left on mobile, right on desktop) | Curators' Picks (center) | Share (right on mobile, left of expand on desktop) */}
