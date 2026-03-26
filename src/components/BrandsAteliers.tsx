@@ -2182,6 +2182,100 @@ function AlphaStrip({
   );
 }
 
+// ─── Ecart Accordion ─────────────────────────────────────────────────────────
+function EcartAccordion({ onOpenPicks }: { onOpenPicks: (name: string) => void }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mt-4 mb-6 rounded-lg border border-border/40 overflow-hidden bg-background">
+      {/* Accordion header */}
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors text-left"
+      >
+        <div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 border border-border/30">
+          <img
+            src={ecartSubDesigners[0].image}
+            alt="Ecart"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-display text-sm tracking-wide text-foreground">
+            Ecart — Designers
+          </h3>
+          <p className="font-body text-[11px] text-muted-foreground mt-0.5">
+            {ecartSubDesigners.length} designers re-edited by Ecart International
+          </p>
+        </div>
+        <div className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}>
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        </div>
+      </button>
+
+      {/* Accordion content — sub-designer portraits */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="px-5 pb-5">
+              <div className="grid grid-cols-3 md:grid-cols-7 gap-2 md:gap-3">
+                {ecartSubDesigners.map((d) => (
+                  <Link
+                    key={d.slug}
+                    to={`/designers/${d.slug}`}
+                    className="group/sub block rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
+                  >
+                    <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
+                      {d.image ? (
+                        <img
+                          src={d.image}
+                          alt={d.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted/5">
+                          <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
+                        </div>
+                      )}
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
+                      </div>
+                    </div>
+                    <div className="px-2 py-1.5 bg-background">
+                      <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1 text-center">
+                        {d.name}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Curators' Picks CTA */}
+              <button
+                onClick={() => onOpenPicks("Ecart Paris")}
+                className="mt-3 flex items-center gap-1.5 text-xs tracking-wider font-body group/picks mx-auto"
+              >
+                <Gem className="h-3 w-3 flex-shrink-0 fill-accent text-accent" />
+                <span className="group-hover/picks:underline underline-offset-2 text-foreground/70">
+                  Curators' Picks
+                </span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ─── Main component ──────────────────────────────────────────────────────────
 const BrandsAteliers = () => {
   const ref = useRef(null);
