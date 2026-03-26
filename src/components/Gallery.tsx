@@ -4,7 +4,7 @@ import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy, MapPin, Plus } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
 import GalleryHotspots from "./GalleryHotspots";
@@ -783,9 +783,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         {/* Pulsating hotspot hint — first card of every section */}
                         {index === 0 && (
                           <div className="absolute top-3 left-3 z-20 pointer-events-none">
-                            <span className="relative flex h-3 w-3">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white/60" />
-                              <span className="relative inline-flex rounded-full h-3 w-3 bg-white/80 shadow-md" />
+                            <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 shadow-[0_0_8px_hsl(var(--primary)/0.4)]">
+                              <Plus className="w-2.5 h-2.5 text-white" />
+                              <span className="absolute inset-0 rounded-full border border-black/20 animate-ping" style={{ animationDuration: "2s" }} />
                             </span>
                           </div>
                         )}
