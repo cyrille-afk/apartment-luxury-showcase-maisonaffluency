@@ -101,7 +101,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                         <span className="text-[9px] font-body text-muted-foreground/70 tracking-wider uppercase">{member.role}</span>
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-md p-0 overflow-hidden bg-background border-primary/20 [&>button]:absolute [&>button]:top-3 [&>button]:right-3 [&>button]:z-50 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:w-9 [&>button]:h-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:shadow-md [&>button]:border [&>button]:border-primary/20 [&>button]:text-foreground">
+                    <DialogContent className="max-w-md p-0 overflow-hidden !rounded-xl sm:!rounded-xl bg-background border-primary/20 [&>button]:absolute [&>button]:top-3 [&>button]:right-3 [&>button]:z-50 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:w-9 [&>button]:h-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:shadow-md [&>button]:border [&>button]:border-primary/20 [&>button]:text-foreground">
                       <div className="flex flex-col items-center p-6 pt-10">
                         <img
                           src={member.image}
