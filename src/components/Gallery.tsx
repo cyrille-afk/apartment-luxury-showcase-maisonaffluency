@@ -314,40 +314,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     }
   }, [allCuratorPicks]);
 
-  // Pulsing hotspot hint — show once per session on the first hotspot section image
-  const [showHotspotHint, setShowHotspotHint] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return !sessionStorage.getItem("__hotspot_hint_seen");
-  });
-  const hotspotHintRef = useRef<HTMLDivElement>(null);
-  const [hintVisible, setHintVisible] = useState(false);
-
-  // Only start the dismiss timer once the hint is actually visible on screen
-  useEffect(() => {
-    if (!showHotspotHint) return;
-    const el = hotspotHintRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setHintVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [showHotspotHint]);
-
-  useEffect(() => {
-    if (!hintVisible) return;
-    const timer = setTimeout(() => {
-      setShowHotspotHint(false);
-      sessionStorage.setItem("__hotspot_hint_seen", "1");
-    }, 15000);
-    return () => clearTimeout(timer);
-  }, [hintVisible]);
+  // Pulsing hotspot hint — always visible on first card of each section
+  const showHotspotHint = true;
 
   // ── Hotspot piece counts per image ──
   const [hotspotCounts, setHotspotCounts] = useState<Record<string, number>>({});
@@ -812,18 +780,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             {item.title}
                           </p>
                         </div>
-                        {/* Subtle hotspot hint — desktop: bottom-left of first image only */}
-                        {!section.items.some(i => i.description) && showHotspotHint && index === 0 && (
-                          <div ref={hotspotHintRef} className="absolute bottom-12 left-3 z-20 pointer-events-none">
-                            <motion.span
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 1, delay: 1.2 }}
-                              className="bg-background/40 backdrop-blur-md font-body text-[10px] text-foreground/70 tracking-wide px-2.5 py-1 rounded-full"
-                            >
-                              Click image to explore pieces
-                            </motion.span>
+                        {/* Pulsating hotspot hint — first card of every section */}
+                        {index === 0 && (
+                          <div className="absolute bottom-12 left-3 z-20 pointer-events-none">
+                            <span className="relative flex h-3 w-3">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white/60" />
+                              <span className="relative inline-flex rounded-full h-3 w-3 bg-white/80 shadow-md" />
+                            </span>
                           </div>
                         )}
                         {/* +1 more indicator on last visible card in 3-col mode */}
