@@ -660,26 +660,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                    {originalSectionIndex === 0 && (
-                      <button
-                        onClick={() => {
-                          const el = document.getElementById("apartment-tour");
-                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }}
-                        className="hidden md:inline-flex items-center gap-2 cursor-pointer group relative"
-                        aria-label="Tour Our Gallery"
-                      >
-                        <img
-                          src="https://res.cloudinary.com/dif1oamtj/image/upload/w_160,h_160,q_auto,f_auto,c_fill,g_auto/bespoke-sofa_gxidtx"
-                          alt="Gallery tour"
-                          className="w-12 h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
-                        />
-                        <span className="text-[10px] uppercase tracking-[0.15em] font-body font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
-                          Tour Our Gallery
-                        </span>
-                        <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
-                      </button>
-                    )}
                   {originalSectionIndex === 0 && (
                     <TooltipProvider delayDuration={200}>
                       <Tooltip>
