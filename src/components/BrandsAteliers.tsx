@@ -1882,6 +1882,17 @@ const brandToDesignerMap: Record<string, string> = {
   "Pierre Frey": "pierre-frey",
 };
 
+// Ecart sub-designers for nested display
+const ecartSubDesigners = [
+  { name: "Jean-Michel Frank", slug: "jean-michel-frank", image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_267,c_fill,g_auto,q_auto/v1/jean-michel-frank-portrait" },
+  { name: "Eileen Gray", slug: "eileen-gray", image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_267,c_fill,g_auto,q_auto/v1/eileen-gray-portrait" },
+  { name: "Pierre Chareau", slug: "pierre-chareau", image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_267,c_fill,g_auto,q_auto/v1/pierre-chareau-portrait" },
+  { name: "Mariano Fortuny", slug: "mariano-fortuny", image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_267,c_fill,g_auto,q_auto/v1/mariano-fortuny-portrait" },
+  { name: "Paul László", slug: "paul-laszlo", image: "" },
+  { name: "Félix Aublet", slug: "felix-aublet", image: "" },
+  { name: "Laurent Maugoust & Cécile Chenais", slug: "laurent-maugoust-cecile-chenais", image: "" },
+];
+
 // Reverse map: designer ID → brand name (for deep-link resolution)
 const designerIdToBrandMap: Record<string, string> = Object.fromEntries(
   Object.entries(brandToDesignerMap).map(([brand, id]) => [id, brand])
