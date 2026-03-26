@@ -22,7 +22,7 @@ const ApartmentTourInterlude = () => {
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/apartment-tour-og.html?v=3`;
+    const shareUrl = `${window.location.origin}/apartment-tour-og.html?v=5`;
     const text = `${shareUrl}`;
 
     if (isMobile) {
