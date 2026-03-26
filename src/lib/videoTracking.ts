@@ -19,7 +19,7 @@ export function trackVideoEvent(
   const watchDuration = getWatchDuration();
 
   supabase
-    .from("video_watch_events" as any)
+    .from("video_watch_events")
     .insert({
       session_id: SESSION_ID,
       event_type: eventType,
