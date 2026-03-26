@@ -62,46 +62,48 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               <p className="text-muted-foreground text-xs tracking-[0.08em] mt-2 font-light font-body max-w-md">
                 An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship, and panoramic cityscape views.
               </p>
+            </div>
+
+            {/* Video — compact, right side */}
+            <div className="relative w-full md:w-1/2 order-1 md:order-2">
+              <div className="overflow-hidden rounded-sm shadow-lg" style={{ aspectRatio: "16/9" }}>
+                {!isPlaying ? (
+                  <button
+                    onClick={handlePlay}
+                    className="absolute inset-0 w-full h-full group cursor-pointer z-10"
+                    aria-label="Play apartment tour video"
+                  >
+                    <img
+                      src={POSTER_URL}
+                      alt="Apartment tour preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#d4bea0]/20 backdrop-blur-none border border-[#d4bea0]/30 flex items-center justify-center group-hover:bg-[#d4bea0]/30 transition-colors">
+                        <Play className="w-5 h-5 md:w-6 md:h-6 text-[#f5f0eb] ml-0.5" fill="currentColor" />
+                      </div>
+                    </div>
+                  </button>
+                ) : null}
+                <video
+                  ref={videoRef}
+                  src={VIDEO_URL}
+                  controls
+                  playsInline
+                  preload="none"
+                  poster={POSTER_URL}
+                  className={`w-full h-full object-cover ${!isPlaying ? "invisible" : ""}`}
+                />
+              </div>
               <button
                 onClick={handleShare}
-                className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors mt-2 self-start"
+                className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors mt-1.5 self-start"
                 aria-label="Share apartment tour"
               >
                 <Share2 className="w-3.5 h-3.5" />
                 Share
               </button>
-            </div>
-
-            {/* Video — compact, right side */}
-            <div className="relative w-full md:w-1/2 overflow-hidden rounded-sm shadow-lg order-1 md:order-2" style={{ aspectRatio: "16/9" }}>
-              {!isPlaying ? (
-                <button
-                  onClick={handlePlay}
-                  className="absolute inset-0 w-full h-full group cursor-pointer z-10"
-                  aria-label="Play apartment tour video"
-                >
-                  <img
-                    src={POSTER_URL}
-                    alt="Apartment tour preview"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#d4bea0]/20 backdrop-blur-none border border-[#d4bea0]/30 flex items-center justify-center group-hover:bg-[#d4bea0]/30 transition-colors">
-                      <Play className="w-5 h-5 md:w-6 md:h-6 text-[#f5f0eb] ml-0.5" fill="currentColor" />
-                    </div>
-                  </div>
-                </button>
-              ) : null}
-              <video
-                ref={videoRef}
-                src={VIDEO_URL}
-                controls
-                playsInline
-                preload="none"
-                poster={POSTER_URL}
-                className={`w-full h-full object-cover ${!isPlaying ? "invisible" : ""}`}
-              />
             </div>
           </motion.div>
         </div>
