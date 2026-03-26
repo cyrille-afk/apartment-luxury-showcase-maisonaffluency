@@ -425,11 +425,6 @@ const Index = () => {
                 <Gallery />
               </Suspense>
             </section>
-            <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 900px' }}>
-              <Suspense fallback={<SectionFallback />}>
-                <CuratingTeam />
-              </Suspense>
-            </section>
 
             {/* Interlude 1: After Curating Team → Before Designers */}
             <Suspense fallback={null}>
