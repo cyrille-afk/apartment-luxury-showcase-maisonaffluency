@@ -116,6 +116,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                     </DialogContent>
                   </Dialog>
                 ))}
+                </div>
               </div>
             </div>
 
