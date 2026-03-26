@@ -12,13 +12,44 @@ const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const PublicDesigners = () => {
   const { data: allDesigners = [], isLoading } = useAllDesigners();
 
-  const items = useMemo(
-    () =>
-      allDesigners
-        .filter((d) => d.is_published)
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [allDesigners]
-  );
+  // Build groups: ateliers with sub-designers get nested cards
+  const { groups, standalone } = useMemo(() => {
+    const published = allDesigners.filter((d) => d.is_published);
+    const byName = new Map(published.map((d) => [d.name, d]));
+
+    // Find parent ateliers (founder === name) that have sub-designers
+    const parentNames = new Set<string>();
+    const childByParent = new Map<string, typeof published>();
+
+    for (const d of published) {
+      if (d.founder && d.founder !== d.name && byName.has(d.founder)) {
+        parentNames.add(d.founder);
+        const arr = childByParent.get(d.founder) || [];
+        arr.push(d);
+        childByParent.set(d.founder, arr);
+      }
+    }
+
+    const groups: Array<{ parent: (typeof published)[0]; children: typeof published }> = [];
+    const standalone: typeof published = [];
+
+    for (const d of published) {
+      if (parentNames.has(d.name)) {
+        const kids = (childByParent.get(d.name) || []).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        groups.push({ parent: d, children: kids });
+      } else if (!d.founder || d.founder === d.name || !byName.has(d.founder)) {
+        // Not a child of a group → standalone
+        standalone.push(d);
+      }
+    }
+
+    groups.sort((a, b) => a.parent.name.localeCompare(b.parent.name));
+    standalone.sort((a, b) => a.name.localeCompare(b.name));
+
+    return { groups, standalone };
+  }, [allDesigners]);
 
   return (
     <>
