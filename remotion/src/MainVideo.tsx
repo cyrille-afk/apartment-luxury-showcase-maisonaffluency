@@ -21,6 +21,7 @@ type SceneData = {
   title: string;
   caption: string;
   orientation: "portrait" | "landscape";
+  pan?: "vertical" | "horizontal"; // default vertical for portrait
 };
 
 const scenes: SceneData[] = [
