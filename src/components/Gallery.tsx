@@ -782,7 +782,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </div>
                         {/* Pulsating hotspot hint — first card of every section */}
                         {index === 0 && (
-                          <div className="absolute bottom-12 left-3 z-20 pointer-events-none">
+                          <div className="absolute top-3 left-3 z-20 pointer-events-none">
                             <span className="relative flex h-3 w-3">
                               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white/60" />
                               <span className="relative inline-flex rounded-full h-3 w-3 bg-white/80 shadow-md" />
