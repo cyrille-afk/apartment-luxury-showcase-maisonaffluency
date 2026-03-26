@@ -67,23 +67,38 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
             transition={{ duration: 0.6 }}
             className="flex flex-col md:flex-row gap-4 md:gap-8 items-start"
           >
-            {/* Text — compact, left side */}
-            <div className="flex-1 flex flex-col justify-center order-2 md:order-1">
+            {/* Title — above video on mobile, left side on desktop */}
+            <div className="flex flex-col text-center md:text-left order-1 md:order-none md:hidden">
               <p className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-muted-foreground/60 mb-2 font-light font-body">
                 Maison Affluency · Singapore
               </p>
               <h2 className="font-serif text-base md:text-lg text-foreground font-light tracking-wide">
                 Tour Our Gallery
               </h2>
-               <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5">
-                An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship,{' '}<br className="hidden md:inline" />and panoramic cityscape views.
+              <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5">
+                An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship,{' '}and panoramic cityscape views.
               </p>
+            </div>
+
+            {/* Text — compact, left side (desktop only for title; team section always here) */}
+            <div className="flex-1 flex flex-col justify-center order-3 md:order-1">
+              <div className="hidden md:block">
+                <p className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-muted-foreground/60 mb-2 font-light font-body">
+                  Maison Affluency · Singapore
+                </p>
+                <h2 className="font-serif text-base md:text-lg text-foreground font-light tracking-wide">
+                  Tour Our Gallery
+                </h2>
+                <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5">
+                  An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship,{' '}<br className="hidden md:inline" />and panoramic cityscape views.
+                </p>
+              </div>
 
               {/* The Curating Team — inline */}
-              <h3 className="font-serif text-base md:text-lg text-foreground font-light tracking-wide mt-4">
+              <h3 className="font-serif text-base md:text-lg text-foreground font-light tracking-wide mt-4 text-center md:text-left">
                 & Meet the Curating Team
               </h3>
-              <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5 mb-3">
+              <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5 mb-3 text-center md:text-left">
                 The heart and soul of the gallery and designers selection
               </p>
               <div className="flex items-start gap-8 justify-center">
@@ -136,7 +151,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
             </div>
 
             {/* Video — compact, right side */}
-            <div className="flex items-start gap-5 w-full md:w-[55%] order-1 md:order-2">
+            <div className="flex items-start gap-5 w-full md:w-[55%] order-2 md:order-2">
               <div className="relative flex-1 overflow-hidden rounded-sm shadow-[0_30px_70px_-10px_rgba(0,0,0,0.5)]" style={{ aspectRatio: "16/9" }}>
                 {!isPlaying ? (
                   <button
