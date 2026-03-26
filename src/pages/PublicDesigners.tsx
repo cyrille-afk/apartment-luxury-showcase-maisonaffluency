@@ -1,23 +1,55 @@
 import { useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import AtelierGroupCard from "@/components/AtelierGroupCard";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 
 const PublicDesigners = () => {
   const { data: allDesigners = [], isLoading } = useAllDesigners();
 
-  const items = useMemo(
-    () =>
-      allDesigners
-        .filter((d) => d.is_published)
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [allDesigners]
-  );
+  // Build groups: ateliers with sub-designers get nested cards
+  const { groups, standalone } = useMemo(() => {
+    const published = allDesigners.filter((d) => d.is_published);
+    const byName = new Map(published.map((d) => [d.name, d]));
+
+    // Find parent ateliers (founder === name) that have sub-designers
+    const parentNames = new Set<string>();
+    const childByParent = new Map<string, typeof published>();
+
+    for (const d of published) {
+      if (d.founder && d.founder !== d.name && byName.has(d.founder)) {
+        parentNames.add(d.founder);
+        const arr = childByParent.get(d.founder) || [];
+        arr.push(d);
+        childByParent.set(d.founder, arr);
+      }
+    }
+
+    const groups: Array<{ parent: (typeof published)[0]; children: typeof published }> = [];
+    const standalone: typeof published = [];
+
+    for (const d of published) {
+      if (parentNames.has(d.name)) {
+        const kids = (childByParent.get(d.name) || []).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        groups.push({ parent: d, children: kids });
+      } else if (!d.founder || d.founder === d.name || !byName.has(d.founder)) {
+        // Not a child of a group → standalone
+        standalone.push(d);
+      }
+    }
+
+    groups.sort((a, b) => a.parent.name.localeCompare(b.parent.name));
+    standalone.sort((a, b) => a.name.localeCompare(b.name));
+
+    return { groups, standalone };
+  }, [allDesigners]);
 
   return (
     <>
@@ -69,7 +101,7 @@ const PublicDesigners = () => {
             </div>
           )}
 
-          {!isLoading && items.length === 0 && (
+          {!isLoading && groups.length === 0 && standalone.length === 0 && (
             <div className="flex flex-col items-center justify-center py-32 text-center">
               <p className="font-body text-sm text-muted-foreground">
                 Content coming soon — we're curating this collection.
@@ -77,83 +109,93 @@ const PublicDesigners = () => {
             </div>
           )}
 
-          {!isLoading && items.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"
-            >
-              {items.map((item) => {
-                const isAtelier = item.founder === item.name;
-                return (
-                  <Link
-                    key={item.slug}
-                    to={`/designers/${item.slug}`}
-                    onClick={() => {
-                      sessionStorage.removeItem("__scroll_y");
-                      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-                    }}
-                    className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+          {!isLoading && (groups.length > 0 || standalone.length > 0) && (
+            <div className="space-y-12">
+              {/* Atelier groups — nested cards */}
+              {groups.length > 0 && (
+                <section>
+                  <h2 className="font-display text-lg tracking-wide text-muted-foreground mb-5 uppercase text-[11px]">
+                    Ateliers & Collections
+                  </h2>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"
                   >
-                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
-                      {item.image_url ? (
-                        <img
-                          src={item.image_url}
-                          alt={item.name}
-                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
-                          <span className="font-display text-3xl text-muted-foreground/20">
-                            {item.name.charAt(0)}
-                          </span>
+                    {groups.map(({ parent, children }) => (
+                      <AtelierGroupCard
+                        key={parent.slug}
+                        parent={parent}
+                        children={children}
+                      />
+                    ))}
+                  </motion.div>
+                </section>
+              )}
+
+              {/* Independent designers */}
+              {standalone.length > 0 && (
+                <section>
+                  <h2 className="font-display text-lg tracking-wide text-muted-foreground mb-5 uppercase text-[11px]">
+                    Independent Designers
+                  </h2>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"
+                  >
+                    {standalone.map((item) => (
+                      <Link
+                        key={item.slug}
+                        to={`/designers/${item.slug}`}
+                        onClick={() => {
+                          sessionStorage.removeItem("__scroll_y");
+                          window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+                        }}
+                        className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+                      >
+                        <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                          {item.image_url ? (
+                            <img
+                              src={item.image_url}
+                              alt={item.name}
+                              className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+                              <span className="font-display text-3xl text-muted-foreground/20">
+                                {item.name.charAt(0)}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Name — top-left */}
+                          <div className="absolute inset-x-0 top-0 px-4 pb-10 pt-3 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
+                            <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+                              {item.name}
+                            </p>
+                          </div>
+
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+                            {item.specialty && (
+                              <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">
+                                {item.specialty}
+                              </p>
+                            )}
+                            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+                              View Profile
+                            </span>
+                          </div>
                         </div>
-                      )}
-
-                      {/* Name — top-left */}
-                      <div className="absolute inset-x-0 top-0 px-4 pb-10 pt-3 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
-                        <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
-                          {item.name}
-                        </p>
-                      </div>
-
-                      {isAtelier && (
-                        <div className="absolute top-3 right-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
-                          <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">
-                            {item.name}
-                          </span>
-                        </div>
-                      )}
-
-                      {item.founder && !isAtelier && (
-                        <span className="absolute top-2.5 right-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full">
-                          {item.founder}
-                        </span>
-                      )}
-
-                      {/* Thumbnail placeholders — bottom-right */}
-                      <div className="absolute bottom-3 right-3 flex gap-2 z-10">
-                        <div className="w-[72px] h-[72px] md:w-20 md:h-20 rounded bg-muted/40 border-2 border-white backdrop-blur-sm shadow-md" />
-                        <div className="w-[72px] h-[72px] md:w-20 md:h-20 rounded bg-muted/40 border-2 border-white backdrop-blur-sm shadow-md" />
-                      </div>
-
-                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
-                        {item.specialty && (
-                          <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">
-                            {item.specialty}
-                          </p>
-                        )}
-                        <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-                          View Profile
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </motion.div>
+                      </Link>
+                    ))}
+                  </motion.div>
+                </section>
+              )}
+            </div>
           )}
 
           {/* Trade Program CTA */}
