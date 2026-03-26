@@ -119,7 +119,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
             </div>
 
             {/* Video — compact, right side */}
-            <div className="flex items-start gap-2 w-full md:w-[55%] order-1 md:order-2">
+            <div className="flex items-start gap-5 w-full md:w-[55%] order-1 md:order-2">
               <div className="relative flex-1 overflow-hidden rounded-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.35)]" style={{ aspectRatio: "16/9" }}>
                 {!isPlaying ? (
                   <button
@@ -152,10 +152,10 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               </div>
               <button
                 onClick={handleShare}
-                className="flex flex-col items-center gap-0.5 text-[10px] font-body text-muted-foreground hover:text-primary transition-colors mt-1"
+                className="flex flex-col items-center gap-1 text-xs font-body text-muted-foreground hover:text-primary transition-colors mt-1"
                 aria-label="Share apartment tour"
               >
-                <Share2 className="w-3.5 h-3.5" />
+                <Share2 className="w-5 h-5" />
                 <span>Share</span>
               </button>
             </div>
