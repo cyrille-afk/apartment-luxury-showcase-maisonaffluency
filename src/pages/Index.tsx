@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useCallback, lazy, Suspense } from "react";
-import FeaturedReadBanner from "@/components/FeaturedReadBanner";
 import { Helmet } from "react-helmet-async";
 import Hero from "@/components/Hero";
 import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
@@ -18,7 +17,8 @@ function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>
   );
 }
 
-// Navigation is heavy (Radix Sheet, Tooltip, DropdownMenu) — lazy-load it
+// Lazy-load FeaturedReadBanner & Navigation to keep lucide-react out of the initial chunk
+const FeaturedReadBanner = lazyRetry(() => import("@/components/FeaturedReadBanner"));
 const Navigation = lazyRetry(() => import("@/components/Navigation"));
 
 
@@ -403,7 +403,9 @@ const Index = () => {
         </Suspense>
       )}
 
-      <FeaturedReadBanner />
+      <Suspense fallback={null}>
+        <FeaturedReadBanner />
+      </Suspense>
 
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:rounded focus:shadow-lg focus:border focus:border-border font-body text-sm">
         Skip to main content
