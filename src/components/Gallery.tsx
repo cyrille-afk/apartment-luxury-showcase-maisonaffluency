@@ -786,7 +786,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
               })()}
 
               <div className={`hidden md:grid md:gap-8 md:grid-cols-2 ${gridCols === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} transition-all duration-300`}>
-                {(gridCols === 3 ? section.items.slice(0, 3) : section.items).map((item, index) => {
+                {section.items.map((item, index) => {
                   const itemKey = `${originalSectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
 
