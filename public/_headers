@@ -1,6 +1,7 @@
 # Hashed assets (JS, CSS) – immutable, cache 1 year
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
 
 # Static images & fonts – immutable, cache 1 year
 /*.png
@@ -26,7 +27,11 @@
 /
   Cache-Control: no-cache
 
-# All HTML pages — force revalidation so mobile browsers always fetch the latest
+# All pages — force revalidation, security & performance headers
 /*
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
