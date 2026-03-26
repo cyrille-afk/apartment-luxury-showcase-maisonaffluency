@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CompetitiveAnalysis from "@/components/trade/CompetitiveAnalysis";
+import VideoAnalytics from "@/components/trade/VideoAnalytics";
 
 interface PlatformStats {
   totalProducts: number;
@@ -244,8 +245,13 @@ export default function TradeInsights() {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="font-body">
             <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
+            <TabsTrigger value="video" className="text-xs">Video Analytics</TabsTrigger>
             <TabsTrigger value="competitive" className="text-xs">Competitive Intelligence</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="video">
+            <VideoAnalytics />
+          </TabsContent>
 
           <TabsContent value="competitive">
             <CompetitiveAnalysis />
