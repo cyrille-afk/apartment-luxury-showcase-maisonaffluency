@@ -1,10 +1,11 @@
 import { useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import AtelierGroupCard from "@/components/AtelierGroupCard";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 
