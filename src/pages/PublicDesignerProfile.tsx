@@ -17,7 +17,7 @@ import PublicProductLightbox, { type PublicLightboxItem } from "@/components/Pub
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
-const DESIGNER_SHARE_VERSION = "20260326b";
+const APPARATUS_SHARE_BRIDGE = "/apparatus-studio-share-v6.html";
 
 function responsiveCloudinaryUrl(url: string, width: number): string {
   if (!url.includes("res.cloudinary.com")) return url;
@@ -169,8 +169,10 @@ const PublicDesignerProfile = () => {
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
   const heroImage = designer.hero_image_url || designer.image_url;
   const isGrouped = groupedPicks.length > 0;
-  const buildDesignerBridgePath = (kind: "og" | "card") =>
-    `/${designer.slug}-${kind}.html?v=${DESIGNER_SHARE_VERSION}&t=${Date.now()}`;
+  const buildDesignerBridgePath = (kind: "og" | "card") => {
+    if (designer.slug === "apparatus-studio") return APPARATUS_SHARE_BRIDGE;
+    return `/${designer.slug}-${kind}.html`;
+  };
 
   /* Split biography into hero paragraphs + remaining (with interleaved media) — same as trade */
   const bioBlocks = designer.biography
