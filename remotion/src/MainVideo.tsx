@@ -66,7 +66,7 @@ const scenes: SceneData[] = [
   { image: portrait("AffluencySG_204_1_qbbpqb"), room: "", title: "A Final Flourish", caption: "Sculptural objects as finishing touches", orientation: "portrait" },
 ];
 
-const SCENE_DUR = 125;
+const SCENE_DUR = 210;
 const TRANS_DUR = 18;
 
 function Scene({ image, room, title, caption, orientation }: SceneData) {
@@ -241,7 +241,7 @@ const TOTAL_FRAMES = 70 + scenes.length * SCENE_DUR + 80 - (scenes.length + 1) *
 const AUDIO_DUR_FRAMES = 32 * 30; // 32s audio at 30fps = 960 frames
 
 const VOICEOVER_START = 70; // Start after intro card
-const VOICEOVER_DUR_FRAMES = Math.round(77.4 * 30); // 77.4s at 30fps
+const VOICEOVER_DUR_FRAMES = Math.round(175.7 * 30); // 175.7s at 30fps
 
 export const MainVideo = () => {
   // Layer audio copies to cover the full video duration
