@@ -7,7 +7,7 @@ import { toast } from "sonner";
 const VIDEO_URL = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/videos/apartment-tour-voiceover.mp4";
 const POSTER_URL = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,c_fill,g_auto/bespoke-sofa_gxidtx";
 
-const ApartmentTourInterlude = () => {
+const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [isPlaying, setIsPlaying] = useState(false);
@@ -37,6 +37,77 @@ const ApartmentTourInterlude = () => {
       }
     }
   };
+
+  if (compact) {
+    return (
+      <section ref={ref} id="apartment-tour" className="pt-4 md:pt-8 pb-2 md:pb-4 bg-white scroll-mt-32">
+        <div className="mx-auto max-w-6xl px-4 md:px-12 lg:px-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col md:flex-row gap-4 md:gap-8 items-start"
+          >
+            {/* Video — compact */}
+            <div className="relative w-full md:w-1/2 overflow-hidden rounded-sm shadow-lg" style={{ aspectRatio: "16/9" }}>
+              {!isPlaying ? (
+                <button
+                  onClick={handlePlay}
+                  className="absolute inset-0 w-full h-full group cursor-pointer z-10"
+                  aria-label="Play apartment tour video"
+                >
+                  <img
+                    src={POSTER_URL}
+                    alt="Apartment tour preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#d4bea0]/20 backdrop-blur-none border border-[#d4bea0]/30 flex items-center justify-center group-hover:bg-[#d4bea0]/30 transition-colors">
+                      <Play className="w-5 h-5 md:w-6 md:h-6 text-[#f5f0eb] ml-0.5" fill="currentColor" />
+                    </div>
+                  </div>
+                </button>
+              ) : null}
+              <video
+                ref={videoRef}
+                src={VIDEO_URL}
+                controls
+                playsInline
+                preload="none"
+                poster={POSTER_URL}
+                className={`w-full h-full object-cover ${!isPlaying ? "invisible" : ""}`}
+              />
+            </div>
+
+            {/* Text — compact */}
+            <div className="flex-1 flex flex-col justify-center">
+              <p className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-muted-foreground/60 mb-2 font-light font-body">
+                Maison Affluency · Singapore
+              </p>
+              <h2 className="font-serif text-lg md:text-2xl text-foreground font-light tracking-wide">
+                Tour Our Gallery
+              </h2>
+              <h3 className="font-serif text-base md:text-lg text-muted-foreground font-light tracking-wide mt-0.5">
+                & Meet the Curating Team
+              </h3>
+              <p className="text-muted-foreground text-xs tracking-[0.08em] mt-2 font-light font-body max-w-md">
+                An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship, and panoramic cityscape views.
+              </p>
+              <button
+                onClick={handleShare}
+                className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors mt-2 self-start"
+                aria-label="Share apartment tour"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                Share
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section ref={ref} id="apartment-tour" className="pt-8 md:pt-12 pb-2 md:pb-4 bg-white scroll-mt-32">
