@@ -44,7 +44,7 @@ const TradeRegister = () => {
               <WhatsAppShareButton
                 onClick={(e) => {
                   e.preventDefault();
-                  sharePageOnWhatsApp("/trade/register", "Apply to Trade Program — Maison Affluency", "Exclusive access for design professionals", { directUrlPath: "/trade-program-og.html" });
+                  sharePageOnWhatsApp("/trade/register", "Apply to Trade Program — Maison Affluency", "Exclusive access for design professionals");
                 }}
                 label="Share trade registration on WhatsApp"
                 size="sm"

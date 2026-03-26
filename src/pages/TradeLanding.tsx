@@ -10,7 +10,9 @@ const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/uplo
 const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773975478/Screen_Shot_2026-03-20_at_10.57.13_AM_yiqv4q.png";
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
-const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program-og.html";
+const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
+const buildTradeProgramShareUrl = () =>
+  `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image?path=/trade/program&v=6&t=${Date.now()}`;
 
 const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
   const [open, setOpen] = useState(false);
@@ -325,7 +327,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             </Link>
             <button
               onClick={() => {
-                const ogUrl = TRADE_PROGRAM_SHARE_URL;
+                const ogUrl = buildTradeProgramShareUrl();
                 navigator.clipboard.writeText(ogUrl).then(() => {
                   setShareCopied(true);
                   setTimeout(() => setShareCopied(false), 2000);
