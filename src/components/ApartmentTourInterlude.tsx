@@ -66,28 +66,53 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               </p>
 
               {/* The Curating Team — inline */}
-              <p className="text-[10px] md:text-[11px] tracking-[0.25em] uppercase text-muted-foreground/50 mt-5 mb-2 font-light font-body">
-                The Curating Team
+              <h4 className="font-serif text-sm md:text-base text-foreground font-light tracking-wide mt-5">
+                Meet The Curating Team
+              </h4>
+              <p className="text-[9px] md:text-[10px] font-body text-muted-foreground/60 italic tracking-wide mt-0.5 mb-3">
+                The heart and soul of the gallery and designers selection
               </p>
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-center text-center">
-                  <img
-                    src="https://res.cloudinary.com/dif1oamtj/image/upload/w_128,q_auto,c_fill/IMG_2542_1_kc4fvs"
-                    alt="Cyrille Delval"
-                    className="w-12 h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm"
-                  />
-                  <span className="text-[10px] font-body text-foreground mt-1 tracking-wide">Cyrille Delval</span>
-                  <span className="text-[9px] font-body text-muted-foreground/70 tracking-wider uppercase">Founder & Curator</span>
-                </div>
-                <div className="flex flex-col items-center text-center">
-                  <img
-                    src="https://res.cloudinary.com/dif1oamtj/image/upload/w_128,q_auto,c_fill/Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs"
-                    alt="Elsa Lemarignier"
-                    className="w-12 h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm"
-                  />
-                  <span className="text-[10px] font-body text-foreground mt-1 tracking-wide">Elsa Lemarignier</span>
-                  <span className="text-[9px] font-body text-muted-foreground/70 tracking-wider uppercase">Art Director</span>
-                </div>
+              <div className="flex items-start gap-4">
+                {[
+                  {
+                    name: "Cyrille Delval",
+                    role: "Founder & Curator",
+                    image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_128,q_auto,c_fill/IMG_2542_1_kc4fvs",
+                    bio: "During a 4 year span, Cyrille studied Art History at the renown Birkbeck College in London whilst navigating a successful investment banking career in London and New York at the same time. This lead him to a serial entrepreneurship life where business and passion mingle. As Affluency co-founder, Cyrille leads Maison Affluency's development in Southeast Asia and the Middle East, sharing his passion for exceptional craftsmanship and unique design pieces.",
+                  },
+                  {
+                    name: "Elsa Lemarignier",
+                    role: "Art Director",
+                    image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_128,q_auto,c_fill/Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs",
+                    bio: "After attending the Ecole du Louvre, Elsa opened her gallery in Paris Carré Rive Gauche where she curated a unique design collection with prominent designers such as Ron Arad. As Affluency co-founder, her mission is to seek out and select exceptional design, art and collectible pieces around the world, showcasing exceptional craftsmanship.",
+                  },
+                ].map((member) => (
+                  <Dialog key={member.name}>
+                    <DialogTrigger asChild>
+                      <button className="flex flex-col items-center text-center group cursor-pointer">
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <span className="text-[10px] font-body text-foreground mt-1 tracking-wide group-hover:text-primary transition-colors">{member.name}</span>
+                        <span className="text-[9px] font-body text-muted-foreground/70 tracking-wider uppercase">{member.role}</span>
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md p-0 overflow-hidden bg-background border-primary/20 [&>button]:absolute [&>button]:top-3 [&>button]:right-3 [&>button]:z-50 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:w-9 [&>button]:h-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:shadow-md [&>button]:border [&>button]:border-primary/20 [&>button]:text-foreground">
+                      <div className="flex flex-col items-center p-6 pt-10">
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          className="w-24 h-24 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-lg mb-4"
+                        />
+                        <h3 className="font-display text-lg text-primary font-semibold">{member.name}</h3>
+                        <p className="text-xs text-muted-foreground tracking-[0.15em] uppercase font-body mb-4">{member.role}</p>
+                        <p className="text-sm text-muted-foreground font-body text-justify max-w-sm">{member.bio}</p>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                ))}
               </div>
             </div>
 
