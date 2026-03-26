@@ -59,7 +59,7 @@ const PublicFavorites = () => {
     const fetchPicks = async () => {
       setLoading(true);
       const { data } = await supabase
-        .from("designer_curator_picks")
+        .from("designer_curator_picks_public")
         .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, category, subcategory, pdf_url, designer_id")
         .in("id", favIds);
 

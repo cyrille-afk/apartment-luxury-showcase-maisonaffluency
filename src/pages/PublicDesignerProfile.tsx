@@ -75,8 +75,8 @@ const PublicDesignerProfile = () => {
   }, [slug]);
 
   const isParentBrand = designer?.founder === designer?.name;
-  const { data: groupedPicks = [] } = useGroupedDesignerPicks(isParentBrand ? designer : undefined);
-  const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
+  const { data: groupedPicks = [] } = useGroupedDesignerPicks(isParentBrand ? designer : undefined, { publicOnly: true });
+  const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
 
   const picks = useMemo(() => {

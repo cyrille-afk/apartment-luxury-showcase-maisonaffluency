@@ -1738,7 +1738,83 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      designer_curator_picks_public: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          designer_id: string | null
+          dimensions: string | null
+          edition: string | null
+          hover_image_url: string | null
+          id: string | null
+          image_url: string | null
+          materials: string | null
+          pdf_filename: string | null
+          pdf_url: string | null
+          pdf_urls: Json | null
+          photo_credit: string | null
+          sort_order: number | null
+          subcategory: string | null
+          subtitle: string | null
+          tags: string[] | null
+          title: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          designer_id?: string | null
+          dimensions?: string | null
+          edition?: string | null
+          hover_image_url?: string | null
+          id?: string | null
+          image_url?: string | null
+          materials?: string | null
+          pdf_filename?: string | null
+          pdf_url?: string | null
+          pdf_urls?: Json | null
+          photo_credit?: string | null
+          sort_order?: number | null
+          subcategory?: string | null
+          subtitle?: string | null
+          tags?: string[] | null
+          title?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          designer_id?: string | null
+          dimensions?: string | null
+          edition?: string | null
+          hover_image_url?: string | null
+          id?: string | null
+          image_url?: string | null
+          materials?: string | null
+          pdf_filename?: string | null
+          pdf_url?: string | null
+          pdf_urls?: Json | null
+          photo_credit?: string | null
+          sort_order?: number | null
+          subcategory?: string | null
+          subtitle?: string | null
+          tags?: string[] | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "designer_curator_picks_designer_id_fkey"
+            columns: ["designer_id"]
+            isOneToOne: false
+            referencedRelation: "designers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_gallery_product_to_quote: {
