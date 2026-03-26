@@ -180,7 +180,7 @@ function IntroCard() {
     }}>
       <div style={{ textAlign: "center" }}>
         <div style={{
-          fontFamily: displayFont, fontSize: 64, fontWeight: 300,
+          fontFamily: displayFont, fontSize: 88, fontWeight: 300,
           color: "#f5f0eb", opacity: logoOpacity,
           transform: `translateY(${logoY}px)`, letterSpacing: "0.08em",
         }}>
@@ -191,7 +191,7 @@ function IntroCard() {
           background: "rgba(212,190,160,0.5)",
         }} />
         <div style={{
-          fontFamily: bodyFont, fontSize: 20, fontWeight: 300,
+          fontFamily: bodyFont, fontSize: 28, fontWeight: 300,
           color: "rgba(212,190,160,0.8)", opacity: subtitleOpacity,
           letterSpacing: "0.2em", textTransform: "uppercase",
         }}>
@@ -214,7 +214,7 @@ function OutroCard() {
     }}>
       <div style={{ textAlign: "center", opacity }}>
         <div style={{
-          fontFamily: displayFont, fontSize: 56, fontWeight: 300,
+          fontFamily: displayFont, fontSize: 80, fontWeight: 300,
           color: "#f5f0eb", letterSpacing: "0.06em",
         }}>
           Maison Affluency
@@ -224,7 +224,7 @@ function OutroCard() {
           background: "rgba(212,190,160,0.5)",
         }} />
         <div style={{
-          fontFamily: bodyFont, fontSize: 22, fontWeight: 300,
+          fontFamily: bodyFont, fontSize: 28, fontWeight: 300,
           color: "rgba(212,190,160,0.8)", letterSpacing: "0.12em",
           textTransform: "uppercase",
         }}>
