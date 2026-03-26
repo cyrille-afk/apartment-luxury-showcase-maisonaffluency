@@ -91,7 +91,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
             </div>
 
             {/* Video — compact, right side */}
-            <div className="relative w-full md:w-1/2 order-1 md:order-2">
+            <div className="relative w-full md:w-[55%] order-1 md:order-2">
               <div className="overflow-hidden rounded-sm shadow-lg" style={{ aspectRatio: "16/9" }}>
                 {!isPlaying ? (
                   <button
