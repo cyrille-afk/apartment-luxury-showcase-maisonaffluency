@@ -59,7 +59,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                 Tour Our Gallery
               </h2>
                <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5">
-                An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship, and panoramic cityscape views.
+                An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship,{' '}<br className="hidden md:inline" />and panoramic cityscape views.
               </p>
 
               {/* The Curating Team — inline */}
