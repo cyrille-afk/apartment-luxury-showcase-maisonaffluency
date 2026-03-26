@@ -252,7 +252,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [gridCols, setGridCols] = useState<3 | 4>(3);
+  const [gridCols, setGridCols] = useState<3 | 4>(4);
 
   // Quote request dialog state (triggered from hotspot pins)
   const [quoteDialogOpen, setQuoteDialogOpen] = useState(false);
