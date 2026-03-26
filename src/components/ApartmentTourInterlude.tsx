@@ -73,13 +73,13 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                 {[
                   {
                     name: "Cyrille Delval",
-                    role: "Founder & Curator",
+                    role: "Co-Founder & CEO",
                     image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_128,q_auto,c_fill/IMG_2542_1_kc4fvs",
                     bio: "During a 4 year span, Cyrille studied Art History at the renown Birkbeck College in London whilst navigating a successful investment banking career in London and New York at the same time. This lead him to a serial entrepreneurship life where business and passion mingle. As Affluency co-founder, Cyrille leads Maison Affluency's development in Southeast Asia and the Middle East, sharing his passion for exceptional craftsmanship and unique design pieces.",
                   },
                   {
                     name: "Elsa Lemarignier",
-                    role: "Art Director",
+                    role: "Co-Founder & CPO",
                     image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_128,q_auto,c_fill/Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs",
                     bio: "After attending the Ecole du Louvre, Elsa opened her gallery in Paris Carré Rive Gauche where she curated a unique design collection with prominent designers such as Ron Arad. As Affluency co-founder, her mission is to seek out and select exceptional design, art and collectible pieces around the world, showcasing exceptional craftsmanship.",
                   },
