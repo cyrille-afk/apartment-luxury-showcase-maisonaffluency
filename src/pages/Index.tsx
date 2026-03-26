@@ -416,8 +416,8 @@ const Index = () => {
         {showBelowFoldSections ? (
           <>
             <section id="overview" className="scroll-mt-20 md:scroll-mt-24">
-              <Suspense fallback={<SectionFallback />}>
-                <Overview />
+              <Suspense fallback={null}>
+                <ApartmentTourInterlude compact />
               </Suspense>
             </section>
             <section id="gallery" className="scroll-mt-20 md:scroll-mt-24">
@@ -425,9 +425,6 @@ const Index = () => {
                 <Gallery />
               </Suspense>
             </section>
-            <Suspense fallback={null}>
-              <ApartmentTourInterlude />
-            </Suspense>
             <section id="curating-team" className="scroll-mt-20 md:scroll-mt-24" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 900px' }}>
               <Suspense fallback={<SectionFallback />}>
                 <CuratingTeam />
