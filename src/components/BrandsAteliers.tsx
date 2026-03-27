@@ -1,5 +1,6 @@
 import React from "react";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
+import { useParentBrandDesignerCountsFiltered } from "@/hooks/useParentBrandDesignerCounts";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import CuratorPicksLegend from "./CuratorPicksLegend";
@@ -1956,6 +1957,132 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
     profileSlug: "theoreme-editions",
     pillLabel: "Théorème",
   },
+  {
+    brandName: "Ozone",
+    dbParentName: "Ozone",
+    instagram: "https://www.instagram.com/ozone_light/?hl=en",
+    profileSlug: "ozone-light",
+    pillLabel: "Ozone",
+  },
+  {
+    brandName: "La Chance Paris",
+    dbParentName: "La Chance",
+    instagram: "https://www.instagram.com/lachance_paris/?hl=en",
+    profileSlug: "la-chance",
+    pillLabel: "La Chance",
+  },
+  {
+    brandName: "Marta Sala Éditions",
+    dbParentName: "Marta Sala Éditions",
+    instagram: "https://www.instagram.com/martasalaeditions/?hl=en",
+    profileSlug: "marta-sala-editions",
+    pillLabel: "Marta Sala",
+  },
+  {
+    brandName: "MMairo",
+    dbParentName: "MMairo",
+    instagram: "https://www.instagram.com/mmairo_design/?hl=en",
+    profileSlug: "mmairo",
+    pillLabel: "MMairo",
+  },
+  {
+    brandName: "Man of Parts",
+    dbParentName: "Man of Parts",
+    instagram: "https://instagram.com/manofparts",
+    profileSlug: "man-of-parts",
+    pillLabel: "Man of Parts",
+  },
+  {
+    brandName: "Pouenat",
+    dbParentName: "Pouenat",
+    instagram: "https://www.instagram.com/pouenat.official/?hl=en",
+    profileSlug: "pouenat",
+    pillLabel: "Pouenat",
+  },
+  {
+    brandName: "De La Espada",
+    dbParentName: "De La Espada",
+    instagram: "https://www.instagram.com/delaespada/",
+    profileSlug: "de-la-espada",
+    pillLabel: "De La Espada",
+  },
+  {
+    brandName: "Delcourt Collection",
+    dbParentName: "Delcourt Collection",
+    instagram: "https://instagram.com/delcourtcollection",
+    profileSlug: "delcourt-collection",
+    pillLabel: "Delcourt",
+  },
+  {
+    brandName: "Collection Particulière",
+    dbParentName: "Collection Particulière",
+    instagram: "https://www.instagram.com/collection_particuliere/",
+    profileSlug: "collection-particuliere",
+    pillLabel: "Collection Particulière",
+  },
+  {
+    brandName: "Entrelacs Création",
+    dbParentName: "Entrelacs",
+    instagram: "https://www.instagram.com/entrelacs_lightings/",
+    profileSlug: "entrelacs",
+    pillLabel: "Entrelacs",
+  },
+  {
+    brandName: "Haymann Editions",
+    dbParentName: "Haymann Editions",
+    instagram: "https://instagram.com/haymanneditions",
+    profileSlug: "haymann-editions",
+    pillLabel: "Haymann",
+  },
+  {
+    brandName: "Alinea Design Objects",
+    dbParentName: "Alinéa Design Objects",
+    instagram: "https://instagram.com/alinea_design_objects",
+    profileSlug: "leo-aerts-alinea",
+    pillLabel: "Alinéa",
+  },
+  {
+    brandName: "Apparatus Studio",
+    dbParentName: "Apparatus Studio",
+    instagram: "https://instagram.com/apparatusstudio",
+    profileSlug: "apparatus-studio",
+    pillLabel: "Apparatus",
+  },
+  {
+    brandName: "Achille Salvagni Atelier",
+    dbParentName: "AS Atelier",
+    instagram: "https://www.instagram.com/achillesalvagniatelier/",
+    profileSlug: "achille-salvagni-atelier",
+    pillLabel: "AS Atelier",
+  },
+  {
+    brandName: "Atelier DeMichelis",
+    dbParentName: "Atelier Demichelis",
+    instagram: "https://instagram.com/atelier_demichelis",
+    profileSlug: "atelier-demichelis",
+    pillLabel: "DeMichelis",
+  },
+  {
+    brandName: "Okha Design Studio",
+    dbParentName: "OKHA",
+    instagram: "https://instagram.com/__okha",
+    profileSlug: "okha",
+    pillLabel: "OKHA",
+  },
+  {
+    brandName: "Arredoluce",
+    dbParentName: "Arredoluce",
+    instagram: "https://www.instagram.com/angelolelii/?hl=en",
+    profileSlug: "arredoluce",
+    pillLabel: "Arredoluce",
+  },
+  {
+    brandName: "Alpange",
+    dbParentName: "Alpange",
+    instagram: "",
+    profileSlug: "alpange",
+    pillLabel: "Alpange",
+  },
 ];
 
 // Quick lookup by brand name
@@ -2130,6 +2257,20 @@ function AlphaStrip({
       .map(c => c.dbParentName);
   }, [parentBrandsInStrip]);
 
+  // Fetch designer counts for all parent brands in this strip
+  const allParentDbNames = useMemo(() => {
+    return Object.values(parentBrandsInStrip).map(c => c.dbParentName);
+  }, [parentBrandsInStrip]);
+  const { data: designerCounts = {} } = useParentBrandDesignerCountsFiltered(allParentDbNames);
+
+  // Helper to get designer count for a parent brand
+  const getDesignerCount = useCallback((brandName: string) => {
+    const config = parentBrandConfigMap[brandName];
+    if (!config) return 0;
+    if (config.staticDesigners) return config.staticDesigners.length;
+    return designerCounts[config.dbParentName] || 0;
+  }, [designerCounts]);
+
   // We'll fetch for the first non-static parent brand that is open
   const openDbParent = useMemo(() => {
     return Object.entries(openParentDesigners).find(([name, open]) => {
@@ -2229,6 +2370,7 @@ function AlphaStrip({
                   {brand.origin}
                 </p>
                 {/* Instagram icon top-right */}
+                {parentConfig.instagram && (
                 <a
                   href={parentConfig.instagram}
                   target="_blank"
@@ -2239,13 +2381,14 @@ function AlphaStrip({
                 >
                   <Instagram className="h-6 w-6 text-white" />
                 </a>
+                )}
                 {/* Toggle sub-designers button */}
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleParentDesigners(brand.name); }}
                   className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
                 >
                   <Layers className="h-3 w-3" />
-                  <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers</span>
+                  <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers{(() => { const count = getDesignerCount(brand.name); return count > 0 ? ` (${count})` : ""; })()}</span>
                   <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${openParentDesigners[brand.name] ? "rotate-180" : ""}`} />
                 </button>
                 {/* Share button — bottom left */}
