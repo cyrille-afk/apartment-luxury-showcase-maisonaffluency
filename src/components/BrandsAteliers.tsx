@@ -2047,6 +2047,36 @@ function AlphaStrip({
                   <span className="font-body text-[9px] uppercase tracking-[0.12em]">{ecartSubDesigners.length} designers</span>
                   <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${ecartDesignersOpen ? "rotate-180" : ""}`} />
                 </button>
+                {/* Share button — bottom left */}
+                <div className="absolute bottom-3 left-3 z-10">
+                  {/* Desktop: Share icon */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const url = `${window.location.origin}/designers/ecart`;
+                      navigator.clipboard.writeText(`${brand.name} — ${url}`);
+                      import('sonner').then(({ toast }) => toast.success('Link copied'));
+                      trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
+                    }}
+                    className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
+                    aria-label="Share Ecart Paris"
+                  >
+                    <Share2 className="h-3 w-3" />
+                    <span className="font-body text-[9px] uppercase tracking-[0.12em]">Share</span>
+                  </button>
+                  {/* Mobile: WhatsApp button */}
+                  <WhatsAppShareButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      shareProfileOnWhatsApp("atelier", brand.id || "ecart", brand.name);
+                      trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
+                    }}
+                    label={`Share ${brand.name} on WhatsApp`}
+                    size="sm"
+                    variant="glass"
+                    className="md:hidden"
+                  />
+                </div>
                 {/* Hover overlay with View Profile */}
                 <Link
                   to="/designers/ecart?from=ateliers"
