@@ -611,13 +611,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             duration: 0.6,
             delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary mb-2">
+                <div className="flex items-end justify-between mb-2">
+                  <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary leading-none">
                     {section.experience}
                   </h3>
-                  <div className="hidden md:flex items-center gap-5 mb-2">
+                  <div className="hidden md:flex items-end gap-5">
                     {!section.items.some(i => i.description) && (
-                      <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">
+                      <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body leading-none pb-[3px]">
                         <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
                           <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
                           <Plus className="relative h-2.5 w-2.5 text-white" />
@@ -638,7 +638,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             import('sonner').then(({ toast }) => toast.success('Link copied'));
                           }
                         }}
-                        className="inline-flex flex-col items-center gap-0.5 text-muted-foreground hover:text-primary transition-colors"
+                        className="inline-flex flex-col items-center gap-0.5 text-muted-foreground hover:text-primary transition-colors leading-none"
                         aria-label="Share Interactive Gallery"
                       >
                         <Share2 className="w-4 h-4" />
@@ -648,10 +648,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     {originalSectionIndex === 0 && (
                       <button
                         onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
-                        className="flex items-center p-1.5 rounded transition-all hover:opacity-70"
+                        className="flex items-center rounded transition-all hover:opacity-70 leading-none"
                         aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
                       >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                           {gridCols === 3 ? (
                             <>
                               <rect x="4" y="3" width="4" height="18" rx="1" fill="black" />
