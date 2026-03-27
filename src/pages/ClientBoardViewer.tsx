@@ -99,11 +99,12 @@ const ClientBoardViewer = () => {
   };
 
   const updateApproval = async (itemId: string, status: "approved" | "rejected") => {
-    if (!board || board.status !== "shared") return;
-    const { error } = await supabase
-      .from("client_board_items")
-      .update({ approval_status: status })
-      .eq("id", itemId);
+    if (!board || board.status !== "shared" || !token) return;
+    const { error } = await supabase.rpc("update_item_approval_by_token", {
+      _token: token,
+      _item_id: itemId,
+      _approval_status: status,
+    });
     if (!error) {
       setItems(prev => prev.map(i => i.id === itemId ? { ...i, approval_status: status } : i));
       toast({ title: status === "approved" ? "Item approved ✓" : "Item declined" });
@@ -111,20 +112,20 @@ const ClientBoardViewer = () => {
   };
 
   const addComment = async (itemId: string | null) => {
-    if (!board || !commentText.trim()) return;
-    const { data, error } = await supabase
-      .from("client_board_comments")
-      .insert({
-        board_id: board.id,
-        item_id: itemId,
-        author_name: clientName || "Client",
-        content: commentText.trim(),
-        is_client: true,
-      })
-      .select()
-      .single();
+    if (!board || !commentText.trim() || !token) return;
+    const { data, error } = await supabase.rpc("add_board_comment_by_token", {
+      _token: token,
+      _board_id: board.id,
+      _content: commentText.trim(),
+      _author_name: clientName || "Client",
+      _is_client: true,
+      _item_id: itemId,
+    });
     if (!error && data) {
-      setComments(prev => [...prev, data as Comment]);
+      // Refetch comments to get the full row
+      const { data: commentsData } = await supabase
+        .rpc("get_board_comments_by_token", { _token: token });
+      if (commentsData) setComments(commentsData as Comment[]);
       setCommentText("");
       setActiveCommentItem(null);
     }
