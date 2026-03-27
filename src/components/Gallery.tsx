@@ -510,9 +510,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     setCurrentSectionIndex(sectionIndex);
     setCurrentItemIndex(itemIndex);
     setSourceItemKey(`${sectionIndex}-${itemIndex}`);
+    setFilterDesigner(null); // Clear designer filter when opening from gallery directly
     imageZoomedRef.current = false;
     setImageZoomed(false);
-    // Auto-expand for sections without descriptions (e.g. "A Sociable Environment" uses hotspots)
     const hasDescription = galleryExperiences[sectionIndex]?.items.some(item => item.description);
     setIsExpanded(!isMobile && !hasDescription);
     setLightboxOpen(true);
