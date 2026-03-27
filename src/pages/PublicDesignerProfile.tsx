@@ -434,7 +434,7 @@ const PublicDesignerProfile = () => {
                   className="flex-1 min-w-0 flex flex-col justify-center"
                 >
                   {designer.philosophy && (
-                    <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5">
+                    <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5 text-center">
                       "{designer.philosophy}"
                     </blockquote>
                   )}
@@ -530,7 +530,7 @@ const PublicDesignerProfile = () => {
                   className="flex flex-col"
                 >
                   {designer.philosophy && (
-                    <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6">
+                    <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center">
                       "{designer.philosophy}"
                     </blockquote>
                   )}
