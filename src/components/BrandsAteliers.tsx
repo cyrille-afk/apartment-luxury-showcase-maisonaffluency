@@ -2014,32 +2014,81 @@ function AlphaStrip({
           return (
             <React.Fragment key={brand.name}>
             {isEcart ? (
-              /* ── Ecart parent card — Trade-style portrait card, navigates to profile ── */
-              <Link
-                to="/designers/ecart?from=ateliers"
-                id={`brand-${brand.id}`}
-                className="group flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all bg-background"
-              >
-                <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
-                  {bg ? (
-                    <img src={bg} alt={brand.name} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
-                      <span className="font-display text-3xl text-primary/40">{brand.name.charAt(0)}</span>
+              /* ── Ecart: parent card on its own row, sub-designers below ── */
+              <div className="flex-none w-full snap-start space-y-5">
+                {/* Parent card — full-width standalone row */}
+                <Link
+                  to="/designers/ecart?from=ateliers"
+                  id={`brand-${brand.id}`}
+                  className="group block w-full max-w-[480px] rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all bg-background"
+                >
+                  <div className="aspect-[16/9] bg-muted/20 overflow-hidden relative">
+                    {bg ? (
+                      <img src={bg} alt={brand.name} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                        <span className="font-display text-3xl text-primary/40">{brand.name.charAt(0)}</span>
+                      </div>
+                    )}
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+                        View Profile
+                      </span>
                     </div>
-                  )}
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
-                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-                      View Profile
-                    </span>
+                    {/* Atelier logo badge */}
+                    <div className="absolute top-3 left-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
+                      <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
+                    </div>
+                    {/* Name overlay at bottom */}
+                    <div className="absolute inset-x-0 bottom-0 px-5 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                      <p className="font-display text-lg md:text-xl text-white tracking-wide drop-shadow-sm">{brand.name}</p>
+                      <p className="font-body text-xs text-white/60 mt-0.5">{brand.origin}</p>
+                    </div>
                   </div>
-                  {/* Atelier logo badge */}
-                  <div className="absolute top-3 left-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
-                    <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
-                  </div>
+                </Link>
+
+                {/* Sub-designer cards — grid below parent */}
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3">
+                  {ecartSubDesigners.map((d) => (
+                    <Link
+                      key={d.slug}
+                      to={`/designers/${d.slug}?from=ateliers`}
+                      className="group/sub rounded-xl overflow-hidden border border-border hover:border-foreground/30 hover:shadow-xl transition-all bg-background"
+                    >
+                      <div className="aspect-[3/4] relative bg-muted/20 overflow-hidden">
+                        {d.image ? (
+                          <img
+                            src={d.image}
+                            alt={d.name}
+                            className="w-full h-full object-cover transition-all duration-700 group-hover/sub:scale-110 group-hover/sub:brightness-[0.65]"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover/sub:bg-muted/20 transition-colors">
+                            <span className="font-display text-3xl text-muted-foreground/20">{d.name.charAt(0)}</span>
+                          </div>
+                        )}
+                        {/* Name overlay at bottom */}
+                        <div className="absolute inset-x-0 bottom-0 px-3 pt-8 pb-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                          <p className="font-display text-[11px] md:text-xs text-white tracking-wide leading-tight drop-shadow-sm">
+                            {d.name}
+                          </p>
+                        </div>
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 px-4">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View Profile</span>
+                        </div>
+                        {/* Founder badge */}
+                        <span className="absolute top-2 left-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                          <Layers className="h-2 w-2" />
+                          Ecart
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </Link>
+              </div>
             ) : (
             <div
               id={`brand-${brand.id}`}
@@ -2145,23 +2194,16 @@ function AlphaStrip({
                   </ul>
                 </div>
                 )}
-
-
-
-
               </div>
 
-               {/* Bottom bar: Expand (left on mobile, right on desktop) | Curators' Picks (center) | Share (right on mobile, left of expand on desktop) */}
+               {/* Bottom bar */}
               <div className={`absolute bottom-0 left-0 right-0 h-16 z-[5] pointer-events-none ${hasBg ? 'bg-gradient-to-t from-black/50 via-black/30 to-transparent' : 'bg-gradient-to-t from-background/60 via-background/30 to-transparent'}`} />
               <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
-                {/* Expand/collapse — left on mobile, right on desktop */}
                 <div className={`md:order-3 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
                   <div className={`rounded-full p-1.5 backdrop-blur-sm ${hasBg ? "bg-white/20 text-white" : "bg-foreground/10 text-foreground"}`}>
                     <ChevronDown className="h-4 w-4" />
                   </div>
                 </div>
-
-                {/* Curators' Picks — center */}
                 <button
                   onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
                   className="md:order-1 flex items-center gap-2 md:gap-1.5 text-sm md:text-xs tracking-wider font-body group/picks touch-manipulation transition-all duration-300 text-white whitespace-nowrap"
@@ -2171,8 +2213,6 @@ function AlphaStrip({
                     Curators' Picks
                   </span>
                 </button>
-
-                {/* WhatsApp share — right on mobile, center-ish on desktop */}
                 <WhatsAppShareButton
                   onClick={(e) => {
                     e.stopPropagation();
@@ -2188,45 +2228,6 @@ function AlphaStrip({
               </div>
             </div>
             )}
-
-            {/* Ecart sub-designer cards — Trade-style with badges */}
-            {isEcart && ecartSubDesigners.map((d) => (
-              <Link
-                key={d.slug}
-                to={`/designers/${d.slug}?from=ateliers`}
-                className="group/sub flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-border hover:border-foreground/30 hover:shadow-xl transition-all bg-background"
-              >
-                <div className="aspect-[3/4] relative bg-muted/20 overflow-hidden">
-                  {d.image ? (
-                    <img
-                      src={d.image}
-                      alt={d.name}
-                      className="w-full h-full object-cover transition-all duration-700 group-hover/sub:scale-110 group-hover/sub:brightness-[0.65]"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover/sub:bg-muted/20 transition-colors">
-                      <span className="font-display text-3xl text-muted-foreground/20">{d.name.charAt(0)}</span>
-                    </div>
-                  )}
-                  {/* Name overlay at bottom */}
-                  <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                    <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
-                      {d.name}
-                    </p>
-                  </div>
-                  {/* Hover overlay with specialty + CTA */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 px-4">
-                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View Profile</span>
-                  </div>
-                  {/* Founder badge — matches Trade DesignerCard */}
-                  <span className="absolute top-2.5 left-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <Layers className="h-2.5 w-2.5" />
-                    Ecart Paris
-                  </span>
-                </div>
-              </Link>
-            ))}
             </React.Fragment>
           );
         })}
