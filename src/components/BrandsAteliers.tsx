@@ -2284,7 +2284,15 @@ function AlphaStrip({
   }, [openParentDesigners]);
 
   const toggleParentDesigners = useCallback((brandName: string) => {
-    setOpenParentDesigners(prev => ({ ...prev, [brandName]: !prev[brandName] }));
+    setOpenParentDesigners(prev => {
+      const isCurrentlyOpen = prev[brandName];
+      // Close all others, toggle the clicked one
+      const next: Record<string, boolean> = {};
+      if (!isCurrentlyOpen) {
+        next[brandName] = true;
+      }
+      return next;
+    });
   }, []);
 
   const handleScroll = useCallback(() => {
