@@ -81,6 +81,21 @@ export const buildAtelierOgUrl = (name: string) => {
 };
 
 /**
+ * Build an OG bridge URL for a parent brand card (shows the brand + its designers).
+ * Falls back to the standard atelier OG bridge if no parent-specific bridge exists.
+ */
+const PARENT_BRAND_OG_OVERRIDES: Record<string, string> = {
+  "ecart-paris": "/ateliers/ecart-paris-designers-og.html",
+};
+
+export const buildParentBrandOgUrl = (name: string) => {
+  const slug = slugify(name);
+  const overridePath = PARENT_BRAND_OG_OVERRIDES[slug];
+  if (overridePath) return withOgCacheBust(`${SITE_URL}${overridePath}`);
+  return buildAtelierOgUrl(name);
+};
+
+/**
  * Build a deep-link URL for a specific designer/brand profile.
  * @deprecated Use buildDesignerOgUrl or buildAtelierOgUrl for social sharing
  */

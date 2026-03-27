@@ -20,7 +20,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
-import { shareProfileOnWhatsApp, buildAtelierOgUrl, withOgCacheBust } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, buildAtelierOgUrl, buildParentBrandOgUrl, withOgCacheBust } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
