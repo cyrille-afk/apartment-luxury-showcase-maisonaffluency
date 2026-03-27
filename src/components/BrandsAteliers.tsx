@@ -2090,31 +2090,9 @@ function AlphaStrip({
                 </div>
               </div>
             ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover/sub:bg-muted/20 transition-colors">
-                      <span className="font-display text-3xl text-muted-foreground/20">{d.name.charAt(0)}</span>
-                    </div>
-                  )}
-                  {/* Name overlay at bottom */}
-                  <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                    <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
-                      {d.name}
-                    </p>
-                  </div>
-                  {/* Hover overlay with specialty + CTA */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 px-4">
-                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View Profile</span>
-                  </div>
-                  {/* Founder badge — matches Trade DesignerCard */}
-                  <span className="absolute top-2.5 left-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <Layers className="h-2.5 w-2.5" />
-                    Ecart Paris
-                  </span>
-                </div>
-              </Link>
-            ))}
-            </React.Fragment>
-          );
-        })}
+            <div
+              id={`brand-${brand.id}`}
+              role="button"
       </div>
 
       {/* Dot indicators — only show when more than 1 card */}
