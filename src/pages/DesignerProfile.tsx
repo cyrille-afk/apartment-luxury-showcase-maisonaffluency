@@ -1,4 +1,4 @@
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, Link, Navigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, type Transition } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote } from "lucide-react";
