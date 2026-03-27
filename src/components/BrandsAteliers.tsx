@@ -2041,7 +2041,7 @@ function AlphaStrip({
                 {/* Toggle sub-designers button */}
                 <button
                   onClick={(e) => { e.stopPropagation(); setEcartDesignersOpen(!ecartDesignersOpen); }}
-                  className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
+                  className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
                 >
                   <Layers className="h-3 w-3" />
                   <span className="font-body text-[9px] uppercase tracking-[0.12em]">{ecartSubDesigners.length} designers</span>
