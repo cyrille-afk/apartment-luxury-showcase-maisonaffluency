@@ -2195,7 +2195,7 @@ const FeaturedDesigners = () => {
       const detail = (e as CustomEvent).detail;
       if (detail.section !== "designer") return;
       // Navigate to the full profile page
-      window.location.href = `/designers/${detail.id}`;
+      window.location.href = `/designers/${detail.id}?from=designers`;
     };
     window.addEventListener("deeplink-open-profile", handler);
     return () => window.removeEventListener("deeplink-open-profile", handler);
@@ -2877,7 +2877,7 @@ const FeaturedDesigners = () => {
                     <Link
                       key={designer.id}
                       id={`designer-card-${designer.id}`}
-                      to={`/designers/${designer.id}`}
+                      to={`/designers/${designer.id}?from=designers`}
                       onClick={() => {
                         sessionStorage.removeItem("__scroll_y");
                         window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -2964,7 +2964,7 @@ const FeaturedDesigners = () => {
                   return (
                     <Link
                       key={designer.id}
-                      to={`/designers/${designer.id}`}
+                      to={`/designers/${designer.id}?from=designers`}
                       onClick={() => {
                         sessionStorage.removeItem("__scroll_y");
                         window.scrollTo({ top: 0, left: 0, behavior: "auto" });
