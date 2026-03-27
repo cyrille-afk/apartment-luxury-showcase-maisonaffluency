@@ -794,7 +794,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          onClick={() => {
                             let flatIdx = 0;
                             for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
-                            const url = `https://www.maisonaffluency.com/gallery-item-${flatIdx}.html`;
+                            const firstItem = galleryExperiences[originalSectionIndex].items[0];
+                            const titleSlug = slugify(firstItem?.title || '');
+                            const url = `https://www.maisonaffluency.com/gallery/${titleSlug}`;
                             const text = `${section.experience} — Maison Affluency`;
                             window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
                          }}
