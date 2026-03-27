@@ -3175,21 +3175,23 @@ const FeaturedDesigners = () => {
                           {((curatorPicksDesigner.curatorPicks[curatorPickIndex] as any).pdfUrls as { label: string; url: string; filename?: string }[]).map((pdf) => (
                             <button
                               key={pdf.label}
-                              onClick={async () => {
-                                try {
-                                  const res = await fetch(pdf.url);
-                                  const blob = await res.blob();
-                                  const blobUrl = URL.createObjectURL(blob);
-                                  const a = document.createElement('a');
-                                  a.href = blobUrl;
-                                  a.download = pdf.filename || `${pdf.label}.pdf`;
-                                  document.body.appendChild(a);
-                                  a.click();
-                                  document.body.removeChild(a);
-                                  URL.revokeObjectURL(blobUrl);
-                                } catch {
-                                  window.open(pdf.url, '_blank');
-                                }
+                              onClick={() => {
+                                requireAuth(async () => {
+                                  try {
+                                    const res = await fetch(pdf.url);
+                                    const blob = await res.blob();
+                                    const blobUrl = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = blobUrl;
+                                    a.download = pdf.filename || `${pdf.label}.pdf`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(blobUrl);
+                                  } catch {
+                                    window.open(pdf.url, '_blank');
+                                  }
+                                }, "download this spec sheet");
                               }}
                               className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300"
                               aria-label={`Download PDF ${pdf.label}`}
