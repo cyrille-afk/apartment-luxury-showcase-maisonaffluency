@@ -544,6 +544,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       const url = returnUrl;
       setReturnUrl(null);
       setExternalSourceId(null);
+      setFilterDesigner(null);
       setTimeout(() => navigate(url), 100);
     } else if (externalSourceId) {
       setTimeout(() => {
@@ -552,6 +553,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         setExternalSourceId(null);
+        setFilterDesigner(null);
       }, 100);
     } else if (sourceItemKey) {
       setTimeout(() => {
