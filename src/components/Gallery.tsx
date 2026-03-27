@@ -618,9 +618,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   {originalSectionIndex === 0 && (
                     <div className="hidden md:flex items-center gap-6">
                       <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">
-                        <span className="relative flex items-center justify-center w-6 h-6 rounded-full bg-black/70 border border-primary/70">
+                        <span className="relative flex items-center justify-center w-4 h-4 rounded-full bg-black/70 border border-primary/70">
                           <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
-                          <Plus className="relative h-3 w-3 text-white" />
+                          <Plus className="relative h-2 w-2 text-white" />
                         </span>
                         Interactive Gallery
                       </span>
