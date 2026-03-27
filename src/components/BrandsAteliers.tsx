@@ -3587,7 +3587,7 @@ const BrandsAteliers = () => {
                                       window.open(pdf.url, '_blank');
                                     }
                                   }, "download this spec sheet");
-                                }
+                                }}
                               >
                                 <FileDown size={14} className="md:hidden text-white" />
                                 <FileDown size={16} className="hidden md:block text-white" />
