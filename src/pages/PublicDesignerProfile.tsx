@@ -416,6 +416,10 @@ const PublicDesignerProfile = () => {
                  </motion.div>
               </div>
 
+              {heritageSlides.length > 0 && (
+                <HeritageSlider slides={heritageSlides} />
+              )}
+
               {remainingBio && (
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
