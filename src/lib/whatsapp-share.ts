@@ -9,7 +9,7 @@ const SITE_URL = "https://www.maisonaffluency.com";
 
 const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
 const OG_FUNCTION_BASE = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image`;
-const OG_SHARE_VERSION = "20260327h";
+const OG_SHARE_VERSION = "20260327i";
 
 type ShareSection = "designer" | "collectible" | "atelier";
 
@@ -85,7 +85,7 @@ export const buildAtelierOgUrl = (name: string) => {
  * Falls back to the standard atelier OG bridge if no parent-specific bridge exists.
  */
 const PARENT_BRAND_OG_OVERRIDES: Record<string, string> = {
-  "ecart-paris": "/ateliers/ecart-paris-designers-og.html",
+  "ecart-paris": "/ateliers/ecart-paris-designers-og-v2.html",
 };
 
 export const buildParentBrandOgUrl = (name: string) => {
