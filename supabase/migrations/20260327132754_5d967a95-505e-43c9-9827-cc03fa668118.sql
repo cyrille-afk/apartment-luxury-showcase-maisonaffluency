@@ -1,0 +1,1 @@
+UPDATE designer_heritage_slides SET caption = 'JM Frank - SIL-Bonney-ILV034-A - © The Regents of the University of California, The Bancroft Library, Universit' WHERE id = '56bbd441-ecfb-484a-8c5e-49c0250229a2';
