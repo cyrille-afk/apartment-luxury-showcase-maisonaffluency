@@ -2038,6 +2038,12 @@ function AlphaStrip({
                 />
               )}
               <div className={`absolute inset-0 transition-all duration-300 ${hasBg ? "bg-black/35 group-hover:bg-black/25" : "bg-card/50 group-hover:bg-card/80"}`} />
+              {/* Atelier logo badge — matches Trade DesignerCard for multi-designer brands */}
+              {isEcart && (
+                <div className="absolute top-3 left-3 z-20 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
+                  <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">Ecart Paris</span>
+                </div>
+              )}
               {brand.photoCredit && (
                 <p className="absolute bottom-2 right-2 z-10 text-[9px] text-white/40 font-body tracking-wider">
                   Photo: {brand.photoCredit}
