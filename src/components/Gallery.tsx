@@ -649,8 +649,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     </div>
                   )}
                 </div>
-                <p className="hidden md:flex items-center gap-2 text-sm md:text-base text-muted-foreground font-body italic">
-                  <span>{section.subtitle}</span>
+                <div className="hidden md:flex items-center gap-4">
+                  <p className="text-sm md:text-base text-muted-foreground font-body italic">
+                    {section.subtitle}
+                  </p>
                   <button
                     onClick={() => {
                       const ogSlugs = ['gallery-sociable-og', 'gallery-intimate-og', 'gallery-sanctuary-og', 'gallery-calming-og', 'gallery-small-room-og', 'gallery-home-office-og', 'gallery-details-og'];
@@ -664,12 +666,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         import('sonner').then(({ toast }) => toast.success('Link copied'));
                       }
                     }}
-                    className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors flex-shrink-0"
+                    className="inline-flex flex-col items-center gap-0.5 text-primary/60 hover:text-primary transition-colors flex-shrink-0"
                     aria-label={`Share ${section.experience}`}
                   >
-                    <Share2 className="w-3.5 h-3.5" />
+                    <Share2 className="w-4 h-4" />
+                    <span className="text-[7px] uppercase tracking-[0.12em] font-body not-italic">Share</span>
                   </button>
-                </p>
+                </div>
               </motion.div>
 
               {/* Mobile: swipeable carousel like Instagram */}
