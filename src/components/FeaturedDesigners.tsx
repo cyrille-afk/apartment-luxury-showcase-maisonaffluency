@@ -11,7 +11,7 @@ import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
-import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, withOgCacheBust } from "@/lib/whatsapp-share";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
@@ -2450,7 +2450,7 @@ const FeaturedDesigners = () => {
               </p>
               <button
                 onClick={() => {
-                  const shareUrl = "https://www.maisonaffluency.com/designers-og.html";
+                  const shareUrl = withOgCacheBust("https://www.maisonaffluency.com/designers-og.html");
                   const text = `Designers & Makers On View — Maison Affluency\n${shareUrl}`;
                   const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
                   window.open(wa, "_blank", "noopener");
