@@ -586,8 +586,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     const titleSlug = slugify(title);
     const designerSlug = filterDesigner ? slugify(filterDesigner) : '';
     const urlPath = designerSlug
-      ? `gallery/${designerSlug}/${titleSlug}`
-      : `gallery/${titleSlug}`;
+      ? `gallery/${designerSlug}/${titleSlug}.html`
+      : `gallery/${titleSlug}.html`;
     const url = `https://www.maisonaffluency.com/${urlPath}`;
     const parts = ['Maison Affluency', 'Interactive Gallery'];
     if (filterDesigner) parts.push(filterDesigner);
@@ -703,7 +703,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                        const firstItem = galleryExperiences[originalSectionIndex].items[0];
                        const titleSlug = slugify(firstItem?.title || '');
                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                       const url = `https://www.maisonaffluency.com/gallery/${titleSlug}`;
+                        const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
                        const text = `${section.experience} — Maison Affluency`;
                        if (isMobile) {
                          window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
@@ -796,7 +796,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
                             const firstItem = galleryExperiences[originalSectionIndex].items[0];
                             const titleSlug = slugify(firstItem?.title || '');
-                            const url = `https://www.maisonaffluency.com/gallery/${titleSlug}`;
+                            const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
                             const text = `${section.experience} — Maison Affluency`;
                             window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
                          }}
