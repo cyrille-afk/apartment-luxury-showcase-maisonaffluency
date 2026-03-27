@@ -982,7 +982,7 @@ const Collectibles = () => {
                           key={designer.id}
                           id={`collectible-card-${designer.id}`}
                           type="button"
-                          onClick={() => navigate(`/designers/${designer.id}`)}
+                          onClick={() => navigate(`/designers/${designer.id}?from=designers`)}
                           className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                         >
                           <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
@@ -1067,7 +1067,7 @@ const Collectibles = () => {
                       <button
                         key={`${designer.id}-mobile`}
                         type="button"
-                        onClick={() => navigate(`/designers/${designer.id}`)}
+                        onClick={() => navigate(`/designers/${designer.id}?from=designers`)}
                         className="group block w-full text-left rounded-xl overflow-hidden border border-border bg-background"
                       >
                         <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">

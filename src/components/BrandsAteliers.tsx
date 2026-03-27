@@ -2016,7 +2016,7 @@ function AlphaStrip({
             {isEcart ? (
               /* ── Ecart parent card — Trade-style portrait card, navigates to profile ── */
               <Link
-                to="/designers/ecart"
+                to="/designers/ecart?from=ateliers"
                 id={`brand-${brand.id}`}
                 className="group flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all bg-background"
               >
@@ -2193,7 +2193,7 @@ function AlphaStrip({
             {isEcart && ecartSubDesigners.map((d) => (
               <Link
                 key={d.slug}
-                to={`/designers/${d.slug}`}
+                to={`/designers/${d.slug}?from=ateliers`}
                 className="group/sub flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-border hover:border-foreground/30 hover:shadow-xl transition-all bg-background"
               >
                 <div className="aspect-[3/4] relative bg-muted/20 overflow-hidden">
@@ -2299,7 +2299,7 @@ function EcartAccordion({ onOpenPicks }: { onOpenPicks: (name: string) => void }
                 {ecartSubDesigners.map((d) => (
                   <Link
                     key={d.slug}
-                    to={`/designers/${d.slug}`}
+                    to={`/designers/${d.slug}?from=ateliers`}
                     className="group/sub block rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
                   >
                     <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
