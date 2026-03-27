@@ -2096,6 +2096,26 @@ function AlphaStrip({
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [openParentDesigners, setOpenParentDesigners] = useState<Record<string, boolean>>({});
 
+  // Auto-expand parent brand designers when navigated back with ?expand= param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const expandFounder = params.get("expand");
+    if (!expandFounder) return;
+    // Find the parent brand config matching this founder name
+    const config = Object.values(parentBrandsInStrip).find(
+      c => c.dbParentName === expandFounder
+    );
+    if (config) {
+      setOpenParentDesigners(prev => ({ ...prev, [config.brandName]: true }));
+      // Clean up the URL param
+      params.delete("expand");
+      const newUrl = params.toString()
+        ? `${window.location.pathname}?${params}${window.location.hash}`
+        : `${window.location.pathname}${window.location.hash}`;
+      window.history.replaceState(null, "", newUrl);
+    }
+  }, [parentBrandsInStrip]);
+
   // Find which brands in this strip are parent brands
   const parentBrandsInStrip = useMemo(() => {
     const result: Record<string, ParentBrandConfig> = {};
