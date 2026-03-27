@@ -392,14 +392,15 @@ function SplitImageBlock({
 
   return (
     <div className={`${index === 0 ? "mb-4 md:mb-6" : "my-4 md:my-6"} flex flex-col md:flex-row gap-3 md:gap-6 items-center`}>
+      {/* Mobile: image always first (order-1); Desktop: controlled by imageOnRight */}
+      <div className={`shrink-0 w-full ${imageWidth} order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
+        {imageEl}
+      </div>
       {textEl && (
-        <div className={`flex-1 min-w-0 ${imageOnRight ? 'md:order-1' : 'md:order-2'}`}>
+        <div className={`flex-1 min-w-0 order-2 ${imageOnRight ? 'md:order-1' : 'md:order-2'}`}>
           {textEl}
         </div>
       )}
-      <div className={`shrink-0 w-full ${imageWidth} ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
-        {imageEl}
-      </div>
     </div>
   );
 }
