@@ -577,7 +577,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     return flat + currentItemIndex;
   }, [currentSectionIndex, currentItemIndex]);
 
-  const ogSlugs = ['gallery-sociable-og', 'gallery-intimate-og', 'gallery-sanctuary-og', 'gallery-calming-og', 'gallery-small-room-og', 'gallery-home-office-og', 'gallery-details-og'];
+  
 
   const shareLightboxImage = useCallback(() => {
     let url = `https://www.maisonaffluency.com/gallery-item-${currentFlatIndex}.html`;
