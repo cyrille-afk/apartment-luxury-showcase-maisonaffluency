@@ -46,9 +46,17 @@ export const buildDesignerOgUrl = (name: string) =>
 
 /**
  * Build a static bridge file URL for an atelier/brand.
+ * Supports per-brand versioned bridge files when cache busting is needed.
  */
-export const buildAtelierOgUrl = (name: string) =>
-  `${SITE_URL}/ateliers/${slugify(name)}-og.html`;
+const ATELIER_OG_BRIDGE_OVERRIDES: Record<string, string> = {
+  "ecart-paris": "/ateliers/ecart-paris-og-v2.html",
+};
+
+export const buildAtelierOgUrl = (name: string) => {
+  const slug = slugify(name);
+  const overridePath = ATELIER_OG_BRIDGE_OVERRIDES[slug];
+  return `${SITE_URL}${overridePath ?? `/ateliers/${slug}-og.html`}`;
+};
 
 /**
  * Build a deep-link URL for a specific designer/brand profile.
