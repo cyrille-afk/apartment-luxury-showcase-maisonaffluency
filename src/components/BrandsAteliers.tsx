@@ -1,4 +1,5 @@
 import React from "react";
+import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import CuratorPicksLegend from "./CuratorPicksLegend";
@@ -125,6 +126,7 @@ const refractoryStudioBg = cloudinaryUrl("Screen_Shot_2026-02-25_at_9.09.20_PM_j
 const martaSalaEditionsBg = cloudinaryUrl("Screen_Shot_2026-02-26_at_7.44.59_AM_xqirha", { width: 1200, quality: "auto:good", crop: "fill" });
 const alpangeBg = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,c_fill,f_auto/v1773210638/Screen_Shot_2026-03-11_at_2.30.01_PM_tdkif9.png";
 const pierreFreyBg = cloudinaryUrl("90_vfmkkj", { width: 1200, quality: "auto:good", crop: "fill" });
+const veroneseBg = "https://res.cloudinary.com/dif1oamtj/image/fetch/w_1200,c_fill,g_auto,q_auto:good,f_auto/https://sixtysixmag.com/wp-content/uploads/VERONESE-OK-13-2400x1823.jpg";
 
 // De La Espada Curators' Picks images
 const delaEspadaElliotChair = cloudinaryUrl("Screen_Shot_2026-02-23_at_11.58.15_AM_bvscfc", { width: 1200, quality: "auto:good", crop: "fill" });
@@ -1722,6 +1724,15 @@ const partnerBrands = [
     description: "Visionary rug designer redefining the ancient craft of carpet-making through bold, contemporary designs that layer traditional motifs with avant-garde aesthetics. Each hand-knotted piece from his ateliers in Nepal, Morocco, and Thailand pushes boundaries of color, texture, and narrative.",
     instagram: "https://www.instagram.com/jankathofficial/?hl=en",
   },
+  {
+    id: "veronese",
+    name: "Véronèse",
+    category: "Lighting",
+    subcategory: "Lighting",
+    origin: "France",
+    description: "Founded in 1925 in Murano, Véronèse is a prestigious lighting manufacturer renowned for its exceptional Murano glass craftsmanship. Collaborating with leading international architects and designers, the house creates timeless luminaires that transform the world's finest interiors.",
+    instagram: "https://www.instagram.com/veronese_/",
+  },
 ];
 
 // Background image map
@@ -1823,6 +1834,7 @@ const brandBgMap: Record<string, string> = {
   "Marta Sala Éditions": martaSalaEditionsBg,
   "Alpange": alpangeBg,
   "Pierre Frey": pierreFreyBg,
+  "Véronèse": veroneseBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
@@ -1895,7 +1907,62 @@ const ecartSubDesigners = [
   { name: "Laurent Maugoust & Cécile Chenais", slug: "laurent-maugoust-cecile-chenais", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Laurent_Maugoust_Cecile_Chenais.jpg" },
 ];
 
-// Reverse map: designer ID → brand name (for deep-link resolution)
+// ─── Parent Brand Configuration ──────────────────────────────────────────────
+// Parent brands that have sub-designers displayed in a collapsible grid.
+// `dbParentName` is the `founder` value used to query sub-designers from the DB.
+// `staticDesigners` are used instead of DB if provided (e.g. Ecart).
+interface ParentBrandConfig {
+  /** Brand name as it appears in the consolidated brands list */
+  brandName: string;
+  /** The `founder` value in the designers table */
+  dbParentName: string;
+  /** Instagram URL */
+  instagram: string;
+  /** Designer profile slug for the View Profile link */
+  profileSlug: string;
+  /** Static sub-designers (overrides DB fetch) */
+  staticDesigners?: { name: string; slug: string; image: string }[];
+  /** Label for the founder pill on sub-designer cards */
+  pillLabel: string;
+}
+
+const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
+  {
+    brandName: "Ecart Paris",
+    dbParentName: "Ecart",
+    instagram: "https://instagram.com/ecart.paris",
+    profileSlug: "ecart",
+    staticDesigners: ecartSubDesigners,
+    pillLabel: "Ecart",
+  },
+  {
+    brandName: "CC-Tapis",
+    dbParentName: "CC-Tapis",
+    instagram: "https://instagram.com/cc_tapis",
+    profileSlug: "cc-tapis",
+    pillLabel: "CC-Tapis",
+  },
+  {
+    brandName: "Véronèse",
+    dbParentName: "Veronese",
+    instagram: "https://www.instagram.com/veronese_/",
+    profileSlug: "veronese",
+    pillLabel: "Véronèse",
+  },
+  {
+    brandName: "Théorème Editions",
+    dbParentName: "Théorème Editions",
+    instagram: "https://instagram.com/theoreme_editions",
+    profileSlug: "theoreme-editions",
+    pillLabel: "Théorème",
+  },
+];
+
+// Quick lookup by brand name
+const parentBrandConfigMap: Record<string, ParentBrandConfig> = {};
+PARENT_BRAND_CONFIGS.forEach(c => { parentBrandConfigMap[c.brandName] = c; });
+
+
 const designerIdToBrandMap: Record<string, string> = Object.fromEntries(
   Object.entries(brandToDesignerMap).map(([brand, id]) => [id, brand])
 );
@@ -1935,6 +2002,82 @@ type ConsolidatedBrand = {
   photoCredit?: string;
 };
 
+// ─── Parent Brand Sub-Designers Grid ─────────────────────────────────────────
+function ParentBrandSubDesignersGrid({ config, onClose }: { config: ParentBrandConfig; onClose: () => void }) {
+  const { data: dbDesigners = [] } = useParentBrandDesigners(config.staticDesigners ? null : config.dbParentName);
+  const designers = config.staticDesigners || dbDesigners;
+
+  return (
+    <motion.div
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: "auto", opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="overflow-hidden"
+    >
+      <div className="pt-4 pb-2">
+        <div className="flex items-center gap-2 mb-3 px-1">
+          <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="font-body text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
+            {config.pillLabel} Designers
+          </span>
+          <span className="font-body text-[10px] text-muted-foreground/50">({designers.length})</span>
+          <div className="flex-1 h-px bg-border/30" />
+          <button
+            onClick={onClose}
+            className="p-1 rounded-full hover:bg-muted/50 transition-colors"
+            aria-label="Close designers"
+          >
+            <X className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
+        </div>
+        {designers.length === 0 ? (
+          <div className="text-center py-6">
+            <span className="font-body text-xs text-muted-foreground/50">Loading designers…</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 md:gap-3">
+            {designers.map((d) => (
+              <Link
+                key={d.slug}
+                to={`/designers/${d.slug}?from=ateliers`}
+                className="group/sub rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
+              >
+                <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
+                  {d.image ? (
+                    <img
+                      src={d.image}
+                      alt={d.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted/5">
+                      <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
+                  </div>
+                  <span className="absolute top-2 left-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                    <Layers className="h-2 w-2" />
+                    {config.pillLabel}
+                  </span>
+                </div>
+                <div className="px-2 py-1.5 bg-background">
+                  <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1 text-center">
+                    {d.name}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 function AlphaStrip({
   letter,
   brands,
@@ -1951,7 +2094,35 @@ function AlphaStrip({
   const stripRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const [ecartDesignersOpen, setEcartDesignersOpen] = useState(false);
+  const [openParentDesigners, setOpenParentDesigners] = useState<Record<string, boolean>>({});
+
+  // Find which brands in this strip are parent brands
+  const parentBrandsInStrip = useMemo(() => {
+    const result: Record<string, ParentBrandConfig> = {};
+    brands.forEach(b => {
+      if (parentBrandConfigMap[b.name]) result[b.name] = parentBrandConfigMap[b.name];
+    });
+    return result;
+  }, [brands]);
+
+  // Fetch sub-designers from DB for parent brands that don't have static data
+  const dbParentNames = useMemo(() => {
+    return Object.values(parentBrandsInStrip)
+      .filter(c => !c.staticDesigners)
+      .map(c => c.dbParentName);
+  }, [parentBrandsInStrip]);
+
+  // We'll fetch for the first non-static parent brand that is open
+  const openDbParent = useMemo(() => {
+    return Object.entries(openParentDesigners).find(([name, open]) => {
+      const config = parentBrandConfigMap[name];
+      return open && config && !config.staticDesigners;
+    })?.[0] || null;
+  }, [openParentDesigners]);
+
+  const toggleParentDesigners = useCallback((brandName: string) => {
+    setOpenParentDesigners(prev => ({ ...prev, [brandName]: !prev[brandName] }));
+  }, []);
 
   const handleScroll = useCallback(() => {
     const el = stripRef.current;
@@ -2011,11 +2182,12 @@ function AlphaStrip({
         {brands.map((brand) => {
           const bg = brandBgMap[brand.name];
           const hasBg = !!bg;
-          const isEcart = brand.name === "Ecart Paris";
+          const parentConfig = parentBrandConfigMap[brand.name];
+          const isParentBrand = !!parentConfig;
           return (
             <React.Fragment key={brand.name}>
-            {isEcart ? (
-              /* ── Ecart: normal-sized inline card with expand toggle ── */
+            {isParentBrand ? (
+              /* ── Parent Brand: inline card with expand toggle ── */
               <div
                 id={`brand-${brand.id}`}
                 className="group flex-none w-[80vw] md:w-[340px] snap-start border border-primary/40 ring-1 ring-primary/20 rounded-lg hover:border-primary/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden h-[280px] md:h-[300px]"
@@ -2040,46 +2212,44 @@ function AlphaStrip({
                 </p>
                 {/* Instagram icon top-right */}
                 <a
-                  href="https://instagram.com/ecart.paris"
+                  href={parentConfig.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity"
                   onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
-                  aria-label="Ecart Paris on Instagram"
+                  aria-label={`${brand.name} on Instagram`}
                 >
                   <Instagram className="h-6 w-6 text-white" />
                 </a>
                 {/* Toggle sub-designers button */}
                 <button
-                  onClick={(e) => { e.stopPropagation(); setEcartDesignersOpen(!ecartDesignersOpen); }}
+                  onClick={(e) => { e.stopPropagation(); toggleParentDesigners(brand.name); }}
                   className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
                 >
                   <Layers className="h-3 w-3" />
-                  <span className="font-body text-[9px] uppercase tracking-[0.12em]">{ecartSubDesigners.length} designers</span>
-                  <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${ecartDesignersOpen ? "rotate-180" : ""}`} />
+                  <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers</span>
+                  <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${openParentDesigners[brand.name] ? "rotate-180" : ""}`} />
                 </button>
                 {/* Share button — bottom left */}
                 <div className="absolute bottom-3 left-3 z-10">
-                  {/* Desktop: Share icon */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const url = `${window.location.origin}/designers/ecart`;
+                      const url = `${window.location.origin}/designers/${parentConfig.profileSlug}`;
                       navigator.clipboard.writeText(`${brand.name} — ${url}`);
                       import('sonner').then(({ toast }) => toast.success('Link copied'));
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
                     className="hidden md:flex items-center gap-1.5 text-white hover:opacity-70 transition-opacity"
-                    aria-label="Share Ecart Paris"
+                    aria-label={`Share ${brand.name}`}
                   >
                     <Share2 className="h-3 w-3" />
                     <span className="font-body text-[9px] uppercase tracking-[0.12em]">Share</span>
                   </button>
-                  {/* Mobile: WhatsApp button */}
                   <WhatsAppShareButton
                     onClick={(e) => {
                       e.stopPropagation();
-                      shareProfileOnWhatsApp("atelier", brand.id || "ecart", brand.name);
+                      shareProfileOnWhatsApp("atelier", brand.id || parentConfig.profileSlug, brand.name);
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
                     label={`Share ${brand.name} on WhatsApp`}
@@ -2090,7 +2260,7 @@ function AlphaStrip({
                 </div>
                 {/* Hover overlay with View Profile */}
                 <Link
-                  to="/designers/ecart?from=ateliers"
+                  to={`/designers/${parentConfig.profileSlug}?from=ateliers`}
                   className="absolute inset-0 z-[6] flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 >
                   <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
@@ -2260,73 +2430,17 @@ function AlphaStrip({
         </div>
       )}
 
-      {/* Ecart sub-designers collapsible — below the scroll strip */}
-      {brands.some(b => b.name === "Ecart Paris") && (
-        <AnimatePresence>
-          {ecartDesignersOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="overflow-hidden"
-            >
-              <div className="pt-4 pb-2">
-                <div className="flex items-center gap-2 mb-3 px-1">
-                  <Layers className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="font-body text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
-                    Ecart Designers
-                  </span>
-                  <div className="flex-1 h-px bg-border/30" />
-                  <button
-                    onClick={() => setEcartDesignersOpen(false)}
-                    className="p-1 rounded-full hover:bg-muted/50 transition-colors"
-                    aria-label="Close designers"
-                  >
-                    <X className="h-3.5 w-3.5 text-muted-foreground" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 md:gap-3">
-                  {ecartSubDesigners.map((d) => (
-                    <Link
-                      key={d.slug}
-                      to={`/designers/${d.slug}?from=ateliers`}
-                      className="group/sub rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
-                    >
-                      <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
-                        {d.image ? (
-                          <img
-                            src={d.image}
-                            alt={d.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted/5">
-                            <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                          <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
-                        </div>
-                        <span className="absolute top-2 left-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                          <Layers className="h-2 w-2" />
-                          Ecart
-                        </span>
-                      </div>
-                      <div className="px-2 py-1.5 bg-background">
-                        <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1 text-center">
-                          {d.name}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
+      {/* Parent brand sub-designers collapsible — below the scroll strip */}
+      {Object.entries(parentBrandsInStrip).map(([brandName, config]) => (
+        <AnimatePresence key={brandName}>
+          {openParentDesigners[brandName] && (
+            <ParentBrandSubDesignersGrid
+              config={config}
+              onClose={() => setOpenParentDesigners(prev => ({ ...prev, [brandName]: false }))}
+            />
           )}
         </AnimatePresence>
-      )}
+      ))}
     </motion.div>
   );
 }
