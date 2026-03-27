@@ -448,7 +448,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           setCurrentItemIndex(itemIndex);
           setExternalSourceId(sourceId);
           setSourceItemKey(null);
+          setSuppressHotspots(true);
           setLightboxOpen(true);
+          setTimeout(() => setSuppressHotspots(false), 1500);
         }
         sessionStorage.removeItem('openGalleryIndex');
         sessionStorage.removeItem('gallerySourceId');
