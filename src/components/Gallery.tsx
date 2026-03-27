@@ -696,11 +696,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   </p>
                   <button
                     onClick={() => {
-                      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                      const ogSectionSlugs = ['gallery-sociable-og', 'gallery-intimate-og', 'gallery-sanctuary-og', 'gallery-calming-og', 'gallery-small-room-og', 'gallery-home-office-og', 'gallery-details-og'];
                       let flatIdx = 0;
                       for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
                       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                      const url = `${supabaseUrl}/functions/v1/og-image?path=/gallery&item=${flatIdx}`;
+                      const url = `https://www.maisonaffluency.com/${ogSectionSlugs[originalSectionIndex] || 'gallery-og'}.html?item=${flatIdx}`;
                       const text = `${section.experience} — Maison Affluency`;
                       if (isMobile) {
                         window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
