@@ -2220,12 +2220,16 @@ function AlphaStrip({
   isInView,
   scrollToGallery,
   onOpenPicks,
+  initialExpandBrand,
+  onExpandConsumed,
 }: {
   letter: string;
   brands: ConsolidatedBrand[];
   isInView: boolean;
   scrollToGallery: (idx: number, name: string) => void;
   onOpenPicks: (brandName: string) => void;
+  initialExpandBrand?: string | null;
+  onExpandConsumed?: () => void;
 }) {
   const stripRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
