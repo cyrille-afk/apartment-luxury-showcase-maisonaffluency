@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useParams, Link, Navigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { motion } from "framer-motion";
-import { ArrowLeft, Package, FileText, Maximize2, Share2, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useDesigner, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
@@ -566,16 +566,22 @@ const PublicDesignerProfile = () => {
                           <HeritageSlider slides={heritageSlides} />
                         )}
 
-                        {editorialBio && (
-                          <div className="mt-10 md:mt-14">
-                            <EditorialBiography
-                              biography={editorialBio}
-                              biographyImages={[]}
-                              pickImages={[]}
-                              designerName={designer.name}
-                            />
-                          </div>
-                        )}
+                        {editorialBio && (() => {
+                          const editorialBlocks = editorialBio.split(/\n\n+/).filter(Boolean);
+                          const shouldCollapse = editorialBlocks.length > 3;
+                          return (
+                            <ProfileCollapsible shouldCollapse={shouldCollapse}>
+                              <div className="mt-10 md:mt-14">
+                                <EditorialBiography
+                                  biography={editorialBio}
+                                  biographyImages={[]}
+                                  pickImages={[]}
+                                  designerName={designer.name}
+                                />
+                              </div>
+                            </ProfileCollapsible>
+                          );
+                        })()}
                       </>
                     );
                   })()}
