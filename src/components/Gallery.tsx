@@ -612,7 +612,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-4">
                     <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary mb-2">
                       {section.experience}
                     </h3>
