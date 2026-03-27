@@ -2256,8 +2256,11 @@ function AlphaStrip({
       onExpandConsumed?.();
       // Scroll this strip into view after a short delay for layout
       setTimeout(() => {
-        stripRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 300);
+        if (!stripRef.current) return;
+        const headerOffset = 160; // account for fixed header + featured-read banner
+        const top = stripRef.current.getBoundingClientRect().top + window.scrollY - headerOffset;
+        window.scrollTo({ top, behavior: "smooth" });
+      }, 400);
     }
   }, [initialExpandBrand, parentBrandsInStrip]);
 
