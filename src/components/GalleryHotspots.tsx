@@ -75,6 +75,8 @@ interface GalleryHotspotsProps {
   onRequestQuote?: (productName: string, designerName: string) => void;
   /** Public: callback to open product lightbox for a matched curator's pick */
   onViewProduct?: (productName: string, designerName: string) => void;
+  /** When set, only show hotspots matching this designer name */
+  filterDesigner?: string | null;
 }
 
 interface PendingHotspot {
@@ -82,7 +84,7 @@ interface PendingHotspot {
   y_percent: number;
 }
 
-const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote, onViewProduct }: GalleryHotspotsProps) => {
+const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote, onViewProduct, filterDesigner }: GalleryHotspotsProps) => {
   const isMobile = useIsMobile();
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -167,7 +169,19 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     fetchHotspots();
   }, [imageIdentifier]);
 
-  // Toggle edit mode with Ctrl+Shift+H
+  // Filter hotspots by designer when opened from a designer card
+  const displayHotspots = useMemo(() => {
+    if (!filterDesigner || !hotspots.length) return hotspots;
+    const filterLower = filterDesigner.toLowerCase();
+    const filtered = hotspots.filter(h => {
+      if (!h.designer_name) return false;
+      const dLower = h.designer_name.toLowerCase();
+      return dLower.includes(filterLower) || filterLower.includes(dLower);
+    });
+    return filtered.length > 0 ? filtered : hotspots;
+  }, [hotspots, filterDesigner]);
+
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === "H") {
@@ -286,7 +300,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
       )}
 
       {/* Existing hotspots */}
-      {hotspots.map((hotspot) => (
+      {displayHotspots.map((hotspot) => (
         <div
           key={hotspot.id}
           className={`absolute pointer-events-auto transition-opacity duration-200 ${activeId && activeId !== hotspot.id ? "opacity-0 pointer-events-none" : "opacity-100"}`}

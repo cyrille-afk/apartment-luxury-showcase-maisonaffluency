@@ -432,6 +432,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   }, [currentItemIndex, lightboxOpen, currentSectionItems]);
 
   const [externalSourceId, setExternalSourceId] = useState<string | null>(null);
+  const [filterDesigner, setFilterDesigner] = useState<string | null>(null);
 
   // Check for gallery index from sessionStorage (set by BrandsAteliers)
   useEffect(() => {
@@ -467,6 +468,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       index: number;
       sourceId?: string;
       returnUrl?: string;
+      filterDesigner?: string;
     }>) => {
       const index = e.detail.index;
       if (index >= 0 && index < allItems.length) {
@@ -475,6 +477,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         setCurrentItemIndex(itemIndex);
         setExternalSourceId(e.detail.sourceId || null);
         setReturnUrl(e.detail.returnUrl || null);
+        setFilterDesigner(e.detail.filterDesigner || null);
         setSourceItemKey(null);
         setLightboxOpen(true);
       }
@@ -507,9 +510,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     setCurrentSectionIndex(sectionIndex);
     setCurrentItemIndex(itemIndex);
     setSourceItemKey(`${sectionIndex}-${itemIndex}`);
+    setFilterDesigner(null); // Clear designer filter when opening from gallery directly
     imageZoomedRef.current = false;
     setImageZoomed(false);
-    // Auto-expand for sections without descriptions (e.g. "A Sociable Environment" uses hotspots)
     const hasDescription = galleryExperiences[sectionIndex]?.items.some(item => item.description);
     setIsExpanded(!isMobile && !hasDescription);
     setLightboxOpen(true);
@@ -541,6 +544,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       const url = returnUrl;
       setReturnUrl(null);
       setExternalSourceId(null);
+      setFilterDesigner(null);
       setTimeout(() => navigate(url), 100);
     } else if (externalSourceId) {
       setTimeout(() => {
@@ -549,6 +553,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         setExternalSourceId(null);
+        setFilterDesigner(null);
       }, 100);
     } else if (sourceItemKey) {
       setTimeout(() => {
@@ -902,6 +907,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                                 imageIdentifier={item.title}
                                 visible={true}
                                 onCloseLightbox={closeLightbox}
+                                 filterDesigner={filterDesigner}
                                  {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                               />
                            )}
@@ -964,6 +970,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
                          visible={!imageZoomed}
                          onCloseLightbox={closeLightbox}
+                         filterDesigner={filterDesigner}
                          {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                        />
                       {/* Close button — desktop: near image */}
