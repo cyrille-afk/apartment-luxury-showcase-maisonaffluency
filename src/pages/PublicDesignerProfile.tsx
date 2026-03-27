@@ -9,7 +9,7 @@ import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
-import { shareProfileOnWhatsApp, sharePageOnWhatsApp } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, sharePageOnWhatsApp, buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import EditorialBiography, { renderParagraph } from "@/components/EditorialBiography";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -169,9 +169,11 @@ const PublicDesignerProfile = () => {
   const websiteLink = designer.links.find((l) => l.type === "Website")?.url;
   const heroImage = designer.hero_image_url || designer.image_url;
   const isGrouped = groupedPicks.length > 0;
-  const buildDesignerBridgePath = (kind: "og" | "card") => {
-    if (designer.slug === "apparatus-studio") return APPARATUS_SHARE_BRIDGE;
-    return `/${designer.slug}-${kind}.html`;
+  const designerOgUrl = buildDesignerOgUrl(designer.name);
+
+  const buildDesignerBridgePath = (_kind: "og" | "card") => {
+    // Extract path portion from the full URL for sharePageOnWhatsApp's directUrlPath
+    return new URL(designerOgUrl).pathname;
   };
 
   /* Split biography into hero paragraphs + remaining (with interleaved media) — same as trade */
