@@ -2231,6 +2231,7 @@ function AlphaStrip({
             </React.Fragment>
           );
         })}
+      </div>
 
       {/* Dot indicators — only show when more than 1 card */}
       {brands.length > 1 && (
