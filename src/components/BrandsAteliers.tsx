@@ -2158,6 +2158,40 @@ function AlphaStrip({
                 />
               </div>
             </div>
+
+            {/* Ecart sub-designer cards inline in the strip */}
+            {isEcart && ecartSubDesigners.map((d) => (
+              <Link
+                key={d.slug}
+                to={`/designers/${d.slug}`}
+                className="group/sub flex-none w-[55vw] md:w-[200px] snap-start rounded-lg overflow-hidden border border-border/40 hover:border-foreground/30 hover:shadow-lg transition-all"
+              >
+                <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
+                  {d.image ? (
+                    <img
+                      src={d.image}
+                      alt={d.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted/5">
+                      <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 px-3 pt-8 pb-2.5 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                    <p className="font-display text-[11px] md:text-xs text-white tracking-wide leading-tight drop-shadow-sm">
+                      {d.name}
+                    </p>
+                    <span className="font-body text-[8px] text-white/60 uppercase tracking-[0.1em]">Ecart</span>
+                  </div>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View Profile</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+            </React.Fragment>
           );
         })}
       </div>
