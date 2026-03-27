@@ -612,10 +612,19 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary mb-2">
-                      {section.experience}
-                    </h3>
+                  <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary mb-2">
+                    {section.experience}
+                  </h3>
+                  <div className="hidden md:flex items-center gap-5 mb-2">
+                    {!section.items.some(i => i.description) && (
+                      <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">
+                        <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
+                          <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
+                          <Plus className="relative h-2.5 w-2.5 text-white" />
+                        </span>
+                        Interactive Gallery
+                      </span>
+                    )}
                     {originalSectionIndex === 0 && (
                       <button
                         onClick={() => {
@@ -629,27 +638,17 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             import('sonner').then(({ toast }) => toast.success('Link copied'));
                           }
                         }}
-                        className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors mb-2"
+                        className="inline-flex flex-col items-center gap-0.5 text-muted-foreground hover:text-primary transition-colors"
                         aria-label="Share Interactive Gallery"
                       >
-                        <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+                        <Share2 className="w-4 h-4" />
+                        <span className="text-[8px] uppercase tracking-[0.12em]">Share</span>
                       </button>
                     )}
-                    {!section.items.some(i => i.description) && (
-                      <span className="hidden md:inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body mb-2 ml-4">
-                        <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
-                          <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
-                          <Plus className="relative h-2.5 w-2.5 text-white" />
-                        </span>
-                        Interactive Gallery
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3">
-                  {originalSectionIndex === 0 && (
+                    {originalSectionIndex === 0 && (
                       <button
                         onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
-                        className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
+                        className="flex items-center p-1.5 rounded transition-all hover:opacity-70"
                         aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
                       >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -669,7 +668,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           )}
                         </svg>
                       </button>
-                  )}
+                    )}
                   </div>
                 </div>
                 <p className="hidden md:block text-sm md:text-base text-muted-foreground font-body italic">
