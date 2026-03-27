@@ -36,7 +36,14 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
     setIsPlaying(true);
     trackVideoEvent("play");
     setTimeout(() => {
-      videoRef.current?.play();
+      const v = videoRef.current;
+      if (!v) return;
+      v.muted = false;
+      v.play().catch(() => {
+        // Browser blocked unmuted autoplay — start muted then unmute on interaction
+        v.muted = true;
+        v.play();
+      });
     }, 100);
   };
 
