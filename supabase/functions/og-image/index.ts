@@ -387,7 +387,7 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url);
   const path = url.searchParams.get("path") || "/";
-  const og = await getOgData(path);
+  const og = await getOgData(path, url);
 
   const redirectUrl = og.url;
   const functionBase = `${
