@@ -942,14 +942,23 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       ))}
                     </div>
                   </div>
-                  {/* Close button — bottom-left of image area */}
-                  <button
-                    onClick={closeLightbox}
-                    className="absolute bottom-2 left-3 z-50 p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
-                    aria-label="Close lightbox"
-                  >
-                    <X className="h-4 w-4 text-white" />
-                  </button>
+                  {/* Close + Share buttons — bottom of image area */}
+                  <div className="absolute bottom-2 left-3 z-50 flex items-center gap-2">
+                    <button
+                      onClick={closeLightbox}
+                      className="p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
+                      aria-label="Close lightbox"
+                    >
+                      <X className="h-4 w-4 text-white" />
+                    </button>
+                    <button
+                      onClick={shareLightboxImage}
+                      className="p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
+                      aria-label="Share this image"
+                    >
+                      <Share2 className="h-4 w-4 text-white" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Dot indicators */}
