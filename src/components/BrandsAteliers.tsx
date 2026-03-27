@@ -2043,7 +2043,7 @@ function AlphaStrip({
                   href="https://instagram.com/ecart.paris"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 hover:bg-white/25 transition-all"
+                  className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity"
                   onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
                   aria-label="Ecart Paris on Instagram"
                 >
@@ -2069,7 +2069,7 @@ function AlphaStrip({
                       import('sonner').then(({ toast }) => toast.success('Link copied'));
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
-                    className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
+                    className="hidden md:flex items-center gap-1.5 text-white hover:opacity-70 transition-opacity"
                     aria-label="Share Ecart Paris"
                   >
                     <Share2 className="h-3 w-3" />
