@@ -2220,12 +2220,16 @@ function AlphaStrip({
   isInView,
   scrollToGallery,
   onOpenPicks,
+  initialExpandBrand,
+  onExpandConsumed,
 }: {
   letter: string;
   brands: ConsolidatedBrand[];
   isInView: boolean;
   scrollToGallery: (idx: number, name: string) => void;
   onOpenPicks: (brandName: string) => void;
+  initialExpandBrand?: string | null;
+  onExpandConsumed?: () => void;
 }) {
   const stripRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -2241,27 +2245,21 @@ function AlphaStrip({
     return result;
   }, [brands]);
 
-  // Auto-expand parent brand designers when navigated back with ?expand= param
+  // Auto-expand parent brand designers when deep-linked with ?expand= param
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const expandFounder = params.get("expand");
-    if (!expandFounder) return;
+    if (!initialExpandBrand) return;
     const config = Object.values(parentBrandsInStrip).find(
-      c => c.dbParentName === expandFounder || c.profileSlug === expandFounder
+      c => c.dbParentName === initialExpandBrand || c.profileSlug === initialExpandBrand
     );
     if (config) {
       setOpenParentDesigners(prev => ({ ...prev, [config.brandName]: true }));
-      params.delete("expand");
-      const newUrl = params.toString()
-        ? `${window.location.pathname}?${params}${window.location.hash}`
-        : `${window.location.pathname}${window.location.hash}`;
-      window.history.replaceState(null, "", newUrl);
+      onExpandConsumed?.();
       // Scroll this strip into view after a short delay for layout
       setTimeout(() => {
         stripRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 300);
     }
-  }, [parentBrandsInStrip]);
+  }, [initialExpandBrand, parentBrandsInStrip]);
 
   // Fetch sub-designers from DB for parent brands that don't have static data
   const dbParentNames = useMemo(() => {
@@ -2751,6 +2749,10 @@ const BrandsAteliers = () => {
   const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [expandBrand, setExpandBrand] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("expand");
+  });
   const hasAutoScrolledSearchRef = useRef(false);
 
   useEffect(() => {
@@ -2815,6 +2817,16 @@ const BrandsAteliers = () => {
     };
     window.addEventListener("deeplink-open-profile", handler);
     return () => window.removeEventListener("deeplink-open-profile", handler);
+  }, []);
+
+  const handleExpandConsumed = useCallback(() => {
+    setExpandBrand(null);
+    const params = new URLSearchParams(window.location.search);
+    params.delete("expand");
+    const newUrl = params.toString()
+      ? `${window.location.pathname}?${params}${window.location.hash}`
+      : `${window.location.pathname}${window.location.hash}`;
+    window.history.replaceState(null, "", newUrl);
   }, []);
 
   const isMobile = useIsMobile();
@@ -3396,6 +3408,8 @@ const BrandsAteliers = () => {
                 isInView={isInView}
                 scrollToGallery={scrollToGallery}
                 onOpenPicks={openPicks}
+                initialExpandBrand={expandBrand}
+                onExpandConsumed={handleExpandConsumed}
               />
               {/* Ecart sub-designers are now inline in the strip */}
             </div>
