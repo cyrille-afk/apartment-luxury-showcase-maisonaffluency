@@ -666,7 +666,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         import('sonner').then(({ toast }) => toast.success('Link copied'));
                       }
                     }}
-                    className="inline-flex flex-col items-center gap-0.5 text-primary/60 hover:text-primary transition-colors flex-shrink-0"
+                    className="inline-flex flex-col items-center gap-0.5 text-foreground hover:text-primary transition-colors flex-shrink-0"
                     aria-label={`Share ${section.experience}`}
                   >
                     <Share2 className="w-4 h-4" />
