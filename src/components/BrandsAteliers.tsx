@@ -3569,23 +3569,25 @@ const BrandsAteliers = () => {
                                 key={pdf.label}
                                 className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
                                 aria-label={`Download PDF ${pdf.label}`}
-                                onClick={async (e) => {
+                                onClick={(e) => {
                                   e.stopPropagation();
-                                  try {
-                                    const res = await fetch(pdf.url);
-                                    const blob = await res.blob();
-                                    const blobUrl = URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = blobUrl;
-                                    a.download = pdf.filename || `${pdf.label}.pdf`;
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    a.remove();
-                                    URL.revokeObjectURL(blobUrl);
-                                  } catch {
-                                    window.open(pdf.url, '_blank');
-                                  }
-                                }}
+                                  requireAuth(async () => {
+                                    try {
+                                      const res = await fetch(pdf.url);
+                                      const blob = await res.blob();
+                                      const blobUrl = URL.createObjectURL(blob);
+                                      const a = document.createElement('a');
+                                      a.href = blobUrl;
+                                      a.download = pdf.filename || `${pdf.label}.pdf`;
+                                      document.body.appendChild(a);
+                                      a.click();
+                                      a.remove();
+                                      URL.revokeObjectURL(blobUrl);
+                                    } catch {
+                                      window.open(pdf.url, '_blank');
+                                    }
+                                  }, "download this spec sheet");
+                                }
                               >
                                 <FileDown size={14} className="md:hidden text-white" />
                                 <FileDown size={16} className="hidden md:block text-white" />
