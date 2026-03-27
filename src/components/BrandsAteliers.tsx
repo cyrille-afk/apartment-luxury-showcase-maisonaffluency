@@ -1833,6 +1833,7 @@ const brandBgMap: Record<string, string> = {
   "Marta Sala Éditions": martaSalaEditionsBg,
   "Alpange": alpangeBg,
   "Pierre Frey": pierreFreyBg,
+  "Véronèse": veroneseBg,
 };
 
 // Mapping from consolidated brand names to FeaturedDesigners IDs for Curators' Picks navigation
