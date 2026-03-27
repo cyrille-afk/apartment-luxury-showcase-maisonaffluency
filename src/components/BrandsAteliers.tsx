@@ -2749,7 +2749,11 @@ const BrandsAteliers = () => {
   const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const hasAutoScrolledSearchRef = useRef(false);
+  const [expandBrand, setExpandBrand] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("expand");
+  });
+
 
   useEffect(() => {
     const trimmed = searchQuery.trim();
