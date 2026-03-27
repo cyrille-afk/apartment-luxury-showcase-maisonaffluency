@@ -582,8 +582,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   
 
   const shareLightboxImage = useCallback(() => {
-    const url = `https://www.maisonaffluency.com/gallery-item-${currentFlatIndex}.html`;
     const title = currentSectionItems[currentItemIndex]?.title || '';
+    const titleSlug = slugify(title);
+    const designerSlug = filterDesigner ? slugify(filterDesigner) : '';
+    const urlPath = designerSlug
+      ? `gallery/${designerSlug}/${titleSlug}`
+      : `gallery/${titleSlug}`;
+    const url = `https://www.maisonaffluency.com/${urlPath}`;
     const parts = ['Maison Affluency', 'Interactive Gallery'];
     if (filterDesigner) parts.push(filterDesigner);
     if (title) parts.push(title);
