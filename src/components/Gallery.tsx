@@ -577,14 +577,12 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     return flat + currentItemIndex;
   }, [currentSectionIndex, currentItemIndex]);
 
-  const ogSlugs = ['gallery-sociable-og', 'gallery-intimate-og', 'gallery-sanctuary-og', 'gallery-calming-og', 'gallery-small-room-og', 'gallery-home-office-og', 'gallery-details-og'];
+  
 
   const shareLightboxImage = useCallback(() => {
-    const ogSectionSlugs = ['gallery-sociable-og', 'gallery-intimate-og', 'gallery-sanctuary-og', 'gallery-calming-og', 'gallery-small-room-og', 'gallery-home-office-og', 'gallery-details-og'];
-    const slug = ogSectionSlugs[currentSectionIndex] || 'gallery-og';
-    let url = `https://www.maisonaffluency.com/${slug}.html?item=${currentFlatIndex}`;
+    let url = `https://www.maisonaffluency.com/gallery-item-${currentFlatIndex}.html`;
     if (filterDesigner) {
-      url += `&designer=${encodeURIComponent(filterDesigner)}`;
+      url += `?designer=${encodeURIComponent(filterDesigner)}`;
     }
     const title = currentSectionItems[currentItemIndex]?.title || '';
     const parts = ['Maison Affluency', 'Interactive Gallery'];
@@ -598,7 +596,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       navigator.clipboard.writeText(`${text} — ${url}`);
       import('sonner').then(({ toast }) => toast.success('Link copied'));
     }
-  }, [currentSectionIndex, currentFlatIndex, currentItemIndex, currentSectionItems, filterDesigner]);
+  }, [currentFlatIndex, currentItemIndex, currentSectionItems, filterDesigner]);
 
   const goToPrevious = () => {
     setCurrentItemIndex(prev => prev === 0 ? currentSectionItems.length - 1 : prev - 1);
@@ -694,20 +692,19 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   <p className="text-sm md:text-base text-muted-foreground font-body italic">
                     {section.subtitle}
                   </p>
-                  <button
-                    onClick={() => {
-                      const ogSectionSlugs = ['gallery-sociable-og', 'gallery-intimate-og', 'gallery-sanctuary-og', 'gallery-calming-og', 'gallery-small-room-og', 'gallery-home-office-og', 'gallery-details-og'];
-                      let flatIdx = 0;
-                      for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
-                      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                      const url = `https://www.maisonaffluency.com/${ogSectionSlugs[originalSectionIndex] || 'gallery-og'}.html?item=${flatIdx}`;
-                      const text = `${section.experience} — Maison Affluency`;
-                      if (isMobile) {
-                        window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-                      } else {
-                        navigator.clipboard.writeText(`${text} — ${url}`);
-                        import('sonner').then(({ toast }) => toast.success('Link copied'));
-                      }
+                   <button
+                     onClick={() => {
+                       let flatIdx = 0;
+                       for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
+                       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                       const url = `https://www.maisonaffluency.com/gallery-item-${flatIdx}.html`;
+                       const text = `${section.experience} — Maison Affluency`;
+                       if (isMobile) {
+                         window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
+                       } else {
+                         navigator.clipboard.writeText(`${text} — ${url}`);
+                         import('sonner').then(({ toast }) => toast.success('Link copied'));
+                       }
                     }}
                     className="inline-flex flex-col items-center gap-0.5 text-foreground hover:text-primary transition-colors flex-shrink-0"
                     aria-label={`Share ${section.experience}`}
@@ -787,15 +784,14 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       <h4 className="font-serif text-foreground text-base">
                         {section.items[activeIdx]?.title}
                       </h4>
-                      <button
-                        onClick={() => {
-                           const ogSectionSlugs = ['gallery-sociable-og', 'gallery-intimate-og', 'gallery-sanctuary-og', 'gallery-calming-og', 'gallery-small-room-og', 'gallery-home-office-og', 'gallery-details-og'];
-                           let flatIdx = 0;
-                           for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
-                           const url = `https://www.maisonaffluency.com/${ogSectionSlugs[originalSectionIndex] || 'gallery-og'}.html?item=${flatIdx}`;
-                           const text = `${section.experience} — Maison Affluency`;
-                           window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-                        }}
+                       <button
+                         onClick={() => {
+                            let flatIdx = 0;
+                            for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
+                            const url = `https://www.maisonaffluency.com/gallery-item-${flatIdx}.html`;
+                            const text = `${section.experience} — Maison Affluency`;
+                            window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
+                         }}
                         className="flex items-center gap-1 text-foreground"
                         aria-label={`Share ${section.experience} on WhatsApp`}
                       >
