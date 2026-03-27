@@ -1,4 +1,5 @@
 import React from "react";
+import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import CuratorPicksLegend from "./CuratorPicksLegend";
