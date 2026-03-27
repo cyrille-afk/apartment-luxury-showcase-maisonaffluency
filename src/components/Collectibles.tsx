@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import CuratorPicksLegend from "./CuratorPicksLegend";
+import { useAuthGate } from "@/hooks/useAuthGate";
+import AuthGateDialog from "@/components/AuthGateDialog";
 import { GALLERY } from "@/constants/galleryIndex";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
 import { useInView } from "framer-motion";
@@ -339,6 +341,7 @@ const Collectibles = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
   const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof collectibleDesigners[0] | null>(null);

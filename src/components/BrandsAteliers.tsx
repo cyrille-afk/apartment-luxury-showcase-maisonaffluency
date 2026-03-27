@@ -1,6 +1,8 @@
 import React from "react";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { useParentBrandDesignerCountsFiltered } from "@/hooks/useParentBrandDesignerCounts";
+import { useAuthGate } from "@/hooks/useAuthGate";
+import AuthGateDialog from "@/components/AuthGateDialog";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import CuratorPicksLegend from "./CuratorPicksLegend";
@@ -2717,6 +2719,7 @@ const BrandsAteliers = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);

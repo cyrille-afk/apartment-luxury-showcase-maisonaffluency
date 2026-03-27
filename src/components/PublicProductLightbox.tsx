@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuthGate } from "@/hooks/useAuthGate";
+import AuthGateDialog from "@/components/AuthGateDialog";
 
 export interface PublicLightboxItem {
   id: string;
