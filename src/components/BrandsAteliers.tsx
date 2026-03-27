@@ -2240,7 +2240,7 @@ function AlphaStrip({
     const expandFounder = params.get("expand");
     if (!expandFounder) return;
     const config = Object.values(parentBrandsInStrip).find(
-      c => c.dbParentName === expandFounder
+      c => c.dbParentName === expandFounder || c.profileSlug === expandFounder
     );
     if (config) {
       setOpenParentDesigners(prev => ({ ...prev, [config.brandName]: true }));
