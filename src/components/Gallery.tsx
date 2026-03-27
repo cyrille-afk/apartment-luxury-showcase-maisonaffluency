@@ -907,6 +907,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                                 imageIdentifier={item.title}
                                 visible={true}
                                 onCloseLightbox={closeLightbox}
+                                 filterDesigner={filterDesigner}
                                  {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                               />
                            )}
@@ -969,6 +970,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
                          visible={!imageZoomed}
                          onCloseLightbox={closeLightbox}
+                         filterDesigner={filterDesigner}
                          {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                        />
                       {/* Close button — desktop: near image */}
