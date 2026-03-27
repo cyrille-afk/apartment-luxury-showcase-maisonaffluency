@@ -4,13 +4,14 @@ import { ArrowLeft, ChevronDown, Quote, Share2, Check } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
+import { withOgCacheBust } from "@/lib/whatsapp-share";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
 const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
 const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773975478/Screen_Shot_2026-03-20_at_10.57.13_AM_yiqv4q.png";
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
-const TRADE_PROGRAM_SHARE_URL = "https://www.maisonaffluency.com/trade-program-og.html";
+const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com/trade-program-og.html");
 
 const FaqItem = ({ question, answer }: { question: string; answer: string }) => {
   const [open, setOpen] = useState(false);

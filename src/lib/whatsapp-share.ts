@@ -9,7 +9,7 @@ const SITE_URL = "https://www.maisonaffluency.com";
 
 const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
 const OG_FUNCTION_BASE = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image`;
-const OG_SHARE_VERSION = "20260322a";
+const OG_SHARE_VERSION = "20260327b";
 
 type ShareSection = "designer" | "collectible" | "atelier";
 
@@ -38,11 +38,23 @@ export const slugify = (s: string) =>
 export const buildOgUrl = (path: string) =>
   `${OG_FUNCTION_BASE}?path=${encodeURIComponent(path)}&v=${OG_SHARE_VERSION}&t=${Date.now()}`;
 
+const appendOgVersion = (url: string) => {
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set("v", OG_SHARE_VERSION);
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+};
+
+export const withOgCacheBust = (url: string) => appendOgVersion(url);
+
 /**
  * Build a static bridge file URL for a designer profile.
  */
 export const buildDesignerOgUrl = (name: string) =>
-  `${SITE_URL}/designers/${slugify(name)}-og.html`;
+  withOgCacheBust(`${SITE_URL}/designers/${slugify(name)}-og.html`);
 
 /**
  * Build a static bridge file URL for an atelier/brand.
@@ -55,7 +67,7 @@ const ATELIER_OG_BRIDGE_OVERRIDES: Record<string, string> = {
 export const buildAtelierOgUrl = (name: string) => {
   const slug = slugify(name);
   const overridePath = ATELIER_OG_BRIDGE_OVERRIDES[slug];
-  return `${SITE_URL}${overridePath ?? `/ateliers/${slug}-og.html`}`;
+  return withOgCacheBust(`${SITE_URL}${overridePath ?? `/ateliers/${slug}-og.html`}`);
 };
 
 /**
@@ -86,7 +98,13 @@ type SharePageOptions = {
   directUrlPath?: string;
 };
 
-const buildSiteShareUrl = (path: string) => `${SITE_URL}${path}`;
+const buildSiteShareUrl = (path: string) => {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const url = `${SITE_URL}${normalizedPath}`;
+  return /\.html(?:$|\?)/i.test(normalizedPath)
+    ? withOgCacheBust(url)
+    : url;
+};
 
 export const sharePageOnWhatsApp = (
   path: string,
