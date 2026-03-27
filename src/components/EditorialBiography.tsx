@@ -803,6 +803,24 @@ export default function EditorialBiography({
 
     const hasInlineVideo = parsed.some((block) => block.type === "video");
 
+    // Rule: biography should never end with a picture — move trailing image before last text
+    if (elements.length >= 2) {
+      const lastKey = String(elements[elements.length - 1].key || "");
+      const isTrailingImage = lastKey.startsWith("fw-") || lastKey.startsWith("manual-img-");
+      if (isTrailingImage) {
+        // Find last text element and swap
+        for (let j = elements.length - 2; j >= 0; j--) {
+          const k = String(elements[j].key || "");
+          if (!k.startsWith("fw-") && !k.startsWith("manual-img-") && !k.startsWith("split-") && !k.startsWith("vid-") && !k.startsWith("manual-vid-") && k !== "mobile-early-img") {
+            // Swap: move trailing image before this text block
+            const [img] = elements.splice(elements.length - 1, 1);
+            elements.splice(j, 0, img);
+            break;
+          }
+        }
+      }
+    }
+
     // Build final children array for the collapsible wrapper
     const wrapperChildren: JSX.Element[] = [];
     if (debugMediaOrder && debugEvents.length > 0) {
