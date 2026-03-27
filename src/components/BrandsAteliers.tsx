@@ -2269,13 +2269,26 @@ function AlphaStrip({
   }, [parentBrandsInStrip]);
   const { data: designerCounts = {} } = useParentBrandDesignerCountsFiltered(allParentDbNames);
 
-  // Helper to get designer count for a parent brand
-  const getDesignerCount = useCallback((brandName: string) => {
+   // Helper to get designer count for a parent brand
+   const getDesignerCount = useCallback((brandName: string): number => {
     const config = parentBrandConfigMap[brandName];
     if (!config) return 0;
     if (config.staticDesigners) return config.staticDesigners.length;
     return designerCounts[config.dbParentName] || 0;
   }, [designerCounts]);
+
+   // Build descriptive share message for parent brands
+   const buildParentShareText = useCallback((brandName: string) => {
+     const config = parentBrandConfigMap[brandName];
+     const count = getDesignerCount(brandName);
+     if (!config || count === 0) return `${brandName} — Maison Affluency`;
+     const designers = config.staticDesigners;
+     const highlight = designers?.[0]?.name;
+     const suffix = highlight
+       ? `${count} Designers incl. ${highlight}`
+       : `${count} Designers`;
+     return `${brandName} — ${suffix} | Maison Affluency`;
+   }, [getDesignerCount]);
 
   // We'll fetch for the first non-static parent brand that is open
   const openDbParent = useMemo(() => {
@@ -2411,7 +2424,7 @@ function AlphaStrip({
                     onClick={(e) => {
                       e.stopPropagation();
                       const url = buildParentBrandOgUrl(brand.name);
-                      navigator.clipboard.writeText(`${brand.name} — Maison Affluency: ${url}`);
+                      navigator.clipboard.writeText(`${buildParentShareText(brand.name)}: ${url}`);
                       import('sonner').then(({ toast }) => toast.success('Link copied'));
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
@@ -2425,7 +2438,7 @@ function AlphaStrip({
                     onClick={(e) => {
                       e.stopPropagation();
                       const url = buildParentBrandOgUrl(brand.name);
-                      const msg = `${brand.name} — Maison Affluency: ${url}`;
+                      const msg = `${buildParentShareText(brand.name)}: ${url}`;
                       const wa = `https://wa.me/?text=${encodeURIComponent(msg)}`;
                       window.location.href = wa;
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
