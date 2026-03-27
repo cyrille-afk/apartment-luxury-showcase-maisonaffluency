@@ -2410,7 +2410,7 @@ function AlphaStrip({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const url = buildAtelierOgUrl(brand.name);
+                      const url = buildParentBrandOgUrl(brand.name);
                       navigator.clipboard.writeText(`${brand.name} — Maison Affluency: ${url}`);
                       import('sonner').then(({ toast }) => toast.success('Link copied'));
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
@@ -2424,7 +2424,10 @@ function AlphaStrip({
                   <WhatsAppShareButton
                     onClick={(e) => {
                       e.stopPropagation();
-                      shareProfileOnWhatsApp("atelier", brand.id || parentConfig.profileSlug, brand.name);
+                      const url = buildParentBrandOgUrl(brand.name);
+                      const msg = `${brand.name} — Maison Affluency: ${url}`;
+                      const wa = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                      window.location.href = wa;
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
                     label={`Share ${brand.name} on WhatsApp`}
