@@ -3408,6 +3408,8 @@ const BrandsAteliers = () => {
                 isInView={isInView}
                 scrollToGallery={scrollToGallery}
                 onOpenPicks={openPicks}
+                initialExpandBrand={expandBrand}
+                onExpandConsumed={handleExpandConsumed}
               />
               {/* Ecart sub-designers are now inline in the strip */}
             </div>
