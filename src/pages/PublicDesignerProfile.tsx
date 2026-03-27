@@ -558,6 +558,10 @@ const PublicDesignerProfile = () => {
                           )}
                         </div>
 
+                        {heritageSlides.length > 0 && (
+                          <HeritageSlider slides={heritageSlides} />
+                        )}
+
                         {editorialBio && (
                           <div className="mt-10 md:mt-14">
                             <EditorialBiography
