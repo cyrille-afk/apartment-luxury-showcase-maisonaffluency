@@ -2034,8 +2034,8 @@ function AlphaStrip({
                 <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
                   <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
                 </div>
-                {/* Origin label under badge */}
-                <p className="absolute top-[calc(0.75rem+3.5rem+0.25rem)] md:top-[calc(0.75rem+4rem+0.25rem)] left-3 z-10 font-body text-[9px] md:text-[10px] text-white/70 uppercase tracking-widest">
+                {/* Origin label centered under badge */}
+                <p className="absolute top-[calc(0.75rem+3.5rem+0.25rem)] md:top-[calc(0.75rem+4rem+0.25rem)] left-3 w-14 md:w-16 z-10 font-body text-[9px] md:text-[10px] text-white/70 uppercase tracking-widest text-center">
                   {brand.origin}
                 </p>
                 {/* Toggle sub-designers button */}
