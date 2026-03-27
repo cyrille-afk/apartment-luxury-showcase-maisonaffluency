@@ -2247,6 +2247,10 @@ function AlphaStrip({
         ? `${window.location.pathname}?${params}${window.location.hash}`
         : `${window.location.pathname}${window.location.hash}`;
       window.history.replaceState(null, "", newUrl);
+      // Scroll this strip into view after a short delay for layout
+      setTimeout(() => {
+        stripRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
     }
   }, [parentBrandsInStrip]);
 
