@@ -72,7 +72,7 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
                   />
                   {slide.caption && (
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent pt-10 pb-3 px-4">
-                      <p className="font-body text-[9px] md:text-[10px] tracking-wide text-white/80 italic text-center leading-relaxed">
+                      <p className="font-body text-[9px] md:text-[10px] tracking-wide text-white/80 italic text-center leading-relaxed whitespace-pre-line">
                         {slide.caption}
                       </p>
                     </div>
