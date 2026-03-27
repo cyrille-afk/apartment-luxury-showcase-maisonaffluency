@@ -580,8 +580,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const ogSlugs = ['gallery-sociable-og', 'gallery-intimate-og', 'gallery-sanctuary-og', 'gallery-calming-og', 'gallery-small-room-og', 'gallery-home-office-og', 'gallery-details-og'];
 
   const shareLightboxImage = useCallback(() => {
-    const slug = ogSlugs[currentSectionIndex] || 'gallery-og';
-    let url = `${window.location.origin}/${slug}.html?item=${currentFlatIndex}`;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    let url = `${supabaseUrl}/functions/v1/og-image?path=/gallery&item=${currentFlatIndex}`;
     if (filterDesigner) {
       url += `&designer=${encodeURIComponent(filterDesigner)}`;
     }
@@ -597,7 +597,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       navigator.clipboard.writeText(`${text} — ${url}`);
       import('sonner').then(({ toast }) => toast.success('Link copied'));
     }
-  }, [currentSectionIndex, currentFlatIndex, currentItemIndex, currentSectionItems, filterDesigner]);
+  }, [currentFlatIndex, currentItemIndex, currentSectionItems, filterDesigner]);
 
   const goToPrevious = () => {
     setCurrentItemIndex(prev => prev === 0 ? currentSectionItems.length - 1 : prev - 1);
