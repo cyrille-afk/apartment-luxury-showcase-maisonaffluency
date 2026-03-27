@@ -1941,6 +1941,17 @@ export type Database = {
       }
     }
     Functions: {
+      add_board_comment_by_token: {
+        Args: {
+          _author_name?: string
+          _board_id: string
+          _content: string
+          _is_client?: boolean
+          _item_id?: string
+          _token: string
+        }
+        Returns: string
+      }
       add_gallery_product_to_quote: {
         Args: {
           _brand_name: string
@@ -1962,6 +1973,62 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      get_board_by_token: {
+        Args: { _token: string }
+        Returns: {
+          client_email: string | null
+          client_name: string
+          created_at: string
+          id: string
+          share_token: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "client_boards"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_board_comments_by_token: {
+        Args: { _token: string }
+        Returns: {
+          author_name: string
+          board_id: string
+          content: string
+          created_at: string
+          id: string
+          is_client: boolean
+          item_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "client_board_comments"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_board_items_by_token: {
+        Args: { _token: string }
+        Returns: {
+          approval_status: string
+          board_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string
+          sort_order: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "client_board_items"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       has_role: {
         Args: {
@@ -1986,6 +2053,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      update_item_approval_by_token: {
+        Args: { _approval_status: string; _item_id: string; _token: string }
+        Returns: undefined
       }
     }
     Enums: {
