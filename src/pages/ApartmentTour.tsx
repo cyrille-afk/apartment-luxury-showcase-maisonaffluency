@@ -1,9 +1,22 @@
+import { useRef, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 
 const VIDEO_URL = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/videos/apartment-tour-voiceover.mp4";
 const OG_IMAGE = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,g_auto,q_auto/bespoke-sofa_gxidtx";
 
 const ApartmentTour = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = false;
+    v.play().catch(() => {
+      v.muted = true;
+      v.play();
+    });
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -41,10 +54,9 @@ const ApartmentTour = () => {
         {/* Video */}
         <div className="w-full max-w-5xl">
           <video
+            ref={videoRef}
             src={VIDEO_URL}
             controls
-            autoPlay
-            muted
             playsInline
             poster={OG_IMAGE}
             className="w-full rounded-sm shadow-2xl"
