@@ -251,7 +251,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
-  const [suppressHotspots, setSuppressHotspots] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
 
@@ -440,6 +439,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     const checkForGalleryIndex = () => {
       const storedIndex = sessionStorage.getItem('openGalleryIndex');
       const sourceId = sessionStorage.getItem('gallerySourceId');
+      const storedDesigner = sessionStorage.getItem('galleryFilterDesigner');
       if (storedIndex !== null) {
         const index = parseInt(storedIndex, 10);
         if (!isNaN(index) && index >= 0 && index < allItems.length) {
@@ -448,12 +448,12 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           setCurrentItemIndex(itemIndex);
           setExternalSourceId(sourceId);
           setSourceItemKey(null);
-          setSuppressHotspots(true);
+          setFilterDesigner(storedDesigner || null);
           setLightboxOpen(true);
-          setTimeout(() => setSuppressHotspots(false), 1500);
         }
         sessionStorage.removeItem('openGalleryIndex');
         sessionStorage.removeItem('gallerySourceId');
+        sessionStorage.removeItem('galleryFilterDesigner');
       }
     };
 
@@ -581,7 +581,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
   const shareLightboxImage = useCallback(() => {
     const slug = ogSlugs[currentSectionIndex] || 'gallery-og';
-    const url = `${window.location.origin}/${slug}.html?item=${currentFlatIndex}`;
+    let url = `${window.location.origin}/${slug}.html?item=${currentFlatIndex}`;
+    if (filterDesigner) {
+      url += `&designer=${encodeURIComponent(filterDesigner)}`;
+    }
     const title = currentSectionItems[currentItemIndex]?.title || '';
     const text = `${title} — Maison Affluency`;
     const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -591,7 +594,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       navigator.clipboard.writeText(`${text} — ${url}`);
       import('sonner').then(({ toast }) => toast.success('Link copied'));
     }
-  }, [currentSectionIndex, currentFlatIndex, currentItemIndex, currentSectionItems]);
+  }, [currentSectionIndex, currentFlatIndex, currentItemIndex, currentSectionItems, filterDesigner]);
 
   const goToPrevious = () => {
     setCurrentItemIndex(prev => prev === 0 ? currentSectionItems.length - 1 : prev - 1);
@@ -1009,7 +1012,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                      <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[95vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
                      <GalleryHotspots
                          imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
-                         visible={!imageZoomed && !suppressHotspots}
+                         visible={!imageZoomed}
                          onCloseLightbox={closeLightbox}
                          filterDesigner={filterDesigner}
                          {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
