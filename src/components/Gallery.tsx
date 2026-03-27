@@ -564,6 +564,32 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       }, 100);
     }
   };
+
+  // Compute flat gallery index for current lightbox image
+  const currentFlatIndex = useMemo(() => {
+    let flat = 0;
+    for (let s = 0; s < currentSectionIndex; s++) {
+      flat += galleryExperiences[s].items.length;
+    }
+    return flat + currentItemIndex;
+  }, [currentSectionIndex, currentItemIndex]);
+
+  const ogSlugs = ['gallery-sociable-og', 'gallery-intimate-og', 'gallery-sanctuary-og', 'gallery-calming-og', 'gallery-small-room-og', 'gallery-home-office-og', 'gallery-details-og'];
+
+  const shareLightboxImage = useCallback(() => {
+    const slug = ogSlugs[currentSectionIndex] || 'gallery-og';
+    const url = `${window.location.origin}/${slug}.html?item=${currentFlatIndex}`;
+    const title = currentSectionItems[currentItemIndex]?.title || '';
+    const text = `${title} — Maison Affluency`;
+    const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobileDevice) {
+      window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
+    } else {
+      navigator.clipboard.writeText(`${text} — ${url}`);
+      import('sonner').then(({ toast }) => toast.success('Link copied'));
+    }
+  }, [currentSectionIndex, currentFlatIndex, currentItemIndex, currentSectionItems]);
+
   const goToPrevious = () => {
     setCurrentItemIndex(prev => prev === 0 ? currentSectionItems.length - 1 : prev - 1);
   };
@@ -916,14 +942,23 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       ))}
                     </div>
                   </div>
-                  {/* Close button — bottom-left of image area */}
-                  <button
-                    onClick={closeLightbox}
-                    className="absolute bottom-2 left-3 z-50 p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
-                    aria-label="Close lightbox"
-                  >
-                    <X className="h-4 w-4 text-white" />
-                  </button>
+                  {/* Close + Share buttons — bottom of image area */}
+                  <div className="absolute bottom-2 left-3 z-50 flex items-center gap-2">
+                    <button
+                      onClick={closeLightbox}
+                      className="p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
+                      aria-label="Close lightbox"
+                    >
+                      <X className="h-4 w-4 text-white" />
+                    </button>
+                    <button
+                      onClick={shareLightboxImage}
+                      className="p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
+                      aria-label="Share this image"
+                    >
+                      <Share2 className="h-4 w-4 text-white" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Dot indicators */}
@@ -973,14 +1008,23 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          filterDesigner={filterDesigner}
                          {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                        />
-                      {/* Close button — desktop: near image */}
-                      <button
-                        onClick={closeLightbox}
-                        className={`hidden md:flex absolute z-50 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}
-                        aria-label="Close lightbox"
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
+                      {/* Close + Share buttons — desktop: near image */}
+                      <div className={`hidden md:flex absolute z-50 gap-2 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}>
+                        <button
+                          onClick={shareLightboxImage}
+                          className="p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                          aria-label="Share this image"
+                        >
+                          <Share2 className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={closeLightbox}
+                          className="p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                          aria-label="Close lightbox"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      </div>
                       {/* Maximize / Minimize icon — z-50 to stay above PinchZoomImage overlay */}
                       {!isExpanded ? (
                         <button
