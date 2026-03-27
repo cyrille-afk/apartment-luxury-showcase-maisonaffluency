@@ -126,6 +126,7 @@ export default function TradeSpecSheet() {
             />
           </div>
         </div>
+        <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
       </>
     );
   }
@@ -144,6 +145,7 @@ export default function TradeSpecSheet() {
           allow="fullscreen"
         />
       </div>
+      <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </>
   );
 }
