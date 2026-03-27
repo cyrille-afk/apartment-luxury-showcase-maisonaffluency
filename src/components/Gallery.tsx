@@ -586,7 +586,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       url += `&designer=${encodeURIComponent(filterDesigner)}`;
     }
     const title = currentSectionItems[currentItemIndex]?.title || '';
-    const text = `${title} — Maison Affluency`;
+    const parts = ['Maison Affluency', 'Interactive Gallery'];
+    if (filterDesigner) parts.push(filterDesigner);
+    if (title) parts.push(title);
+    const text = parts.join(' · ');
     const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobileDevice) {
       window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
