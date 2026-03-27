@@ -53,13 +53,13 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
         Archives
       </h3>
 
-      <div className="relative group max-w-3xl mx-auto">
+      <div className="relative group">
         <div className="overflow-hidden rounded-xl" ref={emblaRef}>
           <div className="flex">
             {slides.map((slide) => (
               <div
                 key={slide.id}
-                className="flex-[0_0_80%] md:flex-[0_0_55%] min-w-0 px-1.5 first:pl-0 last:pr-0"
+                className="flex-[0_0_80%] md:flex-[0_0_45%] min-w-0 px-1.5 first:pl-0 last:pr-0"
               >
               <div className="aspect-[4/3] rounded-lg overflow-hidden bg-muted/10 relative">
                   <img
