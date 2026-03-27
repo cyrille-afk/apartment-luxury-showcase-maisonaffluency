@@ -54,21 +54,17 @@ const ClientBoardViewer = () => {
 
   const fetchBoard = useCallback(async () => {
     if (!token) return;
-    const { data: boardData, error } = await supabase
-      .from("client_boards")
-      .select("*")
-      .eq("share_token", token)
-      .neq("status", "draft")
-      .single();
+    // Use security-definer function to fetch board by token (no open RLS)
+    const { data: boardRows, error } = await supabase
+      .rpc("get_board_by_token", { _token: token });
 
+    const boardData = boardRows?.[0];
     if (error || !boardData) { setNotFound(true); setLoading(false); return; }
     setBoard(boardData as Board);
 
+    // Fetch items via token-gated function
     const { data: itemsData } = await supabase
-      .from("client_board_items")
-      .select("*")
-      .eq("board_id", (boardData as any).id)
-      .order("sort_order");
+      .rpc("get_board_items_by_token", { _token: token });
 
     if (itemsData && itemsData.length > 0) {
       const productIds = itemsData.map((i: any) => i.product_id);
@@ -80,11 +76,9 @@ const ClientBoardViewer = () => {
       setItems(itemsData.map((i: any) => ({ ...i, product: prodMap.get(i.product_id) })));
     }
 
+    // Fetch comments via token-gated function
     const { data: commentsData } = await supabase
-      .from("client_board_comments")
-      .select("*")
-      .eq("board_id", (boardData as any).id)
-      .order("created_at");
+      .rpc("get_board_comments_by_token", { _token: token });
     if (commentsData) setComments(commentsData as Comment[]);
 
     setLoading(false);
