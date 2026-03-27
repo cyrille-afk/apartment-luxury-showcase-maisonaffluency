@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
+import TradeAxonometric from "./pages/TradeAxonometric";
 import { CompareProvider } from "@/contexts/CompareContext";
 import { AuthProvider } from "@/hooks/useAuth";
 
@@ -33,7 +34,6 @@ const TradeProvenance = lazy(() => import("./pages/TradeProvenance"));
 const TradeDocumentsAdmin = lazy(() => import("./pages/TradeDocumentsAdmin"));
 const TradeMediaLibrary = lazy(() => import("./pages/TradeMediaLibrary"));
 const TradeQuotesAdmin = lazy(() => import("./pages/TradeQuotesAdmin"));
-const TradeAxonometric = lazy(() => import("./pages/TradeAxonometric"));
 const TradeAxonometricRequests = lazy(() => import("./pages/TradeAxonometricRequests"));
 const TradeAxonometricGallery = lazy(() => import("./pages/TradeAxonometricGallery"));
 const TradePresentations = lazy(() => import("./pages/TradePresentations"));
