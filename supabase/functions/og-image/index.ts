@@ -437,7 +437,14 @@ Deno.serve(async (req) => {
     og.title
   )}</a>…</p>
   <script>
-    window.location.replace(${JSON.stringify(redirectUrl)});
+    (function(){
+      var p=new URLSearchParams(window.location.search);
+      var item=p.get("item");
+      var designer=p.get("designer");
+      if(item!==null)sessionStorage.setItem("openGalleryIndex",item);
+      if(designer)sessionStorage.setItem("galleryFilterDesigner",designer);
+      window.location.replace(${JSON.stringify(redirectUrl)});
+    })();
   </script>
   <noscript>
     <meta http-equiv="refresh" content="0;url=${escapeHtml(redirectUrl)}" />
