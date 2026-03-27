@@ -526,6 +526,9 @@ const TradeAtelierProfile = () => {
                     pickImages={picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`)}
                     designerName={designer.name}
                   />
+                  {heritageSlides.length > 0 && (
+                    <HeritageSlider slides={heritageSlides} />
+                  )}
                 </motion.div>
               )}
             </div>
