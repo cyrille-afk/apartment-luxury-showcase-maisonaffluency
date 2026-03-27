@@ -580,10 +580,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   
 
   const shareLightboxImage = useCallback(() => {
-    let url = `https://www.maisonaffluency.com/gallery-item-${currentFlatIndex}.html`;
-    if (filterDesigner) {
-      url += `?designer=${encodeURIComponent(filterDesigner)}`;
-    }
+    const url = `https://www.maisonaffluency.com/gallery-item-${currentFlatIndex}.html`;
     const title = currentSectionItems[currentItemIndex]?.title || '';
     const parts = ['Maison Affluency', 'Interactive Gallery'];
     if (filterDesigner) parts.push(filterDesigner);
