@@ -249,15 +249,15 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
               </button>
 
               {product.pdf_url && (
-                <a
-                  href={buildSpecSheetUrl(product.pdf_url, designerDisplay, product.title)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => requireAuth(() => {
+                    window.open(buildSpecSheetUrl(product.pdf_url!, designerDisplay, product.title), '_blank');
+                  }, "download this spec sheet")}
                   title="Spec Sheet"
-                  className="flex items-center justify-center w-9 h-9 rounded-full bg-[hsl(var(--pdf-red))] backdrop-blur-md text-white transition-all shadow-md"
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-[hsl(var(--pdf-red))] backdrop-blur-md text-white transition-all shadow-md cursor-pointer"
                 >
                   <FileDown size={15} />
-                </a>
+                </button>
               )}
             </div>
           </div>
@@ -336,15 +336,15 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
               </button>
 
               {product.pdf_url && (
-                <a
-                  href={buildSpecSheetUrl(product.pdf_url, designerDisplay, product.title)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-[hsl(var(--pdf-red))]/30 text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/10 hover:border-[hsl(var(--pdf-red))]"
+                <button
+                  onClick={() => requireAuth(() => {
+                    window.open(buildSpecSheetUrl(product.pdf_url!, designerDisplay, product.title), '_blank');
+                  }, "download this spec sheet")}
+                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-[hsl(var(--pdf-red))]/30 text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/10 hover:border-[hsl(var(--pdf-red))] cursor-pointer"
                 >
                   <FileDown size={13} />
                   Spec Sheet
-                </a>
+                </button>
               )}
             </div>
 
