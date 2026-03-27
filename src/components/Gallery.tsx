@@ -287,25 +287,56 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   }, []);
 
   const handleHotspotViewProduct = useCallback((productName: string, designerName: string) => {
-    const normName = productName.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
-    const normDesigner = designerName.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+    const normName = norm(productName);
+    const normDesigner = norm(designerName);
     const tokenize = (s: string) => s.split(" ").filter(t => t.length > 2);
     const nameTokens = tokenize(normName);
+    const designerTokens = tokenize(normDesigner);
+
+    // Brand ↔ designer aliases for parent-brand relationships
+    const brandAliases: Record<string, string[]> = {
+      "ecart": ["jean michel frank", "eileen gray", "pierre chareau", "mariano fortuny", "paul laszlo", "felix aublet", "laurent maugoust", "cecile chenais"],
+      "jean michel frank": ["ecart"],
+      "eileen gray": ["ecart"],
+      "pierre chareau": ["ecart"],
+      "mariano fortuny": ["ecart"],
+      "paul laszlo": ["ecart"],
+      "felix aublet": ["ecart"],
+    };
+
+    const isDesignerMatch = (itemBrand: string): boolean => {
+      if (!normDesigner) return false;
+      if (itemBrand.includes(normDesigner) || normDesigner.includes(itemBrand)) return true;
+      if (designerTokens.length >= 2) {
+        const brandTokens = tokenize(itemBrand);
+        const overlap = designerTokens.filter(t => brandTokens.includes(t)).length;
+        if (overlap >= 2) return true;
+      }
+      const aliases = brandAliases[normDesigner] || [];
+      if (aliases.some(a => itemBrand.includes(a) || a.includes(itemBrand))) return true;
+      const rev = brandAliases[itemBrand] || [];
+      if (rev.some(a => normDesigner.includes(a) || a.includes(normDesigner))) return true;
+      return false;
+    };
 
     let best: PublicLightboxItem | null = null;
     let bestScore = 0;
 
     for (const item of allCuratorPicks) {
-      const itemName = item.title.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
-      const itemBrand = item.brand_name.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+      const itemName = norm(item.title);
+      const itemBrand = norm(item.brand_name);
       const itemTokens = tokenize(itemName);
+
       const overlap = nameTokens.filter(t => itemTokens.includes(t)).length;
       const shorter = Math.min(nameTokens.length, itemTokens.length);
       const nameScore = shorter > 0 ? overlap / shorter : 0;
-      // Boost if designer matches
-      const designerMatch = normDesigner && itemBrand.includes(normDesigner) ? 0.2 : 0;
-      const score = nameScore + designerMatch;
-      if (score > bestScore && nameScore >= 0.5) {
+
+      const substringBonus = (itemName.includes(normName) || normName.includes(itemName)) ? 0.3 : 0;
+      const designerBonus = isDesignerMatch(itemBrand) ? 0.4 : 0;
+
+      const score = nameScore + substringBonus + designerBonus;
+      if (score > bestScore && (nameScore >= 0.3 || substringBonus > 0)) {
         bestScore = score;
         best = item;
       }
