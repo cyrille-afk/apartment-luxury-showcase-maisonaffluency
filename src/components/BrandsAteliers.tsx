@@ -2009,9 +2009,10 @@ function AlphaStrip({
         {brands.map((brand) => {
           const bg = brandBgMap[brand.name];
           const hasBg = !!bg;
+          const isEcart = brand.name === "Ecart Paris";
           return (
+            <React.Fragment key={brand.name}>
             <div
-              key={brand.name}
               id={`brand-${brand.id}`}
               role="button"
               tabIndex={0}
@@ -2934,10 +2935,7 @@ const BrandsAteliers = () => {
                 scrollToGallery={scrollToGallery}
                 onOpenPicks={openPicks}
               />
-              {/* Ecart accordion — appears after the E strip */}
-              {letter === "E" && (
-                <EcartAccordion onOpenPicks={openPicks} />
-              )}
+              {/* Ecart sub-designers are now inline in the strip */}
             </div>
           ))}
         </div>
