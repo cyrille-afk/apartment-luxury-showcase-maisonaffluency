@@ -1951,6 +1951,7 @@ function AlphaStrip({
   const stripRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [ecartDesignersOpen, setEcartDesignersOpen] = useState(false);
 
   const handleScroll = useCallback(() => {
     const el = stripRef.current;
