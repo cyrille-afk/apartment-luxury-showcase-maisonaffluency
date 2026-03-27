@@ -300,7 +300,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
       )}
 
       {/* Existing hotspots */}
-      {hotspots.map((hotspot) => (
+      {displayHotspots.map((hotspot) => (
         <div
           key={hotspot.id}
           className={`absolute pointer-events-auto transition-opacity duration-200 ${activeId && activeId !== hotspot.id ? "opacity-0 pointer-events-none" : "opacity-100"}`}
