@@ -14,6 +14,8 @@ import EditorialBiography, { renderParagraph } from "@/components/EditorialBiogr
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
+import HeritageSlider from "@/components/HeritageSlider";
+import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
@@ -77,6 +79,7 @@ const PublicDesignerProfile = () => {
   const isParentBrand = designer?.founder === designer?.name;
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(isParentBrand ? designer : undefined, { publicOnly: true });
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
+  const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
 
   const picks = useMemo(() => {
@@ -413,6 +416,10 @@ const PublicDesignerProfile = () => {
                  </motion.div>
               </div>
 
+              {heritageSlides.length > 0 && (
+                <HeritageSlider slides={heritageSlides} />
+              )}
+
               {remainingBio && (
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
@@ -554,6 +561,10 @@ const PublicDesignerProfile = () => {
                             </div>
                           )}
                         </div>
+
+                        {heritageSlides.length > 0 && (
+                          <HeritageSlider slides={heritageSlides} />
+                        )}
 
                         {editorialBio && (
                           <div className="mt-10 md:mt-14">
