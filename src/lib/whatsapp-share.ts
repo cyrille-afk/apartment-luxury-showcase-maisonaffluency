@@ -42,6 +42,7 @@ const appendOgVersion = (url: string) => {
   try {
     const parsed = new URL(url);
     parsed.searchParams.set("v", OG_SHARE_VERSION);
+    parsed.searchParams.set("t", Date.now().toString());
     return parsed.toString();
   } catch {
     return url;
