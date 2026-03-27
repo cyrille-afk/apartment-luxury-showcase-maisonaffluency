@@ -1,0 +1,1 @@
+UPDATE designers SET biography = REPLACE(biography, E'\n\nhttps://www.youtube.com/embed/dQw4w9WgXcQ | Christopher Boots studio process', '') WHERE slug = 'christopher-boots';
