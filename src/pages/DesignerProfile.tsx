@@ -56,9 +56,15 @@ const DesignerProfile = () => {
         >
           <Link
             to={(() => {
-              if (fromSection === "ateliers") return "/#brands";
+              if (fromSection === "ateliers") {
+                const expand = designer?.founder ? `?expand=${encodeURIComponent(designer.founder)}` : "";
+                return `/${expand}#brands`;
+              }
               if (fromSection === "designers") return "/#designers";
-              return designer?.founder ? "/#brands" : "/#designers";
+              if (designer?.founder) {
+                return `/?expand=${encodeURIComponent(designer.founder)}#brands`;
+              }
+              return "/#designers";
             })()}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors bg-background/80 backdrop-blur-sm px-3 py-2 rounded-sm"
           >
