@@ -611,21 +611,19 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             duration: 0.6,
             delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
-                <div className="flex items-end justify-between mb-2">
-                  <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary leading-none">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary">
                     {section.experience}
                   </h3>
-                  <div className="hidden md:flex items-end gap-5">
-                    {!section.items.some(i => i.description) && (
-                      <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body leading-none pb-[3px]">
-                        <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
+                  {originalSectionIndex === 0 && (
+                    <div className="hidden md:flex items-center gap-6">
+                      <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">
+                        <span className="relative flex items-center justify-center w-6 h-6 rounded-full bg-black/70 border border-primary/70">
                           <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
-                          <Plus className="relative h-2.5 w-2.5 text-white" />
+                          <Plus className="relative h-3 w-3 text-white" />
                         </span>
                         Interactive Gallery
                       </span>
-                    )}
-                    {originalSectionIndex === 0 && (
                       <button
                         onClick={() => {
                           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -638,20 +636,18 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             import('sonner').then(({ toast }) => toast.success('Link copied'));
                           }
                         }}
-                        className="inline-flex flex-col items-center gap-0.5 text-muted-foreground hover:text-primary transition-colors leading-none"
+                        className="inline-flex flex-col items-center gap-0.5 text-muted-foreground hover:text-primary transition-colors"
                         aria-label="Share Interactive Gallery"
                       >
-                        <Share2 className="w-4 h-4" />
+                        <Share2 className="w-5 h-5" />
                         <span className="text-[8px] uppercase tracking-[0.12em]">Share</span>
                       </button>
-                    )}
-                    {originalSectionIndex === 0 && (
                       <button
                         onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
-                        className="flex items-center rounded transition-all hover:opacity-70 leading-none"
+                        className="flex items-center rounded transition-all hover:opacity-70"
                         aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
                       >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
                           {gridCols === 3 ? (
                             <>
                               <rect x="4" y="3" width="4" height="18" rx="1" fill="black" />
@@ -668,8 +664,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           )}
                         </svg>
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
                 <p className="hidden md:block text-sm md:text-base text-muted-foreground font-body italic">
                   {section.subtitle}
