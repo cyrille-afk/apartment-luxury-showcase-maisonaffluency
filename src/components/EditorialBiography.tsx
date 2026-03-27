@@ -487,13 +487,53 @@ function CollapsibleBiographyWrapper({
   children,
   elementCount,
   allowCollapse = true,
+  collapseAfterIndex,
 }: {
   children: React.ReactNode;
   elementCount: number;
   allowCollapse?: boolean;
+  /** If set, collapse after this element index (0-based). Otherwise uses max-height. */
+  collapseAfterIndex?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
   if (!allowCollapse || elementCount <= 3) return <>{children}</>;
+
+  const childArray = Array.isArray(children) ? children : [children];
+
+  // Index-based split: show elements up to collapseAfterIndex, hide rest
+  if (collapseAfterIndex !== undefined && collapseAfterIndex < childArray.length - 1) {
+    const visible = childArray.slice(0, collapseAfterIndex + 1);
+    const hidden = childArray.slice(collapseAfterIndex + 1);
+
+    return (
+      <div>
+        {visible}
+        {!expanded && (
+          <div className="mt-5">
+            <button
+              onClick={() => setExpanded(true)}
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md"
+            >
+              View full profile
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {hidden}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
