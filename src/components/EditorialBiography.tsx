@@ -392,14 +392,15 @@ function SplitImageBlock({
 
   return (
     <div className={`${index === 0 ? "mb-4 md:mb-6" : "my-4 md:my-6"} flex flex-col md:flex-row gap-3 md:gap-6 items-center`}>
+      {/* Mobile: image always first (order-1); Desktop: controlled by imageOnRight */}
+      <div className={`shrink-0 w-full ${imageWidth} order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
+        {imageEl}
+      </div>
       {textEl && (
-        <div className={`flex-1 min-w-0 ${imageOnRight ? 'md:order-1' : 'md:order-2'}`}>
+        <div className={`flex-1 min-w-0 order-2 ${imageOnRight ? 'md:order-1' : 'md:order-2'}`}>
           {textEl}
         </div>
       )}
-      <div className={`shrink-0 w-full ${imageWidth} ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}>
-        {imageEl}
-      </div>
     </div>
   );
 }
@@ -801,6 +802,24 @@ export default function EditorialBiography({
     }
 
     const hasInlineVideo = parsed.some((block) => block.type === "video");
+
+    // Rule: biography should never end with a picture — move trailing image before last text
+    if (elements.length >= 2) {
+      const lastKey = String(elements[elements.length - 1].key || "");
+      const isTrailingImage = lastKey.startsWith("fw-") || lastKey.startsWith("manual-img-");
+      if (isTrailingImage) {
+        // Find last text element and swap
+        for (let j = elements.length - 2; j >= 0; j--) {
+          const k = String(elements[j].key || "");
+          if (!k.startsWith("fw-") && !k.startsWith("manual-img-") && !k.startsWith("split-") && !k.startsWith("vid-") && !k.startsWith("manual-vid-") && k !== "mobile-early-img") {
+            // Swap: move trailing image before this text block
+            const [img] = elements.splice(elements.length - 1, 1);
+            elements.splice(j, 0, img);
+            break;
+          }
+        }
+      }
+    }
 
     // Build final children array for the collapsible wrapper
     const wrapperChildren: JSX.Element[] = [];
