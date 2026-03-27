@@ -1,0 +1,1 @@
+UPDATE designers SET philosophy = 'For a house to be successful, the objects in it must communicate with one another, respond to and balance one another.' WHERE id = 'bcbf4258-bf92-489b-bcea-b512270f8624';
