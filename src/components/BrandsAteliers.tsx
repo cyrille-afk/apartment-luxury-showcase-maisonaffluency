@@ -2038,6 +2038,17 @@ function AlphaStrip({
                 <p className="absolute top-[calc(0.75rem+3.5rem+0.25rem)] md:top-[calc(0.75rem+4rem+0.25rem)] left-3 w-14 md:w-16 z-10 font-body text-[9px] md:text-[10px] text-white/70 uppercase tracking-widest text-center">
                   {brand.origin}
                 </p>
+                {/* Instagram icon top-right */}
+                <a
+                  href="https://instagram.com/ecart.paris"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 hover:bg-white/25 transition-all"
+                  onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
+                  aria-label="Ecart Paris on Instagram"
+                >
+                  <Instagram className="h-4 w-4 text-white" />
+                </a>
                 {/* Toggle sub-designers button */}
                 <button
                   onClick={(e) => { e.stopPropagation(); setEcartDesignersOpen(!ecartDesignersOpen); }}
