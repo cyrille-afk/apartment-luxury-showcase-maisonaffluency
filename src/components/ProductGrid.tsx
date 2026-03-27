@@ -625,24 +625,26 @@ function singularizeSub(s: string): string {
                       <button
                         className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
                         aria-label="Download PDF"
-                        onClick={async (e) => {
+                        onClick={(e) => {
                           e.stopPropagation();
-                          const url = currentItem.pick.pdfUrl as string;
-                          const filename = currentItem.pick.pdfFilename || `${currentItem.pick.title.replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
-                          try {
-                            const res = await fetch(url);
-                            const blob = await res.blob();
-                            const blobUrl = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = blobUrl;
-                            a.download = filename;
-                            document.body.appendChild(a);
-                            a.click();
-                            a.remove();
-                            URL.revokeObjectURL(blobUrl);
-                          } catch {
-                            window.open(url, '_blank');
-                          }
+                          requireAuth(async () => {
+                            const url = currentItem.pick.pdfUrl as string;
+                            const filename = currentItem.pick.pdfFilename || `${currentItem.pick.title.replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
+                            try {
+                              const res = await fetch(url);
+                              const blob = await res.blob();
+                              const blobUrl = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = blobUrl;
+                              a.download = filename;
+                              document.body.appendChild(a);
+                              a.click();
+                              a.remove();
+                              URL.revokeObjectURL(blobUrl);
+                            } catch {
+                              window.open(url, '_blank');
+                            }
+                          }, "download this spec sheet");
                         }}
                       >
                         <FileDown size={14} className="md:hidden text-white" />
