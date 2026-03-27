@@ -2216,6 +2216,74 @@ function AlphaStrip({
           ))}
         </div>
       )}
+
+      {/* Ecart sub-designers collapsible — below the scroll strip */}
+      {brands.some(b => b.name === "Ecart Paris") && (
+        <AnimatePresence>
+          {ecartDesignersOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="pt-4 pb-2">
+                <div className="flex items-center gap-2 mb-3 px-1">
+                  <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="font-body text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
+                    Ecart Designers
+                  </span>
+                  <div className="flex-1 h-px bg-border/30" />
+                  <button
+                    onClick={() => setEcartDesignersOpen(false)}
+                    className="p-1 rounded-full hover:bg-muted/50 transition-colors"
+                    aria-label="Close designers"
+                  >
+                    <X className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 md:gap-3">
+                  {ecartSubDesigners.map((d) => (
+                    <Link
+                      key={d.slug}
+                      to={`/designers/${d.slug}?from=ateliers`}
+                      className="group/sub rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
+                    >
+                      <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
+                        {d.image ? (
+                          <img
+                            src={d.image}
+                            alt={d.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted/5">
+                            <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
+                        </div>
+                        <span className="absolute top-2 left-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                          <Layers className="h-2 w-2" />
+                          Ecart
+                        </span>
+                      </div>
+                      <div className="px-2 py-1.5 bg-background">
+                        <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1 text-center">
+                          {d.name}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </motion.div>
   );
 }
