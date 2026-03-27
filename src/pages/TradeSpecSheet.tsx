@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuthGate } from "@/hooks/useAuthGate";
+import AuthGateDialog from "@/components/AuthGateDialog";
 
 /**
  * In-app spec sheet viewer.
@@ -19,6 +21,7 @@ export default function TradeSpecSheet() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
   const pageTitle = product
     ? `${brand} — ${product} Spec Sheet`
@@ -86,11 +89,30 @@ export default function TradeSpecSheet() {
               <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider truncate">{brand}</p>
               <h1 className="font-display text-sm text-foreground truncate">{product} — Spec Sheet</h1>
             </div>
-            <Button size="sm" className="gap-1.5 bg-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/90 text-white shrink-0" asChild>
-              <a href={pdfUrl} download={`${brand} — ${product} Spec Sheet.pdf`}>
-                <FileDown className="w-3.5 h-3.5" />
-                Download
-              </a>
+            <Button
+              size="sm"
+              className="gap-1.5 bg-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/90 text-white shrink-0"
+              onClick={() => {
+                requireAuth(async () => {
+                  try {
+                    const res = await fetch(pdfUrl!);
+                    const blob = await res.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = `${brand} — ${product} Spec Sheet.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(blobUrl);
+                  } catch {
+                    window.open(pdfUrl!, '_blank');
+                  }
+                }, "download this spec sheet");
+              }}
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              Download
             </Button>
           </div>
 
@@ -104,6 +126,7 @@ export default function TradeSpecSheet() {
             />
           </div>
         </div>
+        <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
       </>
     );
   }
@@ -122,6 +145,7 @@ export default function TradeSpecSheet() {
           allow="fullscreen"
         />
       </div>
+      <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </>
   );
 }
