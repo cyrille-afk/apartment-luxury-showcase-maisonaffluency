@@ -53,13 +53,13 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
         Archives
       </h3>
 
-      <div className="relative group">
+      <div className="relative group max-w-3xl mx-auto">
         <div className="overflow-hidden rounded-xl" ref={emblaRef}>
           <div className="flex">
             {slides.map((slide) => (
               <div
                 key={slide.id}
-                className="flex-[0_0_85%] md:flex-[0_0_60%] min-w-0 px-2 first:pl-0 last:pr-0"
+                className="flex-[0_0_80%] md:flex-[0_0_55%] min-w-0 px-1.5 first:pl-0 last:pr-0"
               >
               <div className="aspect-[4/3] rounded-lg overflow-hidden bg-muted/10 relative">
                   <img
@@ -70,7 +70,7 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
                   />
                   {slide.caption && (
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent pt-10 pb-3 px-4">
-                      <p className="font-body text-[11px] md:text-[13px] tracking-wide text-white/85 italic text-center leading-relaxed">
+                      <p className="font-body text-[10px] md:text-[11px] tracking-wide text-white/80 italic text-center leading-relaxed whitespace-pre-line">
                         {slide.caption}
                       </p>
                     </div>
