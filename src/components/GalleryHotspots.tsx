@@ -75,6 +75,8 @@ interface GalleryHotspotsProps {
   onRequestQuote?: (productName: string, designerName: string) => void;
   /** Public: callback to open product lightbox for a matched curator's pick */
   onViewProduct?: (productName: string, designerName: string) => void;
+  /** When set, only show hotspots matching this designer name */
+  filterDesigner?: string | null;
 }
 
 interface PendingHotspot {
