@@ -61,7 +61,7 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
             {slides.map((slide) => (
               <div
                 key={slide.id}
-                className="flex-[0_0_80%] md:flex-[0_0_45%] min-w-0 px-1.5 first:pl-0 last:pr-0"
+                className="flex-[0_0_80%] md:flex-[0_0_45%] min-w-0 px-2"
               >
               <div className="aspect-[4/3] rounded-lg overflow-hidden bg-muted/10 relative">
                   <img
