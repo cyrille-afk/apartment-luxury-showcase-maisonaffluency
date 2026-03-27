@@ -16,6 +16,8 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
     align: "center",
     containScroll: false,
     slidesToScroll: 1,
+    dragFree: false,
+    duration: 20,
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
