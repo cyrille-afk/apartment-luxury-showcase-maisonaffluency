@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuthGate } from "@/hooks/useAuthGate";
+import AuthGateDialog from "@/components/AuthGateDialog";
 
 /**
  * In-app spec sheet viewer.
