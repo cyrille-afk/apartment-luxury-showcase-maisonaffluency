@@ -20,7 +20,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
-import { shareProfileOnWhatsApp, buildAtelierOgUrl, withOgCacheBust } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, buildAtelierOgUrl, buildParentBrandOgUrl, withOgCacheBust } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -2240,7 +2240,7 @@ function AlphaStrip({
     const expandFounder = params.get("expand");
     if (!expandFounder) return;
     const config = Object.values(parentBrandsInStrip).find(
-      c => c.dbParentName === expandFounder
+      c => c.dbParentName === expandFounder || c.profileSlug === expandFounder
     );
     if (config) {
       setOpenParentDesigners(prev => ({ ...prev, [config.brandName]: true }));
@@ -2410,7 +2410,7 @@ function AlphaStrip({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const url = buildAtelierOgUrl(brand.name);
+                      const url = buildParentBrandOgUrl(brand.name);
                       navigator.clipboard.writeText(`${brand.name} — Maison Affluency: ${url}`);
                       import('sonner').then(({ toast }) => toast.success('Link copied'));
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
@@ -2424,7 +2424,10 @@ function AlphaStrip({
                   <WhatsAppShareButton
                     onClick={(e) => {
                       e.stopPropagation();
-                      shareProfileOnWhatsApp("atelier", brand.id || parentConfig.profileSlug, brand.name);
+                      const url = buildParentBrandOgUrl(brand.name);
+                      const msg = `${brand.name} — Maison Affluency: ${url}`;
+                      const wa = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                      window.location.href = wa;
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
                     label={`Share ${brand.name} on WhatsApp`}
