@@ -838,6 +838,7 @@ function singularizeSub(s: string): string {
       productName={quoteProduct.name}
       designerName={quoteProduct.designer}
     />
+    <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </>
   );
 };
