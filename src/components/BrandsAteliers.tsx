@@ -2753,7 +2753,7 @@ const BrandsAteliers = () => {
     const params = new URLSearchParams(window.location.search);
     return params.get("expand");
   });
-
+  const hasAutoScrolledSearchRef = useRef(false);
 
   useEffect(() => {
     const trimmed = searchQuery.trim();
