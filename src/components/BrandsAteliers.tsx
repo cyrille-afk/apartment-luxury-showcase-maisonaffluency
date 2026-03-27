@@ -1906,7 +1906,62 @@ const ecartSubDesigners = [
   { name: "Laurent Maugoust & Cécile Chenais", slug: "laurent-maugoust-cecile-chenais", image: "https://res.cloudinary.com/dif1oamtj/image/fetch/w_200,h_267,c_fill,g_auto,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Laurent_Maugoust_Cecile_Chenais.jpg" },
 ];
 
-// Reverse map: designer ID → brand name (for deep-link resolution)
+// ─── Parent Brand Configuration ──────────────────────────────────────────────
+// Parent brands that have sub-designers displayed in a collapsible grid.
+// `dbParentName` is the `founder` value used to query sub-designers from the DB.
+// `staticDesigners` are used instead of DB if provided (e.g. Ecart).
+interface ParentBrandConfig {
+  /** Brand name as it appears in the consolidated brands list */
+  brandName: string;
+  /** The `founder` value in the designers table */
+  dbParentName: string;
+  /** Instagram URL */
+  instagram: string;
+  /** Designer profile slug for the View Profile link */
+  profileSlug: string;
+  /** Static sub-designers (overrides DB fetch) */
+  staticDesigners?: { name: string; slug: string; image: string }[];
+  /** Label for the founder pill on sub-designer cards */
+  pillLabel: string;
+}
+
+const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
+  {
+    brandName: "Ecart Paris",
+    dbParentName: "Ecart",
+    instagram: "https://instagram.com/ecart.paris",
+    profileSlug: "ecart",
+    staticDesigners: ecartSubDesigners,
+    pillLabel: "Ecart",
+  },
+  {
+    brandName: "CC-Tapis",
+    dbParentName: "CC-Tapis",
+    instagram: "https://instagram.com/cc_tapis",
+    profileSlug: "cc-tapis",
+    pillLabel: "CC-Tapis",
+  },
+  {
+    brandName: "Véronèse",
+    dbParentName: "Veronese",
+    instagram: "https://www.instagram.com/veronese_/",
+    profileSlug: "veronese",
+    pillLabel: "Véronèse",
+  },
+  {
+    brandName: "Théorème Editions",
+    dbParentName: "Théorème Editions",
+    instagram: "https://instagram.com/theoreme_editions",
+    profileSlug: "theoreme-editions",
+    pillLabel: "Théorème",
+  },
+];
+
+// Quick lookup by brand name
+const parentBrandConfigMap: Record<string, ParentBrandConfig> = {};
+PARENT_BRAND_CONFIGS.forEach(c => { parentBrandConfigMap[c.brandName] = c; });
+
+
 const designerIdToBrandMap: Record<string, string> = Object.fromEntries(
   Object.entries(brandToDesignerMap).map(([brand, id]) => [id, brand])
 );
