@@ -50,7 +50,7 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
       className="my-10 md:my-14"
     >
       <h3 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground mb-5">
-        Heritage Collection
+        Archives
       </h3>
 
       <div className="relative group">
