@@ -254,7 +254,7 @@ function VideoBlock({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={transition}
-      className="my-6 md:my-8 -mx-2 md:-mx-6"
+      className="my-4 md:my-6 -mx-2 md:-mx-6"
     >
       <div className="aspect-video rounded-xl overflow-hidden bg-muted/20 shadow-lg relative flex items-center justify-center">
         {embedUrl ? (
@@ -388,10 +388,10 @@ function SplitImageBlock({
     </motion.div>
   ) : null;
 
-  const imageWidth = isSmall ? "md:w-[24%]" : "md:w-[38%]";
+  const imageWidth = isSmall ? "md:w-[22%]" : "md:w-[32%]";
 
   return (
-    <div className={`${index === 0 ? "mb-6 md:mb-8" : "my-6 md:my-8"} flex flex-col md:flex-row gap-4 md:gap-8 items-center`}>
+    <div className={`${index === 0 ? "mb-4 md:mb-6" : "my-4 md:my-6"} flex flex-col md:flex-row gap-3 md:gap-6 items-center`}>
       {textEl && (
         <div className={`flex-1 min-w-0 ${imageOnRight ? 'md:order-1' : 'md:order-2'}`}>
           {textEl}
@@ -415,9 +415,9 @@ function FullWidthImageBlock({ url, designerName, index, overrideCaption }: { ur
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={transition}
-      className="my-6 md:my-8"
+      className="my-4 md:my-6"
     >
-      <div className="rounded-xl overflow-hidden bg-muted/10 aspect-square max-w-[520px] mx-auto">
+      <div className="rounded-xl overflow-hidden bg-muted/10 aspect-square max-w-[480px] mx-auto">
         <img
           src={url}
           alt={caption || `${designerName} — editorial`}
