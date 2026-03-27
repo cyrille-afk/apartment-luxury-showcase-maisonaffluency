@@ -802,26 +802,26 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             </span>
                           </div>
                         )}
-                        {/* +1 more indicator on last visible card in 3-col mode */}
+                        {/* +1 more indicator on last visible card in 3-col mode — top right */}
                         {gridCols === 3 && index === 2 && section.items.length > 3 && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setGridCols(4);
                             }}
-                            className="absolute bottom-2 right-2 md:bottom-4 md:right-4 z-10 bg-black/50 backdrop-blur-sm text-white font-body text-xs tracking-wide px-3 py-1.5 rounded-full hover:bg-black/70 transition-all duration-300"
+                            className="absolute top-2 right-2 md:top-4 md:right-4 z-10 bg-black/50 backdrop-blur-sm text-white font-body text-xs tracking-wide px-3 py-1.5 rounded-full hover:bg-black/70 transition-all duration-300"
                             aria-label="Show 1 more photo"
                           >
                             +1 more
                           </button>
                         )}
-                        {/* Expand icon - opens lightbox directly */}
+                        {/* Expand icon — bottom right */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             openLightbox(originalSectionIndex, index);
                           }}
-                          className={`absolute bottom-2 left-2 ${gridCols === 3 && index === 2 && section.items.length > 3 ? 'md:bottom-4 md:left-4' : 'md:bottom-4 md:left-auto md:right-4'} flex opacity-100 transition-opacity duration-300`}
+                          className="absolute bottom-2 right-2 md:bottom-4 md:right-4 flex opacity-100 transition-opacity duration-300"
                           aria-label="View full image"
                         >
                           <span className={`bg-black/60 text-white rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300 ${gridCols === 4 ? 'p-1.5' : 'p-1.5 md:p-2'}`}>
