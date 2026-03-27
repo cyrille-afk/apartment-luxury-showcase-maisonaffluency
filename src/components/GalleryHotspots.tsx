@@ -173,10 +173,18 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
   const displayHotspots = useMemo(() => {
     if (!filterDesigner || !hotspots.length) return hotspots;
     const filterLower = filterDesigner.toLowerCase();
+    // Extract meaningful tokens: split on " - ", " for ", commas, then check overlap
+    const extractTokens = (s: string) =>
+      s.split(/\s[-–—]\s|\sfor\s|,\s*/).map(t => t.trim().toLowerCase()).filter(Boolean);
+    const filterTokens = extractTokens(filterLower);
     const filtered = hotspots.filter(h => {
       if (!h.designer_name) return false;
       const dLower = h.designer_name.toLowerCase();
-      return dLower.includes(filterLower) || filterLower.includes(dLower);
+      // Direct substring match
+      if (dLower.includes(filterLower) || filterLower.includes(dLower)) return true;
+      // Token overlap: any token from the filter matches any token in the hotspot name
+      const hotspotTokens = extractTokens(dLower);
+      return filterTokens.some(ft => hotspotTokens.some(ht => ht.includes(ft) || ft.includes(ht)));
     });
     return filtered.length > 0 ? filtered : hotspots;
   }, [hotspots, filterDesigner]);
