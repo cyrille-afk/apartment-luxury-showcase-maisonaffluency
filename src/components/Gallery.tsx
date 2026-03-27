@@ -581,7 +581,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
   const shareLightboxImage = useCallback(() => {
     const slug = ogSlugs[currentSectionIndex] || 'gallery-og';
-    const url = `${window.location.origin}/${slug}.html?item=${currentFlatIndex}`;
+    let url = `${window.location.origin}/${slug}.html?item=${currentFlatIndex}`;
+    if (filterDesigner) {
+      url += `&designer=${encodeURIComponent(filterDesigner)}`;
+    }
     const title = currentSectionItems[currentItemIndex]?.title || '';
     const text = `${title} — Maison Affluency`;
     const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -591,7 +594,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       navigator.clipboard.writeText(`${text} — ${url}`);
       import('sonner').then(({ toast }) => toast.success('Link copied'));
     }
-  }, [currentSectionIndex, currentFlatIndex, currentItemIndex, currentSectionItems]);
+  }, [currentSectionIndex, currentFlatIndex, currentItemIndex, currentSectionItems, filterDesigner]);
 
   const goToPrevious = () => {
     setCurrentItemIndex(prev => prev === 0 ? currentSectionItems.length - 1 : prev - 1);
