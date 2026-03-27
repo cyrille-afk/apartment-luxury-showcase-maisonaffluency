@@ -2386,7 +2386,7 @@ function AlphaStrip({
                   className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
                 >
                   <Layers className="h-3 w-3" />
-                  <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers</span>
+                  <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers{(() => { const count = getDesignerCount(brand.name); return count > 0 ? ` (${count})` : ""; })()}</span>
                   <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${openParentDesigners[brand.name] ? "rotate-180" : ""}`} />
                 </button>
                 {/* Share button — bottom left */}
