@@ -2014,11 +2014,11 @@ function AlphaStrip({
           return (
             <React.Fragment key={brand.name}>
             {isEcart ? (
-              /* ── Ecart parent card — Trade-style portrait card ── */
-              <button
-                onClick={() => onOpenPicks(brand.name)}
+              /* ── Ecart parent card — Trade-style portrait card, navigates to profile ── */
+              <Link
+                to="/designers/ecart"
                 id={`brand-${brand.id}`}
-                className="group text-left flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all bg-background"
+                className="group flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all bg-background"
               >
                 <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                   {bg ? (
@@ -2031,7 +2031,7 @@ function AlphaStrip({
                   {/* Hover overlay */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
                     <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-                      Curators' Picks
+                      View Profile
                     </span>
                   </div>
                   {/* Atelier logo badge */}
@@ -2039,7 +2039,7 @@ function AlphaStrip({
                     <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
                   </div>
                 </div>
-              </button>
+              </Link>
             ) : (
             <div
               id={`brand-${brand.id}`}
