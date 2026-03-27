@@ -1927,6 +1927,8 @@ interface ParentBrandConfig {
   staticDesigners?: { name: string; slug: string; image: string }[];
   /** Label for the founder pill on sub-designer cards */
   pillLabel: string;
+  /** Featured designer name used in share text (e.g. "incl. Gabriel Hendifar") */
+  highlightDesigner?: string;
 }
 
 const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
@@ -2042,6 +2044,7 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
     instagram: "https://instagram.com/alinea_design_objects",
     profileSlug: "leo-aerts-alinea",
     pillLabel: "Alinéa",
+    highlightDesigner: "Leo Aerts",
   },
   {
     brandName: "Apparatus Studio",
@@ -2049,6 +2052,7 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
     instagram: "https://instagram.com/apparatusstudio",
     profileSlug: "apparatus-studio",
     pillLabel: "Apparatus",
+    highlightDesigner: "Gabriel Hendifar",
   },
   {
     brandName: "Achille Salvagni Atelier",
@@ -2056,6 +2060,7 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
     instagram: "https://www.instagram.com/achillesalvagniatelier/",
     profileSlug: "achille-salvagni-atelier",
     pillLabel: "AS Atelier",
+    highlightDesigner: "Achille Salvagni",
   },
   {
     brandName: "Atelier DeMichelis",
@@ -2063,6 +2068,7 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
     instagram: "https://instagram.com/atelier_demichelis",
     profileSlug: "atelier-demichelis",
     pillLabel: "DeMichelis",
+    highlightDesigner: "Thomas DeMichelis",
   },
   {
     brandName: "Okha Design Studio",
@@ -2070,6 +2076,7 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
     instagram: "https://instagram.com/__okha",
     profileSlug: "okha",
     pillLabel: "OKHA",
+    highlightDesigner: "Adam Court",
   },
   {
     brandName: "Arredoluce",
@@ -2282,8 +2289,7 @@ function AlphaStrip({
      const config = parentBrandConfigMap[brandName];
      const count = getDesignerCount(brandName);
      if (!config || count === 0) return `${brandName} — Maison Affluency`;
-     const designers = config.staticDesigners;
-     const highlight = designers?.[0]?.name;
+    const highlight = config.highlightDesigner || config.staticDesigners?.[0]?.name;
      const suffix = highlight
        ? `${count} Designers incl. ${highlight}`
        : `${count} Designers`;
