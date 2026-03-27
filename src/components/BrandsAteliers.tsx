@@ -2047,7 +2047,7 @@ function AlphaStrip({
                   onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
                   aria-label="Ecart Paris on Instagram"
                 >
-                  <Instagram className="h-4 w-4 text-white" />
+                  <Instagram className="h-6 w-6 text-white" />
                 </a>
                 {/* Toggle sub-designers button */}
                 <button
