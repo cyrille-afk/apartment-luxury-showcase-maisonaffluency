@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
+import { useAuthGate } from "@/hooks/useAuthGate";
+import AuthGateDialog from "@/components/AuthGateDialog";
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
@@ -171,6 +173,7 @@ const _sharedProductList = buildProductList(atelierOnlyPicks);
 
 const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
@@ -622,24 +625,26 @@ function singularizeSub(s: string): string {
                       <button
                         className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
                         aria-label="Download PDF"
-                        onClick={async (e) => {
+                        onClick={(e) => {
                           e.stopPropagation();
-                          const url = currentItem.pick.pdfUrl as string;
-                          const filename = currentItem.pick.pdfFilename || `${currentItem.pick.title.replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
-                          try {
-                            const res = await fetch(url);
-                            const blob = await res.blob();
-                            const blobUrl = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = blobUrl;
-                            a.download = filename;
-                            document.body.appendChild(a);
-                            a.click();
-                            a.remove();
-                            URL.revokeObjectURL(blobUrl);
-                          } catch {
-                            window.open(url, '_blank');
-                          }
+                          requireAuth(async () => {
+                            const url = currentItem.pick.pdfUrl as string;
+                            const filename = currentItem.pick.pdfFilename || `${currentItem.pick.title.replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
+                            try {
+                              const res = await fetch(url);
+                              const blob = await res.blob();
+                              const blobUrl = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = blobUrl;
+                              a.download = filename;
+                              document.body.appendChild(a);
+                              a.click();
+                              a.remove();
+                              URL.revokeObjectURL(blobUrl);
+                            } catch {
+                              window.open(url, '_blank');
+                            }
+                          }, "download this spec sheet");
                         }}
                       >
                         <FileDown size={14} className="md:hidden text-white" />
@@ -833,6 +838,7 @@ function singularizeSub(s: string): string {
       productName={quoteProduct.name}
       designerName={quoteProduct.designer}
     />
+    <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </>
   );
 };
