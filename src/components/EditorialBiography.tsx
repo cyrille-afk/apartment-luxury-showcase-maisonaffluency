@@ -800,21 +800,33 @@ export default function EditorialBiography({
 
     const hasInlineVideo = parsed.some((block) => block.type === "video");
 
+    // Find index of first element that contains an image (SplitImageBlock or FullWidthImageBlock)
+    // by checking keys for 'split-' or 'fw-' or 'mobile-early-img'
+    const firstImageElIdx = elements.findIndex((el) => {
+      const key = String(el.key || "");
+      return key.startsWith("split-") || key.startsWith("fw-") || key === "mobile-early-img";
+    });
+
     return (
-      <CollapsibleBiographyWrapper elementCount={elements.length}>
-        <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
-          {debugMediaOrder && debugEvents.length > 0 && (
-            <div className="mb-4 rounded-md border border-border bg-muted/30 p-3">
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Debug media order</p>
-              <ol className="mt-2 space-y-1 text-xs text-muted-foreground list-decimal list-inside">
-                {debugEvents.map((event, idx) => (
-                  <li key={`${idx}-${event}`}>{event}</li>
-                ))}
-              </ol>
-            </div>
-          )}
-          {elements}
-        </div>
+      <CollapsibleBiographyWrapper
+        elementCount={elements.length}
+        collapseAfterIndex={firstImageElIdx >= 0 ? firstImageElIdx : undefined}
+      >
+        {debugMediaOrder && debugEvents.length > 0 && (
+          <div key="debug" className="mb-4 rounded-md border border-border bg-muted/30 p-3 font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Debug media order</p>
+            <ol className="mt-2 space-y-1 text-xs text-muted-foreground list-decimal list-inside">
+              {debugEvents.map((event, idx) => (
+                <li key={`${idx}-${event}`}>{event}</li>
+              ))}
+            </ol>
+          </div>
+        )}
+        {elements.map((el, i) => (
+          <div key={el.key || i} className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+            {el}
+          </div>
+        ))}
       </CollapsibleBiographyWrapper>
     );
   }
