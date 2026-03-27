@@ -2257,6 +2257,20 @@ function AlphaStrip({
       .map(c => c.dbParentName);
   }, [parentBrandsInStrip]);
 
+  // Fetch designer counts for all parent brands in this strip
+  const allParentDbNames = useMemo(() => {
+    return Object.values(parentBrandsInStrip).map(c => c.dbParentName);
+  }, [parentBrandsInStrip]);
+  const { data: designerCounts = {} } = useParentBrandDesignerCountsFiltered(allParentDbNames);
+
+  // Helper to get designer count for a parent brand
+  const getDesignerCount = useCallback((brandName: string) => {
+    const config = parentBrandConfigMap[brandName];
+    if (!config) return 0;
+    if (config.staticDesigners) return config.staticDesigners.length;
+    return designerCounts[config.dbParentName] || 0;
+  }, [designerCounts]);
+
   // We'll fetch for the first non-static parent brand that is open
   const openDbParent = useMemo(() => {
     return Object.entries(openParentDesigners).find(([name, open]) => {
