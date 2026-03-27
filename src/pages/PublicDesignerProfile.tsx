@@ -40,6 +40,38 @@ function displayName(name: string): string {
   return name;
 }
 
+function ProfileCollapsible({ children, shouldCollapse }: { children: React.ReactNode; shouldCollapse: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  if (!shouldCollapse) return <>{children}</>;
+  return (
+    <div className="relative">
+      <AnimatePresence initial={false}>
+        {expanded ? (
+          <motion.div
+            key="expanded"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {children}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+      {!expanded && (
+        <div className="mt-6">
+          <button
+            onClick={() => setExpanded(true)}
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md"
+          >
+            View full profile
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
