@@ -4,7 +4,7 @@ import { useInView } from "framer-motion";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy, MapPin, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Maximize2, Minimize2, Instagram, Copy, MapPin, Plus, Share2 } from "lucide-react";
 import PinchZoomImage from "./PinchZoomImage";
 import PinchHint from "./PinchHint";
 import GalleryHotspots from "./GalleryHotspots";
@@ -629,6 +629,25 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   </div>
                   <div className="flex items-center gap-3">
                   {originalSectionIndex === 0 && (
+                    <>
+                      {/* Share button */}
+                      <button
+                        onClick={() => {
+                          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                          const url = `${window.location.origin}/#gallery`;
+                          const text = `Interactive Gallery — Maison Affluency`;
+                          if (isMobile) {
+                            window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
+                          } else {
+                            navigator.clipboard.writeText(`${text} — ${url}`);
+                            import('sonner').then(({ toast }) => toast.success('Link copied'));
+                          }
+                        }}
+                        className="flex items-center p-1.5 rounded transition-all hover:opacity-70"
+                        aria-label="Share Interactive Gallery"
+                      >
+                        <Share2 className="h-4 w-4 text-foreground" />
+                      </button>
                       <button
                         onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
                         className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
@@ -651,6 +670,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           )}
                         </svg>
                       </button>
+                    </>
                   )}
                   </div>
                 </div>
