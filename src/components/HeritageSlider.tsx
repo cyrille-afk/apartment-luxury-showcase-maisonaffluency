@@ -61,19 +61,21 @@ const HeritageSlider = ({ slides }: HeritageSliderProps) => {
                 key={slide.id}
                 className="flex-[0_0_85%] md:flex-[0_0_60%] min-w-0 px-2 first:pl-0 last:pr-0"
               >
-                <div className="aspect-[4/3] rounded-lg overflow-hidden bg-muted/10">
+              <div className="aspect-[4/3] rounded-lg overflow-hidden bg-muted/10 relative">
                   <img
                     src={slide.image_url}
                     alt={slide.caption || "Heritage piece"}
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
+                  {slide.caption && (
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent pt-10 pb-3 px-4">
+                      <p className="font-body text-[11px] md:text-[13px] tracking-wide text-white/85 italic text-center leading-relaxed">
+                        {slide.caption}
+                      </p>
+                    </div>
+                  )}
                 </div>
-                {slide.caption && (
-                  <p className="mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center">
-                    {slide.caption}
-                  </p>
-                )}
               </div>
             ))}
           </div>
