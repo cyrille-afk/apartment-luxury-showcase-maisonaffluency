@@ -20,6 +20,89 @@ const EditorialBiography = lazy(() => import("@/components/EditorialBiography"))
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
+/** Inline heritage slide manager for each designer */
+function HeritageSlideManager({ designerId }: { designerId: string }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [slides, setSlides] = useState<{ id: string; image_url: string; caption: string | null; sort_order: number }[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from("designer_heritage_slides" as any)
+      .select("*")
+      .eq("designer_id", designerId)
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        setSlides((data as any[]) || []);
+        setLoaded(true);
+      });
+  }, [designerId]);
+
+  const handleUpload = async (urls: string[]) => {
+    for (const url of urls) {
+      const order = slides.length;
+      const { data, error } = await (supabase.from("designer_heritage_slides" as any) as any)
+        .insert({ designer_id: designerId, image_url: url, sort_order: order })
+        .select()
+        .single();
+      if (error) {
+        toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      } else if (data) {
+        setSlides((prev) => [...prev, data as any]);
+      }
+    }
+    queryClient.invalidateQueries({ queryKey: ["heritage-slides", designerId] });
+  };
+
+  const handleDelete = async (id: string) => {
+    await (supabase.from("designer_heritage_slides" as any) as any).delete().eq("id", id);
+    setSlides((prev) => prev.filter((s) => s.id !== id));
+    queryClient.invalidateQueries({ queryKey: ["heritage-slides", designerId] });
+  };
+
+  const handleCaptionChange = async (id: string, caption: string) => {
+    setSlides((prev) => prev.map((s) => (s.id === id ? { ...s, caption: caption || null } : s)));
+    await (supabase.from("designer_heritage_slides" as any) as any).update({ caption: caption || null }).eq("id", id);
+  };
+
+  if (!loaded) return null;
+
+  return (
+    <div>
+      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+        Heritage Slides <span className="normal-case font-normal">(5–7 historical photos shown as a slider between paragraphs)</span>
+      </label>
+      <div className="mt-2 space-y-2">
+        {slides.map((slide) => (
+          <div key={slide.id} className="flex items-start gap-2">
+            <img src={slide.image_url} alt="" className="w-16 h-10 object-cover rounded shrink-0 bg-muted" />
+            <Input
+              value={slide.caption || ""}
+              onChange={(e) => handleCaptionChange(slide.id, e.target.value)}
+              placeholder="Caption (optional)"
+              className="text-xs flex-1"
+            />
+            <button
+              onClick={() => handleDelete(slide.id)}
+              className="text-muted-foreground hover:text-destructive transition-colors p-1 mt-1"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ))}
+        <CloudUpload
+          folder="heritage-slides"
+          accept="image/*"
+          multiple
+          label="Upload heritage photos"
+          onUpload={handleUpload}
+        />
+      </div>
+    </div>
+  );
+}
+
 interface DesignerRow {
   id: string;
   slug: string;
