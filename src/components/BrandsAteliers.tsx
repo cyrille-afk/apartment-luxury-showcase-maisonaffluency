@@ -18,7 +18,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
-import { shareProfileOnWhatsApp } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, buildAtelierOgUrl } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -2408,8 +2408,8 @@ function AlphaStrip({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const url = `${window.location.origin}/designers/${parentConfig.profileSlug}`;
-                      navigator.clipboard.writeText(`${brand.name} — ${url}`);
+                      const url = buildAtelierOgUrl(brand.name);
+                      navigator.clipboard.writeText(`${brand.name} — Maison Affluency: ${url}`);
                       import('sonner').then(({ toast }) => toast.success('Link copied'));
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
