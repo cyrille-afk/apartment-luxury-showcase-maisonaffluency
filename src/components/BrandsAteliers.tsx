@@ -3107,8 +3107,7 @@ const BrandsAteliers = () => {
           </p>
           <button
             onClick={() => {
-              const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
-              const shareUrl = `https://${projectId}.supabase.co/functions/v1/og-image?path=${encodeURIComponent("/#brands")}&v=20260325b&t=${Date.now()}`;
+              const shareUrl = "https://www.maisonaffluency.com/brands-og.html";
               const text = `Ateliers & Partners — Maison Affluency\n${shareUrl}`;
               const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
               window.open(wa, "_blank", "noopener");
