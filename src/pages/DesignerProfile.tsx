@@ -161,7 +161,7 @@ const DesignerProfile = () => {
             >
               <div className="border-l-2 border-primary/30 pl-8 py-4">
                 <Quote className="w-6 h-6 text-primary/40 mb-3" />
-                <blockquote className="font-display text-xl md:text-2xl italic leading-relaxed text-foreground/80">
+                <blockquote className="font-display text-base md:text-2xl md:text-center italic leading-relaxed text-foreground/80">
                   "{designer.philosophy}"
                 </blockquote>
               </div>
