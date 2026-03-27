@@ -1723,6 +1723,15 @@ const partnerBrands = [
     description: "Visionary rug designer redefining the ancient craft of carpet-making through bold, contemporary designs that layer traditional motifs with avant-garde aesthetics. Each hand-knotted piece from his ateliers in Nepal, Morocco, and Thailand pushes boundaries of color, texture, and narrative.",
     instagram: "https://www.instagram.com/jankathofficial/?hl=en",
   },
+  {
+    id: "veronese",
+    name: "Véronèse",
+    category: "Lighting",
+    subcategory: "Lighting",
+    origin: "France",
+    description: "Founded in 1925 in Murano, Véronèse is a prestigious lighting manufacturer renowned for its exceptional Murano glass craftsmanship. Collaborating with leading international architects and designers, the house creates timeless luminaires that transform the world's finest interiors.",
+    instagram: "https://www.instagram.com/veronese_/",
+  },
 ];
 
 // Background image map
