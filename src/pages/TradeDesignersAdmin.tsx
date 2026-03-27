@@ -473,6 +473,9 @@ const TradeDesignersAdmin = () => {
                         </div>
                       </div>
 
+                      {/* Heritage Slides */}
+                      <HeritageSlideManager designerId={d.id} />
+
                       <div className="flex items-center gap-3 flex-wrap">
                         <div className="flex items-center gap-2">
                           <Switch
