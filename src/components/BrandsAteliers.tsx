@@ -1951,6 +1951,7 @@ function AlphaStrip({
   const stripRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [ecartDesignersOpen, setEcartDesignersOpen] = useState(false);
 
   const handleScroll = useCallback(() => {
     const el = stripRef.current;
@@ -2014,80 +2015,45 @@ function AlphaStrip({
           return (
             <React.Fragment key={brand.name}>
             {isEcart ? (
-              /* ── Ecart: parent card on its own row, sub-designers below ── */
-              <div className="flex-none w-full snap-start space-y-5">
-                {/* Parent card — full-width standalone row */}
+              /* ── Ecart: normal-sized inline card with expand toggle ── */
+              <div
+                id={`brand-${brand.id}`}
+                className="group flex-none w-[80vw] md:w-[340px] snap-start border border-primary/40 ring-1 ring-primary/20 rounded-lg hover:border-primary/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden h-[280px] md:h-[300px]"
+              >
+                {bg && (
+                  <img
+                    src={bg}
+                    alt={brand.name}
+                    loading="lazy"
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover object-[center_top]"
+                  />
+                )}
+                <div className="absolute inset-0 bg-black/35 group-hover:bg-black/25 transition-all duration-300" />
+                {/* Atelier logo badge */}
+                <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
+                  <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
+                </div>
+                {/* Name overlay at bottom */}
+                <div className="absolute inset-x-0 bottom-0 z-[5] px-5 pt-10 pb-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                  <p className="font-display text-lg md:text-xl text-white tracking-wide drop-shadow-sm">{brand.name}</p>
+                  <p className="font-body text-xs text-white/60 mt-0.5">{brand.origin}</p>
+                </div>
+                {/* Toggle sub-designers button */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); setEcartDesignersOpen(!ecartDesignersOpen); }}
+                  className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
+                >
+                  <Layers className="h-3 w-3" />
+                  <span className="font-body text-[9px] uppercase tracking-[0.12em]">{ecartSubDesigners.length} designers</span>
+                  <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${ecartDesignersOpen ? "rotate-180" : ""}`} />
+                </button>
+                {/* Click to profile */}
                 <Link
                   to="/designers/ecart?from=ateliers"
-                  id={`brand-${brand.id}`}
-                  className="group block w-full max-w-[480px] rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all bg-background"
-                >
-                  <div className="aspect-[16/9] bg-muted/20 overflow-hidden relative">
-                    {bg ? (
-                      <img src={bg} alt={brand.name} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
-                        <span className="font-display text-3xl text-primary/40">{brand.name.charAt(0)}</span>
-                      </div>
-                    )}
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
-                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-                        View Profile
-                      </span>
-                    </div>
-                    {/* Atelier logo badge */}
-                    <div className="absolute top-3 left-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
-                      <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
-                    </div>
-                    {/* Name overlay at bottom */}
-                    <div className="absolute inset-x-0 bottom-0 px-5 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                      <p className="font-display text-lg md:text-xl text-white tracking-wide drop-shadow-sm">{brand.name}</p>
-                      <p className="font-body text-xs text-white/60 mt-0.5">{brand.origin}</p>
-                    </div>
-                  </div>
-                </Link>
-
-                {/* Sub-designer cards — grid below parent */}
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3">
-                  {ecartSubDesigners.map((d) => (
-                    <Link
-                      key={d.slug}
-                      to={`/designers/${d.slug}?from=ateliers`}
-                      className="group/sub rounded-xl overflow-hidden border border-border hover:border-foreground/30 hover:shadow-xl transition-all bg-background"
-                    >
-                      <div className="aspect-[3/4] relative bg-muted/20 overflow-hidden">
-                        {d.image ? (
-                          <img
-                            src={d.image}
-                            alt={d.name}
-                            className="w-full h-full object-cover transition-all duration-700 group-hover/sub:scale-110 group-hover/sub:brightness-[0.65]"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover/sub:bg-muted/20 transition-colors">
-                            <span className="font-display text-3xl text-muted-foreground/20">{d.name.charAt(0)}</span>
-                          </div>
-                        )}
-                        {/* Name overlay at bottom */}
-                        <div className="absolute inset-x-0 bottom-0 px-3 pt-8 pb-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                          <p className="font-display text-[11px] md:text-xs text-white tracking-wide leading-tight drop-shadow-sm">
-                            {d.name}
-                          </p>
-                        </div>
-                        {/* Hover overlay */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 px-4">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View Profile</span>
-                        </div>
-                        {/* Founder badge */}
-                        <span className="absolute top-2 left-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                          <Layers className="h-2 w-2" />
-                          Ecart
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                  className="absolute inset-0 z-[1]"
+                  aria-label={`View ${brand.name} profile`}
+                />
               </div>
             ) : (
             <div
@@ -2249,6 +2215,74 @@ function AlphaStrip({
             />
           ))}
         </div>
+      )}
+
+      {/* Ecart sub-designers collapsible — below the scroll strip */}
+      {brands.some(b => b.name === "Ecart Paris") && (
+        <AnimatePresence>
+          {ecartDesignersOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="pt-4 pb-2">
+                <div className="flex items-center gap-2 mb-3 px-1">
+                  <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="font-body text-[11px] text-muted-foreground uppercase tracking-[0.12em]">
+                    Ecart Designers
+                  </span>
+                  <div className="flex-1 h-px bg-border/30" />
+                  <button
+                    onClick={() => setEcartDesignersOpen(false)}
+                    className="p-1 rounded-full hover:bg-muted/50 transition-colors"
+                    aria-label="Close designers"
+                  >
+                    <X className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 md:gap-3">
+                  {ecartSubDesigners.map((d) => (
+                    <Link
+                      key={d.slug}
+                      to={`/designers/${d.slug}?from=ateliers`}
+                      className="group/sub rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
+                    >
+                      <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
+                        {d.image ? (
+                          <img
+                            src={d.image}
+                            alt={d.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted/5">
+                            <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
+                        </div>
+                        <span className="absolute top-2 left-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                          <Layers className="h-2 w-2" />
+                          Ecart
+                        </span>
+                      </div>
+                      <div className="px-2 py-1.5 bg-background">
+                        <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1 text-center">
+                          {d.name}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
     </motion.div>
   );
