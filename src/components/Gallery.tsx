@@ -251,6 +251,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
+  const [suppressHotspots, setSuppressHotspots] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<3 | 4>(3);
 
@@ -447,7 +448,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           setCurrentItemIndex(itemIndex);
           setExternalSourceId(sourceId);
           setSourceItemKey(null);
+          setSuppressHotspots(true);
           setLightboxOpen(true);
+          setTimeout(() => setSuppressHotspots(false), 1500);
         }
         sessionStorage.removeItem('openGalleryIndex');
         sessionStorage.removeItem('gallerySourceId');
@@ -1006,7 +1009,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                      <PinchZoomImage key={currentItemIndex} src={currentSectionItems[currentItemIndex]?.image} alt={currentSectionItems[currentItemIndex]?.title} className={`object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-300 ${isExpanded ? 'max-h-[88vh] max-w-[95vw]' : 'w-full max-w-full max-h-[65vh]'}`} loading="eager" decoding="sync" fetchPriority="high" onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }} />
                      <GalleryHotspots
                          imageIdentifier={currentSectionItems[currentItemIndex]?.title || ""}
-                         visible={!imageZoomed}
+                         visible={!imageZoomed && !suppressHotspots}
                          onCloseLightbox={closeLightbox}
                          filterDesigner={filterDesigner}
                          {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
