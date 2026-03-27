@@ -451,6 +451,10 @@ const TradeAtelierProfile = () => {
                 </motion.div>
               </div>
 
+              {heritageSlides.length > 0 && (
+                <HeritageSlider slides={heritageSlides} />
+              )}
+
               {/* Remaining biography with exactly two staggered images */}
               {remainingBio && (
                 <motion.div
