@@ -84,7 +84,7 @@ interface PendingHotspot {
   y_percent: number;
 }
 
-const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote, onViewProduct }: GalleryHotspotsProps) => {
+const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote, onViewProduct, filterDesigner }: GalleryHotspotsProps) => {
   const isMobile = useIsMobile();
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
