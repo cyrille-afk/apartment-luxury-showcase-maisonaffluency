@@ -2034,11 +2034,10 @@ function AlphaStrip({
                 <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
                   <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
                 </div>
-                {/* Name overlay at bottom */}
-                <div className="absolute inset-x-0 bottom-0 z-[5] px-5 pt-10 pb-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none">
-                  <p className="font-display text-lg md:text-xl text-white tracking-wide drop-shadow-sm">{brand.name}</p>
-                  <p className="font-body text-xs text-white/60 mt-0.5">{brand.origin}</p>
-                </div>
+                {/* Origin label under badge */}
+                <p className="absolute top-[calc(0.75rem+3.5rem+0.25rem)] md:top-[calc(0.75rem+4rem+0.25rem)] left-3 z-10 font-body text-[9px] md:text-[10px] text-white/70 uppercase tracking-widest">
+                  {brand.origin}
+                </p>
                 {/* Toggle sub-designers button */}
                 <button
                   onClick={(e) => { e.stopPropagation(); setEcartDesignersOpen(!ecartDesignersOpen); }}
