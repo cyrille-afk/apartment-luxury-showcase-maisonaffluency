@@ -432,6 +432,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   }, [currentItemIndex, lightboxOpen, currentSectionItems]);
 
   const [externalSourceId, setExternalSourceId] = useState<string | null>(null);
+  const [filterDesigner, setFilterDesigner] = useState<string | null>(null);
 
   // Check for gallery index from sessionStorage (set by BrandsAteliers)
   useEffect(() => {
