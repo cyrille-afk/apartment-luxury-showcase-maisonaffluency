@@ -2245,27 +2245,21 @@ function AlphaStrip({
     return result;
   }, [brands]);
 
-  // Auto-expand parent brand designers when navigated back with ?expand= param
+  // Auto-expand parent brand designers when deep-linked with ?expand= param
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const expandFounder = params.get("expand");
-    if (!expandFounder) return;
+    if (!initialExpandBrand) return;
     const config = Object.values(parentBrandsInStrip).find(
-      c => c.dbParentName === expandFounder || c.profileSlug === expandFounder
+      c => c.dbParentName === initialExpandBrand || c.profileSlug === initialExpandBrand
     );
     if (config) {
       setOpenParentDesigners(prev => ({ ...prev, [config.brandName]: true }));
-      params.delete("expand");
-      const newUrl = params.toString()
-        ? `${window.location.pathname}?${params}${window.location.hash}`
-        : `${window.location.pathname}${window.location.hash}`;
-      window.history.replaceState(null, "", newUrl);
+      onExpandConsumed?.();
       // Scroll this strip into view after a short delay for layout
       setTimeout(() => {
         stripRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 300);
     }
-  }, [parentBrandsInStrip]);
+  }, [initialExpandBrand, parentBrandsInStrip]);
 
   // Fetch sub-designers from DB for parent brands that don't have static data
   const dbParentNames = useMemo(() => {
