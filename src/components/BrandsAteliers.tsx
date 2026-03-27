@@ -2013,6 +2013,37 @@ function AlphaStrip({
           const isEcart = brand.name === "Ecart Paris";
           return (
             <React.Fragment key={brand.name}>
+            {isEcart ? (
+              /* ── Ecart parent card — Trade-style portrait card ── */
+              <button
+                onClick={() => onOpenPicks(brand.name)}
+                id={`brand-${brand.id}`}
+                className="group text-left flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all bg-background"
+              >
+                <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                  {bg ? (
+                    <img src={bg} alt={brand.name} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                      <span className="font-display text-3xl text-primary/40">{brand.name.charAt(0)}</span>
+                    </div>
+                  )}
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+                    <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">
+                      {brand.description}
+                    </p>
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+                      Curators' Picks
+                    </span>
+                  </div>
+                  {/* Atelier logo badge */}
+                  <div className="absolute top-3 left-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
+                    <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
+                  </div>
+                </div>
+              </button>
+            ) : (
             <div
               id={`brand-${brand.id}`}
               role="button"
@@ -2038,12 +2069,6 @@ function AlphaStrip({
                 />
               )}
               <div className={`absolute inset-0 transition-all duration-300 ${hasBg ? "bg-black/35 group-hover:bg-black/25" : "bg-card/50 group-hover:bg-card/80"}`} />
-              {/* Atelier logo badge — matches Trade DesignerCard for multi-designer brands */}
-              {isEcart && (
-                <div className="absolute top-3 left-3 z-20 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
-                  <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">Ecart Paris</span>
-                </div>
-              )}
               {brand.photoCredit && (
                 <p className="absolute bottom-2 right-2 z-10 text-[9px] text-white/40 font-body tracking-wider">
                   Photo: {brand.photoCredit}
@@ -2165,6 +2190,7 @@ function AlphaStrip({
                 />
               </div>
             </div>
+            )}
 
             {/* Ecart sub-designer cards — Trade-style with badges */}
             {isEcart && ecartSubDesigners.map((d) => (
