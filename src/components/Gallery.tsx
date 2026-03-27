@@ -627,7 +627,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       <button
                         onClick={() => {
                           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                          const url = `${window.location.origin}/#gallery`;
+                          const url = `${window.location.origin}/gallery-og.html`;
                           const text = `Interactive Gallery — Maison Affluency`;
                           if (isMobile) {
                             window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
