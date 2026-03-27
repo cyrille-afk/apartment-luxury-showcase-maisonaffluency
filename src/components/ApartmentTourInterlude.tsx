@@ -184,7 +184,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               </div>
               <button
                 onClick={handleShare}
-                className="flex flex-col items-center gap-1 text-xs font-body text-muted-foreground hover:text-primary transition-colors mt-1"
+                className="flex flex-col items-center gap-1 text-xs font-body text-foreground hover:text-primary transition-colors mt-1"
                 aria-label="Share apartment tour"
               >
                 <Share2 className="w-5 h-5" />
@@ -216,7 +216,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               </h2>
               <button
                 onClick={handleShare}
-                className="inline-flex items-center gap-1 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1 text-[11px] font-body text-foreground hover:text-primary transition-colors"
                 aria-label="Share apartment tour"
               >
                 <Share2 className="w-3.5 h-3.5 md:w-4 md:h-4" />

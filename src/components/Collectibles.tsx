@@ -695,7 +695,7 @@ const Collectibles = () => {
                     const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
                     window.open(wa, "_blank", "noopener");
                   }}
-                  className="inline-flex items-center gap-1.5 text-[11px] font-body text-muted-foreground hover:text-primary transition-colors"
+                  className="inline-flex items-center gap-1.5 text-[11px] font-body text-foreground hover:text-primary transition-colors"
                   aria-label="Share Collectible Design section"
                 >
                   <Share2 className="w-3.5 h-3.5" />
