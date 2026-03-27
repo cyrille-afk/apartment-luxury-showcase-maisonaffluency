@@ -1,0 +1,1 @@
+UPDATE designers SET philosophy = 'We''re in the business of making future relics — things that feel like they''ve always belonged, even when they''re brand new.' WHERE slug = 'christopher-boots';
