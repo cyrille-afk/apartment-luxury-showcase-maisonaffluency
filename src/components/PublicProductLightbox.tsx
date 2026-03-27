@@ -71,6 +71,7 @@ function useLocalFavorites() {
 const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelated, inline }: Props) => {
   const isMobile = useIsMobile();
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const { isFavorited, toggleFavorite } = useLocalFavorites();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
@@ -392,7 +393,12 @@ const PublicProductLightbox = ({ product, allPicks = [], onClose, onSelectRelate
     </AnimatePresence>
   );
 
-  return inline ? content : createPortal(content, document.body);
+  return (
+    <>
+      {inline ? content : createPortal(content, document.body)}
+      <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
+    </>
+  );
 };
 
 export default PublicProductLightbox;

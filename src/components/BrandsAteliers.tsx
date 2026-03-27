@@ -3803,6 +3803,7 @@ const BrandsAteliers = () => {
         productName={picksDesignerName ? picksDesigner?.curatorPicks[picksIndex]?.title : undefined}
         designerName={picksDesignerName || undefined}
       />
+      <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </section>
   );
 };

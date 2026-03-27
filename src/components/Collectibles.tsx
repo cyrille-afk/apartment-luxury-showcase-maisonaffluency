@@ -1414,6 +1414,7 @@ const Collectibles = () => {
       productName={curatorPicksDesigner?.curatorPicks[curatorPickIndex]?.title}
       designerName={curatorPicksDesigner?.name}
     />
+    <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </>
   );
 };
