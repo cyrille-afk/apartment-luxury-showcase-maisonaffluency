@@ -17,6 +17,8 @@ function displayName(name: string): string {
 
 const DesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const fromSection = searchParams.get("from"); // "ateliers" | "designers" | null
   const { data: designer, isLoading } = useDesigner(slug);
   const { data: picks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
