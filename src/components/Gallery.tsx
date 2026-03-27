@@ -48,6 +48,8 @@ const homeOffice3Image = g("home-office-3_t39msw");
 const officeBooksCornerImage = g("AffluencySG_143_1_f9iihg");
 const galleryCategories = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "Decorative Object"] as const;
 
+const slugify = (s: string) => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
 const galleryExperiences = [{
   experience: "A Sociable Environment",
   subtitle: "Bespoke sofa, hand-knotted artisan rug, sculptural lighting and collectible furniture",
@@ -580,8 +582,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   
 
   const shareLightboxImage = useCallback(() => {
-    const url = `https://www.maisonaffluency.com/gallery-item-${currentFlatIndex}.html`;
     const title = currentSectionItems[currentItemIndex]?.title || '';
+    const titleSlug = slugify(title);
+    const designerSlug = filterDesigner ? slugify(filterDesigner) : '';
+    const urlPath = designerSlug
+      ? `gallery/${designerSlug}/${titleSlug}`
+      : `gallery/${titleSlug}`;
+    const url = `https://www.maisonaffluency.com/${urlPath}`;
     const parts = ['Maison Affluency', 'Interactive Gallery'];
     if (filterDesigner) parts.push(filterDesigner);
     if (title) parts.push(title);
@@ -693,8 +700,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                      onClick={() => {
                        let flatIdx = 0;
                        for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
+                       const firstItem = galleryExperiences[originalSectionIndex].items[0];
+                       const titleSlug = slugify(firstItem?.title || '');
                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                       const url = `https://www.maisonaffluency.com/gallery-item-${flatIdx}.html`;
+                       const url = `https://www.maisonaffluency.com/gallery/${titleSlug}`;
                        const text = `${section.experience} — Maison Affluency`;
                        if (isMobile) {
                          window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
@@ -785,7 +794,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          onClick={() => {
                             let flatIdx = 0;
                             for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
-                            const url = `https://www.maisonaffluency.com/gallery-item-${flatIdx}.html`;
+                            const firstItem = galleryExperiences[originalSectionIndex].items[0];
+                            const titleSlug = slugify(firstItem?.title || '');
+                            const url = `https://www.maisonaffluency.com/gallery/${titleSlug}`;
                             const text = `${section.experience} — Maison Affluency`;
                             window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
                          }}
