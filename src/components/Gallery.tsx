@@ -942,8 +942,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       ))}
                     </div>
                   </div>
-                  {/* Close + Share buttons — bottom of image area */}
-                  <div className="absolute bottom-2 left-3 z-50 flex items-center gap-2">
+                  {/* Close button — mobile bottom-left */}
+                  <div className="absolute bottom-2 left-3 z-50">
                     <button
                       onClick={closeLightbox}
                       className="p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
@@ -951,6 +951,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     >
                       <X className="h-4 w-4 text-white" />
                     </button>
+                  </div>
+                  {/* Share button — mobile top-left */}
+                  <div className="absolute top-2 left-3 z-50">
                     <button
                       onClick={shareLightboxImage}
                       className="p-1.5 bg-black/60 backdrop-blur-sm rounded-full"
@@ -1008,8 +1011,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          filterDesigner={filterDesigner}
                          {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                        />
-                      {/* Close + Share buttons — desktop: near image */}
-                      <div className={`hidden md:flex absolute z-50 gap-2 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}>
+                      {/* Share button — desktop top-right */}
+                      <div className="hidden md:flex absolute top-3 right-3 z-50">
                         <button
                           onClick={shareLightboxImage}
                           className="p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20"
@@ -1017,6 +1020,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         >
                           <Share2 className="h-5 w-5" />
                         </button>
+                      </div>
+                      {/* Close button — desktop near image */}
+                      <div className={`hidden md:flex absolute z-50 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}>
                         <button
                           onClick={closeLightbox}
                           className="p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20"
