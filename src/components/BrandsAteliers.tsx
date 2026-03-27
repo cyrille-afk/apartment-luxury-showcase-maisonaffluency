@@ -2043,7 +2043,7 @@ function AlphaStrip({
                   href="https://instagram.com/ecart.paris"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 hover:bg-white/25 transition-all"
+                  className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity"
                   onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
                   aria-label="Ecart Paris on Instagram"
                 >
