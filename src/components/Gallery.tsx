@@ -440,6 +440,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     const checkForGalleryIndex = () => {
       const storedIndex = sessionStorage.getItem('openGalleryIndex');
       const sourceId = sessionStorage.getItem('gallerySourceId');
+      const storedDesigner = sessionStorage.getItem('galleryFilterDesigner');
       if (storedIndex !== null) {
         const index = parseInt(storedIndex, 10);
         if (!isNaN(index) && index >= 0 && index < allItems.length) {
@@ -448,12 +449,12 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           setCurrentItemIndex(itemIndex);
           setExternalSourceId(sourceId);
           setSourceItemKey(null);
-          setSuppressHotspots(true);
+          setFilterDesigner(storedDesigner || null);
           setLightboxOpen(true);
-          setTimeout(() => setSuppressHotspots(false), 1500);
         }
         sessionStorage.removeItem('openGalleryIndex');
         sessionStorage.removeItem('gallerySourceId');
+        sessionStorage.removeItem('galleryFilterDesigner');
       }
     };
 
