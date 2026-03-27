@@ -108,7 +108,7 @@ const DesignerProfile = () => {
         </section>
 
         {/* Content */}
-        <div className="max-w-5xl mx-auto px-6 md:px-16 py-16 space-y-20">
+        <div className="max-w-5xl mx-auto px-6 md:px-16 pt-8 md:pt-10 pb-16 space-y-20">
           {/* Biography */}
           {designer.biography && (
             <motion.section
