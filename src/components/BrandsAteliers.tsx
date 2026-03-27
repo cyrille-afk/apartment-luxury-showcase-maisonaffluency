@@ -2015,10 +2015,10 @@ function AlphaStrip({
             <React.Fragment key={brand.name}>
             {isEcart ? (
               /* ── Ecart parent card — Trade-style portrait card ── */
-              <Link
-                to={`/designers/jean-michel-frank`}
+              <button
+                onClick={() => onOpenPicks(brand.name)}
                 id={`brand-${brand.id}`}
-                className="group flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all bg-background"
+                className="group text-left flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all bg-background"
               >
                 <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
                   {bg ? (
@@ -2042,7 +2042,7 @@ function AlphaStrip({
                     <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
                   </div>
                 </div>
-              </Link>
+              </button>
             ) : (
             <div
               id={`brand-${brand.id}`}
