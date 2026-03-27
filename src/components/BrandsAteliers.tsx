@@ -1,6 +1,8 @@
 import React from "react";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { useParentBrandDesignerCountsFiltered } from "@/hooks/useParentBrandDesignerCounts";
+import { useAuthGate } from "@/hooks/useAuthGate";
+import AuthGateDialog from "@/components/AuthGateDialog";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import CuratorPicksLegend from "./CuratorPicksLegend";
@@ -2717,6 +2719,7 @@ const BrandsAteliers = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(null);
@@ -3531,25 +3534,27 @@ const BrandsAteliers = () => {
                           <button
                             className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
                             aria-label="Download PDF"
-                            onClick={async (e) => {
+                            onClick={(e) => {
                               e.stopPropagation();
-                              const pick = picksDesigner.curatorPicks[picksIndex] as any;
-                              const url = pick.pdfUrl as string;
-                              const filename = pick.pdfFilename || `Maison_Affluency-${(pick.title as string).replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
-                              try {
-                                const res = await fetch(url);
-                                const blob = await res.blob();
-                                const blobUrl = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = blobUrl;
-                                a.download = filename;
-                                document.body.appendChild(a);
-                                a.click();
-                                a.remove();
-                                URL.revokeObjectURL(blobUrl);
-                              } catch {
-                                window.open(url, '_blank');
-                              }
+                              requireAuth(async () => {
+                                const pick = picksDesigner.curatorPicks[picksIndex] as any;
+                                const url = pick.pdfUrl as string;
+                                const filename = pick.pdfFilename || `Maison_Affluency-${(pick.title as string).replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
+                                try {
+                                  const res = await fetch(url);
+                                  const blob = await res.blob();
+                                  const blobUrl = URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = blobUrl;
+                                  a.download = filename;
+                                  document.body.appendChild(a);
+                                  a.click();
+                                  a.remove();
+                                  URL.revokeObjectURL(blobUrl);
+                                } catch {
+                                  window.open(url, '_blank');
+                                }
+                              }, "download this spec sheet");
                             }}
                           >
                             <FileDown size={14} className="md:hidden text-white" />
@@ -3564,22 +3569,24 @@ const BrandsAteliers = () => {
                                 key={pdf.label}
                                 className="flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
                                 aria-label={`Download PDF ${pdf.label}`}
-                                onClick={async (e) => {
+                                onClick={(e) => {
                                   e.stopPropagation();
-                                  try {
-                                    const res = await fetch(pdf.url);
-                                    const blob = await res.blob();
-                                    const blobUrl = URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = blobUrl;
-                                    a.download = pdf.filename || `${pdf.label}.pdf`;
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    a.remove();
-                                    URL.revokeObjectURL(blobUrl);
-                                  } catch {
-                                    window.open(pdf.url, '_blank');
-                                  }
+                                  requireAuth(async () => {
+                                    try {
+                                      const res = await fetch(pdf.url);
+                                      const blob = await res.blob();
+                                      const blobUrl = URL.createObjectURL(blob);
+                                      const a = document.createElement('a');
+                                      a.href = blobUrl;
+                                      a.download = pdf.filename || `${pdf.label}.pdf`;
+                                      document.body.appendChild(a);
+                                      a.click();
+                                      a.remove();
+                                      URL.revokeObjectURL(blobUrl);
+                                    } catch {
+                                      window.open(pdf.url, '_blank');
+                                    }
+                                  }, "download this spec sheet");
                                 }}
                               >
                                 <FileDown size={14} className="md:hidden text-white" />
@@ -3800,6 +3807,7 @@ const BrandsAteliers = () => {
         productName={picksDesignerName ? picksDesigner?.curatorPicks[picksIndex]?.title : undefined}
         designerName={picksDesignerName || undefined}
       />
+      <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </section>
   );
 };

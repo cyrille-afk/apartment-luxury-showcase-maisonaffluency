@@ -232,7 +232,21 @@ const TradeLogin = () => {
               Apply here
             </Link>
           </p>
+          <div className="relative flex items-center gap-4 py-1">
+            <div className="flex-1 border-t border-border" />
+            <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">or</span>
+            <div className="flex-1 border-t border-border" />
+          </div>
           <p className="font-body text-sm md:text-xs text-muted-foreground">
+            Not a design professional?{" "}
+            <Link to="/trade/register?type=public" className="text-foreground underline underline-offset-4 hover:opacity-70 font-medium">
+              Create a free account
+            </Link>
+          </p>
+          <p className="font-body text-[10px] text-muted-foreground/60 leading-relaxed max-w-xs mx-auto">
+            Browse curators' picks, save favourites, download spec sheets, and request quotes.
+          </p>
+          <p className="font-body text-sm md:text-xs text-muted-foreground mt-2">
             <Link to="/" className="hover:text-foreground transition-colors">
               ← Back to Maison Affluency
             </Link>
