@@ -89,11 +89,30 @@ export default function TradeSpecSheet() {
               <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider truncate">{brand}</p>
               <h1 className="font-display text-sm text-foreground truncate">{product} — Spec Sheet</h1>
             </div>
-            <Button size="sm" className="gap-1.5 bg-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/90 text-white shrink-0" asChild>
-              <a href={pdfUrl} download={`${brand} — ${product} Spec Sheet.pdf`}>
-                <FileDown className="w-3.5 h-3.5" />
-                Download
-              </a>
+            <Button
+              size="sm"
+              className="gap-1.5 bg-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/90 text-white shrink-0"
+              onClick={() => {
+                requireAuth(async () => {
+                  try {
+                    const res = await fetch(pdfUrl!);
+                    const blob = await res.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = `${brand} — ${product} Spec Sheet.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(blobUrl);
+                  } catch {
+                    window.open(pdfUrl!, '_blank');
+                  }
+                }, "download this spec sheet");
+              }}
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              Download
             </Button>
           </div>
 
