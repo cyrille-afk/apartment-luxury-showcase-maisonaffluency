@@ -2424,7 +2424,7 @@ function AlphaStrip({
                     onClick={(e) => {
                       e.stopPropagation();
                       const url = buildParentBrandOgUrl(brand.name);
-                      navigator.clipboard.writeText(`${brand.name} — Maison Affluency: ${url}`);
+                      navigator.clipboard.writeText(`${buildParentShareText(brand.name)}: ${url}`);
                       import('sonner').then(({ toast }) => toast.success('Link copied'));
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
@@ -2438,7 +2438,7 @@ function AlphaStrip({
                     onClick={(e) => {
                       e.stopPropagation();
                       const url = buildParentBrandOgUrl(brand.name);
-                      const msg = `${brand.name} — Maison Affluency: ${url}`;
+                      const msg = `${buildParentShareText(brand.name)}: ${url}`;
                       const wa = `https://wa.me/?text=${encodeURIComponent(msg)}`;
                       window.location.href = wa;
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
