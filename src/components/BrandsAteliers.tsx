@@ -2290,10 +2290,13 @@ function AlphaStrip({
      const count = getDesignerCount(brandName);
      if (!config || count === 0) return `${brandName} — Maison Affluency`;
     const highlight = config.highlightDesigner || config.staticDesigners?.[0]?.name;
-     const suffix = highlight
-       ? `${count} Designers incl. ${highlight}`
-       : `${count} Designers`;
-     return `${brandName} — ${suffix} | Maison Affluency`;
+    if (count === 1 && highlight) {
+      return `${brandName} · ${highlight} — Maison Affluency`;
+    }
+    if (highlight) {
+      return `${brandName} · ${count} Designers incl. ${highlight} — Maison Affluency`;
+    }
+    return `${brandName} · ${count} Designers — Maison Affluency`;
    }, [getDesignerCount]);
 
   // We'll fetch for the first non-static parent brand that is open
