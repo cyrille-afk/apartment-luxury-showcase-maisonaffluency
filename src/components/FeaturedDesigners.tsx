@@ -2151,6 +2151,7 @@ const FeaturedDesigners = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [designerGridCols, setDesignerGridCols] = useState<3 | 5>(3);
@@ -3139,22 +3140,24 @@ const FeaturedDesigners = () => {
                       {/* PDF download button */}
                       {(curatorPicksDesigner.curatorPicks[curatorPickIndex] as any)?.pdfUrl && !isZoomed && (
                         <button
-                          onClick={async () => {
-                            const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
-                            try {
-                              const res = await fetch(pick.pdfUrl);
-                              const blob = await res.blob();
-                              const url = URL.createObjectURL(blob);
-                              const a = document.createElement('a');
-                              a.href = url;
-                              a.download = pick.pdfFilename || `${pick.title?.replace(/\s+/g, '_') || 'specification'}.pdf`;
-                              document.body.appendChild(a);
-                              a.click();
-                              document.body.removeChild(a);
-                              URL.revokeObjectURL(url);
-                            } catch {
-                              window.open(pick.pdfUrl, '_blank');
-                            }
+                          onClick={() => {
+                            requireAuth(async () => {
+                              const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex] as any;
+                              try {
+                                const res = await fetch(pick.pdfUrl);
+                                const blob = await res.blob();
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = pick.pdfFilename || `${pick.title?.replace(/\s+/g, '_') || 'specification'}.pdf`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                              } catch {
+                                window.open(pick.pdfUrl, '_blank');
+                              }
+                            }, "download this spec sheet");
                           }}
                           className="absolute bottom-2 right-2 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300 z-10"
                           aria-label="Download PDF specification"
@@ -3409,6 +3412,7 @@ const FeaturedDesigners = () => {
         productName={curatorPicksDesigner?.curatorPicks[curatorPickIndex]?.title}
         designerName={curatorPicksDesigner?.name}
       />
+      <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </section>
   );
 };
