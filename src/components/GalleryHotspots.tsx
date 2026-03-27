@@ -169,7 +169,19 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     fetchHotspots();
   }, [imageIdentifier]);
 
-  // Toggle edit mode with Ctrl+Shift+H
+  // Filter hotspots by designer when opened from a designer card
+  const displayHotspots = useMemo(() => {
+    if (!filterDesigner || !hotspots.length) return hotspots;
+    const filterLower = filterDesigner.toLowerCase();
+    const filtered = hotspots.filter(h => {
+      if (!h.designer_name) return false;
+      const dLower = h.designer_name.toLowerCase();
+      return dLower.includes(filterLower) || filterLower.includes(dLower);
+    });
+    return filtered.length > 0 ? filtered : hotspots;
+  }, [hotspots, filterDesigner]);
+
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === "H") {
