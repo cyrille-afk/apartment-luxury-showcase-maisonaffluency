@@ -121,6 +121,7 @@ const TradeAtelierProfile = () => {
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
+  const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
 
   // Extract image URLs used in biography to deprioritize matching picks
   const bioImageUrls = useMemo(() => {
