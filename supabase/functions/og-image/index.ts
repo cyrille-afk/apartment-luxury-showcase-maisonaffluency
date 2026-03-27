@@ -290,6 +290,72 @@ async function getOgData(path: string): Promise<OgData> {
     }
   }
 
+  // ── Dynamic: Gallery item deep-link /gallery?item=N&designer=... ──
+  if (clean === "/gallery" || clean === "/#gallery") {
+    const urlObj = new URL(req.url);
+    const itemParam = urlObj.searchParams.get("item");
+    const designerParam = urlObj.searchParams.get("designer");
+
+    // Gallery flat index → metadata
+    const galleryItems: { title: string; section: string; cloudinaryId: string }[] = [
+      /* A Sociable Environment (0-3) */
+      { title: "An Inviting Lounge Area", section: "A Sociable Environment", cloudinaryId: "bespoke-sofa_gxidtx" },
+      { title: "A Sophisticated Living Room", section: "A Sociable Environment", cloudinaryId: "living-room-hero_zxfcxl" },
+      { title: "Panoramic Cityscape Views", section: "A Sociable Environment", cloudinaryId: "dining-room_ey0bu5" },
+      { title: "A Sun Lit Reading Corner", section: "A Sociable Environment", cloudinaryId: "IMG_2402_y3atdm" },
+      /* An Intimate Setting (4-7) */
+      { title: "A Dreamy Tuscan Landscape", section: "An Intimate Setting", cloudinaryId: "intimate-dining_ux4pee" },
+      { title: "A Highly Customised Dining Room", section: "An Intimate Setting", cloudinaryId: "intimate-table-detail_aqxvvm" },
+      { title: "A Relaxed Setting", section: "An Intimate Setting", cloudinaryId: "intimate-lounge_tf4sm1" },
+      { title: "A Colourful Nook", section: "An Intimate Setting", cloudinaryId: "IMG_2133_wtxd62" },
+      /* A Personal Sanctuary (8-11) */
+      { title: "A Sophisticated Boudoir", section: "A Personal Sanctuary", cloudinaryId: "boudoir_ll5spn" },
+      { title: "A Jewelry Box Like Setting", section: "A Personal Sanctuary", cloudinaryId: "70CFDC93-4CFC-4A13-804C-EE956BC3A159_aa1meq" },
+      { title: "A Serene Decor", section: "A Personal Sanctuary", cloudinaryId: "bedroom-second_cyfmdj" },
+      { title: "A Design Treasure Trove", section: "A Personal Sanctuary", cloudinaryId: "art-master-bronze_hf6bad" },
+      /* A Calming and Dreamy Environment (12-15) */
+      { title: "A Masterful Suite", section: "A Calming and Dreamy Environment", cloudinaryId: "master-suite_y6jaix" },
+      { title: "Design Tableau", section: "A Calming and Dreamy Environment", cloudinaryId: "bedroom-third_ol56sx" },
+      { title: "A Venitian Cocoon", section: "A Calming and Dreamy Environment", cloudinaryId: "calming-2" },
+      { title: "Unique By Design Vignette", section: "A Calming and Dreamy Environment", cloudinaryId: "bedroom-alt_yk0j0d" },
+      /* A Small Room with Massive Personality (16-19) */
+      { title: "An Artistic Statement", section: "A Small Room with Massive Personality", cloudinaryId: "small-room-bedroom_mp8mdd" },
+      { title: "Compact Elegance", section: "A Small Room with Massive Personality", cloudinaryId: "small-room-personality_wvxz6y" },
+      { title: "Yellow Crystalline", section: "A Small Room with Massive Personality", cloudinaryId: "small-room-vase_s3nz5o" },
+      { title: "Golden Hour", section: "A Small Room with Massive Personality", cloudinaryId: "small-room-chair_aobzyb" },
+      /* Home Office with a View (20-23) */
+      { title: "A Workspace of Distinction", section: "Home Office with a View", cloudinaryId: "home-office-desk_g0ywv2" },
+      { title: "Refined Details", section: "Home Office with a View", cloudinaryId: "home-office-desk-2_gb1nlb" },
+      { title: "Light & Focus", section: "Home Office with a View", cloudinaryId: "home-office-3_t39msw" },
+      { title: "Design & Fine Art Books Corner", section: "Home Office with a View", cloudinaryId: "AffluencySG_143_1_f9iihg" },
+      /* The Details Make the Design (24-27) */
+      { title: "Curated Vignette", section: "The Details Make the Design", cloudinaryId: "details-section_u6rwbu" },
+      { title: "The Details Make the Design", section: "The Details Make the Design", cloudinaryId: "details-console_hk6uxt" },
+      { title: "Light & Texture", section: "The Details Make the Design", cloudinaryId: "details-lamp_clzcrk" },
+      { title: "Craftsmanship at Every Corner", section: "The Details Make the Design", cloudinaryId: "AffluencySG_204_1_qbbpqb" },
+    ];
+
+    if (itemParam !== null) {
+      const idx = parseInt(itemParam, 10);
+      const item = galleryItems[idx];
+      if (item) {
+        const parts = ["Maison Affluency", "Interactive Gallery"];
+        if (designerParam) parts.push(designerParam);
+        parts.push(item.title);
+        const ogTitle = parts.join(" · ");
+        const desc = `${item.title} — ${item.section}. Explore the interactive gallery at Maison Affluency.`;
+        const img = `https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/${item.cloudinaryId}.jpg`;
+
+        return {
+          title: ogTitle,
+          description: desc,
+          image: img,
+          url: `${SITE_URL}/#gallery`,
+        };
+      }
+    }
+  }
+
   // ── Fallback: homepage ─────────────────────────────────────────
   return {
     title: "Maison Affluency | Luxury Furniture & Collectible Design",
