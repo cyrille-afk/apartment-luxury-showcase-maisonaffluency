@@ -468,6 +468,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       index: number;
       sourceId?: string;
       returnUrl?: string;
+      filterDesigner?: string;
     }>) => {
       const index = e.detail.index;
       if (index >= 0 && index < allItems.length) {
@@ -476,6 +477,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         setCurrentItemIndex(itemIndex);
         setExternalSourceId(e.detail.sourceId || null);
         setReturnUrl(e.detail.returnUrl || null);
+        setFilterDesigner(e.detail.filterDesigner || null);
         setSourceItemKey(null);
         setLightboxOpen(true);
       }
