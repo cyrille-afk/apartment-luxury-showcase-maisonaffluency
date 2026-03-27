@@ -292,9 +292,8 @@ async function getOgData(path: string, reqUrl?: URL): Promise<OgData> {
 
   // ── Dynamic: Gallery item deep-link /gallery?item=N&designer=... ──
   if (clean === "/gallery" || clean === "/#gallery") {
-    const urlObj = new URL(req.url);
-    const itemParam = urlObj.searchParams.get("item");
-    const designerParam = urlObj.searchParams.get("designer");
+    const itemParam = reqUrl?.searchParams.get("item") ?? null;
+    const designerParam = reqUrl?.searchParams.get("designer") ?? null;
 
     // Gallery flat index → metadata
     const galleryItems: { title: string; section: string; cloudinaryId: string }[] = [
