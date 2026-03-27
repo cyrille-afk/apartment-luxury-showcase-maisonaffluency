@@ -1250,23 +1250,25 @@ const Collectibles = () => {
                     {/* PDF download button */}
                     {curatorPicksDesigner.curatorPicks[curatorPickIndex]?.pdfUrl && !isZoomed && (
                       <button
-                        onClick={async (e) => {
+                        onClick={(e) => {
                           e.stopPropagation();
-                          const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
-                          try {
-                            const res = await fetch(pick.pdfUrl!);
-                            const blob = await res.blob();
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = pick.pdfFilename || `${pick.title?.replace(/\s+/g, '_') || 'specification'}.pdf`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            URL.revokeObjectURL(url);
-                          } catch {
-                            window.open(pick.pdfUrl!, '_blank');
-                          }
+                          requireAuth(async () => {
+                            const pick = curatorPicksDesigner.curatorPicks[curatorPickIndex];
+                            try {
+                              const res = await fetch(pick.pdfUrl!);
+                              const blob = await res.blob();
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = pick.pdfFilename || `${pick.title?.replace(/\s+/g, '_') || 'specification'}.pdf`;
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                              URL.revokeObjectURL(url);
+                            } catch {
+                              window.open(pick.pdfUrl!, '_blank');
+                            }
+                          }, "download this spec sheet");
                         }}
                         className="absolute bottom-2 right-2 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 rounded-full bg-[#d32f2f]/80 text-white hover:bg-[#d32f2f] backdrop-blur-sm transition-all duration-300 z-10"
                         aria-label="Download PDF specification"
