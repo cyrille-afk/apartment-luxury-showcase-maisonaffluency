@@ -21,6 +21,7 @@ export default function TradeSpecSheet() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
   const pageTitle = product
     ? `${brand} — ${product} Spec Sheet`
