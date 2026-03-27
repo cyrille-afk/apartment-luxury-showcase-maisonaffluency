@@ -487,13 +487,53 @@ function CollapsibleBiographyWrapper({
   children,
   elementCount,
   allowCollapse = true,
+  collapseAfterIndex,
 }: {
   children: React.ReactNode;
   elementCount: number;
   allowCollapse?: boolean;
+  /** If set, collapse after this element index (0-based). Otherwise uses max-height. */
+  collapseAfterIndex?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
   if (!allowCollapse || elementCount <= 3) return <>{children}</>;
+
+  const childArray = Array.isArray(children) ? children : [children];
+
+  // Index-based split: show elements up to collapseAfterIndex, hide rest
+  if (collapseAfterIndex !== undefined && collapseAfterIndex < childArray.length - 1) {
+    const visible = childArray.slice(0, collapseAfterIndex + 1);
+    const hidden = childArray.slice(collapseAfterIndex + 1);
+
+    return (
+      <div>
+        {visible}
+        {!expanded && (
+          <div className="mt-5">
+            <button
+              onClick={() => setExpanded(true)}
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md"
+            >
+              View full profile
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {hidden}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
@@ -760,21 +800,40 @@ export default function EditorialBiography({
 
     const hasInlineVideo = parsed.some((block) => block.type === "video");
 
-    return (
-      <CollapsibleBiographyWrapper elementCount={elements.length}>
-        <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
-          {debugMediaOrder && debugEvents.length > 0 && (
-            <div className="mb-4 rounded-md border border-border bg-muted/30 p-3">
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Debug media order</p>
-              <ol className="mt-2 space-y-1 text-xs text-muted-foreground list-decimal list-inside">
-                {debugEvents.map((event, idx) => (
-                  <li key={`${idx}-${event}`}>{event}</li>
-                ))}
-              </ol>
-            </div>
-          )}
-          {elements}
+    // Build final children array for the collapsible wrapper
+    const wrapperChildren: JSX.Element[] = [];
+    if (debugMediaOrder && debugEvents.length > 0) {
+      wrapperChildren.push(
+        <div key="debug" className="mb-4 rounded-md border border-border bg-muted/30 p-3 font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Debug media order</p>
+          <ol className="mt-2 space-y-1 text-xs text-muted-foreground list-decimal list-inside">
+            {debugEvents.map((event, idx) => (
+              <li key={`${idx}-${event}`}>{event}</li>
+            ))}
+          </ol>
         </div>
+      );
+    }
+    for (const el of elements) {
+      wrapperChildren.push(
+        <div key={el.key || wrapperChildren.length} className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
+          {el}
+        </div>
+      );
+    }
+
+    // Find the wrapper-child index of the first image block (split or full-width)
+    const firstImageWrapperIdx = wrapperChildren.findIndex((el) => {
+      const key = String(el.key || "");
+      return key.startsWith("split-") || key.startsWith("fw-") || key === "mobile-early-img";
+    });
+
+    return (
+      <CollapsibleBiographyWrapper
+        elementCount={wrapperChildren.length}
+        collapseAfterIndex={firstImageWrapperIdx >= 0 ? firstImageWrapperIdx : undefined}
+      >
+        {wrapperChildren}
       </CollapsibleBiographyWrapper>
     );
   }
