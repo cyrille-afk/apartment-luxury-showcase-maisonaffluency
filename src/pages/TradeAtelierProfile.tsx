@@ -1,4 +1,6 @@
 import { useMemo, useEffect, useState, useCallback } from "react";
+import HeritageSlider from "@/components/HeritageSlider";
+import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
@@ -119,6 +121,7 @@ const TradeAtelierProfile = () => {
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
   const rawPicks = groupedPicks.length > 0 ? groupedPicks : ownPicks;
+  const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
 
   // Extract image URLs used in biography to deprioritize matching picks
   const bioImageUrls = useMemo(() => {
@@ -448,6 +451,10 @@ const TradeAtelierProfile = () => {
                 </motion.div>
               </div>
 
+              {heritageSlides.length > 0 && (
+                <HeritageSlider slides={heritageSlides} />
+              )}
+
               {/* Remaining biography with exactly two staggered images */}
               {remainingBio && (
                 <motion.div
@@ -519,6 +526,9 @@ const TradeAtelierProfile = () => {
                     pickImages={picks.slice(0, 3).map((p) => `${p.image_url} | ${p.title}`)}
                     designerName={designer.name}
                   />
+                  {heritageSlides.length > 0 && (
+                    <HeritageSlider slides={heritageSlides} />
+                  )}
                 </motion.div>
               )}
             </div>
