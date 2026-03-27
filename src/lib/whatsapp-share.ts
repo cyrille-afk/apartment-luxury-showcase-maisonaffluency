@@ -1,9 +1,8 @@
 /**
  * WhatsApp share utility with deep-link support and mobile compatibility.
  *
- * For pages that need rich OG previews (trade/program, journal, etc.) we route
- * through the `og-image` edge function which serves static HTML with the correct
- * OG tags and then redirects the browser to the real SPA page.
+ * Uses static bridge HTML files with pre-baked OG tags for reliable
+ * social previews on WhatsApp, iMessage, Slack, etc.
  */
 
 const SITE_URL = "https://www.maisonaffluency.com";
@@ -14,6 +13,23 @@ const OG_SHARE_VERSION = "20260322a";
 
 type ShareSection = "designer" | "collectible" | "atelier";
 
+/** Slugify a name for URL paths — matches the Gallery.tsx slugify */
+export const slugify = (s: string) =>
+  s.toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[éèêë]/g, 'e')
+    .replace(/[àâä]/g, 'a')
+    .replace(/[ùûü]/g, 'u')
+    .replace(/[ôö]/g, 'o')
+    .replace(/[îï]/g, 'i')
+    .replace(/ç/g, 'c')
+    .replace(/ñ/g, 'n')
+    .replace(/ø/g, 'o')
+    .replace(/å/g, 'a')
+    .replace(/ř/g, 'r')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+
 /**
  * Build an OG-friendly URL for a specific SPA route.
  * Prefer static bridge files on the main domain for reliable OG previews.
@@ -23,7 +39,20 @@ export const buildOgUrl = (path: string) =>
   `${OG_FUNCTION_BASE}?path=${encodeURIComponent(path)}&v=${OG_SHARE_VERSION}&t=${Date.now()}`;
 
 /**
+ * Build a static bridge file URL for a designer profile.
+ */
+export const buildDesignerOgUrl = (name: string) =>
+  `${SITE_URL}/designers/${slugify(name)}-og.html`;
+
+/**
+ * Build a static bridge file URL for an atelier/brand.
+ */
+export const buildAtelierOgUrl = (name: string) =>
+  `${SITE_URL}/ateliers/${slugify(name)}-og.html`;
+
+/**
  * Build a deep-link URL for a specific designer/brand profile.
+ * @deprecated Use buildDesignerOgUrl or buildAtelierOgUrl for social sharing
  */
 export const buildProfileUrl = (section: ShareSection, id: string) =>
   `${SITE_URL}/#${section}/${id}`;
@@ -44,8 +73,6 @@ export const shareOnWhatsApp = (message: string) => {
 
 /**
  * Share a specific SPA page on WhatsApp with proper OG preview support.
- * The shared URL goes through the og-image edge function so crawlers
- * see the correct title, description, and image.
  */
 type SharePageOptions = {
   directUrlPath?: string;
@@ -69,15 +96,17 @@ export const sharePageOnWhatsApp = (
 };
 
 /**
- * Convenience: share a designer/brand profile on WhatsApp with a deep link.
+ * Share a designer or atelier profile on WhatsApp using static OG bridge files.
  */
 export const shareProfileOnWhatsApp = (
   section: ShareSection,
-  id: string,
+  _id: string,
   name: string,
   subtitle?: string
 ) => {
-  const url = buildProfileUrl(section, id);
+  const url = section === "atelier"
+    ? buildAtelierOgUrl(name)
+    : buildDesignerOgUrl(name);
   const message = subtitle
     ? `Check out ${name} – ${subtitle} at Maison Affluency: ${url}`
     : `Check out ${name} at Maison Affluency: ${url}`;
