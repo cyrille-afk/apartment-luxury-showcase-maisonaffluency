@@ -1,0 +1,1 @@
+UPDATE designers SET specialty = 'Sculptural Design' WHERE slug = 'christopher-boots';
