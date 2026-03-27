@@ -2819,6 +2819,16 @@ const BrandsAteliers = () => {
     return () => window.removeEventListener("deeplink-open-profile", handler);
   }, []);
 
+  const handleExpandConsumed = useCallback(() => {
+    setExpandBrand(null);
+    const params = new URLSearchParams(window.location.search);
+    params.delete("expand");
+    const newUrl = params.toString()
+      ? `${window.location.pathname}?${params}${window.location.hash}`
+      : `${window.location.pathname}${window.location.hash}`;
+    window.history.replaceState(null, "", newUrl);
+  }, []);
+
   const isMobile = useIsMobile();
   // Curators' Picks lightbox state
   const [picksDesignerName, setPicksDesignerName] = useState<string | null>(null);
