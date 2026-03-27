@@ -7,7 +7,7 @@ import { GALLERY } from "@/constants/galleryIndex";
 import { useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
-import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, Gem, Maximize2, Minimize2, Share2, FileDown, MessageSquareQuote, Scale } from "lucide-react";
+import { Search, X, Instagram, ExternalLink, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight, Gem, Maximize2, Minimize2, Share2, FileDown, MessageSquareQuote, Scale, Layers } from "lucide-react";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PinchZoomImage from "./PinchZoomImage";
 import { trackCTA } from "@/lib/analytics";
@@ -2038,6 +2038,12 @@ function AlphaStrip({
                 />
               )}
               <div className={`absolute inset-0 transition-all duration-300 ${hasBg ? "bg-black/35 group-hover:bg-black/25" : "bg-card/50 group-hover:bg-card/80"}`} />
+              {/* Atelier logo badge — matches Trade DesignerCard for multi-designer brands */}
+              {isEcart && (
+                <div className="absolute top-3 left-3 z-20 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
+                  <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">Ecart Paris</span>
+                </div>
+              )}
               {brand.photoCredit && (
                 <p className="absolute bottom-2 right-2 z-10 text-[9px] text-white/40 font-body tracking-wider">
                   Photo: {brand.photoCredit}
@@ -2160,35 +2166,41 @@ function AlphaStrip({
               </div>
             </div>
 
-            {/* Ecart sub-designer cards inline in the strip */}
+            {/* Ecart sub-designer cards — Trade-style with badges */}
             {isEcart && ecartSubDesigners.map((d) => (
               <Link
                 key={d.slug}
                 to={`/designers/${d.slug}`}
-                className="group/sub flex-none w-[55vw] md:w-[200px] snap-start rounded-lg overflow-hidden border border-border/40 hover:border-foreground/30 hover:shadow-lg transition-all"
+                className="group/sub flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-border hover:border-foreground/30 hover:shadow-xl transition-all bg-background"
               >
-                <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
+                <div className="aspect-[3/4] relative bg-muted/20 overflow-hidden">
                   {d.image ? (
                     <img
                       src={d.image}
                       alt={d.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110"
+                      className="w-full h-full object-cover transition-all duration-700 group-hover/sub:scale-110 group-hover/sub:brightness-[0.65]"
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted/5">
-                      <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
+                    <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover/sub:bg-muted/20 transition-colors">
+                      <span className="font-display text-3xl text-muted-foreground/20">{d.name.charAt(0)}</span>
                     </div>
                   )}
-                  <div className="absolute inset-x-0 bottom-0 px-3 pt-8 pb-2.5 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                    <p className="font-display text-[11px] md:text-xs text-white tracking-wide leading-tight drop-shadow-sm">
+                  {/* Name overlay at bottom */}
+                  <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                    <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
                       {d.name}
                     </p>
-                    <span className="font-body text-[8px] text-white/60 uppercase tracking-[0.1em]">Ecart</span>
                   </div>
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View Profile</span>
+                  {/* Hover overlay with specialty + CTA */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 px-4">
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View Profile</span>
                   </div>
+                  {/* Founder badge — matches Trade DesignerCard */}
+                  <span className="absolute top-2.5 left-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Layers className="h-2.5 w-2.5" />
+                    Ecart Paris
+                  </span>
                 </div>
               </Link>
             ))}
