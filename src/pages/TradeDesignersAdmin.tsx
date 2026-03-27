@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, Fragment } from "react";
+import { useState, useMemo, useCallback, Fragment, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { lazy, Suspense } from "react";
+import CloudUpload from "@/components/trade/CloudUpload";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
