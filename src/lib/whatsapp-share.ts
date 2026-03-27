@@ -9,7 +9,7 @@ const SITE_URL = "https://www.maisonaffluency.com";
 
 const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "dcrauiygaezoduwdjmsm";
 const OG_FUNCTION_BASE = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/og-image`;
-const OG_SHARE_VERSION = "20260327b";
+const OG_SHARE_VERSION = "20260327c";
 
 type ShareSection = "designer" | "collectible" | "atelier";
 
@@ -50,18 +50,28 @@ const appendOgVersion = (url: string) => {
 
 export const withOgCacheBust = (url: string) => appendOgVersion(url);
 
+const DESIGNER_OG_BRIDGE_OVERRIDES: Record<string, string> = {
+  "jean-michel-frank": "/designers/jean-michel-frank-og-v2.html",
+  "eileen-gray": "/designers/eileen-gray-og-v2.html",
+};
+
 /**
  * Build a static bridge file URL for a designer profile.
  */
 export const buildDesignerOgUrl = (name: string) =>
-  withOgCacheBust(`${SITE_URL}/designers/${slugify(name)}-og.html`);
+  withOgCacheBust(
+    `${SITE_URL}${
+      DESIGNER_OG_BRIDGE_OVERRIDES[slugify(name)] ??
+      `/designers/${slugify(name)}-og.html`
+    }`
+  );
 
 /**
  * Build a static bridge file URL for an atelier/brand.
  * Supports per-brand versioned bridge files when cache busting is needed.
  */
 const ATELIER_OG_BRIDGE_OVERRIDES: Record<string, string> = {
-  "ecart-paris": "/ateliers/ecart-paris-og-v2.html",
+  "ecart-paris": "/ateliers/ecart-paris-og-v3.html",
 };
 
 export const buildAtelierOgUrl = (name: string) => {
