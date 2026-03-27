@@ -564,6 +564,32 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       }, 100);
     }
   };
+
+  // Compute flat gallery index for current lightbox image
+  const currentFlatIndex = useMemo(() => {
+    let flat = 0;
+    for (let s = 0; s < currentSectionIndex; s++) {
+      flat += galleryExperiences[s].items.length;
+    }
+    return flat + currentItemIndex;
+  }, [currentSectionIndex, currentItemIndex]);
+
+  const ogSlugs = ['gallery-sociable-og', 'gallery-intimate-og', 'gallery-sanctuary-og', 'gallery-calming-og', 'gallery-small-room-og', 'gallery-home-office-og', 'gallery-details-og'];
+
+  const shareLightboxImage = useCallback(() => {
+    const slug = ogSlugs[currentSectionIndex] || 'gallery-og';
+    const url = `${window.location.origin}/${slug}.html?item=${currentFlatIndex}`;
+    const title = currentSectionItems[currentItemIndex]?.title || '';
+    const text = `${title} — Maison Affluency`;
+    const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobileDevice) {
+      window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
+    } else {
+      navigator.clipboard.writeText(`${text} — ${url}`);
+      import('sonner').then(({ toast }) => toast.success('Link copied'));
+    }
+  }, [currentSectionIndex, currentFlatIndex, currentItemIndex, currentSectionItems]);
+
   const goToPrevious = () => {
     setCurrentItemIndex(prev => prev === 0 ? currentSectionItems.length - 1 : prev - 1);
   };
