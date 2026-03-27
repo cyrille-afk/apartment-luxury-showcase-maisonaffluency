@@ -2014,197 +2014,82 @@ function AlphaStrip({
           return (
             <React.Fragment key={brand.name}>
             {isEcart ? (
-              /* ── Ecart parent card — Trade-style portrait card, navigates to profile ── */
-              <Link
-                to="/designers/ecart?from=ateliers"
-                id={`brand-${brand.id}`}
-                className="group flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all bg-background"
-              >
-                <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
-                  {bg ? (
-                    <img src={bg} alt={brand.name} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
-                      <span className="font-display text-3xl text-primary/40">{brand.name.charAt(0)}</span>
-                    </div>
-                  )}
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
-                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-                      View Profile
-                    </span>
-                  </div>
-                  {/* Atelier logo badge */}
-                  <div className="absolute top-3 left-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
-                    <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
-                  </div>
-                </div>
-              </Link>
-            ) : (
-            <div
-              id={`brand-${brand.id}`}
-              role="button"
-              tabIndex={0}
-              aria-expanded={expandedCard === brand.name}
-              aria-label={`${brand.name} — ${brand.origin}`}
-              onClick={() => setExpandedCard(expandedCard === brand.name ? null : brand.name)}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedCard(expandedCard === brand.name ? null : brand.name); } }}
-              className={`group flex-none w-[80vw] md:w-[340px] snap-start border border-border/40 rounded-lg hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden p-5 md:p-6 ${expandedCard === brand.name ? "min-h-[280px] md:min-h-[300px]" : "h-[280px] md:h-[300px]"}`}
-            >
-              {/* Lazy-loaded background image */}
-              {bg && (
-                <img
-                  src={bg}
-                  alt={`${brand.name} background`}
-                  loading="lazy"
-                  aria-hidden="true"
-                  className="absolute inset-0 w-full h-full pointer-events-none select-none"
-                  style={{
-                    objectFit: "cover",
-                    objectPosition: brand.name === "Jindrich Halabala" ? "center center" : brand.name === "Eric Schmitt Studio" ? "center 30%" : brand.name === "Dagmar London" ? "center 45%" : brand.name === "Robicara" ? "center 45%" : brand.name === "Okha Design Studio" ? "center 30%" : brand.name === "Sé Collections" ? "center center" : brand.name === "Andrée Putman" ? "center 60%" : "center top",
-                  }}
-                />
-              )}
-              <div className={`absolute inset-0 transition-all duration-300 ${hasBg ? "bg-black/35 group-hover:bg-black/25" : "bg-card/50 group-hover:bg-card/80"}`} />
-              {brand.photoCredit && (
-                <p className="absolute bottom-2 right-2 z-10 text-[9px] text-white/40 font-body tracking-wider">
-                  Photo: {brand.photoCredit}
-                </p>
-              )}
-              <div className={`relative z-10 pb-14 ${expandedCard === brand.name ? "" : "max-h-[calc(100%-3.5rem)] overflow-hidden"}`}>
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-start gap-2">
-                    {brand.instagram && (
-                      <a
-                        href={brand.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1 -m-1 touch-manipulation flex-shrink-0 mt-0.5 group/insta"
-                        onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
-                        aria-label={`${brand.name} on Instagram`}
-                      >
-                        <svg className="h-6 w-6 md:h-7 md:w-7 transition-transform duration-300 group-hover/insta:scale-110" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient-strip)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <defs>
-                            <linearGradient id="instagram-gradient-strip" x1="0%" y1="100%" x2="100%" y2="0%">
-                              <stop offset="0%" stopColor="#f09433" />
-                              <stop offset="25%" stopColor="#e6683c" />
-                              <stop offset="50%" stopColor="#dc2743" />
-                              <stop offset="75%" stopColor="#cc2366" />
-                              <stop offset="100%" stopColor="#bc1888" />
-                            </linearGradient>
-                          </defs>
-                          <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                        </svg>
-                      </a>
+              /* ── Ecart: parent card on its own row, sub-designers below ── */
+              <div className="flex-none w-full snap-start space-y-5">
+                {/* Parent card — full-width standalone row */}
+                <Link
+                  to="/designers/ecart?from=ateliers"
+                  id={`brand-${brand.id}`}
+                  className="group block w-full max-w-[480px] rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all bg-background"
+                >
+                  <div className="aspect-[16/9] bg-muted/20 overflow-hidden relative">
+                    {bg ? (
+                      <img src={bg} alt={brand.name} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="lazy" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                        <span className="font-display text-3xl text-primary/40">{brand.name.charAt(0)}</span>
+                      </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className={`font-serif text-lg md:text-xl transition-colors duration-300 mb-0.5 ${hasBg ? "text-white" : "text-foreground group-hover:text-primary"}`}>
-                        {brand.name}
-                      </h3>
-                      {brandDesignerNames[brand.name] && (
-                        <p className={`text-[9px] md:text-[10px] font-body italic tracking-wide mb-0.5 transition-colors duration-300 ${hasBg ? "text-white/60" : "text-muted-foreground/70"}`}>
-                          {brandDesignerNames[brand.name].join(" · ")}
-                        </p>
-                      )}
-                      <span className={`text-[10px] md:text-xs uppercase tracking-wider transition-colors duration-300 ${hasBg ? "text-white/80" : "text-muted-foreground"}`}>
-                        {brand.origin}
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+                        View Profile
                       </span>
                     </div>
+                    {/* Atelier logo badge */}
+                    <div className="absolute top-3 left-3 w-16 h-16 md:w-20 md:h-20 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
+                      <span className="font-display text-[7px] md:text-[9px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
+                    </div>
+                    {/* Name overlay at bottom */}
+                    <div className="absolute inset-x-0 bottom-0 px-5 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                      <p className="font-display text-lg md:text-xl text-white tracking-wide drop-shadow-sm">{brand.name}</p>
+                      <p className="font-body text-xs text-white/60 mt-0.5">{brand.origin}</p>
+                    </div>
                   </div>
+                </Link>
+
+                {/* Sub-designer cards — grid below parent */}
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3">
+                  {ecartSubDesigners.map((d) => (
+                    <Link
+                      key={d.slug}
+                      to={`/designers/${d.slug}?from=ateliers`}
+                      className="group/sub rounded-xl overflow-hidden border border-border hover:border-foreground/30 hover:shadow-xl transition-all bg-background"
+                    >
+                      <div className="aspect-[3/4] relative bg-muted/20 overflow-hidden">
+                        {d.image ? (
+                          <img
+                            src={d.image}
+                            alt={d.name}
+                            className="w-full h-full object-cover transition-all duration-700 group-hover/sub:scale-110 group-hover/sub:brightness-[0.65]"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover/sub:bg-muted/20 transition-colors">
+                            <span className="font-display text-3xl text-muted-foreground/20">{d.name.charAt(0)}</span>
+                          </div>
+                        )}
+                        {/* Name overlay at bottom */}
+                        <div className="absolute inset-x-0 bottom-0 px-3 pt-8 pb-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                          <p className="font-display text-[11px] md:text-xs text-white tracking-wide leading-tight drop-shadow-sm">
+                            {d.name}
+                          </p>
+                        </div>
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 px-4">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View Profile</span>
+                        </div>
+                        {/* Founder badge */}
+                        <span className="absolute top-2 left-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                          <Layers className="h-2 w-2" />
+                          Ecart
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-
-                <p className={`text-xs md:text-sm font-body leading-relaxed mb-3 transition-colors duration-300 pl-8 md:pl-0 ${expandedCard === brand.name ? "" : "line-clamp-3"} ${hasBg ? "text-white/90" : "text-muted-foreground"}`}>
-                  {brand.description}
-                </p>
-
-                {expandedCard === brand.name && brand.featuredItems.some(item => item.featured) && (
-                <div className="space-y-1 mb-3 pl-8 md:pl-0">
-                  <span className="text-[10px] md:text-xs uppercase tracking-wider block transition-colors duration-300 text-[hsl(var(--gold))]"><em>On View</em></span>
-                  <ul className="space-y-0.5">
-                    {brand.featuredItems.map((item, itemIndex) => (
-                      <li key={itemIndex}>
-                        {item.featured && item.galleryIndex !== undefined ? (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); scrollToGallery(item.galleryIndex!, brand.name); }}
-                            className={`text-xs md:text-sm font-body hover:text-primary transition-colors duration-300 flex items-center gap-1 group/link touch-manipulation text-left ${hasBg ? "text-white" : "text-foreground"}`}
-                          >
-                            <span className={`underline underline-offset-2 ${hasBg ? "decoration-white/40 group-hover/link:decoration-white" : "decoration-primary/40 group-hover/link:decoration-primary"}`}>
-                              {item.featured}
-                            </span>
-                            <svg className={`h-3 w-3 opacity-50 group-hover/link:opacity-100 transition-opacity flex-shrink-0 ${hasBg ? "text-white/80" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                          </button>
-                        ) : item.featured ? (
-                          <span className={`text-xs md:text-sm font-body transition-colors duration-300 ${hasBg ? "text-white/90" : "text-foreground"}`}>
-                            {item.featured}
-                          </span>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                )}
-
-
-
-
               </div>
-
-               {/* Bottom bar: Expand (left on mobile, right on desktop) | Curators' Picks (center) | Share (right on mobile, left of expand on desktop) */}
-              <div className={`absolute bottom-0 left-0 right-0 h-16 z-[5] pointer-events-none ${hasBg ? 'bg-gradient-to-t from-black/50 via-black/30 to-transparent' : 'bg-gradient-to-t from-background/60 via-background/30 to-transparent'}`} />
-              <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
-                {/* Expand/collapse — left on mobile, right on desktop */}
-                <div className={`md:order-3 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
-                  <div className={`rounded-full p-1.5 backdrop-blur-sm ${hasBg ? "bg-white/20 text-white" : "bg-foreground/10 text-foreground"}`}>
-                    <ChevronDown className="h-4 w-4" />
-                  </div>
-                </div>
-
-                {/* Curators' Picks — center */}
-                <button
-                  onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
-                  className="md:order-1 flex items-center gap-2 md:gap-1.5 text-sm md:text-xs tracking-wider font-body group/picks touch-manipulation transition-all duration-300 text-white whitespace-nowrap"
-                >
-                  <Gem className="h-4 w-4 md:h-3 md:w-3 flex-shrink-0 fill-accent text-accent" />
-                  <span className="group-hover/picks:underline underline-offset-2">
-                    Curators' Picks
-                  </span>
-                </button>
-
-                {/* WhatsApp share — right on mobile, center-ish on desktop */}
-                <WhatsAppShareButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const featuredText = brand.featuredItems.find(i => i.featured)?.featured;
-                    shareProfileOnWhatsApp("atelier", brand.id, brand.name, featuredText);
-                    trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
-                  }}
-                  label={`Share ${brand.name} on WhatsApp`}
-                  size="sm"
-                  variant={hasBg ? "glass" : "solid"}
-                  className="md:order-2"
-                />
-              </div>
-            </div>
-            )}
-
-            {/* Ecart sub-designer cards — Trade-style with badges */}
-            {isEcart && ecartSubDesigners.map((d) => (
-              <Link
-                key={d.slug}
-                to={`/designers/${d.slug}?from=ateliers`}
-                className="group/sub flex-none w-[55vw] md:w-[200px] snap-start rounded-xl overflow-hidden border border-border hover:border-foreground/30 hover:shadow-xl transition-all bg-background"
-              >
-                <div className="aspect-[3/4] relative bg-muted/20 overflow-hidden">
-                  {d.image ? (
-                    <img
-                      src={d.image}
-                      alt={d.name}
-                      className="w-full h-full object-cover transition-all duration-700 group-hover/sub:scale-110 group-hover/sub:brightness-[0.65]"
-                      loading="lazy"
-                    />
-                  ) : (
+            ) : (
                     <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover/sub:bg-muted/20 transition-colors">
                       <span className="font-display text-3xl text-muted-foreground/20">{d.name.charAt(0)}</span>
                     </div>
