@@ -18,7 +18,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
-import { shareProfileOnWhatsApp, buildAtelierOgUrl } from "@/lib/whatsapp-share";
+import { shareProfileOnWhatsApp, buildAtelierOgUrl, withOgCacheBust } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -3107,7 +3107,7 @@ const BrandsAteliers = () => {
           </p>
           <button
             onClick={() => {
-              const shareUrl = "https://www.maisonaffluency.com/brands-og.html";
+              const shareUrl = withOgCacheBust("https://www.maisonaffluency.com/brands-og.html");
               const text = `Ateliers & Partners — Maison Affluency\n${shareUrl}`;
               const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
               window.open(wa, "_blank", "noopener");
