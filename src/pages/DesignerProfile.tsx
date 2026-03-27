@@ -55,11 +55,19 @@ const DesignerProfile = () => {
           className="fixed top-6 left-6 z-50"
         >
           <Link
-            to={designer?.founder ? "/#brands" : "/#designers"}
+            to={(() => {
+              if (fromSection === "ateliers") return "/#brands";
+              if (fromSection === "designers") return "/#designers";
+              return designer?.founder ? "/#brands" : "/#designers";
+            })()}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors bg-background/80 backdrop-blur-sm px-3 py-2 rounded-sm"
           >
             <ArrowLeft className="w-4 h-4" />
-            {designer?.founder ? "Ateliers" : "Designers"}
+            {(() => {
+              if (fromSection === "ateliers") return "Ateliers";
+              if (fromSection === "designers") return "Designers";
+              return designer?.founder ? "Ateliers" : "Designers";
+            })()}
           </Link>
         </motion.div>
 
