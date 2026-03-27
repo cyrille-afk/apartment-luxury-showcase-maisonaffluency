@@ -394,9 +394,13 @@ Deno.serve(async (req) => {
   }/functions/v1/og-image`;
   const shareVersion = url.searchParams.get("v");
   const sharePath = encodeURI(path);
-  const shareUrl = `${functionBase}?path=${sharePath}${
-    shareVersion ? `&v=${encodeURIComponent(shareVersion)}` : ""
-  }`;
+  // Forward item & designer params for gallery deep-links
+  const itemP = url.searchParams.get("item");
+  const designerP = url.searchParams.get("designer");
+  let shareUrl = `${functionBase}?path=${sharePath}`;
+  if (itemP) shareUrl += `&item=${encodeURIComponent(itemP)}`;
+  if (designerP) shareUrl += `&designer=${encodeURIComponent(designerP)}`;
+  if (shareVersion) shareUrl += `&v=${encodeURIComponent(shareVersion)}`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
