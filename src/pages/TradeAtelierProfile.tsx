@@ -1,4 +1,6 @@
 import { useMemo, useEffect, useState, useCallback } from "react";
+import HeritageSlider from "@/components/HeritageSlider";
+import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
