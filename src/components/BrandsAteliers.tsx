@@ -2078,7 +2078,7 @@ function ParentBrandSubDesignersGrid({ config, onClose }: { config: ParentBrandC
   );
 }
 
-
+function AlphaStrip({
   letter,
   brands,
   isInView,
