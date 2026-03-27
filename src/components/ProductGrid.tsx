@@ -173,6 +173,7 @@ const _sharedProductList = buildProductList(atelierOnlyPicks);
 
 const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
