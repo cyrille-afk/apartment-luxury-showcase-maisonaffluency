@@ -2839,7 +2839,7 @@ const FeaturedDesigners = () => {
                           return thumb ? (
                             <div
                               key={i}
-                              className="w-[72px] h-[72px] md:w-20 md:h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md cursor-pointer hover:scale-105 transition-transform"
+                              className="relative w-[72px] h-[72px] md:w-20 md:h-20 rounded overflow-hidden border-2 border-white backdrop-blur-sm shadow-md cursor-pointer hover:scale-105 transition-transform"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -2956,6 +2956,9 @@ const FeaturedDesigners = () => {
                               }}
                             >
                               <img src={thumb.image} alt="" className="w-full h-full object-cover" loading="lazy" />
+                              <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
+                                <Plus className="w-1.5 h-1.5 text-white" />
+                              </span>
                             </div>
                           ) : (
                             <div key={i} className="w-14 h-14 rounded bg-muted/40 border-2 border-white backdrop-blur-sm shadow-md" />
