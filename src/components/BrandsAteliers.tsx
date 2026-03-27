@@ -2106,11 +2106,12 @@ function AlphaStrip({
         {brands.map((brand) => {
           const bg = brandBgMap[brand.name];
           const hasBg = !!bg;
-          const isEcart = brand.name === "Ecart Paris";
+          const parentConfig = parentBrandConfigMap[brand.name];
+          const isParentBrand = !!parentConfig;
           return (
             <React.Fragment key={brand.name}>
-            {isEcart ? (
-              /* ── Ecart: normal-sized inline card with expand toggle ── */
+            {isParentBrand ? (
+              /* ── Parent Brand: inline card with expand toggle ── */
               <div
                 id={`brand-${brand.id}`}
                 className="group flex-none w-[80vw] md:w-[340px] snap-start border border-primary/40 ring-1 ring-primary/20 rounded-lg hover:border-primary/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden h-[280px] md:h-[300px]"
@@ -2135,46 +2136,44 @@ function AlphaStrip({
                 </p>
                 {/* Instagram icon top-right */}
                 <a
-                  href="https://instagram.com/ecart.paris"
+                  href={parentConfig.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity"
                   onClick={(e) => { e.stopPropagation(); trackCTA.instagram("Ateliers", brand.name); }}
-                  aria-label="Ecart Paris on Instagram"
+                  aria-label={`${brand.name} on Instagram`}
                 >
                   <Instagram className="h-6 w-6 text-white" />
                 </a>
                 {/* Toggle sub-designers button */}
                 <button
-                  onClick={(e) => { e.stopPropagation(); setEcartDesignersOpen(!ecartDesignersOpen); }}
+                  onClick={(e) => { e.stopPropagation(); toggleParentDesigners(brand.name); }}
                   className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
                 >
                   <Layers className="h-3 w-3" />
-                  <span className="font-body text-[9px] uppercase tracking-[0.12em]">{ecartSubDesigners.length} designers</span>
-                  <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${ecartDesignersOpen ? "rotate-180" : ""}`} />
+                  <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers</span>
+                  <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${openParentDesigners[brand.name] ? "rotate-180" : ""}`} />
                 </button>
                 {/* Share button — bottom left */}
                 <div className="absolute bottom-3 left-3 z-10">
-                  {/* Desktop: Share icon */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const url = `${window.location.origin}/designers/ecart`;
+                      const url = `${window.location.origin}/designers/${parentConfig.profileSlug}`;
                       navigator.clipboard.writeText(`${brand.name} — ${url}`);
                       import('sonner').then(({ toast }) => toast.success('Link copied'));
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
                     className="hidden md:flex items-center gap-1.5 text-white hover:opacity-70 transition-opacity"
-                    aria-label="Share Ecart Paris"
+                    aria-label={`Share ${brand.name}`}
                   >
                     <Share2 className="h-3 w-3" />
                     <span className="font-body text-[9px] uppercase tracking-[0.12em]">Share</span>
                   </button>
-                  {/* Mobile: WhatsApp button */}
                   <WhatsAppShareButton
                     onClick={(e) => {
                       e.stopPropagation();
-                      shareProfileOnWhatsApp("atelier", brand.id || "ecart", brand.name);
+                      shareProfileOnWhatsApp("atelier", brand.id || parentConfig.profileSlug, brand.name);
                       trackCTA.whatsapp(`Ateliers_Share_${brand.name}`);
                     }}
                     label={`Share ${brand.name} on WhatsApp`}
@@ -2185,7 +2184,7 @@ function AlphaStrip({
                 </div>
                 {/* Hover overlay with View Profile */}
                 <Link
-                  to="/designers/ecart?from=ateliers"
+                  to={`/designers/${parentConfig.profileSlug}?from=ateliers`}
                   className="absolute inset-0 z-[6] flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 >
                   <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
