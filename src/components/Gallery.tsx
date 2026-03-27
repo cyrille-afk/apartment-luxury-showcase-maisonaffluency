@@ -612,10 +612,29 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary mb-2">
                       {section.experience}
                     </h3>
+                    {originalSectionIndex === 0 && (
+                      <button
+                        onClick={() => {
+                          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                          const url = `${window.location.origin}/#gallery`;
+                          const text = `Interactive Gallery — Maison Affluency`;
+                          if (isMobile) {
+                            window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
+                          } else {
+                            navigator.clipboard.writeText(`${text} — ${url}`);
+                            import('sonner').then(({ toast }) => toast.success('Link copied'));
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors mb-2"
+                        aria-label="Share Interactive Gallery"
+                      >
+                        <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+                      </button>
+                    )}
                     {!section.items.some(i => i.description) && (
                       <span className="hidden md:inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body mb-2">
                         <span className="relative flex items-center justify-center w-4 h-4">
@@ -629,25 +648,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   </div>
                   <div className="flex items-center gap-3">
                   {originalSectionIndex === 0 && (
-                    <>
-                      {/* Share button */}
-                      <button
-                        onClick={() => {
-                          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                          const url = `${window.location.origin}/#gallery`;
-                          const text = `Interactive Gallery — Maison Affluency`;
-                          if (isMobile) {
-                            window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-                          } else {
-                            navigator.clipboard.writeText(`${text} — ${url}`);
-                            import('sonner').then(({ toast }) => toast.success('Link copied'));
-                          }
-                        }}
-                        className="flex items-center p-1.5 rounded transition-all hover:opacity-70"
-                        aria-label="Share Interactive Gallery"
-                      >
-                        <Share2 className="h-4 w-4 text-foreground" />
-                      </button>
                       <button
                         onClick={() => setGridCols(gridCols === 3 ? 4 : 3)}
                         className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
@@ -670,7 +670,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           )}
                         </svg>
                       </button>
-                    </>
                   )}
                   </div>
                 </div>
