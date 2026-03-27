@@ -2018,7 +2018,35 @@ function AlphaStrip({
   const stripRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const [ecartDesignersOpen, setEcartDesignersOpen] = useState(false);
+  const [openParentDesigners, setOpenParentDesigners] = useState<Record<string, boolean>>({});
+
+  // Find which brands in this strip are parent brands
+  const parentBrandsInStrip = useMemo(() => {
+    const result: Record<string, ParentBrandConfig> = {};
+    brands.forEach(b => {
+      if (parentBrandConfigMap[b.name]) result[b.name] = parentBrandConfigMap[b.name];
+    });
+    return result;
+  }, [brands]);
+
+  // Fetch sub-designers from DB for parent brands that don't have static data
+  const dbParentNames = useMemo(() => {
+    return Object.values(parentBrandsInStrip)
+      .filter(c => !c.staticDesigners)
+      .map(c => c.dbParentName);
+  }, [parentBrandsInStrip]);
+
+  // We'll fetch for the first non-static parent brand that is open
+  const openDbParent = useMemo(() => {
+    return Object.entries(openParentDesigners).find(([name, open]) => {
+      const config = parentBrandConfigMap[name];
+      return open && config && !config.staticDesigners;
+    })?.[0] || null;
+  }, [openParentDesigners]);
+
+  const toggleParentDesigners = useCallback((brandName: string) => {
+    setOpenParentDesigners(prev => ({ ...prev, [brandName]: !prev[brandName] }));
+  }, []);
 
   const handleScroll = useCallback(() => {
     const el = stripRef.current;
