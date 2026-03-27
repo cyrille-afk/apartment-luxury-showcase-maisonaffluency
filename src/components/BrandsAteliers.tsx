@@ -2029,7 +2029,7 @@ function AlphaStrip({
                     className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover object-[center_top]"
                   />
                 )}
-                <div className="absolute inset-0 bg-black/35 group-hover:bg-black/25 transition-all duration-300" />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/15 transition-all duration-300" />
                 {/* Atelier logo badge */}
                 <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
                   <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
