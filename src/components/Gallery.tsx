@@ -586,8 +586,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     const titleSlug = slugify(title);
     const designerSlug = filterDesigner ? slugify(filterDesigner) : '';
     const urlPath = designerSlug
-      ? `gallery/${designerSlug}/${titleSlug}`
-      : `gallery/${titleSlug}`;
+      ? `gallery/${designerSlug}/${titleSlug}.html`
+      : `gallery/${titleSlug}.html`;
     const url = `https://www.maisonaffluency.com/${urlPath}`;
     const parts = ['Maison Affluency', 'Interactive Gallery'];
     if (filterDesigner) parts.push(filterDesigner);
