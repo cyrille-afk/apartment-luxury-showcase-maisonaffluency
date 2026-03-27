@@ -66,7 +66,7 @@ function ogImage(url: string): string {
 }
 
 /** Route → OG metadata map. Static routes first, then dynamic DB lookups. */
-async function getOgData(path: string): Promise<OgData> {
+async function getOgData(path: string, reqUrl?: URL): Promise<OgData> {
   const clean = path.replace(/\/+$/, "") || "/";
 
   // ── Section hash routes (e.g. /#designers, /#collectibles, /#brands) ──
