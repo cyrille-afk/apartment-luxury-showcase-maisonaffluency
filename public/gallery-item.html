@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interactive Gallery — Maison Affluency</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="canonical" href="https://www.maisonaffluency.com/#gallery" />
+    <!--
+      Bot-aware bridge: crawlers are redirected to the OG edge function (which
+      returns proper per-item Open Graph meta tags). Human visitors are sent
+      straight to the SPA with sessionStorage deep-link params.
+    -->
+    <script>
+      (function(){
+        var p = new URLSearchParams(location.search);
+        var item = p.get("item") || "0";
+        var designer = p.get("designer") || "";
+        var isBot = /bot|crawl|spider|WhatsApp|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Pinterest|Googlebot/i.test(navigator.userAgent);
+        if (isBot) {
+          // Redirect bot to edge function which serves proper OG tags
+          var ogUrl = "https://dcrauiygaezoduwdjmsm.supabase.co/functions/v1/og-image?path=/gallery&item=" + encodeURIComponent(item);
+          if (designer) ogUrl += "&designer=" + encodeURIComponent(designer);
+          window.location.replace(ogUrl);
+        } else {
+          // Human visitor: store deep-link params and go to SPA
+          sessionStorage.setItem("openGalleryIndex", item);
+          if (designer) sessionStorage.setItem("galleryFilterDesigner", designer);
+          window.location.replace("https://www.maisonaffluency.com/#gallery");
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting…</p>
+    <noscript>
+      <meta http-equiv="refresh" content="0;url=https://www.maisonaffluency.com/#gallery" />
+    </noscript>
+  </body>
+</html>
