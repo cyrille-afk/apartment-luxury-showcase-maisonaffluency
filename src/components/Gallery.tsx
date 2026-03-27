@@ -1008,14 +1008,23 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          filterDesigner={filterDesigner}
                          {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                        />
-                      {/* Close button — desktop: near image */}
-                      <button
-                        onClick={closeLightbox}
-                        className={`hidden md:flex absolute z-50 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}
-                        aria-label="Close lightbox"
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
+                      {/* Close + Share buttons — desktop: near image */}
+                      <div className={`hidden md:flex absolute z-50 gap-2 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}>
+                        <button
+                          onClick={shareLightboxImage}
+                          className="p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                          aria-label="Share this image"
+                        >
+                          <Share2 className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={closeLightbox}
+                          className="p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 border border-white/20"
+                          aria-label="Close lightbox"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      </div>
                       {/* Maximize / Minimize icon — z-50 to stay above PinchZoomImage overlay */}
                       {!isExpanded ? (
                         <button
