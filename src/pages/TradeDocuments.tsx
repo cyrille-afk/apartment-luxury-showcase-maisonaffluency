@@ -275,6 +275,15 @@ const TradeDocuments = () => {
                       key={doc.id}
                       onClick={async (e) => {
                         e.preventDefault();
+                        // Track download
+                        supabase.auth.getUser().then(({ data }) => {
+                          if (data?.user) {
+                            supabase.from("document_downloads").insert({
+                              user_id: data.user.id,
+                              document_id: doc.id,
+                            }).then(() => {});
+                          }
+                        });
                         try {
                           const res = await fetch(doc.file_url);
                           const blob = await res.blob();
