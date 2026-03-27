@@ -2370,6 +2370,7 @@ function AlphaStrip({
                   {brand.origin}
                 </p>
                 {/* Instagram icon top-right */}
+                {parentConfig.instagram && (
                 <a
                   href={parentConfig.instagram}
                   target="_blank"
@@ -2380,6 +2381,7 @@ function AlphaStrip({
                 >
                   <Instagram className="h-6 w-6 text-white" />
                 </a>
+                )}
                 {/* Toggle sub-designers button */}
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleParentDesigners(brand.name); }}
