@@ -2035,7 +2035,7 @@ function AlphaStrip({
                   <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">{brand.name}</span>
                 </div>
                 {/* Name overlay at bottom */}
-                <div className="absolute inset-x-0 bottom-0 z-[5] px-5 pt-10 pb-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                <div className="absolute inset-x-0 bottom-0 z-[5] px-5 pt-10 pb-14 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none">
                   <p className="font-display text-lg md:text-xl text-white tracking-wide drop-shadow-sm">{brand.name}</p>
                   <p className="font-body text-xs text-white/60 mt-0.5">{brand.origin}</p>
                 </div>
@@ -2048,12 +2048,24 @@ function AlphaStrip({
                   <span className="font-body text-[9px] uppercase tracking-[0.12em]">{ecartSubDesigners.length} designers</span>
                   <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${ecartDesignersOpen ? "rotate-180" : ""}`} />
                 </button>
-                {/* Click to profile */}
-                <Link
-                  to="/designers/ecart?from=ateliers"
-                  className="absolute inset-0 z-[1]"
-                  aria-label={`View ${brand.name} profile`}
-                />
+                {/* Bottom bar with profile link + curators picks */}
+                <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
+                  <Link
+                    to="/designers/ecart?from=ateliers"
+                    className="flex items-center gap-1.5 text-sm md:text-xs tracking-wider font-body text-white hover:underline underline-offset-2 touch-manipulation"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ExternalLink className="h-3.5 w-3.5 md:h-3 md:w-3" />
+                    <span>View Profile</span>
+                  </Link>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
+                    className="flex items-center gap-1.5 text-sm md:text-xs tracking-wider font-body group/picks touch-manipulation text-white"
+                  >
+                    <Gem className="h-4 w-4 md:h-3 md:w-3 flex-shrink-0 fill-accent text-accent" />
+                    <span className="group-hover/picks:underline underline-offset-2">Curators' Picks</span>
+                  </button>
+                </div>
               </div>
             ) : (
             <div
