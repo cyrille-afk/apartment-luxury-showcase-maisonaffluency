@@ -46,6 +46,7 @@ const ScrapeProducts = () => {
   const [previewUrls, setPreviewUrls] = useState<Record<string, string[]>>({});
   const [selectedPreviewUrls, setSelectedPreviewUrls] = useState<Record<string, Set<string>>>({});
   const [previewFilter, setPreviewFilter] = useState<Record<string, string>>({});
+  const [previewPage, setPreviewPage] = useState<Record<string, number>>({});
 
   // Discover All state
   const [discoverSiteUrl, setDiscoverSiteUrl] = useState("");
