@@ -1092,26 +1092,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   </div>
                 </div>
 
-                {/* Section / category filter chips */}
-                <div className="flex justify-center gap-1.5 mt-2 px-4 shrink-0 flex-wrap">
-                  {galleryExperiences.map((section, si) => (
-                    <button
-                      key={si}
-                      onClick={() => {
-                        setCurrentSectionIndex(si);
-                        setCurrentItemIndex(0);
-                        emblaApi?.scrollTo(0);
-                      }}
-                      className={`px-2.5 py-1 rounded-full text-[8px] uppercase tracking-[0.12em] font-body transition-all border ${
-                        si === currentSectionIndex
-                          ? 'bg-white/20 text-white border-white/40'
-                          : 'bg-transparent text-white/50 border-white/15 hover:text-white/80'
-                      }`}
-                    >
-                      {section.experience.replace(/^An?\s+/i, '')}
-                    </button>
-                  ))}
-                </div>
+                {/* Section label */}
+                <p className="text-center text-[9px] uppercase tracking-[0.15em] text-white/50 font-body mt-2 shrink-0">
+                  {galleryExperiences[currentSectionIndex]?.experience.replace(/^An?\s+/i, '')}
+                  <span className="text-white/30 ml-1.5">{currentSectionIndex + 1}/{galleryExperiences.length}</span>
+                </p>
 
                 {/* Dot indicators */}
                 <div className="flex justify-center gap-1.5 mt-1.5 shrink-0">
