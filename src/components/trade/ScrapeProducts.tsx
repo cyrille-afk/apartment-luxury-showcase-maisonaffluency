@@ -595,7 +595,7 @@ const ScrapeProducts = () => {
                                 type="checkbox"
                                 checked={selectedPreviewUrls[brand.id]?.has(url) || false}
                                 onChange={() => {
-                                  const next = new Set(selectedPreviewUrls[brand.id] || new Set());
+                                  const next = new Set<string>(selectedPreviewUrls[brand.id] || new Set<string>());
                                   next.has(url) ? next.delete(url) : next.add(url);
                                   setSelectedPreviewUrls((prev) => ({ ...prev, [brand.id]: next }));
                                 }}
