@@ -1,7 +1,8 @@
 import { useRef, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 
-const VIDEO_URL = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/videos/apartment-tour-voiceover.mp4";
+const VIDEO_URL = APARTMENT_TOUR_VIDEO_URL;
 const OG_IMAGE = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,g_auto,q_auto/bespoke-sofa_gxidtx";
 
 const ApartmentTour = () => {
