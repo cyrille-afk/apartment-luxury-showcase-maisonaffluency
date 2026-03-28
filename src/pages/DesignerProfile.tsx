@@ -191,7 +191,7 @@ const DesignerProfile = () => {
               <h2 className="font-display text-lg tracking-widest uppercase text-muted-foreground mb-8">
                 Curators' Picks
               </h2>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {picks.map((pick) => (
                   <div key={pick.id} className="group">
                     <div className="aspect-[4/5] bg-muted/20 rounded-lg overflow-hidden mb-3">
