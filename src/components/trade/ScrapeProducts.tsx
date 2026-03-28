@@ -35,6 +35,7 @@ const ScrapeProducts = () => {
     { id: crypto.randomUUID(), brand_name: "", category: "Rugs", urls_text: "" },
   ]);
   const [scraping, setScaping] = useState(false);
+  const [scrapeProgress, setScrapeProgress] = useState<{ done: number; total: number; inserted: number; updated: number; errors: number } | null>(null);
   const [results, setResults] = useState<any>(null);
   const [saveConfigs, setSaveConfigs] = useState(true);
   const [savedConfigs, setSavedConfigs] = useState<SavedConfig[]>([]);
@@ -98,29 +99,59 @@ const ScrapeProducts = () => {
       return;
     }
 
+    const CHUNK_SIZE = 10;
+    // Flatten into individual chunks per brand
+    const chunks: { brand_name: string; category: string; urls: string[] }[] = [];
+    for (const b of brandsPayload) {
+      for (let i = 0; i < b.urls.length; i += CHUNK_SIZE) {
+        chunks.push({ brand_name: b.brand_name, category: b.category, urls: b.urls.slice(i, i + CHUNK_SIZE) });
+      }
+    }
+
     const totalUrls = brandsPayload.reduce((s, b) => s + b.urls.length, 0);
     setScaping(true);
     setResults(null);
+    setScrapeProgress({ done: 0, total: totalUrls, inserted: 0, updated: 0, errors: 0 });
+
+    let totalInserted = 0;
+    let totalUpdated = 0;
+    let totalErrors = 0;
+    let urlsDone = 0;
+    const allResults: any[] = [];
 
     try {
-      const { data, error } = await supabase.functions.invoke("scrape-products", {
-        body: {
-          brands: brandsPayload,
-          save_configs: saveConfigs,
-        },
-      });
-      if (error) throw error;
-      setResults(data);
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        const isLastChunk = i === chunks.length - 1;
+        const { data, error } = await supabase.functions.invoke("scrape-products", {
+          body: {
+            brands: [chunk],
+            save_configs: isLastChunk ? saveConfigs : false,
+          },
+        });
+        if (error) throw error;
+
+        urlsDone += chunk.urls.length;
+        totalInserted += data?.summary?.total_inserted || data?.inserted || 0;
+        totalUpdated += data?.summary?.total_updated || data?.updated || 0;
+        totalErrors += data?.summary?.total_errors || 0;
+        allResults.push(data);
+
+        setScrapeProgress({ done: urlsDone, total: totalUrls, inserted: totalInserted, updated: totalUpdated, errors: totalErrors });
+      }
+
+      setResults(allResults.length === 1 ? allResults[0] : { summary: { total_inserted: totalInserted, total_updated: totalUpdated, total_errors: totalErrors }, brands: allResults.flatMap((r) => r.brands || []) });
       fetchConfigs();
       toast({
         title: `Scrape complete — ${brandsPayload.length} brand(s)`,
-        description: `${data.summary.total_inserted} inserted, ${data.summary.total_updated} updated`,
+        description: `${totalInserted} inserted, ${totalUpdated} updated`,
       });
     } catch (err: any) {
       toast({ title: "Scrape failed", description: err.message, variant: "destructive" });
       setResults({ error: err.message });
     } finally {
       setScaping(false);
+      setScrapeProgress(null);
     }
   };
 
@@ -772,10 +803,24 @@ const ScrapeProducts = () => {
               </>
             )}
           </button>
-          {scraping && (
-            <span className="font-body text-xs text-muted-foreground animate-pulse">
-              This may take several minutes for large batches…
-            </span>
+          {scraping && scrapeProgress && (
+            <div className="flex-1 space-y-1.5 max-w-md">
+              <div className="flex items-center justify-between font-body text-[10px] text-muted-foreground">
+                <span>{scrapeProgress.done} / {scrapeProgress.total} URLs</span>
+                <span>{Math.round((scrapeProgress.done / scrapeProgress.total) * 100)}%</span>
+              </div>
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
+                  style={{ width: `${(scrapeProgress.done / scrapeProgress.total) * 100}%` }}
+                />
+              </div>
+              <div className="flex gap-3 font-body text-[10px] text-muted-foreground">
+                <span className="text-green-600">{scrapeProgress.inserted} inserted</span>
+                <span className="text-blue-600">{scrapeProgress.updated} updated</span>
+                {scrapeProgress.errors > 0 && <span className="text-destructive">{scrapeProgress.errors} errors</span>}
+              </div>
+            </div>
           )}
         </div>
 
