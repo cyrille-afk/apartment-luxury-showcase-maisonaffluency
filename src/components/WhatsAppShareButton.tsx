@@ -67,7 +67,7 @@ const WhatsAppShareButton = memo(function WhatsAppShareButton({
   return (
     <button
       onClick={onClick}
-      className={`${visibility} items-center ${s.button} font-body rounded-full transition-all duration-300 touch-manipulation ${v} ${className}`}
+      className={`${visibility} items-center ${s.button} font-body md:rounded-full transition-all duration-300 touch-manipulation ${v} ${className}`}
       aria-label={label}
     >
       <svg
