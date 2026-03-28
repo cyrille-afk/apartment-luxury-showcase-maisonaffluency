@@ -3,7 +3,7 @@
  * Extracted from the original TradeShowroom for use as a tab alongside the interactive Gallery.
  */
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart } from "lucide-react";
+import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart, Tag } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -93,7 +93,9 @@ const inferCategory = (name: string): string => {
   return "Décor";
 };
 
-type PriceMatch = { name: string; cents: number; currency: string; price_unit?: string };
+type PriceMatch = { name: string; cents: number; rrp_cents?: number; currency: string; price_unit?: string };
+
+const TRADE_DISCOUNT = 0.08;
 
 const normalizeProductName = (value: string): string =>
   value.toLowerCase().replace(/['']/g, "").replace(/&/g, " and ").replace(/\([^)]*\)/g, " ").replace(/[^a-z0-9\s]/g, " ").replace(/\b(custom|details?|edition|ed|piece|volume|the|and|of|in)\b/g, " ").replace(/\s+/g, " ").trim();
@@ -155,6 +157,7 @@ const ShowroomGridView = ({
   const [selectedSection, setSelectedSection] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const [showTradePrice, setShowTradePrice] = useState(false);
   const fxRates = useFxRates();
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
