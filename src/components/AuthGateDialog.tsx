@@ -11,6 +11,8 @@ interface AuthGateDialogProps {
   onClose: () => void;
   /** What the user was trying to do — shown as context */
   action?: string;
+  /** Which form to show initially when opened */
+  initialMode?: "prompt" | "signup" | "login";
 }
 
 /**
