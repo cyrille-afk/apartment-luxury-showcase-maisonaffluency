@@ -7,7 +7,7 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { trackVideoEvent, attachMilestoneTracking } from "@/lib/videoTracking";
 
-const VIDEO_URL = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/videos/apartment-tour-voiceover.mp4";
+const VIDEO_URL = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/videos/apartment-tour.mp4";
 const POSTER_URL = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto:good,c_fill,g_auto/bespoke-sofa_gxidtx";
 
 const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
