@@ -577,6 +577,7 @@ const ShowroomGridView = ({
                       brandName={product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : (product.designer_name || "")}
                       currentPriceCents={price?.cents}
                       currency={price?.currency || "SGD"}
+                      priceUnit={price?.price_unit}
                       displayCurrency={displayCurrency}
                       fxRates={fxRates}
                       onPriceUpdated={() => window.location.reload()}
@@ -628,6 +629,7 @@ const ShowroomGridView = ({
                       brandName={product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : (product.designer_name || "")}
                       currentPriceCents={price?.cents}
                       currency={price?.currency || "SGD"}
+                      priceUnit={price?.price_unit}
                       displayCurrency={displayCurrency}
                       fxRates={fxRates}
                       onPriceUpdated={() => window.location.reload()}

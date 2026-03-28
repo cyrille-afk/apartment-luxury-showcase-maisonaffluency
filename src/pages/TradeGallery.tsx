@@ -496,6 +496,7 @@ const TradeGallery = () => {
                       brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
                       currentPriceCents={price?.cents}
                       currency={price?.currency || "SGD"}
+                      priceUnit={price?.price_unit}
                       displayCurrency={displayCurrency}
                       fxRates={fxRates}
                       onPriceUpdated={() => refreshPrices()}
@@ -543,6 +544,7 @@ const TradeGallery = () => {
                       brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
                       currentPriceCents={price?.cents}
                       currency={price?.currency || "SGD"}
+                      priceUnit={price?.price_unit}
                       displayCurrency={displayCurrency}
                       fxRates={fxRates}
                       onPriceUpdated={() => refreshPrices()}
