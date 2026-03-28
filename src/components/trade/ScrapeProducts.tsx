@@ -586,42 +586,78 @@ const ScrapeProducts = () => {
                       />
                     </div>
 
-                    <div className="max-h-48 overflow-y-auto space-y-0.5 border border-border rounded bg-background p-1.5">
-                      {previewUrls[brand.id]
-                        .filter((u) => {
-                          const f = previewFilter[brand.id] || "";
-                          return !f || u.toLowerCase().includes(f.toLowerCase());
-                        })
-                         .map((url) => {
-                          const slug = url.replace(/^https?:\/\/[^/]+/, "").replace(/\/$/, "");
-                          const lastSegment = slug.split("/").filter(Boolean).pop() || slug;
-                          const productName = lastSegment
-                            .replace(/[-_]/g, " ")
-                            .replace(/\b\w/g, (c) => c.toUpperCase())
-                            .trim();
-                          return (
-                            <label
-                              key={url}
-                              className="flex items-center gap-2 px-1.5 py-1 rounded hover:bg-muted/50 cursor-pointer transition-colors"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selectedPreviewUrls[brand.id]?.has(url) || false}
-                                onChange={() => {
-                                  const next = new Set<string>(selectedPreviewUrls[brand.id] || new Set<string>());
-                                  next.has(url) ? next.delete(url) : next.add(url);
-                                  setSelectedPreviewUrls((prev) => ({ ...prev, [brand.id]: next }));
-                                }}
-                                className="rounded border-border shrink-0"
-                              />
-                              <span className="flex flex-col min-w-0">
-                                <span className="font-body text-[11px] text-foreground truncate">{productName}</span>
-                                <span className="font-mono text-[9px] text-muted-foreground truncate" title={url}>{slug}</span>
+                    {(() => {
+                      const PAGE_SIZE = 50;
+                      const filtered = previewUrls[brand.id].filter((u) => {
+                        const f = previewFilter[brand.id] || "";
+                        return !f || u.toLowerCase().includes(f.toLowerCase());
+                      });
+                      const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+                      const page = Math.min(previewPage[brand.id] || 0, Math.max(0, totalPages - 1));
+                      const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+                      return (
+                        <>
+                          <div className="max-h-64 overflow-y-auto space-y-0.5 border border-border rounded bg-background p-1.5">
+                            {paged.map((url) => {
+                              const slug = url.replace(/^https?:\/\/[^/]+/, "").replace(/\/$/, "");
+                              const lastSegment = slug.split("/").filter(Boolean).pop() || slug;
+                              const productName = lastSegment
+                                .replace(/[-_]/g, " ")
+                                .replace(/\b\w/g, (c) => c.toUpperCase())
+                                .trim();
+                              return (
+                                <label
+                                  key={url}
+                                  className="flex items-center gap-2 px-1.5 py-1 rounded hover:bg-muted/50 cursor-pointer transition-colors"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedPreviewUrls[brand.id]?.has(url) || false}
+                                    onChange={() => {
+                                      const next = new Set<string>(selectedPreviewUrls[brand.id] || new Set<string>());
+                                      next.has(url) ? next.delete(url) : next.add(url);
+                                      setSelectedPreviewUrls((prev) => ({ ...prev, [brand.id]: next }));
+                                    }}
+                                    className="rounded border-border shrink-0"
+                                  />
+                                  <span className="flex flex-col min-w-0">
+                                    <span className="font-body text-[11px] text-foreground truncate">{productName}</span>
+                                    <span className="font-mono text-[9px] text-muted-foreground truncate" title={url}>{slug}</span>
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                          {totalPages > 1 && (
+                            <div className="flex items-center justify-between pt-1">
+                              <span className="font-body text-[10px] text-muted-foreground">
+                                {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
                               </span>
-                            </label>
-                          );
-                        })}
-                    </div>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => setPreviewPage((prev) => ({ ...prev, [brand.id]: page - 1 }))}
+                                  disabled={page === 0}
+                                  className="px-2 py-0.5 rounded border border-border font-body text-[10px] text-foreground hover:bg-muted disabled:opacity-30 transition-colors"
+                                >
+                                  ← Prev
+                                </button>
+                                <span className="font-body text-[10px] text-muted-foreground px-1">
+                                  {page + 1} / {totalPages}
+                                </span>
+                                <button
+                                  onClick={() => setPreviewPage((prev) => ({ ...prev, [brand.id]: page + 1 }))}
+                                  disabled={page >= totalPages - 1}
+                                  className="px-2 py-0.5 rounded border border-border font-body text-[10px] text-foreground hover:bg-muted disabled:opacity-30 transition-colors"
+                                >
+                                  Next →
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
 
                     <div className="flex items-center gap-2">
                       <button
