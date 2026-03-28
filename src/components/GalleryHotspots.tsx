@@ -6,7 +6,7 @@ import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ── Price helpers ── */
-interface TradePrice { cents: number; currency: string; }
+interface TradePrice { cents: number; currency: string; price_unit?: string; }
 
 const normalizeName = (s: string) =>
   s.toLowerCase().replace(/['']/g, "'").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
@@ -16,7 +16,7 @@ const tokenize = (s: string) => normalizeName(s).split(" ").filter(t => t.length
 function fuzzyPriceMatch(
   name: string,
   exactMap: Map<string, TradePrice>,
-  entries: { name: string; cents: number; currency: string }[],
+  entries: { name: string; cents: number; currency: string; price_unit?: string }[],
 ): TradePrice | null {
   const key = normalizeName(name);
   const exact = exactMap.get(key);
@@ -32,18 +32,19 @@ function fuzzyPriceMatch(
     const score = shorter > 0 ? overlap / shorter : 0;
     if (score > bestScore && score > 0.5) {
       bestScore = score;
-      best = { cents: e.cents, currency: e.currency };
+      best = { cents: e.cents, currency: e.currency, price_unit: e.price_unit };
     }
   }
   return best;
 }
 
-function formatPrice(cents: number, currency: string): string {
+function formatPrice(cents: number, currency: string, priceUnit?: string): string {
   const amount = cents / 100;
+  const suffix = priceUnit === "per_sqm" ? "/m²" : "";
   try {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+    return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount) + suffix;
   } catch {
-    return `${currency} ${amount.toLocaleString()}`;
+    return `${currency} ${amount.toLocaleString()}` + suffix;
   }
 }
 
@@ -100,17 +101,17 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
   const [editData, setEditData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
 
   // ── Trade price lookup ──
-  const [tradePrices, setTradePrices] = useState<{ name: string; cents: number; currency: string }[]>([]);
+  const [tradePrices, setTradePrices] = useState<{ name: string; cents: number; currency: string; price_unit?: string }[]>([]);
 
   useEffect(() => {
     if (!onAddToQuote) return; // only fetch for trade mode
     const fetchPrices = async () => {
       const { data } = await supabase
         .from("trade_products")
-        .select("product_name, trade_price_cents, rrp_price_cents, currency");
+        .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit");
       if (data) {
         const entries = data
-          .map(p => ({ name: p.product_name, cents: p.trade_price_cents ?? p.rrp_price_cents ?? 0, currency: p.currency }))
+          .map(p => ({ name: p.product_name, cents: p.trade_price_cents ?? p.rrp_price_cents ?? 0, currency: p.currency, price_unit: p.price_unit }))
           .filter(e => e.cents > 0);
         setTradePrices(entries);
       }
@@ -120,7 +121,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
 
   const priceExactMap = useMemo(() => {
     const m = new Map<string, TradePrice>();
-    for (const e of tradePrices) m.set(normalizeName(e.name), { cents: e.cents, currency: e.currency });
+    for (const e of tradePrices) m.set(normalizeName(e.name), { cents: e.cents, currency: e.currency, price_unit: e.price_unit });
     return m;
   }, [tradePrices]);
 
@@ -421,7 +422,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                           const price = getHotspotPrice(hotspot.product_name);
                           return price ? (
                             <p className="font-display text-sm text-accent font-semibold mt-1.5">
-                              {formatPrice(price.cents, price.currency)}
+                              {formatPrice(price.cents, price.currency, price.price_unit)}
                             </p>
                           ) : (
                             <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-1.5 italic">Price on request</p>
