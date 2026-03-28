@@ -57,6 +57,8 @@ interface Hotspot {
   designer_name: string | null;
   product_image_url: string | null;
   link_url: string | null;
+  materials?: string | null;
+  dimensions?: string | null;
 }
 
 interface HotspotProduct {
@@ -65,6 +67,7 @@ interface HotspotProduct {
   product_image_url: string | null;
   materials: string | null;
   dimensions: string | null;
+  link_url?: string | null;
 }
 
 interface GalleryHotspotsProps {
@@ -76,7 +79,7 @@ interface GalleryHotspotsProps {
   /** Public: callback to open quote request dialog pre-filled */
   onRequestQuote?: (productName: string, designerName: string) => void;
   /** Public: callback to open product lightbox for a matched curator's pick */
-  onViewProduct?: (productName: string, designerName: string) => void;
+  onViewProduct?: (productName: string, designerName: string, linkUrl?: string | null) => void;
   /** When set, only show hotspots matching this designer name */
   filterDesigner?: string | null;
 }
@@ -534,7 +537,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                             className="flex items-center gap-1.5 mt-2.5 w-full text-xs font-body bg-foreground text-background rounded px-3 py-2 hover:bg-foreground/90 transition-colors justify-center"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onViewProduct(hotspot.product_name, hotspot.designer_name || "");
+                              onViewProduct(hotspot.product_name, hotspot.designer_name || "", hotspot.link_url);
                               setActiveId(null);
                             }}
                           >
