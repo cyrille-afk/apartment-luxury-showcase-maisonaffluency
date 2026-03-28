@@ -598,7 +598,7 @@ export default function EditorialBiography({
     // Separate into text paragraphs and media URLs, preserving order
     type Block =
       | { type: "text"; content: string }
-      | { type: "image"; url: string; caption: string | null; poster: string | null; align: "left" | "right" | null }
+      | { type: "image"; url: string; caption: string | null; poster: string | null; align: "left" | "right" | null; size: "small" | null }
       | { type: "video"; url: string; caption: string | null; poster: string | null };
     const parsed: Block[] = blocks.map((b) => {
       const media = parseMediaLine(b);
@@ -606,7 +606,7 @@ export default function EditorialBiography({
       if (isVideoUrl(media.url)) {
         return { type: "video" as const, url: media.url, caption: media.caption, poster: media.poster };
       }
-      return { type: "image" as const, url: media.url, caption: media.caption, poster: media.poster, align: media.align };
+      return { type: "image" as const, url: media.url, caption: media.caption, poster: media.poster, align: media.align, size: media.size };
     });
 
     // Group consecutive text blocks that follow an image, pair them for split layout
@@ -746,7 +746,8 @@ export default function EditorialBiography({
               index={imageIdx}
               paragraphs={paired}
               overrideCaption={block.caption}
-              forceAlign={(block as any).align}
+              forceAlign={block.align}
+              size={block.size}
             />
           );
         } else {
