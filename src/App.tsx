@@ -61,6 +61,7 @@ const PublicDesignerProfile = lazy(() => import("./pages/PublicDesignerProfile")
 const PublicFavorites = lazy(() => import("./pages/PublicFavorites"));
 const TradeSpecSheet = lazy(() => import("./pages/TradeSpecSheet"));
 const ApartmentTour = lazy(() => import("./pages/ApartmentTour"));
+const SpecSheetRedirect = lazy(() => import("./pages/SpecSheetRedirect"));
 
 
 
