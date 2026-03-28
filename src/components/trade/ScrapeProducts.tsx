@@ -612,7 +612,7 @@ const ScrapeProducts = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
-                          const selected = Array.from(selectedPreviewUrls[brand.id] || []);
+                          const selected = Array.from(selectedPreviewUrls[brand.id] || new Set<string>()) as string[];
                           if (!selected.length) {
                             toast({ title: "Select at least one URL", variant: "destructive" });
                             return;
