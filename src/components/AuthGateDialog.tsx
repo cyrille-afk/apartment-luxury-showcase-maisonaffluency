@@ -25,6 +25,8 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [isDesigner, setIsDesigner] = useState(false);
+  const [newsletter, setNewsletter] = useState(true);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -56,7 +58,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
       email,
       password,
       options: {
-        data: { first_name: firstName, last_name: lastName },
+        data: { first_name: firstName, last_name: lastName, is_designer: isDesigner, newsletter },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -109,7 +111,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
 
   const content = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" onClick={onClose}>
-      <div className="bg-background border border-border rounded-lg p-6 w-full max-w-sm shadow-xl relative" onClick={(e) => e.stopPropagation()}>
+      <div className={`bg-background border border-border rounded-lg p-6 w-full shadow-xl relative ${mode === "signup" ? "max-w-lg" : "max-w-sm"}`} onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
           <X size={16} />
         </button>
@@ -156,28 +158,82 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
 
         {mode === "signup" && (
           <>
-            <h2 className="font-display text-lg text-foreground mb-4">Create Account</h2>
+            <h2 className="font-display text-xl text-foreground">Sign up</h2>
+            <p className="font-body text-xs text-muted-foreground mt-1 mb-5">
+              Already have an account?{" "}
+              <button onClick={() => setMode("login")} className="underline underline-offset-2 hover:text-foreground transition-colors">Log in</button>
+            </p>
+
             {googleButton}
             {divider}
-            <form onSubmit={handleSignUp} className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <input type="text" placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required
-                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
-                <input type="text" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} required
-                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+
+            <form onSubmit={handleSignUp} className="space-y-4">
+              {/* Architect / Designer question */}
+              <div className="flex items-center justify-between">
+                <span className="font-body text-sm text-foreground">Are you an architect or an interior designer?</span>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="isDesigner"
+                      checked={isDesigner}
+                      onChange={() => setIsDesigner(true)}
+                      className="w-4 h-4 accent-foreground"
+                    />
+                    <span className="font-body text-sm">Yes</span>
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="isDesigner"
+                      checked={!isDesigner}
+                      onChange={() => setIsDesigner(false)}
+                      className="w-4 h-4 accent-foreground"
+                    />
+                    <span className="font-body text-sm">No</span>
+                  </label>
+                </div>
               </div>
-              <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
-                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
-              <input type="password" placeholder="Password (min 6 characters)" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="new-password"
-                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+
+              <div className="grid grid-cols-2 gap-4">
+                <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
+                <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)}
+                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <input type="email" placeholder="Email address *" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
+                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
+                <input type="password" placeholder="Create password *" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="new-password"
+                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
+              </div>
+
+              {/* Newsletter checkbox */}
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={newsletter}
+                  onChange={(e) => setNewsletter(e.target.checked)}
+                  className="w-4 h-4 accent-foreground rounded"
+                />
+                <span className="font-body text-sm text-foreground">Subscribe me to the newsletter</span>
+              </label>
+
               <button type="submit" disabled={loading}
-                className="w-full py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
-                {loading ? "Creating..." : "Create Account"}
+                className="w-full py-3 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] hover:opacity-90 transition-opacity disabled:opacity-50">
+                {loading ? "Creating..." : "Register"}
               </button>
             </form>
-            <button onClick={() => setMode("login")} className="w-full mt-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors text-center">
-              Already have an account? <span className="underline underline-offset-2">Sign in</span>
-            </button>
+
+            {isDesigner && (
+              <p className="font-body text-[10px] text-muted-foreground/70 text-center mt-3 leading-relaxed">
+                As a design professional, you may also{" "}
+                <button onClick={() => navigate("/trade/register")} className="underline underline-offset-2 hover:text-foreground transition-colors">
+                  apply for trade access
+                </button>{" "}
+                for exclusive pricing.
+              </p>
+            )}
           </>
         )}
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Building2, Briefcase, BookOpen, Heart, Pin } from "lucide-react";
+import { Menu, X, Crown, Search, ChevronDown, ChevronRight, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Building2, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
+import { useAuth } from "@/hooks/useAuth";
 import { trackCTA } from "@/lib/analytics";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
@@ -18,9 +19,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
+import AuthGateDialog from "@/components/AuthGateDialog";
+import { supabase } from "@/integrations/supabase/client";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 const leftNavItems = [{
@@ -84,7 +88,9 @@ const contactOptions = [
 const navItems = [...leftNavItems, ...rightNavItems];
 
 const Navigation = () => {
+  const { user } = useAuth();
   const { items: pinItems, setIsComparing } = useCompare();
+  const [authGateOpen, setAuthGateOpen] = useState(false);
   // localStorage-backed favorite count
   const [favCount, setFavCount] = useState(0);
   useEffect(() => {
@@ -213,7 +219,7 @@ const Navigation = () => {
     setTimeout(() => scrollToSection(id), 450);
   };
 
-  return <nav className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-sm border-b border-border/50">
+  return <><nav className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-sm border-b border-border/50">
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         {/* Mobile: single row */}
         <div className="flex h-24 items-center justify-center md:hidden relative">
@@ -229,6 +235,15 @@ const Navigation = () => {
               <span className="h-px w-6 bg-foreground" aria-hidden="true" />
             </div>
           </div>
+
+          {/* Mobile account icon — right side */}
+          <button
+            onClick={() => user ? navigate("/trade") : setAuthGateOpen(true)}
+            className="absolute right-0 p-2 text-foreground hover:text-primary transition-colors"
+            aria-label={user ? "My Account" : "Sign In"}
+          >
+            <User className="h-5 w-5" />
+          </button>
 
           {/* Mobile Hamburger Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -467,6 +482,62 @@ const Navigation = () => {
               </div>
             </div>
             <div className="flex justify-end items-center gap-4">
+              {/* Account icon */}
+              <DropdownMenu>
+                <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
+                  <User className="w-4 h-4 text-foreground group-hover:text-primary transition-colors" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
+                  {user ? (
+                    <>
+                      <div className="px-4 py-2.5 border-b border-border">
+                        <p className="font-body text-xs text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/trade")}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <User className="h-4 w-4 text-primary" />
+                        <span className="font-body text-sm">My Account</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors text-destructive"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span className="font-body text-sm">Sign Out</span>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => setAuthGateOpen(true)}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <UserPlus className="h-4 w-4 text-primary" />
+                        <span className="font-body text-sm">Sign Up</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setAuthGateOpen(true)}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <LogIn className="h-4 w-4 text-primary" />
+                        <span className="font-body text-sm">Log In</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => navigate("/trade/register")}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
+                        <span className="font-body text-sm">Trade Program</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <button
                 onClick={() => navigate("/favorites")}
                 className="relative group p-1 transition-colors"
@@ -609,6 +680,8 @@ const Navigation = () => {
           )}
         </div>
       </div>
-    </nav>;
+    </nav>
+    <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" />
+    </>;
 };
 export default Navigation;
