@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin, XCircle, History, CalendarIcon } from "lucide-react";
+import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin, XCircle, History, CalendarIcon, Download } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -1054,6 +1054,37 @@ const ScrapeProducts = () => {
                 {loadingHistory ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
                 Refresh
               </button>
+              {scrapeHistory.length > 0 && (
+                <button
+                  onClick={() => {
+                    const headers = ["Brand", "Status", "Total URLs", "Scraped", "Inserted", "Updated", "Errors", "Duration (s)", "Started At", "Completed At"];
+                    const rows = scrapeHistory.map((r) => [
+                      `"${(r.brand_name || "").replace(/"/g, '""')}"`,
+                      r.status,
+                      r.total_urls,
+                      r.total_scraped,
+                      r.inserted,
+                      r.updated,
+                      r.errors,
+                      r.duration_seconds,
+                      r.started_at,
+                      r.completed_at,
+                    ].join(","));
+                    const csv = [headers.join(","), ...rows].join("\n");
+                    const blob = new Blob([csv], { type: "text/csv" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `scrape-history-${new Date().toISOString().slice(0, 10)}.csv`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="font-body text-[10px] text-primary hover:underline flex items-center gap-1"
+                >
+                  <Download className="h-3 w-3" />
+                  CSV
+                </button>
+              )}
             </div>
           </div>
 
