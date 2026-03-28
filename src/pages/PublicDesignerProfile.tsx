@@ -763,14 +763,22 @@ const PublicDesignerProfile = () => {
                                 style={hoverPos ? { objectPosition: hoverPos } : undefined}
                                 loading="lazy"
                               />
-                              <div className="absolute top-2 right-2 z-10 rounded-lg border border-border/70 bg-background/90 p-1.5 shadow-md">
-                                <img
-                                  src={responsiveCloudinaryUrl(pick.hover_image_url, 200)}
-                                  alt={`${pick.title} alternate finish thumbnail`}
-                                  className="h-10 w-8 md:h-12 md:w-10 rounded object-cover"
-                                  style={hoverPos ? { objectPosition: hoverPos } : undefined}
-                                  loading="lazy"
-                                />
+                              <div className="absolute top-2 right-2 z-10 rounded-lg border border-border/70 bg-background/90 p-1.5 shadow-md pointer-events-none">
+                                <div className="grid grid-cols-2 gap-1">
+                                  <img
+                                    src={responsiveCloudinaryUrl(pick.image_url, 200)}
+                                    alt={`${pick.title} primary finish thumbnail`}
+                                    className="h-10 w-8 md:h-12 md:w-10 rounded object-cover border border-border/60"
+                                    loading="lazy"
+                                  />
+                                  <img
+                                    src={pick.hover_image_url}
+                                    alt={`${pick.title} alternate finish thumbnail`}
+                                    className="h-10 w-8 md:h-12 md:w-10 rounded object-cover border border-border/60"
+                                    style={hoverPos ? { objectPosition: hoverPos } : undefined}
+                                    loading="lazy"
+                                  />
+                                </div>
                               </div>
                             </>
                           );
