@@ -43,6 +43,9 @@ const ScrapeProducts = () => {
   const [mappingBrandId, setMappingBrandId] = useState<string | null>(null);
   const [mapUrl, setMapUrl] = useState<Record<string, string>>({});
   const [mapSearch, setMapSearch] = useState<Record<string, string>>({});
+  const [previewUrls, setPreviewUrls] = useState<Record<string, string[]>>({});
+  const [selectedPreviewUrls, setSelectedPreviewUrls] = useState<Record<string, Set<string>>>({});
+  const [previewFilter, setPreviewFilter] = useState<Record<string, string>>({});
 
   // Discover All state
   const [discoverSiteUrl, setDiscoverSiteUrl] = useState("");
