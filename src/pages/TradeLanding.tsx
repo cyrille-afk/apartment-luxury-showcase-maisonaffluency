@@ -753,7 +753,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             </div>
 
             {/* Right — Registration Form */}
-            <div id="register" className="flex-1 lg:pl-12 order-1 lg:order-3 bg-background rounded-xl p-5 lg:p-0 lg:bg-transparent lg:rounded-none">
+            <div id="register" className="flex-1 lg:pl-12 order-1 lg:order-3 bg-background rounded-xl p-5 lg:p-0 lg:bg-transparent lg:rounded-none scroll-mt-16">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
