@@ -269,7 +269,6 @@ const ScrapeProducts = () => {
     }
 
     const chunks: { brand_name: string; category: string; urls: string[]; location?: string }[] = [];
-    const chunks: { brand_name: string; category: string; urls: string[]; location?: string }[] = [];
     for (const b of brandsPayload) {
       for (let i = 0; i < b.urls.length; i += chunkSize) {
         chunks.push({ brand_name: b.brand_name, category: b.category, urls: b.urls.slice(i, i + chunkSize), location: b.location });
