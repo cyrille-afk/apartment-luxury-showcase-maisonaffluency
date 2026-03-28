@@ -192,6 +192,11 @@ const TradeGallery = () => {
     return best;
   };
 
+  const applyDiscount = (p: { cents: number; currency: string } | null) => {
+    if (!p) return null;
+    return showTradePrice ? { cents: Math.round(p.cents * (1 - TRADE_DISCOUNT)), currency: p.currency } : p;
+  };
+
   const filtered = useMemo(() => {
     return allProducts.filter((p) => {
       const q = search.toLowerCase();
