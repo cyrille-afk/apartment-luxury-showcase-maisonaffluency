@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
-import { Heart, FolderOpen } from "lucide-react";
+import { Heart, FolderOpen, Tag } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale } from "lucide-react";
@@ -39,6 +39,8 @@ const TradeGallery = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const [showTradePrice, setShowTradePrice] = useState(false);
+  const TRADE_DISCOUNT = 0.08;
   const fxRates = useFxRates();
   const [draftQuotes, setDraftQuotes] = useState<DraftQuote[]>([]);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
@@ -190,6 +192,11 @@ const TradeGallery = () => {
     return best;
   };
 
+  const applyDiscount = (p: { cents: number; currency: string } | null) => {
+    if (!p) return null;
+    return showTradePrice ? { cents: Math.round(p.cents * (1 - TRADE_DISCOUNT)), currency: p.currency } : p;
+  };
+
   const filtered = useMemo(() => {
     return allProducts.filter((p) => {
       const q = search.toLowerCase();
@@ -221,13 +228,13 @@ const TradeGallery = () => {
     designerId: product.id,
     section: "designers",
     price: (() => {
-      const p = getProductPrice(product);
+      const p = applyDiscount(getProductPrice(product));
       return p ? formatPriceConverted(p.cents, p.currency, displayCurrency, fxRates) : null;
     })(),
   });
 
   const toLightboxItem = (product: TradeProduct): TradeProductLightboxItem => {
-    const price = getProductPrice(product);
+    const price = applyDiscount(getProductPrice(product));
     return {
       id: product.id,
       product_name: product.product_name,
@@ -241,6 +248,7 @@ const TradeGallery = () => {
       subcategory: product.subcategory,
       pdf_url: product.pdf_url,
       price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates) : null,
+    };
     };
   };
 
@@ -365,6 +373,19 @@ const TradeGallery = () => {
             </select>
           )}
           <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
+          <button
+            onClick={() => setShowTradePrice((v) => !v)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 rounded-md border font-body text-xs transition-colors",
+              showTradePrice
+                ? "border-accent bg-accent/10 text-accent"
+                : "border-border text-muted-foreground hover:text-foreground"
+            )}
+            title={showTradePrice ? "Showing trade price (–8%)" : "Showing retail price"}
+          >
+            <Tag className="h-3.5 w-3.5" />
+            {showTradePrice ? "Trade –8%" : "Retail"}
+          </button>
         </div>
       </div>
 
@@ -380,7 +401,7 @@ const TradeGallery = () => {
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
-            const price = getProductPrice(product);
+            const price = applyDiscount(getProductPrice(product));
             const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
@@ -495,7 +516,7 @@ const TradeGallery = () => {
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
-            const price = getProductPrice(product);
+            const price = applyDiscount(getProductPrice(product));
             const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">

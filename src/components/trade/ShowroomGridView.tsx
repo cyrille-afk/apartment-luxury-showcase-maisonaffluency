@@ -3,7 +3,7 @@
  * Extracted from the original TradeShowroom for use as a tab alongside the interactive Gallery.
  */
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart } from "lucide-react";
+import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart, Tag } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -93,7 +93,9 @@ const inferCategory = (name: string): string => {
   return "Décor";
 };
 
-type PriceMatch = { name: string; cents: number; currency: string; price_unit?: string };
+type PriceMatch = { name: string; cents: number; rrp_cents?: number; currency: string; price_unit?: string };
+
+const TRADE_DISCOUNT = 0.08;
 
 const normalizeProductName = (value: string): string =>
   value.toLowerCase().replace(/['']/g, "").replace(/&/g, " and ").replace(/\([^)]*\)/g, " ").replace(/[^a-z0-9\s]/g, " ").replace(/\b(custom|details?|edition|ed|piece|volume|the|and|of|in)\b/g, " ").replace(/\s+/g, " ").trim();
@@ -155,6 +157,7 @@ const ShowroomGridView = ({
   const [selectedSection, setSelectedSection] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>("original");
+  const [showTradePrice, setShowTradePrice] = useState(false);
   const fxRates = useFxRates();
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [addedProductIds, setAddedProductIds] = useState<Set<string>>(new Set());
@@ -219,9 +222,9 @@ const ShowroomGridView = ({
               hoverImageLookup.set(ppKey, gallery[0]);
               if (normalizedName) hoverImageLookup.set(normalizedName, gallery[0]);
             }
-            const cents = pp.trade_price_cents ?? pp.rrp_price_cents;
-            if (!cents) continue;
-            const entry: PriceMatch = { name: pp.product_name, cents, currency: pp.currency, price_unit: pp.price_unit };
+            const rrp = pp.rrp_price_cents ?? pp.trade_price_cents;
+            if (!rrp) continue;
+            const entry: PriceMatch = { name: pp.product_name, cents: rrp, rrp_cents: pp.rrp_price_cents ?? undefined, currency: pp.currency, price_unit: pp.price_unit };
             priceEntries.push(entry);
             priceLookup.set(ppKey, entry);
             if (normalizedName) priceLookup.set(normalizedName, entry);
@@ -348,9 +351,12 @@ const ShowroomGridView = ({
     designerName: product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : (product.designer_name || "Unknown"),
     designerId: product.id,
     section: "designers",
-    price: product.trade_price_cents && product.currency
-      ? formatPriceConverted(product.trade_price_cents, product.currency, displayCurrency, fxRates)
-      : null,
+    price: (() => {
+      const raw = product.trade_price_cents;
+      if (!raw || !product.currency) return null;
+      const c = showTradePrice ? Math.round(raw * (1 - TRADE_DISCOUNT)) : raw;
+      return formatPriceConverted(c, product.currency, displayCurrency, fxRates, product.price_unit);
+    })(),
   });
 
   const toLightboxItem = (product: ShowroomProduct): TradeProductLightboxItem => ({
@@ -363,9 +369,12 @@ const ShowroomGridView = ({
     category: product.category || inferCategory(product.product_name),
     subcategory: product.subcategory || undefined,
     pdf_url: product.pdf_url,
-    price: product.trade_price_cents && product.currency
-      ? formatPriceConverted(product.trade_price_cents, product.currency, displayCurrency, fxRates)
-      : null,
+    price: (() => {
+      const raw = product.trade_price_cents;
+      if (!raw || !product.currency) return null;
+      const c = showTradePrice ? Math.round(raw * (1 - TRADE_DISCOUNT)) : raw;
+      return formatPriceConverted(c, product.currency, displayCurrency, fxRates, product.price_unit);
+    })(),
   });
 
   const handleLightboxAddToQuote = (item: TradeProductLightboxItem) => {
@@ -437,6 +446,19 @@ const ShowroomGridView = ({
             {sections.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
           <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
+          <button
+            onClick={() => setShowTradePrice((v) => !v)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 rounded-md border font-body text-xs transition-colors",
+              showTradePrice
+                ? "border-accent bg-accent/10 text-accent"
+                : "border-border text-muted-foreground hover:text-foreground"
+            )}
+            title={showTradePrice ? "Showing trade price (–8%)" : "Showing retail price"}
+          >
+            <Tag className="h-3.5 w-3.5" />
+            {showTradePrice ? "Trade –8%" : "Retail"}
+          </button>
         </div>
       </div>
 
@@ -459,8 +481,10 @@ const ShowroomGridView = ({
             const isAdded = addedProductIds.has(product.id);
             const pinned = isPinned(product.product_name, product.id);
             const isHighlighted = !!(highlightedId && product.trade_product_id === highlightedId);
-            const price = product.trade_price_cents && product.currency
-              ? { cents: product.trade_price_cents, currency: product.currency, price_unit: product.price_unit }
+            const rawCents = product.trade_price_cents;
+            const displayCents = rawCents && showTradePrice ? Math.round(rawCents * (1 - TRADE_DISCOUNT)) : rawCents;
+            const price = displayCents && product.currency
+              ? { cents: displayCents, currency: product.currency, price_unit: product.price_unit }
               : null;
             return (
               <div
@@ -573,8 +597,10 @@ const ShowroomGridView = ({
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const pinned = isPinned(product.product_name, product.id);
-            const price = product.trade_price_cents && product.currency
-              ? { cents: product.trade_price_cents, currency: product.currency, price_unit: product.price_unit }
+            const rawCents = product.trade_price_cents;
+            const displayCents = rawCents && showTradePrice ? Math.round(rawCents * (1 - TRADE_DISCOUNT)) : rawCents;
+            const price = displayCents && product.currency
+              ? { cents: displayCents, currency: product.currency, price_unit: product.price_unit }
               : null;
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
