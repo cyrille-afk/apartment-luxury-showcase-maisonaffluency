@@ -685,6 +685,18 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             duration: 0.6,
             delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
+                {/* Mobile: Interactive Gallery badge above first section title */}
+                {originalSectionIndex === 0 && (
+                  <div className="flex justify-end mb-2 md:hidden">
+                    <span className="inline-flex items-center gap-1.5 text-[9px] uppercase tracking-[0.15em] text-muted-foreground font-body">
+                      <span className="relative flex items-center justify-center w-3.5 h-3.5 rounded-full bg-black/70 border border-primary/70">
+                        <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
+                        <Plus className="relative h-2 w-2 text-white" />
+                      </span>
+                      Interactive Gallery
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary">
                     {section.experience}
