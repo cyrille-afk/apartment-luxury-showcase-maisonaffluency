@@ -592,10 +592,19 @@ const PublicDesignerProfile = () => {
                       }
                     }
 
-                    // Remove the first media from the remaining bio so EditorialBiography handles the rest
-                    const editorialBio = firstMediaIdx >= 0
-                      ? [...remainingBlocks.slice(0, firstMediaIdx), ...remainingBlocks.slice(firstMediaIdx + 1)].join("\n\n")
-                      : remainingBio;
+                    // Pull the first text block after the first media so it can sit side-by-side with that image
+                    const firstPairTextIdx = firstMediaIdx >= 0
+                      ? remainingBlocks.findIndex((block, idx) => idx > firstMediaIdx && !isMediaBlock(block))
+                      : -1;
+                    const firstPairText = firstPairTextIdx >= 0 ? remainingBlocks[firstPairTextIdx] : null;
+
+                    // Remove consumed blocks (first media + first paired text) from editorial flow
+                    const consumedIndexes = new Set<number>();
+                    if (firstMediaIdx >= 0) consumedIndexes.add(firstMediaIdx);
+                    if (firstPairTextIdx >= 0) consumedIndexes.add(firstPairTextIdx);
+                    const editorialBio = remainingBlocks
+                      .filter((_, idx) => !consumedIndexes.has(idx))
+                      .join("\n\n");
 
                     return (
                       <>
@@ -606,6 +615,9 @@ const PublicDesignerProfile = () => {
                               {heroParagraphs.map((p: string, i: number) => (
                                 <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
                               ))}
+                              {firstPairText && (
+                                <p className={heroParagraphs.length > 0 ? "mt-4" : ""}>{renderParagraph(firstPairText)}</p>
+                              )}
                             </div>
                           </div>
                           {firstMediaParsed && (
