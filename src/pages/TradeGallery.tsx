@@ -53,8 +53,8 @@ const TradeGallery = () => {
   const [lastFavoritedName, setLastFavoritedName] = useState<string>("");
 
   // Price lookup from trade_products table
-  const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string }>>(new Map());
-  const [priceEntries, setPriceEntries] = useState<{ name: string; cents: number; currency: string }[]>([]);
+  const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string; price_unit?: string }>>(new Map());
+  const [priceEntries, setPriceEntries] = useState<{ name: string; cents: number; currency: string; price_unit?: string }[]>([]);
 
   const normalizeName = (s: string) =>
     s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
@@ -64,14 +64,14 @@ const TradeGallery = () => {
   const refreshPrices = async () => {
     const { data } = await supabase
       .from("trade_products")
-      .select("product_name, trade_price_cents, currency")
+      .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit")
       .not("trade_price_cents", "is", null);
     if (data) {
-      const lookup = new Map<string, { cents: number; currency: string }>();
-      const entries: { name: string; cents: number; currency: string }[] = [];
+      const lookup = new Map<string, { cents: number; currency: string; price_unit?: string }>();
+      const entries: { name: string; cents: number; currency: string; price_unit?: string }[] = [];
       for (const p of data) {
         if (p.trade_price_cents) {
-          const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency };
+          const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency, price_unit: p.price_unit };
           entries.push(entry);
           lookup.set(p.product_name.trim().toLowerCase(), entry);
           const norm = normalizeName(p.product_name);
@@ -162,7 +162,7 @@ const TradeGallery = () => {
   );
 
   /** Find price by exact name, normalized name, substring, or token overlap */
-  const getProductPrice = (product: TradeProduct): { cents: number; currency: string } | null => {
+  const getProductPrice = (product: TradeProduct): { cents: number; currency: string; price_unit?: string } | null => {
     const nameKey = product.product_name.trim().toLowerCase();
     if (priceLookup.has(nameKey)) return priceLookup.get(nameKey)!;
     if (product.subtitle) {
@@ -180,7 +180,7 @@ const TradeGallery = () => {
     // Token overlap
     const targetTokens = new Set(tokenizeName(product.product_name));
     if (targetTokens.size === 0) return null;
-    let best: { cents: number; currency: string } | null = null;
+    let best: { cents: number; currency: string; price_unit?: string } | null = null;
     let bestScore = 0;
     for (const e of priceEntries) {
       const ct = tokenizeName(e.name);
@@ -192,9 +192,9 @@ const TradeGallery = () => {
     return best;
   };
 
-  const applyDiscount = (p: { cents: number; currency: string } | null) => {
+  const applyDiscount = (p: { cents: number; currency: string; price_unit?: string } | null) => {
     if (!p) return null;
-    return showTradePrice ? { cents: Math.round(p.cents * (1 - TRADE_DISCOUNT)), currency: p.currency } : p;
+    return showTradePrice ? { cents: Math.round(p.cents * (1 - TRADE_DISCOUNT)), currency: p.currency, price_unit: p.price_unit } : p;
   };
 
   const filtered = useMemo(() => {
@@ -229,7 +229,7 @@ const TradeGallery = () => {
     section: "designers",
     price: (() => {
       const p = applyDiscount(getProductPrice(product));
-      return p ? formatPriceConverted(p.cents, p.currency, displayCurrency, fxRates) : null;
+      return p ? formatPriceConverted(p.cents, p.currency, displayCurrency, fxRates, p.price_unit) : null;
     })(),
   });
 
@@ -247,7 +247,7 @@ const TradeGallery = () => {
       category: product.category,
       subcategory: product.subcategory,
       pdf_url: product.pdf_url,
-      price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates) : null,
+      price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit) : null,
     };
   };
 
@@ -502,7 +502,7 @@ const TradeGallery = () => {
                     />
                   ) : price ? (
                     <p className="font-display text-sm text-accent font-semibold mt-1 inline-flex items-center justify-center gap-1.5">
-                      {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
+                      {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
                       {showTradePrice && <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">Trade –8%</span>}
                     </p>
                   ) : null}
@@ -550,7 +550,7 @@ const TradeGallery = () => {
                   </div>
                 ) : price ? (
                   <span className="font-display text-sm text-accent font-semibold shrink-0 inline-flex items-center gap-1.5">
-                    {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
+                    {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
                     {showTradePrice && <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>}
                   </span>
                 ) : null}
