@@ -535,7 +535,7 @@ const Navigation = () => {
                   ) : (
                     <>
                       <DropdownMenuItem
-                        onClick={() => { setAuthGateOpen(true); setAuthGateMode("signup"); }}
+                        onClick={() => { setAuthGateOpen(true); }}
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                       >
                         <UserPlus className="h-4 w-4 text-primary" />
@@ -543,7 +543,7 @@ const Navigation = () => {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => { setAuthGateOpen(true); setAuthGateMode("login"); }}
+                        onClick={() => { setAuthGateOpen(true); }}
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                       >
                         <LogIn className="h-4 w-4 text-primary" />
