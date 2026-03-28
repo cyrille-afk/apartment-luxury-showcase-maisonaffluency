@@ -25,6 +25,8 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [isDesigner, setIsDesigner] = useState(false);
+  const [newsletter, setNewsletter] = useState(true);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
