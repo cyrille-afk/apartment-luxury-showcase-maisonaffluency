@@ -228,13 +228,13 @@ const TradeGallery = () => {
     designerId: product.id,
     section: "designers",
     price: (() => {
-      const p = getProductPrice(product);
+      const p = applyDiscount(getProductPrice(product));
       return p ? formatPriceConverted(p.cents, p.currency, displayCurrency, fxRates) : null;
     })(),
   });
 
   const toLightboxItem = (product: TradeProduct): TradeProductLightboxItem => {
-    const price = getProductPrice(product);
+    const price = applyDiscount(getProductPrice(product));
     return {
       id: product.id,
       product_name: product.product_name,
@@ -248,6 +248,7 @@ const TradeGallery = () => {
       subcategory: product.subcategory,
       pdf_url: product.pdf_url,
       price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates) : null,
+    };
     };
   };
 
