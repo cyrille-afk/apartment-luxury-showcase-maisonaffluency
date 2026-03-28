@@ -204,7 +204,7 @@ const ScrapeProducts = () => {
         <ScrapeDiscoverAll onLoadBrands={setBrands} />
         </ScrapeErrorBoundary>
 
-        {/* New scrape form */}
+        <ScrapeErrorBoundary section="New Scrape Form">
         <div className="space-y-4">
           <h3 className="font-display text-sm text-foreground">New Scrape</h3>
           {brands.map((brand, idx) => (
@@ -225,6 +225,7 @@ const ScrapeProducts = () => {
             Add another brand
           </button>
         </div>
+        </ScrapeErrorBoundary>
 
         {/* Scrape settings */}
         <div className="flex items-center gap-4 flex-wrap">
