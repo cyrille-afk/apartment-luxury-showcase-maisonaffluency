@@ -504,7 +504,7 @@ const Navigation = () => {
             </div>
           </div>
           {/* Icons row below */}
-          <div className="w-full flex justify-end -mt-1 pb-1 gap-5">
+          <div className="w-full flex justify-center -mt-1 pb-1 gap-5">
               {/* Account icon */}
               <DropdownMenu>
                 <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
