@@ -358,6 +358,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
     let best: PublicLightboxItem | null = null;
     let bestScore = 0;
+    let bestNoDesigner: PublicLightboxItem | null = null;
+    let bestNoDesignerScore = 0;
 
     for (const item of allCuratorPicks) {
       const itemName = norm(item.title);
@@ -369,14 +371,22 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       const nameScore = shorter > 0 ? overlap / shorter : 0;
 
       const substringBonus = (itemName.includes(normName) || normName.includes(itemName)) ? 0.3 : 0;
-      const designerBonus = isDesignerMatch(itemBrand) ? 0.4 : 0;
+      const designerMatch = isDesignerMatch(itemBrand);
 
-      const score = nameScore + substringBonus + designerBonus;
-      if (score > bestScore && (nameScore >= 0.3 || substringBonus > 0)) {
+      const score = nameScore + substringBonus;
+      if (score < 0.3 && substringBonus === 0) continue;
+
+      if (designerMatch && score > bestScore) {
         bestScore = score;
         best = item;
+      } else if (!designerMatch && score > bestNoDesignerScore) {
+        bestNoDesignerScore = score;
+        bestNoDesigner = item;
       }
     }
+
+    // Prefer designer-matched result; only fall back if no designer match found
+    if (!best && !normDesigner) best = bestNoDesigner;
 
     if (best) {
       setHotspotLightboxProduct(best);
