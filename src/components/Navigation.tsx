@@ -481,7 +481,7 @@ const Navigation = () => {
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
               </div>
             </div>
-            <div className="flex justify-end items-center gap-4">
+            <div className="flex justify-end items-center gap-5">
               <DropdownMenu>
                 <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none relative group">
                   Contact Us
@@ -501,10 +501,7 @@ const Navigation = () => {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-          </div>
-          {/* Icons row below */}
-          <div className="w-full flex justify-end -mt-1 pb-1 gap-5">
+
               {/* Account icon */}
               <DropdownMenu>
                 <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
@@ -581,6 +578,7 @@ const Navigation = () => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+            </div>
           </div>
 
           <div className="flex items-center gap-6 lg:gap-10 pb-3 self-start">
