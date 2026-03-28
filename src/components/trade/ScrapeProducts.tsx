@@ -1,57 +1,158 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ChevronRight, Globe, Package } from "lucide-react";
+import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+interface BrandEntry {
+  id: string;
+  brand_name: string;
+  category: string;
+  urls_text: string;
+}
+
+interface SavedConfig {
+  id: string;
+  brand_name: string;
+  category: string;
+  urls: string[];
+  is_active: boolean;
+  schedule_cron: string | null;
+  last_run_at: string | null;
+  last_run_result: any;
+}
+
+const SCHEDULE_OPTIONS = [
+  { label: "Manual only", value: "" },
+  { label: "Daily", value: "0 3 * * *" },
+  { label: "Weekly (Mon)", value: "0 3 * * 1" },
+  { label: "Monthly (1st)", value: "0 3 1 * *" },
+];
 
 const ScrapeProducts = () => {
   const { toast } = useToast();
-  const [urlText, setUrlText] = useState("");
-  const [brandName, setBrandName] = useState("");
-  const [category, setCategory] = useState("Rugs");
-  const [scraping, setScraping] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [brands, setBrands] = useState<BrandEntry[]>([
+    { id: crypto.randomUUID(), brand_name: "", category: "Rugs", urls_text: "" },
+  ]);
+  const [scraping, setScaping] = useState(false);
+  const [results, setResults] = useState<any>(null);
+  const [saveConfigs, setSaveConfigs] = useState(true);
+  const [savedConfigs, setSavedConfigs] = useState<SavedConfig[]>([]);
+  const [loadingConfigs, setLoadingConfigs] = useState(false);
+  const [runningConfigId, setRunningConfigId] = useState<string | null>(null);
+
+  const fetchConfigs = useCallback(async () => {
+    setLoadingConfigs(true);
+    const { data } = await supabase.from("scrape_configs").select("*").order("brand_name") as { data: SavedConfig[] | null };
+    setSavedConfigs(data || []);
+    setLoadingConfigs(false);
+  }, []);
+
+  useEffect(() => { fetchConfigs(); }, [fetchConfigs]);
+
+  const addBrand = () => {
+    setBrands((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), brand_name: "", category: "Uncategorized", urls_text: "" },
+    ]);
+  };
+
+  const removeBrand = (id: string) => {
+    if (brands.length <= 1) return;
+    setBrands((prev) => prev.filter((b) => b.id !== id));
+  };
+
+  const updateBrand = (id: string, field: keyof BrandEntry, value: string) => {
+    setBrands((prev) => prev.map((b) => (b.id === id ? { ...b, [field]: value } : b)));
+  };
 
   const handleScrape = async () => {
-    const urls = urlText
-      .split(/[\n,]+/)
-      .map((u) => u.trim())
-      .filter((u) => u.startsWith("http"));
+    const brandsPayload = brands
+      .filter((b) => b.brand_name.trim() && b.urls_text.trim())
+      .map((b) => ({
+        brand_name: b.brand_name.trim(),
+        category: b.category.trim() || "Uncategorized",
+        urls: b.urls_text
+          .split(/[\n,]+/)
+          .map((u) => u.trim())
+          .filter((u) => u.startsWith("http")),
+      }))
+      .filter((b) => b.urls.length > 0);
 
-    if (!urls.length) {
-      toast({ title: "No valid URLs found", variant: "destructive" });
+    if (!brandsPayload.length) {
+      toast({ title: "Add at least one brand with valid URLs", variant: "destructive" });
       return;
     }
-    if (!brandName.trim()) {
-      toast({ title: "Brand name is required", variant: "destructive" });
-      return;
-    }
 
-    setScraping(true);
-    setResult(null);
+    const totalUrls = brandsPayload.reduce((s, b) => s + b.urls.length, 0);
+    setScaping(true);
+    setResults(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("scrape-products", {
         body: {
-          urls,
-          brand_name: brandName.trim(),
-          category: category.trim() || "Uncategorized",
+          brands: brandsPayload,
+          save_configs: saveConfigs,
         },
       });
-
       if (error) throw error;
-      setResult(data);
+      setResults(data);
+      fetchConfigs();
       toast({
-        title: "Scrape complete",
-        description: `${data.inserted} inserted, ${data.updated} updated, ${data.skipped} skipped`,
+        title: `Scrape complete — ${brandsPayload.length} brand(s)`,
+        description: `${data.summary.total_inserted} inserted, ${data.summary.total_updated} updated`,
       });
     } catch (err: any) {
       toast({ title: "Scrape failed", description: err.message, variant: "destructive" });
-      setResult({ error: err.message });
+      setResults({ error: err.message });
     } finally {
-      setScraping(false);
+      setScaping(false);
     }
   };
+
+  const runSavedConfig = async (configId: string) => {
+    setRunningConfigId(configId);
+    try {
+      const { data, error } = await supabase.functions.invoke("scrape-products", {
+        body: { config_id: configId },
+      });
+      if (error) throw error;
+      toast({
+        title: "Re-scrape complete",
+        description: `${data.inserted} inserted, ${data.updated} updated`,
+      });
+      fetchConfigs();
+    } catch (err: any) {
+      toast({ title: "Re-scrape failed", description: err.message, variant: "destructive" });
+    } finally {
+      setRunningConfigId(null);
+    }
+  };
+
+  const toggleConfigActive = async (config: SavedConfig) => {
+    await supabase.from("scrape_configs").update({ is_active: !config.is_active }).eq("id", config.id);
+    fetchConfigs();
+  };
+
+  const updateSchedule = async (configId: string, cron: string) => {
+    await supabase.from("scrape_configs").update({
+      schedule_cron: cron || null,
+      updated_at: new Date().toISOString(),
+    }).eq("id", configId);
+    fetchConfigs();
+    toast({ title: "Schedule updated" });
+  };
+
+  const deleteConfig = async (configId: string) => {
+    await supabase.from("scrape_configs").delete().eq("id", configId);
+    fetchConfigs();
+    toast({ title: "Config deleted" });
+  };
+
+  const totalUrls = brands.reduce(
+    (s, b) => s + b.urls_text.split(/[\n,]+/).filter((u) => u.trim().startsWith("http")).length,
+    0
+  );
 
   return (
     <Collapsible>
@@ -60,107 +161,262 @@ const ScrapeProducts = () => {
         <h2 className="font-display text-lg text-foreground">Scrape Products</h2>
       </CollapsibleTrigger>
       <p className="font-body text-xs text-muted-foreground ml-6">
-        Paste product page URLs to scrape pricing and details via Firecrawl into the trade catalogue.
+        Scrape product pages via Firecrawl. Supports multiple brands and saved configurations.
       </p>
-      <CollapsibleContent className="mt-3 ml-6 space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="font-body text-xs text-muted-foreground block mb-1">Brand Name *</label>
-            <div className="relative">
-              <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
-              <input
-                value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
-                placeholder="e.g. Atelier Février"
-                className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
-              />
+      <CollapsibleContent className="mt-3 ml-6 space-y-6">
+        {/* Saved Configs */}
+        {savedConfigs.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="font-display text-sm text-foreground flex items-center gap-2">
+              <Save className="h-3.5 w-3.5" /> Saved Configurations
+            </h3>
+            <div className="space-y-2">
+              {savedConfigs.map((config) => (
+                <div
+                  key={config.id}
+                  className="border border-border rounded-md p-3 flex items-center gap-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-display text-sm text-foreground">{config.brand_name}</span>
+                      <span className="font-body text-[10px] text-muted-foreground px-1.5 py-0.5 rounded bg-muted">
+                        {config.category}
+                      </span>
+                      <span className="font-body text-[10px] text-muted-foreground">
+                        {config.urls.length} URLs
+                      </span>
+                      {!config.is_active && (
+                        <span className="font-body text-[10px] text-destructive/70 px-1.5 py-0.5 rounded bg-destructive/10">
+                          paused
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 font-body text-[10px] text-muted-foreground/60">
+                      {config.last_run_at && (
+                        <span>Last run: {new Date(config.last_run_at).toLocaleDateString()}</span>
+                      )}
+                      {config.last_run_result && !config.last_run_result.error && (
+                        <span>
+                          {config.last_run_result.inserted}i / {config.last_run_result.updated}u / {config.last_run_result.skipped}s
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <select
+                    value={config.schedule_cron || ""}
+                    onChange={(e) => updateSchedule(config.id, e.target.value)}
+                    className="px-2 py-1 rounded border border-border bg-background font-body text-[10px] text-foreground"
+                  >
+                    {SCHEDULE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+
+                  <button
+                    onClick={() => toggleConfigActive(config)}
+                    className={`px-2 py-1 rounded border text-[10px] font-body transition-colors ${
+                      config.is_active
+                        ? "border-success/30 text-success hover:bg-success/10"
+                        : "border-muted text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {config.is_active ? "Active" : "Paused"}
+                  </button>
+
+                  <button
+                    onClick={() => runSavedConfig(config.id)}
+                    disabled={runningConfigId === config.id}
+                    className="p-1.5 rounded border border-border text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+                    title="Run now"
+                  >
+                    {runningConfigId === config.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Play className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => deleteConfig(config.id)}
+                    className="p-1.5 rounded border border-destructive/20 text-destructive/60 hover:bg-destructive/10 transition-colors"
+                    title="Delete config"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
-          <div>
-            <label className="font-body text-xs text-muted-foreground block mb-1">Category</label>
-            <input
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="e.g. Rugs, Lighting, Furniture"
-              className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
-            />
-          </div>
+        )}
+
+        {/* New scrape form */}
+        <div className="space-y-4">
+          <h3 className="font-display text-sm text-foreground">New Scrape</h3>
+
+          {brands.map((brand, idx) => (
+            <div key={brand.id} className="border border-border rounded-md p-4 space-y-3 relative">
+              {brands.length > 1 && (
+                <button
+                  onClick={() => removeBrand(brand.id)}
+                  className="absolute top-3 right-3 p-1 text-destructive/50 hover:text-destructive transition-colors"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">
+                  Brand {idx + 1}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-body text-xs text-muted-foreground block mb-1">Brand Name *</label>
+                  <div className="relative">
+                    <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+                    <input
+                      value={brand.brand_name}
+                      onChange={(e) => updateBrand(brand.id, "brand_name", e.target.value)}
+                      placeholder="e.g. Atelier Février"
+                      className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="font-body text-xs text-muted-foreground block mb-1">Category</label>
+                  <input
+                    value={brand.category}
+                    onChange={(e) => updateBrand(brand.id, "category", e.target.value)}
+                    placeholder="e.g. Rugs, Lighting"
+                    className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-body text-xs text-muted-foreground block mb-1">
+                  Product URLs (one per line)
+                </label>
+                <textarea
+                  value={brand.urls_text}
+                  onChange={(e) => updateBrand(brand.id, "urls_text", e.target.value)}
+                  rows={5}
+                  placeholder={"https://example.com/product/item-1/\nhttps://example.com/product/item-2/"}
+                  className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary/30 font-mono leading-relaxed resize-y"
+                />
+                <p className="font-body text-[10px] text-muted-foreground/50 mt-0.5">
+                  {brand.urls_text.split(/[\n,]+/).filter((u) => u.trim().startsWith("http")).length} URL(s)
+                </p>
+              </div>
+            </div>
+          ))}
+
+          <button
+            onClick={addBrand}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-dashed border-border text-muted-foreground font-body text-xs hover:border-foreground/30 hover:text-foreground transition-colors"
+          >
+            <Plus className="h-3 w-3" />
+            Add another brand
+          </button>
         </div>
 
-        <div>
-          <label className="font-body text-xs text-muted-foreground block mb-1">
-            Product URLs (one per line or comma-separated)
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 font-body text-xs text-muted-foreground cursor-pointer">
+            <input
+              type="checkbox"
+              checked={saveConfigs}
+              onChange={(e) => setSaveConfigs(e.target.checked)}
+              className="rounded border-border"
+            />
+            Save configuration for re-scraping
           </label>
-          <textarea
-            value={urlText}
-            onChange={(e) => setUrlText(e.target.value)}
-            rows={8}
-            placeholder={"https://example.com/product/item-1/\nhttps://example.com/product/item-2/\nhttps://example.com/product/item-3/"}
-            className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary/30 font-mono leading-relaxed resize-y"
-          />
-          <p className="font-body text-[10px] text-muted-foreground/50 mt-1">
-            {urlText.split(/[\n,]+/).filter((u) => u.trim().startsWith("http")).length} valid URL(s) detected
-          </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={handleScrape}
-            disabled={scraping || !brandName.trim() || !urlText.trim()}
+            disabled={scraping || !brands.some((b) => b.brand_name.trim() && b.urls_text.trim())}
             className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] hover:bg-foreground/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {scraping ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Scraping…
+                Scraping {brands.filter((b) => b.brand_name.trim()).length} brand(s)…
               </>
             ) : (
               <>
                 <Globe className="h-3.5 w-3.5" />
-                Scrape &amp; Import
+                Scrape &amp; Import ({totalUrls} URLs)
               </>
             )}
           </button>
           {scraping && (
             <span className="font-body text-xs text-muted-foreground animate-pulse">
-              This may take 3–6 minutes for large batches…
+              This may take several minutes for large batches…
             </span>
           )}
         </div>
 
-        {result && (
-          <div className="rounded-md border border-border p-4 bg-muted/30">
-            <h4 className="font-display text-sm text-foreground mb-2">
-              {result.error ? "Error" : "Results"}
+        {/* Results */}
+        {results && (
+          <div className="rounded-md border border-border p-4 bg-muted/30 space-y-3">
+            <h4 className="font-display text-sm text-foreground">
+              {results.error ? "Error" : "Results"}
             </h4>
-            {result.error ? (
-              <p className="font-body text-xs text-destructive">{result.error}</p>
+            {results.error ? (
+              <p className="font-body text-xs text-destructive">{results.error}</p>
+            ) : results.results ? (
+              <>
+                <div className="grid grid-cols-4 gap-3 font-body text-xs text-center">
+                  <div>
+                    <div className="text-lg font-display text-foreground">{results.summary.brands}</div>
+                    <div className="text-muted-foreground">Brands</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-display text-success">{results.summary.total_inserted}</div>
+                    <div className="text-muted-foreground">Inserted</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-display text-warning">{results.summary.total_updated}</div>
+                    <div className="text-muted-foreground">Updated</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-display text-muted-foreground">{results.summary.total_skipped}</div>
+                    <div className="text-muted-foreground">Skipped</div>
+                  </div>
+                </div>
+                {results.results.map((r: any, i: number) => (
+                  <div key={i} className="border-t border-border pt-2 font-body text-xs">
+                    <span className="font-medium text-foreground">{r.brand_name}</span>
+                    <span className="text-muted-foreground ml-2">
+                      {r.total_scraped} scraped · {r.inserted}i / {r.updated}u / {r.skipped}s
+                    </span>
+                    {r.errors?.length > 0 && (
+                      <span className="text-destructive/70 ml-2">({r.errors.length} errors)</span>
+                    )}
+                  </div>
+                ))}
+              </>
             ) : (
-              <div className="grid grid-cols-4 gap-3 font-body text-xs">
-                <div className="text-center">
-                  <div className="text-xl font-display text-foreground">{result.total_scraped}</div>
+              <div className="grid grid-cols-4 gap-3 font-body text-xs text-center">
+                <div>
+                  <div className="text-lg font-display text-foreground">{results.total_scraped}</div>
                   <div className="text-muted-foreground">Scraped</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-xl font-display text-success">{result.inserted}</div>
+                <div>
+                  <div className="text-lg font-display text-success">{results.inserted}</div>
                   <div className="text-muted-foreground">Inserted</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-xl font-display text-warning">{result.updated}</div>
+                <div>
+                  <div className="text-lg font-display text-warning">{results.updated}</div>
                   <div className="text-muted-foreground">Updated</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-xl font-display text-muted-foreground">{result.skipped}</div>
+                <div>
+                  <div className="text-lg font-display text-muted-foreground">{results.skipped}</div>
                   <div className="text-muted-foreground">Skipped</div>
                 </div>
-              </div>
-            )}
-            {result.errors?.length > 0 && (
-              <div className="mt-3 space-y-1">
-                <p className="font-body text-[10px] text-destructive font-medium">Errors:</p>
-                {result.errors.slice(0, 10).map((e: string, i: number) => (
-                  <p key={i} className="font-body text-[10px] text-destructive/70">{e}</p>
-                ))}
               </div>
             )}
           </div>
