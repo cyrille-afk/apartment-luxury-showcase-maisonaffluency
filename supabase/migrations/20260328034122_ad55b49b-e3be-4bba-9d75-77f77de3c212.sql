@@ -1,0 +1,5 @@
+UPDATE designers SET biography = replace(
+  biography,
+  E'<strong>\u2018Tous nos tapis semblent vivants et anim\u00e9s gr\u00e2ce \u00e0 un jeu de texture et de mouvement. Il arrive que l\u2019inspiration soit la m\u00eame, mais l\u2019expression est toujours diff\u00e9rente.\u2019</strong> \u2014 Lisa Mukhia Pretet, De Fil en D\u00e9co interview, 2024',
+  E'<strong>\u2018Tous nos tapis semblent vivants et anim\u00e9s gr\u00e2ce \u00e0 un jeu de texture et de mouvement. Il arrive que l\u2019inspiration soit la m\u00eame, mais l\u2019expression est toujours diff\u00e9rente.\u2019</strong> \u2014 Lisa Mukhia Pretet, De Fil en D\u00e9co interview, 2024\n(\u2018All our rugs seem alive and animated through a play of texture and movement. The inspiration may be the same, but the expression is always different.\u2019)'
+) WHERE slug='atelier-fevrier';
