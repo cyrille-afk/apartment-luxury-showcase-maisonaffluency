@@ -135,16 +135,31 @@ const TradeLanding = () => {
     });
   }, []);
 
+  const location = useLocation();
+
   useEffect(() => {
-    if (window.location.hash === "#register") {
-      setTimeout(() => {
-        const target = document.getElementById("register");
-        if (!target) return;
-        const y = target.getBoundingClientRect().top + window.scrollY - 120;
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }, 600);
-    }
-  }, []);
+    const hash = location.hash;
+    if (!hash || (hash !== "#register" && hash !== "#apply")) return;
+
+    const id = hash.replace("#", "");
+    const scrollToHash = () => {
+      const target = document.getElementById(id);
+      if (!target) return;
+
+      const nav = document.querySelector("nav");
+      const featuredBanner = document.querySelector("[data-featured-read-banner]");
+      const navHeight = nav?.getBoundingClientRect().height ?? 0;
+      const bannerHeight = featuredBanner && window.getComputedStyle(featuredBanner).position === "fixed"
+        ? featuredBanner.getBoundingClientRect().height
+        : 0;
+      const offset = navHeight + bannerHeight + 28;
+
+      const y = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    };
+
+    requestAnimationFrame(() => setTimeout(scrollToHash, 250));
+  }, [location.hash]);
 
   const scrollToForm = () => {
     const el = formRef.current;
