@@ -690,10 +690,21 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   }, [currentFlatIndex, currentItemIndex, currentSectionItems, filterDesigner]);
 
   const goToPrevious = () => {
-    setCurrentItemIndex(prev => prev === 0 ? currentSectionItems.length - 1 : prev - 1);
+    if (currentItemIndex > 0) {
+      setCurrentItemIndex(prev => prev - 1);
+    } else if (currentSectionIndex > 0) {
+      const prevSection = currentSectionIndex - 1;
+      setCurrentSectionIndex(prevSection);
+      setCurrentItemIndex(galleryExperiences[prevSection].items.length - 1);
+    }
   };
   const goToNext = () => {
-    setCurrentItemIndex(prev => prev === currentSectionItems.length - 1 ? 0 : prev + 1);
+    if (currentItemIndex < currentSectionItems.length - 1) {
+      setCurrentItemIndex(prev => prev + 1);
+    } else if (currentSectionIndex < galleryExperiences.length - 1) {
+      setCurrentSectionIndex(currentSectionIndex + 1);
+      setCurrentItemIndex(0);
+    }
   };
   // Swipe detection via shared hook with native non-passive listeners
   const swipeContainerRef = useRef<HTMLDivElement>(null);
