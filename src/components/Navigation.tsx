@@ -552,7 +552,7 @@ const Navigation = () => {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={() => navigate("/trade/register")}
+                          onClick={() => navigate("/trade#register")}
                           className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                         >
                           <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
