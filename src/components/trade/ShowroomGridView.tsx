@@ -35,6 +35,7 @@ interface ShowroomProduct {
   pdf_url?: string;
   trade_price_cents?: number | null;
   currency?: string;
+  price_unit?: string;
 }
 
 interface ShowroomGridViewProps {
@@ -92,7 +93,7 @@ const inferCategory = (name: string): string => {
   return "Décor";
 };
 
-type PriceMatch = { name: string; cents: number; currency: string };
+type PriceMatch = { name: string; cents: number; currency: string; price_unit?: string };
 
 const normalizeProductName = (value: string): string =>
   value.toLowerCase().replace(/['']/g, "").replace(/&/g, " and ").replace(/\([^)]*\)/g, " ").replace(/[^a-z0-9\s]/g, " ").replace(/\b(custom|details?|edition|ed|piece|volume|the|and|of|in)\b/g, " ").replace(/\s+/g, " ").trim();
@@ -199,7 +200,7 @@ const ShowroomGridView = ({
 
         const { data: pricedProducts } = await supabase
           .from("trade_products")
-          .select("id, product_name, trade_price_cents, rrp_price_cents, currency, gallery_images")
+          .select("id, product_name, trade_price_cents, rrp_price_cents, currency, gallery_images, price_unit")
           .eq("is_active", true);
 
         const priceLookup = new Map<string, PriceMatch>();
@@ -220,7 +221,7 @@ const ShowroomGridView = ({
             }
             const cents = pp.trade_price_cents ?? pp.rrp_price_cents;
             if (!cents) continue;
-            const entry: PriceMatch = { name: pp.product_name, cents, currency: pp.currency };
+            const entry: PriceMatch = { name: pp.product_name, cents, currency: pp.currency, price_unit: pp.price_unit };
             priceEntries.push(entry);
             priceLookup.set(ppKey, entry);
             if (normalizedName) priceLookup.set(normalizedName, entry);
@@ -238,7 +239,7 @@ const ShowroomGridView = ({
             if (existingItem) {
               const price = findBestPriceMatch(item.product_name, priceLookup, priceEntries);
               const pdf = pdfLookup.get(key);
-              if (price && !existingItem.trade_price_cents) { existingItem.trade_price_cents = price.cents; existingItem.currency = price.currency; }
+              if (price && !existingItem.trade_price_cents) { existingItem.trade_price_cents = price.cents; existingItem.currency = price.currency; existingItem.price_unit = price.price_unit; }
               if (pdf && !existingItem.pdf_url) existingItem.pdf_url = pdf;
             }
             continue;
@@ -259,6 +260,7 @@ const ShowroomGridView = ({
               pdf_url: pdfLookup.get(key),
               trade_price_cents: price?.cents ?? null,
               currency: price?.currency,
+              price_unit: price?.price_unit,
             });
             if (item.product_image_url) seenImageUrls.set(item.product_image_url, key);
           }
@@ -458,7 +460,7 @@ const ShowroomGridView = ({
             const pinned = isPinned(product.product_name, product.id);
             const isHighlighted = !!(highlightedId && product.trade_product_id === highlightedId);
             const price = product.trade_price_cents && product.currency
-              ? { cents: product.trade_price_cents, currency: product.currency }
+              ? { cents: product.trade_price_cents, currency: product.currency, price_unit: product.price_unit }
               : null;
             return (
               <div
@@ -557,7 +559,7 @@ const ShowroomGridView = ({
                     />
                   ) : price ? (
                     <p className="font-display text-sm text-accent font-semibold mt-1">
-                      {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
+                      {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
                     </p>
                   ) : null}
                 </div>
@@ -572,7 +574,7 @@ const ShowroomGridView = ({
             const isAdded = addedProductIds.has(product.id);
             const pinned = isPinned(product.product_name, product.id);
             const price = product.trade_price_cents && product.currency
-              ? { cents: product.trade_price_cents, currency: product.currency }
+              ? { cents: product.trade_price_cents, currency: product.currency, price_unit: product.price_unit }
               : null;
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
@@ -606,7 +608,7 @@ const ShowroomGridView = ({
                   </div>
                 ) : price ? (
                   <span className="font-display text-sm text-accent font-semibold shrink-0">
-                    {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
+                    {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
                   </span>
                 ) : null}
                 <button

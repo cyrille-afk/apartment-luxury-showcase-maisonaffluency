@@ -1,0 +1,1 @@
+UPDATE public.trade_products SET price_unit = 'per_sqm' WHERE id = '17a5a832-d3cc-4314-91d3-08208b1c9136';

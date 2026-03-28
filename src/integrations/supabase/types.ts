@@ -1703,6 +1703,7 @@ export type Database = {
           is_active: boolean
           lead_time: string | null
           materials: string | null
+          price_unit: string
           product_name: string
           rrp_price_cents: number | null
           sku: string | null
@@ -1724,6 +1725,7 @@ export type Database = {
           is_active?: boolean
           lead_time?: string | null
           materials?: string | null
+          price_unit?: string
           product_name: string
           rrp_price_cents?: number | null
           sku?: string | null
@@ -1745,6 +1747,7 @@ export type Database = {
           is_active?: boolean
           lead_time?: string | null
           materials?: string | null
+          price_unit?: string
           product_name?: string
           rrp_price_cents?: number | null
           sku?: string | null

@@ -76,21 +76,31 @@ export function convertCents(
   return Math.round(cents * rate);
 }
 
+/** Price unit suffixes for display */
+const PRICE_UNIT_SUFFIX: Record<string, string> = {
+  per_piece: "",
+  per_sqm: "/m²",
+  per_lm: "/lm",
+};
+
 /** Format cents as a price string, converting via live rates */
 export function formatPriceConverted(
   cents: number,
   originalCurrency: string,
   displayCurrency: DisplayCurrency,
   rates: Record<string, number>,
+  priceUnit?: string,
 ): string {
   const targetCurrency = displayCurrency === "original" ? originalCurrency : displayCurrency;
   const targetCents = convertCents(cents, originalCurrency, displayCurrency, rates);
-  return new Intl.NumberFormat("en-US", {
+  const formatted = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: targetCurrency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(targetCents / 100);
+  const suffix = priceUnit ? (PRICE_UNIT_SUFFIX[priceUnit] ?? "") : "";
+  return formatted + suffix;
 }
 
 const OPTIONS: { value: DisplayCurrency; label: string }[] = [
