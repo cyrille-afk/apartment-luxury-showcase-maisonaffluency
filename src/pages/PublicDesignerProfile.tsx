@@ -609,7 +609,7 @@ const PublicDesignerProfile = () => {
                             </div>
                           </div>
                           {firstMediaParsed && (
-                            <div className="shrink-0 w-full md:w-[38%]">
+                            <div className={`shrink-0 w-full ${firstMediaParsed.size === "small" ? "md:w-[28%]" : "md:w-[38%]"}`}>
                               <figure>
                                 <div className="rounded-xl overflow-hidden bg-muted/10">
                                   <img
