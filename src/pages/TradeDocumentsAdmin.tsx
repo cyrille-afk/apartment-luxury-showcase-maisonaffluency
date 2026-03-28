@@ -91,7 +91,7 @@ const TradeDocumentsAdmin = () => {
     setFetching(false);
   };
 
-  /** Swap sort_order of two documents within the same brand */
+  /** Swap sort_order of two documents within the same brand (optimistic, no refetch) */
   const handleReorder = useCallback(async (doc: TradeDocument, direction: "up" | "down") => {
     const brandDocs = documents.filter(d => d.brand_name === doc.brand_name);
     const idx = brandDocs.findIndex(d => d.id === doc.id);
@@ -101,15 +101,25 @@ const TradeDocumentsAdmin = () => {
     const other = brandDocs[swapIdx];
     const myOrder = doc.sort_order;
     const otherOrder = other.sort_order;
-    // If they have the same sort_order, offset them
     const newMyOrder = otherOrder;
     const newOtherOrder = myOrder === otherOrder ? myOrder + (direction === "up" ? 1 : -1) : myOrder;
+
+    // Optimistic local update
+    setDocuments(prev => {
+      const updated = prev.map(d => {
+        if (d.id === doc.id) return { ...d, sort_order: newMyOrder };
+        if (d.id === other.id) return { ...d, sort_order: newOtherOrder };
+        return d;
+      });
+      return updated.sort((a, b) =>
+        a.brand_name.localeCompare(b.brand_name) || a.sort_order - b.sort_order
+      );
+    });
 
     await Promise.all([
       supabase.from("trade_documents").update({ sort_order: newMyOrder }).eq("id", doc.id),
       supabase.from("trade_documents").update({ sort_order: newOtherOrder }).eq("id", other.id),
     ]);
-    fetchDocs();
   }, [documents]);
 
   const handleSave = async () => {
