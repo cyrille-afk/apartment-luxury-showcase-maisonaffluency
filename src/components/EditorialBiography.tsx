@@ -49,6 +49,27 @@ function normalizeCloudinaryVideoUrl(url: string): string {
 
 /** Render inline HTML: <strong>, <a href="...">, and highlighted quoted text */
 export function renderParagraph(text: string): React.ReactNode[] {
+  // Check for multi-line content with a parenthetical translation on its own line
+  const lines = text.split(/\n/);
+  if (lines.length > 1) {
+    return lines.flatMap((line, li) => {
+      const trimmed = line.trim();
+      // Render parenthetical lines in light grey
+      if (/^\([^)]+\)$/.test(trimmed)) {
+        return [
+          li > 0 ? <br key={`br-${li}`} /> : null,
+          <span key={`paren-${li}`} className="text-muted-foreground/60 not-italic text-[13px] md:text-sm">{trimmed}</span>,
+        ].filter(Boolean);
+      }
+      const nodes = renderSingleLine(trimmed);
+      return li > 0 ? [<br key={`br-${li}`} />, ...nodes] : nodes;
+    });
+  }
+  return renderSingleLine(text);
+}
+
+/** Render a single line of inline HTML */
+function renderSingleLine(text: string): React.ReactNode[] {
   // Split on <strong>...</strong> and <a href="...">...</a> tags
   const parts = text.split(/(<strong>[\s\S]*?<\/strong>|<a\s+href="[^"]*"[^>]*>[\s\S]*?<\/a>)/g);
   return parts.map((part, i) => {
