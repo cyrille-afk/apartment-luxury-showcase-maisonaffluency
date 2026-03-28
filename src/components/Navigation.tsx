@@ -503,14 +503,14 @@ const Navigation = () => {
               </DropdownMenu>
             </div>
           </div>
-          {/* Icons row below */}
-          <div className="w-full flex justify-center -mt-1 pb-1 gap-5">
+          {/* Icons row below — centered */}
+          <div className="flex justify-center -mt-1 pb-1 gap-5">
               {/* Account icon */}
               <DropdownMenu>
                 <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
                   <User className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
+                <DropdownMenuContent align="center" className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
                   {user ? (
                     <>
                       <div className="px-4 py-2.5 border-b border-border">
@@ -535,14 +535,15 @@ const Navigation = () => {
                   ) : (
                     <>
                       <DropdownMenuItem
-                        onClick={() => setAuthGateOpen(true)}
+                        onClick={() => { setAuthGateOpen(true); setAuthGateMode("signup"); }}
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                       >
                         <UserPlus className="h-4 w-4 text-primary" />
                         <span className="font-body text-sm">Sign Up</span>
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => setAuthGateOpen(true)}
+                        onClick={() => { setAuthGateOpen(true); setAuthGateMode("login"); }}
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                       >
                         <LogIn className="h-4 w-4 text-primary" />
