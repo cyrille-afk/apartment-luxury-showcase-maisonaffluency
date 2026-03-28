@@ -427,7 +427,22 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                             </p>
                           ) : null;
                         })()}
-                        {/* Trade price */}
+                        {/* PDF spec sheet link */}
+                        {(() => {
+                          const pdfUrl = getHotspotPdf(hotspot.product_name);
+                          return pdfUrl ? (
+                            <a
+                              href={pdfUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 mt-1.5 text-[10px] font-body text-primary hover:text-primary/80 transition-colors uppercase tracking-[0.1em]"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <FileText className="w-3 h-3" />
+                              View Spec Sheet
+                            </a>
+                          ) : null;
+                        })()}
                         {onAddToQuote && (() => {
                           const price = getHotspotPrice(hotspot.product_name);
                           return price ? (
