@@ -115,6 +115,97 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Group by brand/designer slug if requested
+    if (group_by_brand) {
+      const groups: Record<string, { slug: string; label: string; urls: string[] }> = {};
+      for (const link of productLinks) {
+        try {
+          const path = new URL(link).pathname;
+          // Extract brand slug from common URL patterns:
+          // /product/brand-name-product-title/ → try to match brand prefix
+          // /products-category/designer/brand-name/ → brand-name
+          const segments = path.split("/").filter(Boolean);
+          
+          let brandSlug = "unknown";
+          
+          // Pattern: /product/brandslug-productname/
+          if (segments[0] === "product" && segments[1]) {
+            // Try splitting on common separators — take first 1-3 words as brand
+            const parts = segments[1].split("-");
+            // Heuristic: look for repeating prefixes across all URLs
+            brandSlug = segments[1]; // full slug as fallback
+          }
+          
+          if (!groups[brandSlug]) {
+            // Create label from slug
+            const label = brandSlug
+              .split("-")
+              .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(" ");
+            groups[brandSlug] = { slug: brandSlug, label, urls: [] };
+          }
+          groups[brandSlug].urls.push(link);
+        } catch {
+          // skip malformed URLs
+        }
+      }
+      
+      // Now try to find common prefixes to group better
+      const allSlugs = Object.keys(groups);
+      if (allSlugs.length > 10) {
+        // Re-group by extracting brand prefix from product slugs
+        const regrouped: Record<string, { slug: string; label: string; urls: string[] }> = {};
+        
+        for (const link of productLinks) {
+          try {
+            const path = new URL(link).pathname;
+            const segments = path.split("/").filter(Boolean);
+            if (segments[0] === "product" && segments[1]) {
+              const parts = segments[1].split("-");
+              // Try progressively shorter prefixes to find groupings
+              // Most e-commerce sites use: brand-slug-product-name
+              // We'll try 2-word prefix first, then 3-word
+              let bestPrefix = parts.slice(0, 2).join("-");
+              
+              if (!regrouped[bestPrefix]) {
+                const label = bestPrefix
+                  .split("-")
+                  .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+                  .join(" ");
+                regrouped[bestPrefix] = { slug: bestPrefix, label, urls: [] };
+              }
+              regrouped[bestPrefix].urls.push(link);
+            }
+          } catch {}
+        }
+        
+        // If regrouping gives 2-50 groups, use it; otherwise fall back to full slugs
+        const regroupedArr = Object.values(regrouped).filter(g => g.urls.length > 0);
+        if (regroupedArr.length >= 2 && regroupedArr.length <= 200) {
+          return new Response(
+            JSON.stringify({
+              success: true,
+              total_links: links.length,
+              product_links: productLinks.length,
+              brands: regroupedArr.sort((a, b) => a.label.localeCompare(b.label)),
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
+      const brandsArr = Object.values(groups).filter(g => g.urls.length > 0);
+      return new Response(
+        JSON.stringify({
+          success: true,
+          total_links: links.length,
+          product_links: productLinks.length,
+          brands: brandsArr.sort((a, b) => a.label.localeCompare(b.label)),
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
