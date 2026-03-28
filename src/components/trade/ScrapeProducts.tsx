@@ -66,6 +66,7 @@ const ScrapeProducts = () => {
   const [remainingChunks, setRemainingChunks] = useState<{ brand_name: string; category: string; urls: string[] }[] | null>(null);
   const [results, setResults] = useState<any>(null);
   const [saveConfigs, setSaveConfigs] = useState(true);
+  const [chunkDelay, setChunkDelay] = useState(0);
   const [savedConfigs, setSavedConfigs] = useState<SavedConfig[]>([]);
   const [loadingConfigs, setLoadingConfigs] = useState(false);
   const [runningConfigId, setRunningConfigId] = useState<string | null>(null);
@@ -194,6 +195,11 @@ const ScrapeProducts = () => {
           },
         });
         if (error) throw error;
+
+        // Configurable delay between chunks
+        if (i < chunks.length - 1 && chunkDelay > 0) {
+          await new Promise((r) => setTimeout(r, chunkDelay * 1000));
+        }
 
         urlsDone += chunk.urls.length;
         totalInserted += data?.summary?.total_inserted || data?.inserted || 0;
@@ -912,6 +918,22 @@ const ScrapeProducts = () => {
               className="rounded border-border"
             />
             Save configuration for re-scraping
+          </label>
+          <label className="flex items-center gap-2 font-body text-xs text-muted-foreground">
+            <span>Chunk delay</span>
+            <select
+              value={chunkDelay}
+              onChange={(e) => setChunkDelay(Number(e.target.value))}
+              className="px-2 py-1 rounded border border-border bg-background font-body text-xs text-foreground"
+            >
+              <option value={0}>None</option>
+              <option value={2}>2s</option>
+              <option value={5}>5s</option>
+              <option value={10}>10s</option>
+              <option value={15}>15s</option>
+              <option value={30}>30s</option>
+              <option value={60}>60s</option>
+            </select>
           </label>
         </div>
 
