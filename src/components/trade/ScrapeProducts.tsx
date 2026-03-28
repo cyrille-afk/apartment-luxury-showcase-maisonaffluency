@@ -77,6 +77,9 @@ const ScrapeProducts = () => {
   const [editingUrlsConfigId, setEditingUrlsConfigId] = useState<string | null>(null);
   const [editingUrlsText, setEditingUrlsText] = useState("");
   const [mappingBrandId, setMappingBrandId] = useState<string | null>(null);
+  const [mappingConfigId, setMappingConfigId] = useState<string | null>(null);
+  const [configDiscoveredUrls, setConfigDiscoveredUrls] = useState<Record<string, string[]>>({});
+  const [configSelectedUrls, setConfigSelectedUrls] = useState<Record<string, Set<string>>>({});
   const [mapUrl, setMapUrl] = useState<Record<string, string>>({});
   const [mapSearch, setMapSearch] = useState<Record<string, string>>({});
   const [previewUrls, setPreviewUrls] = useState<Record<string, string[]>>({});
@@ -459,7 +462,115 @@ const ScrapeProducts = () => {
                         </span>
                       )}
                     </div>
+
+                    {/* Discovered URLs panel */}
+                    {configDiscoveredUrls[config.id]?.length > 0 && (
+                      <div className="mt-2 border border-border rounded p-2 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="font-body text-[10px] text-foreground">
+                            {configSelectedUrls[config.id]?.size || 0} / {configDiscoveredUrls[config.id].length} new URLs selected
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => setConfigSelectedUrls(prev => ({
+                                ...prev,
+                                [config.id]: new Set(configDiscoveredUrls[config.id])
+                              }))}
+                              className="font-body text-[10px] text-primary hover:underline"
+                            >All</button>
+                            <button
+                              onClick={() => setConfigSelectedUrls(prev => ({
+                                ...prev,
+                                [config.id]: new Set()
+                              }))}
+                              className="font-body text-[10px] text-muted-foreground hover:underline"
+                            >None</button>
+                          </div>
+                        </div>
+                        <div className="max-h-32 overflow-y-auto space-y-0.5">
+                          {configDiscoveredUrls[config.id].map((url) => (
+                            <label key={url} className="flex items-center gap-1.5 font-body text-[10px] text-muted-foreground hover:text-foreground cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={configSelectedUrls[config.id]?.has(url) || false}
+                                onChange={(e) => {
+                                  setConfigSelectedUrls(prev => {
+                                    const s = new Set(prev[config.id] || []);
+                                    e.target.checked ? s.add(url) : s.delete(url);
+                                    return { ...prev, [config.id]: s };
+                                  });
+                                }}
+                                className="rounded"
+                              />
+                              <span className="truncate">{url.replace(/^https?:\/\/[^/]+/, '')}</span>
+                            </label>
+                          ))}
+                        </div>
+                        <div className="flex gap-1.5">
+                          <button
+                            onClick={async () => {
+                              const selected = Array.from(configSelectedUrls[config.id] || []);
+                              if (!selected.length) { toast({ title: "No URLs selected", variant: "destructive" }); return; }
+                              const merged = [...new Set([...config.urls, ...selected])];
+                              await updateConfigField(config.id, "urls", merged);
+                              setConfigDiscoveredUrls(prev => { const n = { ...prev }; delete n[config.id]; return n; });
+                              setConfigSelectedUrls(prev => { const n = { ...prev }; delete n[config.id]; return n; });
+                              toast({ title: `Added ${selected.length} URLs`, description: `Config now has ${merged.length} total URLs` });
+                            }}
+                            className="px-2 py-1 rounded border border-success/30 text-success font-body text-[10px] hover:bg-success/10 transition-colors"
+                          >
+                            <Check className="h-3 w-3 inline mr-1" />Add selected
+                          </button>
+                          <button
+                            onClick={() => {
+                              setConfigDiscoveredUrls(prev => { const n = { ...prev }; delete n[config.id]; return n; });
+                            }}
+                            className="px-2 py-1 rounded border border-border text-muted-foreground font-body text-[10px] hover:bg-muted transition-colors"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Discover URLs button */}
+                  <button
+                    onClick={async () => {
+                      if (!config.urls.length) { toast({ title: "No existing URLs to derive site from", variant: "destructive" }); return; }
+                      const baseUrl = new URL(config.urls[0]).origin;
+                      setMappingConfigId(config.id);
+                      try {
+                        const { data, error } = await supabase.functions.invoke("firecrawl-map", {
+                          body: { url: baseUrl, limit: 500 },
+                        });
+                        if (error) throw error;
+                        const allUrls: string[] = (data.urls || data.links || []).filter((u: string) => u.startsWith("http"));
+                        const existingSet = new Set(config.urls);
+                        const newUrls = allUrls.filter(u => !existingSet.has(u));
+                        if (newUrls.length) {
+                          setConfigDiscoveredUrls(prev => ({ ...prev, [config.id]: newUrls }));
+                          setConfigSelectedUrls(prev => ({ ...prev, [config.id]: new Set(newUrls) }));
+                          toast({ title: `Found ${newUrls.length} new URLs`, description: `${allUrls.length} total, ${allUrls.length - newUrls.length} already in config` });
+                        } else {
+                          toast({ title: "No new URLs found", variant: "destructive" });
+                        }
+                      } catch (err: any) {
+                        toast({ title: "Discovery failed", description: err.message, variant: "destructive" });
+                      } finally {
+                        setMappingConfigId(null);
+                      }
+                    }}
+                    disabled={mappingConfigId === config.id}
+                    className="p-1.5 rounded border border-primary/20 text-primary hover:bg-primary/5 transition-colors disabled:opacity-40"
+                    title="Discover new URLs"
+                  >
+                    {mappingConfigId === config.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Search className="h-3.5 w-3.5" />
+                    )}
+                  </button>
 
                   <select
                     value={config.schedule_cron || ""}
