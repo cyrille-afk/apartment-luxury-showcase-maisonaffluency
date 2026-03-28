@@ -446,6 +446,9 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
   const visibleParagraphs = shouldCollapse && !expanded
     ? paragraphs.slice(0, MOBILE_COLLAPSE_THRESHOLD)
     : paragraphs;
+  const hiddenParagraphs = shouldCollapse && !expanded
+    ? paragraphs.slice(MOBILE_COLLAPSE_THRESHOLD)
+    : [];
 
   return (
     <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
