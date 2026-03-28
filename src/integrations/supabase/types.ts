@@ -1414,6 +1414,51 @@ export type Database = {
           },
         ]
       }
+      scrape_configs: {
+        Row: {
+          brand_name: string
+          category: string
+          created_at: string
+          created_by: string | null
+          extract_prompt: string | null
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          last_run_result: Json | null
+          schedule_cron: string | null
+          updated_at: string
+          urls: string[]
+        }
+        Insert: {
+          brand_name: string
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          extract_prompt?: string | null
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          last_run_result?: Json | null
+          schedule_cron?: string | null
+          updated_at?: string
+          urls?: string[]
+        }
+        Update: {
+          brand_name?: string
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          extract_prompt?: string | null
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          last_run_result?: Json | null
+          schedule_cron?: string | null
+          updated_at?: string
+          urls?: string[]
+        }
+        Relationships: []
+      }
       section_heroes: {
         Row: {
           created_at: string
