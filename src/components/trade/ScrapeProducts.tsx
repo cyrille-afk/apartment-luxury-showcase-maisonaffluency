@@ -981,6 +981,74 @@ const ScrapeProducts = () => {
             )}
           </div>
         )}
+
+        {/* Scrape History */}
+        <div className="space-y-3 border-t border-border pt-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-sm text-foreground flex items-center gap-2">
+              <History className="h-4 w-4 text-muted-foreground" />
+              Scrape History
+            </h3>
+            <button
+              onClick={fetchHistory}
+              disabled={loadingHistory}
+              className="font-body text-[10px] text-primary hover:underline flex items-center gap-1"
+            >
+              {loadingHistory ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+              Refresh
+            </button>
+          </div>
+
+          {scrapeHistory.length === 0 ? (
+            <p className="font-body text-xs text-muted-foreground">No scrape runs yet.</p>
+          ) : (
+            <div className="space-y-1.5">
+              <div className="grid grid-cols-[1fr_80px_60px_60px_60px_70px_70px] gap-2 font-body text-[10px] text-muted-foreground uppercase tracking-wider px-2 pb-1 border-b border-border">
+                <span>Brand</span>
+                <span>Status</span>
+                <span className="text-right">URLs</span>
+                <span className="text-right">Inserted</span>
+                <span className="text-right">Updated</span>
+                <span className="text-right">Duration</span>
+                <span className="text-right">When</span>
+              </div>
+              {scrapeHistory.map((run) => {
+                const dur = Number(run.duration_seconds);
+                const durLabel = dur >= 60 ? `${Math.floor(dur / 60)}m ${dur % 60}s` : `${dur}s`;
+                const ago = (() => {
+                  const diff = (Date.now() - new Date(run.started_at).getTime()) / 1000;
+                  if (diff < 60) return "just now";
+                  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+                  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+                  return `${Math.floor(diff / 86400)}d ago`;
+                })();
+                return (
+                  <div
+                    key={run.id}
+                    className="grid grid-cols-[1fr_80px_60px_60px_60px_70px_70px] gap-2 font-body text-[11px] text-foreground px-2 py-1.5 rounded hover:bg-muted/30 transition-colors"
+                  >
+                    <span className="truncate font-medium" title={run.brand_name}>{run.brand_name}</span>
+                    <span>
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-medium ${
+                        run.status === "completed" ? "bg-primary/10 text-primary" :
+                        run.status === "cancelled" ? "bg-accent/50 text-accent-foreground" :
+                        "bg-destructive/10 text-destructive"
+                      }`}>
+                        {run.status}
+                      </span>
+                    </span>
+                    <span className="text-right">{run.total_scraped}/{run.total_urls}</span>
+                    <span className="text-right text-green-600">{run.inserted}</span>
+                    <span className="text-right text-blue-600">{run.updated}</span>
+                    <span className="text-right text-muted-foreground">{durLabel}</span>
+                    <span className="text-right text-muted-foreground" title={new Date(run.started_at).toLocaleString()}>{ago}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
       </CollapsibleContent>
     </Collapsible>
   );
