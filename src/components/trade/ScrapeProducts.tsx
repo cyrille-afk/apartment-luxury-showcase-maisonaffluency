@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin, XCircle, History, CalendarIcon, Download } from "lucide-react";
+import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin, XCircle, History, CalendarIcon, Download, Pencil, Check, X } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -74,6 +74,8 @@ const ScrapeProducts = () => {
   const [savedConfigs, setSavedConfigs] = useState<SavedConfig[]>([]);
   const [loadingConfigs, setLoadingConfigs] = useState(false);
   const [runningConfigId, setRunningConfigId] = useState<string | null>(null);
+  const [editingUrlsConfigId, setEditingUrlsConfigId] = useState<string | null>(null);
+  const [editingUrlsText, setEditingUrlsText] = useState("");
   const [mappingBrandId, setMappingBrandId] = useState<string | null>(null);
   const [mapUrl, setMapUrl] = useState<Record<string, string>>({});
   const [mapSearch, setMapSearch] = useState<Record<string, string>>({});
