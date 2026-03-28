@@ -364,14 +364,36 @@ const ScrapeProducts = () => {
                       <span className="font-body text-[10px] text-muted-foreground">
                         {config.urls.length} URLs
                       </span>
-                      {config.location && (
-                        <span className="font-body text-[10px] text-muted-foreground px-1.5 py-0.5 rounded bg-muted">
-                          📍 {config.location}
-                        </span>
-                      )}
-                      <span className="font-body text-[10px] text-muted-foreground/50">
-                        {config.chunk_size || 10}/{config.chunk_delay || 0}s
-                      </span>
+                      <select
+                        value={config.location || ""}
+                        onChange={(e) => updateConfigField(config.id, "location", e.target.value)}
+                        className="px-1.5 py-0.5 rounded border border-border bg-background font-body text-[10px] text-foreground"
+                        title="Country"
+                      >
+                        {COUNTRY_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>{o.value ? `📍 ${o.value}` : "🌐 Auto"}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={config.chunk_size || 10}
+                        onChange={(e) => updateConfigField(config.id, "chunk_size", Number(e.target.value))}
+                        className="px-1.5 py-0.5 rounded border border-border bg-background font-body text-[10px] text-foreground w-14"
+                        title="Chunk size"
+                      >
+                        {[3, 5, 10, 15, 20].map(n => (
+                          <option key={n} value={n}>{n}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={config.chunk_delay || 0}
+                        onChange={(e) => updateConfigField(config.id, "chunk_delay", Number(e.target.value))}
+                        className="px-1.5 py-0.5 rounded border border-border bg-background font-body text-[10px] text-foreground w-14"
+                        title="Delay (s)"
+                      >
+                        {[0, 2, 5, 10, 15, 30].map(n => (
+                          <option key={n} value={n}>{n}s</option>
+                        ))}
+                      </select>
                       {!config.is_active && (
                         <span className="font-body text-[10px] text-destructive/70 px-1.5 py-0.5 rounded bg-destructive/10">
                           paused
