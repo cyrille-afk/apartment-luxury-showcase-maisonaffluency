@@ -500,19 +500,21 @@ const ScrapeProducts = () => {
                           },
                         });
                         if (error) throw error;
-                        if (data.urls?.length) {
-                          const existing = brand.urls_text.split(/[\n,]+/).map((u: string) => u.trim()).filter(Boolean);
-                          const newUrls = data.urls.filter((u: string) => !existing.includes(u));
-                          const combined = [...existing, ...newUrls].filter((u: string) => u.startsWith("http"));
-                          updateBrand(brand.id, "urls_text", combined.join("\n"));
+                        const urls: string[] = (data.urls || data.links || []).filter((u: string) => u.startsWith("http"));
+                        if (urls.length) {
+                          const existing = new Set(brand.urls_text.split(/[\n,]+/).map((u: string) => u.trim()).filter(Boolean));
+                          const newUrls = urls.filter((u: string) => !existing.has(u));
+                          setPreviewUrls((prev) => ({ ...prev, [brand.id]: newUrls }));
+                          setSelectedPreviewUrls((prev) => ({ ...prev, [brand.id]: new Set(newUrls) }));
+                          setPreviewFilter((prev) => ({ ...prev, [brand.id]: "" }));
                           toast({
-                            title: `Found ${data.urls.length} product URLs`,
-                            description: `${newUrls.length} new added (${data.total_links} total links scanned)`,
+                            title: `Found ${newUrls.length} new URLs`,
+                            description: `${urls.length} total discovered, ${urls.length - newUrls.length} already added`,
                           });
                         } else {
                           toast({
                             title: "No product URLs found",
-                            description: `Scanned ${data.total_links} links. Try a different URL or search term.`,
+                            description: `Scanned ${data.total_links || 0} links. Try a different URL or search term.`,
                             variant: "destructive",
                           });
                         }
@@ -536,6 +538,110 @@ const ScrapeProducts = () => {
                 <p className="font-body text-[10px] text-muted-foreground/40">
                   Scans the site to find all /product/ pages. Use the filter to narrow by brand or keyword.
                 </p>
+
+                {/* URL Preview with checkboxes */}
+                {previewUrls[brand.id]?.length > 0 && (
+                  <div className="space-y-2 border border-primary/15 rounded-md p-3 bg-primary/[0.02]">
+                    <div className="flex items-center justify-between">
+                      <span className="font-body text-xs text-foreground font-medium">
+                        {previewUrls[brand.id].length} new URLs discovered
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            const urls = previewUrls[brand.id];
+                            const filter = previewFilter[brand.id] || "";
+                            const visible = filter ? urls.filter((u) => u.toLowerCase().includes(filter.toLowerCase())) : urls;
+                            const sel = selectedPreviewUrls[brand.id] || new Set();
+                            const allSelected = visible.every((u) => sel.has(u));
+                            const next = new Set(sel);
+                            visible.forEach((u) => allSelected ? next.delete(u) : next.add(u));
+                            setSelectedPreviewUrls((prev) => ({ ...prev, [brand.id]: next }));
+                          }}
+                          className="font-body text-[10px] text-primary hover:underline"
+                        >
+                          Toggle all
+                        </button>
+                        <span className="font-body text-[10px] text-muted-foreground">
+                          {selectedPreviewUrls[brand.id]?.size || 0} selected
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
+                      <input
+                        value={previewFilter[brand.id] || ""}
+                        onChange={(e) => setPreviewFilter((prev) => ({ ...prev, [brand.id]: e.target.value }))}
+                        placeholder="Filter URLs…"
+                        className="w-full pl-8 pr-3 py-1.5 rounded border border-border bg-background font-body text-[10px] text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                      />
+                    </div>
+
+                    <div className="max-h-48 overflow-y-auto space-y-0.5 border border-border rounded bg-background p-1.5">
+                      {previewUrls[brand.id]
+                        .filter((u) => {
+                          const f = previewFilter[brand.id] || "";
+                          return !f || u.toLowerCase().includes(f.toLowerCase());
+                        })
+                        .map((url) => {
+                          const slug = url.replace(/^https?:\/\/[^/]+/, "").replace(/\/$/, "");
+                          return (
+                            <label
+                              key={url}
+                              className="flex items-center gap-2 px-1.5 py-1 rounded hover:bg-muted/50 cursor-pointer transition-colors"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedPreviewUrls[brand.id]?.has(url) || false}
+                                onChange={() => {
+                                  const next = new Set(selectedPreviewUrls[brand.id] || new Set());
+                                  next.has(url) ? next.delete(url) : next.add(url);
+                                  setSelectedPreviewUrls((prev) => ({ ...prev, [brand.id]: next }));
+                                }}
+                                className="rounded border-border shrink-0"
+                              />
+                              <span className="font-mono text-[10px] text-foreground/80 truncate" title={url}>
+                                {slug}
+                              </span>
+                            </label>
+                          );
+                        })}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          const selected = Array.from(selectedPreviewUrls[brand.id] || []);
+                          if (!selected.length) {
+                            toast({ title: "Select at least one URL", variant: "destructive" });
+                            return;
+                          }
+                          const existing = brand.urls_text.split(/[\n,]+/).map((u: string) => u.trim()).filter(Boolean);
+                          const combined = [...existing, ...selected].filter((u) => u.startsWith("http"));
+                          updateBrand(brand.id, "urls_text", combined.join("\n"));
+                          setPreviewUrls((prev) => { const n = { ...prev }; delete n[brand.id]; return n; });
+                          setSelectedPreviewUrls((prev) => { const n = { ...prev }; delete n[brand.id]; return n; });
+                          toast({ title: `${selected.length} URL(s) added` });
+                        }}
+                        disabled={(selectedPreviewUrls[brand.id]?.size || 0) === 0}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.08em] hover:bg-foreground/90 disabled:opacity-40 transition-colors"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Add {selectedPreviewUrls[brand.id]?.size || 0} URL(s)
+                      </button>
+                      <button
+                        onClick={() => {
+                          setPreviewUrls((prev) => { const n = { ...prev }; delete n[brand.id]; return n; });
+                          setSelectedPreviewUrls((prev) => { const n = { ...prev }; delete n[brand.id]; return n; });
+                        }}
+                        className="px-3 py-1.5 rounded-md border border-border font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
