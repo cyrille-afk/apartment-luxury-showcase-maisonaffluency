@@ -36,6 +36,7 @@ const ScrapeProducts = () => {
   ]);
   const [scraping, setScaping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState<{ done: number; total: number; inserted: number; updated: number; errors: number } | null>(null);
+  const scrapeCancelledRef = useRef(false);
   const [results, setResults] = useState<any>(null);
   const [saveConfigs, setSaveConfigs] = useState(true);
   const [savedConfigs, setSavedConfigs] = useState<SavedConfig[]>([]);
