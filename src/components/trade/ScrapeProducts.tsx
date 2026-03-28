@@ -59,6 +59,17 @@ const ScrapeProducts = () => {
   const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
   const [slugFilter, setSlugFilter] = useState("");
 
+  // Scrape history
+  const [scrapeHistory, setScrapeHistory] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  const fetchHistory = useCallback(async () => {
+    setLoadingHistory(true);
+    const { data } = await supabase.from("scrape_runs").select("*").order("started_at", { ascending: false }).limit(20);
+    setScrapeHistory(data || []);
+    setLoadingHistory(false);
+  }, []);
+
   const fetchConfigs = useCallback(async () => {
     setLoadingConfigs(true);
     const { data } = await supabase.from("scrape_configs").select("*").order("brand_name") as { data: SavedConfig[] | null };
@@ -66,7 +77,7 @@ const ScrapeProducts = () => {
     setLoadingConfigs(false);
   }, []);
 
-  useEffect(() => { fetchConfigs(); }, [fetchConfigs]);
+  useEffect(() => { fetchConfigs(); fetchHistory(); }, [fetchConfigs, fetchHistory]);
 
   const addBrand = () => {
     setBrands((prev) => [
