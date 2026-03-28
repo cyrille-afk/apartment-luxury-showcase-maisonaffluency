@@ -861,6 +861,7 @@ export default function EditorialBiography({
       <CollapsibleBiographyWrapper
         elementCount={wrapperChildren.length}
         collapseAfterIndex={firstImageWrapperIdx >= 0 ? firstImageWrapperIdx : undefined}
+        allowCollapse={externalAllowCollapse}
       >
         {wrapperChildren}
       </CollapsibleBiographyWrapper>
