@@ -83,36 +83,11 @@ const ScrapeProducts = () => {
     setBrands((prev) => prev.map((b) => (b.id === id ? { ...b, [field]: value } : b)));
   };
 
-  const handleScrape = async () => {
-    const brandsPayload = brands
-      .filter((b) => b.brand_name.trim() && b.urls_text.trim())
-      .map((b) => ({
-        brand_name: b.brand_name.trim(),
-        category: b.category.trim() || "Uncategorized",
-        urls: b.urls_text
-          .split(/[\n,]+/)
-          .map((u) => u.trim())
-          .filter((u) => u.startsWith("http")),
-      }))
-      .filter((b) => b.urls.length > 0);
-
-    if (!brandsPayload.length) {
-      toast({ title: "Add at least one brand with valid URLs", variant: "destructive" });
-      return;
-    }
-
-    const CHUNK_SIZE = 10;
-    // Flatten into individual chunks per brand
-    const chunks: { brand_name: string; category: string; urls: string[] }[] = [];
-    for (const b of brandsPayload) {
-      for (let i = 0; i < b.urls.length; i += CHUNK_SIZE) {
-        chunks.push({ brand_name: b.brand_name, category: b.category, urls: b.urls.slice(i, i + CHUNK_SIZE) });
-      }
-    }
-
-    const totalUrls = brandsPayload.reduce((s, b) => s + b.urls.length, 0);
+  const runChunks = async (chunks: { brand_name: string; category: string; urls: string[] }[]) => {
+    const totalUrls = chunks.reduce((s, c) => s + c.urls.length, 0);
     setScaping(true);
     setResults(null);
+    setRemainingChunks(null);
     scrapeCancelledRef.current = false;
     setScrapeProgress({ done: 0, total: totalUrls, inserted: 0, updated: 0, errors: 0 });
 
@@ -125,7 +100,9 @@ const ScrapeProducts = () => {
     try {
       for (let i = 0; i < chunks.length; i++) {
         if (scrapeCancelledRef.current) {
-          toast({ title: "Scrape cancelled", description: `Stopped after ${urlsDone} of ${totalUrls} URLs` });
+          const left = chunks.slice(i);
+          setRemainingChunks(left);
+          toast({ title: "Scrape cancelled", description: `Stopped after ${urlsDone} of ${totalUrls} URLs. ${left.reduce((s, c) => s + c.urls.length, 0)} remaining.` });
           break;
         }
         const chunk = chunks[i];
@@ -147,19 +124,52 @@ const ScrapeProducts = () => {
         setScrapeProgress({ done: urlsDone, total: totalUrls, inserted: totalInserted, updated: totalUpdated, errors: totalErrors });
       }
 
-      setResults(allResults.length === 1 ? allResults[0] : { summary: { total_inserted: totalInserted, total_updated: totalUpdated, total_errors: totalErrors }, brands: allResults.flatMap((r) => r.brands || []) });
-      fetchConfigs();
-      toast({
-        title: `Scrape complete — ${brandsPayload.length} brand(s)`,
-        description: `${totalInserted} inserted, ${totalUpdated} updated`,
-      });
+      if (!scrapeCancelledRef.current) {
+        setResults(allResults.length === 1 ? allResults[0] : { summary: { total_inserted: totalInserted, total_updated: totalUpdated, total_errors: totalErrors }, brands: allResults.flatMap((r) => r.brands || []) });
+        fetchConfigs();
+        toast({
+          title: `Scrape complete`,
+          description: `${totalInserted} inserted, ${totalUpdated} updated`,
+        });
+      }
     } catch (err: any) {
+      const left = chunks.slice(Math.max(0, Math.floor(urlsDone / 10)));
+      if (left.length > 0) setRemainingChunks(left);
       toast({ title: "Scrape failed", description: err.message, variant: "destructive" });
       setResults({ error: err.message });
     } finally {
       setScaping(false);
       setScrapeProgress(null);
     }
+  };
+
+  const handleScrape = async () => {
+    const brandsPayload = brands
+      .filter((b) => b.brand_name.trim() && b.urls_text.trim())
+      .map((b) => ({
+        brand_name: b.brand_name.trim(),
+        category: b.category.trim() || "Uncategorized",
+        urls: b.urls_text
+          .split(/[\n,]+/)
+          .map((u) => u.trim())
+          .filter((u) => u.startsWith("http")),
+      }))
+      .filter((b) => b.urls.length > 0);
+
+    if (!brandsPayload.length) {
+      toast({ title: "Add at least one brand with valid URLs", variant: "destructive" });
+      return;
+    }
+
+    const CHUNK_SIZE = 10;
+    const chunks: { brand_name: string; category: string; urls: string[] }[] = [];
+    for (const b of brandsPayload) {
+      for (let i = 0; i < b.urls.length; i += CHUNK_SIZE) {
+        chunks.push({ brand_name: b.brand_name, category: b.category, urls: b.urls.slice(i, i + CHUNK_SIZE) });
+      }
+    }
+
+    await runChunks(chunks);
   };
 
   const runSavedConfig = async (configId: string) => {
