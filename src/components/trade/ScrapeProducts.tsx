@@ -560,7 +560,14 @@ const ScrapeProducts = () => {
                           }}
                           className="font-body text-[10px] text-primary hover:underline"
                         >
-                          Toggle all
+                          {(() => {
+                            const urls = previewUrls[brand.id];
+                            const filter = previewFilter[brand.id] || "";
+                            const visible = filter ? urls.filter((u) => u.toLowerCase().includes(filter.toLowerCase())) : urls;
+                            const sel = selectedPreviewUrls[brand.id] || new Set<string>();
+                            const allSelected = visible.length > 0 && visible.every((u) => sel.has(u));
+                            return allSelected ? "Deselect all on page" : "Select all on page";
+                          })()}
                         </button>
                         <span className="font-body text-[10px] text-muted-foreground">
                           {selectedPreviewUrls[brand.id]?.size || 0} selected
@@ -584,8 +591,13 @@ const ScrapeProducts = () => {
                           const f = previewFilter[brand.id] || "";
                           return !f || u.toLowerCase().includes(f.toLowerCase());
                         })
-                        .map((url) => {
+                         .map((url) => {
                           const slug = url.replace(/^https?:\/\/[^/]+/, "").replace(/\/$/, "");
+                          const lastSegment = slug.split("/").filter(Boolean).pop() || slug;
+                          const productName = lastSegment
+                            .replace(/[-_]/g, " ")
+                            .replace(/\b\w/g, (c) => c.toUpperCase())
+                            .trim();
                           return (
                             <label
                               key={url}
@@ -601,8 +613,9 @@ const ScrapeProducts = () => {
                                 }}
                                 className="rounded border-border shrink-0"
                               />
-                              <span className="font-mono text-[10px] text-foreground/80 truncate" title={url}>
-                                {slug}
+                              <span className="flex flex-col min-w-0">
+                                <span className="font-body text-[11px] text-foreground truncate">{productName}</span>
+                                <span className="font-mono text-[9px] text-muted-foreground truncate" title={url}>{slug}</span>
                               </span>
                             </label>
                           );
