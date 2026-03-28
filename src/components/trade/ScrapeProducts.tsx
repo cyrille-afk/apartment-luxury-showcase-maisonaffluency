@@ -123,6 +123,10 @@ const ScrapeProducts = () => {
 
     try {
       for (let i = 0; i < chunks.length; i++) {
+        if (scrapeCancelledRef.current) {
+          toast({ title: "Scrape cancelled", description: `Stopped after ${urlsDone} of ${totalUrls} URLs` });
+          break;
+        }
         const chunk = chunks[i];
         const isLastChunk = i === chunks.length - 1;
         const { data, error } = await supabase.functions.invoke("scrape-products", {
