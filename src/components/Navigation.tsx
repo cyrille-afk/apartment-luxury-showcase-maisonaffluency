@@ -491,7 +491,7 @@ const Navigation = () => {
                     <ChevronDown className="h-4 w-4" />
                     <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
+                  <DropdownMenuContent align="end" side="left" sideOffset={8} className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
                     {contactOptions.map((option) => (
                       <DropdownMenuItem 
                         key={option.label}
