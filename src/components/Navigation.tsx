@@ -88,7 +88,9 @@ const contactOptions = [
 const navItems = [...leftNavItems, ...rightNavItems];
 
 const Navigation = () => {
+  const { user } = useAuth();
   const { items: pinItems, setIsComparing } = useCompare();
+  const [authGateOpen, setAuthGateOpen] = useState(false);
   // localStorage-backed favorite count
   const [favCount, setFavCount] = useState(0);
   useEffect(() => {
