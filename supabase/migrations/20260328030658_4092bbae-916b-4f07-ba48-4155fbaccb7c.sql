@@ -1,0 +1,1 @@
+UPDATE designers SET philosophy = 'Montrer la créativité et la richesse de l''artisanat traditionnel népalais. (To showcase the creativity and richness of traditional Nepalese craftsmanship.) — Lisa Mukhia Pretet' WHERE id = '978acfb6-03a8-4e78-a208-33d33d88dab6';
