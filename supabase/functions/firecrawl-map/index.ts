@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { url, search, limit = 200, filter_path } = body;
+    const { url, search, limit = 200, filter_path, group_by_brand } = body;
 
     if (!url) {
       return new Response(JSON.stringify({ error: "url is required" }), {
