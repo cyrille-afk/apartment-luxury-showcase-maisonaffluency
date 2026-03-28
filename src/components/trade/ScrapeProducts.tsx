@@ -473,17 +473,31 @@ const ScrapeProducts = () => {
                           </span>
                           <div className="flex items-center gap-1.5">
                             <button
-                              onClick={() => setConfigSelectedUrls(prev => ({
-                                ...prev,
-                                [config.id]: new Set(configDiscoveredUrls[config.id])
-                              }))}
+                              onClick={() => {
+                                const filter = (configDiscoverFilter[config.id] || "").toLowerCase();
+                                const filtered = filter
+                                  ? configDiscoveredUrls[config.id].filter(u => u.toLowerCase().includes(filter))
+                                  : configDiscoveredUrls[config.id];
+                                setConfigSelectedUrls(prev => ({
+                                  ...prev,
+                                  [config.id]: new Set([...(prev[config.id] || []), ...filtered])
+                                }));
+                              }}
                               className="font-body text-[10px] text-primary hover:underline"
                             >All</button>
                             <button
-                              onClick={() => setConfigSelectedUrls(prev => ({
-                                ...prev,
-                                [config.id]: new Set()
-                              }))}
+                              onClick={() => {
+                                const filter = (configDiscoverFilter[config.id] || "").toLowerCase();
+                                const filtered = filter
+                                  ? new Set(configDiscoveredUrls[config.id].filter(u => u.toLowerCase().includes(filter)))
+                                  : null;
+                                setConfigSelectedUrls(prev => {
+                                  if (!filtered) return { ...prev, [config.id]: new Set() };
+                                  const s = new Set(prev[config.id] || []);
+                                  filtered.forEach(u => s.delete(u));
+                                  return { ...prev, [config.id]: s };
+                                });
+                              }}
                               className="font-body text-[10px] text-muted-foreground hover:underline"
                             >None</button>
                           </div>
