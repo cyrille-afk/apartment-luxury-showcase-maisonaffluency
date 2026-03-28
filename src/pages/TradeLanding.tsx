@@ -699,20 +699,19 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         </div>
         </div>
 
-        {/* Back to top arrow — centered above FAQ + Registration */}
-        <div className="flex justify-center py-8">
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="group flex flex-col items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Back to top"
-          >
-            <ArrowLeft className="w-5 h-5 rotate-90 group-hover:-translate-y-1 transition-transform" />
-            <span className="font-body text-[10px] uppercase tracking-[0.2em]">Discover the program</span>
-          </button>
-        </div>
-
         {/* ─── FAQ + Registration Side by Side ─── */}
         <div ref={formRef} id="apply" className="w-full border-y border-border bg-muted/30 scroll-mt-16">
+          {/* Back to top arrow — inside section, visible on arrival */}
+          <div className="flex justify-center pt-8 pb-2">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="group flex flex-col items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Back to top"
+            >
+              <ArrowLeft className="w-5 h-5 rotate-90 group-hover:-translate-y-1 transition-transform" />
+              <span className="font-body text-[10px] uppercase tracking-[0.2em]">Discover the program</span>
+            </button>
+          </div>
           <div className="max-w-7xl mx-auto px-6 md:px-12 py-14 md:py-20 flex flex-col lg:flex-row lg:items-stretch gap-10 lg:gap-16">
             
             {/* Left — FAQ */}
