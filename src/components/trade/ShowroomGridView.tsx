@@ -591,8 +591,10 @@ const ShowroomGridView = ({
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const pinned = isPinned(product.product_name, product.id);
-            const price = product.trade_price_cents && product.currency
-              ? { cents: product.trade_price_cents, currency: product.currency, price_unit: product.price_unit }
+            const rawCents = product.trade_price_cents;
+            const displayCents = rawCents && showTradePrice ? Math.round(rawCents * (1 - TRADE_DISCOUNT)) : rawCents;
+            const price = displayCents && product.currency
+              ? { cents: displayCents, currency: product.currency, price_unit: product.price_unit }
               : null;
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
