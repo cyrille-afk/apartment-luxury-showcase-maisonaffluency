@@ -236,7 +236,7 @@ Deno.serve(async (req) => {
 
       const result = await runScrape(
         serviceClient, firecrawlKey,
-        config.urls, config.brand_name, config.category, config.extract_prompt
+        config.urls, config.brand_name, config.category, config.extract_prompt, config.location || undefined
       );
 
       await serviceClient.from("scrape_configs").update({
@@ -270,6 +270,9 @@ Deno.serve(async (req) => {
           urls: b.urls,
           extract_prompt: b.extract_prompt || null,
           schedule_cron: b.schedule_cron || null,
+          chunk_size: body.chunk_size || 10,
+          chunk_delay: body.chunk_delay || 0,
+          location: b.location || "",
           is_active: true,
           created_by: userId,
           updated_at: new Date().toISOString(),
