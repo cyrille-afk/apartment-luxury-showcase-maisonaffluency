@@ -1,0 +1,1 @@
+UPDATE designers SET biography = replace(biography, 'https://www.atelierfevrier.com/wp-content/uploads/2025/06/Atelier-feb-24-106-scaled.jpg', 'https://www.atelierfevrier.com/wp-content/uploads/2025/06/Atelier-feb-24-106-scaled.jpg | left') WHERE slug='atelier-fevrier';
