@@ -44,6 +44,13 @@ const ScrapeProducts = () => {
   const [mapUrl, setMapUrl] = useState<Record<string, string>>({});
   const [mapSearch, setMapSearch] = useState<Record<string, string>>({});
 
+  // Discover All state
+  const [discoverSiteUrl, setDiscoverSiteUrl] = useState("");
+  const [discovering, setDiscovering] = useState(false);
+  const [discoveredBrands, setDiscoveredBrands] = useState<{ slug: string; label: string; urls: string[] }[]>([]);
+  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
+  const [slugFilter, setSlugFilter] = useState("");
+
   const fetchConfigs = useCallback(async () => {
     setLoadingConfigs(true);
     const { data } = await supabase.from("scrape_configs").select("*").order("brand_name") as { data: SavedConfig[] | null };
