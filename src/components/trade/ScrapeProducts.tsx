@@ -97,6 +97,9 @@ const ScrapeProducts = () => {
 
   const runChunks = async (chunks: { brand_name: string; category: string; urls: string[] }[]) => {
     const totalUrls = chunks.reduce((s, c) => s + c.urls.length, 0);
+    const brandNames = [...new Set(chunks.map((c) => c.brand_name))].join(", ");
+    const categories = [...new Set(chunks.map((c) => c.category))].join(", ");
+    const startedAt = new Date().toISOString();
     setScaping(true);
     setResults(null);
     setRemainingChunks(null);
@@ -108,6 +111,8 @@ const ScrapeProducts = () => {
     let totalUpdated = 0;
     let totalErrors = 0;
     let urlsDone = 0;
+    let finalStatus = "completed";
+    let errorMsg: string | null = null;
     const allResults: any[] = [];
 
     try {
@@ -115,6 +120,7 @@ const ScrapeProducts = () => {
         if (scrapeCancelledRef.current) {
           const left = chunks.slice(i);
           setRemainingChunks(left);
+          finalStatus = "cancelled";
           toast({ title: "Scrape cancelled", description: `Stopped after ${urlsDone} of ${totalUrls} URLs. ${left.reduce((s, c) => s + c.urls.length, 0)} remaining.` });
           break;
         }
@@ -148,9 +154,28 @@ const ScrapeProducts = () => {
     } catch (err: any) {
       const left = chunks.slice(Math.max(0, Math.floor(urlsDone / 10)));
       if (left.length > 0) setRemainingChunks(left);
+      finalStatus = "failed";
+      errorMsg = err.message;
       toast({ title: "Scrape failed", description: err.message, variant: "destructive" });
       setResults({ error: err.message });
     } finally {
+      const durationSeconds = Math.round((Date.now() - scrapeStartTimeRef.current) / 1000);
+      // Log scrape run
+      await supabase.from("scrape_runs").insert({
+        brand_name: brandNames,
+        category: categories,
+        total_urls: totalUrls,
+        total_scraped: urlsDone,
+        inserted: totalInserted,
+        updated: totalUpdated,
+        errors: totalErrors,
+        duration_seconds: durationSeconds,
+        status: finalStatus,
+        error_message: errorMsg,
+        started_at: startedAt,
+        completed_at: new Date().toISOString(),
+      });
+      fetchHistory();
       setScaping(false);
       setScrapeProgress(null);
     }
