@@ -19,10 +19,10 @@ interface AuthGateDialogProps {
  * Modal that prompts unauthenticated users to create an account or sign in
  * before accessing gated features (e.g. tear sheet downloads).
  */
-export default function AuthGateDialog({ open, onClose, action = "download this document" }: AuthGateDialogProps) {
+export default function AuthGateDialog({ open, onClose, action = "download this document", initialMode = "prompt" }: AuthGateDialogProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [mode, setMode] = useState<"prompt" | "signup" | "login">("prompt");
+  const [mode, setMode] = useState<"prompt" | "signup" | "login">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
