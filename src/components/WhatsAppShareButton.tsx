@@ -43,7 +43,7 @@ const variantClasses = {
   solid:
     "bg-white hover:bg-white/90 border border-border/30 text-muted-foreground",
   glass:
-    "bg-white/20 hover:bg-white/35 border border-white/20 text-white backdrop-blur-sm",
+    "bg-white/20 hover:bg-white/35 border border-white/20 text-white",
   /** Green-branded variant — stands out on mobile inside accordion content */
   branded:
     "bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] md:bg-[#25D366]/10 md:hover:bg-[#25D366]/20 md:border-[#25D366]/30 md:text-[#1da851] md:font-semibold",
