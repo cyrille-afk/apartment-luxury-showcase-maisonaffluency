@@ -4,7 +4,7 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
@@ -51,14 +51,32 @@ function writeLocalFavorites(ids: Set<string>) {
 
 function useLocalFavorites() {
   const [ids, setIds] = useState<Set<string>>(() => readLocalFavorites());
+  const hasShownPromptRef = useRef(false);
 
   const isFavorited = useCallback((id: string) => ids.has(id), [ids]);
 
   const toggleFavorite = useCallback((id: string) => {
     setIds((prev) => {
       const next = new Set(prev);
+      const wasAdding = !next.has(id);
       if (next.has(id)) next.delete(id); else next.add(id);
       writeLocalFavorites(next);
+
+      // After 3+ favourites, prompt to register so they persist
+      if (wasAdding && next.size >= 3 && !hasShownPromptRef.current) {
+        hasShownPromptRef.current = true;
+        import("sonner").then(({ toast }) =>
+          toast("Save your favourites permanently", {
+            description: "Create a free account so your favourites sync across devices.",
+            action: {
+              label: "Sign up",
+              onClick: () => window.location.assign("/trade/program"),
+            },
+            duration: 8000,
+          })
+        );
+      }
+
       return next;
     });
   }, []);
