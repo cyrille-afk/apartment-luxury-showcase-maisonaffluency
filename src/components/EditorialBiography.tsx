@@ -70,8 +70,8 @@ export function renderParagraph(text: string): React.ReactNode[] {
 
 /** Render a single line of inline HTML */
 function renderSingleLine(text: string): React.ReactNode[] {
-  // Split on <strong>...</strong> and <a href="...">...</a> tags
-  const parts = text.split(/(<strong>[\s\S]*?<\/strong>|<a\s+href="[^"]*"[^>]*>[\s\S]*?<\/a>)/g);
+  // Split on <strong>...</strong>, <em>...</em>, and <a href="...">...</a> tags
+  const parts = text.split(/(<strong>[\s\S]*?<\/strong>|<em>[\s\S]*?<\/em>|<a\s+href="[^"]*"[^>]*>[\s\S]*?<\/a>)/g);
   return parts.map((part, i) => {
     const strongMatch = part.match(/^<strong>([\s\S]*?)<\/strong>$/);
     if (strongMatch) {
@@ -79,6 +79,14 @@ function renderSingleLine(text: string): React.ReactNode[] {
         <strong key={i} className="font-black text-foreground" style={{ fontWeight: 900 }}>
           {renderQuotedText(strongMatch[1])}
         </strong>
+      );
+    }
+    const emMatch = part.match(/^<em>([\s\S]*?)<\/em>$/);
+    if (emMatch) {
+      return (
+        <em key={i} className="text-muted-foreground/60 not-italic">
+          {emMatch[1]}
+        </em>
       );
     }
     const linkMatch = part.match(/^<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>$/);
