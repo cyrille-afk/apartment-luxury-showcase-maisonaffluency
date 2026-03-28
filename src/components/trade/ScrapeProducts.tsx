@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin, XCircle, History } from "lucide-react";
+import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin, XCircle, History, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 
@@ -63,6 +66,8 @@ const ScrapeProducts = () => {
   // Scrape history
   const [scrapeHistory, setScrapeHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [historyFrom, setHistoryFrom] = useState<Date | undefined>(undefined);
+  const [historyTo, setHistoryTo] = useState<Date | undefined>(undefined);
 
   const chartData = useMemo(() => {
     if (!scrapeHistory.length) return [];
@@ -79,10 +84,19 @@ const ScrapeProducts = () => {
 
   const fetchHistory = useCallback(async () => {
     setLoadingHistory(true);
-    const { data } = await supabase.from("scrape_runs").select("*").order("started_at", { ascending: false }).limit(20);
+    let query = supabase.from("scrape_runs").select("*").order("started_at", { ascending: false }).limit(100);
+    if (historyFrom) {
+      query = query.gte("started_at", historyFrom.toISOString());
+    }
+    if (historyTo) {
+      const endOfDay = new Date(historyTo);
+      endOfDay.setHours(23, 59, 59, 999);
+      query = query.lte("started_at", endOfDay.toISOString());
+    }
+    const { data } = await query;
     setScrapeHistory(data || []);
     setLoadingHistory(false);
-  }, []);
+  }, [historyFrom, historyTo]);
 
   const fetchConfigs = useCallback(async () => {
     setLoadingConfigs(true);
