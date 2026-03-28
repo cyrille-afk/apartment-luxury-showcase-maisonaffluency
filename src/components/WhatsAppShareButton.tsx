@@ -30,26 +30,26 @@ type WhatsAppShareButtonProps = {
 
 const sizeClasses = {
   default: {
-    button: "gap-2 px-4 py-2 md:px-3 md:py-1.5 text-sm md:text-xs min-h-[44px] md:min-h-0",
+    button: "gap-1.5 md:gap-2 md:px-3 md:py-1.5 text-sm md:text-xs min-h-[44px] md:min-h-0",
     icon: "w-4 h-4 md:w-3.5 md:h-3.5",
   },
   sm: {
-    button: "gap-1.5 px-3 py-1.5 md:px-2 md:py-1 text-xs md:text-[11px] min-h-[44px] md:min-h-0",
+    button: "gap-1 md:gap-1.5 md:px-2 md:py-1 text-xs md:text-[11px] min-h-[44px] md:min-h-0",
     icon: "w-3.5 h-3.5 md:w-3 md:h-3",
   },
 } as const;
 
 const variantClasses = {
   solid:
-    "bg-white hover:bg-white/90 border border-border/30 text-muted-foreground",
+    "bg-transparent md:bg-white md:hover:bg-white/90 md:border md:border-border/30 text-muted-foreground",
   glass:
-    "bg-white/20 hover:bg-white/35 border border-white/20 text-white",
+    "bg-transparent md:bg-white/20 md:hover:bg-white/35 md:border md:border-white/20 text-white",
   /** Green-branded variant — stands out on mobile inside accordion content */
   branded:
-    "bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] md:bg-[#25D366]/10 md:hover:bg-[#25D366]/20 md:border-[#25D366]/30 md:text-[#1da851] md:font-semibold",
+    "bg-transparent md:bg-[#25D366]/10 md:hover:bg-[#25D366]/20 md:border md:border-[#25D366]/30 text-[#25D366] md:text-[#1da851] md:font-semibold",
   /** Prominent white variant with stronger contrast for mobile */
   prominent:
-    "bg-white hover:bg-white/90 border border-foreground/20 text-foreground shadow-sm md:border-border/30 md:text-muted-foreground md:shadow-none",
+    "bg-transparent md:bg-white md:hover:bg-white/90 md:border md:border-foreground/20 text-foreground md:shadow-sm md:border-border/30 md:text-muted-foreground md:shadow-none",
 } as const;
 
 const WhatsAppShareButton = memo(function WhatsAppShareButton({
@@ -67,7 +67,7 @@ const WhatsAppShareButton = memo(function WhatsAppShareButton({
   return (
     <button
       onClick={onClick}
-      className={`${visibility} items-center ${s.button} font-body rounded-full transition-all duration-300 touch-manipulation ${v} ${className}`}
+      className={`${visibility} items-center ${s.button} font-body md:rounded-full transition-all duration-300 touch-manipulation ${v} ${className}`}
       aria-label={label}
     >
       <svg
