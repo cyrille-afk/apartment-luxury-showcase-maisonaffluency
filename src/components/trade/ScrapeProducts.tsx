@@ -1182,6 +1182,27 @@ const ScrapeProducts = () => {
                   </div>
                 );
               })}
+              {filteredHistory.length > 1 && (() => {
+                const totals = filteredHistory.reduce((acc, r) => ({
+                  urls: acc.urls + (r.total_urls || 0),
+                  scraped: acc.scraped + (r.total_scraped || 0),
+                  inserted: acc.inserted + (r.inserted || 0),
+                  updated: acc.updated + (r.updated || 0),
+                  duration: acc.duration + (Number(r.duration_seconds) || 0),
+                }), { urls: 0, scraped: 0, inserted: 0, updated: 0, duration: 0 });
+                const durLabel = totals.duration >= 60 ? `${Math.floor(totals.duration / 60)}m ${totals.duration % 60}s` : `${totals.duration}s`;
+                return (
+                  <div className="grid grid-cols-[1fr_80px_60px_60px_60px_70px_70px] gap-2 font-body text-[11px] font-semibold text-foreground px-2 py-1.5 border-t border-border mt-1">
+                    <span>{filteredHistory.length} runs</span>
+                    <span />
+                    <span className="text-right">{totals.scraped}/{totals.urls}</span>
+                    <span className="text-right text-green-600">{totals.inserted}</span>
+                    <span className="text-right text-blue-600">{totals.updated}</span>
+                    <span className="text-right text-muted-foreground">{durLabel}</span>
+                    <span />
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
