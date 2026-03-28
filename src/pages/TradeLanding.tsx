@@ -135,6 +135,14 @@ const TradeLanding = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (window.location.hash === "#register") {
+      setTimeout(() => {
+        document.getElementById("register")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 600);
+    }
+  }, []);
+
   const scrollToForm = () => {
     const el = formRef.current;
     if (!el) return;
@@ -745,7 +753,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             </div>
 
             {/* Right — Registration Form */}
-            <div className="flex-1 lg:pl-12 order-1 lg:order-3 bg-background rounded-xl p-5 lg:p-0 lg:bg-transparent lg:rounded-none">
+            <div id="register" className="flex-1 lg:pl-12 order-1 lg:order-3 bg-background rounded-xl p-5 lg:p-0 lg:bg-transparent lg:rounded-none">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
