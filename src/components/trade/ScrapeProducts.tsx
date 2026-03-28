@@ -90,6 +90,7 @@ const ScrapeProducts = () => {
     setResults(null);
     setRemainingChunks(null);
     scrapeCancelledRef.current = false;
+    scrapeStartTimeRef.current = Date.now();
     setScrapeProgress({ done: 0, total: totalUrls, inserted: 0, updated: 0, errors: 0 });
 
     let totalInserted = 0;
