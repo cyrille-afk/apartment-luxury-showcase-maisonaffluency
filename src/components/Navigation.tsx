@@ -694,7 +694,7 @@ const Navigation = () => {
         </div>
       </div>
     </nav>
-    <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" />
+    <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" initialMode={authGateMode} />
     </>;
 };
 export default Navigation;
