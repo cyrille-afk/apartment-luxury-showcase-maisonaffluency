@@ -936,6 +936,11 @@ const ScrapeProducts = () => {
             </select>
           </label>
         </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleScrape}
+            disabled={scraping || !brands.some((b) => b.brand_name.trim() && b.urls_text.trim())}
             className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] hover:bg-foreground/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {scraping ? (
