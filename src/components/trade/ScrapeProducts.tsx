@@ -81,6 +81,7 @@ const ScrapeProducts = () => {
   const [configDiscoveredUrls, setConfigDiscoveredUrls] = useState<Record<string, string[]>>({});
   const [configSelectedUrls, setConfigSelectedUrls] = useState<Record<string, Set<string>>>({});
   const [configDiscoverFilter, setConfigDiscoverFilter] = useState<Record<string, string>>({});
+  const [configDiscoverPage, setConfigDiscoverPage] = useState<Record<string, number>>({});
   const [mapUrl, setMapUrl] = useState<Record<string, string>>({});
   const [mapSearch, setMapSearch] = useState<Record<string, string>>({});
   const [previewUrls, setPreviewUrls] = useState<Record<string, string[]>>({});
