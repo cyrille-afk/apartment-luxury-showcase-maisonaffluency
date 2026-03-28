@@ -580,7 +580,7 @@ const ScrapeProducts = () => {
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
                       <input
                         value={previewFilter[brand.id] || ""}
-                        onChange={(e) => setPreviewFilter((prev) => ({ ...prev, [brand.id]: e.target.value }))}
+                        onChange={(e) => { setPreviewFilter((prev) => ({ ...prev, [brand.id]: e.target.value })); setPreviewPage((prev) => ({ ...prev, [brand.id]: 0 })); }}
                         placeholder="Filter URLs…"
                         className="w-full pl-8 pr-3 py-1.5 rounded border border-border bg-background font-body text-[10px] text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
                       />
