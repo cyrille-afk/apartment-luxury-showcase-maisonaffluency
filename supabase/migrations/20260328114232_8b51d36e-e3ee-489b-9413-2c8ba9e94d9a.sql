@@ -1,0 +1,1 @@
+ALTER TABLE public.trade_products ADD COLUMN price_unit text NOT NULL DEFAULT 'per_piece';
