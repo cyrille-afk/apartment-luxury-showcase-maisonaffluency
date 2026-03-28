@@ -68,11 +68,23 @@ const ScrapeProducts = () => {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [historyFrom, setHistoryFrom] = useState<Date | undefined>(undefined);
   const [historyTo, setHistoryTo] = useState<Date | undefined>(undefined);
+  const [historyBrand, setHistoryBrand] = useState("");
+
+  const historyBrands = useMemo(() => {
+    const set = new Set<string>();
+    for (const run of scrapeHistory) if (run.brand_name) set.add(run.brand_name);
+    return Array.from(set).sort();
+  }, [scrapeHistory]);
+
+  const filteredHistory = useMemo(() => {
+    if (!historyBrand) return scrapeHistory;
+    return scrapeHistory.filter((r) => r.brand_name === historyBrand);
+  }, [scrapeHistory, historyBrand]);
 
   const chartData = useMemo(() => {
-    if (!scrapeHistory.length) return [];
+    if (!filteredHistory.length) return [];
     const byDay: Record<string, { date: string; inserted: number; updated: number; errors: number }> = {};
-    for (const run of scrapeHistory) {
+    for (const run of filteredHistory) {
       const day = new Date(run.started_at).toISOString().slice(0, 10);
       if (!byDay[day]) byDay[day] = { date: day, inserted: 0, updated: 0, errors: 0 };
       byDay[day].inserted += run.inserted || 0;
@@ -80,7 +92,7 @@ const ScrapeProducts = () => {
       byDay[day].errors += run.errors || 0;
     }
     return Object.values(byDay).sort((a, b) => a.date.localeCompare(b.date));
-  }, [scrapeHistory]);
+  }, [filteredHistory]);
 
   const fetchHistory = useCallback(async () => {
     setLoadingHistory(true);
