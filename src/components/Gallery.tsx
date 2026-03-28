@@ -1187,39 +1187,41 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           <Minimize2 className="w-4 h-4 text-white" />
                         </button>
                       )}
-                  </div>
-                   {/* Section / category filter chips */}
-                   <div className="flex justify-center gap-1.5 mt-2 px-4 shrink-0 flex-wrap">
-                     {galleryExperiences.map((section, si) => (
-                       <button
-                         key={si}
-                         onClick={() => {
-                           setCurrentSectionIndex(si);
-                           setCurrentItemIndex(0);
-                         }}
-                         className={`px-2.5 py-1 rounded-full text-[8px] uppercase tracking-[0.12em] font-body transition-all border ${
-                           si === currentSectionIndex
-                             ? 'bg-white/20 text-white border-white/40'
-                             : 'bg-transparent text-white/50 border-white/15 hover:text-white/80'
-                         }`}
-                       >
-                         {section.experience.replace(/^An?\s+/i, '')}
-                       </button>
-                     ))}
                    </div>
-                   {/* Dot indicators */}
-                   <div className="flex justify-center gap-1.5 mt-1.5 shrink-0">
-                     {currentSectionItems.map((_, i) => (
-                       <button
-                         key={i}
-                         onClick={() => setCurrentItemIndex(i)}
-                         className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
-                         aria-label={`Go to image ${i + 1}`}
-                       />
-                     ))}
-                   </div>
-                   <div className="pb-6" />
                 </ExpandedScrollContainer>
+
+                {/* Section / category filter chips — fixed at bottom */}
+                <div className="absolute bottom-10 left-0 right-0 z-50 flex flex-col items-center gap-1.5 pointer-events-none">
+                  <div className="flex justify-center gap-1.5 px-4 flex-wrap pointer-events-auto">
+                    {galleryExperiences.map((section, si) => (
+                      <button
+                        key={si}
+                        onClick={() => {
+                          setCurrentSectionIndex(si);
+                          setCurrentItemIndex(0);
+                        }}
+                        className={`px-2.5 py-1 rounded-full text-[8px] uppercase tracking-[0.12em] font-body transition-all border backdrop-blur-sm ${
+                          si === currentSectionIndex
+                            ? 'bg-white/25 text-white border-white/40'
+                            : 'bg-black/30 text-white/60 border-white/15 hover:text-white/90 hover:bg-black/40'
+                        }`}
+                      >
+                        {section.experience.replace(/^An?\s+/i, '')}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Dot indicators */}
+                  <div className="flex justify-center gap-1.5 pointer-events-auto">
+                    {currentSectionItems.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentItemIndex(i)}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentItemIndex ? 'bg-white' : 'bg-white/40'}`}
+                        aria-label={`Go to image ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+                </div>
 
                {/* Next button */}
                <button onClick={goToNext} className="hidden md:flex absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-50 text-white/50 hover:text-white transition-colors" aria-label="Next image">
