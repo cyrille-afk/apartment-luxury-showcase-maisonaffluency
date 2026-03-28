@@ -1186,27 +1186,12 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                    </div>
                 </ExpandedScrollContainer>
 
-                {/* Section / category filter chips — fixed at bottom */}
-                <div className="absolute bottom-10 left-0 right-0 z-50 flex flex-col items-center gap-1.5 pointer-events-none">
-                  <div className="flex justify-center gap-1.5 px-4 flex-wrap pointer-events-auto">
-                    {galleryExperiences.map((section, si) => (
-                      <button
-                        key={si}
-                        onClick={() => {
-                          setCurrentSectionIndex(si);
-                          setCurrentItemIndex(0);
-                        }}
-                        className={`px-2.5 py-1 rounded-full text-[8px] uppercase tracking-[0.12em] font-body transition-all border backdrop-blur-sm ${
-                          si === currentSectionIndex
-                            ? 'bg-white/25 text-white border-white/40'
-                            : 'bg-black/30 text-white/60 border-white/15 hover:text-white/90 hover:bg-black/40'
-                        }`}
-                      >
-                        {section.experience.replace(/^An?\s+/i, '')}
-                      </button>
-                    ))}
-                  </div>
-                  {/* Dot indicators */}
+                {/* Section label + dot indicators — fixed at bottom */}
+                <div className="absolute bottom-6 left-0 right-0 z-50 flex flex-col items-center gap-1.5 pointer-events-none">
+                  <p className="text-[9px] uppercase tracking-[0.15em] text-white/50 font-body">
+                    {galleryExperiences[currentSectionIndex]?.experience.replace(/^An?\s+/i, '')}
+                    <span className="text-white/30 ml-1.5">{currentSectionIndex + 1}/{galleryExperiences.length}</span>
+                  </p>
                   <div className="flex justify-center gap-1.5 pointer-events-auto">
                     {currentSectionItems.map((_, i) => (
                       <button
