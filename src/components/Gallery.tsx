@@ -267,9 +267,39 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
   // ── Hotspot → PublicProductLightbox matching ──
   const [hotspotLightboxProduct, setHotspotLightboxProduct] = useState<PublicLightboxItem | null>(null);
+  const [dbCuratorPicks, setDbCuratorPicks] = useState<PublicLightboxItem[]>([]);
+
+  useEffect(() => {
+    const fetchDbCuratorPicks = async () => {
+      const { data } = await supabase
+        .from("designer_curator_picks")
+        .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,category,subcategory,pdf_url,pdf_urls,designers(name)")
+        .not("image_url", "is", null);
+
+      if (!data) return;
+
+      const mapped: PublicLightboxItem[] = (data as any[]).map((p) => ({
+        id: p.id,
+        title: p.title,
+        subtitle: p.subtitle || null,
+        image_url: p.image_url,
+        hover_image_url: p.hover_image_url || null,
+        brand_name: p.designers?.name || "Unknown",
+        materials: p.materials || null,
+        dimensions: p.dimensions || null,
+        category: p.category || null,
+        subcategory: p.subcategory || null,
+        pdf_url: p.pdf_url || p.pdf_urls?.[0]?.url || null,
+      }));
+
+      setDbCuratorPicks(mapped);
+    };
+
+    fetchDbCuratorPicks();
+  }, []);
 
   const allCuratorPicks = useMemo((): PublicLightboxItem[] => {
-    return getAllTradeProducts()
+    const staticPicks = getAllTradeProducts()
       .filter(p => p.image_url)
       .map(p => ({
         id: p.id,
@@ -284,7 +314,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         subcategory: p.subcategory || null,
         pdf_url: p.pdf_url || p.pdf_urls?.[0]?.url || null,
       }));
-  }, []);
+
+    const byKey = new Map<string, PublicLightboxItem>();
+    for (const pick of staticPicks) byKey.set(`${slugify(pick.brand_name)}::${slugify(pick.title)}`, pick);
+    for (const pick of dbCuratorPicks) byKey.set(`${slugify(pick.brand_name)}::${slugify(pick.title)}`, pick);
+
+    return [...byKey.values()];
+  }, [dbCuratorPicks]);
 
   const handleHotspotViewProduct = useCallback((productName: string, designerName: string) => {
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
