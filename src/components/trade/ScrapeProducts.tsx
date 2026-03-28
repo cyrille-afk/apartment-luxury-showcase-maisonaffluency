@@ -37,6 +37,7 @@ const ScrapeProducts = () => {
   const [scraping, setScaping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState<{ done: number; total: number; inserted: number; updated: number; errors: number } | null>(null);
   const scrapeCancelledRef = useRef(false);
+  const scrapeStartTimeRef = useRef<number>(0);
   const [remainingChunks, setRemainingChunks] = useState<{ brand_name: string; category: string; urls: string[] }[] | null>(null);
   const [results, setResults] = useState<any>(null);
   const [saveConfigs, setSaveConfigs] = useState(true);
@@ -89,6 +90,7 @@ const ScrapeProducts = () => {
     setResults(null);
     setRemainingChunks(null);
     scrapeCancelledRef.current = false;
+    scrapeStartTimeRef.current = Date.now();
     setScrapeProgress({ done: 0, total: totalUrls, inserted: 0, updated: 0, errors: 0 });
 
     let totalInserted = 0;
@@ -825,7 +827,16 @@ const ScrapeProducts = () => {
               <div className="flex-1 space-y-1.5 max-w-md">
                 <div className="flex items-center justify-between font-body text-[10px] text-muted-foreground">
                   <span>{scrapeProgress.done} / {scrapeProgress.total} URLs</span>
-                  <span>{Math.round((scrapeProgress.done / scrapeProgress.total) * 100)}%</span>
+                  <span className="flex items-center gap-2">
+                    {scrapeProgress.done > 0 && (() => {
+                      const elapsed = (Date.now() - scrapeStartTimeRef.current) / 1000;
+                      const rate = scrapeProgress.done / elapsed;
+                      const remaining = (scrapeProgress.total - scrapeProgress.done) / rate;
+                      if (remaining < 60) return <span>~{Math.ceil(remaining)}s left</span>;
+                      return <span>~{Math.ceil(remaining / 60)}m left</span>;
+                    })()}
+                    <span>{Math.round((scrapeProgress.done / scrapeProgress.total) * 100)}%</span>
+                  </span>
                 </div>
                 <div className="h-2 rounded-full bg-muted overflow-hidden">
                   <div
