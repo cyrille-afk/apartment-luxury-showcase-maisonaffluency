@@ -2579,7 +2579,7 @@ function AlphaStrip({
                {/* Bottom bar */}
               <div className={`absolute bottom-0 left-0 right-0 h-16 z-[5] pointer-events-none ${hasBg ? 'bg-gradient-to-t from-black/50 via-black/30 to-transparent' : 'bg-gradient-to-t from-background/60 via-background/30 to-transparent'}`} />
               <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
-                <div className={`md:order-3 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
+                <div className={`hidden md:block md:order-3 transition-all duration-300 ${expandedCard === brand.name ? "rotate-180" : ""}`}>
                   <div className={`rounded-full p-1.5 backdrop-blur-sm ${hasBg ? "bg-white/20 text-white" : "bg-foreground/10 text-foreground"}`}>
                     <ChevronDown className="h-4 w-4" />
                   </div>
