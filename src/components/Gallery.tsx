@@ -322,7 +322,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     return [...byKey.values()];
   }, [dbCuratorPicks]);
 
-  const handleHotspotViewProduct = useCallback((productName: string, designerName: string) => {
+  const handleHotspotViewProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null) => {
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
     const normName = norm(productName);
     const normDesigner = norm(designerName);
@@ -380,8 +380,18 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
     if (best) {
       setHotspotLightboxProduct(best);
+      return;
     }
-  }, [allCuratorPicks]);
+
+    if (linkUrl?.startsWith('/')) {
+      navigate(linkUrl);
+      return;
+    }
+
+    if (linkUrl) {
+      window.location.href = linkUrl;
+    }
+  }, [allCuratorPicks, navigate]);
 
   // Pulsing hotspot hint — always visible on first card of each section
   const showHotspotHint = true;
