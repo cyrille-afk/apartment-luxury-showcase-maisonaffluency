@@ -1012,19 +1012,49 @@ const ScrapeProducts = () => {
 
         {/* Scrape History */}
         <div className="space-y-3 border-t border-border pt-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <h3 className="font-display text-sm text-foreground flex items-center gap-2">
               <History className="h-4 w-4 text-muted-foreground" />
               Scrape History
             </h3>
-            <button
-              onClick={fetchHistory}
-              disabled={loadingHistory}
-              className="font-body text-[10px] text-primary hover:underline flex items-center gap-1"
-            >
-              {loadingHistory ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
-              Refresh
-            </button>
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-1 text-[10px] font-body border border-border rounded px-2 py-1 hover:bg-muted/30 transition-colors">
+                    <CalendarIcon className="h-3 w-3" />
+                    {historyFrom ? format(historyFrom, "dd/MM/yy") : "From"}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={historyFrom} onSelect={setHistoryFrom} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+              <span className="text-[10px] text-muted-foreground">–</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-1 text-[10px] font-body border border-border rounded px-2 py-1 hover:bg-muted/30 transition-colors">
+                    <CalendarIcon className="h-3 w-3" />
+                    {historyTo ? format(historyTo, "dd/MM/yy") : "To"}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={historyTo} onSelect={setHistoryTo} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+              {(historyFrom || historyTo) && (
+                <button onClick={() => { setHistoryFrom(undefined); setHistoryTo(undefined); }} className="text-[10px] font-body text-muted-foreground hover:text-foreground transition-colors">
+                  Clear
+                </button>
+              )}
+              <button
+                onClick={fetchHistory}
+                disabled={loadingHistory}
+                className="font-body text-[10px] text-primary hover:underline flex items-center gap-1"
+              >
+                {loadingHistory ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                Refresh
+              </button>
+            </div>
           </div>
 
           {chartData.length > 0 && (
