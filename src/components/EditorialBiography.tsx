@@ -81,6 +81,14 @@ function renderSingleLine(text: string): React.ReactNode[] {
         </strong>
       );
     }
+    const emMatch = part.match(/^<em>([\s\S]*?)<\/em>$/);
+    if (emMatch) {
+      return (
+        <em key={i} className="text-muted-foreground/60 not-italic">
+          {emMatch[1]}
+        </em>
+      );
+    }
     const linkMatch = part.match(/^<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>$/);
     if (linkMatch) {
       return (
