@@ -88,6 +88,7 @@ interface PendingHotspot {
 
 const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote, onViewProduct, filterDesigner }: GalleryHotspotsProps) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
