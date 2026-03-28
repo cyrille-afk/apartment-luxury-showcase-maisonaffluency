@@ -351,9 +351,12 @@ const ShowroomGridView = ({
     designerName: product.designer_name?.includes(" - ") ? product.designer_name.split(" - ")[0].trim() : (product.designer_name || "Unknown"),
     designerId: product.id,
     section: "designers",
-    price: product.trade_price_cents && product.currency
-      ? formatPriceConverted(product.trade_price_cents, product.currency, displayCurrency, fxRates)
-      : null,
+    price: (() => {
+      const raw = product.trade_price_cents;
+      if (!raw || !product.currency) return null;
+      const c = showTradePrice ? Math.round(raw * (1 - TRADE_DISCOUNT)) : raw;
+      return formatPriceConverted(c, product.currency, displayCurrency, fxRates, product.price_unit);
+    })(),
   });
 
   const toLightboxItem = (product: ShowroomProduct): TradeProductLightboxItem => ({
@@ -366,9 +369,12 @@ const ShowroomGridView = ({
     category: product.category || inferCategory(product.product_name),
     subcategory: product.subcategory || undefined,
     pdf_url: product.pdf_url,
-    price: product.trade_price_cents && product.currency
-      ? formatPriceConverted(product.trade_price_cents, product.currency, displayCurrency, fxRates)
-      : null,
+    price: (() => {
+      const raw = product.trade_price_cents;
+      if (!raw || !product.currency) return null;
+      const c = showTradePrice ? Math.round(raw * (1 - TRADE_DISCOUNT)) : raw;
+      return formatPriceConverted(c, product.currency, displayCurrency, fxRates, product.price_unit);
+    })(),
   });
 
   const handleLightboxAddToQuote = (item: TradeProductLightboxItem) => {
