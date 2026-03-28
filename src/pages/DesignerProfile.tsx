@@ -161,7 +161,7 @@ const DesignerProfile = () => {
             >
               <div className="border-l-2 border-primary/30 pl-8 py-4">
                 <Quote className="w-6 h-6 text-primary/40 mb-3" />
-                <blockquote className="font-display text-[13px] sm:text-base md:text-2xl md:text-center italic leading-relaxed">
+                <blockquote className="font-display text-[13px] sm:text-base md:text-2xl md:text-center italic leading-relaxed" /* philosophy-split */>
                   {(() => {
                     const match = designer.philosophy.match(/^(.*?)(\([^)]+\))(.*)$/s);
                     if (match) {
