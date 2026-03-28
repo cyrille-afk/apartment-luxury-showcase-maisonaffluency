@@ -460,7 +460,7 @@ const ShowroomGridView = ({
             const pinned = isPinned(product.product_name, product.id);
             const isHighlighted = !!(highlightedId && product.trade_product_id === highlightedId);
             const price = product.trade_price_cents && product.currency
-              ? { cents: product.trade_price_cents, currency: product.currency }
+              ? { cents: product.trade_price_cents, currency: product.currency, price_unit: product.price_unit }
               : null;
             return (
               <div
@@ -559,7 +559,7 @@ const ShowroomGridView = ({
                     />
                   ) : price ? (
                     <p className="font-display text-sm text-accent font-semibold mt-1">
-                      {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
+                      {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
                     </p>
                   ) : null}
                 </div>
@@ -574,7 +574,7 @@ const ShowroomGridView = ({
             const isAdded = addedProductIds.has(product.id);
             const pinned = isPinned(product.product_name, product.id);
             const price = product.trade_price_cents && product.currency
-              ? { cents: product.trade_price_cents, currency: product.currency }
+              ? { cents: product.trade_price_cents, currency: product.currency, price_unit: product.price_unit }
               : null;
             return (
               <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
@@ -608,7 +608,7 @@ const ShowroomGridView = ({
                   </div>
                 ) : price ? (
                   <span className="font-display text-sm text-accent font-semibold shrink-0">
-                    {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
+                    {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
                   </span>
                 ) : null}
                 <button
