@@ -58,7 +58,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
       email,
       password,
       options: {
-        data: { first_name: firstName, last_name: lastName },
+        data: { first_name: firstName, last_name: lastName, is_designer: isDesigner, newsletter },
         emailRedirectTo: window.location.origin,
       },
     });
