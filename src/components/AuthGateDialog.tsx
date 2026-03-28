@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, FileDown, UserPlus } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -31,6 +31,8 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const [newsletter, setNewsletter] = useState(true);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => { if (open) setMode(initialMode); }, [open, initialMode]);
 
   if (!open) return null;
 
