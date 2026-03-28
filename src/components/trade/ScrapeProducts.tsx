@@ -177,6 +177,7 @@ const ScrapeProducts = () => {
       </p>
       <CollapsibleContent className="mt-3 ml-6 space-y-6">
         {/* Saved Configs */}
+        <ScrapeErrorBoundary section="Saved Configurations">
         {savedConfigs.length > 0 && (
           <div className="space-y-2">
             <h3 className="font-display text-sm text-foreground flex items-center gap-2">
@@ -196,9 +197,12 @@ const ScrapeProducts = () => {
             </div>
           </div>
         )}
+        </ScrapeErrorBoundary>
 
         {/* Discover All */}
+        <ScrapeErrorBoundary section="URL Discovery">
         <ScrapeDiscoverAll onLoadBrands={setBrands} />
+        </ScrapeErrorBoundary>
 
         {/* New scrape form */}
         <div className="space-y-4">
@@ -383,7 +387,9 @@ const ScrapeProducts = () => {
         )}
 
         {/* Scrape History */}
+        <ScrapeErrorBoundary section="Scrape History">
         <ScrapeHistory />
+        </ScrapeErrorBoundary>
       </CollapsibleContent>
     </Collapsible>
   );
