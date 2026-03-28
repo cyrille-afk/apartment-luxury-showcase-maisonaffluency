@@ -161,8 +161,20 @@ const DesignerProfile = () => {
             >
               <div className="border-l-2 border-primary/30 pl-8 py-4">
                 <Quote className="w-6 h-6 text-primary/40 mb-3" />
-                <blockquote className="font-display text-[13px] sm:text-base md:text-2xl md:text-center italic leading-relaxed text-foreground/80">
-                  "{designer.philosophy}"
+                <blockquote className="font-display text-[13px] sm:text-base md:text-2xl md:text-center italic leading-relaxed">
+                  {(() => {
+                    const match = designer.philosophy.match(/^(.*?)(\([^)]+\))(.*)$/s);
+                    if (match) {
+                      return (
+                        <>
+                          "<span className="text-foreground">{match[1].trimEnd()}</span>{' '}
+                          <span className="text-muted-foreground/60">{match[2]}</span>
+                          <span className="text-foreground">{match[3]}</span>"
+                        </>
+                      );
+                    }
+                    return <span className="text-foreground/80">"{designer.philosophy}"</span>;
+                  })()}
                 </blockquote>
               </div>
             </motion.section>
