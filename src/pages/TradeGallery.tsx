@@ -53,8 +53,8 @@ const TradeGallery = () => {
   const [lastFavoritedName, setLastFavoritedName] = useState<string>("");
 
   // Price lookup from trade_products table
-  const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string }>>(new Map());
-  const [priceEntries, setPriceEntries] = useState<{ name: string; cents: number; currency: string }[]>([]);
+  const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string; price_unit?: string }>>(new Map());
+  const [priceEntries, setPriceEntries] = useState<{ name: string; cents: number; currency: string; price_unit?: string }[]>([]);
 
   const normalizeName = (s: string) =>
     s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
