@@ -547,31 +547,52 @@ const ScrapeProducts = () => {
                       <span className="font-body text-xs text-foreground font-medium">
                         {previewUrls[brand.id].length} new URLs discovered
                       </span>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => {
+                            const all = previewUrls[brand.id];
+                            const sel = selectedPreviewUrls[brand.id] || new Set<string>();
+                            const allSelected = all.length > 0 && all.every((u) => sel.has(u));
+                            setSelectedPreviewUrls((prev) => ({ ...prev, [brand.id]: allSelected ? new Set<string>() : new Set(all) }));
+                          }}
+                          className="font-body text-[10px] text-primary font-medium hover:underline"
+                        >
+                          {(() => {
+                            const all = previewUrls[brand.id];
+                            const sel = selectedPreviewUrls[brand.id] || new Set<string>();
+                            return all.length > 0 && all.every((u) => sel.has(u)) ? "Deselect all" : "Select all";
+                          })()}
+                        </button>
+                        <span className="text-muted-foreground/30">|</span>
                         <button
                           onClick={() => {
                             const urls = previewUrls[brand.id];
                             const filter = previewFilter[brand.id] || "";
-                            const visible = filter ? urls.filter((u) => u.toLowerCase().includes(filter.toLowerCase())) : urls;
+                            const PAGE_SIZE = 50;
+                            const filtered = filter ? urls.filter((u) => u.toLowerCase().includes(filter.toLowerCase())) : urls;
+                            const page = Math.min(previewPage[brand.id] || 0, Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1));
+                            const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
                             const sel = selectedPreviewUrls[brand.id] || new Set<string>();
-                            const allSelected = visible.every((u) => sel.has(u));
+                            const allOnPage = paged.length > 0 && paged.every((u) => sel.has(u));
                             const next = new Set<string>(sel);
-                            visible.forEach((u) => allSelected ? next.delete(u) : next.add(u));
+                            paged.forEach((u) => allOnPage ? next.delete(u) : next.add(u));
                             setSelectedPreviewUrls((prev) => ({ ...prev, [brand.id]: next }));
                           }}
-                          className="font-body text-[10px] text-primary hover:underline"
+                          className="font-body text-[10px] text-primary/70 hover:underline"
                         >
                           {(() => {
                             const urls = previewUrls[brand.id];
                             const filter = previewFilter[brand.id] || "";
-                            const visible = filter ? urls.filter((u) => u.toLowerCase().includes(filter.toLowerCase())) : urls;
+                            const PAGE_SIZE = 50;
+                            const filtered = filter ? urls.filter((u) => u.toLowerCase().includes(filter.toLowerCase())) : urls;
+                            const page = Math.min(previewPage[brand.id] || 0, Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1));
+                            const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
                             const sel = selectedPreviewUrls[brand.id] || new Set<string>();
-                            const allSelected = visible.length > 0 && visible.every((u) => sel.has(u));
-                            return allSelected ? "Deselect all on page" : "Select all on page";
+                            return paged.length > 0 && paged.every((u) => sel.has(u)) ? "Deselect page" : "Select page";
                           })()}
                         </button>
                         <span className="font-body text-[10px] text-muted-foreground">
-                          {selectedPreviewUrls[brand.id]?.size || 0} selected
+                          {selectedPreviewUrls[brand.id]?.size || 0} / {previewUrls[brand.id].length} selected
                         </span>
                       </div>
                     </div>
