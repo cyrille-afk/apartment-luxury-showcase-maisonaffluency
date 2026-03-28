@@ -322,6 +322,12 @@ const ScrapeProducts = () => {
     toast({ title: "Config deleted" });
   };
 
+  const updateConfigField = async (configId: string, field: string, value: any) => {
+    await supabase.from("scrape_configs").update({ [field]: value, updated_at: new Date().toISOString() }).eq("id", configId);
+    setSavedConfigs(prev => prev.map(c => c.id === configId ? { ...c, [field]: value } : c));
+    toast({ title: "Config updated" });
+  };
+
   const totalUrls = brands.reduce(
     (s, b) => s + b.urls_text.split(/[\n,]+/).filter((u) => u.trim().startsWith("http")).length,
     0
