@@ -446,6 +446,9 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
   const visibleParagraphs = shouldCollapse && !expanded
     ? paragraphs.slice(0, MOBILE_COLLAPSE_THRESHOLD)
     : paragraphs;
+  const hiddenParagraphs = shouldCollapse && !expanded
+    ? paragraphs.slice(MOBILE_COLLAPSE_THRESHOLD)
+    : [];
 
   return (
     <div className="font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
@@ -464,14 +467,14 @@ function MobileCollapsible({ paragraphs }: { paragraphs: string[] }) {
         </button>
       )}
       <AnimatePresence>
-        {shouldCollapse && expanded && (
+        {hiddenParagraphs.length > 0 && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
-            {paragraphs.slice(MOBILE_COLLAPSE_THRESHOLD).map((p, i) => (
+            {hiddenParagraphs.map((p, i) => (
               <p key={i} className="mt-3 md:mt-5">
                 {renderParagraph(p)}
               </p>
