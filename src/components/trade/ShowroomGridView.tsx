@@ -200,7 +200,7 @@ const ShowroomGridView = ({
 
         const { data: pricedProducts } = await supabase
           .from("trade_products")
-          .select("id, product_name, trade_price_cents, rrp_price_cents, currency, gallery_images")
+          .select("id, product_name, trade_price_cents, rrp_price_cents, currency, gallery_images, price_unit")
           .eq("is_active", true);
 
         const priceLookup = new Map<string, PriceMatch>();
@@ -221,7 +221,7 @@ const ShowroomGridView = ({
             }
             const cents = pp.trade_price_cents ?? pp.rrp_price_cents;
             if (!cents) continue;
-            const entry: PriceMatch = { name: pp.product_name, cents, currency: pp.currency };
+            const entry: PriceMatch = { name: pp.product_name, cents, currency: pp.currency, price_unit: pp.price_unit };
             priceEntries.push(entry);
             priceLookup.set(ppKey, entry);
             if (normalizedName) priceLookup.set(normalizedName, entry);
@@ -239,7 +239,7 @@ const ShowroomGridView = ({
             if (existingItem) {
               const price = findBestPriceMatch(item.product_name, priceLookup, priceEntries);
               const pdf = pdfLookup.get(key);
-              if (price && !existingItem.trade_price_cents) { existingItem.trade_price_cents = price.cents; existingItem.currency = price.currency; }
+              if (price && !existingItem.trade_price_cents) { existingItem.trade_price_cents = price.cents; existingItem.currency = price.currency; existingItem.price_unit = price.price_unit; }
               if (pdf && !existingItem.pdf_url) existingItem.pdf_url = pdf;
             }
             continue;
@@ -260,6 +260,7 @@ const ShowroomGridView = ({
               pdf_url: pdfLookup.get(key),
               trade_price_cents: price?.cents ?? null,
               currency: price?.currency,
+              price_unit: price?.price_unit,
             });
             if (item.product_image_url) seenImageUrls.set(item.product_image_url, key);
           }
