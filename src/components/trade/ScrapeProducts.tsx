@@ -363,9 +363,21 @@ const ScrapeProducts = () => {
                       <span className="font-body text-[10px] text-muted-foreground px-1.5 py-0.5 rounded bg-muted">
                         {config.category}
                       </span>
-                      <span className="font-body text-[10px] text-muted-foreground">
+                      <button
+                        onClick={() => {
+                          if (editingUrlsConfigId === config.id) {
+                            setEditingUrlsConfigId(null);
+                          } else {
+                            setEditingUrlsConfigId(config.id);
+                            setEditingUrlsText(config.urls.join("\n"));
+                          }
+                        }}
+                        className="font-body text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                        title="Edit URLs"
+                      >
                         {config.urls.length} URLs
-                      </span>
+                        <Pencil className="h-2.5 w-2.5" />
+                      </button>
                       <select
                         value={config.location || ""}
                         onChange={(e) => updateConfigField(config.id, "location", e.target.value)}
@@ -402,6 +414,41 @@ const ScrapeProducts = () => {
                         </span>
                       )}
                     </div>
+                    {editingUrlsConfigId === config.id && (
+                      <div className="mt-2 space-y-1.5">
+                        <textarea
+                          value={editingUrlsText}
+                          onChange={(e) => setEditingUrlsText(e.target.value)}
+                          rows={6}
+                          className="w-full px-2 py-1.5 rounded border border-border bg-background font-body text-[10px] text-foreground resize-y"
+                          placeholder="One URL per line"
+                        />
+                        <div className="flex items-center gap-2">
+                          <span className="font-body text-[10px] text-muted-foreground">
+                            {editingUrlsText.split(/[\n,]+/).filter(u => u.trim().startsWith("http")).length} valid URLs
+                          </span>
+                          <button
+                            onClick={async () => {
+                              const newUrls = editingUrlsText.split(/[\n,]+/).map(u => u.trim()).filter(u => u.startsWith("http"));
+                              if (!newUrls.length) { toast({ title: "No valid URLs", variant: "destructive" }); return; }
+                              await updateConfigField(config.id, "urls", newUrls);
+                              setEditingUrlsConfigId(null);
+                            }}
+                            className="p-1 rounded border border-success/30 text-success hover:bg-success/10 transition-colors"
+                            title="Save URLs"
+                          >
+                            <Check className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={() => setEditingUrlsConfigId(null)}
+                            className="p-1 rounded border border-border text-muted-foreground hover:bg-muted transition-colors"
+                            title="Cancel"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex items-center gap-3 mt-1 font-body text-[10px] text-muted-foreground/60">
                       {config.last_run_at && (
                         <span>Last run: {new Date(config.last_run_at).toLocaleDateString()}</span>
