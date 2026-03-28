@@ -14,6 +14,7 @@ import {
 import TaxonomyAudit from "@/components/trade/TaxonomyAudit";
 import HeroManager from "@/components/trade/HeroManager";
 import SampleRequestsAdmin from "@/components/trade/SampleRequestsAdmin";
+import ScrapeProducts from "@/components/trade/ScrapeProducts";
 
 interface Application {
   id: string;
@@ -132,6 +133,9 @@ const TradeAdmin = () => {
           <HeroManager />
         </CollapsibleContent>
       </Collapsible>
+
+      {/* Scrape Products */}
+      <ScrapeProducts />
 
       {/* Sample Requests Manager */}
       <SampleRequestsAdmin />
