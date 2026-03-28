@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare } from "lucide-react";
+import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { motion, AnimatePresence } from "framer-motion";
@@ -130,30 +130,40 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     return fuzzyPriceMatch(productName, priceExactMap, tradePrices);
   }, [tradePrices, priceExactMap]);
 
-  // ── Edition lookup from curator picks ──
-  const editionLookup = useMemo(() => {
-    const m = new Map<string, string>();
+  // ── Edition & PDF lookup from curator picks ──
+  const { editionLookup, pdfLookup } = useMemo(() => {
+    const editions = new Map<string, string>();
+    const pdfs = new Map<string, string>();
     for (const p of getAllTradeProducts()) {
-      if (p.edition) m.set(normalizeName(p.product_name), p.edition);
+      const key = normalizeName(p.product_name);
+      if (p.edition) editions.set(key, p.edition);
+      if (p.pdf_url) pdfs.set(key, p.pdf_url);
     }
-    return m;
+    return { editionLookup: editions, pdfLookup: pdfs };
   }, []);
 
-  const getHotspotEdition = useCallback((productName: string): string | null => {
+  const fuzzyLookup = useCallback((productName: string, map: Map<string, string>): string | null => {
     const key = normalizeName(productName);
-    const exact = editionLookup.get(key);
+    const exact = map.get(key);
     if (exact) return exact;
-    // fuzzy token match
     const tokens = tokenize(productName);
     if (!tokens.length) return null;
-    for (const [k, v] of editionLookup) {
+    for (const [k, v] of map) {
       const eTokens = tokenize(k);
       const overlap = tokens.filter(t => eTokens.includes(t)).length;
       const shorter = Math.min(tokens.length, eTokens.length);
       if (shorter > 0 && overlap / shorter > 0.5) return v;
     }
     return null;
-  }, [editionLookup]);
+  }, []);
+
+  const getHotspotEdition = useCallback((productName: string): string | null => {
+    return fuzzyLookup(productName, editionLookup);
+  }, [editionLookup, fuzzyLookup]);
+
+  const getHotspotPdf = useCallback((productName: string): string | null => {
+    return fuzzyLookup(productName, pdfLookup);
+  }, [pdfLookup, fuzzyLookup]);
 
   useEffect(() => {
     if (!imageIdentifier) return;
@@ -417,7 +427,22 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                             </p>
                           ) : null;
                         })()}
-                        {/* Trade price */}
+                        {/* PDF spec sheet link */}
+                        {(() => {
+                          const pdfUrl = getHotspotPdf(hotspot.product_name);
+                          return pdfUrl ? (
+                            <a
+                              href={pdfUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 mt-1.5 text-[10px] font-body text-primary hover:text-primary/80 transition-colors uppercase tracking-[0.1em]"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <FileText className="w-3 h-3" />
+                              View Spec Sheet
+                            </a>
+                          ) : null;
+                        })()}
                         {onAddToQuote && (() => {
                           const price = getHotspotPrice(hotspot.product_name);
                           return price ? (

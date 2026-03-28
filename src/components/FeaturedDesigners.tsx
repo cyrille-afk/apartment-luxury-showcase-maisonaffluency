@@ -789,7 +789,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Rugs", "Textile"],
         materials: "40% wool, 60% silk — 125 knots/sq.inch",
         dimensions: "Custom dimensions available",
-        description: "Inspired by and named after Nautilus, a beautiful seashell, this rug is thought provoking and possesses the power to make you think beyond the norms of ordinary. It symbolises an amalgamation of two beautiful bodies together with the mother of pearl, therefore culminating into something unique and distinct."
+        description: "Inspired by and named after Nautilus, a beautiful seashell, this rug is thought provoking and possesses the power to make you think beyond the norms of ordinary. It symbolises an amalgamation of two beautiful bodies together with the mother of pearl, therefore culminating into something unique and distinct.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/spec-sheets/atelier-fevrier/Nautilus_Rug_-_Maison_Affluency_v2.pdf",
       },
       { 
         image: atelierFevrierPick1, 
@@ -799,7 +800,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Rugs", "Textile"],
         materials: "90% wool, 10% silk — 100 knots/sq. inch",
         dimensions: "Custom dimensions available",
-        description: "Evocative of one of the most ancient greek ceramics, the François vase, initially discovered in pieces then eagerly put back together (so it could tell its story). Its irregularity and ostensibly mended areas – resonant with the Japanese Kintsugi practice – mirror the beauty in its rawest, most vulnerable state."
+        description: "Evocative of one of the most ancient greek ceramics, the François vase, initially discovered in pieces then eagerly put back together (so it could tell its story). Its irregularity and ostensibly mended areas – resonant with the Japanese Kintsugi practice – mirror the beauty in its rawest, most vulnerable state.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/spec-sheets/atelier-fevrier/Ceramic_-_Maison_Affluency.pdf",
       },
       { 
         image: atelierFevrierPick2, 
@@ -809,7 +811,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Rugs", "Textile"],
         materials: "60% nettle, 40% silk — 100 knots/sq.inch",
         dimensions: "Custom dimensions available",
-        description: "Emma Donnersberg's work embodies a delicate balance of strength and softness. Her work features playful and soft shapes and forms that exudes harmony and sophistication. The Mushroom rug beautifully captures her distinct style and Atelier Février's detailed craftsmanship and precise execution, it is a testament to a collaborative challenge put to the test and masterfully executed."
+        description: "Emma Donnersberg's work embodies a delicate balance of strength and softness. Her work features playful and soft shapes and forms that exudes harmony and sophistication. The Mushroom rug beautifully captures her distinct style and Atelier Février's detailed craftsmanship and precise execution, it is a testament to a collaborative challenge put to the test and masterfully executed.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/spec-sheets/atelier-fevrier/Mushroom_-_Maison_Affluency.pdf",
       },
       { 
         image: atelierFevrierPick4, 
@@ -819,7 +822,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Rugs", "Textile"],
         materials: "15% wool, 85% silk — 125 knots/sq. inch",
         dimensions: "Custom dimensions available",
-        description: "Designed by Sebastian Leon of Atelier d'Amis. The Fréquence rug collection is inspired by the enigmatic vibrational phenomenon called \"cymatics\", which correlates sound frequencies with geometric mandalas. The individual rugs are named after the frequencies of the A note – the standard for tuning – in three consecutive octaves."
+        description: "Designed by Sebastian Leon of Atelier d'Amis. The Fréquence rug collection is inspired by the enigmatic vibrational phenomenon called \"cymatics\", which correlates sound frequencies with geometric mandalas. The individual rugs are named after the frequencies of the A note – the standard for tuning – in three consecutive octaves.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/spec-sheets/atelier-fevrier/Frequence_440_Rug_-_Maison_Affluency.pdf",
       },
       { 
         image: atelierFevrierPick5, 
@@ -829,7 +833,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Rugs", "Textile"],
         materials: "80% wool, 20% silk — 100 knots/sq. inch",
         dimensions: "Custom dimensions available",
-        description: "Created in collaboration with Francois Mascarello of Mascarello Studio."
+        description: "Created in collaboration with Francois Mascarello of Mascarello Studio.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/spec-sheets/atelier-fevrier/Echo_-_Maison_Affluency.pdf",
       },
       { 
         image: atelierFevrierPick6, 
@@ -839,7 +844,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Rugs", "Textile"],
         materials: "90% wool, 10% silk — 125 knots/sq.inch",
         dimensions: "300 × 400 cm",
-        description: "Ricky is inspired by Japanese engraving.\nSymbolizing a cloud and its lining, the details are focused around the edges with various layers and levels of cutting."
+        description: "Ricky is inspired by Japanese engraving.\nSymbolizing a cloud and its lining, the details are focused around the edges with various layers and levels of cutting.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/spec-sheets/atelier-fevrier/Ricky_Rug_-_Maison_Affluency.pdf",
       },
       { 
         image: atelierFevrierPick7, 
@@ -849,7 +855,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         tags: ["Rugs", "Textile"],
         materials: "60% wool, 40% silk — 100 knots/sq. inch",
         dimensions: "Custom dimensions available",
-        description: "Inspired by the timeless work of Léon Bakst, the Ribbon rug is the result of a close collaboration between Atelier Février and de Gournay."
+        description: "Inspired by the timeless work of Léon Bakst, the Ribbon rug is the result of a close collaboration between Atelier Février and de Gournay.",
+        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/spec-sheets/atelier-fevrier/Ribbon_-_Maison_Affluency.pdf",
       },
     ],
     links: [
