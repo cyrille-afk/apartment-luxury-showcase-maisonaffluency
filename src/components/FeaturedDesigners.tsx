@@ -2906,7 +2906,50 @@ const FeaturedDesigners = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <div className="grid gap-4 grid-cols-2">
-              {filteredDesigners
+              {filteredPicks ? (
+                filteredPicks.map(({ pick, designer, pickIndex }, i) => (
+                  <button
+                    key={`${designer.id}-${pickIndex}`}
+                    type="button"
+                    onClick={() => {
+                      setCuratorPicksDesigner(designer);
+                      setCuratorPickIndex(pickIndex);
+                      setIsZoomed(false);
+                      setPicksHovered(false);
+                    }}
+                    className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+                  >
+                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                      {pick.image ? (
+                        <img
+                          src={pick.image}
+                          alt={pick.title}
+                          className="w-full h-full object-cover transition-all duration-700"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted/10">
+                          <span className="font-display text-3xl text-muted-foreground/20">
+                            {pick.title.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute inset-x-0 bottom-0 px-3 pt-10 pb-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                        <p className="font-display text-sm text-white tracking-wide leading-tight drop-shadow-sm">
+                          {pick.title}
+                        </p>
+                        {pick.subtitle && (
+                          <p className="font-body text-[10px] text-white/70 mt-0.5">{pick.subtitle}</p>
+                        )}
+                        <p className="font-body text-[9px] text-white/50 mt-1 uppercase tracking-wider">
+                          {formatDesignerName(designer.name, (designer as any).displayName).brand || formatDesignerName(designer.name, (designer as any).displayName).person}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                ))
+              ) : (
+              filteredDesigners
                 .slice()
                 .sort((a, b) => {
                   const nameA = (a.displayName || a.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -2982,7 +3025,8 @@ const FeaturedDesigners = () => {
                       {cardContent}
                     </Link>
                   );
-                })}
+                })
+              )}
           </div>
         </motion.div>
         </div>
