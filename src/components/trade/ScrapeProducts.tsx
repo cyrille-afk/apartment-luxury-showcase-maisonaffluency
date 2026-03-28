@@ -469,7 +469,16 @@ const ScrapeProducts = () => {
                       <div className="mt-2 border border-border rounded p-2 space-y-1.5">
                         <div className="flex items-center justify-between">
                           <span className="font-body text-[10px] text-foreground">
-                            {configSelectedUrls[config.id]?.size || 0} / {configDiscoveredUrls[config.id].length} new URLs selected
+                            {(() => {
+                              const filter = (configDiscoverFilter[config.id] || "").toLowerCase();
+                              const all = configDiscoveredUrls[config.id];
+                              const filtered = filter ? all.filter(u => u.toLowerCase().includes(filter)) : all;
+                              const filteredSelected = filtered.filter(u => configSelectedUrls[config.id]?.has(u)).length;
+                              const totalSelected = configSelectedUrls[config.id]?.size || 0;
+                              return filter
+                                ? `${filteredSelected}/${filtered.length} filtered · ${totalSelected}/${all.length} total selected`
+                                : `${totalSelected} / ${all.length} new URLs selected`;
+                            })()}
                           </span>
                           <div className="flex items-center gap-1.5">
                             <button
