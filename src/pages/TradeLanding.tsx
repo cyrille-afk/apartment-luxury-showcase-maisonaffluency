@@ -838,7 +838,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 {mobileFormExpanded && (
                   <div className="lg:hidden">
                     <p className="font-body text-sm text-muted-foreground mb-6">
-                      Complete the form below to get started. We'll review your application within 1–2 business days.
+                      Complete the form below to get started.<br />We'll review your application within 1–2 business days.
                     </p>
                     <TradeRegistrationForm prefillEmail={heroEmail || prefillEmail} />
                     <p className="mt-6 font-body text-sm text-muted-foreground">
@@ -853,7 +853,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                 {/* Desktop: always show full form */}
                 <div className="hidden lg:block">
                   <p className="font-body text-sm text-muted-foreground mb-6">
-                    Complete the form below to get started. We'll review your application within 1–2 business days.
+                    Complete the form below to get started.<br />We'll review your application within 1–2 business days.
                   </p>
                   <TradeRegistrationForm prefillEmail={heroEmail || prefillEmail} />
                   <p className="mt-6 font-body text-sm text-muted-foreground">
