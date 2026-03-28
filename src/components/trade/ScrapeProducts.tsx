@@ -585,7 +585,7 @@ const ScrapeProducts = () => {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="font-body text-xs text-muted-foreground block mb-1">Brand Name *</label>
                   <div className="relative">
