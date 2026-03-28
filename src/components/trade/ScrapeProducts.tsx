@@ -810,23 +810,32 @@ const ScrapeProducts = () => {
             )}
           </button>
           {scraping && scrapeProgress && (
-            <div className="flex-1 space-y-1.5 max-w-md">
-              <div className="flex items-center justify-between font-body text-[10px] text-muted-foreground">
-                <span>{scrapeProgress.done} / {scrapeProgress.total} URLs</span>
-                <span>{Math.round((scrapeProgress.done / scrapeProgress.total) * 100)}%</span>
+            <>
+              <div className="flex-1 space-y-1.5 max-w-md">
+                <div className="flex items-center justify-between font-body text-[10px] text-muted-foreground">
+                  <span>{scrapeProgress.done} / {scrapeProgress.total} URLs</span>
+                  <span>{Math.round((scrapeProgress.done / scrapeProgress.total) * 100)}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
+                    style={{ width: `${(scrapeProgress.done / scrapeProgress.total) * 100}%` }}
+                  />
+                </div>
+                <div className="flex gap-3 font-body text-[10px] text-muted-foreground">
+                  <span className="text-green-600">{scrapeProgress.inserted} inserted</span>
+                  <span className="text-blue-600">{scrapeProgress.updated} updated</span>
+                  {scrapeProgress.errors > 0 && <span className="text-destructive">{scrapeProgress.errors} errors</span>}
+                </div>
               </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
-                  style={{ width: `${(scrapeProgress.done / scrapeProgress.total) * 100}%` }}
-                />
-              </div>
-              <div className="flex gap-3 font-body text-[10px] text-muted-foreground">
-                <span className="text-green-600">{scrapeProgress.inserted} inserted</span>
-                <span className="text-blue-600">{scrapeProgress.updated} updated</span>
-                {scrapeProgress.errors > 0 && <span className="text-destructive">{scrapeProgress.errors} errors</span>}
-              </div>
-            </div>
+              <button
+                onClick={() => { scrapeCancelledRef.current = true; }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-destructive/30 text-destructive font-body text-[10px] uppercase tracking-[0.08em] hover:bg-destructive/10 transition-colors"
+              >
+                <XCircle className="h-3 w-3" />
+                Cancel
+              </button>
+            </>
           )}
         </div>
 
