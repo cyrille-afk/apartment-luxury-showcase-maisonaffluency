@@ -700,7 +700,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
         </div>
 
         {/* ─── FAQ + Registration Side by Side ─── */}
-        <div ref={formRef} id="apply" className="w-full border-y border-border bg-muted/30">
+        <div ref={formRef} id="apply" className="w-full border-y border-border bg-muted/30 scroll-mt-16">
           <div className="max-w-7xl mx-auto px-6 md:px-12 py-14 md:py-20 flex flex-col lg:flex-row lg:items-stretch gap-10 lg:gap-16">
             
             {/* Left — FAQ */}
@@ -753,7 +753,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
             </div>
 
             {/* Right — Registration Form */}
-            <div id="register" className="flex-1 lg:pl-12 order-1 lg:order-3 bg-background rounded-xl p-5 lg:p-0 lg:bg-transparent lg:rounded-none">
+            <div id="register" className="flex-1 lg:pl-12 order-1 lg:order-3 bg-background rounded-xl p-5 lg:p-0 lg:bg-transparent lg:rounded-none scroll-mt-16">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
