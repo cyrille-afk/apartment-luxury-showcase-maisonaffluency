@@ -252,6 +252,7 @@ const ScrapeProducts = () => {
           .split(/[\n,]+/)
           .map((u) => u.trim())
           .filter((u) => u.startsWith("http")),
+        location: b.location || undefined,
       }))
       .filter((b) => b.urls.length > 0);
 
@@ -546,6 +547,7 @@ const ScrapeProducts = () => {
                       brand_name: b.label,
                       category: "Uncategorized",
                       urls_text: b.urls.join("\n"),
+                      location: "",
                     }))
                   );
                   toast({ title: `${selected.length} brand(s) loaded into scrape form` });
@@ -604,6 +606,18 @@ const ScrapeProducts = () => {
                     placeholder="e.g. Rugs, Lighting"
                     className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
                   />
+                </div>
+                <div>
+                  <label className="font-body text-xs text-muted-foreground block mb-1">Country</label>
+                  <select
+                    value={brand.location}
+                    onChange={(e) => updateBrand(brand.id, "location", e.target.value)}
+                    className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  >
+                    {COUNTRY_OPTIONS.map((c) => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
