@@ -13,7 +13,28 @@ interface BrandEntry {
   brand_name: string;
   category: string;
   urls_text: string;
+  location: string;
 }
+
+const COUNTRY_OPTIONS = [
+  { label: "Auto (default)", value: "" },
+  { label: "🇫🇷 France", value: "FR" },
+  { label: "🇮🇹 Italy", value: "IT" },
+  { label: "🇺🇸 United States", value: "US" },
+  { label: "🇬🇧 United Kingdom", value: "GB" },
+  { label: "🇩🇪 Germany", value: "DE" },
+  { label: "🇪🇸 Spain", value: "ES" },
+  { label: "🇵🇹 Portugal", value: "PT" },
+  { label: "🇳🇱 Netherlands", value: "NL" },
+  { label: "🇧🇪 Belgium", value: "BE" },
+  { label: "🇸🇪 Sweden", value: "SE" },
+  { label: "🇩🇰 Denmark", value: "DK" },
+  { label: "🇯🇵 Japan", value: "JP" },
+  { label: "🇸🇬 Singapore", value: "SG" },
+  { label: "🇦🇺 Australia", value: "AU" },
+  { label: "🇧🇷 Brazil", value: "BR" },
+  { label: "🇮🇳 India", value: "IN" },
+];
 
 interface SavedConfig {
   id: string;
@@ -36,7 +57,7 @@ const SCHEDULE_OPTIONS = [
 const ScrapeProducts = () => {
   const { toast } = useToast();
   const [brands, setBrands] = useState<BrandEntry[]>([
-    { id: crypto.randomUUID(), brand_name: "", category: "Rugs", urls_text: "" },
+    { id: crypto.randomUUID(), brand_name: "", category: "Rugs", urls_text: "", location: "" },
   ]);
   const [scraping, setScaping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState<{ done: number; total: number; inserted: number; updated: number; errors: number } | null>(null);
@@ -122,7 +143,7 @@ const ScrapeProducts = () => {
   const addBrand = () => {
     setBrands((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), brand_name: "", category: "Uncategorized", urls_text: "" },
+      { id: crypto.randomUUID(), brand_name: "", category: "Uncategorized", urls_text: "", location: "" },
     ]);
   };
 
@@ -231,6 +252,7 @@ const ScrapeProducts = () => {
           .split(/[\n,]+/)
           .map((u) => u.trim())
           .filter((u) => u.startsWith("http")),
+        location: b.location || undefined,
       }))
       .filter((b) => b.urls.length > 0);
 
@@ -525,6 +547,7 @@ const ScrapeProducts = () => {
                       brand_name: b.label,
                       category: "Uncategorized",
                       urls_text: b.urls.join("\n"),
+                      location: "",
                     }))
                   );
                   toast({ title: `${selected.length} brand(s) loaded into scrape form` });
@@ -562,7 +585,7 @@ const ScrapeProducts = () => {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="font-body text-xs text-muted-foreground block mb-1">Brand Name *</label>
                   <div className="relative">
@@ -583,6 +606,18 @@ const ScrapeProducts = () => {
                     placeholder="e.g. Rugs, Lighting"
                     className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
                   />
+                </div>
+                <div>
+                  <label className="font-body text-xs text-muted-foreground block mb-1">Country</label>
+                  <select
+                    value={brand.location}
+                    onChange={(e) => updateBrand(brand.id, "location", e.target.value)}
+                    className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  >
+                    {COUNTRY_OPTIONS.map((c) => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
