@@ -130,30 +130,40 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     return fuzzyPriceMatch(productName, priceExactMap, tradePrices);
   }, [tradePrices, priceExactMap]);
 
-  // ── Edition lookup from curator picks ──
-  const editionLookup = useMemo(() => {
-    const m = new Map<string, string>();
+  // ── Edition & PDF lookup from curator picks ──
+  const { editionLookup, pdfLookup } = useMemo(() => {
+    const editions = new Map<string, string>();
+    const pdfs = new Map<string, string>();
     for (const p of getAllTradeProducts()) {
-      if (p.edition) m.set(normalizeName(p.product_name), p.edition);
+      const key = normalizeName(p.product_name);
+      if (p.edition) editions.set(key, p.edition);
+      if (p.pdf_url) pdfs.set(key, p.pdf_url);
     }
-    return m;
+    return { editionLookup: editions, pdfLookup: pdfs };
   }, []);
 
-  const getHotspotEdition = useCallback((productName: string): string | null => {
+  const fuzzyLookup = useCallback((productName: string, map: Map<string, string>): string | null => {
     const key = normalizeName(productName);
-    const exact = editionLookup.get(key);
+    const exact = map.get(key);
     if (exact) return exact;
-    // fuzzy token match
     const tokens = tokenize(productName);
     if (!tokens.length) return null;
-    for (const [k, v] of editionLookup) {
+    for (const [k, v] of map) {
       const eTokens = tokenize(k);
       const overlap = tokens.filter(t => eTokens.includes(t)).length;
       const shorter = Math.min(tokens.length, eTokens.length);
       if (shorter > 0 && overlap / shorter > 0.5) return v;
     }
     return null;
-  }, [editionLookup]);
+  }, []);
+
+  const getHotspotEdition = useCallback((productName: string): string | null => {
+    return fuzzyLookup(productName, editionLookup);
+  }, [editionLookup, fuzzyLookup]);
+
+  const getHotspotPdf = useCallback((productName: string): string | null => {
+    return fuzzyLookup(productName, pdfLookup);
+  }, [pdfLookup, fuzzyLookup]);
 
   useEffect(() => {
     if (!imageIdentifier) return;
