@@ -2422,7 +2422,7 @@ function AlphaStrip({
                 {/* Toggle sub-designers button */}
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleParentDesigners(brand.name); }}
-                  className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
+                  className="hidden md:flex absolute bottom-3 right-3 z-10 items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all"
                 >
                   <Layers className="h-3 w-3" />
                   <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers{(() => { const count = getDesignerCount(brand.name); return count > 0 ? ` (${count})` : ""; })()}</span>
