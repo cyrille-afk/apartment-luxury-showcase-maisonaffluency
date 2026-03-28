@@ -560,7 +560,14 @@ const ScrapeProducts = () => {
                           }}
                           className="font-body text-[10px] text-primary hover:underline"
                         >
-                          Toggle all
+                          {(() => {
+                            const urls = previewUrls[brand.id];
+                            const filter = previewFilter[brand.id] || "";
+                            const visible = filter ? urls.filter((u) => u.toLowerCase().includes(filter.toLowerCase())) : urls;
+                            const sel = selectedPreviewUrls[brand.id] || new Set<string>();
+                            const allSelected = visible.length > 0 && visible.every((u) => sel.has(u));
+                            return allSelected ? "Deselect all on page" : "Select all on page";
+                          })()}
                         </button>
                         <span className="font-body text-[10px] text-muted-foreground">
                           {selectedPreviewUrls[brand.id]?.size || 0} selected
