@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin, XCircle, History } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 
 interface BrandEntry {
   id: string;
@@ -62,6 +63,19 @@ const ScrapeProducts = () => {
   // Scrape history
   const [scrapeHistory, setScrapeHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+
+  const chartData = useMemo(() => {
+    if (!scrapeHistory.length) return [];
+    const byDay: Record<string, { date: string; inserted: number; updated: number; errors: number }> = {};
+    for (const run of scrapeHistory) {
+      const day = new Date(run.started_at).toISOString().slice(0, 10);
+      if (!byDay[day]) byDay[day] = { date: day, inserted: 0, updated: 0, errors: 0 };
+      byDay[day].inserted += run.inserted || 0;
+      byDay[day].updated += run.updated || 0;
+      byDay[day].errors += run.errors || 0;
+    }
+    return Object.values(byDay).sort((a, b) => a.date.localeCompare(b.date));
+  }, [scrapeHistory]);
 
   const fetchHistory = useCallback(async () => {
     setLoadingHistory(true);
@@ -998,6 +1012,30 @@ const ScrapeProducts = () => {
               Refresh
             </button>
           </div>
+
+          {chartData.length > 0 && (
+            <div className="h-48 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                    tickFormatter={(v) => { const d = new Date(v + "T00:00:00"); return `${d.getDate()}/${d.getMonth() + 1}`; }}
+                  />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{ fontSize: 11, background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 6 }}
+                    labelStyle={{ fontWeight: 600 }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 10 }} />
+                  <Bar dataKey="inserted" name="Inserted" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="updated" name="Updated" fill="hsl(var(--muted-foreground))" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="errors" name="Errors" fill="hsl(var(--destructive))" radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
 
           {scrapeHistory.length === 0 ? (
             <p className="font-body text-xs text-muted-foreground">No scrape runs yet.</p>
