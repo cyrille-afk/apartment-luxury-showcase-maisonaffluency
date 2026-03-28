@@ -229,7 +229,7 @@ const TradeGallery = () => {
     section: "designers",
     price: (() => {
       const p = applyDiscount(getProductPrice(product));
-      return p ? formatPriceConverted(p.cents, p.currency, displayCurrency, fxRates) : null;
+      return p ? formatPriceConverted(p.cents, p.currency, displayCurrency, fxRates, p.price_unit) : null;
     })(),
   });
 
@@ -247,7 +247,7 @@ const TradeGallery = () => {
       category: product.category,
       subcategory: product.subcategory,
       pdf_url: product.pdf_url,
-      price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates) : null,
+      price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit) : null,
     };
   };
 
@@ -502,7 +502,7 @@ const TradeGallery = () => {
                     />
                   ) : price ? (
                     <p className="font-display text-sm text-accent font-semibold mt-1 inline-flex items-center justify-center gap-1.5">
-                      {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
+                      {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
                       {showTradePrice && <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">Trade –8%</span>}
                     </p>
                   ) : null}
@@ -550,7 +550,7 @@ const TradeGallery = () => {
                   </div>
                 ) : price ? (
                   <span className="font-display text-sm text-accent font-semibold shrink-0 inline-flex items-center gap-1.5">
-                    {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
+                    {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}
                     {showTradePrice && <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>}
                   </span>
                 ) : null}
