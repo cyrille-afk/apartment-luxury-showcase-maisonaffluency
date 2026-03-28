@@ -8,6 +8,7 @@ import ScrapeConfigCard from "./scrape/ScrapeConfigCard";
 import ScrapeDiscoverAll from "./scrape/ScrapeDiscoverAll";
 import ScrapeBrandForm from "./scrape/ScrapeBrandForm";
 import ScrapeHistory from "./scrape/ScrapeHistory";
+import ScrapeErrorBoundary from "./scrape/ScrapeErrorBoundary";
 
 const ScrapeProducts = () => {
   const { toast } = useToast();
@@ -176,6 +177,7 @@ const ScrapeProducts = () => {
       </p>
       <CollapsibleContent className="mt-3 ml-6 space-y-6">
         {/* Saved Configs */}
+        <ScrapeErrorBoundary section="Saved Configurations">
         {savedConfigs.length > 0 && (
           <div className="space-y-2">
             <h3 className="font-display text-sm text-foreground flex items-center gap-2">
@@ -195,11 +197,14 @@ const ScrapeProducts = () => {
             </div>
           </div>
         )}
+        </ScrapeErrorBoundary>
 
         {/* Discover All */}
+        <ScrapeErrorBoundary section="URL Discovery">
         <ScrapeDiscoverAll onLoadBrands={setBrands} />
+        </ScrapeErrorBoundary>
 
-        {/* New scrape form */}
+        <ScrapeErrorBoundary section="New Scrape Form">
         <div className="space-y-4">
           <h3 className="font-display text-sm text-foreground">New Scrape</h3>
           {brands.map((brand, idx) => (
@@ -220,6 +225,7 @@ const ScrapeProducts = () => {
             Add another brand
           </button>
         </div>
+        </ScrapeErrorBoundary>
 
         {/* Scrape settings */}
         <div className="flex items-center gap-4 flex-wrap">
@@ -382,7 +388,9 @@ const ScrapeProducts = () => {
         )}
 
         {/* Scrape History */}
+        <ScrapeErrorBoundary section="Scrape History">
         <ScrapeHistory />
+        </ScrapeErrorBoundary>
       </CollapsibleContent>
     </Collapsible>
   );
