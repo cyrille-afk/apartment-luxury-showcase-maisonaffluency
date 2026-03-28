@@ -850,6 +850,28 @@ const ScrapeProducts = () => {
           )}
         </div>
 
+        {/* Retry remaining */}
+        {!scraping && remainingChunks && remainingChunks.length > 0 && (
+          <div className="flex items-center gap-3 p-3 rounded-md border border-primary/20 bg-primary/[0.03]">
+            <span className="font-body text-xs text-foreground">
+              {remainingChunks.reduce((s, c) => s + c.urls.length, 0)} URLs remaining
+            </span>
+            <button
+              onClick={() => runChunks(remainingChunks)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.08em] hover:bg-foreground/90 transition-colors"
+            >
+              <RefreshCw className="h-3 w-3" />
+              Resume scrape
+            </button>
+            <button
+              onClick={() => setRemainingChunks(null)}
+              className="font-body text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         {/* Results */}
         {results && (
           <div className="rounded-md border border-border p-4 bg-muted/30 space-y-3">
