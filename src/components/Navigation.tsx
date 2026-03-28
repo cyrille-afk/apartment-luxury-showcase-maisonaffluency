@@ -91,6 +91,7 @@ const Navigation = () => {
   const { user } = useAuth();
   const { items: pinItems, setIsComparing } = useCompare();
   const [authGateOpen, setAuthGateOpen] = useState(false);
+  const [authGateMode, setAuthGateMode] = useState<"prompt" | "signup" | "login">("prompt");
   // localStorage-backed favorite count
   const [favCount, setFavCount] = useState(0);
   useEffect(() => {
@@ -532,7 +533,7 @@ const Navigation = () => {
                     ) : (
                       <>
                         <DropdownMenuItem
-                          onClick={() => { setAuthGateOpen(true); }}
+                          onClick={() => { setAuthGateMode("signup"); setAuthGateOpen(true); }}
                           className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                         >
                           <UserPlus className="h-4 w-4 text-primary" />
@@ -540,7 +541,7 @@ const Navigation = () => {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={() => { setAuthGateOpen(true); }}
+                          onClick={() => { setAuthGateMode("login"); setAuthGateOpen(true); }}
                           className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                         >
                           <LogIn className="h-4 w-4 text-primary" />
@@ -693,7 +694,7 @@ const Navigation = () => {
         </div>
       </div>
     </nav>
-    <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" />
+    <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" initialMode={authGateMode} />
     </>;
 };
 export default Navigation;

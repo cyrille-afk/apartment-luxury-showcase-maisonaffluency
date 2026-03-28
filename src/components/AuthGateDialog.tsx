@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, FileDown, UserPlus } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -11,16 +11,18 @@ interface AuthGateDialogProps {
   onClose: () => void;
   /** What the user was trying to do — shown as context */
   action?: string;
+  /** Which form to show initially when opened */
+  initialMode?: "prompt" | "signup" | "login";
 }
 
 /**
  * Modal that prompts unauthenticated users to create an account or sign in
  * before accessing gated features (e.g. tear sheet downloads).
  */
-export default function AuthGateDialog({ open, onClose, action = "download this document" }: AuthGateDialogProps) {
+export default function AuthGateDialog({ open, onClose, action = "download this document", initialMode = "prompt" }: AuthGateDialogProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [mode, setMode] = useState<"prompt" | "signup" | "login">("prompt");
+  const [mode, setMode] = useState<"prompt" | "signup" | "login">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -29,6 +31,8 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const [newsletter, setNewsletter] = useState(true);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => { if (open) setMode(initialMode); }, [open, initialMode]);
 
   if (!open) return null;
 
