@@ -316,7 +316,7 @@ const Navigation = () => {
                                         onClick={() => {
                                           setIsOpen(false);
                                           window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: null } }));
-                                          handleNavClick('#product-grid');
+                                          handleNavClick('#designers');
                                         }}
                                         className="block text-[12px] tracking-[0.15em] font-body text-foreground hover:text-primary transition-colors py-1.5 font-semibold"
                                       >
@@ -328,7 +328,7 @@ const Navigation = () => {
                                           onClick={() => { 
                                             setIsOpen(false); 
                                             window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: cat, subcategory: sub } })); 
-                                            handleNavClick('#product-grid'); 
+                                            handleNavClick('#designers'); 
                                           }}
                                           className="block text-[12px] tracking-[0.15em] font-body text-foreground hover:text-[hsl(var(--accent))] transition-colors py-1.5 font-semibold"
                                         >
@@ -564,7 +564,7 @@ const Navigation = () => {
                         setActiveMegaCat(cat);
                         setActiveMegaSub(null);
                         setMegaMenuOpen(false);
-                        setTimeout(() => scrollToSection('product-grid'), 120);
+                        setTimeout(() => scrollToSection('designers'), 120);
                       }}
                       className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 text-left w-full", activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))] font-bold" : "text-foreground font-semibold hover:text-primary")}
                     >
@@ -580,7 +580,7 @@ const Navigation = () => {
                               setActiveMegaCat(cat);
                               setActiveMegaSub(sub);
                               setMegaMenuOpen(false);
-                              setTimeout(() => scrollToSection('product-grid'), 120);
+                              setTimeout(() => scrollToSection('designers'), 120);
                             }}
                             className={cn("text-left text-[10px] tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-foreground hover:text-primary")}
                           >
