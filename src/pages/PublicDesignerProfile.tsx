@@ -398,7 +398,7 @@ const PublicDesignerProfile = () => {
                           title="Copy shareable link"
                           onClick={(e) => {
                             e.stopPropagation();
-                            const url = `https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`;
+                            const url = designerOgUrl;
                             navigator.clipboard.writeText(url).then(() => {
                               setShareCopied(true);
                               setTimeout(() => setShareCopied(false), 2000);
