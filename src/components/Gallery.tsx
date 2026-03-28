@@ -791,12 +791,12 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           {!isHotspotSection && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                           )}
-                          {/* Pulsating dot — mobile hotspot hint */}
-                          {isHotspotSection && hotspotCounts[item.title] > 0 && (
-                            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
-                              <span className="relative flex h-3 w-3">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white/60" />
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-white/80 shadow-md" />
+                          {/* Pulsating hotspot icon — first card only */}
+                          {isHotspotSection && index === 0 && hotspotCounts[item.title] > 0 && (
+                            <span className="absolute top-3 left-3 z-20 pointer-events-none">
+                              <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
+                                <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
+                                <Plus className="relative h-2.5 w-2.5 text-white" />
                               </span>
                             </span>
                           )}
