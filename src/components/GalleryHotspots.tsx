@@ -57,6 +57,8 @@ interface Hotspot {
   designer_name: string | null;
   product_image_url: string | null;
   link_url: string | null;
+  materials?: string | null;
+  dimensions?: string | null;
 }
 
 interface HotspotProduct {
@@ -65,6 +67,7 @@ interface HotspotProduct {
   product_image_url: string | null;
   materials: string | null;
   dimensions: string | null;
+  link_url?: string | null;
 }
 
 interface GalleryHotspotsProps {
@@ -76,7 +79,7 @@ interface GalleryHotspotsProps {
   /** Public: callback to open quote request dialog pre-filled */
   onRequestQuote?: (productName: string, designerName: string) => void;
   /** Public: callback to open product lightbox for a matched curator's pick */
-  onViewProduct?: (productName: string, designerName: string) => void;
+  onViewProduct?: (product: HotspotProduct) => void;
   /** When set, only show hotspots matching this designer name */
   filterDesigner?: string | null;
 }
