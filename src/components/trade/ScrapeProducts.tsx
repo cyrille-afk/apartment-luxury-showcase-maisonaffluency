@@ -67,6 +67,7 @@ const ScrapeProducts = () => {
   const [results, setResults] = useState<any>(null);
   const [saveConfigs, setSaveConfigs] = useState(true);
   const [chunkDelay, setChunkDelay] = useState(0);
+  const [chunkSize, setChunkSize] = useState(10);
   const [savedConfigs, setSavedConfigs] = useState<SavedConfig[]>([]);
   const [loadingConfigs, setLoadingConfigs] = useState(false);
   const [runningConfigId, setRunningConfigId] = useState<string | null>(null);
@@ -267,11 +268,10 @@ const ScrapeProducts = () => {
       return;
     }
 
-    const CHUNK_SIZE = 10;
-    const chunks: { brand_name: string; category: string; urls: string[] }[] = [];
+    const chunks: { brand_name: string; category: string; urls: string[]; location?: string }[] = [];
     for (const b of brandsPayload) {
-      for (let i = 0; i < b.urls.length; i += CHUNK_SIZE) {
-        chunks.push({ brand_name: b.brand_name, category: b.category, urls: b.urls.slice(i, i + CHUNK_SIZE) });
+      for (let i = 0; i < b.urls.length; i += chunkSize) {
+        chunks.push({ brand_name: b.brand_name, category: b.category, urls: b.urls.slice(i, i + chunkSize), location: b.location });
       }
     }
 
@@ -933,6 +933,20 @@ const ScrapeProducts = () => {
               <option value={15}>15s</option>
               <option value={30}>30s</option>
               <option value={60}>60s</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-2 font-body text-xs text-muted-foreground">
+            <span>Chunk size</span>
+            <select
+              value={chunkSize}
+              onChange={(e) => setChunkSize(Number(e.target.value))}
+              className="px-2 py-1 rounded border border-border bg-background font-body text-xs text-foreground"
+            >
+              <option value={3}>3</option>
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={15}>15</option>
+              <option value={20}>20</option>
             </select>
           </label>
         </div>
