@@ -481,7 +481,7 @@ const Navigation = () => {
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
               </div>
             </div>
-            <div className="flex justify-end items-center gap-4">
+            <div className="flex flex-col items-end gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none relative group">
                   Contact Us
@@ -501,88 +501,88 @@ const Navigation = () => {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+              {/* Icons below Contact Us */}
+              <div className="flex items-center gap-5">
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
+                    <User className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
+                    {user ? (
+                      <>
+                        <div className="px-4 py-2.5 border-b border-border">
+                          <p className="font-body text-xs text-muted-foreground truncate">{user.email}</p>
+                        </div>
+                        <DropdownMenuItem
+                          onClick={() => navigate("/trade")}
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                        >
+                          <User className="h-4 w-4 text-primary" />
+                          <span className="font-body text-sm">My Account</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors text-destructive"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          <span className="font-body text-sm">Sign Out</span>
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => { setAuthGateOpen(true); }}
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                        >
+                          <UserPlus className="h-4 w-4 text-primary" />
+                          <span className="font-body text-sm">Sign Up</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => { setAuthGateOpen(true); }}
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                        >
+                          <LogIn className="h-4 w-4 text-primary" />
+                          <span className="font-body text-sm">Log In</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => navigate("/trade/register")}
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                        >
+                          <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
+                          <span className="font-body text-sm">Trade Program</span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => navigate("/favorites")}
+                        className="relative group p-1 transition-colors"
+                      >
+                        <Heart className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
+                        {favCount > 0 && (
+                          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none px-1">
+                            {favCount}
+                          </span>
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="font-body text-xs uppercase tracking-wider">
+                      Wishlist
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
           </div>
-          {/* Icons row below — centered */}
-          <div className="flex justify-center -mt-1 pb-1 gap-5">
-              {/* Account icon */}
-              <DropdownMenu>
-                <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
-                  <User className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="center" className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
-                  {user ? (
-                    <>
-                      <div className="px-4 py-2.5 border-b border-border">
-                        <p className="font-body text-xs text-muted-foreground truncate">{user.email}</p>
-                      </div>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/trade")}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <User className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">My Account</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors text-destructive"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span className="font-body text-sm">Sign Out</span>
-                      </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <>
-                      <DropdownMenuItem
-                        onClick={() => { setAuthGateOpen(true); }}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <UserPlus className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">Sign Up</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => { setAuthGateOpen(true); }}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <LogIn className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">Log In</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => navigate("/trade/register")}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
-                        <span className="font-body text-sm">Trade Program</span>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
 
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => navigate("/favorites")}
-                      className="relative group p-1 transition-colors"
-                    >
-                      <Heart className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
-                      {favCount > 0 && (
-                        <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none px-1">
-                          {favCount}
-                        </span>
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="font-body text-xs uppercase tracking-wider">
-                    Wishlist
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-          </div>
 
           <div className="flex items-center gap-6 lg:gap-10 pb-3 self-start">
             {leftNavItems.map((item, index) => (
