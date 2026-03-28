@@ -401,7 +401,7 @@ const TradeGallery = () => {
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
-            const price = getProductPrice(product);
+            const price = applyDiscount(getProductPrice(product));
             const pinned = isPinned(product.product_name, product.id);
             return (
               <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-foreground/20 transition-colors">
