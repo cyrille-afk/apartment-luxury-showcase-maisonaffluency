@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw } from "lucide-react";
+import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface BrandEntry {
@@ -40,6 +40,9 @@ const ScrapeProducts = () => {
   const [savedConfigs, setSavedConfigs] = useState<SavedConfig[]>([]);
   const [loadingConfigs, setLoadingConfigs] = useState(false);
   const [runningConfigId, setRunningConfigId] = useState<string | null>(null);
+  const [mappingBrandId, setMappingBrandId] = useState<string | null>(null);
+  const [mapUrl, setMapUrl] = useState<Record<string, string>>({});
+  const [mapSearch, setMapSearch] = useState<Record<string, string>>({});
 
   const fetchConfigs = useCallback(async () => {
     setLoadingConfigs(true);
@@ -293,6 +296,85 @@ const ScrapeProducts = () => {
                     className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
                   />
                 </div>
+              </div>
+
+              {/* URL Discovery */}
+              <div className="space-y-2">
+                <label className="font-body text-xs text-muted-foreground block">
+                  Discover Product URLs
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+                    <input
+                      value={mapUrl[brand.id] || ""}
+                      onChange={(e) => setMapUrl((prev) => ({ ...prev, [brand.id]: e.target.value }))}
+                      placeholder="Brand page URL, e.g. https://example.com/designer/brand-name/"
+                      className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                    />
+                  </div>
+                  <div className="relative w-40">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+                    <input
+                      value={mapSearch[brand.id] || ""}
+                      onChange={(e) => setMapSearch((prev) => ({ ...prev, [brand.id]: e.target.value }))}
+                      placeholder="Filter (optional)"
+                      className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                    />
+                  </div>
+                  <button
+                    onClick={async () => {
+                      const siteUrl = mapUrl[brand.id]?.trim();
+                      if (!siteUrl) {
+                        toast({ title: "Enter a brand page URL first", variant: "destructive" });
+                        return;
+                      }
+                      setMappingBrandId(brand.id);
+                      try {
+                        const { data, error } = await supabase.functions.invoke("firecrawl-map", {
+                          body: {
+                            url: siteUrl,
+                            search: mapSearch[brand.id]?.trim() || undefined,
+                            limit: 300,
+                          },
+                        });
+                        if (error) throw error;
+                        if (data.urls?.length) {
+                          const existing = brand.urls_text.split(/[\n,]+/).map((u: string) => u.trim()).filter(Boolean);
+                          const newUrls = data.urls.filter((u: string) => !existing.includes(u));
+                          const combined = [...existing, ...newUrls].filter((u: string) => u.startsWith("http"));
+                          updateBrand(brand.id, "urls_text", combined.join("\n"));
+                          toast({
+                            title: `Found ${data.urls.length} product URLs`,
+                            description: `${newUrls.length} new added (${data.total_links} total links scanned)`,
+                          });
+                        } else {
+                          toast({
+                            title: "No product URLs found",
+                            description: `Scanned ${data.total_links} links. Try a different URL or search term.`,
+                            variant: "destructive",
+                          });
+                        }
+                      } catch (err: any) {
+                        toast({ title: "Map failed", description: err.message, variant: "destructive" });
+                      } finally {
+                        setMappingBrandId(null);
+                      }
+                    }}
+                    disabled={mappingBrandId === brand.id}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-md border border-primary/20 text-primary font-body text-xs hover:bg-primary/5 transition-colors disabled:opacity-40 whitespace-nowrap"
+                  >
+                    {mappingBrandId === brand.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <MapPin className="h-3.5 w-3.5" />
+                    )}
+                    Discover
+                  </button>
+                </div>
+                <p className="font-body text-[10px] text-muted-foreground/40">
+                  Scans the site to find all /product/ pages. Use the filter to narrow by brand or keyword.
+                </p>
               </div>
 
               <div>
