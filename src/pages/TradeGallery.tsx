@@ -64,14 +64,14 @@ const TradeGallery = () => {
   const refreshPrices = async () => {
     const { data } = await supabase
       .from("trade_products")
-      .select("product_name, trade_price_cents, currency")
+      .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit")
       .not("trade_price_cents", "is", null);
     if (data) {
-      const lookup = new Map<string, { cents: number; currency: string }>();
-      const entries: { name: string; cents: number; currency: string }[] = [];
+      const lookup = new Map<string, { cents: number; currency: string; price_unit?: string }>();
+      const entries: { name: string; cents: number; currency: string; price_unit?: string }[] = [];
       for (const p of data) {
         if (p.trade_price_cents) {
-          const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency };
+          const entry = { name: p.product_name, cents: p.trade_price_cents, currency: p.currency, price_unit: p.price_unit };
           entries.push(entry);
           lookup.set(p.product_name.trim().toLowerCase(), entry);
           const norm = normalizeName(p.product_name);
