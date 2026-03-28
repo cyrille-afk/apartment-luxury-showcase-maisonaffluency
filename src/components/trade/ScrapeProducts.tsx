@@ -1055,8 +1055,20 @@ const ScrapeProducts = () => {
               </Popover>
               {(historyFrom || historyTo) && (
                 <button onClick={() => { setHistoryFrom(undefined); setHistoryTo(undefined); }} className="text-[10px] font-body text-muted-foreground hover:text-foreground transition-colors">
-                  Clear
+                  Clear dates
                 </button>
+              )}
+              {historyBrands.length > 1 && (
+                <select
+                  value={historyBrand}
+                  onChange={(e) => setHistoryBrand(e.target.value)}
+                  className="text-[10px] font-body border border-border rounded px-1.5 py-1 bg-background text-foreground"
+                >
+                  <option value="">All brands</option>
+                  {historyBrands.map((b) => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
               )}
               <button
                 onClick={fetchHistory}
@@ -1066,11 +1078,11 @@ const ScrapeProducts = () => {
                 {loadingHistory ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
                 Refresh
               </button>
-              {scrapeHistory.length > 0 && (
+              {filteredHistory.length > 0 && (
                 <button
                   onClick={() => {
                     const headers = ["Brand", "Status", "Total URLs", "Scraped", "Inserted", "Updated", "Errors", "Duration (s)", "Started At", "Completed At"];
-                    const rows = scrapeHistory.map((r) => [
+                    const rows = filteredHistory.map((r) => [
                       `"${(r.brand_name || "").replace(/"/g, '""')}"`,
                       r.status,
                       r.total_urls,
@@ -1124,7 +1136,7 @@ const ScrapeProducts = () => {
             </div>
           )}
 
-          {scrapeHistory.length === 0 ? (
+          {filteredHistory.length === 0 ? (
             <p className="font-body text-xs text-muted-foreground">No scrape runs yet.</p>
           ) : (
             <div className="space-y-1.5">
@@ -1137,7 +1149,7 @@ const ScrapeProducts = () => {
                 <span className="text-right">Duration</span>
                 <span className="text-right">When</span>
               </div>
-              {scrapeHistory.map((run) => {
+              {filteredHistory.map((run) => {
                 const dur = Number(run.duration_seconds);
                 const durLabel = dur >= 60 ? `${Math.floor(dur / 60)}m ${dur % 60}s` : `${dur}s`;
                 const ago = (() => {
