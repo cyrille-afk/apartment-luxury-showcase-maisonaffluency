@@ -8,6 +8,7 @@ import ScrapeConfigCard from "./scrape/ScrapeConfigCard";
 import ScrapeDiscoverAll from "./scrape/ScrapeDiscoverAll";
 import ScrapeBrandForm from "./scrape/ScrapeBrandForm";
 import ScrapeHistory from "./scrape/ScrapeHistory";
+import ScrapeErrorBoundary from "./scrape/ScrapeErrorBoundary";
 
 const ScrapeProducts = () => {
   const { toast } = useToast();
