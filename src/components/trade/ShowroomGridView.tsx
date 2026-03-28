@@ -93,7 +93,7 @@ const inferCategory = (name: string): string => {
   return "Décor";
 };
 
-type PriceMatch = { name: string; cents: number; currency: string };
+type PriceMatch = { name: string; cents: number; currency: string; price_unit?: string };
 
 const normalizeProductName = (value: string): string =>
   value.toLowerCase().replace(/['']/g, "").replace(/&/g, " and ").replace(/\([^)]*\)/g, " ").replace(/[^a-z0-9\s]/g, " ").replace(/\b(custom|details?|edition|ed|piece|volume|the|and|of|in)\b/g, " ").replace(/\s+/g, " ").trim();
