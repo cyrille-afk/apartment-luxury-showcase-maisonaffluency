@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw } from "lucide-react";
+import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface BrandEntry {
@@ -40,6 +40,9 @@ const ScrapeProducts = () => {
   const [savedConfigs, setSavedConfigs] = useState<SavedConfig[]>([]);
   const [loadingConfigs, setLoadingConfigs] = useState(false);
   const [runningConfigId, setRunningConfigId] = useState<string | null>(null);
+  const [mappingBrandId, setMappingBrandId] = useState<string | null>(null);
+  const [mapUrl, setMapUrl] = useState<Record<string, string>>({});
+  const [mapSearch, setMapSearch] = useState<Record<string, string>>({});
 
   const fetchConfigs = useCallback(async () => {
     setLoadingConfigs(true);
