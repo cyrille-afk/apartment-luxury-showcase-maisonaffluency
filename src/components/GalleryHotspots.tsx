@@ -493,6 +493,10 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                                 setTimeout(() => {
                                   window.dispatchEvent(new CustomEvent('open-curators-pick', { detail: hash }));
                                 }, 150);
+                              } else if (url.startsWith('/')) {
+                                setActiveId(null);
+                                onCloseLightbox?.();
+                                setTimeout(() => { navigate(url); }, 300);
                               } else {
                                 onCloseLightbox?.();
                                 setTimeout(() => { window.location.href = url; }, 300);
