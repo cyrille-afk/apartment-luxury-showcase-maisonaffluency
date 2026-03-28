@@ -81,6 +81,7 @@ const ScrapeProducts = () => {
   const [configDiscoveredUrls, setConfigDiscoveredUrls] = useState<Record<string, string[]>>({});
   const [configSelectedUrls, setConfigSelectedUrls] = useState<Record<string, Set<string>>>({});
   const [configDiscoverFilter, setConfigDiscoverFilter] = useState<Record<string, string>>({});
+  const [configDiscoverPage, setConfigDiscoverPage] = useState<Record<string, number>>({});
   const [mapUrl, setMapUrl] = useState<Record<string, string>>({});
   const [mapSearch, setMapSearch] = useState<Record<string, string>>({});
   const [previewUrls, setPreviewUrls] = useState<Record<string, string[]>>({});
@@ -515,7 +516,10 @@ const ScrapeProducts = () => {
                           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
                           <input
                             value={configDiscoverFilter[config.id] || ""}
-                            onChange={(e) => setConfigDiscoverFilter(prev => ({ ...prev, [config.id]: e.target.value }))}
+                            onChange={(e) => {
+                              setConfigDiscoverFilter(prev => ({ ...prev, [config.id]: e.target.value }));
+                              setConfigDiscoverPage(prev => ({ ...prev, [config.id]: 0 }));
+                            }}
                             placeholder="Filter URLs…"
                             className="w-full pl-7 pr-2 py-1 rounded border border-border bg-background font-body text-[10px] text-foreground placeholder:text-muted-foreground/40"
                           />
@@ -525,6 +529,10 @@ const ScrapeProducts = () => {
                           const filtered = filter
                             ? configDiscoveredUrls[config.id].filter(u => u.toLowerCase().includes(filter))
                             : configDiscoveredUrls[config.id];
+                          const PAGE_SIZE = 30;
+                          const page = configDiscoverPage[config.id] || 0;
+                          const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+                          const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
                           return (
                             <>
                               {filter && (
@@ -532,8 +540,8 @@ const ScrapeProducts = () => {
                                   Showing {filtered.length} of {configDiscoveredUrls[config.id].length}
                                 </span>
                               )}
-                              <div className="max-h-32 overflow-y-auto space-y-0.5">
-                                {filtered.map((url) => (
+                              <div className="max-h-40 overflow-y-auto space-y-0.5">
+                                {paged.map((url) => (
                                   <label key={url} className="flex items-center gap-1.5 font-body text-[10px] text-muted-foreground hover:text-foreground cursor-pointer">
                                     <input
                                       type="checkbox"
@@ -551,6 +559,23 @@ const ScrapeProducts = () => {
                                   </label>
                                 ))}
                               </div>
+                              {totalPages > 1 && (
+                                <div className="flex items-center justify-center gap-2 pt-1">
+                                  <button
+                                    onClick={() => setConfigDiscoverPage(prev => ({ ...prev, [config.id]: Math.max(0, page - 1) }))}
+                                    disabled={page === 0}
+                                    className="px-2 py-0.5 rounded border border-border font-body text-[10px] text-foreground disabled:opacity-30 hover:bg-muted transition-colors"
+                                  >←</button>
+                                  <span className="font-body text-[10px] text-muted-foreground">
+                                    {page + 1} / {totalPages}
+                                  </span>
+                                  <button
+                                    onClick={() => setConfigDiscoverPage(prev => ({ ...prev, [config.id]: Math.min(totalPages - 1, page + 1) }))}
+                                    disabled={page >= totalPages - 1}
+                                    className="px-2 py-0.5 rounded border border-border font-body text-[10px] text-foreground disabled:opacity-30 hover:bg-muted transition-colors"
+                                  >→</button>
+                                </div>
+                              )}
                             </>
                           );
                         })()}
