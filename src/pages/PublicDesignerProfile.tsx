@@ -609,6 +609,7 @@ const PublicDesignerProfile = () => {
                                   biographyImages={[]}
                                   pickImages={[]}
                                   designerName={designer.name}
+                                  allowCollapse={false}
                                 />
                               </div>
                             </ProfileCollapsible>
