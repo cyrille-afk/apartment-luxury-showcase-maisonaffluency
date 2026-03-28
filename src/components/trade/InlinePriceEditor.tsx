@@ -9,6 +9,7 @@ interface InlinePriceEditorProps {
   brandName?: string;
   currentPriceCents?: number | null;
   currency?: string;
+  priceUnit?: string;
   displayCurrency?: DisplayCurrency;
   fxRates?: Record<string, number>;
   onPriceUpdated?: (newCents: number, currency: string) => void;
@@ -57,6 +58,7 @@ export default function InlinePriceEditor({
   brandName,
   currentPriceCents,
   currency = "SGD",
+  priceUnit,
   displayCurrency = "original",
   fxRates = {},
   onPriceUpdated,
@@ -169,7 +171,7 @@ export default function InlinePriceEditor({
     >
       {currentPriceCents ? (
         <span className="font-display text-sm text-accent font-semibold">
-          {formatPriceConverted(currentPriceCents, currency, displayCurrency, fxRates)}
+          {formatPriceConverted(currentPriceCents, currency, displayCurrency, fxRates, priceUnit)}
         </span>
       ) : (
         <span className="font-body text-[10px] text-muted-foreground/60 italic">Set price</span>
