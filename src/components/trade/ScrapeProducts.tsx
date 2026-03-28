@@ -13,7 +13,28 @@ interface BrandEntry {
   brand_name: string;
   category: string;
   urls_text: string;
+  location: string;
 }
+
+const COUNTRY_OPTIONS = [
+  { label: "Auto (default)", value: "" },
+  { label: "🇫🇷 France", value: "FR" },
+  { label: "🇮🇹 Italy", value: "IT" },
+  { label: "🇺🇸 United States", value: "US" },
+  { label: "🇬🇧 United Kingdom", value: "GB" },
+  { label: "🇩🇪 Germany", value: "DE" },
+  { label: "🇪🇸 Spain", value: "ES" },
+  { label: "🇵🇹 Portugal", value: "PT" },
+  { label: "🇳🇱 Netherlands", value: "NL" },
+  { label: "🇧🇪 Belgium", value: "BE" },
+  { label: "🇸🇪 Sweden", value: "SE" },
+  { label: "🇩🇰 Denmark", value: "DK" },
+  { label: "🇯🇵 Japan", value: "JP" },
+  { label: "🇸🇬 Singapore", value: "SG" },
+  { label: "🇦🇺 Australia", value: "AU" },
+  { label: "🇧🇷 Brazil", value: "BR" },
+  { label: "🇮🇳 India", value: "IN" },
+];
 
 interface SavedConfig {
   id: string;
@@ -36,7 +57,7 @@ const SCHEDULE_OPTIONS = [
 const ScrapeProducts = () => {
   const { toast } = useToast();
   const [brands, setBrands] = useState<BrandEntry[]>([
-    { id: crypto.randomUUID(), brand_name: "", category: "Rugs", urls_text: "" },
+    { id: crypto.randomUUID(), brand_name: "", category: "Rugs", urls_text: "", location: "" },
   ]);
   const [scraping, setScaping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState<{ done: number; total: number; inserted: number; updated: number; errors: number } | null>(null);
@@ -122,7 +143,7 @@ const ScrapeProducts = () => {
   const addBrand = () => {
     setBrands((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), brand_name: "", category: "Uncategorized", urls_text: "" },
+      { id: crypto.randomUUID(), brand_name: "", category: "Uncategorized", urls_text: "", location: "" },
     ]);
   };
 
