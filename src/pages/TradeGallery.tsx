@@ -249,7 +249,6 @@ const TradeGallery = () => {
       pdf_url: product.pdf_url,
       price: price ? formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates) : null,
     };
-    };
   };
 
   const handleLightboxAddToQuote = (item: TradeProductLightboxItem) => {
