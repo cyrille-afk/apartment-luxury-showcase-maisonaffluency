@@ -390,7 +390,7 @@ function SplitImageBlock({
     </motion.div>
   ) : null;
 
-  const imageWidth = isSmall ? "md:w-[22%]" : "md:w-[32%]";
+  const imageWidth = isSmall ? "md:w-[22%]" : "md:w-[42%]";
 
   return (
     <div className={`${index === 0 ? "mb-4 md:mb-6" : "my-4 md:my-6"} flex flex-col md:flex-row gap-3 md:gap-6 items-center`}>
