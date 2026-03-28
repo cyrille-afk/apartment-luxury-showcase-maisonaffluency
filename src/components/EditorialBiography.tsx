@@ -625,10 +625,15 @@ export default function EditorialBiography({
       if (debugMediaOrder) debugEvents.push(`Leading text block (${leadingText.length} paragraph${leadingText.length > 1 ? "s" : ""})`);
 
       if (earlyMobileImage) {
-        // First paragraph
+        // Show first two paragraphs before the image (place image after 2nd paragraph)
+        const splitAt = Math.min(2, leadingText.length);
         elements.push(
           <div key="leading-text-before">
-            <p>{renderParagraph(leadingText[0])}</p>
+            {leadingText.slice(0, splitAt).map((p, pi) => (
+              <p key={pi} className={pi > 0 ? "mt-4" : ""}>
+                {renderParagraph(p)}
+              </p>
+            ))}
           </div>
         );
         // First image pulled up for mobile
@@ -643,10 +648,10 @@ export default function EditorialBiography({
         );
         imageIdx++;
         // Remaining leading text
-        if (leadingText.length > 1) {
+        if (leadingText.length > splitAt) {
           elements.push(
             <div key="leading-text-after">
-              {leadingText.slice(1).map((p, pi) => (
+              {leadingText.slice(splitAt).map((p, pi) => (
                 <p key={pi} className={pi > 0 ? "mt-4" : ""}>
                   {renderParagraph(p)}
                 </p>
