@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin } from "lucide-react";
+import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin, XCircle } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface BrandEntry {
@@ -36,6 +36,7 @@ const ScrapeProducts = () => {
   ]);
   const [scraping, setScaping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState<{ done: number; total: number; inserted: number; updated: number; errors: number } | null>(null);
+  const scrapeCancelledRef = useRef(false);
   const [results, setResults] = useState<any>(null);
   const [saveConfigs, setSaveConfigs] = useState(true);
   const [savedConfigs, setSavedConfigs] = useState<SavedConfig[]>([]);
@@ -111,6 +112,7 @@ const ScrapeProducts = () => {
     const totalUrls = brandsPayload.reduce((s, b) => s + b.urls.length, 0);
     setScaping(true);
     setResults(null);
+    scrapeCancelledRef.current = false;
     setScrapeProgress({ done: 0, total: totalUrls, inserted: 0, updated: 0, errors: 0 });
 
     let totalInserted = 0;
@@ -121,6 +123,10 @@ const ScrapeProducts = () => {
 
     try {
       for (let i = 0; i < chunks.length; i++) {
+        if (scrapeCancelledRef.current) {
+          toast({ title: "Scrape cancelled", description: `Stopped after ${urlsDone} of ${totalUrls} URLs` });
+          break;
+        }
         const chunk = chunks[i];
         const isLastChunk = i === chunks.length - 1;
         const { data, error } = await supabase.functions.invoke("scrape-products", {
@@ -804,23 +810,32 @@ const ScrapeProducts = () => {
             )}
           </button>
           {scraping && scrapeProgress && (
-            <div className="flex-1 space-y-1.5 max-w-md">
-              <div className="flex items-center justify-between font-body text-[10px] text-muted-foreground">
-                <span>{scrapeProgress.done} / {scrapeProgress.total} URLs</span>
-                <span>{Math.round((scrapeProgress.done / scrapeProgress.total) * 100)}%</span>
+            <>
+              <div className="flex-1 space-y-1.5 max-w-md">
+                <div className="flex items-center justify-between font-body text-[10px] text-muted-foreground">
+                  <span>{scrapeProgress.done} / {scrapeProgress.total} URLs</span>
+                  <span>{Math.round((scrapeProgress.done / scrapeProgress.total) * 100)}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
+                    style={{ width: `${(scrapeProgress.done / scrapeProgress.total) * 100}%` }}
+                  />
+                </div>
+                <div className="flex gap-3 font-body text-[10px] text-muted-foreground">
+                  <span className="text-green-600">{scrapeProgress.inserted} inserted</span>
+                  <span className="text-blue-600">{scrapeProgress.updated} updated</span>
+                  {scrapeProgress.errors > 0 && <span className="text-destructive">{scrapeProgress.errors} errors</span>}
+                </div>
               </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
-                  style={{ width: `${(scrapeProgress.done / scrapeProgress.total) * 100}%` }}
-                />
-              </div>
-              <div className="flex gap-3 font-body text-[10px] text-muted-foreground">
-                <span className="text-green-600">{scrapeProgress.inserted} inserted</span>
-                <span className="text-blue-600">{scrapeProgress.updated} updated</span>
-                {scrapeProgress.errors > 0 && <span className="text-destructive">{scrapeProgress.errors} errors</span>}
-              </div>
-            </div>
+              <button
+                onClick={() => { scrapeCancelledRef.current = true; }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-destructive/30 text-destructive font-body text-[10px] uppercase tracking-[0.08em] hover:bg-destructive/10 transition-colors"
+              >
+                <XCircle className="h-3 w-3" />
+                Cancel
+              </button>
+            </>
           )}
         </div>
 
