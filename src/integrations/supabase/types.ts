@@ -1459,6 +1459,57 @@ export type Database = {
         }
         Relationships: []
       }
+      scrape_runs: {
+        Row: {
+          brand_name: string
+          category: string
+          completed_at: string
+          created_at: string
+          duration_seconds: number
+          error_message: string | null
+          errors: number
+          id: string
+          inserted: number
+          started_at: string
+          status: string
+          total_scraped: number
+          total_urls: number
+          updated: number
+        }
+        Insert: {
+          brand_name: string
+          category?: string
+          completed_at?: string
+          created_at?: string
+          duration_seconds?: number
+          error_message?: string | null
+          errors?: number
+          id?: string
+          inserted?: number
+          started_at?: string
+          status?: string
+          total_scraped?: number
+          total_urls?: number
+          updated?: number
+        }
+        Update: {
+          brand_name?: string
+          category?: string
+          completed_at?: string
+          created_at?: string
+          duration_seconds?: number
+          error_message?: string | null
+          errors?: number
+          id?: string
+          inserted?: number
+          started_at?: string
+          status?: string
+          total_scraped?: number
+          total_urls?: number
+          updated?: number
+        }
+        Relationships: []
+      }
       section_heroes: {
         Row: {
           created_at: string
