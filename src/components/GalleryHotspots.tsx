@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { motion, AnimatePresence } from "framer-motion";
@@ -92,6 +93,7 @@ interface PendingHotspot {
 const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote, onViewProduct, filterDesigner }: GalleryHotspotsProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -335,11 +337,25 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
       onMouseUp={handleDragEnd}
       onMouseLeave={handleDragEnd}
     >
+      {/* Admin edit toggle button */}
+      {isAdmin && !editMode && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setEditMode(true); setPending(null); setActiveId(null); }}
+          className="absolute top-2 right-2 z-50 pointer-events-auto flex items-center gap-1.5 bg-black/80 backdrop-blur-sm text-white text-[10px] font-body uppercase tracking-wider px-2.5 py-1.5 rounded-full hover:bg-black transition-colors"
+          title="Toggle hotspot edit mode"
+        >
+          <Settings className="w-3 h-3" /> Edit Hotspots
+        </button>
+      )}
+
       {/* Edit mode indicator */}
       {editMode && (
-        <div className="absolute top-2 left-2 z-50 bg-amber-500 text-black text-xs font-bold px-2.5 py-1 rounded-full pointer-events-none select-none">
-          EDIT MODE — Click to place · Ctrl+Shift+H to exit
-        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); setEditMode(false); setPending(null); setActiveId(null); setEditingId(null); }}
+          className="absolute top-2 left-2 z-50 pointer-events-auto bg-amber-500 text-black text-xs font-bold px-2.5 py-1 rounded-full hover:bg-amber-400 transition-colors cursor-pointer select-none"
+        >
+          EDIT MODE — Click to place · Click here to exit
+        </button>
       )}
 
       {/* Existing hotspots */}
