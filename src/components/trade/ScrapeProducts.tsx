@@ -909,7 +909,7 @@ const ScrapeProducts = () => {
           </button>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <label className="flex items-center gap-2 font-body text-xs text-muted-foreground cursor-pointer">
             <input
               type="checkbox"
@@ -920,19 +920,31 @@ const ScrapeProducts = () => {
             Save configuration for re-scraping
           </label>
           <label className="flex items-center gap-2 font-body text-xs text-muted-foreground">
-            <span>Chunk delay</span>
+            <span>Mode</span>
             <select
-              value={chunkDelay}
-              onChange={(e) => setChunkDelay(Number(e.target.value))}
+              value={
+                chunkSize === 20 && chunkDelay === 0 ? "quick" :
+                chunkSize === 10 && chunkDelay === 0 ? "normal" :
+                chunkSize === 5 && chunkDelay === 5 ? "cautious" :
+                chunkSize === 3 && chunkDelay === 15 ? "stealth" : "custom"
+              }
+              onChange={(e) => {
+                const mode = e.target.value;
+                if (mode === "quick") { setChunkSize(20); setChunkDelay(0); }
+                else if (mode === "normal") { setChunkSize(10); setChunkDelay(0); }
+                else if (mode === "cautious") { setChunkSize(5); setChunkDelay(5); }
+                else if (mode === "stealth") { setChunkSize(3); setChunkDelay(15); }
+              }}
               className="px-2 py-1 rounded border border-border bg-background font-body text-xs text-foreground"
             >
-              <option value={0}>None</option>
-              <option value={2}>2s</option>
-              <option value={5}>5s</option>
-              <option value={10}>10s</option>
-              <option value={15}>15s</option>
-              <option value={30}>30s</option>
-              <option value={60}>60s</option>
+              <option value="quick">⚡ Quick (20 / no delay)</option>
+              <option value="normal">● Normal (10 / no delay)</option>
+              <option value="cautious">🛡 Cautious (5 / 5s delay)</option>
+              <option value="stealth">🥷 Stealth (3 / 15s delay)</option>
+              {chunkSize !== 20 && chunkSize !== 10 && chunkSize !== 5 && chunkSize !== 3 || 
+               chunkDelay !== 0 && chunkDelay !== 5 && chunkDelay !== 15 ? (
+                <option value="custom">Custom</option>
+              ) : null}
             </select>
           </label>
           <label className="flex items-center gap-2 font-body text-xs text-muted-foreground">
@@ -947,6 +959,22 @@ const ScrapeProducts = () => {
               <option value={10}>10</option>
               <option value={15}>15</option>
               <option value={20}>20</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-2 font-body text-xs text-muted-foreground">
+            <span>Delay</span>
+            <select
+              value={chunkDelay}
+              onChange={(e) => setChunkDelay(Number(e.target.value))}
+              className="px-2 py-1 rounded border border-border bg-background font-body text-xs text-foreground"
+            >
+              <option value={0}>None</option>
+              <option value={2}>2s</option>
+              <option value={5}>5s</option>
+              <option value={10}>10s</option>
+              <option value={15}>15s</option>
+              <option value={30}>30s</option>
+              <option value={60}>60s</option>
             </select>
           </label>
         </div>
