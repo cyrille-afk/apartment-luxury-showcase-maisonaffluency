@@ -1,0 +1,1 @@
+UPDATE designers SET biography = regexp_replace(biography, 'https://www.atelierfevrier.com/wp-content/uploads/2025/06/Atelier-feb-24-151-scaled.jpg', 'https://www.atelierfevrier.com/wp-content/uploads/2025/06/Atelier-feb-24-151-scaled.jpg | small') WHERE slug='atelier-fevrier';
