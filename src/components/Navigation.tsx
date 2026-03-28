@@ -473,6 +473,62 @@ const Navigation = () => {
               </div>
             </div>
             <div className="flex justify-end items-center gap-4">
+              {/* Account icon */}
+              <DropdownMenu>
+                <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
+                  <User className="w-4 h-4 text-foreground group-hover:text-primary transition-colors" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
+                  {user ? (
+                    <>
+                      <div className="px-4 py-2.5 border-b border-border">
+                        <p className="font-body text-xs text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/trade")}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <User className="h-4 w-4 text-primary" />
+                        <span className="font-body text-sm">My Account</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors text-destructive"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span className="font-body text-sm">Sign Out</span>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => setAuthGateOpen(true)}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <UserPlus className="h-4 w-4 text-primary" />
+                        <span className="font-body text-sm">Sign Up</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setAuthGateOpen(true)}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <LogIn className="h-4 w-4 text-primary" />
+                        <span className="font-body text-sm">Log In</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => navigate("/trade/register")}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
+                        <span className="font-body text-sm">Trade Program</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <button
                 onClick={() => navigate("/favorites")}
                 className="relative group p-1 transition-colors"
