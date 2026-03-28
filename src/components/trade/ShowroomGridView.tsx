@@ -35,6 +35,7 @@ interface ShowroomProduct {
   pdf_url?: string;
   trade_price_cents?: number | null;
   currency?: string;
+  price_unit?: string;
 }
 
 interface ShowroomGridViewProps {
