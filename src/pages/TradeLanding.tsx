@@ -135,6 +135,14 @@ const TradeLanding = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (window.location.hash === "#register") {
+      setTimeout(() => {
+        document.getElementById("register")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 600);
+    }
+  }, []);
+
   const scrollToForm = () => {
     const el = formRef.current;
     if (!el) return;
