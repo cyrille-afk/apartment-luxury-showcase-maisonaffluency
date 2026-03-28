@@ -130,17 +130,36 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     return fuzzyPriceMatch(productName, priceExactMap, tradePrices);
   }, [tradePrices, priceExactMap]);
 
-  // ── Edition & PDF lookup from curator picks ──
+  // ── Edition & PDF lookup from curator picks (static + DB) ──
+  const [dbPicks, setDbPicks] = useState<{ title: string; edition: string | null; pdf_url: string | null }[]>([]);
+
+  useEffect(() => {
+    const fetchDbPicks = async () => {
+      const { data } = await supabase
+        .from("designer_curator_picks")
+        .select("title, edition, pdf_url");
+      if (data) setDbPicks(data);
+    };
+    fetchDbPicks();
+  }, []);
+
   const { editionLookup, pdfLookup } = useMemo(() => {
     const editions = new Map<string, string>();
     const pdfs = new Map<string, string>();
+    // Static data
     for (const p of getAllTradeProducts()) {
       const key = normalizeName(p.product_name);
       if (p.edition) editions.set(key, p.edition);
       if (p.pdf_url) pdfs.set(key, p.pdf_url);
     }
+    // DB data (overrides static)
+    for (const p of dbPicks) {
+      const key = normalizeName(p.title);
+      if (p.edition) editions.set(key, p.edition);
+      if (p.pdf_url) pdfs.set(key, p.pdf_url);
+    }
     return { editionLookup: editions, pdfLookup: pdfs };
-  }, []);
+  }, [dbPicks]);
 
   const fuzzyLookup = useCallback((productName: string, map: Map<string, string>): string | null => {
     const key = normalizeName(productName);
