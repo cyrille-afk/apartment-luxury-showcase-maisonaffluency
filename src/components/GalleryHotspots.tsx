@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,6 +88,7 @@ interface PendingHotspot {
 
 const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote, onViewProduct, filterDesigner }: GalleryHotspotsProps) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -491,6 +493,10 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                                 setTimeout(() => {
                                   window.dispatchEvent(new CustomEvent('open-curators-pick', { detail: hash }));
                                 }, 150);
+                              } else if (url.startsWith('/')) {
+                                setActiveId(null);
+                                onCloseLightbox?.();
+                                setTimeout(() => { navigate(url); }, 300);
                               } else {
                                 onCloseLightbox?.();
                                 setTimeout(() => { window.location.href = url; }, 300);
