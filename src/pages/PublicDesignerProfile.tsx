@@ -77,7 +77,7 @@ const PublicDesignerProfile = () => {
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
   const { data: designer, isLoading } = useDesigner(slug);
-  const [gridCols, setGridCols] = useState<3 | 4>(3);
+  const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const isMobile = useIsMobile();
