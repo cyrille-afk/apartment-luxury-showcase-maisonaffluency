@@ -222,9 +222,9 @@ const ShowroomGridView = ({
               hoverImageLookup.set(ppKey, gallery[0]);
               if (normalizedName) hoverImageLookup.set(normalizedName, gallery[0]);
             }
-            const cents = pp.trade_price_cents ?? pp.rrp_price_cents;
-            if (!cents) continue;
-            const entry: PriceMatch = { name: pp.product_name, cents, currency: pp.currency, price_unit: pp.price_unit };
+            const rrp = pp.rrp_price_cents ?? pp.trade_price_cents;
+            if (!rrp) continue;
+            const entry: PriceMatch = { name: pp.product_name, cents: rrp, rrp_cents: pp.rrp_price_cents ?? undefined, currency: pp.currency, price_unit: pp.price_unit };
             priceEntries.push(entry);
             priceLookup.set(ppKey, entry);
             if (normalizedName) priceLookup.set(normalizedName, entry);
