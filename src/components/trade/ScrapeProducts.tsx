@@ -827,7 +827,16 @@ const ScrapeProducts = () => {
               <div className="flex-1 space-y-1.5 max-w-md">
                 <div className="flex items-center justify-between font-body text-[10px] text-muted-foreground">
                   <span>{scrapeProgress.done} / {scrapeProgress.total} URLs</span>
-                  <span>{Math.round((scrapeProgress.done / scrapeProgress.total) * 100)}%</span>
+                  <span className="flex items-center gap-2">
+                    {scrapeProgress.done > 0 && (() => {
+                      const elapsed = (Date.now() - scrapeStartTimeRef.current) / 1000;
+                      const rate = scrapeProgress.done / elapsed;
+                      const remaining = (scrapeProgress.total - scrapeProgress.done) / rate;
+                      if (remaining < 60) return <span>~{Math.ceil(remaining)}s left</span>;
+                      return <span>~{Math.ceil(remaining / 60)}m left</span>;
+                    })()}
+                    <span>{Math.round((scrapeProgress.done / scrapeProgress.total) * 100)}%</span>
+                  </span>
                 </div>
                 <div className="h-2 rounded-full bg-muted overflow-hidden">
                   <div
