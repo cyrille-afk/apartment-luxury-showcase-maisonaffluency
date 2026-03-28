@@ -80,6 +80,7 @@ const ScrapeProducts = () => {
   const [mappingConfigId, setMappingConfigId] = useState<string | null>(null);
   const [configDiscoveredUrls, setConfigDiscoveredUrls] = useState<Record<string, string[]>>({});
   const [configSelectedUrls, setConfigSelectedUrls] = useState<Record<string, Set<string>>>({});
+  const [configDiscoverFilter, setConfigDiscoverFilter] = useState<Record<string, string>>({});
   const [mapUrl, setMapUrl] = useState<Record<string, string>>({});
   const [mapSearch, setMapSearch] = useState<Record<string, string>>({});
   const [previewUrls, setPreviewUrls] = useState<Record<string, string[]>>({});
@@ -487,25 +488,49 @@ const ScrapeProducts = () => {
                             >None</button>
                           </div>
                         </div>
-                        <div className="max-h-32 overflow-y-auto space-y-0.5">
-                          {configDiscoveredUrls[config.id].map((url) => (
-                            <label key={url} className="flex items-center gap-1.5 font-body text-[10px] text-muted-foreground hover:text-foreground cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={configSelectedUrls[config.id]?.has(url) || false}
-                                onChange={(e) => {
-                                  setConfigSelectedUrls(prev => {
-                                    const s = new Set(prev[config.id] || []);
-                                    e.target.checked ? s.add(url) : s.delete(url);
-                                    return { ...prev, [config.id]: s };
-                                  });
-                                }}
-                                className="rounded"
-                              />
-                              <span className="truncate">{url.replace(/^https?:\/\/[^/]+/, '')}</span>
-                            </label>
-                          ))}
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
+                          <input
+                            value={configDiscoverFilter[config.id] || ""}
+                            onChange={(e) => setConfigDiscoverFilter(prev => ({ ...prev, [config.id]: e.target.value }))}
+                            placeholder="Filter URLs…"
+                            className="w-full pl-7 pr-2 py-1 rounded border border-border bg-background font-body text-[10px] text-foreground placeholder:text-muted-foreground/40"
+                          />
                         </div>
+                        {(() => {
+                          const filter = (configDiscoverFilter[config.id] || "").toLowerCase();
+                          const filtered = filter
+                            ? configDiscoveredUrls[config.id].filter(u => u.toLowerCase().includes(filter))
+                            : configDiscoveredUrls[config.id];
+                          return (
+                            <>
+                              {filter && (
+                                <span className="font-body text-[10px] text-muted-foreground/50">
+                                  Showing {filtered.length} of {configDiscoveredUrls[config.id].length}
+                                </span>
+                              )}
+                              <div className="max-h-32 overflow-y-auto space-y-0.5">
+                                {filtered.map((url) => (
+                                  <label key={url} className="flex items-center gap-1.5 font-body text-[10px] text-muted-foreground hover:text-foreground cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={configSelectedUrls[config.id]?.has(url) || false}
+                                      onChange={(e) => {
+                                        setConfigSelectedUrls(prev => {
+                                          const s = new Set(prev[config.id] || []);
+                                          e.target.checked ? s.add(url) : s.delete(url);
+                                          return { ...prev, [config.id]: s };
+                                        });
+                                      }}
+                                      className="rounded"
+                                    />
+                                    <span className="truncate">{url.replace(/^https?:\/\/[^/]+/, '')}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </>
+                          );
+                        })()}
                         <div className="flex gap-1.5">
                           <button
                             onClick={async () => {
