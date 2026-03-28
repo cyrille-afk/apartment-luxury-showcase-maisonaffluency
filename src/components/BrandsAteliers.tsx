@@ -3286,7 +3286,7 @@ const BrandsAteliers = () => {
                             {selectedCategory === category && categoryMap[category]?.length > 0 && (
                               <div className="ml-8 mt-1 mb-2 space-y-1 border-l border-border/40 pl-3">
                                 <button
-                                  onClick={() => setSelectedSubcategory(null)}
+                                  onClick={() => { setSelectedSubcategory(null); setFilterOpen(false); setTimeout(() => { document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150); }}
                                   className={`block text-[11px] tracking-[0.15em] font-body transition-all duration-300 py-1 ${
                                     !selectedSubcategory ? 'text-primary' : 'text-foreground/60 hover:text-primary'
                                   }`}
