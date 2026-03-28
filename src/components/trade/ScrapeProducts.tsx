@@ -112,6 +112,7 @@ const ScrapeProducts = () => {
     const totalUrls = brandsPayload.reduce((s, b) => s + b.urls.length, 0);
     setScaping(true);
     setResults(null);
+    scrapeCancelledRef.current = false;
     setScrapeProgress({ done: 0, total: totalUrls, inserted: 0, updated: 0, errors: 0 });
 
     let totalInserted = 0;
