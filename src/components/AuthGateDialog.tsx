@@ -111,7 +111,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
 
   const content = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" onClick={onClose}>
-      <div className={cn("bg-background border border-border rounded-lg p-6 w-full shadow-xl relative", mode === "signup" ? "max-w-lg" : "max-w-sm")} onClick={(e) => e.stopPropagation()}>
+      <div className={`bg-background border border-border rounded-lg p-6 w-full shadow-xl relative ${mode === "signup" ? "max-w-lg" : "max-w-sm"}`} onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
           <X size={16} />
         </button>
