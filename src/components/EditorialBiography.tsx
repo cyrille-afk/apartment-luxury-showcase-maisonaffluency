@@ -12,6 +12,8 @@ interface EditorialBiographyProps {
   designerName: string;
   /** Shows debug events for text/media pairing in preview contexts */
   debugMediaOrder?: boolean;
+  /** When false, disables the internal collapsible wrapper (use when already wrapped externally) */
+  allowCollapse?: boolean;
 }
 
 /** Number of biography paragraphs to show before "Read more" on mobile */
@@ -576,6 +578,7 @@ export default function EditorialBiography({
   pickImages: _pickImages,
   designerName,
   debugMediaOrder = false,
+  allowCollapse: externalAllowCollapse = true,
 }: EditorialBiographyProps) {
   const isMobile = useIsMobile();
   const blocks = biography
