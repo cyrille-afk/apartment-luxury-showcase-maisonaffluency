@@ -45,6 +45,9 @@ interface SavedConfig {
   schedule_cron: string | null;
   last_run_at: string | null;
   last_run_result: any;
+  chunk_size: number;
+  chunk_delay: number;
+  location: string;
 }
 
 const SCHEDULE_OPTIONS = [
@@ -193,6 +196,8 @@ const ScrapeProducts = () => {
           body: {
             brands: [chunk],
             save_configs: isLastChunk ? saveConfigs : false,
+            chunk_size: chunkSize,
+            chunk_delay: chunkDelay,
           },
         });
         if (error) throw error;
@@ -352,6 +357,14 @@ const ScrapeProducts = () => {
                       </span>
                       <span className="font-body text-[10px] text-muted-foreground">
                         {config.urls.length} URLs
+                      </span>
+                      {config.location && (
+                        <span className="font-body text-[10px] text-muted-foreground px-1.5 py-0.5 rounded bg-muted">
+                          📍 {config.location}
+                        </span>
+                      )}
+                      <span className="font-body text-[10px] text-muted-foreground/50">
+                        {config.chunk_size || 10}/{config.chunk_delay || 0}s
                       </span>
                       {!config.is_active && (
                         <span className="font-body text-[10px] text-destructive/70 px-1.5 py-0.5 rounded bg-destructive/10">

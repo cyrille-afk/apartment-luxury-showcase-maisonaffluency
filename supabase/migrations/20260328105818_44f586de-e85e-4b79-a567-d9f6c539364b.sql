@@ -1,0 +1,4 @@
+ALTER TABLE public.scrape_configs
+  ADD COLUMN IF NOT EXISTS chunk_size integer NOT NULL DEFAULT 10,
+  ADD COLUMN IF NOT EXISTS chunk_delay integer NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS location text NOT NULL DEFAULT '';
