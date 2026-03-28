@@ -433,11 +433,24 @@ const PublicDesignerProfile = () => {
                   transition={{ ...transition, delay: 0.15 }}
                   className="flex-1 min-w-0 flex flex-col justify-center"
                 >
-                  {designer.philosophy && (
-                    <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5 text-center">
-                      "{designer.philosophy}"
-                    </blockquote>
-                  )}
+                  {designer.philosophy && (() => {
+                    const match = designer.philosophy.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
+                    if (match) {
+                      return (
+                        <blockquote className="font-display italic leading-snug mb-5 text-center">
+                          <span className="text-base md:text-lg text-foreground">"{match[1].trimEnd()}"</span>
+                          {match[3] && <span className="text-base md:text-lg text-foreground"> {match[3]}</span>}
+                          <br />
+                          <span className="text-sm md:text-base text-muted-foreground/60">{match[2]}</span>
+                        </blockquote>
+                      );
+                    }
+                    return (
+                      <blockquote className="font-display text-base md:text-lg italic leading-snug text-foreground mb-5 text-center">
+                        "{designer.philosophy}"
+                      </blockquote>
+                    );
+                  })()}
                   {heroParagraphs.length > 0 && (
                     <div className="font-body text-sm leading-relaxed text-foreground/85">
                       {heroParagraphs.map((p: string, i: number) => (
@@ -529,11 +542,24 @@ const PublicDesignerProfile = () => {
                   transition={{ ...transition, delay: 0.2 }}
                   className="flex flex-col"
                 >
-                  {designer.philosophy && (
-                    <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center">
-                      "{designer.philosophy}"
-                    </blockquote>
-                  )}
+                  {designer.philosophy && (() => {
+                    const match = designer.philosophy.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
+                    if (match) {
+                      return (
+                        <blockquote className="font-display italic leading-snug mb-6 text-center">
+                          <span className="text-lg md:text-xl text-foreground">"{match[1].trimEnd()}"</span>
+                          {match[3] && <span className="text-lg md:text-xl text-foreground"> {match[3]}</span>}
+                          <br />
+                          <span className="text-sm md:text-base text-muted-foreground/60">{match[2]}</span>
+                        </blockquote>
+                      );
+                    }
+                    return (
+                      <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center">
+                        "{designer.philosophy}"
+                      </blockquote>
+                    );
+                  })()}
 
                   {/* Side-by-side: About + opening text on left, first media on right */}
                   {(() => {
