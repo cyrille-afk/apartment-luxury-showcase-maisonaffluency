@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin, XCircle } from "lucide-react";
+import { Loader2, ChevronRight, Globe, Package, Plus, Trash2, Save, Play, Clock, RefreshCw, Search, MapPin, XCircle, History } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface BrandEntry {
@@ -59,6 +59,17 @@ const ScrapeProducts = () => {
   const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
   const [slugFilter, setSlugFilter] = useState("");
 
+  // Scrape history
+  const [scrapeHistory, setScrapeHistory] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  const fetchHistory = useCallback(async () => {
+    setLoadingHistory(true);
+    const { data } = await supabase.from("scrape_runs").select("*").order("started_at", { ascending: false }).limit(20);
+    setScrapeHistory(data || []);
+    setLoadingHistory(false);
+  }, []);
+
   const fetchConfigs = useCallback(async () => {
     setLoadingConfigs(true);
     const { data } = await supabase.from("scrape_configs").select("*").order("brand_name") as { data: SavedConfig[] | null };
@@ -66,7 +77,7 @@ const ScrapeProducts = () => {
     setLoadingConfigs(false);
   }, []);
 
-  useEffect(() => { fetchConfigs(); }, [fetchConfigs]);
+  useEffect(() => { fetchConfigs(); fetchHistory(); }, [fetchConfigs, fetchHistory]);
 
   const addBrand = () => {
     setBrands((prev) => [
@@ -86,6 +97,9 @@ const ScrapeProducts = () => {
 
   const runChunks = async (chunks: { brand_name: string; category: string; urls: string[] }[]) => {
     const totalUrls = chunks.reduce((s, c) => s + c.urls.length, 0);
+    const brandNames = [...new Set(chunks.map((c) => c.brand_name))].join(", ");
+    const categories = [...new Set(chunks.map((c) => c.category))].join(", ");
+    const startedAt = new Date().toISOString();
     setScaping(true);
     setResults(null);
     setRemainingChunks(null);
@@ -97,6 +111,8 @@ const ScrapeProducts = () => {
     let totalUpdated = 0;
     let totalErrors = 0;
     let urlsDone = 0;
+    let finalStatus = "completed";
+    let errorMsg: string | null = null;
     const allResults: any[] = [];
 
     try {
@@ -104,6 +120,7 @@ const ScrapeProducts = () => {
         if (scrapeCancelledRef.current) {
           const left = chunks.slice(i);
           setRemainingChunks(left);
+          finalStatus = "cancelled";
           toast({ title: "Scrape cancelled", description: `Stopped after ${urlsDone} of ${totalUrls} URLs. ${left.reduce((s, c) => s + c.urls.length, 0)} remaining.` });
           break;
         }
@@ -137,9 +154,28 @@ const ScrapeProducts = () => {
     } catch (err: any) {
       const left = chunks.slice(Math.max(0, Math.floor(urlsDone / 10)));
       if (left.length > 0) setRemainingChunks(left);
+      finalStatus = "failed";
+      errorMsg = err.message;
       toast({ title: "Scrape failed", description: err.message, variant: "destructive" });
       setResults({ error: err.message });
     } finally {
+      const durationSeconds = Math.round((Date.now() - scrapeStartTimeRef.current) / 1000);
+      // Log scrape run
+      await supabase.from("scrape_runs").insert({
+        brand_name: brandNames,
+        category: categories,
+        total_urls: totalUrls,
+        total_scraped: urlsDone,
+        inserted: totalInserted,
+        updated: totalUpdated,
+        errors: totalErrors,
+        duration_seconds: durationSeconds,
+        status: finalStatus,
+        error_message: errorMsg,
+        started_at: startedAt,
+        completed_at: new Date().toISOString(),
+      });
+      fetchHistory();
       setScaping(false);
       setScrapeProgress(null);
     }
@@ -945,6 +981,74 @@ const ScrapeProducts = () => {
             )}
           </div>
         )}
+
+        {/* Scrape History */}
+        <div className="space-y-3 border-t border-border pt-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-sm text-foreground flex items-center gap-2">
+              <History className="h-4 w-4 text-muted-foreground" />
+              Scrape History
+            </h3>
+            <button
+              onClick={fetchHistory}
+              disabled={loadingHistory}
+              className="font-body text-[10px] text-primary hover:underline flex items-center gap-1"
+            >
+              {loadingHistory ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+              Refresh
+            </button>
+          </div>
+
+          {scrapeHistory.length === 0 ? (
+            <p className="font-body text-xs text-muted-foreground">No scrape runs yet.</p>
+          ) : (
+            <div className="space-y-1.5">
+              <div className="grid grid-cols-[1fr_80px_60px_60px_60px_70px_70px] gap-2 font-body text-[10px] text-muted-foreground uppercase tracking-wider px-2 pb-1 border-b border-border">
+                <span>Brand</span>
+                <span>Status</span>
+                <span className="text-right">URLs</span>
+                <span className="text-right">Inserted</span>
+                <span className="text-right">Updated</span>
+                <span className="text-right">Duration</span>
+                <span className="text-right">When</span>
+              </div>
+              {scrapeHistory.map((run) => {
+                const dur = Number(run.duration_seconds);
+                const durLabel = dur >= 60 ? `${Math.floor(dur / 60)}m ${dur % 60}s` : `${dur}s`;
+                const ago = (() => {
+                  const diff = (Date.now() - new Date(run.started_at).getTime()) / 1000;
+                  if (diff < 60) return "just now";
+                  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+                  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+                  return `${Math.floor(diff / 86400)}d ago`;
+                })();
+                return (
+                  <div
+                    key={run.id}
+                    className="grid grid-cols-[1fr_80px_60px_60px_60px_70px_70px] gap-2 font-body text-[11px] text-foreground px-2 py-1.5 rounded hover:bg-muted/30 transition-colors"
+                  >
+                    <span className="truncate font-medium" title={run.brand_name}>{run.brand_name}</span>
+                    <span>
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-medium ${
+                        run.status === "completed" ? "bg-primary/10 text-primary" :
+                        run.status === "cancelled" ? "bg-accent/50 text-accent-foreground" :
+                        "bg-destructive/10 text-destructive"
+                      }`}>
+                        {run.status}
+                      </span>
+                    </span>
+                    <span className="text-right">{run.total_scraped}/{run.total_urls}</span>
+                    <span className="text-right text-green-600">{run.inserted}</span>
+                    <span className="text-right text-blue-600">{run.updated}</span>
+                    <span className="text-right text-muted-foreground">{durLabel}</span>
+                    <span className="text-right text-muted-foreground" title={new Date(run.started_at).toLocaleString()}>{ago}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
       </CollapsibleContent>
     </Collapsible>
   );
