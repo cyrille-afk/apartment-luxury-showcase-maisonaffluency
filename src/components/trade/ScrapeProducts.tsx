@@ -552,9 +552,9 @@ const ScrapeProducts = () => {
                             const urls = previewUrls[brand.id];
                             const filter = previewFilter[brand.id] || "";
                             const visible = filter ? urls.filter((u) => u.toLowerCase().includes(filter.toLowerCase())) : urls;
-                            const sel = selectedPreviewUrls[brand.id] || new Set();
+                            const sel = selectedPreviewUrls[brand.id] || new Set<string>();
                             const allSelected = visible.every((u) => sel.has(u));
-                            const next = new Set(sel);
+                            const next = new Set<string>(sel);
                             visible.forEach((u) => allSelected ? next.delete(u) : next.add(u));
                             setSelectedPreviewUrls((prev) => ({ ...prev, [brand.id]: next }));
                           }}
