@@ -571,13 +571,22 @@ const PublicDesignerProfile = () => {
 
                     // Find first media URL in remainingBlocks
                     let firstMediaIdx = -1;
-                    let firstMediaParsed: { url: string; caption: string | null } | null = null;
+                    let firstMediaParsed: { url: string; caption: string | null; size: "small" | null } | null = null;
                     for (let i = 0; i < remainingBlocks.length; i++) {
                       const line = remainingBlocks[i];
                       const pipes = line.split(/\s*\|\s*/);
                       const url = pipes[0]?.trim() || "";
                       if (/^https?:\/\//i.test(url) && /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(url) || /res\.cloudinary\.com\/.+\/image\/upload/i.test(url)) {
-                        firstMediaParsed = { url, caption: pipes[1]?.trim() || null };
+                        let caption: string | null = null;
+                        let size: "small" | null = null;
+                        for (let j = 1; j < pipes.length; j++) {
+                          const seg = pipes[j].trim();
+                          if (/^small$/i.test(seg)) size = "small";
+                          else if (/^(left|right)$/i.test(seg)) { /* skip alignment */ }
+                          else if (/^poster:/i.test(seg)) { /* skip poster */ }
+                          else if (!caption) caption = seg;
+                        }
+                        firstMediaParsed = { url, caption, size };
                         firstMediaIdx = i;
                         break;
                       }
