@@ -743,6 +743,18 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   </div>
                 ))}
               </div>
+
+              {/* Back to top arrow */}
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                  className="group flex flex-col items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Back to top"
+                >
+                  <ArrowLeft className="w-5 h-5 rotate-90 group-hover:-translate-y-1 transition-transform" />
+                  <span className="font-body text-[10px] uppercase tracking-[0.2em]">Discover the program</span>
+                </button>
+              </div>
             </div>
 
             {/* Divider */}
