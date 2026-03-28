@@ -709,6 +709,8 @@ const PublicDesignerProfile = () => {
                   const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
                   const designerSlug = isGrouped && ap.designer_slug ? ap.designer_slug : undefined;
                   const hasMultipleSizes = !!pick.dimensions && pick.dimensions.includes("\n");
+                  const hoverPosTag = pick.tags?.find((t) => t.startsWith("hover-pos:"));
+                  const hoverPos = hoverPosTag ? hoverPosTag.replace("hover-pos:", "") : undefined;
 
                   return (
                     <div
@@ -749,40 +751,36 @@ const PublicDesignerProfile = () => {
                           )}
                           loading="lazy"
                         />
-                        {pick.hover_image_url && (() => {
-                          const hoverPosTag = pick.tags?.find((t) => t.startsWith("hover-pos:"));
-                          const hoverPos = hoverPosTag ? hoverPosTag.replace("hover-pos:", "") : undefined;
-                          return (
-                            <>
-                              <img
-                                src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
-                                srcSet={pickSrcSet(pick.hover_image_url)}
-                                sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
-                                alt={`${pick.title} alternate finish`}
-                                className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-                                style={hoverPos ? { objectPosition: hoverPos } : undefined}
-                                loading="lazy"
-                              />
-                              <div className="absolute top-2 right-2 z-10 rounded-lg border border-border/70 bg-background/90 p-1.5 shadow-md pointer-events-none">
-                                <div className="grid grid-cols-2 gap-1">
-                                  <img
-                                    src={responsiveCloudinaryUrl(pick.image_url, 200)}
-                                    alt={`${pick.title} primary finish thumbnail`}
-                                    className="h-10 w-8 md:h-12 md:w-10 rounded object-cover border border-border/60"
-                                    loading="lazy"
-                                  />
-                                  <img
-                                    src={pick.hover_image_url}
-                                    alt={`${pick.title} alternate finish thumbnail`}
-                                    className="h-10 w-8 md:h-12 md:w-10 rounded object-cover border border-border/60"
-                                    style={hoverPos ? { objectPosition: hoverPos } : undefined}
-                                    loading="lazy"
-                                  />
-                                </div>
+                        {pick.hover_image_url && (
+                          <>
+                            <img
+                              src={responsiveCloudinaryUrl(pick.hover_image_url, 600)}
+                              srcSet={pickSrcSet(pick.hover_image_url)}
+                              sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
+                              alt={`${pick.title} alternate finish`}
+                              className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                              style={hoverPos ? { objectPosition: hoverPos } : undefined}
+                              loading="lazy"
+                            />
+                            <div className="absolute top-2 right-2 z-10 rounded-lg border border-border/70 bg-background/90 p-1.5 shadow-md pointer-events-none">
+                              <div className="grid grid-cols-2 gap-1">
+                                <img
+                                  src={responsiveCloudinaryUrl(pick.image_url, 200)}
+                                  alt={`${pick.title} primary finish thumbnail`}
+                                  className="h-10 w-8 md:h-12 md:w-10 rounded object-cover border border-border/60"
+                                  loading="lazy"
+                                />
+                                <img
+                                  src={pick.hover_image_url}
+                                  alt={`${pick.title} alternate finish thumbnail`}
+                                  className="h-10 w-8 md:h-12 md:w-10 rounded object-cover border border-border/60"
+                                  style={hoverPos ? { objectPosition: hoverPos } : undefined}
+                                  loading="lazy"
+                                />
                               </div>
-                            </>
-                          );
-                        })()}
+                            </div>
+                          </>
+                        )}
                         {pick.tags && pick.tags.length > 0 && (() => {
                           const collectionTags = pick.tags.filter((t) =>
                             /couture|edition|limited|modern scholar|unesco|good design award/i.test(t)
@@ -823,6 +821,23 @@ const PublicDesignerProfile = () => {
 
                       <div className="flex flex-col flex-1">
                         <h3 className="font-display text-[11px] md:text-xs tracking-wide leading-snug">{pick.title}</h3>
+                        {pick.hover_image_url && (
+                          <div className="mt-1.5 mb-1.5 grid grid-cols-2 gap-1.5">
+                            <img
+                              src={responsiveCloudinaryUrl(pick.image_url, 240)}
+                              alt={`${pick.title} primary finish`}
+                              className="h-12 w-full rounded-md object-cover border border-border/60"
+                              loading="lazy"
+                            />
+                            <img
+                              src={pick.hover_image_url}
+                              alt={`${pick.title} alternate finish`}
+                              className="h-12 w-full rounded-md object-cover border border-border/60"
+                              style={hoverPos ? { objectPosition: hoverPos } : undefined}
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
                         {designerLabel && designerSlug ? (
                           <Link
                             to={`/designers/${designerSlug}`}
