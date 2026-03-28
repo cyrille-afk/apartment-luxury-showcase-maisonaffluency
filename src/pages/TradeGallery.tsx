@@ -501,8 +501,9 @@ const TradeGallery = () => {
                       onPriceUpdated={() => refreshPrices()}
                     />
                   ) : price ? (
-                    <p className="font-display text-sm text-accent font-semibold mt-1">
+                    <p className="font-display text-sm text-accent font-semibold mt-1 inline-flex items-center justify-center gap-1.5">
                       {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
+                      {showTradePrice && <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">Trade –8%</span>}
                     </p>
                   ) : null}
                 </div>
@@ -548,8 +549,9 @@ const TradeGallery = () => {
                     />
                   </div>
                 ) : price ? (
-                  <span className="font-display text-sm text-accent font-semibold shrink-0">
+                  <span className="font-display text-sm text-accent font-semibold shrink-0 inline-flex items-center gap-1.5">
                     {formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates)}
+                    {showTradePrice && <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider">–8%</span>}
                   </span>
                 ) : null}
                 <button
