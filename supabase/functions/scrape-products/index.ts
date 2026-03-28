@@ -15,7 +15,8 @@ async function runScrape(
   urls: string[],
   brandName: string,
   category: string,
-  extractPrompt?: string
+  extractPrompt?: string,
+  location?: string
 ) {
   const prompt = extractPrompt || DEFAULT_PROMPT;
 
@@ -31,6 +32,7 @@ async function runScrape(
       formats: ["extract"],
       extract: { prompt },
       waitFor: 4000,
+      ...(location ? { location: { country: location } } : {}),
     }),
   });
 
@@ -279,7 +281,7 @@ Deno.serve(async (req) => {
     for (const b of brands) {
       const result = await runScrape(
         serviceClient, firecrawlKey,
-        b.urls, b.brand_name, b.category || "Uncategorized", b.extract_prompt
+        b.urls, b.brand_name, b.category || "Uncategorized", b.extract_prompt, b.location
       );
       allResults.push(result);
     }
