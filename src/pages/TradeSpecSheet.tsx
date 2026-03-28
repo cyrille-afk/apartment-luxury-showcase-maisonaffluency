@@ -3,16 +3,16 @@ import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { FileDown } from "lucide-react";
+import { FileDown, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuthGate } from "@/hooks/useAuthGate";
+import { useAuth } from "@/hooks/useAuth";
 import AuthGateDialog from "@/components/AuthGateDialog";
 
 /**
  * In-app spec sheet viewer.
  * URL pattern: /trade/spec-sheet?brand=Ecart&product=Wolf+Armchair
  * Resolves the actual PDF URL from the database so the address bar stays clean.
- * Mobile: shows a download card + Google Docs embedded viewer for better rendering.
+ * SECURITY: PDF viewing AND downloading require authentication.
  */
 export default function TradeSpecSheet() {
   const [params] = useSearchParams();
@@ -21,7 +21,8 @@ export default function TradeSpecSheet() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
-  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
+  const { user, loading: authLoading } = useAuth();
+  const [gateOpen, setGateOpen] = useState(false);
 
   const pageTitle = product
     ? `${brand} — ${product} Spec Sheet`
@@ -56,7 +57,7 @@ export default function TradeSpecSheet() {
     resolve();
   }, [product]);
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <p className="font-body text-sm text-muted-foreground">Loading spec sheet…</p>
@@ -71,6 +72,53 @@ export default function TradeSpecSheet() {
       </div>
     );
   }
+
+  /* ── Auth gate: user must be registered to view or download ── */
+  if (!user) {
+    return (
+      <>
+        <Helmet>
+          <title>{pageTitle} | Maison & Ateliers</title>
+        </Helmet>
+        <div className="flex flex-col items-center justify-center h-[60vh] gap-6 px-4 text-center">
+          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+            <Lock className="w-7 h-7 text-muted-foreground" />
+          </div>
+          <div>
+            <h1 className="font-display text-xl text-foreground mb-2">{pageTitle}</h1>
+            <p className="font-body text-sm text-muted-foreground max-w-md">
+              Register or sign in to view and download this spec sheet.
+            </p>
+          </div>
+          <Button
+            className="gap-2 bg-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/90 text-white"
+            onClick={() => setGateOpen(true)}
+          >
+            <FileDown className="w-4 h-4" />
+            Sign in to view
+          </Button>
+        </div>
+        <AuthGateDialog open={gateOpen} onClose={() => setGateOpen(false)} action="view this spec sheet" />
+      </>
+    );
+  }
+
+  const handleDownload = async () => {
+    try {
+      const res = await fetch(pdfUrl!);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${brand} — ${product} Spec Sheet.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(pdfUrl!, '_blank');
+    }
+  };
 
   /* Mobile: Google Docs viewer iframe + prominent download button */
   if (isMobile) {
@@ -92,24 +140,7 @@ export default function TradeSpecSheet() {
             <Button
               size="sm"
               className="gap-1.5 bg-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/90 text-white shrink-0"
-              onClick={() => {
-                requireAuth(async () => {
-                  try {
-                    const res = await fetch(pdfUrl!);
-                    const blob = await res.blob();
-                    const blobUrl = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = blobUrl;
-                    a.download = `${brand} — ${product} Spec Sheet.pdf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    URL.revokeObjectURL(blobUrl);
-                  } catch {
-                    window.open(pdfUrl!, '_blank');
-                  }
-                }, "download this spec sheet");
-              }}
+              onClick={handleDownload}
             >
               <FileDown className="w-3.5 h-3.5" />
               Download
@@ -126,7 +157,6 @@ export default function TradeSpecSheet() {
             />
           </div>
         </div>
-        <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
       </>
     );
   }
@@ -145,7 +175,6 @@ export default function TradeSpecSheet() {
           allow="fullscreen"
         />
       </div>
-      <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </>
   );
 }
