@@ -506,7 +506,7 @@ const Navigation = () => {
                 </DropdownMenu>
               </div>
               {/* Icons centered under Contact Us, 1 line below */}
-              <div className="flex items-center justify-center gap-5 mt-3 self-end pr-4">
+              <div className="flex items-center justify-center gap-5 mt-3 self-end pr-8">
                 <DropdownMenu>
                   <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
                     <User className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
