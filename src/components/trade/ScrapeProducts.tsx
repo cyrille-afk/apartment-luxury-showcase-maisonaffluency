@@ -64,6 +64,19 @@ const ScrapeProducts = () => {
   const [scrapeHistory, setScrapeHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
+  const chartData = useMemo(() => {
+    if (!scrapeHistory.length) return [];
+    const byDay: Record<string, { date: string; inserted: number; updated: number; errors: number }> = {};
+    for (const run of scrapeHistory) {
+      const day = new Date(run.started_at).toISOString().slice(0, 10);
+      if (!byDay[day]) byDay[day] = { date: day, inserted: 0, updated: 0, errors: 0 };
+      byDay[day].inserted += run.inserted || 0;
+      byDay[day].updated += run.updated || 0;
+      byDay[day].errors += run.errors || 0;
+    }
+    return Object.values(byDay).sort((a, b) => a.date.localeCompare(b.date));
+  }, [scrapeHistory]);
+
   const fetchHistory = useCallback(async () => {
     setLoadingHistory(true);
     const { data } = await supabase.from("scrape_runs").select("*").order("started_at", { ascending: false }).limit(20);
