@@ -1051,19 +1051,35 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                 </div>
               )}
-              {!isLoading && filteredItems.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-32 text-center">
-                  <p className="font-body text-sm text-muted-foreground">
-                    {searchQuery ? "No designers match your search." : "Content coming soon — we're curating this collection."}
-                  </p>
-                </div>
-              )}
-              {!isLoading && alphaGroups.length > 0 && (
-                <div>
-                  {alphaGroups.map(([letter, designers]) => (
-                    <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
-                  ))}
-                </div>
+              {!isLoading && filteredPicks ? (
+                filteredPicks.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-32 text-center">
+                    <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    {filteredPicks.map((pick) => (
+                      <PickCard key={pick.id} pick={pick} />
+                    ))}
+                  </div>
+                )
+              ) : (
+                <>
+                  {!isLoading && filteredItems.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-32 text-center">
+                      <p className="font-body text-sm text-muted-foreground">
+                        {searchQuery ? "No designers match your search." : "Content coming soon — we're curating this collection."}
+                      </p>
+                    </div>
+                  )}
+                  {!isLoading && alphaGroups.length > 0 && (
+                    <div>
+                      {alphaGroups.map(([letter, designers]) => (
+                        <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
