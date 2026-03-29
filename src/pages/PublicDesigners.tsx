@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback, useRef, useEffect } from "react"
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { ChevronDown, ChevronLeft, ChevronRight, Search, X, Layers, Instagram, Share2, Plus } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Instagram, Share2, Plus } from "lucide-react";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import Navigation from "@/components/Navigation";
@@ -784,6 +784,29 @@ function LetterCarousel({
   );
 }
 
+// ─── Back to Top Button ──────────────────────────────────────────────────────
+function BackToTopButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 600);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      className="fixed bottom-6 right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-foreground text-background shadow-lg hover:opacity-80 transition-opacity"
+      aria-label="Back to top"
+    >
+      <ChevronUp className="h-5 w-5" />
+    </button>
+  );
+}
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 const PublicDesigners = () => {
   const { data: allDesigners = [], isLoading } = useAllDesigners();
@@ -999,6 +1022,9 @@ const PublicDesigners = () => {
         </div>
 
         <Footer />
+
+        {/* Floating back-to-top button */}
+        <BackToTopButton />
       </div>
     </>
   );
