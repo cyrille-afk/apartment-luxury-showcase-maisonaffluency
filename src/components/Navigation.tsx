@@ -216,28 +216,15 @@ const Navigation = () => {
   return <><nav className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-sm border-b border-border/50">
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         {/* Mobile: single row */}
-        <div className="flex h-24 items-end pb-2.5 justify-center md:hidden relative">
-          <div className="flex flex-col items-center ml-6">
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-[1.6rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
-                M <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
-              </span>
-            </button>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="h-px w-6 bg-foreground" aria-hidden="true" />
-              <span className="font-body text-[8px] md:text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Since 2017</span>
-              <span className="h-px w-6 bg-foreground" aria-hidden="true" />
-            </div>
-          </div>
-
-
-          {/* Mobile Hamburger Menu */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-12 w-12 absolute left-0 bottom-0 text-primary" aria-label="Toggle menu">
-                {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
-              </Button>
-            </SheetTrigger>
+        <div className="flex h-24 items-end pb-2.5 md:hidden relative">
+          {/* Burger + Brand aligned together */}
+          <div className="flex items-end gap-1 pb-0.5">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-14 w-14 text-primary -ml-3" aria-label="Toggle menu">
+                  {isOpen ? <X className="h-9 w-9" /> : <Menu className="h-9 w-9" />}
+                </Button>
+              </SheetTrigger>
             
             <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
               <div className="sr-only">
