@@ -764,9 +764,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     </span>
                   </div>
                 )}
-                {/* First section: Interactive Gallery label centred above images */}
+                {/* First section: Interactive Gallery label left-aligned above title */}
                 {originalSectionIndex === 0 && (
-                  <div className="hidden md:flex items-center justify-center gap-2 mb-3">
+                  <div className="hidden md:flex items-center gap-2 mb-2">
                     <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">
                       <span className="relative flex items-center justify-center w-4 h-4 rounded-full bg-black/70 border border-primary/70">
                         <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
