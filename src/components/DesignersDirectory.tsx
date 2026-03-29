@@ -111,6 +111,47 @@ function useDesignerCategories() {
   });
 }
 
+// ─── Hook: fetch full curator picks for product card rendering ───────────────
+type PickItem = {
+  id: string;
+  designer_id: string;
+  image_url: string;
+  title: string;
+  subtitle: string | null;
+  category: string | null;
+  subcategory: string | null;
+  tags: string[] | null;
+  materials: string | null;
+  dimensions: string | null;
+  designer_name?: string;
+  designer_slug?: string;
+};
+
+function useFullCuratorPicks(enabled: boolean) {
+  return useQuery({
+    queryKey: ["full-curator-picks-directory"],
+    queryFn: async () => {
+      const [{ data: picks }, { data: designers }] = await Promise.all([
+        supabase
+          .from("designer_curator_picks_public")
+          .select("id, designer_id, image_url, title, subtitle, category, subcategory, tags, materials, dimensions"),
+        supabase
+          .from("designers")
+          .select("id, name, slug"),
+      ]);
+      if (!picks) return [];
+      const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug }]));
+      return (picks as any[]).map((p): PickItem => ({
+        ...p,
+        designer_name: designerMap.get(p.designer_id)?.name || "Unknown",
+        designer_slug: designerMap.get(p.designer_id)?.slug || "",
+      }));
+    },
+    enabled,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 /** Parse names into [displayName, parentLabel] for correct card rendering */
 function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
   if (item.founder && item.founder !== item.name) {
