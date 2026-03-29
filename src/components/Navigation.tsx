@@ -230,14 +230,6 @@ const Navigation = () => {
             </div>
           </div>
 
-          {/* Mobile account icon — right side, aligned with Since 2017 */}
-          <button
-            onClick={() => user ? navigate("/trade") : setAuthGateOpen(true)}
-            className="absolute right-0 bottom-2 p-2 text-foreground hover:text-primary transition-colors"
-            aria-label={user ? "My Account" : "Sign In"}
-          >
-            <User className="h-5 w-5" />
-          </button>
 
           {/* Mobile Hamburger Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
