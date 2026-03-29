@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
+import { GALLERY } from "@/constants/galleryIndex";
 import { scrollToSection } from "@/lib/scrollToSection";
 
 // ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
@@ -49,6 +50,40 @@ function resolveThumbToGalleryIndex(thumbUrl: string): number | null {
 }
 
 const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
+
+const normalizeDesignerKey = (value: string) =>
+  value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+
+const IMAGE_IDENTIFIER_TO_INDEX: Record<string, number> = {
+  "An Inviting Lounge Area": GALLERY.AN_INVITING_LOUNGE_AREA,
+  "A Sophisticated Living Room": GALLERY.A_SOPHISTICATED_LIVING_ROOM,
+  "Panoramic Cityscape Views": GALLERY.PANORAMIC_CITYSCAPE_VIEWS,
+  "A Sun Lit Reading Corner": GALLERY.A_SUN_LIT_READING_CORNER,
+  "A Dreamy Tuscan Landscape": GALLERY.A_DREAMY_TUSCAN_LANDSCAPE,
+  "A Highly Customised Dining Room": GALLERY.A_HIGHLY_CUSTOMISED_DINING_ROOM,
+  "A Relaxed Setting": GALLERY.A_RELAXED_SETTING,
+  "A Colourful Nook": GALLERY.A_COLOURFUL_NOOK,
+  "A Sophisticated Boudoir": GALLERY.A_SOPHISTICATED_BOUDOIR,
+  "A Jewelry Box Like Setting": GALLERY.A_JEWELRY_BOX_LIKE_SETTING,
+  "A Serene Decor": GALLERY.A_SERENE_DECOR,
+  "A Design Treasure Trove": GALLERY.A_DESIGN_TREASURE_TROVE,
+  "A Masterful Suite": GALLERY.A_MASTERFUL_SUITE,
+  "Design Tableau": GALLERY.DESIGN_TABLEAU,
+  "A Venitian Cocoon": GALLERY.A_VENITIAN_COCOON,
+  "Unique By Design Vignette": GALLERY.UNIQUE_BY_DESIGN_VIGNETTE,
+  "An Artistic Statement": GALLERY.AN_ARTISTIC_STATEMENT,
+  "Compact Elegance": GALLERY.COMPACT_ELEGANCE,
+  "Yellow Crystalline": GALLERY.YELLOW_CRYSTALLINE,
+  "Golden Hour": GALLERY.GOLDEN_HOUR,
+  "A Workspace of Distinction": GALLERY.A_WORKSPACE_OF_DISTINCTION,
+  "Refined Details": GALLERY.REFINED_DETAILS,
+  "Light & Focus": GALLERY.LIGHT_AND_FOCUS,
+  "Design & Fine Art Books Corner": GALLERY.DESIGN_AND_FINE_ART_BOOKS_CORNER,
+  "Curated Vignette": GALLERY.CURATED_VIGNETTE,
+  "The Details Make The Design": GALLERY.THE_DETAILS_MAKE_THE_DESIGN,
+  "Light & Texture": GALLERY.LIGHT_AND_TEXTURE,
+  "Craftsmanship At Every Corner": GALLERY.CRAFTSMANSHIP_AT_EVERY_CORNER,
+};
 
 // ─── Gallery room thumbnails (keyed by DB slug) ─────────────────────────────
 const CARD_THUMBNAILS: Record<string, string[]> = {
