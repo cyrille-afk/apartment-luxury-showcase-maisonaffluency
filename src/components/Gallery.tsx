@@ -964,37 +964,40 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary">
-                        {section.experience}
-                      </h3>
+                    {/* Mobile: title left-aligned */}
+                    <div className="md:hidden flex items-center justify-between mb-2">
+                      <h3 className="text-xl font-serif text-foreground">{section.experience}</h3>
                     </div>
-                    <div className="hidden md:flex items-center gap-4">
-                      <p className="text-sm md:text-base text-muted-foreground font-body italic">
+                    {/* Desktop: centred title + share, centred subtitle */}
+                    <div className="hidden md:flex flex-col items-center text-center mb-3">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-primary">
+                          {section.experience}
+                        </h3>
+                        <button
+                          onClick={() => {
+                            const firstItem = galleryExperiences[originalSectionIndex].items[0];
+                            const titleSlug = slugify(firstItem?.title || '');
+                            const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                            const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
+                            const text = `${section.experience} — Maison Affluency`;
+                            if (isMobileDevice) {
+                              window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
+                            } else {
+                              navigator.clipboard.writeText(`${text} — ${url}`);
+                              import('sonner').then(({ toast }) => toast.success('Link copied'));
+                            }
+                          }}
+                          className="inline-flex flex-col items-center gap-0.5 text-foreground hover:text-primary transition-colors flex-shrink-0"
+                          aria-label={`Share ${section.experience}`}
+                        >
+                          <Share2 className="w-4 h-4" />
+                          <span className="text-[7px] uppercase tracking-[0.12em] font-body">Share</span>
+                        </button>
+                      </div>
+                      <p className="text-sm md:text-base text-muted-foreground font-body italic mt-1">
                         {section.subtitle}
                       </p>
-                      <button
-                        onClick={() => {
-                          let flatIdx = 0;
-                          for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
-                          const firstItem = galleryExperiences[originalSectionIndex].items[0];
-                          const titleSlug = slugify(firstItem?.title || '');
-                          const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                          const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
-                          const text = `${section.experience} — Maison Affluency`;
-                          if (isMobileDevice) {
-                            window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-                          } else {
-                            navigator.clipboard.writeText(`${text} — ${url}`);
-                            import('sonner').then(({ toast }) => toast.success('Link copied'));
-                          }
-                        }}
-                        className="inline-flex flex-col items-center gap-0.5 text-foreground hover:text-primary transition-colors flex-shrink-0"
-                        aria-label={`Share ${section.experience}`}
-                      >
-                        <Share2 className="w-4 h-4" />
-                        <span className="text-[7px] uppercase tracking-[0.12em] font-body not-italic">Share</span>
-                      </button>
                     </div>
                   </>
                 )}
