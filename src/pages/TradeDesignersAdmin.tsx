@@ -1,12 +1,13 @@
 import { useState, useMemo, useCallback, Fragment, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle } from "lucide-react";
+import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -344,11 +345,20 @@ const TradeDesignersAdmin = () => {
       </Helmet>
 
       <div className="space-y-6">
-        <div>
-          <h1 className="font-display text-2xl tracking-wide">Designer Editor</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {designers.length} designers · Search, filter, and edit biographies inline.
-          </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="font-display text-2xl tracking-wide">Designer Editor</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {designers.length} designers · Search, filter, and edit biographies inline.
+            </p>
+          </div>
+          <Link
+            to="/trade/designers/instagram"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-body text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
+          >
+            <Instagram className="h-3.5 w-3.5" />
+            IG Audit
+          </Link>
         </div>
 
         {/* Search + A-Z */}
