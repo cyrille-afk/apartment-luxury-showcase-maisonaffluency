@@ -45,6 +45,36 @@ const CARD_THUMBNAILS: Record<string, string[]> = {
   "tristan-auer": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085769/home-office-3_t39msw.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1773200000/Screen_Shot_2026-03-11_at_11.11.33_AM_p0wtix.png"],
 };
 
+// ─── Instagram links (keyed by DB slug) ─────────────────────────────────────
+const INSTAGRAM_LINKS: Record<string, string> = {
+  "adam-courts-okha": "https://www.instagram.com/__okha/",
+  "alexander-lamont": "https://instagram.com/alexanderlamont",
+  "leo-aerts-alinea": "https://www.instagram.com/alinea_design_objects/",
+  "apparatus-studio": "https://instagram.com/apparatusstudio",
+  "atelier-fevrier": "https://instagram.com/atelierfevrier",
+  "atelier-pendhapa": "https://instagram.com/pendhapa.architects",
+  "bina-baitel": "https://www.instagram.com/binabaitel/",
+  "bruno-de-maistre": "https://instagram.com/bruno_de_maistre_bdm",
+  "emmanuel-levet-stenne": "https://instagram.com/emanuellelevetstenne",
+  "entrelacs-creation": "https://instagram.com/entrelacs_lightings",
+  "felix-agostini": "https://www.instagram.com/maisoncharlesparis/",
+  "robicara": "https://www.instagram.com/robicaradesign/",
+  "forest-giaconia": "https://www.instagram.com/forest.giaconia/",
+  "garnier-linker": "https://www.instagram.com/garnieretlinker/",
+  "hamrei": "https://instagram.com/hamrei",
+  "jeremy-maxwell-wintrebert": "https://www.instagram.com/jmw_studio",
+  "leo-sentou": "https://www.instagram.com/leosentou",
+  "kira": "https://www.instagram.com/madeinkira/",
+  "man-of-parts": "https://www.instagram.com/manofparts/",
+  "milan-pekar": "https://www.instagram.com/pekarmilan/",
+  "nathalie-ziegler": "https://instagram.com/nathaliezieglerpasqua",
+  "olivia-cognet": "https://www.instagram.com/olivia_cognet",
+  "pierre-bonnefille": "https://www.instagram.com/pierrebonnefille/",
+  "reda-amalou": "https://www.instagram.com/redaamaloudesign/",
+  "thierry-lemaire": "https://www.instagram.com/thierrylemaire_/",
+  "tristan-auer": "https://www.instagram.com/tristanauer/",
+};
+
 /** Parse names into [displayName, parentLabel] for correct card rendering */
 function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
   // If DB has explicit founder that differs from name → use it as parent
