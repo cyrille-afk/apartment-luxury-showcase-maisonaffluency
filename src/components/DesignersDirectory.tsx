@@ -392,11 +392,16 @@ function SingleDesignerCard({ item }: { item: Designer }) {
                         e.preventDefault();
                         e.stopPropagation();
                         if (galleryIdx !== null) {
-                          // Scroll to gallery section, then dispatch lightbox open event
+                          // Store intent in sessionStorage so Gallery picks it up even if not yet mounted
+                          sessionStorage.setItem('openGalleryIndex', String(galleryIdx));
+                          sessionStorage.setItem('gallerySourceId', `designer-card-${item.slug}`);
+                          sessionStorage.setItem('galleryFilterDesigner', item.name);
+                          // Scroll to gallery section
                           const galleryEl = document.getElementById('gallery');
                           if (galleryEl) {
                             galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
                           }
+                          // Also dispatch event in case Gallery is already mounted
                           setTimeout(() => {
                             window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
                               detail: {
@@ -405,7 +410,7 @@ function SingleDesignerCard({ item }: { item: Designer }) {
                                 filterDesigner: item.name,
                               },
                             }));
-                          }, 500);
+                          }, 600);
                         }
                       }}
                       className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md hover:border-primary/80 transition-colors cursor-pointer"
