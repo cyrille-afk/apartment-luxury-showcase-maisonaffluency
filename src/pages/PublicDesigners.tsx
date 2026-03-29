@@ -207,10 +207,15 @@ function ParentBrandCard({
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    const url = `https://www.maisonaffluency.com/designers/${item.slug}`;
+    const bridgeUrl = buildShareUrl(item.slug);
     const text = `${item.display_name || item.name} — Maison Affluency`;
-    navigator.clipboard.writeText(`${text}: ${url}`);
-    import("sonner").then(({ toast }) => toast.success("Link copied"));
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = `https://wa.me/?text=${encodeURIComponent(`${text}\n${bridgeUrl}`)}`;
+    } else {
+      navigator.clipboard.writeText(`${text}: ${bridgeUrl}`);
+      import("sonner").then(({ toast }) => toast.success("Link copied"));
+    }
     trackCTA.whatsapp(`Directory_Share_${item.name}`);
   };
 
