@@ -500,6 +500,7 @@ function LetterGroup({
           >
             {needsCarousel ? (
               <LetterCarousel
+                letter={letter}
                 designers={designers}
                 openParent={openParent}
                 setOpenParent={setOpenParent}
@@ -558,11 +559,13 @@ function LetterGroup({
 
 // ─── Letter Carousel (horizontal swipe with dots) ────────────────────────────
 function LetterCarousel({
+  letter,
   designers,
   openParent,
   setOpenParent,
   parentDesignerCountByName,
 }: {
+  letter: string;
   designers: Designer[];
   openParent: string | null;
   setOpenParent: (name: string | null) => void;
@@ -771,7 +774,12 @@ function LetterCarousel({
       <CarouselDots count={pages.length} selected={activePage} onSelect={scrollToPage} />
 
       {/* Sub-grid below carousel when a parent is expanded */}
-      <AnimatePresence>
+      <AnimatePresence onExitComplete={() => {
+        if (!openParent) {
+          const el = document.getElementById(`alpha-${letter}`);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }}>
         {openParentItem && openParent && (
           <ParentSubGrid
             key={openParent}
