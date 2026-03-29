@@ -708,7 +708,7 @@ function LetterCarousel({
         {pages.length > 1 && activePage > 0 && (
           <button
             onClick={goPrev}
-            className="hidden lg:flex absolute -left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors"
+            className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors"
             aria-label="Previous page"
           >
             <ChevronLeft className="h-4 w-4 text-foreground" />
@@ -719,7 +719,7 @@ function LetterCarousel({
         {pages.length > 1 && activePage < pages.length - 1 && (
           <button
             onClick={goNext}
-            className="hidden lg:flex absolute -right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors"
+            className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 items-center justify-center rounded-full bg-background/90 border border-border shadow-md hover:bg-accent transition-colors"
             aria-label="Next page"
           >
             <ChevronRight className="h-4 w-4 text-foreground" />
