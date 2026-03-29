@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Instagram, Share2, Plus, SlidersHorizontal } from "lucide-react";
@@ -107,6 +108,47 @@ function useDesignerCategories() {
       if (error) throw error;
       return data || [];
     },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// ─── Hook: fetch full curator picks for product card rendering ───────────────
+type PickItem = {
+  id: string;
+  designer_id: string;
+  image_url: string;
+  title: string;
+  subtitle: string | null;
+  category: string | null;
+  subcategory: string | null;
+  tags: string[] | null;
+  materials: string | null;
+  dimensions: string | null;
+  designer_name?: string;
+  designer_slug?: string;
+};
+
+function useFullCuratorPicks(enabled: boolean) {
+  return useQuery({
+    queryKey: ["full-curator-picks-directory"],
+    queryFn: async () => {
+      const [{ data: picks }, { data: designers }] = await Promise.all([
+        supabase
+          .from("designer_curator_picks_public")
+          .select("id, designer_id, image_url, title, subtitle, category, subcategory, tags, materials, dimensions"),
+        supabase
+          .from("designers")
+          .select("id, name, slug"),
+      ]);
+      if (!picks) return [];
+      const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug }]));
+      return (picks as any[]).map((p): PickItem => ({
+        ...p,
+        designer_name: designerMap.get(p.designer_id)?.name || "Unknown",
+        designer_slug: designerMap.get(p.designer_id)?.slug || "",
+      }));
+    },
+    enabled,
     staleTime: 5 * 60 * 1000,
   });
 }
@@ -571,6 +613,57 @@ const SUBCATEGORY_TO_TAGS: Record<string, string[]> = {
   "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
 };
 
+// ─── Product Pick Card (shown when category filter is active) ────────────────
+const PickCard = ({ pick }: { pick: PickItem }) => {
+  const navigate = useNavigate();
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (pick.designer_slug) navigate(`/designers/${pick.designer_slug}`);
+      }}
+      className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+    >
+      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+        {pick.image_url ? (
+          <img
+            src={pick.image_url}
+            alt={pick.title}
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+            <span className="font-display text-3xl text-muted-foreground/20">{pick.title.charAt(0)}</span>
+          </div>
+        )}
+        <div className="absolute inset-x-0 bottom-0 px-4 pt-10 pb-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+            {pick.title}
+          </p>
+          {pick.subtitle && (
+            <p className="font-body text-[10px] text-white/70 mt-0.5">{pick.subtitle}</p>
+          )}
+          <p className="font-body text-[9px] text-white/50 mt-1 uppercase tracking-wider">
+            {pick.designer_name}
+          </p>
+        </div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+          {pick.materials && (
+            <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-2 max-w-[90%]">{pick.materials}</p>
+          )}
+          {pick.dimensions && (
+            <p className="font-body text-[10px] text-white/60 text-center mb-4">{pick.dimensions}</p>
+          )}
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+            View
+          </span>
+        </div>
+      </div>
+    </button>
+  );
+};
+
 // ─── Main Directory Component ────────────────────────────────────────────────
 interface DesignersDirectoryProps {
   initialLetter?: string;
@@ -596,6 +689,26 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const { data: fullPicks = [] } = useFullCuratorPicks(!!(selectedCategory || selectedSubcategory));
+
+  // When category/subcategory is active, show product cards instead of designers
+  const filteredPicks = useMemo(() => {
+    if (!selectedCategory && !selectedSubcategory) return null;
+    if (!fullPicks.length) return null;
+    const matchPick = (pick: PickItem) => {
+      if (selectedSubcategory) {
+        const tags = SUBCATEGORY_TO_TAGS[selectedSubcategory] || [selectedSubcategory];
+        return tags.some(tag =>
+          pick.subcategory === tag ||
+          pick.category === tag ||
+          (pick.tags && pick.tags.some(t => t.toLowerCase() === tag.toLowerCase()))
+        );
+      }
+      return pick.category === selectedCategory || (pick.tags && pick.tags.includes(selectedCategory!));
+    };
+    return fullPicks.filter(matchPick);
+  }, [selectedCategory, selectedSubcategory, fullPicks]);
 
   const broadcastFilter = useCallback((cat: string | null, sub: string | null) => {
     window.dispatchEvent(new CustomEvent('syncCategoryFilter', { detail: { category: cat, subcategory: sub, source: 'designers' } }));
@@ -902,7 +1015,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           {/* Results count */}
           {(searchQuery || selectedCategory) && (
             <p className="text-left text-[10px] text-muted-foreground/50 mb-4 font-body tracking-wider">
-              {totalCount} designer{totalCount !== 1 ? 's' : ''} found
+              {filteredPicks
+                ? `${filteredPicks.length} piece${filteredPicks.length !== 1 ? 's' : ''} found`
+                : `${totalCount} designer${totalCount !== 1 ? 's' : ''} found`}
               {selectedCategory && !selectedSubcategory && <span> · {selectedCategory}</span>}
               {selectedSubcategory && <span> · {selectedSubcategory}</span>}
             </p>
@@ -987,50 +1102,84 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                 </div>
               )}
-              {!isLoading && filteredItems.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-32 text-center">
-                  <p className="font-body text-sm text-muted-foreground">
-                    {searchQuery ? "No designers match your search." : "Content coming soon — we're curating this collection."}
-                  </p>
-                </div>
-              )}
-              {!isLoading && alphaGroups.length > 0 && (
-                <div>
-                  {alphaGroups.map(([letter, designers]) => (
-                    <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
-                  ))}
-                </div>
+              {!isLoading && filteredPicks ? (
+                filteredPicks.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-32 text-center">
+                    <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    {filteredPicks.map((pick) => (
+                      <PickCard key={pick.id} pick={pick} />
+                    ))}
+                  </div>
+                )
+              ) : (
+                <>
+                  {!isLoading && filteredItems.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-32 text-center">
+                      <p className="font-body text-sm text-muted-foreground">
+                        {searchQuery ? "No designers match your search." : "Content coming soon — we're curating this collection."}
+                      </p>
+                    </div>
+                  )}
+                  {!isLoading && alphaGroups.length > 0 && (
+                    <div>
+                      {alphaGroups.map(([letter, designers]) => (
+                        <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
 
           {/* Mobile: Directory */}
           <div className="md:hidden">
-            {/* Mobile A-Z bar */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-3 mb-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as any}>
-              {LETTERS.map((letter) => {
-                const isActive = activeLetters.has(letter);
-                return (
-                  <button key={letter} onClick={() => jumpToLetter(letter)} className={`flex-none font-serif text-base leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}>{letter}</button>
-                );
-              })}
-            </div>
+            {!filteredPicks && (
+              /* Mobile A-Z bar — hide when showing product picks */
+              <div className="flex items-center gap-1 overflow-x-auto pb-3 mb-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as any}>
+                {LETTERS.map((letter) => {
+                  const isActive = activeLetters.has(letter);
+                  return (
+                    <button key={letter} onClick={() => jumpToLetter(letter)} className={`flex-none font-serif text-base leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}>{letter}</button>
+                  );
+                })}
+              </div>
+            )}
             {isLoading && (
               <div className="flex items-center justify-center py-32">
                 <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
               </div>
             )}
-            {!isLoading && filteredItems.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-32 text-center">
-                <p className="font-body text-sm text-muted-foreground">{searchQuery ? "No designers match your search." : "Content coming soon."}</p>
-              </div>
-            )}
-            {!isLoading && alphaGroups.length > 0 && (
-              <div>
-                {alphaGroups.map(([letter, designers]) => (
-                  <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
-                ))}
-              </div>
+            {!isLoading && filteredPicks ? (
+              filteredPicks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-32 text-center">
+                  <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 grid-cols-2">
+                  {filteredPicks.map((pick) => (
+                    <PickCard key={pick.id} pick={pick} />
+                  ))}
+                </div>
+              )
+            ) : (
+              <>
+                {!isLoading && filteredItems.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-32 text-center">
+                    <p className="font-body text-sm text-muted-foreground">{searchQuery ? "No designers match your search." : "Content coming soon."}</p>
+                  </div>
+                )}
+                {!isLoading && alphaGroups.length > 0 && (
+                  <div>
+                    {alphaGroups.map(([letter, designers]) => (
+                      <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
