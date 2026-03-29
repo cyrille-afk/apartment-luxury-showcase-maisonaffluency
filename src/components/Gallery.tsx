@@ -764,69 +764,88 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     </span>
                   </div>
                 )}
-                {/* First section: Interactive Gallery label left-aligned above title */}
-                {originalSectionIndex === 0 && (
-                  <div className="hidden md:flex items-center gap-2 mb-2">
-                    <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">
-                      <span className="relative flex items-center justify-center w-4 h-4 rounded-full bg-black/70 border border-primary/70">
-                        <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
-                        <Plus className="relative h-2 w-2 text-white" />
+                {originalSectionIndex === 0 ? (
+                  <>
+                    {/* Interactive Gallery label — left-aligned where title normally sits */}
+                    <div className="hidden md:flex items-center gap-2 mb-3">
+                      <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body">
+                        <span className="relative flex items-center justify-center w-4 h-4 rounded-full bg-black/70 border border-primary/70">
+                          <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
+                          <Plus className="relative h-2 w-2 text-white" />
+                        </span>
+                        Interactive Gallery
                       </span>
-                      Interactive Gallery
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary">
-                    {section.experience}
-                  </h3>
-                  {originalSectionIndex === 0 && (
-                    <div className="hidden md:flex items-center gap-1">
-                      {([1, 2, 3, 4] as const).map((cols) => (
-                        <button
-                          key={cols}
-                          onClick={() => setGridCols(cols)}
-                          className={`flex items-center rounded p-0.5 transition-all ${gridCols === cols ? 'opacity-100' : 'opacity-35 hover:opacity-60'}`}
-                          aria-label={`Switch to ${cols} column grid`}
-                        >
-                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                            {cols === 1 && <rect x="7" y="3" width="10" height="18" rx="1" fill="currentColor" />}
-                            {cols === 2 && (<><rect x="3" y="3" width="8" height="18" rx="1" fill="currentColor" /><rect x="13" y="3" width="8" height="18" rx="1" fill="currentColor" /></>)}
-                            {cols === 3 && (<><rect x="2" y="3" width="5.5" height="18" rx="1" fill="currentColor" /><rect x="9.25" y="3" width="5.5" height="18" rx="1" fill="currentColor" /><rect x="16.5" y="3" width="5.5" height="18" rx="1" fill="currentColor" /></>)}
-                            {cols === 4 && (<><rect x="1.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="7" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="12.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="18" y="3" width="4" height="18" rx="0.5" fill="currentColor" /></>)}
-                          </svg>
-                        </button>
-                      ))}
                     </div>
-                  )}
-                </div>
-                <div className="hidden md:flex items-center gap-4">
-                  <p className="text-sm md:text-base text-muted-foreground font-body italic">
-                    {section.subtitle}
-                  </p>
-                   <button
-                     onClick={() => {
-                       let flatIdx = 0;
-                       for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
-                       const firstItem = galleryExperiences[originalSectionIndex].items[0];
-                       const titleSlug = slugify(firstItem?.title || '');
-                       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                        const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
-                       const text = `${section.experience} — Maison Affluency`;
-                       if (isMobile) {
-                         window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-                       } else {
-                         navigator.clipboard.writeText(`${text} — ${url}`);
-                         import('sonner').then(({ toast }) => toast.success('Link copied'));
-                       }
-                    }}
-                    className="inline-flex flex-col items-center gap-0.5 text-foreground hover:text-primary transition-colors flex-shrink-0"
-                    aria-label={`Share ${section.experience}`}
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span className="text-[7px] uppercase tracking-[0.12em] font-body not-italic">Share</span>
-                  </button>
-                </div>
+                    {/* Title + subtitle centred */}
+                    <div className="hidden md:flex flex-col items-center text-center mb-4">
+                      <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-primary">
+                        {section.experience}
+                      </h3>
+                      <p className="text-sm md:text-base text-muted-foreground font-body italic mt-1">
+                        {section.subtitle}
+                      </p>
+                    </div>
+                    {/* Grid toggle — right-aligned */}
+                    <div className="hidden md:flex justify-end mb-2">
+                      <div className="flex items-center gap-1">
+                        {([1, 2, 3, 4] as const).map((cols) => (
+                          <button
+                            key={cols}
+                            onClick={() => setGridCols(cols)}
+                            className={`flex items-center rounded p-0.5 transition-all ${gridCols === cols ? 'opacity-100' : 'opacity-35 hover:opacity-60'}`}
+                            aria-label={`Switch to ${cols} column grid`}
+                          >
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                              {cols === 1 && <rect x="7" y="3" width="10" height="18" rx="1" fill="currentColor" />}
+                              {cols === 2 && (<><rect x="3" y="3" width="8" height="18" rx="1" fill="currentColor" /><rect x="13" y="3" width="8" height="18" rx="1" fill="currentColor" /></>)}
+                              {cols === 3 && (<><rect x="2" y="3" width="5.5" height="18" rx="1" fill="currentColor" /><rect x="9.25" y="3" width="5.5" height="18" rx="1" fill="currentColor" /><rect x="16.5" y="3" width="5.5" height="18" rx="1" fill="currentColor" /></>)}
+                              {cols === 4 && (<><rect x="1.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="7" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="12.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="18" y="3" width="4" height="18" rx="0.5" fill="currentColor" /></>)}
+                            </svg>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Mobile: title left-aligned */}
+                    <div className="md:hidden flex items-center justify-between mb-2">
+                      <h3 className="text-xl font-serif text-foreground">{section.experience}</h3>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-foreground md:text-primary">
+                        {section.experience}
+                      </h3>
+                    </div>
+                    <div className="hidden md:flex items-center gap-4">
+                      <p className="text-sm md:text-base text-muted-foreground font-body italic">
+                        {section.subtitle}
+                      </p>
+                      <button
+                        onClick={() => {
+                          let flatIdx = 0;
+                          for (let s = 0; s < originalSectionIndex; s++) flatIdx += galleryExperiences[s].items.length;
+                          const firstItem = galleryExperiences[originalSectionIndex].items[0];
+                          const titleSlug = slugify(firstItem?.title || '');
+                          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                          const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
+                          const text = `${section.experience} — Maison Affluency`;
+                          if (isMobile) {
+                            window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
+                          } else {
+                            navigator.clipboard.writeText(`${text} — ${url}`);
+                            import('sonner').then(({ toast }) => toast.success('Link copied'));
+                          }
+                        }}
+                        className="inline-flex flex-col items-center gap-0.5 text-foreground hover:text-primary transition-colors flex-shrink-0"
+                        aria-label={`Share ${section.experience}`}
+                      >
+                        <Share2 className="w-4 h-4" />
+                        <span className="text-[7px] uppercase tracking-[0.12em] font-body not-italic">Share</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </motion.div>
 
               {/* Mobile: swipeable carousel like Instagram */}
