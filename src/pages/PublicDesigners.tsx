@@ -393,11 +393,11 @@ function SingleDesignerCard({ item }: { item: Designer }) {
           <div className="absolute bottom-3 right-3 z-10 flex items-end gap-2">
             <button
               onClick={(e) => handleDesignerShare(e, item, displayName)}
-              className="flex items-center gap-1.5 text-white hover:text-white/90 transition-opacity mb-1 drop-shadow-md"
+              className="flex items-center gap-1 text-white/80 hover:text-white transition-opacity mb-1"
               aria-label={`Share ${displayName}`}
             >
-              <Share2 className="h-4 w-4" strokeWidth={2.5} />
-              <span className="font-body text-[10px] uppercase tracking-[0.15em] font-medium">Share</span>
+              <Share2 className="h-3.5 w-3.5" />
+              <span className="font-body text-[8px] uppercase tracking-[0.12em]">Share</span>
             </button>
             <div className="flex flex-col items-center gap-1.5">
               <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">
