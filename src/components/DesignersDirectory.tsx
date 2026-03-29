@@ -527,7 +527,19 @@ function CarouselDots({ count, selected, onSelect }: { count: number; selected: 
 }
 
 // ─── Letter Group ────────────────────────────────────────────────────────────
-function LetterGroup({ letter, designers, forceOpen, parentDesignerCountByName }: { letter: string; designers: Designer[]; forceOpen?: boolean; parentDesignerCountByName: Record<string, number> }) {
+function LetterGroup({
+  letter,
+  designers,
+  forceOpen,
+  parentDesignerCountByName,
+  fallbackGalleryIndexByDesigner,
+}: {
+  letter: string;
+  designers: Designer[];
+  forceOpen?: boolean;
+  parentDesignerCountByName: Record<string, number>;
+  fallbackGalleryIndexByDesigner: Record<string, number>;
+}) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
   const isRevealed = forceOpen || isInView;
@@ -547,7 +559,14 @@ function LetterGroup({ letter, designers, forceOpen, parentDesignerCountByName }
         {isRevealed ? (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
             {needsCarousel ? (
-              <LetterCarousel letter={letter} designers={designers} openParent={openParent} setOpenParent={setOpenParent} parentDesignerCountByName={parentDesignerCountByName} />
+              <LetterCarousel
+                letter={letter}
+                designers={designers}
+                openParent={openParent}
+                setOpenParent={setOpenParent}
+                parentDesignerCountByName={parentDesignerCountByName}
+                fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+              />
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
                 {designers.map((item) => {
@@ -568,7 +587,7 @@ function LetterGroup({ letter, designers, forceOpen, parentDesignerCountByName }
                       </React.Fragment>
                     );
                   }
-                  return <SingleDesignerCard key={item.slug} item={item} />;
+                  return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} />;
                 })}
               </div>
             )}
