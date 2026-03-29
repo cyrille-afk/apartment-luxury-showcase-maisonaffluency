@@ -929,12 +929,12 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           <div className="flex items-center gap-1">
                             {/* Left button: toggles between 1 and 2 columns — icon shows destination */}
                             <button
-                              onClick={() => setGridCols(gridCols <= 1 ? 2 : 1)}
+                              onClick={() => setGridCols(gridCols === 2 ? 1 : 2)}
                               className={`flex items-center justify-center rounded-md border-2 p-1 transition-all ${gridCols <= 2 ? 'border-foreground opacity-100' : 'border-foreground/25 opacity-40 hover:opacity-60 hover:border-foreground/40'}`}
-                              aria-label={gridCols <= 1 ? 'Switch to 2 columns' : 'Switch to 1 column'}
+                              aria-label={gridCols === 1 ? 'Switch to 2 columns' : 'Switch to 1 column'}
                             >
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                {gridCols <= 1
+                                {gridCols === 1
                                   ? (<><rect x="3" y="3" width="8" height="18" rx="1.5" fill="currentColor" /><rect x="13" y="3" width="8" height="18" rx="1.5" fill="currentColor" /></>)
                                   : <rect x="7" y="3" width="10" height="18" rx="1.5" fill="currentColor" />
                                 }
