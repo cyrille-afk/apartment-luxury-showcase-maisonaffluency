@@ -210,7 +210,7 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, labe
     el.setPointerCapture?.(event.pointerId);
   };
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (!isPointerDraggingRef.current) return;
     const el = scrollRef.current;
     if (!el) return;
@@ -220,13 +220,13 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, labe
     el.scrollLeft = dragStartScrollLeftRef.current - deltaX;
   };
 
-  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+  const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
     if (!isPointerDraggingRef.current) return;
     isPointerDraggingRef.current = false;
     scrollRef.current?.releasePointerCapture?.(event.pointerId);
   };
 
-  const handleClickCapture = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleClickCapture = (event: MouseEvent<HTMLDivElement>) => {
     if (dragDistanceRef.current <= 6) {
       dragDistanceRef.current = 0;
       return;
