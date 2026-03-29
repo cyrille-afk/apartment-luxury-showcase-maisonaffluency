@@ -523,7 +523,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
             <ChevronRight className="h-4 w-4 text-foreground" />
           </button>
         )}
-        <div ref={viewportRef} onScroll={handleScroll} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onPointerLeave={endDrag} onClickCapture={handleClickCapture} className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-y ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}>
+        <div ref={viewportRef} onScroll={handleScroll} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onPointerLeave={endDrag} onClickCapture={handleClickCapture} className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-x ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}>
           <div className="flex">
             {pages.map((page, pageIndex) => (
               <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
