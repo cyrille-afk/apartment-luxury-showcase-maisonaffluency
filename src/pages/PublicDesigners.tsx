@@ -221,7 +221,7 @@ function ParentBrandCard({
 
   return (
     <div className="col-span-2 md:col-span-2">
-      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[3/2]">
+      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[14/9]">
         {/* Background image */}
         {(item.hero_image_url || item.image_url) && (
           <img
@@ -464,10 +464,12 @@ function LetterGroup({
   letter,
   designers,
   forceOpen,
+  parentDesignerCountByName,
 }: {
   letter: string;
   designers: Designer[];
   forceOpen?: boolean;
+  parentDesignerCountByName: Record<string, number>;
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
@@ -497,22 +499,30 @@ function LetterGroup({
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
             {needsCarousel ? (
-              <LetterCarousel designers={designers} openParent={openParent} setOpenParent={setOpenParent} />
+              <LetterCarousel
+                designers={designers}
+                openParent={openParent}
+                setOpenParent={setOpenParent}
+                parentDesignerCountByName={parentDesignerCountByName}
+              />
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
                 {designers.map((item) => {
-                  const isAtelier = item.founder === item.name;
+                  const designerCount = parentDesignerCountByName[item.name] ?? 0;
+                  const isParentBrand = item.founder === item.name && designerCount > 0;
 
-                  if (isAtelier) {
+                  if (isParentBrand) {
+                    const isOpen = openParent === item.name;
                     return (
                       <React.Fragment key={item.slug}>
-                        <ParentBrandCardWrapper
+                        <ParentBrandCard
                           item={item}
-                          openParent={openParent}
-                          setOpenParent={setOpenParent}
+                          isOpen={isOpen}
+                          onToggle={() => setOpenParent(isOpen ? null : item.name)}
+                          designerCount={designerCount}
                         />
                         <AnimatePresence>
-                          {openParent === item.name && (
+                          {isOpen && (
                             <div className="col-span-2 md:col-span-3 lg:col-span-5">
                               <ParentSubGrid
                                 key={item.name}
@@ -551,10 +561,12 @@ function LetterCarousel({
   designers,
   openParent,
   setOpenParent,
+  parentDesignerCountByName,
 }: {
   designers: Designer[];
   openParent: string | null;
   setOpenParent: (name: string | null) => void;
+  parentDesignerCountByName: Record<string, number>;
 }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [activePage, setActivePage] = useState(0);
@@ -588,8 +600,8 @@ function LetterCarousel({
     let usedSlots = 0;
 
     for (const item of designers) {
-      const isAtelier = item.founder === item.name;
-      const slotCost = isAtelier ? 2 : 1;
+      const isParentBrand = item.founder === item.name && (parentDesignerCountByName[item.name] ?? 0) > 0;
+      const slotCost = isParentBrand ? 2 : 1;
 
       if (usedSlots + slotCost > slotsPerPage && currentPage.length > 0) {
         result.push(currentPage);
@@ -603,7 +615,7 @@ function LetterCarousel({
 
     if (currentPage.length > 0) result.push(currentPage);
     return result;
-  }, [designers, slotsPerPage]);
+  }, [designers, parentDesignerCountByName, slotsPerPage]);
 
   useEffect(() => {
     setActivePage((prev) => Math.min(prev, Math.max(0, pages.length - 1)));
@@ -660,7 +672,11 @@ function LetterCarousel({
   }, []);
 
   // Find open parent for sub-grid rendering
-  const openParentItem = openParent ? designers.find(d => d.name === openParent && d.founder === d.name) : null;
+  const openParentItem = openParent
+    ? designers.find(
+        (d) => d.name === openParent && d.founder === d.name && (parentDesignerCountByName[d.name] ?? 0) > 0
+      )
+    : null;
 
   return (
     <div>
@@ -682,17 +698,22 @@ function LetterCarousel({
             <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
                 {page.map((item) => {
-                  const isAtelier = item.founder === item.name;
-                  if (isAtelier) {
+                  const designerCount = parentDesignerCountByName[item.name] ?? 0;
+                  const isParentBrand = item.founder === item.name && designerCount > 0;
+
+                  if (isParentBrand) {
+                    const isOpen = openParent === item.name;
                     return (
-                      <CarouselAtelierCard
+                      <ParentBrandCard
                         key={item.slug}
                         item={item}
-                        openParent={openParent}
-                        setOpenParent={setOpenParent}
+                        isOpen={isOpen}
+                        onToggle={() => setOpenParent(isOpen ? null : item.name)}
+                        designerCount={designerCount}
                       />
                     );
                   }
+
                   return <SingleDesignerCard key={item.slug} item={item} />;
                 })}
               </div>
@@ -713,61 +734,6 @@ function LetterCarousel({
         )}
       </AnimatePresence>
     </div>
-  );
-}
-
-// ─── Carousel Atelier Card — renders parent or falls back to portrait ────────
-function CarouselAtelierCard({
-  item,
-  openParent,
-  setOpenParent,
-}: {
-  item: Designer;
-  openParent: string | null;
-  setOpenParent: (name: string | null) => void;
-}) {
-  const { data: subDesigners = [] } = useParentBrandDesigners(item.name);
-  const isOpen = openParent === item.name;
-
-  // Single-designer brands: show as portrait card instead of empty space
-  if (subDesigners.length <= 1) {
-    return <SingleDesignerCard item={item} />;
-  }
-
-  return (
-    <ParentBrandCard
-      item={item}
-      isOpen={isOpen}
-      onToggle={() => setOpenParent(isOpen ? null : item.name)}
-      designerCount={subDesigners.length}
-    />
-  );
-}
-
-// Wrapper to handle designer count fetching for parent brands
-// Hides parent landscape card when ≤1 sub-designer (the sub already shows as portrait)
-function ParentBrandCardWrapper({
-  item,
-  openParent,
-  setOpenParent,
-}: {
-  item: Designer;
-  openParent: string | null;
-  setOpenParent: (name: string | null) => void;
-}) {
-  const { data: subDesigners = [] } = useParentBrandDesigners(item.name);
-  const isOpen = openParent === item.name;
-
-  // Skip landscape card for single-designer brands — portrait card handles it
-  if (subDesigners.length <= 1) return null;
-
-  return (
-    <ParentBrandCard
-      item={item}
-      isOpen={isOpen}
-      onToggle={() => setOpenParent(isOpen ? null : item.name)}
-      designerCount={subDesigners.length}
-    />
   );
 }
 
@@ -822,6 +788,16 @@ const PublicDesigners = () => {
   }, [filteredItems]);
 
   const activeLetters = useMemo(() => new Set(alphaGroups.map(([l]) => l)), [alphaGroups]);
+
+  const parentDesignerCountByName = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const d of items) {
+      const founder = d.founder;
+      if (!founder || founder === d.name) continue;
+      counts[founder] = (counts[founder] || 0) + 1;
+    }
+    return counts;
+  }, [items]);
 
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
@@ -958,6 +934,7 @@ const PublicDesigners = () => {
                   letter={letter}
                   designers={designers}
                   forceOpen={forcedLetters.has(letter)}
+                  parentDesignerCountByName={parentDesignerCountByName}
                 />
               ))}
             </div>
