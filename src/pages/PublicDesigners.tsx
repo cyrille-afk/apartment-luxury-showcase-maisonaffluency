@@ -81,134 +81,112 @@ function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: (
 function LetterGroup({
   letter,
   designers,
-  isExpanded,
-  onToggle,
 }: {
   letter: string;
   designers: Designer[];
-  isExpanded: boolean;
-  onToggle: () => void;
 }) {
   const [openParent, setOpenParent] = useState<string | null>(null);
 
   return (
-    <div id={`alpha-${letter}`} className="scroll-mt-32">
-      {/* Letter header — always visible, clickable to expand */}
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center gap-3 py-3 px-1 group/letter hover:bg-muted/20 transition-colors rounded-sm"
-      >
-        <span className="font-serif text-2xl md:text-3xl text-foreground w-8 text-left">{letter}</span>
+    <div id={`alpha-${letter}`} className="scroll-mt-32 mb-10">
+      {/* Letter heading */}
+      <div className="flex items-center gap-3 mb-4 px-1">
+        <span className="font-serif text-2xl md:text-3xl text-foreground">{letter}</span>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="font-body text-[11px] text-muted-foreground tracking-widest uppercase">
-          {designers.length} designer{designers.length !== 1 ? "s" : ""}
+        <span className="font-body text-[10px] text-muted-foreground/50 tracking-widest uppercase">
+          {designers.length}
         </span>
-        <ChevronDown
-          className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}
-        />
-      </button>
+      </div>
 
-      {/* Expanded card grid */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 pt-3 pb-8">
-              {designers.map((item) => {
-                const isAtelier = item.founder === item.name;
-                return (
-                  <div key={item.slug}>
-                    <Link
-                      to={`/designers/${item.slug}`}
-                      onClick={() => {
-                        sessionStorage.removeItem("__scroll_y");
-                        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-                      }}
-                      className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
-                    >
-                      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
-                        {item.image_url ? (
-                          <img
-                            src={item.image_url}
-                            alt={item.name}
-                            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
-                            <span className="font-display text-3xl text-muted-foreground/20">
-                              {item.name.charAt(0)}
-                            </span>
-                          </div>
-                        )}
+      {/* Card grid — always visible */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+        {designers.map((item) => {
+          const isAtelier = item.founder === item.name;
+          return (
+            <div key={item.slug}>
+              <Link
+                to={`/designers/${item.slug}`}
+                onClick={() => {
+                  sessionStorage.removeItem("__scroll_y");
+                  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+                }}
+                className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+              >
+                <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                  {item.image_url ? (
+                    <img
+                      src={item.image_url}
+                      alt={item.name}
+                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+                      <span className="font-display text-3xl text-muted-foreground/20">
+                        {item.name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
 
-                        {/* Name overlay — top */}
-                        <div className="absolute inset-x-0 top-0 px-4 pb-10 pt-3 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
-                          <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
-                            {item.display_name || item.name}
-                          </p>
-                        </div>
-
-                        {/* Atelier badge */}
-                        {isAtelier && (
-                          <div className="absolute top-3 right-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
-                            <span className="font-display text-[6px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">
-                              {item.name}
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Founder pill */}
-                        {item.founder && !isAtelier && (
-                          <span className="absolute top-2.5 right-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full">
-                            {item.founder}
-                          </span>
-                        )}
-
-                        {/* Hover overlay */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
-                          {item.specialty && (
-                            <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">
-                              {item.specialty}
-                            </p>
-                          )}
-                          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
-                            View Profile
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-
-                    {/* Parent brand: Designers toggle */}
-                    {isAtelier && (
-                      <button
-                        onClick={() => setOpenParent(openParent === item.name ? null : item.name)}
-                        className="mt-1.5 flex items-center gap-1.5 px-2 py-1 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Layers className="h-3 w-3" />
-                        <span className="font-body text-[10px] uppercase tracking-[0.12em]">Designers</span>
-                        <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${openParent === item.name ? "rotate-180" : ""}`} />
-                      </button>
-                    )}
-
-                    {/* Sub-designers grid */}
-                    <AnimatePresence>
-                      {isAtelier && openParent === item.name && (
-                        <ParentSubGrid parentName={item.name} onClose={() => setOpenParent(null)} />
-                      )}
-                    </AnimatePresence>
+                  {/* Name overlay — top */}
+                  <div className="absolute inset-x-0 top-0 px-4 pb-10 pt-3 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
+                    <p className="font-display text-sm md:text-[15px] text-white tracking-wide leading-tight drop-shadow-sm">
+                      {item.display_name || item.name}
+                    </p>
                   </div>
-                );
-              })}
+
+                  {/* Atelier badge */}
+                  {isAtelier && (
+                    <div className="absolute top-3 right-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden">
+                      <span className="font-display text-[6px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">
+                        {item.name}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Founder pill */}
+                  {item.founder && !isAtelier && (
+                    <span className="absolute top-2.5 right-2.5 bg-foreground/75 backdrop-blur-sm text-background font-body text-[8px] uppercase tracking-[0.1em] px-2 py-0.5 rounded-full">
+                      {item.founder}
+                    </span>
+                  )}
+
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4">
+                    {item.specialty && (
+                      <p className="font-body text-[11px] text-white/85 text-center leading-relaxed line-clamp-3 mb-4 max-w-[90%]">
+                        {item.specialty}
+                      </p>
+                    )}
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">
+                      View Profile
+                    </span>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Parent brand: Designers toggle */}
+              {isAtelier && (
+                <button
+                  onClick={() => setOpenParent(openParent === item.name ? null : item.name)}
+                  className="mt-1.5 flex items-center gap-1.5 px-2 py-1 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Layers className="h-3 w-3" />
+                  <span className="font-body text-[10px] uppercase tracking-[0.12em]">Designers</span>
+                  <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${openParent === item.name ? "rotate-180" : ""}`} />
+                </button>
+              )}
+
+              {/* Sub-designers grid */}
+              <AnimatePresence>
+                {isAtelier && openParent === item.name && (
+                  <ParentSubGrid parentName={item.name} onClose={() => setOpenParent(null)} />
+                )}
+              </AnimatePresence>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          );
+        })}
+      </div>
     </div>
   );
 }
