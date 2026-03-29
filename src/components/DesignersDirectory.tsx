@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
+import { GALLERY } from "@/constants/galleryIndex";
 import { scrollToSection } from "@/lib/scrollToSection";
 
 // ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
@@ -49,6 +50,40 @@ function resolveThumbToGalleryIndex(thumbUrl: string): number | null {
 }
 
 const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
+
+const normalizeDesignerKey = (value: string) =>
+  value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+
+const IMAGE_IDENTIFIER_TO_INDEX: Record<string, number> = {
+  "An Inviting Lounge Area": GALLERY.AN_INVITING_LOUNGE_AREA,
+  "A Sophisticated Living Room": GALLERY.A_SOPHISTICATED_LIVING_ROOM,
+  "Panoramic Cityscape Views": GALLERY.PANORAMIC_CITYSCAPE_VIEWS,
+  "A Sun Lit Reading Corner": GALLERY.A_SUN_LIT_READING_CORNER,
+  "A Dreamy Tuscan Landscape": GALLERY.A_DREAMY_TUSCAN_LANDSCAPE,
+  "A Highly Customised Dining Room": GALLERY.A_HIGHLY_CUSTOMISED_DINING_ROOM,
+  "A Relaxed Setting": GALLERY.A_RELAXED_SETTING,
+  "A Colourful Nook": GALLERY.A_COLOURFUL_NOOK,
+  "A Sophisticated Boudoir": GALLERY.A_SOPHISTICATED_BOUDOIR,
+  "A Jewelry Box Like Setting": GALLERY.A_JEWELRY_BOX_LIKE_SETTING,
+  "A Serene Decor": GALLERY.A_SERENE_DECOR,
+  "A Design Treasure Trove": GALLERY.A_DESIGN_TREASURE_TROVE,
+  "A Masterful Suite": GALLERY.A_MASTERFUL_SUITE,
+  "Design Tableau": GALLERY.DESIGN_TABLEAU,
+  "A Venitian Cocoon": GALLERY.A_VENITIAN_COCOON,
+  "Unique By Design Vignette": GALLERY.UNIQUE_BY_DESIGN_VIGNETTE,
+  "An Artistic Statement": GALLERY.AN_ARTISTIC_STATEMENT,
+  "Compact Elegance": GALLERY.COMPACT_ELEGANCE,
+  "Yellow Crystalline": GALLERY.YELLOW_CRYSTALLINE,
+  "Golden Hour": GALLERY.GOLDEN_HOUR,
+  "A Workspace of Distinction": GALLERY.A_WORKSPACE_OF_DISTINCTION,
+  "Refined Details": GALLERY.REFINED_DETAILS,
+  "Light & Focus": GALLERY.LIGHT_AND_FOCUS,
+  "Design & Fine Art Books Corner": GALLERY.DESIGN_AND_FINE_ART_BOOKS_CORNER,
+  "Curated Vignette": GALLERY.CURATED_VIGNETTE,
+  "The Details Make The Design": GALLERY.THE_DETAILS_MAKE_THE_DESIGN,
+  "Light & Texture": GALLERY.LIGHT_AND_TEXTURE,
+  "Craftsmanship At Every Corner": GALLERY.CRAFTSMANSHIP_AT_EVERY_CORNER,
+};
 
 // ─── Gallery room thumbnails (keyed by DB slug) ─────────────────────────────
 const CARD_THUMBNAILS: Record<string, string[]> = {
@@ -142,6 +177,45 @@ function useDesignerCategories() {
       return data || [];
     },
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+// ─── Hook: fetch fallback gallery index per designer from gallery hotspots ───
+function useDesignerHotspotFallbacks() {
+  return useQuery({
+    queryKey: ["designer-hotspot-fallbacks"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gallery_hotspots")
+        .select("designer_name, image_identifier")
+        .not("designer_name", "is", null)
+        .not("image_identifier", "is", null);
+
+      if (error) throw error;
+
+      const countsByDesigner: Record<string, Record<number, number>> = {};
+      for (const row of data || []) {
+        const designerName = (row as { designer_name?: string }).designer_name;
+        const imageIdentifier = (row as { image_identifier?: string }).image_identifier;
+        if (!designerName || !imageIdentifier) continue;
+
+        const index = IMAGE_IDENTIFIER_TO_INDEX[imageIdentifier];
+        if (index === undefined) continue;
+
+        const key = normalizeDesignerKey(designerName);
+        if (!countsByDesigner[key]) countsByDesigner[key] = {};
+        countsByDesigner[key][index] = (countsByDesigner[key][index] || 0) + 1;
+      }
+
+      const fallbackByDesigner: Record<string, number> = {};
+      for (const [designerKey, countMap] of Object.entries(countsByDesigner)) {
+        const top = Object.entries(countMap).sort((a, b) => b[1] - a[1])[0];
+        if (top) fallbackByDesigner[designerKey] = Number(top[0]);
+      }
+
+      return fallbackByDesigner;
+    },
+    staleTime: 10 * 60 * 1000,
   });
 }
 
@@ -348,10 +422,11 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount }: { item: Desi
 }
 
 // ─── Single Designer Card ────────────────────────────────────────────────────
-function SingleDesignerCard({ item }: { item: Designer }) {
+function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number> }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
   const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
+  const fallbackGalleryIdx = fallbackGalleryIndexByDesigner?.[normalizeDesignerKey(item.name)] ?? null;
 
   return (
     <Link id={`designer-card-${item.slug}`} to={`/designers/${item.slug}`} className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
@@ -388,16 +463,17 @@ function SingleDesignerCard({ item }: { item: Designer }) {
               <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
               <div className="flex gap-1.5">
                 {thumbs.slice(0, 2).map((src, i) => {
-                  const galleryIdx = resolveThumbToGalleryIndex(src);
+                  const mappedGalleryIdx = resolveThumbToGalleryIndex(src);
+                  const resolvedGalleryIdx = mappedGalleryIdx ?? fallbackGalleryIdx;
                   return (
                     <button
                       key={i}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (galleryIdx !== null) {
+                        if (resolvedGalleryIdx !== null) {
                           // Store intent in sessionStorage so Gallery picks it up even if not yet mounted
-                          sessionStorage.setItem('openGalleryIndex', String(galleryIdx));
+                          sessionStorage.setItem('openGalleryIndex', String(resolvedGalleryIdx));
                           sessionStorage.setItem('gallerySourceId', `designer-card-${item.slug}`);
                           sessionStorage.setItem('galleryFilterDesigner', item.name);
                           // Scroll to gallery section
@@ -409,7 +485,7 @@ function SingleDesignerCard({ item }: { item: Designer }) {
                           setTimeout(() => {
                             window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
                               detail: {
-                                index: galleryIdx,
+                                index: resolvedGalleryIdx,
                                 sourceId: `designer-card-${item.slug}`,
                                 filterDesigner: item.name,
                               },
@@ -451,7 +527,19 @@ function CarouselDots({ count, selected, onSelect }: { count: number; selected: 
 }
 
 // ─── Letter Group ────────────────────────────────────────────────────────────
-function LetterGroup({ letter, designers, forceOpen, parentDesignerCountByName }: { letter: string; designers: Designer[]; forceOpen?: boolean; parentDesignerCountByName: Record<string, number> }) {
+function LetterGroup({
+  letter,
+  designers,
+  forceOpen,
+  parentDesignerCountByName,
+  fallbackGalleryIndexByDesigner,
+}: {
+  letter: string;
+  designers: Designer[];
+  forceOpen?: boolean;
+  parentDesignerCountByName: Record<string, number>;
+  fallbackGalleryIndexByDesigner: Record<string, number>;
+}) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
   const isRevealed = forceOpen || isInView;
@@ -471,7 +559,14 @@ function LetterGroup({ letter, designers, forceOpen, parentDesignerCountByName }
         {isRevealed ? (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
             {needsCarousel ? (
-              <LetterCarousel letter={letter} designers={designers} openParent={openParent} setOpenParent={setOpenParent} parentDesignerCountByName={parentDesignerCountByName} />
+              <LetterCarousel
+                letter={letter}
+                designers={designers}
+                openParent={openParent}
+                setOpenParent={setOpenParent}
+                parentDesignerCountByName={parentDesignerCountByName}
+                fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+              />
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
                 {designers.map((item) => {
@@ -492,7 +587,7 @@ function LetterGroup({ letter, designers, forceOpen, parentDesignerCountByName }
                       </React.Fragment>
                     );
                   }
-                  return <SingleDesignerCard key={item.slug} item={item} />;
+                  return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} />;
                 })}
               </div>
             )}
@@ -508,7 +603,7 @@ function LetterGroup({ letter, designers, forceOpen, parentDesignerCountByName }
 }
 
 // ─── Letter Carousel ─────────────────────────────────────────────────────────
-function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number> }) {
+function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDesignerCountByName, fallbackGalleryIndexByDesigner }: { letter: string; designers: Designer[]; openParent: string | null; setOpenParent: (name: string | null) => void; parentDesignerCountByName: Record<string, number>; fallbackGalleryIndexByDesigner: Record<string, number> }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [activePage, setActivePage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -642,7 +737,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
                       const isOpen = openParent === item.name;
                       return <ParentBrandCard key={item.slug} item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} />;
                     }
-                    return <SingleDesignerCard key={item.slug} item={item} />;
+                    return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} />;
                   })}
                 </div>
               </div>
@@ -745,6 +840,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const { data: allDesigners = [], isLoading } = useAllDesigners();
   const { data: curatorPicksData = [] } = useDesignerCategories();
+  const { data: fallbackGalleryIndexByDesigner = {} } = useDesignerHotspotFallbacks();
   const [searchQuery, setSearchQuery] = useState("");
   const [forcedLetters, setForcedLetters] = useState<Set<string>>(new Set());
   const letterBarRef = useRef<HTMLDivElement>(null);
@@ -1191,7 +1287,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   {!isLoading && alphaGroups.length > 0 && (
                     <div>
                       {alphaGroups.map(([letter, designers]) => (
-                        <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
+                        <LetterGroup
+                          key={letter}
+                          letter={letter}
+                          designers={designers}
+                          forceOpen={forcedLetters.has(letter)}
+                          parentDesignerCountByName={parentDesignerCountByName}
+                          fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+                        />
                       ))}
                     </div>
                   )}
@@ -1240,7 +1343,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 {!isLoading && alphaGroups.length > 0 && (
                   <div>
                     {alphaGroups.map(([letter, designers]) => (
-                      <LetterGroup key={letter} letter={letter} designers={designers} forceOpen={forcedLetters.has(letter)} parentDesignerCountByName={parentDesignerCountByName} />
+                      <LetterGroup
+                        key={letter}
+                        letter={letter}
+                        designers={designers}
+                        forceOpen={forcedLetters.has(letter)}
+                        parentDesignerCountByName={parentDesignerCountByName}
+                        fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+                      />
                     ))}
                   </div>
                 )}
