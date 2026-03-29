@@ -14,6 +14,35 @@ import { trackCTA } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
+import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
+import { scrollToSection } from "@/lib/scrollToSection";
+
+// ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
+function extractCloudinaryId(url: string): string | null {
+  const match = url.match(/\/v\d+\/(.+?)(?:\.\w+)?$/);
+  return match?.[1] || null;
+}
+
+const THUMBNAIL_TO_GALLERY_INDEX: Map<string, number> = (() => {
+  // Build reverse map: cloudinary ID → flat gallery index
+  const idToIndex = new Map<string, number>();
+  for (const [idx, thumbUrl] of Object.entries(GALLERY_THUMBNAILS)) {
+    const id = extractCloudinaryId(thumbUrl);
+    if (id) idToIndex.set(id, Number(idx));
+  }
+  return idToIndex;
+})();
+
+function resolveThumbToGalleryIndex(thumbUrl: string): number | null {
+  const id = extractCloudinaryId(thumbUrl);
+  if (!id) return null;
+  // Try exact match first, then partial
+  if (THUMBNAIL_TO_GALLERY_INDEX.has(id)) return THUMBNAIL_TO_GALLERY_INDEX.get(id)!;
+  for (const [key, idx] of THUMBNAIL_TO_GALLERY_INDEX) {
+    if (id.includes(key) || key.includes(id)) return idx;
+  }
+  return null;
+}
 
 const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
 
