@@ -930,7 +930,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           <div className="hidden md:flex items-center gap-3 mb-6">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-foreground text-foreground transition-colors relative"
+              className="flex items-center gap-1.5 px-3 h-10 rounded border border-foreground text-foreground transition-colors relative"
               aria-label="Filter"
             >
               <SlidersHorizontal className="h-4 w-4" />
