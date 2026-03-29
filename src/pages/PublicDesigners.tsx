@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { ChevronDown, Search, X, Layers, Instagram, Share2, Plus } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import Navigation from "@/components/Navigation";
@@ -431,6 +432,37 @@ function SingleDesignerCard({ item }: { item: Designer }) {
   );
 }
 
+// ─── Carousel Dots ───────────────────────────────────────────────────────────
+function CarouselDots({ api, count }: { api: any; count: number }) {
+  const [selected, setSelected] = useState(0);
+  const totalSnaps = api?.scrollSnapList().length ?? count;
+
+  useEffect(() => {
+    if (!api) return;
+    const onSelect = () => setSelected(api.selectedScrollSnap());
+    api.on("select", onSelect);
+    onSelect();
+    return () => { api.off("select", onSelect); };
+  }, [api]);
+
+  if (totalSnaps <= 1) return null;
+
+  return (
+    <div className="flex justify-center gap-1.5 mt-3">
+      {Array.from({ length: totalSnaps }).map((_, i) => (
+        <button
+          key={i}
+          onClick={() => api?.scrollTo(i)}
+          className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+            i === selected ? "bg-foreground scale-125" : "bg-foreground/25 hover:bg-foreground/40"
+          }`}
+          aria-label={`Go to page ${i + 1}`}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ─── Letter Group with scroll-reveal ─────────────────────────────────────────
 
 function LetterGroup({
@@ -446,6 +478,9 @@ function LetterGroup({
   const isInView = useInView(sentinelRef, { margin: "200px 0px 200px 0px", once: true });
   const isRevealed = forceOpen || isInView;
   const [openParent, setOpenParent] = useState<string | null>(null);
+
+  // Count non-hidden cards (parent brands with ≤1 sub-designer are hidden)
+  const needsCarousel = designers.length > 5;
 
   return (
     <div id={`alpha-${letter}`} className="scroll-mt-32 mb-6">
@@ -467,37 +502,40 @@ function LetterGroup({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
-              {designers.map((item) => {
-                const isAtelier = item.founder === item.name;
+            {needsCarousel ? (
+              <LetterCarousel designers={designers} openParent={openParent} setOpenParent={setOpenParent} />
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
+                {designers.map((item) => {
+                  const isAtelier = item.founder === item.name;
 
-                if (isAtelier) {
-                  return (
-                    <React.Fragment key={item.slug}>
-                      <ParentBrandCardWrapper
-                        item={item}
-                        openParent={openParent}
-                        setOpenParent={setOpenParent}
-                      />
-                      {/* Sub-grid spans full width, placed right after parent in DOM = right below in grid */}
-                      <AnimatePresence>
-                        {openParent === item.name && (
-                          <div className="col-span-2 md:col-span-3 lg:col-span-5">
-                            <ParentSubGrid
-                              key={item.name}
-                              parentName={item.name}
-                              onClose={() => setOpenParent(null)}
-                            />
-                          </div>
-                        )}
-                      </AnimatePresence>
-                    </React.Fragment>
-                  );
-                }
+                  if (isAtelier) {
+                    return (
+                      <React.Fragment key={item.slug}>
+                        <ParentBrandCardWrapper
+                          item={item}
+                          openParent={openParent}
+                          setOpenParent={setOpenParent}
+                        />
+                        <AnimatePresence>
+                          {openParent === item.name && (
+                            <div className="col-span-2 md:col-span-3 lg:col-span-5">
+                              <ParentSubGrid
+                                key={item.name}
+                                parentName={item.name}
+                                onClose={() => setOpenParent(null)}
+                              />
+                            </div>
+                          )}
+                        </AnimatePresence>
+                      </React.Fragment>
+                    );
+                  }
 
-                return <SingleDesignerCard key={item.slug} item={item} />;
-              })}
-            </div>
+                  return <SingleDesignerCard key={item.slug} item={item} />;
+                })}
+              </div>
+            )}
           </motion.div>
         ) : (
           <div
@@ -508,6 +546,69 @@ function LetterGroup({
               {designers.length} designer{designers.length !== 1 ? "s" : ""}
             </span>
           </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── Letter Carousel (horizontal swipe with dots) ────────────────────────────
+function LetterCarousel({
+  designers,
+  openParent,
+  setOpenParent,
+}: {
+  designers: Designer[];
+  openParent: string | null;
+  setOpenParent: (name: string | null) => void;
+}) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    slidesToScroll: 5,
+    containScroll: "trimSnaps",
+    dragFree: false,
+  });
+
+  // Find open parent for sub-grid rendering
+  const openParentItem = openParent ? designers.find(d => d.name === openParent && d.founder === d.name) : null;
+
+  return (
+    <div>
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex gap-4 md:gap-5">
+          {designers.map((item) => {
+            const isAtelier = item.founder === item.name;
+
+            if (isAtelier) {
+              return (
+                <div key={item.slug} className="flex-none w-full md:w-[calc(66.666%-6px)] lg:w-[calc(40%-12px)]">
+                  <ParentBrandCardWrapper
+                    item={item}
+                    openParent={openParent}
+                    setOpenParent={setOpenParent}
+                  />
+                </div>
+              );
+            }
+
+            return (
+              <div key={item.slug} className="flex-none w-[calc(50%-8px)] md:w-[calc(33.333%-14px)] lg:w-[calc(20%-16px)]">
+                <SingleDesignerCard item={item} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <CarouselDots api={emblaApi} count={designers.length} />
+
+      {/* Sub-grid below carousel when a parent is expanded */}
+      <AnimatePresence>
+        {openParentItem && openParent && (
+          <ParentSubGrid
+            key={openParent}
+            parentName={openParent}
+            onClose={() => setOpenParent(null)}
+          />
         )}
       </AnimatePresence>
     </div>
