@@ -45,6 +45,36 @@ const CARD_THUMBNAILS: Record<string, string[]> = {
   "tristan-auer": ["https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1772085769/home-office-3_t39msw.jpg", "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,h_200,c_fill,g_auto,q_auto,f_auto/v1773200000/Screen_Shot_2026-03-11_at_11.11.33_AM_p0wtix.png"],
 };
 
+// ─── Instagram links (keyed by DB slug) ─────────────────────────────────────
+const INSTAGRAM_LINKS: Record<string, string> = {
+  "adam-courts-okha": "https://www.instagram.com/__okha/",
+  "alexander-lamont": "https://instagram.com/alexanderlamont",
+  "leo-aerts-alinea": "https://www.instagram.com/alinea_design_objects/",
+  "apparatus-studio": "https://instagram.com/apparatusstudio",
+  "atelier-fevrier": "https://instagram.com/atelierfevrier",
+  "atelier-pendhapa": "https://instagram.com/pendhapa.architects",
+  "bina-baitel": "https://www.instagram.com/binabaitel/",
+  "bruno-de-maistre": "https://instagram.com/bruno_de_maistre_bdm",
+  "emmanuel-levet-stenne": "https://instagram.com/emanuellelevetstenne",
+  "entrelacs-creation": "https://instagram.com/entrelacs_lightings",
+  "felix-agostini": "https://www.instagram.com/maisoncharlesparis/",
+  "robicara": "https://www.instagram.com/robicaradesign/",
+  "forest-giaconia": "https://www.instagram.com/forest.giaconia/",
+  "garnier-linker": "https://www.instagram.com/garnieretlinker/",
+  "hamrei": "https://instagram.com/hamrei",
+  "jeremy-maxwell-wintrebert": "https://www.instagram.com/jmw_studio",
+  "leo-sentou": "https://www.instagram.com/leosentou",
+  "kira": "https://www.instagram.com/madeinkira/",
+  "man-of-parts": "https://www.instagram.com/manofparts/",
+  "milan-pekar": "https://www.instagram.com/pekarmilan/",
+  "nathalie-ziegler": "https://instagram.com/nathaliezieglerpasqua",
+  "olivia-cognet": "https://www.instagram.com/olivia_cognet",
+  "pierre-bonnefille": "https://www.instagram.com/pierrebonnefille/",
+  "reda-amalou": "https://www.instagram.com/redaamaloudesign/",
+  "thierry-lemaire": "https://www.instagram.com/thierrylemaire_/",
+  "tristan-auer": "https://www.instagram.com/tristanauer/",
+};
+
 /** Parse names into [displayName, parentLabel] for correct card rendering */
 function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
   // If DB has explicit founder that differs from name → use it as parent
@@ -242,7 +272,7 @@ function ParentBrandCard({
 function SingleDesignerCard({ item }: { item: Designer }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
-  const instagramLink = (item.links as any[])?.find((l: any) => l.type === "instagram")?.url;
+  const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
 
   return (
     <Link
@@ -290,20 +320,25 @@ function SingleDesignerCard({ item }: { item: Designer }) {
           )}
         </div>
 
-        {/* Gallery room thumbnails — bottom-right */}
+        {/* Gallery room thumbnails — bottom-right with "on view" label */}
         {thumbs.length > 0 && (
-          <div className="absolute bottom-3 right-3 flex gap-1.5 z-10">
-            {thumbs.slice(0, 2).map((src, i) => (
-              <div
-                key={i}
-                className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md"
-              >
-                <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
-                  <Plus className="w-2 h-2 text-white" />
-                </span>
-              </div>
-            ))}
+          <div className="absolute bottom-3 right-3 flex flex-col items-end gap-1 z-10">
+            <span className="font-body text-[8px] uppercase tracking-[0.15em] text-white/90 drop-shadow-md">
+              on view
+            </span>
+            <div className="flex gap-1.5">
+              {thumbs.slice(0, 2).map((src, i) => (
+                <div
+                  key={i}
+                  className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md"
+                >
+                  <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
+                    <Plus className="w-2 h-2 text-white" />
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
