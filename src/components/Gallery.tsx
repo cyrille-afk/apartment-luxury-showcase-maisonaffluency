@@ -586,6 +586,16 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     if (!activeCategory) return galleryExperiences;
     return galleryExperiences.filter(section => section.categories.includes(activeCategory));
   }, [activeCategory]);
+
+  // Mobile section pill filter — null means "all"
+  const [mobileSectionIndex, setMobileSectionIndex] = useState<number | null>(null);
+  const mobilePillRef = useRef<HTMLDivElement>(null);
+
+  const mobileFilteredExperiences = useMemo(() => {
+    if (mobileSectionIndex === null) return filteredExperiences;
+    const section = filteredExperiences[mobileSectionIndex];
+    return section ? [section] : filteredExperiences;
+  }, [filteredExperiences, mobileSectionIndex]);
   // Track active dot per mobile scroll strip (one index per section)
   const [activeScrollIndices, setActiveScrollIndices] = useState<number[]>(
     galleryExperiences.map(() => 0)
