@@ -431,23 +431,30 @@ function SingleDesignerCard({ item }: { item: Designer }) {
 }
 
 // ─── Carousel Dots ───────────────────────────────────────────────────────────
-function CarouselDots({ api, count }: { api: any; count: number }) {
+function CarouselDots({ api }: { api: any }) {
   const [selected, setSelected] = useState(0);
-  const totalSnaps = api?.scrollSnapList().length ?? count;
+  const [snapCount, setSnapCount] = useState(0);
 
   useEffect(() => {
     if (!api) return;
-    const onSelect = () => setSelected(api.selectedScrollSnap());
-    api.on("select", onSelect);
-    onSelect();
-    return () => { api.off("select", onSelect); };
+    const update = () => {
+      setSelected(api.selectedScrollSnap());
+      setSnapCount(api.scrollSnapList().length);
+    };
+    api.on("select", update);
+    api.on("reInit", update);
+    update();
+    return () => {
+      api.off("select", update);
+      api.off("reInit", update);
+    };
   }, [api]);
 
-  if (totalSnaps <= 1) return null;
+  if (snapCount <= 1) return null;
 
   return (
     <div className="flex justify-center gap-1.5 mt-3">
-      {Array.from({ length: totalSnaps }).map((_, i) => (
+      {Array.from({ length: snapCount }).map((_, i) => (
         <button
           key={i}
           onClick={() => api?.scrollTo(i)}
@@ -477,7 +484,6 @@ function LetterGroup({
   const isRevealed = forceOpen || isInView;
   const [openParent, setOpenParent] = useState<string | null>(null);
 
-  // Count non-hidden cards (parent brands with ≤1 sub-designer are hidden)
   const needsCarousel = designers.length > 5;
 
   return (
@@ -566,13 +572,6 @@ function LetterCarousel({
     containScroll: "trimSnaps",
   });
 
-  // Filter out atelier items that would render as null (≤1 sub-designer handled by wrapper)
-  // Build flat list of renderable cards
-  const cards = designers.map((item) => {
-    const isAtelier = item.founder === item.name;
-    return { item, isAtelier };
-  });
-
   // Find open parent for sub-grid rendering
   const openParentItem = openParent ? designers.find(d => d.name === openParent && d.founder === d.name) : null;
 
@@ -580,7 +579,8 @@ function LetterCarousel({
     <div>
       <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
         <div className="flex -ml-4">
-          {cards.map(({ item, isAtelier }) => {
+          {designers.map((item) => {
+            const isAtelier = item.founder === item.name;
             const slideWidth = isAtelier
               ? "flex-[0_0_100%] md:flex-[0_0_40%] lg:flex-[0_0_40%]"
               : "flex-[0_0_50%] md:flex-[0_0_33.333%] lg:flex-[0_0_20%]";
@@ -588,7 +588,7 @@ function LetterCarousel({
             return (
               <div key={item.slug} className={`${slideWidth} min-w-0 pl-4`}>
                 {isAtelier ? (
-                  <ParentBrandCardWrapper
+                  <CarouselAtelierCard
                     item={item}
                     openParent={openParent}
                     setOpenParent={setOpenParent}
@@ -601,7 +601,7 @@ function LetterCarousel({
           })}
         </div>
       </div>
-      <CarouselDots api={emblaApi} count={designers.length} />
+      <CarouselDots api={emblaApi} />
 
       {/* Sub-grid below carousel when a parent is expanded */}
       <AnimatePresence>
@@ -614,6 +614,34 @@ function LetterCarousel({
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+// ─── Carousel Atelier Card — renders parent or falls back to portrait ────────
+function CarouselAtelierCard({
+  item,
+  openParent,
+  setOpenParent,
+}: {
+  item: Designer;
+  openParent: string | null;
+  setOpenParent: (name: string | null) => void;
+}) {
+  const { data: subDesigners = [] } = useParentBrandDesigners(item.name);
+  const isOpen = openParent === item.name;
+
+  // Single-designer brands: show as portrait card instead of empty space
+  if (subDesigners.length <= 1) {
+    return <SingleDesignerCard item={item} />;
+  }
+
+  return (
+    <ParentBrandCard
+      item={item}
+      isOpen={isOpen}
+      onToggle={() => setOpenParent(isOpen ? null : item.name)}
+      designerCount={subDesigners.length}
+    />
   );
 }
 
