@@ -230,13 +230,7 @@ function SingleDesignerCard({ item }: { item: Designer }) {
           )}
         </div>
 
-        {/* Founder pill — top-right for sub-designers */}
-        {hasParent && (
-          <span className="absolute top-2 right-2 bg-foreground/75 backdrop-blur-sm text-background font-body text-[7px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full flex items-center gap-1">
-            <Layers className="h-2 w-2" />
-            {item.founder}
-          </span>
-        )}
+        {/* Badge removed — parent company already shown below designer name */}
 
         {/* Hover overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
@@ -338,6 +332,7 @@ function LetterGroup({
 }
 
 // Wrapper to handle designer count fetching for parent brands
+// Hides parent landscape card when ≤1 sub-designer (the sub already shows as portrait)
 function ParentBrandCardWrapper({
   item,
   openParent,
@@ -349,6 +344,9 @@ function ParentBrandCardWrapper({
 }) {
   const { data: subDesigners = [] } = useParentBrandDesigners(item.name);
   const isOpen = openParent === item.name;
+
+  // Skip landscape card for single-designer brands — portrait card handles it
+  if (subDesigners.length <= 1) return null;
 
   return (
     <ParentBrandCard
