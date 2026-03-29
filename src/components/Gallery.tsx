@@ -275,18 +275,18 @@ const DesktopCarouselStrip = ({
         {section.items.map((item, index) => (
           <div
             key={`${item.title}-${index}-desktop-strip`}
-            className="relative flex-none w-full snap-center cursor-pointer aspect-[16/10] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] rounded-sm"
+            className="group relative flex-none w-full snap-center cursor-pointer aspect-[16/10] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] rounded-sm overflow-hidden"
             onClick={() => openLightbox(originalSectionIndex, index)}
           >
             <img
               src={item.image}
               alt={`${item.title} — ${section.experience}`}
-              className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] rounded-sm"
+              className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.85] rounded-sm"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent rounded-sm" />
-            {/* Title overlay */}
-            <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 pointer-events-none z-10">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 rounded-sm" />
+            {/* Title overlay on hover */}
+            <div className="absolute bottom-0 left-0 right-0 px-6 pb-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 pointer-events-none z-10">
               <p className="font-display text-white text-sm tracking-widest uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                 {item.title}
               </p>
