@@ -932,7 +932,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   <button
                     key={letter}
                     onClick={() => jumpToLetter(letter)}
-                    className={`flex-none font-serif text-sm md:text-base leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}
+                    className={`flex-none font-serif text-lg lg:text-xl leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}
                   >
                     {letter}
                   </button>
@@ -1005,7 +1005,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               {LETTERS.map((letter) => {
                 const isActive = activeLetters.has(letter);
                 return (
-                  <button key={letter} onClick={() => jumpToLetter(letter)} className={`flex-none font-serif text-sm leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}>{letter}</button>
+                  <button key={letter} onClick={() => jumpToLetter(letter)} className={`flex-none font-serif text-base leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/25 cursor-default"}`}>{letter}</button>
                 );
               })}
             </div>
