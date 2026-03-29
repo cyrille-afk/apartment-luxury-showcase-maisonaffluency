@@ -218,23 +218,21 @@ const Navigation = () => {
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         {/* Mobile: single row */}
         <div className="flex h-24 items-end pb-2.5 md:hidden relative justify-center">
-          {/* Burger — absolute left */}
-          <div className="absolute left-0 bottom-2">
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-14 w-14 text-primary -ml-3" aria-label="Toggle menu">
-                  {isOpen ? <X className="h-9 w-9" /> : <Menu className="h-9 w-9" />}
-                </Button>
-              </SheetTrigger>
-          </div>
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            {/* Burger — absolute left */}
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-14 w-14 text-primary absolute left-0 bottom-2 -ml-3" aria-label="Toggle menu">
+                {isOpen ? <X className="h-9 w-9" /> : <Menu className="h-9 w-9" />}
+              </Button>
+            </SheetTrigger>
 
-          {/* Brand — centered */}
-          <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap pb-0.5">
-            <span className="font-brand text-[2rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
-              M <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
-            </span>
-          </button>
-            
+            {/* Brand — centered */}
+            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap pb-0.5">
+              <span className="font-brand text-[2rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+                M <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
+              </span>
+            </button>
+
             <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
               <div className="sr-only">
                 <h2>Navigation Menu</h2>
