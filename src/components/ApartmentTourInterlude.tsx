@@ -103,7 +103,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               </div>
 
               {/* The Curating Team — inline */}
-              <h3 className="font-serif text-base md:text-lg text-foreground font-light tracking-wide mt-4 text-center md:text-left">
+              <h3 id="curating-team" className="font-serif text-base md:text-lg text-foreground font-light tracking-wide mt-4 text-center md:text-left scroll-mt-28">
                 & Meet the Curating Team
               </h3>
               <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5 mb-3 text-center md:text-left">
