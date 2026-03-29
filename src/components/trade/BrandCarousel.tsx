@@ -272,8 +272,8 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, labe
 
         <div
           ref={scrollRef}
-          className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pb-1"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pb-1 touch-pan-x"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
         >
           {/* All brands chip */}
           <button
