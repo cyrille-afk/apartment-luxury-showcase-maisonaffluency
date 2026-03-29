@@ -349,6 +349,7 @@ function SingleDesignerCard({ item }: { item: Designer }) {
           <img
             src={item.image_url}
             alt={item.name}
+            draggable={false}
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]"
             loading="lazy"
           />
@@ -407,7 +408,7 @@ function SingleDesignerCard({ item }: { item: Designer }) {
                     key={i}
                     className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md"
                   >
-                    <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    <img src={src} alt="" draggable={false} className="w-full h-full object-cover" loading="lazy" />
                     <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
                       <Plus className="w-2 h-2 text-white" />
                     </span>
@@ -553,12 +554,17 @@ function LetterCarousel({
 }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [activePage, setActivePage] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const [cardsPerPage, setCardsPerPage] = useState(() => {
     if (typeof window === "undefined") return 5;
     if (window.innerWidth >= 1024) return 5;
     if (window.innerWidth >= 768) return 3;
     return 2;
   });
+
+  const dragStartXRef = useRef(0);
+  const dragStartScrollLeftRef = useRef(0);
+  const didDragRef = useRef(false);
 
   useEffect(() => {
     const onResize = () => {
@@ -597,12 +603,56 @@ function LetterCarousel({
     setActivePage(index);
   }, []);
 
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    setIsDragging(true);
+    didDragRef.current = false;
+    dragStartXRef.current = e.clientX;
+    dragStartScrollLeftRef.current = viewport.scrollLeft;
+    viewport.setPointerCapture?.(e.pointerId);
+  }, []);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const delta = e.clientX - dragStartXRef.current;
+    if (Math.abs(delta) > 4) didDragRef.current = true;
+    viewport.scrollLeft = dragStartScrollLeftRef.current - delta;
+  }, [isDragging]);
+
+  const endDrag = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const viewport = viewportRef.current;
+    viewport?.releasePointerCapture?.(e.pointerId);
+    setIsDragging(false);
+  }, [isDragging]);
+
+  const handleClickCapture = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!didDragRef.current) return;
+    e.preventDefault();
+    e.stopPropagation();
+    didDragRef.current = false;
+  }, []);
+
   return (
     <div>
       <div
         ref={viewportRef}
         onScroll={handleScroll}
-        className="overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onPointerLeave={endDrag}
+        onClickCapture={handleClickCapture}
+        className={`overflow-x-auto snap-x snap-mandatory scrollbar-hide select-none touch-pan-y ${
+          isDragging ? "cursor-grabbing" : "cursor-grab"
+        }`}
       >
         <div className="flex">
           {pages.map((page, pageIndex) => (
