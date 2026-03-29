@@ -484,7 +484,6 @@ const Navigation = () => {
               </div>
             </SheetContent>
           </Sheet>
-          </div>
         </div>
 
         {/* Desktop: stacked layout */}
