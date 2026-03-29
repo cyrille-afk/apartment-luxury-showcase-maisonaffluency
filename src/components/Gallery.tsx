@@ -275,7 +275,7 @@ const DesktopCarouselStrip = ({
         {section.items.map((item, index) => (
           <div
             key={`${item.title}-${index}-desktop-strip`}
-            className="relative flex-none w-full snap-center cursor-pointer aspect-[16/10] shadow-[0_30px_70px_-10px_rgba(0,0,0,0.5)] rounded-sm"
+            className="relative flex-none w-full snap-center cursor-pointer aspect-[16/10] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] rounded-sm"
             onClick={() => openLightbox(originalSectionIndex, index)}
           >
             <img
@@ -1140,7 +1140,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       className={`group cursor-pointer ${hiddenIn3Col ? 'hidden' : ''}`}
                     >
                       <div
-                        className={`relative mb-2 overflow-hidden rounded-sm shadow-[0_30px_70px_-10px_rgba(0,0,0,0.5)] transition-all duration-500 group-hover:shadow-[0_35px_80px_-10px_rgba(0,0,0,0.6)] ${gridCols === 2 ? 'aspect-[3/2]' : 'aspect-[4/5]'}`}
+                        className={`relative mb-2 overflow-hidden rounded-sm shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-all duration-500 group-hover:shadow-[0_25px_60px_-10px_rgba(0,0,0,0.4)] ${gridCols === 2 ? 'aspect-[3/2]' : 'aspect-[4/5]'}`}
                         onClick={() => openLightbox(originalSectionIndex, index)}
                       >
                         <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 2 ? "(max-width: 1024px) 50vw, 50vw" : gridCols === 3 ? "(max-width: 1024px) 50vw, 33vw" : "(max-width: 1024px) 50vw, 25vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.85]" loading="lazy" />
