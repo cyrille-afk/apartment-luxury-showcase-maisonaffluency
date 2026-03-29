@@ -180,6 +180,45 @@ function useDesignerCategories() {
   });
 }
 
+// ─── Hook: fetch fallback gallery index per designer from gallery hotspots ───
+function useDesignerHotspotFallbacks() {
+  return useQuery({
+    queryKey: ["designer-hotspot-fallbacks"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gallery_hotspots")
+        .select("designer_name, image_identifier")
+        .not("designer_name", "is", null)
+        .not("image_identifier", "is", null);
+
+      if (error) throw error;
+
+      const countsByDesigner: Record<string, Record<number, number>> = {};
+      for (const row of data || []) {
+        const designerName = (row as { designer_name?: string }).designer_name;
+        const imageIdentifier = (row as { image_identifier?: string }).image_identifier;
+        if (!designerName || !imageIdentifier) continue;
+
+        const index = IMAGE_IDENTIFIER_TO_INDEX[imageIdentifier];
+        if (index === undefined) continue;
+
+        const key = normalizeDesignerKey(designerName);
+        if (!countsByDesigner[key]) countsByDesigner[key] = {};
+        countsByDesigner[key][index] = (countsByDesigner[key][index] || 0) + 1;
+      }
+
+      const fallbackByDesigner: Record<string, number> = {};
+      for (const [designerKey, countMap] of Object.entries(countsByDesigner)) {
+        const top = Object.entries(countMap).sort((a, b) => b[1] - a[1])[0];
+        if (top) fallbackByDesigner[designerKey] = Number(top[0]);
+      }
+
+      return fallbackByDesigner;
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
 // ─── Hook: fetch full curator picks for product card rendering ───────────────
 type PickItem = {
   id: string;
