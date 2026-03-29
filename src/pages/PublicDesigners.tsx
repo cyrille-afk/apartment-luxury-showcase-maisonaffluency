@@ -332,6 +332,7 @@ function LetterGroup({
 }
 
 // Wrapper to handle designer count fetching for parent brands
+// Hides parent landscape card when ≤1 sub-designer (the sub already shows as portrait)
 function ParentBrandCardWrapper({
   item,
   openParent,
@@ -343,6 +344,9 @@ function ParentBrandCardWrapper({
 }) {
   const { data: subDesigners = [] } = useParentBrandDesigners(item.name);
   const isOpen = openParent === item.name;
+
+  // Skip landscape card for single-designer brands — portrait card handles it
+  if (subDesigners.length <= 1) return null;
 
   return (
     <ParentBrandCard
