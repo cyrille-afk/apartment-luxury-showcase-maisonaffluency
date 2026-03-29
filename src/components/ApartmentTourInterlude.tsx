@@ -77,7 +77,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
           >
             {/* Title — above video on mobile, left side on desktop */}
             <div className="flex flex-col text-center md:text-left order-1 md:order-none md:hidden">
-              <p className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-muted-foreground/60 mb-2 font-light font-body">
+              <p className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-foreground mb-2 font-light font-body">
                 Maison Affluency · Singapore
               </p>
               <h2 className="font-serif text-base md:text-lg text-foreground font-light tracking-wide">
