@@ -864,7 +864,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             return filteredExperiences.map((section, sectionIndex) => {
             // Find original index for proper lightbox mapping
             const originalSectionIndex = galleryExperiences.indexOf(section);
-            return <div key={section.experience} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''}`}>
+            const isMobilePillActive = originalSectionIndex === activeMobilePill;
+            return <div key={section.experience} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''} ${!isMobilePillActive ? 'hidden md:block' : ''}`}>
               {originalSectionIndex === 0 && <div id="sociable-environment" className="scroll-mt-[10rem] md:scroll-mt-[11rem]" style={{ pointerEvents: "none" }} aria-hidden="true" />}
               <motion.div initial={{
             opacity: 0,
