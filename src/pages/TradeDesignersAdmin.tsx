@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, Fragment, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
