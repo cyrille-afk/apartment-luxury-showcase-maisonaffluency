@@ -57,7 +57,7 @@ const DesignerProfile = () => {
           className="fixed top-6 left-6 z-50"
         >
           <Link
-            to="/#designers"
+            to={backTo}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors bg-background/80 backdrop-blur-sm px-3 py-2 rounded-sm"
           >
             <ArrowLeft className="w-4 h-4" />
