@@ -236,7 +236,8 @@ function ParentBrandCard({
 
 // ─── Single Designer Card (portrait, with optional parent attribution) ───────
 function SingleDesignerCard({ item }: { item: Designer }) {
-  const hasParent = item.founder && item.founder !== item.name;
+  const { displayName, parentLabel } = parseDesignerDisplayName(item);
+  const thumbs = CARD_THUMBNAILS[item.slug] || [];
 
   return (
     <Link
@@ -261,23 +262,32 @@ function SingleDesignerCard({ item }: { item: Designer }) {
 
         {/* Name overlay — top */}
         <div className="absolute inset-x-0 top-0 px-3 pb-10 pt-2.5 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
-          {hasParent ? (
-            <>
-              <p className="font-display text-xs md:text-sm text-white tracking-wide leading-tight drop-shadow-sm">
-                {item.display_name || item.name}
-              </p>
-              <p className="font-body text-[10px] text-white/70 mt-0.5 tracking-wide">
-                {item.founder}
-              </p>
-            </>
-          ) : (
-            <p className="font-display text-xs md:text-sm text-white tracking-wide leading-tight drop-shadow-sm">
-              {item.display_name || item.name}
+          <p className="font-display text-xs md:text-sm text-white tracking-wide leading-tight drop-shadow-sm">
+            {displayName}
+          </p>
+          {parentLabel && (
+            <p className="font-body text-[10px] text-white/70 mt-0.5 tracking-wide">
+              {parentLabel}
             </p>
           )}
         </div>
 
-        {/* Badge removed — parent company already shown below designer name */}
+        {/* Gallery room thumbnails — bottom-right */}
+        {thumbs.length > 0 && (
+          <div className="absolute bottom-3 right-3 flex gap-1.5 z-10">
+            {thumbs.slice(0, 2).map((src, i) => (
+              <div
+                key={i}
+                className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md"
+              >
+                <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
+                  <Plus className="w-2 h-2 text-white" />
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Hover overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
