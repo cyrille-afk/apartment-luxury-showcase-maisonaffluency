@@ -145,7 +145,9 @@ function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: (
           </div>
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2 md:gap-3">
-            {designers.map((d) => (
+            {designers.map((d) => {
+              const igUrl = d.instagramUrl || INSTAGRAM_LINKS[d.slug];
+              return (
               <Link
                 key={d.slug}
                 to={`/designers/${d.slug}`}
@@ -162,13 +164,25 @@ function ParentSubGrid({ parentName, onClose }: { parentName: string; onClose: (
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <span className="font-body text-[9px] text-white uppercase tracking-[0.15em]">View</span>
                   </div>
+                  {igUrl && (
+                    <a
+                      href={igUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute top-2 right-2 z-10 p-1 rounded-full bg-black/40 backdrop-blur-sm text-white/80 hover:text-white hover:bg-black/60 transition-all"
+                    >
+                      <Instagram className="h-2.5 w-2.5" />
+                    </a>
+                  )}
                 </div>
                 <div className="px-2 py-1.5 bg-background text-center">
                   <p className="font-body text-[10px] md:text-[11px] text-foreground leading-tight line-clamp-1">{d.name}</p>
                   <p className="font-body text-[8px] text-muted-foreground/60 uppercase tracking-[0.1em] mt-0.5 line-clamp-1">{parentName}</p>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
