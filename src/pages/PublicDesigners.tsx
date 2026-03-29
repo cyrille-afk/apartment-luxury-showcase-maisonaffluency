@@ -431,23 +431,30 @@ function SingleDesignerCard({ item }: { item: Designer }) {
 }
 
 // ─── Carousel Dots ───────────────────────────────────────────────────────────
-function CarouselDots({ api, count }: { api: any; count: number }) {
+function CarouselDots({ api }: { api: any }) {
   const [selected, setSelected] = useState(0);
-  const totalSnaps = api?.scrollSnapList().length ?? count;
+  const [snapCount, setSnapCount] = useState(0);
 
   useEffect(() => {
     if (!api) return;
-    const onSelect = () => setSelected(api.selectedScrollSnap());
-    api.on("select", onSelect);
-    onSelect();
-    return () => { api.off("select", onSelect); };
+    const update = () => {
+      setSelected(api.selectedScrollSnap());
+      setSnapCount(api.scrollSnapList().length);
+    };
+    api.on("select", update);
+    api.on("reInit", update);
+    update();
+    return () => {
+      api.off("select", update);
+      api.off("reInit", update);
+    };
   }, [api]);
 
-  if (totalSnaps <= 1) return null;
+  if (snapCount <= 1) return null;
 
   return (
     <div className="flex justify-center gap-1.5 mt-3">
-      {Array.from({ length: totalSnaps }).map((_, i) => (
+      {Array.from({ length: snapCount }).map((_, i) => (
         <button
           key={i}
           onClick={() => api?.scrollTo(i)}
@@ -477,7 +484,6 @@ function LetterGroup({
   const isRevealed = forceOpen || isInView;
   const [openParent, setOpenParent] = useState<string | null>(null);
 
-  // Count non-hidden cards (parent brands with ≤1 sub-designer are hidden)
   const needsCarousel = designers.length > 5;
 
   return (
