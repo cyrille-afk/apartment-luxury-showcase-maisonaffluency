@@ -572,13 +572,6 @@ function LetterCarousel({
     containScroll: "trimSnaps",
   });
 
-  // Filter out atelier items that would render as null (≤1 sub-designer handled by wrapper)
-  // Build flat list of renderable cards
-  const cards = designers.map((item) => {
-    const isAtelier = item.founder === item.name;
-    return { item, isAtelier };
-  });
-
   // Find open parent for sub-grid rendering
   const openParentItem = openParent ? designers.find(d => d.name === openParent && d.founder === d.name) : null;
 
