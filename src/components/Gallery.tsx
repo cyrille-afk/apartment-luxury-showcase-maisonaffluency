@@ -228,6 +228,112 @@ const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean
   );
 };
 
+/** Desktop single-column carousel strip (mirrors mobile swipe UX) */
+const DesktopCarouselStrip = ({
+  section,
+  originalSectionIndex,
+  isInView,
+  hotspotCounts,
+  openLightbox,
+}: {
+  section: typeof galleryExperiences[number];
+  originalSectionIndex: number;
+  isInView: boolean;
+  hotspotCounts: Record<string, number>;
+  openLightbox: (sectionIndex: number, itemIndex: number) => void;
+}) => {
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    const cardWidth = strip.scrollWidth / section.items.length;
+    const index = Math.round(strip.scrollLeft / cardWidth);
+    setActiveIdx(index);
+  }, [section.items.length]);
+
+  const scrollToIdx = (idx: number) => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    const cardWidth = strip.scrollWidth / section.items.length;
+    strip.scrollTo({ left: cardWidth * idx, behavior: 'smooth' });
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay: originalSectionIndex * 0.2 }}
+      className="hidden md:block"
+    >
+      <div
+        ref={stripRef}
+        onScroll={handleScroll}
+        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+      >
+        {section.items.map((item, index) => (
+          <div
+            key={`${item.title}-${index}-desktop-strip`}
+            className="relative flex-none w-full snap-center cursor-pointer aspect-[16/10]"
+            onClick={() => openLightbox(originalSectionIndex, index)}
+          >
+            <img
+              src={item.image}
+              alt={`${item.title} — ${section.experience}`}
+              className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] rounded-sm"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent rounded-sm" />
+            {/* Title overlay */}
+            <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 pointer-events-none z-10">
+              <p className="font-display text-white text-sm tracking-widest uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                {item.title}
+              </p>
+            </div>
+            {/* Pulsating hotspot — first card */}
+            {index === 0 && (
+              <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 shadow-[0_0_8px_hsl(var(--primary)/0.4)]">
+                  <Plus className="w-2.5 h-2.5 text-white" />
+                  <span className="absolute inset-0 rounded-full border border-black/20 animate-ping" style={{ animationDuration: "2s" }} />
+                </span>
+              </div>
+            )}
+            {/* Expand icon */}
+            <button
+              onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
+              className="absolute bottom-4 right-4 flex opacity-100 transition-opacity duration-300"
+              aria-label="View full image"
+            >
+              <span className="bg-black/60 text-white p-2 rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300">
+                <Maximize2 className="w-4 h-4" />
+              </span>
+            </button>
+          </div>
+        ))}
+      </div>
+      {/* Dot indicators */}
+      {section.items.length > 1 && (
+        <div className="flex justify-center gap-2 mt-3">
+          {section.items.map((_, dotIndex) => (
+            <button
+              key={dotIndex}
+              aria-label={`Go to photo ${dotIndex + 1}`}
+              onClick={() => scrollToIdx(dotIndex)}
+              className={`rounded-full transition-all duration-300 ${
+                activeIdx === dotIndex
+                  ? 'w-2 h-2 bg-primary'
+                  : 'w-2 h-2 bg-primary/30'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
 interface GalleryProps {
   /** Trade mode: pass to GalleryHotspots as onAddToQuote */
   onHotspotAddToQuote?: (product: { product_name: string; designer_name: string | null; product_image_url: string | null; materials: string | null; dimensions: string | null }) => void;
@@ -996,7 +1102,17 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 );
               })()}
 
-              <div className={`hidden md:grid transition-all duration-300 ${gridCols === 1 ? 'md:grid-cols-1 md:gap-10' : gridCols === 2 ? 'md:grid-cols-2 md:gap-8' : gridCols === 3 ? 'md:grid-cols-2 lg:grid-cols-3 md:gap-8' : 'md:grid-cols-2 lg:grid-cols-4 md:gap-8'}`}>
+              {/* Desktop: single-column = horizontal carousel with dots; multi-column = grid */}
+              {gridCols === 1 ? (
+                <DesktopCarouselStrip
+                  section={section}
+                  originalSectionIndex={originalSectionIndex}
+                  isInView={isInView}
+                  hotspotCounts={hotspotCounts}
+                  openLightbox={openLightbox}
+                />
+              ) : (
+                <div className={`hidden md:grid transition-all duration-300 ${gridCols === 2 ? 'md:grid-cols-2 md:gap-8' : gridCols === 3 ? 'md:grid-cols-2 lg:grid-cols-3 md:gap-8' : 'md:grid-cols-2 lg:grid-cols-4 md:gap-8'}`}>
                 {section.items.map((item, index) => {
                   const itemKey = `${originalSectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
@@ -1012,10 +1128,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       className={`group cursor-pointer ${hiddenIn3Col ? 'hidden' : ''}`}
                     >
                       <div
-                        className={`relative mb-2 overflow-hidden rounded-sm shadow-md transition-all duration-500 group-hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.35)] ${gridCols === 1 ? 'aspect-[16/10]' : gridCols === 2 ? 'aspect-[3/2]' : 'aspect-[4/5]'}`}
+                        className={`relative mb-2 overflow-hidden rounded-sm shadow-md transition-all duration-500 group-hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.35)] ${gridCols === 2 ? 'aspect-[3/2]' : 'aspect-[4/5]'}`}
                         onClick={() => openLightbox(originalSectionIndex, index)}
                       >
-                        <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 1 ? "100vw" : gridCols === 2 ? "(max-width: 1024px) 50vw, 50vw" : gridCols === 3 ? "(max-width: 1024px) 50vw, 33vw" : "(max-width: 1024px) 50vw, 25vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.85]" loading="lazy" />
+                        <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 2 ? "(max-width: 1024px) 50vw, 50vw" : gridCols === 3 ? "(max-width: 1024px) 50vw, 33vw" : "(max-width: 1024px) 50vw, 25vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.85]" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         {/* Cinematic title overlay on hover */}
                         <div className="absolute bottom-0 left-0 right-0 px-4 pb-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 pointer-events-none z-10">
@@ -1063,6 +1179,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   );
                 })}
               </div>
+              )}
             </div>;
           });
           })()}
