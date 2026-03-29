@@ -429,6 +429,10 @@ const Index = () => {
               </section>
             </div>
 
+            <Suspense fallback={null}>
+              <CuratingTeam />
+            </Suspense>
+
             {/* Interlude 1: After Curating Team → Before Designers */}
             <Suspense fallback={null}>
               <ParallaxInterlude
