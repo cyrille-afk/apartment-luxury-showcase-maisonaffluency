@@ -14,6 +14,35 @@ import { trackCTA } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
+import { GALLERY_THUMBNAILS } from "@/constants/galleryThumbnails";
+import { scrollToSection } from "@/lib/scrollToSection";
+
+// ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
+function extractCloudinaryId(url: string): string | null {
+  const match = url.match(/\/v\d+\/(.+?)(?:\.\w+)?$/);
+  return match?.[1] || null;
+}
+
+const THUMBNAIL_TO_GALLERY_INDEX: Map<string, number> = (() => {
+  // Build reverse map: cloudinary ID → flat gallery index
+  const idToIndex = new Map<string, number>();
+  for (const [idx, thumbUrl] of Object.entries(GALLERY_THUMBNAILS)) {
+    const id = extractCloudinaryId(thumbUrl);
+    if (id) idToIndex.set(id, Number(idx));
+  }
+  return idToIndex;
+})();
+
+function resolveThumbToGalleryIndex(thumbUrl: string): number | null {
+  const id = extractCloudinaryId(thumbUrl);
+  if (!id) return null;
+  // Try exact match first, then partial
+  if (THUMBNAIL_TO_GALLERY_INDEX.has(id)) return THUMBNAIL_TO_GALLERY_INDEX.get(id)!;
+  for (const [key, idx] of THUMBNAIL_TO_GALLERY_INDEX) {
+    if (id.includes(key) || key.includes(id)) return idx;
+  }
+  return null;
+}
 
 const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
 
@@ -321,7 +350,7 @@ function SingleDesignerCard({ item }: { item: Designer }) {
   const instagramLink = INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url;
 
   return (
-    <Link to={`/designers/${item.slug}`} className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
+    <Link id={`designer-card-${item.slug}`} to={`/designers/${item.slug}`} className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background">
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
         {instagramLink && (
           <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 p-1 hover:opacity-70 transition-opacity" onClick={(e) => e.stopPropagation()} aria-label={`${item.name} on Instagram`}>
@@ -354,14 +383,40 @@ function SingleDesignerCard({ item }: { item: Designer }) {
             <div className="flex flex-col items-center gap-1.5">
               <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
               <div className="flex gap-1.5">
-                {thumbs.slice(0, 2).map((src, i) => (
-                  <div key={i} className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md">
-                    <img src={src} alt="" draggable={false} className="w-full h-full object-cover" loading="lazy" />
-                    <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
-                      <Plus className="w-2 h-2 text-white" />
-                    </span>
-                  </div>
-                ))}
+                {thumbs.slice(0, 2).map((src, i) => {
+                  const galleryIdx = resolveThumbToGalleryIndex(src);
+                  return (
+                    <button
+                      key={i}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (galleryIdx !== null) {
+                          // Scroll to gallery section, then dispatch lightbox open event
+                          const galleryEl = document.getElementById('gallery');
+                          if (galleryEl) {
+                            galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
+                          setTimeout(() => {
+                            window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
+                              detail: {
+                                index: galleryIdx,
+                                sourceId: `designer-card-${item.slug}`,
+                                filterDesigner: item.name,
+                              },
+                            }));
+                          }, 500);
+                        }
+                      }}
+                      className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md hover:border-primary/80 transition-colors cursor-pointer"
+                    >
+                      <img src={src} alt="" draggable={false} className="w-full h-full object-cover" loading="lazy" />
+                      <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
+                        <Plus className="w-2 h-2 text-white" />
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
