@@ -93,7 +93,7 @@ interface PendingHotspot {
 const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote, onViewProduct, filterDesigner }: GalleryHotspotsProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isSuperAdmin } = useAuth();
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -338,7 +338,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
       onMouseLeave={handleDragEnd}
     >
       {/* Admin edit toggle button */}
-      {isAdmin && !editMode && (
+      {isSuperAdmin && !editMode && (
         <button
           onClick={(e) => { e.stopPropagation(); setEditMode(true); setPending(null); setActiveId(null); }}
           className="absolute top-2 right-2 z-50 pointer-events-auto flex items-center gap-1.5 bg-black/80 backdrop-blur-sm text-white text-[10px] font-body uppercase tracking-wider px-2.5 py-1.5 rounded-full hover:bg-black transition-colors"
