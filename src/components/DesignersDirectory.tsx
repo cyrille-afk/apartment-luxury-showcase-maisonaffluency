@@ -19,8 +19,12 @@ import { scrollToSection } from "@/lib/scrollToSection";
 
 // ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
 function extractCloudinaryId(url: string): string | null {
-  const match = url.match(/\/v\d+\/(.+?)(?:\.\w+)?$/);
-  return match?.[1] || null;
+  // Match URLs with version: /v12345/public-id.ext
+  const withVersion = url.match(/\/v\d+\/(.+?)(?:\.\w+)?$/);
+  if (withVersion?.[1]) return withVersion[1];
+  // Match URLs without version (from cloudinaryUrl helper): /transforms/public-id
+  const withoutVersion = url.match(/\/upload\/[^/]+\/(.+?)(?:\.\w+)?$/);
+  return withoutVersion?.[1] || null;
 }
 
 const THUMBNAIL_TO_GALLERY_INDEX: Map<string, number> = (() => {
