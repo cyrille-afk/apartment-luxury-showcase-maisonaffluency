@@ -370,6 +370,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4>(1);
+  const [activeMobilePill, setActiveMobilePill] = useState(0);
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Quote request dialog state (triggered from hotspot pins)
   const [quoteDialogOpen, setQuoteDialogOpen] = useState(false);
