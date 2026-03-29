@@ -195,18 +195,16 @@ function LetterGroup({
 const PublicDesigners = () => {
   const { data: allDesigners = [], isLoading } = useAllDesigners();
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
   const [searchParams] = useSearchParams();
   const letterBarRef = useRef<HTMLDivElement>(null);
 
-  // Auto-expand a letter from URL param
+  // Jump to letter from URL param
   useEffect(() => {
     const letter = searchParams.get("letter")?.toUpperCase();
     if (letter && LETTERS.includes(letter)) {
-      setExpandedLetters(new Set([letter]));
       setTimeout(() => {
         document.getElementById(`alpha-${letter}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
+      }, 300);
     }
   }, [searchParams]);
 
