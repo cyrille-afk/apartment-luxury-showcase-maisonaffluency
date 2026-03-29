@@ -766,8 +766,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 )}
                 {originalSectionIndex === 0 ? (
                   <>
-                    {/* Row 1: Interactive Gallery (left) — Grid toggle (right) */}
-                    <div className="hidden md:flex items-center justify-between mb-3">
+                    {/* Row 1: Interactive Gallery (left) */}
+                    <div className="hidden md:flex items-center mb-3">
                       <span className="inline-flex items-center gap-3 font-serif text-base md:text-lg text-foreground font-light tracking-wide">
                         <span className="relative flex items-center justify-center w-6 h-6 rounded-full bg-black/70 border border-primary/70">
                           <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
@@ -775,25 +775,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </span>
                         Interactive Gallery
                       </span>
-                      <div className="flex items-center gap-1">
-                        {([2, 4] as const).map((cols) => (
-                          <button
-                            key={cols}
-                            onClick={() => setGridCols(cols === 2 ? (gridCols <= 2 ? 1 : 2) : (gridCols >= 3 ? 4 : 3))}
-                            className={`flex items-center rounded p-0.5 transition-all ${
-                              (cols === 2 && gridCols <= 2) || (cols === 4 && gridCols >= 3) ? 'opacity-100' : 'opacity-35 hover:opacity-60'
-                            }`}
-                            aria-label={cols === 2 ? 'Large grid (1–2 columns)' : 'Small grid (3–4 columns)'}
-                          >
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                              {cols === 2 && (<><rect x="3" y="3" width="8" height="18" rx="1" fill="currentColor" /><rect x="13" y="3" width="8" height="18" rx="1" fill="currentColor" /></>)}
-                              {cols === 4 && (<><rect x="1.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="7" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="12.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="18" y="3" width="4" height="18" rx="0.5" fill="currentColor" /></>)}
-                            </svg>
-                          </button>
-                        ))}
-                      </div>
                     </div>
-                    {/* Row 2: Title + Share + subtitle centred directly above images */}
+                    {/* Row 2: Title + Share centred */}
                     <div className="hidden md:flex flex-col items-center text-center mb-3">
                       <div className="flex items-center gap-3">
                         <h3 className="text-xl md:text-2xl lg:text-2xl font-serif text-primary">
@@ -820,9 +803,29 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           <span className="text-[7px] uppercase tracking-[0.12em] font-body">Share</span>
                         </button>
                       </div>
-                      <p className="text-sm md:text-base text-muted-foreground font-body italic mt-1">
-                        {section.subtitle}
-                      </p>
+                      {/* Subtitle + grid toggle icons on same row */}
+                      <div className="flex items-center gap-3 mt-1">
+                        <p className="text-sm md:text-base text-muted-foreground font-body italic">
+                          {section.subtitle}
+                        </p>
+                        <div className="flex items-center gap-1">
+                          {([2, 4] as const).map((cols) => (
+                            <button
+                              key={cols}
+                              onClick={() => setGridCols(cols === 2 ? (gridCols <= 2 ? 1 : 2) : (gridCols >= 3 ? 4 : 3))}
+                              className={`flex items-center rounded p-0.5 transition-all ${
+                                (cols === 2 && gridCols <= 2) || (cols === 4 && gridCols >= 3) ? 'opacity-100' : 'opacity-35 hover:opacity-60'
+                              }`}
+                              aria-label={cols === 2 ? 'Large grid (1–2 columns)' : 'Small grid (3–4 columns)'}
+                            >
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                {cols === 2 && (<><rect x="3" y="3" width="8" height="18" rx="1" fill="currentColor" /><rect x="13" y="3" width="8" height="18" rx="1" fill="currentColor" /></>)}
+                                {cols === 4 && (<><rect x="1.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="7" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="12.5" y="3" width="4" height="18" rx="0.5" fill="currentColor" /><rect x="18" y="3" width="4" height="18" rx="0.5" fill="currentColor" /></>)}
+                              </svg>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                     {/* Mobile: title left-aligned */}
                     <div className="md:hidden flex items-center justify-between mb-2">
