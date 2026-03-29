@@ -864,7 +864,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             return filteredExperiences.map((section, sectionIndex) => {
             // Find original index for proper lightbox mapping
             const originalSectionIndex = galleryExperiences.indexOf(section);
-            return <div key={section.experience} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''}`}>
+            const isMobilePillActive = originalSectionIndex === activeMobilePill;
+            return <div key={section.experience} ref={el => { sectionRefs.current[originalSectionIndex] = el; }} className={`mb-6 md:mb-10 ${originalSectionIndex === 0 ? 'pt-2 md:pt-0' : ''} ${!isMobilePillActive ? 'hidden md:block' : ''}`}>
               {originalSectionIndex === 0 && <div id="sociable-environment" className="scroll-mt-[10rem] md:scroll-mt-[11rem]" style={{ pointerEvents: "none" }} aria-hidden="true" />}
               <motion.div initial={{
             opacity: 0,
@@ -896,12 +897,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           key={exp.experience}
                           onClick={() => {
                             setActiveMobilePill(idx);
-                            const el = sectionRefs.current[idx];
-                            if (el) {
-                              const offset = 100;
-                              const top = el.getBoundingClientRect().top + window.scrollY - offset;
-                              window.scrollTo({ top, behavior: 'smooth' });
-                            }
                           }}
                           className={`flex-none px-4 py-2 rounded-full text-[11px] uppercase tracking-[0.12em] font-body font-semibold whitespace-nowrap border transition-all duration-300 ${
                             activeMobilePill === idx
