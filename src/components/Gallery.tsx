@@ -284,7 +284,7 @@ const DesktopCarouselStrip = ({
               className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.92] rounded-sm"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 rounded-sm" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 rounded-sm" />
             {/* Title overlay on hover */}
             <div className="absolute bottom-0 left-0 right-0 px-6 pb-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 pointer-events-none z-10">
               <p className="font-display text-white text-sm tracking-widest uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
