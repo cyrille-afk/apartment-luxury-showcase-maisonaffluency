@@ -246,12 +246,6 @@ const PublicDesigners = () => {
     document.getElementById(`alpha-${letter}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [activeLetters]);
 
-  // When searching, auto-expand all matching letters
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      setExpandedLetters(new Set(alphaGroups.map(([l]) => l)));
-    }
-  }, [searchQuery, alphaGroups]);
 
   const totalCount = filteredItems.length;
 
