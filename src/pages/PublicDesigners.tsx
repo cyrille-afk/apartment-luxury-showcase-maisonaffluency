@@ -594,58 +594,38 @@ function LetterCarousel({
   }, []);
 
   // Paginate by slots: parent brands take 2 slots, regular cards take 1
+  // Fill each page by pulling the next card that fits remaining slots,
+  // so we don't leave avoidable 1-slot blanks beside cards like Lamont.
   const pages = useMemo(() => {
     const getSlotCost = (item: Designer) => {
       const isParentBrand = item.founder === item.name && (parentDesignerCountByName[item.name] ?? 0) > 0;
       return isParentBrand ? 2 : 1;
     };
 
-    const staged: { items: Designer[]; usedSlots: number }[] = [];
-    let current = { items: [] as Designer[], usedSlots: 0 };
+    const pool = [...designers];
+    const builtPages: Designer[][] = [];
 
-    for (const item of designers) {
-      const slotCost = getSlotCost(item);
+    while (pool.length > 0) {
+      const page: Designer[] = [];
+      let usedSlots = 0;
 
-      if (current.usedSlots + slotCost > slotsPerPage && current.items.length > 0) {
-        staged.push(current);
-        current = { items: [], usedSlots: 0 };
+      while (usedSlots < slotsPerPage && pool.length > 0) {
+        const remaining = slotsPerPage - usedSlots;
+        const nextIndex = pool.findIndex((candidate) => getSlotCost(candidate) <= remaining);
+        if (nextIndex === -1) break;
+
+        const [picked] = pool.splice(nextIndex, 1);
+        if (!picked) break;
+
+        page.push(picked);
+        usedSlots += getSlotCost(picked);
       }
 
-      current.items.push(item);
-      current.usedSlots += slotCost;
+      if (page.length > 0) builtPages.push(page);
+      else break;
     }
 
-    if (current.items.length > 0) staged.push(current);
-
-    // Rebalance pages to reduce visual blanks:
-    // if the immediate next card doesn't fit (e.g. parent card = 2 slots),
-    // pull the first later card that does fit.
-    for (let i = 0; i < staged.length - 1; i++) {
-      const page = staged[i];
-      let remaining = slotsPerPage - page.usedSlots;
-      if (remaining <= 0) continue;
-
-      for (let j = i + 1; j < staged.length && remaining > 0; j++) {
-        const donor = staged[j];
-        if (!donor || donor.items.length === 0) continue;
-
-        while (remaining > 0 && donor.items.length > 0) {
-          const candidateIndex = donor.items.findIndex((candidate) => getSlotCost(candidate) <= remaining);
-          if (candidateIndex === -1) break;
-
-          const [candidate] = donor.items.splice(candidateIndex, 1);
-          if (!candidate) break;
-
-          const candidateCost = getSlotCost(candidate);
-          page.items.push(candidate);
-          page.usedSlots += candidateCost;
-          donor.usedSlots -= candidateCost;
-          remaining -= candidateCost;
-        }
-      }
-    }
-
-    return staged.filter((page) => page.items.length > 0).map((page) => page.items);
+    return builtPages;
   }, [designers, parentDesignerCountByName, slotsPerPage]);
 
   useEffect(() => {
