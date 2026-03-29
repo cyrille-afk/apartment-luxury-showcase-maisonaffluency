@@ -47,6 +47,7 @@ const CARD_THUMBNAILS: Record<string, string[]> = {
 
 // ─── Instagram links (keyed by DB slug) ─────────────────────────────────────
 const INSTAGRAM_LINKS: Record<string, string> = {
+  // Single designers
   "adam-courts-okha": "https://www.instagram.com/__okha/",
   "alexander-lamont": "https://instagram.com/alexanderlamont",
   "leo-aerts-alinea": "https://www.instagram.com/alinea_design_objects/",
@@ -73,6 +74,25 @@ const INSTAGRAM_LINKS: Record<string, string> = {
   "reda-amalou": "https://www.instagram.com/redaamaloudesign/",
   "thierry-lemaire": "https://www.instagram.com/thierrylemaire_/",
   "tristan-auer": "https://www.instagram.com/tristanauer/",
+  // Parent brands
+  "ecart": "https://instagram.com/ecart.paris",
+  "cc-tapis": "https://instagram.com/cc_tapis",
+  "veronese": "https://www.instagram.com/veronese_/",
+  "theoreme-editions": "https://instagram.com/theoreme_editions",
+  "ozone-light": "https://www.instagram.com/ozone_light/",
+  "la-chance": "https://www.instagram.com/lachance_paris/",
+  "marta-sala-editions": "https://www.instagram.com/martasalaeditions/",
+  "mmairo": "https://www.instagram.com/mmairo_design/",
+  "pouenat": "https://www.instagram.com/pouenat.official/",
+  "de-la-espada": "https://www.instagram.com/delaespada/",
+  "delcourt-collection": "https://instagram.com/delcourtcollection",
+  "collection-particuliere": "https://www.instagram.com/collection_particuliere/",
+  "entrelacs": "https://www.instagram.com/entrelacs_lightings/",
+  "haymann-editions": "https://instagram.com/haymanneditions",
+  "achille-salvagni-atelier": "https://www.instagram.com/achillesalvagniatelier/",
+  "atelier-demichelis": "https://instagram.com/atelier_demichelis",
+  "okha": "https://instagram.com/__okha",
+  "arredoluce": "https://www.instagram.com/angelolelii/",
 };
 
 /** Parse names into [displayName, parentLabel] for correct card rendering */
