@@ -497,7 +497,7 @@ function LetterGroup({
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
             {needsCarousel ? (
-              <LetterCarousel designers={designers} />
+              <LetterCarousel designers={designers} openParent={openParent} setOpenParent={setOpenParent} />
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
                 {designers.map((item) => {
@@ -549,13 +549,17 @@ function LetterGroup({
 // ─── Letter Carousel (horizontal swipe with dots) ────────────────────────────
 function LetterCarousel({
   designers,
+  openParent,
+  setOpenParent,
 }: {
   designers: Designer[];
+  openParent: string | null;
+  setOpenParent: (name: string | null) => void;
 }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [activePage, setActivePage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [cardsPerPage, setCardsPerPage] = useState(() => {
+  const [slotsPerPage, setSlotsPerPage] = useState(() => {
     if (typeof window === "undefined") return 5;
     if (window.innerWidth >= 1024) return 5;
     if (window.innerWidth >= 768) return 3;
@@ -568,22 +572,38 @@ function LetterCarousel({
 
   useEffect(() => {
     const onResize = () => {
-      if (window.innerWidth >= 1024) setCardsPerPage(5);
-      else if (window.innerWidth >= 768) setCardsPerPage(3);
-      else setCardsPerPage(2);
+      if (window.innerWidth >= 1024) setSlotsPerPage(5);
+      else if (window.innerWidth >= 768) setSlotsPerPage(3);
+      else setSlotsPerPage(2);
     };
     onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // Paginate by slots: parent brands take 2 slots, regular cards take 1
   const pages = useMemo(() => {
     const result: Designer[][] = [];
-    for (let i = 0; i < designers.length; i += cardsPerPage) {
-      result.push(designers.slice(i, i + cardsPerPage));
+    let currentPage: Designer[] = [];
+    let usedSlots = 0;
+
+    for (const item of designers) {
+      const isAtelier = item.founder === item.name;
+      const slotCost = isAtelier ? 2 : 1;
+
+      if (usedSlots + slotCost > slotsPerPage && currentPage.length > 0) {
+        result.push(currentPage);
+        currentPage = [];
+        usedSlots = 0;
+      }
+
+      currentPage.push(item);
+      usedSlots += slotCost;
     }
+
+    if (currentPage.length > 0) result.push(currentPage);
     return result;
-  }, [designers, cardsPerPage]);
+  }, [designers, slotsPerPage]);
 
   useEffect(() => {
     setActivePage((prev) => Math.min(prev, Math.max(0, pages.length - 1)));
@@ -639,6 +659,9 @@ function LetterCarousel({
     didDragRef.current = false;
   }, []);
 
+  // Find open parent for sub-grid rendering
+  const openParentItem = openParent ? designers.find(d => d.name === openParent && d.founder === d.name) : null;
+
   return (
     <div>
       <div
@@ -658,15 +681,37 @@ function LetterCarousel({
           {pages.map((page, pageIndex) => (
             <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
-                {page.map((item) => (
-                  <SingleDesignerCard key={item.slug} item={item} />
-                ))}
+                {page.map((item) => {
+                  const isAtelier = item.founder === item.name;
+                  if (isAtelier) {
+                    return (
+                      <CarouselAtelierCard
+                        key={item.slug}
+                        item={item}
+                        openParent={openParent}
+                        setOpenParent={setOpenParent}
+                      />
+                    );
+                  }
+                  return <SingleDesignerCard key={item.slug} item={item} />;
+                })}
               </div>
             </div>
           ))}
         </div>
       </div>
       <CarouselDots count={pages.length} selected={activePage} onSelect={scrollToPage} />
+
+      {/* Sub-grid below carousel when a parent is expanded */}
+      <AnimatePresence>
+        {openParentItem && openParent && (
+          <ParentSubGrid
+            key={openParent}
+            parentName={openParent}
+            onClose={() => setOpenParent(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
