@@ -472,7 +472,9 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     const target = e.target as HTMLElement;
-    if (target.closest("a,button,input,textarea,select,[role='button']")) return;
+    // Only block drag-start from interactive controls on mouse.
+    // On touch, cards are links, so we must allow drag start for mobile swipe.
+    if (e.pointerType === "mouse" && target.closest("a,button,input,textarea,select,[role='button']")) return;
     const viewport = viewportRef.current;
     if (!viewport) return;
     setIsDragging(true);
