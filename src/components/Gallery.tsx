@@ -882,8 +882,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 {originalSectionIndex === 0 ? (
                   <>
                     {/* Row 1: Interactive Gallery (left) with icon on right */}
-                    <div className="hidden md:block mt-4" />
-                    <div className="hidden md:flex items-center mb-1">
+                    <div className="hidden md:block mt-1" />
+                    <div className="hidden md:flex items-center mb-0">
                       <span className="inline-flex items-center gap-3 font-serif text-sm md:text-base text-foreground font-light tracking-wide">
                         Interactive Gallery
                         <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
