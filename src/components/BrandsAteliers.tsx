@@ -2496,16 +2496,6 @@ function AlphaStrip({
                     variant="glass"
                     className="md:hidden"
                   />
-                  {/* Curators' Picks gem */}
-                  {hasPicks && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onOpenPicks(brand.name); }}
-                      className="flex items-center gap-1.5 text-white hover:opacity-70 transition-opacity"
-                    >
-                      <Gem className="h-3.5 w-3.5 fill-accent text-accent" />
-                      <span className="hidden md:inline font-body text-[9px] uppercase tracking-[0.12em] text-white">Picks</span>
-                    </button>
-                  )}
                 </div>
 
                 {/* Hover overlay — View Profile */}
