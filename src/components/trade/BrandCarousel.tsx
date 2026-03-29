@@ -177,6 +177,10 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, labe
   const { toast } = useToast();
   const [uploadingBrand, setUploadingBrand] = useState<string | null>(null);
   const [brandThumbnails, setBrandThumbnails] = useState<Record<string, string>>({});
+  const isPointerDraggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragStartScrollLeftRef = useRef(0);
+  const dragDistanceRef = useRef(0);
 
   // Fetch brand thumbnails from dedicated table
   useEffect(() => {
@@ -192,6 +196,45 @@ const BrandCarousel = ({ brands, selectedBrand, onSelect, editable = false, labe
 
   const scroll = (dir: "left" | "right") => {
     scrollRef.current?.scrollBy({ left: dir === "left" ? -240 : 240, behavior: "smooth" });
+  };
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "touch") return;
+    const el = scrollRef.current;
+    if (!el) return;
+
+    isPointerDraggingRef.current = true;
+    dragDistanceRef.current = 0;
+    dragStartXRef.current = event.clientX;
+    dragStartScrollLeftRef.current = el.scrollLeft;
+    el.setPointerCapture?.(event.pointerId);
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDraggingRef.current) return;
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const deltaX = event.clientX - dragStartXRef.current;
+    dragDistanceRef.current = Math.max(dragDistanceRef.current, Math.abs(deltaX));
+    el.scrollLeft = dragStartScrollLeftRef.current - deltaX;
+  };
+
+  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDraggingRef.current) return;
+    isPointerDraggingRef.current = false;
+    scrollRef.current?.releasePointerCapture?.(event.pointerId);
+  };
+
+  const handleClickCapture = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (dragDistanceRef.current <= 6) {
+      dragDistanceRef.current = 0;
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    dragDistanceRef.current = 0;
   };
 
   const handleThumbnailUpload = async (brandName: string, file: File) => {
