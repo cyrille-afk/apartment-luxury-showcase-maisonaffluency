@@ -934,7 +934,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                               aria-label={gridCols <= 1 ? 'Switch to 2 columns' : 'Switch to 1 column'}
                             >
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                {gridCols <= 1
+                                {gridCols >= 2
                                   ? <rect x="7" y="3" width="10" height="18" rx="1.5" fill="currentColor" />
                                   : (<><rect x="3" y="3" width="8" height="18" rx="1.5" fill="currentColor" /><rect x="13" y="3" width="8" height="18" rx="1.5" fill="currentColor" /></>)
                                 }
@@ -948,8 +948,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             >
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                 {gridCols >= 4
-                                  ? (<><rect x="1.5" y="3" width="4" height="18" rx="1" fill="currentColor" /><rect x="7" y="3" width="4" height="18" rx="1" fill="currentColor" /><rect x="12.5" y="3" width="4" height="18" rx="1" fill="currentColor" /><rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" /></>)
-                                  : (<><rect x="2" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" /><rect x="9.25" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" /><rect x="16.5" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" /></>)
+                                  ? (<><rect x="2" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" /><rect x="9.25" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" /><rect x="16.5" y="3" width="5.5" height="18" rx="1.5" fill="currentColor" /></>)
+                                  : (<><rect x="1.5" y="3" width="4" height="18" rx="1" fill="currentColor" /><rect x="7" y="3" width="4" height="18" rx="1" fill="currentColor" /><rect x="12.5" y="3" width="4" height="18" rx="1" fill="currentColor" /><rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" /></>)
                                 }
                               </svg>
                             </button>
