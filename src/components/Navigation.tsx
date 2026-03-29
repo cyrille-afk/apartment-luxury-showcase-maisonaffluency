@@ -453,17 +453,8 @@ const Navigation = () => {
         <div className="hidden md:flex flex-col items-center">
           {/* Top row: Trade Program | MAISON AFFLUENCY | Contact Us */}
           <div className="w-full grid grid-cols-[1fr_auto_1fr] items-start pt-5 pb-1">
-            <div className="flex justify-start gap-6 lg:gap-8 pt-1">
-              {rightNavItems.map((item) => (
-                <button 
-                  key={item.href} 
-                  onClick={() => handleNavClick(item.href)} 
-                  className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap relative group text-foreground flex items-center gap-1.5"
-                >
-                  {item.label}
-                  <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
-                </button>
-              ))}
+            <div className="flex justify-start pt-1">
+              {/* Left column kept for grid balance */}
             </div>
             <div className="flex flex-col items-center">
               <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
